@@ -1,0 +1,612 @@
+package main
+
+import (
+	"fmt"
+	"log"
+	"net/http"
+	"time"
+
+	"erp-golang/internal/config"
+	"erp-golang/internal/core/ai"
+	"erp-golang/internal/core/database"
+	"erp-golang/internal/core/middleware"
+	"erp-golang/internal/core/registry"
+	"erp-golang/internal/core/storage"
+	"erp-golang/internal/modules/account"
+	"erp-golang/internal/modules/approval"
+	"erp-golang/internal/modules/asset"
+	"erp-golang/internal/modules/attachment"
+	"erp-golang/internal/modules/attendance"
+	"erp-golang/internal/modules/bank_reconciliation"
+	"erp-golang/internal/modules/barcode"
+	"erp-golang/internal/modules/base"
+	"erp-golang/internal/modules/budget"
+	"erp-golang/internal/modules/chatter"
+	"erp-golang/internal/modules/crm"
+	"erp-golang/internal/modules/currency"
+	"erp-golang/internal/modules/expense"
+	"erp-golang/internal/modules/fleet"
+	"erp-golang/internal/modules/helpdesk"
+	"erp-golang/internal/modules/hr"
+	"erp-golang/internal/modules/landed_cost"
+	"erp-golang/internal/modules/leave"
+	"erp-golang/internal/modules/maintenance"
+	"erp-golang/internal/modules/mrp"
+	"erp-golang/internal/modules/pos"
+	"erp-golang/internal/modules/payroll"
+	"erp-golang/internal/modules/product"
+	"erp-golang/internal/modules/project"
+	"erp-golang/internal/modules/purchase"
+	"erp-golang/internal/modules/purchase_requisition"
+	"erp-golang/internal/modules/quality"
+	"erp-golang/internal/modules/recruitment"
+	"erp-golang/internal/modules/sale"
+	"erp-golang/internal/modules/stock"
+	"erp-golang/internal/modules/stock_inventory"
+	"erp-golang/internal/modules/tax_efaktur"
+	"erp-golang/internal/modules/traceability"
+	"erp-golang/internal/modules/subscription"
+	"erp-golang/internal/modules/audit_trail"
+	"erp-golang/internal/modules/webhook"
+	"erp-golang/internal/modules/inbound_webhook"
+	"erp-golang/internal/modules/intercompany"
+	"erp-golang/internal/modules/treasury"
+	"erp-golang/internal/modules/mrp_advanced"
+	"erp-golang/internal/modules/tax_ebupot"
+	"erp-golang/internal/modules/esignature"
+	"erp-golang/internal/modules/wms"
+	"erp-golang/internal/modules/vendor_portal"
+	"erp-golang/internal/modules/customer_portal"
+	"erp-golang/internal/modules/customs_bonded"
+	"erp-golang/internal/modules/lowcode_studio"
+	"erp-golang/internal/modules/reports"
+	"erp-golang/internal/modules/workflow_engine"
+	"erp-golang/internal/modules/integration_hub"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+)
+
+func main() {
+	log.Println("=====================================================")
+	log.Println("     Starting Odoo-Go ERP Backend & Dashboard        ")
+	log.Println("=====================================================")
+
+	// 1. Load Configurations
+	cfg := config.LoadConfig()
+
+	// 2. Initialize Database (SQLite by default, or PostgreSQL)
+	db, err := database.InitDB(cfg)
+	if err != nil {
+		log.Fatalf("Fatal: Database initialization failed: %v", err)
+	}
+
+	// 3. Initialize AI Client & Storage Provider (Cloudflare R2 / Local Disk)
+	aiClient := ai.NewClient(cfg)
+	storageProv, err := storage.InitStorageProvider(cfg)
+	if err != nil {
+		log.Fatalf("Fatal: Storage provider initialization failed: %v", err)
+	}
+
+	// 4. Initialize Module Manager
+	manager := registry.NewModuleManager(db)
+
+	// Create and register core & extended modules
+	baseMod := base.NewModule(db, cfg.JWTSecret)
+	productMod := product.NewModule(db)
+	stockMod := stock.NewModule(db)
+	saleMod := sale.NewModule(db, stockMod.Service())
+	purchaseMod := purchase.NewModule(db, stockMod.Service())
+	accountMod := account.NewModule(db)
+	mrpMod := mrp.NewModule(db, stockMod.Service())
+	posMod := pos.NewModule(db)
+	hrMod := hr.NewModule(db)
+	crmMod := crm.NewModule(db, saleMod.Service())
+	chatterMod := chatter.NewModule(db)
+	projectMod := project.NewModule(db)
+	assetMod := asset.NewModule(db, accountMod.Service())
+	helpdeskMod := helpdesk.NewModule(db)
+	maintenanceMod := maintenance.NewModule(db)
+	fleetMod := fleet.NewModule(db)
+	leaveMod := leave.NewModule(db)
+	expenseMod := expense.NewModule(db, accountMod.Service(), chatterMod.Service())
+	qualityMod := quality.NewModule(db, stockMod.Service(), mrpMod.Service(), chatterMod.Service())
+	approvalMod := approval.NewModule(db, chatterMod.Service())
+	attachmentMod := attachment.NewModule(db, storageProv, aiClient, chatterMod.Service(), expenseMod.Service())
+	attendanceMod := attendance.NewModule(db, chatterMod.Service(), aiClient)
+	recruitmentMod := recruitment.NewModule(db, hrMod.Service(), chatterMod.Service(), aiClient)
+	stockInventoryMod := stock_inventory.NewModule(db, chatterMod.Service(), aiClient)
+	payrollMod := payroll.NewModule(db, chatterMod.Service(), aiClient, accountMod.Service())
+	budgetMod := budget.NewModule(db, chatterMod.Service(), aiClient, accountMod.Service())
+	barcodeMod := barcode.NewModule(db)
+	purchaseRequisitionMod := purchase_requisition.NewModule(db, purchaseMod.Service(), chatterMod.Service())
+	currencyMod := currency.NewModule(db, accountMod.Service(), chatterMod.Service(), aiClient)
+	taxEFakturMod := tax_efaktur.NewModule(db, accountMod.Service(), chatterMod.Service(), aiClient)
+	bankReconcileMod := bank_reconciliation.NewModule(db, accountMod.Service(), chatterMod.Service(), aiClient)
+	landedCostMod := landed_cost.NewModule(db, accountMod.Service(), stockMod.Service(), chatterMod.Service(), aiClient)
+	traceabilityMod := traceability.NewModule(db, chatterMod.Service(), aiClient)
+	subscriptionMod := subscription.NewModule(db, accountMod.Service(), chatterMod.Service(), aiClient)
+	auditTrailMod := audit_trail.NewModule(db, chatterMod.Service(), aiClient)
+	webhookMod := webhook.NewModule(db, chatterMod.Service(), aiClient)
+	inboundWebhookMod := inbound_webhook.NewModule(db, accountMod.Service(), chatterMod.Service(), aiClient)
+	intercompanyMod := intercompany.NewModule(db, accountMod.Service(), chatterMod.Service(), aiClient)
+	treasuryMod := treasury.NewModule(db, accountMod.Service(), chatterMod.Service(), aiClient)
+	mrpAdvancedMod := mrp_advanced.NewModule(db, mrpMod.Service(), chatterMod.Service(), aiClient)
+	taxEbupotMod := tax_ebupot.NewModule(db, payrollMod.Service(), accountMod.Service(), chatterMod.Service(), aiClient)
+	esignatureMod := esignature.NewModule(db, chatterMod.Service(), aiClient)
+	wmsMod := wms.NewModule(db, stockMod.Service(), chatterMod.Service(), aiClient)
+	vendorPortalMod := vendor_portal.NewModule(db, purchaseMod.Service(), stockMod.Service(), accountMod.Service(), chatterMod.Service(), aiClient)
+	customerPortalMod := customer_portal.NewModule(db, saleMod.Service(), stockMod.Service(), accountMod.Service(), chatterMod.Service(), aiClient)
+	customsBondedMod := customs_bonded.NewModule(db, stockMod.Service(), chatterMod.Service(), aiClient)
+	lowCodeStudioMod := lowcode_studio.NewModule(db, chatterMod.Service(), aiClient)
+	reportsMod := reports.NewModule(db)
+	workflowEngineMod := workflow_engine.NewModule(db, chatterMod.Service(), aiClient)
+	integrationHubMod := integration_hub.NewModule(db, chatterMod.Service(), aiClient)
+
+	manager.Register(baseMod)
+	manager.Register(productMod)
+	manager.Register(stockMod)
+	manager.Register(saleMod)
+	manager.Register(purchaseMod)
+	manager.Register(accountMod)
+	manager.Register(mrpMod)
+	manager.Register(posMod)
+	manager.Register(hrMod)
+	manager.Register(crmMod)
+	manager.Register(chatterMod)
+	manager.Register(projectMod)
+	manager.Register(assetMod)
+	manager.Register(helpdeskMod)
+	manager.Register(maintenanceMod)
+	manager.Register(fleetMod)
+	manager.Register(leaveMod)
+	manager.Register(expenseMod)
+	manager.Register(qualityMod)
+	manager.Register(approvalMod)
+	manager.Register(attachmentMod)
+	manager.Register(attendanceMod)
+	manager.Register(recruitmentMod)
+	manager.Register(stockInventoryMod)
+	manager.Register(payrollMod)
+	manager.Register(budgetMod)
+	manager.Register(barcodeMod)
+	manager.Register(purchaseRequisitionMod)
+	manager.Register(currencyMod)
+	manager.Register(taxEFakturMod)
+	manager.Register(bankReconcileMod)
+	manager.Register(landedCostMod)
+	manager.Register(traceabilityMod)
+	manager.Register(subscriptionMod)
+	manager.Register(auditTrailMod)
+	manager.Register(webhookMod)
+	manager.Register(inboundWebhookMod)
+	manager.Register(intercompanyMod)
+	manager.Register(treasuryMod)
+	manager.Register(mrpAdvancedMod)
+	manager.Register(taxEbupotMod)
+	manager.Register(esignatureMod)
+	manager.Register(wmsMod)
+	manager.Register(vendorPortalMod)
+	manager.Register(customerPortalMod)
+	manager.Register(customsBondedMod)
+	manager.Register(lowCodeStudioMod)
+	manager.Register(reportsMod)
+	manager.Register(workflowEngineMod)
+	manager.Register(integrationHubMod)
+
+	// 4. Auto-migrate all models
+	if err := manager.MigrateAll(); err != nil {
+		log.Fatalf("Fatal: Database migration failed: %v", err)
+	}
+
+	// 5. Seed default master data
+	if err := manager.SeedAll(); err != nil {
+		log.Fatalf("Fatal: Database seeding failed: %v", err)
+	}
+
+	// 5.1 Start automated background worker for Reordering Rules / Procurement
+	go func() {
+		log.Println("[Cron Worker] Automated Reordering & Procurement engine started (interval: 3m)")
+		ticker := time.NewTicker(3 * time.Minute)
+		defer ticker.Stop()
+		for range ticker.C {
+			orders, err := purchaseMod.Service().RunReorderingRules(1)
+			if err == nil && len(orders) > 0 {
+				log.Printf("[Cron Worker] Generated %d automatic draft purchase orders from stock reordering rules", len(orders))
+			}
+		}
+	}()
+
+	// 5.2 Start automated background worker for Recurring Subscription Invoicing
+	go func() {
+		log.Println("[Cron Worker] Automated Subscription Recurring Invoicing engine started (interval: 5m)")
+		ticker := time.NewTicker(5 * time.Minute)
+		defer ticker.Stop()
+		for range ticker.C {
+			todayStr := time.Now().Format("2006-01-02")
+			res, err := subscriptionMod.Service().RunBillingBatch(subscription.BillingBatchRequest{TargetDate: todayStr}, 1, 1)
+			if err == nil && res.InvoicesGenerated > 0 {
+				log.Printf("[Cron Worker] Subscription Billing Batch: Generated %d recurring invoices (Revenue: Rp %.2f)", res.InvoicesGenerated, res.TotalBilledRevenue)
+			}
+		}
+	}()
+
+	// 5.3 Start automated background worker for Webhook Outbound Retry Queue
+	go func() {
+		log.Println("[Cron Worker] Automated Webhook Outbound Retry engine started (interval: 1m)")
+		ticker := time.NewTicker(1 * time.Minute)
+		defer ticker.Stop()
+		for range ticker.C {
+			retried, err := webhookMod.Service().RunRetryQueue(1)
+			if err == nil && retried > 0 {
+				log.Printf("[Cron Worker] Webhook Engine: Processed and retried %d outbound deliveries", retried)
+			}
+		}
+	}()
+
+	// 6. Setup Gin HTTP Server
+	gin.SetMode(gin.ReleaseMode)
+	r := gin.Default()
+
+	// Enable CORS
+	r.Use(middleware.CORSMiddleware())
+
+	// Health Check
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status":     "ok",
+			"app":        cfg.AppName,
+			"version":    "1.41.0",
+			"db_type":    cfg.DBType,
+			"storage":    storageProv.Type(),
+			"upload_dir": cfg.UploadDir,
+			"modules":    []string{"base", "product", "stock", "sale", "purchase", "account", "mrp", "pos", "hr", "crm", "chatter", "project", "asset", "helpdesk", "maintenance", "fleet", "leave", "expense", "quality", "approval", "attachment", "attendance", "recruitment", "stock_inventory", "payroll", "budget", "barcode", "purchase_requisition", "currency", "tax_efaktur", "bank_reconciliation", "landed_cost", "traceability", "subscription", "audit_trail", "webhook", "inbound_webhook", "intercompany", "treasury", "mrp_advanced", "tax_ebupot", "esignature", "wms", "vendor_portal", "customer_portal", "customs_bonded", "lowcode_studio", "reports", "workflow_engine", "integration_hub"},
+		})
+	})
+
+	// Auth Middleware
+	authMiddleware := middleware.AuthMiddleware(cfg.JWTSecret)
+
+	// Cloudflare Workers AI Service Handler
+	aiHandler := ai.NewHandler(aiClient, db)
+
+	// API v1 Router Group
+	apiV1 := r.Group("/api/v1")
+	{
+		// Dashboard Stats
+		apiV1.GET("/dashboard/stats", authMiddleware, func(c *gin.Context) {
+			getDashboardStats(c, db)
+		})
+
+		// Register routes for all modules
+		manager.RegisterAllRoutes(apiV1, authMiddleware)
+
+		// Register Cloudflare Workers AI endpoints
+		ai.RegisterAIRoutes(apiV1, authMiddleware, aiHandler)
+	}
+
+	// Serve Static Web Frontend
+	r.Static("/web", "./web")
+	r.StaticFile("/", "./web/index.html")
+
+	addr := fmt.Sprintf(":%s", cfg.Port)
+	log.Printf("[Server] Odoo-Go ERP Server is listening on http://localhost%s", addr)
+	log.Printf("[Server] Web Dashboard available at http://localhost%s/", addr)
+	log.Printf("[Server] Default Admin Login: admin@odoo.local / admin123")
+	log.Printf("[Storage] Storage Backend: %s (Upload directory: %s)", storageProv.Type(), cfg.UploadDir)
+	if storageProv.Type() == "r2" {
+		log.Printf("[Cloudflare R2] Connected to Cloudflare R2 Bucket: %s", cfg.CloudflareR2Bucket)
+	}
+	if aiClient.IsCloudflareConfigured() {
+		log.Printf("[Cloudflare AI] Connected to Cloudflare Workers AI edge network (Model: %s)", cfg.CloudflareAIModel)
+	} else {
+		log.Printf("[Cloudflare AI] Running with Local Smart Heuristic Engine (Cloudflare credentials optional)")
+	}
+
+	if err := r.Run(addr); err != nil {
+		log.Fatalf("Server failed to run: %v", err)
+	}
+}
+
+func getDashboardStats(c *gin.Context, db *gorm.DB) {
+	_, companyID, _ := middleware.GetUserContext(c)
+
+	var productCount int64
+	db.Table("products").Where("company_id = ? AND active = ?", companyID, true).Count(&productCount)
+
+	var customerCount int64
+	db.Table("partners").Where("company_id = ? AND customer_rank > 0", companyID).Count(&customerCount)
+
+	var vendorCount int64
+	db.Table("partners").Where("company_id = ? AND supplier_rank > 0", companyID).Count(&vendorCount)
+
+	var saleCount int64
+	db.Table("sale_orders").Where("company_id = ?", companyID).Count(&saleCount)
+
+	var purchaseCount int64
+	db.Table("purchase_orders").Where("company_id = ?", companyID).Count(&purchaseCount)
+
+	var pickingCount int64
+	db.Table("stock_pickings").Where("company_id = ?", companyID).Count(&pickingCount)
+
+	var invoiceCount int64
+	db.Table("account_moves").Where("company_id = ?", companyID).Count(&invoiceCount)
+
+	var totalSales float64
+	db.Table("sale_orders").Where("company_id = ? AND state = 'sale'", companyID).
+		Select("COALESCE(SUM(amount_total), 0)").Scan(&totalSales)
+
+	var mrpCount int64
+	db.Table("mrp_productions").Where("company_id = ?", companyID).Count(&mrpCount)
+
+	var posOrderCount int64
+	db.Table("pos_orders").Where("company_id = ?", companyID).Count(&posOrderCount)
+
+	var empCount int64
+	db.Table("employees").Where("company_id = ? AND status = 'active'", companyID).Count(&empCount)
+
+	var leadCount int64
+	db.Table("crm_leads").Where("company_id = ?", companyID).Count(&leadCount)
+
+	var projectCount int64
+	db.Table("projects").Where("company_id = ?", companyID).Count(&projectCount)
+
+	var taskCount int64
+	db.Table("tasks").Where("company_id = ?", companyID).Count(&taskCount)
+
+	var assetCount int64
+	db.Table("assets").Where("company_id = ?", companyID).Count(&assetCount)
+
+	var ticketCount int64
+	db.Table("helpdesk_tickets").Where("company_id = ?", companyID).Count(&ticketCount)
+
+	var equipmentCount int64
+	db.Table("maintenance_equipments").Where("company_id = ?", companyID).Count(&equipmentCount)
+
+	var maintRequestCount int64
+	db.Table("maintenance_requests").Where("company_id = ?", companyID).Count(&maintRequestCount)
+
+	var vehicleCount int64
+	db.Table("fleet_vehicles").Where("company_id = ?", companyID).Count(&vehicleCount)
+
+	var leaveCount int64
+	db.Table("leave_requests").Where("company_id = ?", companyID).Count(&leaveCount)
+
+	var expenseCount int64
+	db.Table("expenses").Where("company_id = ?", companyID).Count(&expenseCount)
+
+	var expenseSheetCount int64
+	db.Table("expense_sheets").Where("company_id = ?", companyID).Count(&expenseSheetCount)
+
+	var qcCount int64
+	db.Table("quality_checks").Where("company_id = ?", companyID).Count(&qcCount)
+
+	var qaCount int64
+	db.Table("quality_alerts").Where("company_id = ?", companyID).Count(&qaCount)
+
+	var approvalCount int64
+	db.Table("approval_requests").Where("company_id = ?", companyID).Count(&approvalCount)
+
+	var docCount int64
+	db.Table("ir_attachments").Where("company_id = ?", companyID).Count(&docCount)
+
+	var attCount int64
+	db.Table("hr_attendances").Where("company_id = ?", companyID).Count(&attCount)
+
+	var openingCount int64
+	db.Table("hr_job_openings").Where("company_id = ? AND state = 'open'", companyID).Count(&openingCount)
+
+	var applicantCount int64
+	db.Table("hr_applicants").Where("company_id = ?", companyID).Count(&applicantCount)
+
+	var stockInventoryCount int64
+	db.Table("stock_inventories").Where("company_id = ?", companyID).Count(&stockInventoryCount)
+
+	var payrollSlipCount int64
+	db.Table("payroll_payslips").Where("company_id = ?", companyID).Count(&payrollSlipCount)
+
+	var budgetCount int64
+	db.Table("account_budgets").Where("company_id = ?", companyID).Count(&budgetCount)
+
+	var lotCount int64
+	db.Table("stock_production_lots").Where("company_id = ?", companyID).Count(&lotCount)
+
+	var reqCount int64
+	db.Table("purchase_requisitions").Where("company_id = ?", companyID).Count(&reqCount)
+
+	var currencyCount int64
+	db.Table("res_currencies").Where("active = ?", true).Count(&currencyCount)
+
+	var taxInvoiceCount int64
+	db.Table("account_tax_invoices").Where("company_id = ?", companyID).Count(&taxInvoiceCount)
+
+	var bankStatementCount int64
+	db.Table("account_bank_statements").Where("company_id = ?", companyID).Count(&bankStatementCount)
+
+	var landedCostCount int64
+	db.Table("stock_landed_costs").Where("company_id = ?", companyID).Count(&landedCostCount)
+
+	var traceCount int64
+	db.Table("stock_lot_traces").Where("company_id = ?", companyID).Count(&traceCount)
+
+	var recallCount int64
+	db.Table("stock_lot_recalls").Where("company_id = ?", companyID).Count(&recallCount)
+
+	var subCount int64
+	db.Table("subscriptions").Where("company_id = ?", companyID).Count(&subCount)
+
+	var subMRR float64
+	db.Table("subscriptions").Where("company_id = ? AND state = 'in_progress'", companyID).
+		Select("COALESCE(SUM(total_mrr), 0)").Scan(&subMRR)
+
+	var auditLogCount int64
+	db.Table("audit_log_entries").Where("company_id = ?", companyID).Count(&auditLogCount)
+
+	var suspiciousAuditCount int64
+	db.Table("audit_log_entries").Where("company_id = ? AND is_suspicious = ?", companyID, true).Count(&suspiciousAuditCount)
+
+	var webhookSubCount int64
+	db.Table("webhook_subscriptions").Where("company_id = ? AND is_active = ?", companyID, true).Count(&webhookSubCount)
+
+	var webhookDeliveryCount int64
+	db.Table("webhook_deliveries").Where("company_id = ?", companyID).Count(&webhookDeliveryCount)
+
+	var inboundEndpointCount int64
+	db.Table("inbound_webhook_endpoints").Where("company_id = ? AND is_active = ?", companyID, true).Count(&inboundEndpointCount)
+
+	var inboundLogCount int64
+	db.Table("inbound_webhook_logs").Where("company_id = ?", companyID).Count(&inboundLogCount)
+
+	var icGroupCount, icTxCount, icRunCount int64
+	db.Table("intercompany_groups").Count(&icGroupCount)
+	db.Table("intercompany_transactions").Count(&icTxCount)
+	db.Table("consolidation_runs").Count(&icRunCount)
+
+	var bankAccCount int64
+	db.Table("treasury_bank_accounts").Where("company_id = ? AND active = ?", companyID, true).Count(&bankAccCount)
+
+	var forecastCount int64
+	db.Table("cash_flow_forecasts").Where("company_id = ?", companyID).Count(&forecastCount)
+
+	var transferCount int64
+	db.Table("inter_bank_transfers").Where("company_id = ?", companyID).Count(&transferCount)
+
+	var totalLiquidCash float64
+	db.Table("treasury_bank_accounts").Where("company_id = ? AND active = ? AND status = 'active'", companyID, true).
+		Select("COALESCE(SUM(current_balance), 0)").Scan(&totalLiquidCash)
+
+	var workCenterCount int64
+	var routingCount int64
+	var workOrderCount int64
+	db.Table("work_centers").Where("company_id = ? OR company_id = 0", companyID).Count(&workCenterCount)
+	db.Table("routings").Where("company_id = ? OR company_id = 0", companyID).Count(&routingCount)
+	db.Table("work_orders").Where("company_id = ? OR company_id = 0", companyID).Count(&workOrderCount)
+
+	var ebupotPeriodCount int64
+	var ebupotSlipCount int64
+	var totalEbupotTax float64
+	db.Table("tax_ebupot_periods").Where("company_id = ? OR company_id = 0", companyID).Count(&ebupotPeriodCount)
+	db.Table("tax_ebupot_withholding_slips").Where("company_id = ? OR company_id = 0", companyID).Count(&ebupotSlipCount)
+	db.Table("tax_ebupot_withholding_slips").Where("company_id = ? OR company_id = 0", companyID).Select("COALESCE(SUM(tax_withheld), 0)").Scan(&totalEbupotTax)
+
+	var esignRequestCount, esignSignedCount int64
+	db.Table("document_sign_requests").Where("company_id = ? OR company_id = 0", companyID).Count(&esignRequestCount)
+	db.Table("document_sign_requests").Where("(company_id = ? OR company_id = 0) AND status = 'signed'", companyID).Count(&esignSignedCount)
+
+	var wmsZoneCount, wmsBinCount, wmsWaveCount int64
+	db.Table("wms_zones").Count(&wmsZoneCount)
+	db.Table("wms_bin_locations").Count(&wmsBinCount)
+	db.Table("wms_wave_pickings").Count(&wmsWaveCount)
+
+	var vendorAccCount, vendorBidCount, vendorASNCount, vendorInvCount int64
+	db.Table("vendor_portal_accounts").Count(&vendorAccCount)
+	db.Table("vendor_quotation_bids").Count(&vendorBidCount)
+	db.Table("vendor_asns").Count(&vendorASNCount)
+	db.Table("vendor_invoice_submissions").Count(&vendorInvCount)
+
+	var custAccCount, custOrderCount, custRMACount, custPayCount int64
+	db.Table("customer_portal_accounts").Count(&custAccCount)
+	db.Table("customer_portal_order_requests").Count(&custOrderCount)
+	db.Table("customer_portal_rma_requests").Count(&custRMACount)
+	db.Table("customer_portal_payment_notifications").Count(&custPayCount)
+
+	var customsDocCount, customsMutationCount, customsSubcontractCount int64
+	db.Table("customs_documents").Count(&customsDocCount)
+	db.Table("customs_it_inventory_mutations").Count(&customsMutationCount)
+	db.Table("customs_subcontracts").Count(&customsSubcontractCount)
+
+	var workflowDefCount, workflowInstCount int64
+	db.Table("workflow_definitions").Count(&workflowDefCount)
+	db.Table("workflow_instances").Count(&workflowInstCount)
+
+	var integrationKeyCount, integrationConnectorCount, integrationLogCount int64
+	db.Table("integration_api_keys").Count(&integrationKeyCount)
+	db.Table("integration_connectors").Count(&integrationConnectorCount)
+	db.Table("integration_logs").Count(&integrationLogCount)
+
+	c.JSON(http.StatusOK, gin.H{
+		"products":                  productCount,
+		"customers":                 customerCount,
+		"vendors":                   vendorCount,
+		"sales_orders":              saleCount,
+		"purchase_orders":           purchaseCount,
+		"pickings":                  pickingCount,
+		"invoices":                  invoiceCount,
+		"total_sales":               totalSales,
+		"mrp_orders":                mrpCount,
+		"pos_orders":                posOrderCount,
+		"employees":                 empCount,
+		"crm_leads":                 leadCount,
+		"projects":                  projectCount,
+		"tasks":                     taskCount,
+		"assets":                    assetCount,
+		"tickets":                   ticketCount,
+		"equipments":                equipmentCount,
+		"maintenance_requests":      maintRequestCount,
+		"vehicles":                  vehicleCount,
+		"leaves":                    leaveCount,
+		"expenses":                  expenseCount,
+		"expense_sheets":            expenseSheetCount,
+		"quality_checks":            qcCount,
+		"quality_alerts":            qaCount,
+		"approvals":                 approvalCount,
+		"attachments":               docCount,
+		"attendances":               attCount,
+		"job_openings":              openingCount,
+		"applicants":                applicantCount,
+		"stock_inventories":         stockInventoryCount,
+		"payroll_payslips":          payrollSlipCount,
+		"budgets":                   budgetCount,
+		"lots":                      lotCount,
+		"purchase_requisitions":     reqCount,
+		"currencies":                currencyCount,
+		"tax_invoices":              taxInvoiceCount,
+		"bank_statements":           bankStatementCount,
+		"landed_costs":              landedCostCount,
+		"traceability_records":      traceCount,
+		"recalls":                   recallCount,
+		"subscriptions":             subCount,
+		"subscription_mrr":          subMRR,
+		"audit_logs":                auditLogCount,
+		"suspicious_audit_logs":     suspiciousAuditCount,
+		"webhook_subscriptions":     webhookSubCount,
+		"webhook_deliveries":        webhookDeliveryCount,
+		"inbound_webhook_endpoints": inboundEndpointCount,
+		"inbound_webhook_logs":      inboundLogCount,
+		"intercompany_groups":       icGroupCount,
+		"intercompany_transactions": icTxCount,
+		"consolidation_runs":        icRunCount,
+		"treasury_bank_accounts":    bankAccCount,
+		"cash_flow_forecasts":       forecastCount,
+		"interbank_transfers":       transferCount,
+		"total_liquid_cash":         totalLiquidCash,
+		"work_centers":              workCenterCount,
+		"routings":                  routingCount,
+		"work_orders":               workOrderCount,
+		"ebupot_periods":            ebupotPeriodCount,
+		"ebupot_slips":              ebupotSlipCount,
+		"total_ebupot_tax":          totalEbupotTax,
+		"esign_requests":            esignRequestCount,
+		"esign_signed":              esignSignedCount,
+		"wms_zones":                 wmsZoneCount,
+		"wms_bins":                  wmsBinCount,
+		"wms_waves":                 wmsWaveCount,
+		"vendor_portal_accounts":    vendorAccCount,
+		"vendor_quotation_bids":     vendorBidCount,
+		"vendor_asns":               vendorASNCount,
+		"vendor_invoice_submissions": vendorInvCount,
+		"customer_portal_accounts":  custAccCount,
+		"customer_b2b_orders":       custOrderCount,
+		"customer_rmas":             custRMACount,
+		"customer_payment_notifs":   custPayCount,
+		"customs_documents":         customsDocCount,
+		"customs_mutations":         customsMutationCount,
+		"customs_subcontracts":      customsSubcontractCount,
+		"workflow_definitions":      workflowDefCount,
+		"workflow_instances":        workflowInstCount,
+		"integration_api_keys":      integrationKeyCount,
+		"integration_connectors":    integrationConnectorCount,
+		"integration_logs":          integrationLogCount,
+	})
+}
+

@@ -1,0 +1,20718 @@
+// State & Global Variables
+let state = {
+    token: localStorage.getItem('odoo_token') || '',
+    user: null,
+    currentTab: 'dashboard',
+    products: [],
+    partners: [],
+    salesOrders: [],
+    purchaseOrders: [],
+    pickings: [],
+    quants: [],
+    invoices: [],
+    leads: [],
+    currentCrmStage: 'all',
+    projects: [],
+    tasks: [],
+    currentTaskStage: 'all',
+    assets: [],
+    currentAsset: null,
+    warehouses: [],
+    locations: [],
+    currentPickingFilter: 'all',
+    currentWarehouseFilter: 'all',
+    tickets: [],
+    teams: [],
+    equipments: [],
+    maintenanceRequests: [],
+    equipmentCategories: [],
+    vehicles: [],
+    fleetModels: [],
+    serviceLogs: [],
+    currentFleetTypeFilter: 'all',
+    leaveRequests: [],
+    leaveAllocations: [],
+    leaveTypes: [],
+    currentLeaveTypeFilter: 'all',
+    expenses: [],
+    expenseSheets: [],
+    expenseCategories: [],
+    currentExpenseView: 'sheets',
+    qualityChecks: [],
+    qualityAlerts: [],
+    qualityPoints: [],
+    currentQualityView: 'checks',
+    currentQualityCheck: null,
+    attachments: [],
+    currentAttachmentOCR: null
+};
+
+// API Helper
+async function api(endpoint, method = 'GET', body = null) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (state.token) {
+        headers['Authorization'] = `Bearer ${state.token}`;
+    }
+
+    try {
+        const response = await fetch(`/api/v1${endpoint}`, {
+            method,
+            headers,
+            body: body ? JSON.stringify(body) : null
+        });
+
+        if (response.status === 401 && endpoint !== '/auth/login') {
+            await autoLogin();
+            return api(endpoint, method, body);
+        }
+
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.error || 'Server request failed');
+        }
+        return data;
+    } catch (err) {
+        console.error(`API Error [${endpoint}]:`, err);
+        throw err;
+    }
+}
+
+async function apiGet(endpoint) {
+    const ep = endpoint.startsWith('/api/v1') ? endpoint.substring(7) : endpoint;
+    const res = await api(ep, 'GET');
+    return res && res.data !== undefined ? res.data : res;
+}
+
+async function apiPost(endpoint, body = {}) {
+    const ep = endpoint.startsWith('/api/v1') ? endpoint.substring(7) : endpoint;
+    const res = await api(ep, 'POST', body);
+    return res && res.data !== undefined ? res.data : res;
+}
+
+// Auto Login default admin if no token
+async function autoLogin() {
+    try {
+        const data = await api('/auth/login', 'POST', {
+            email: 'admin@odoo.local',
+            password: 'admin123'
+        });
+        state.token = data.token;
+        state.user = data.user;
+        localStorage.setItem('odoo_token', data.token);
+        updateUserUI();
+    } catch (e) {
+        showToast('Login failed: ' + e.message, 'danger');
+    }
+}
+
+function updateUserUI() {
+    if (state.user) {
+        document.getElementById('userName').textContent = state.user.name;
+        document.getElementById('userRole').textContent = state.user.role;
+        document.getElementById('userAvatar').textContent = state.user.name.charAt(0).toUpperCase();
+    }
+}
+
+// Format IDR Currency
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0
+    }).format(amount || 0);
+}
+
+// Toast Notifications
+function showToast(msg, type = 'primary') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = msg;
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.remove();
+    }, 4000);
+}
+
+// Modal Helpers
+function openModal(id) {
+    document.getElementById(id).classList.add('active');
+    if (id === 'modalCreateSaleOrder') populateSoPartnerAndProductSelects();
+    if (id === 'modalCreatePurchaseOrder') populatePoPartnerAndProductSelects();
+    if (id === 'modalCreateMO') populateMoBomSelect();
+    if (id === 'modalPosCheckout') populatePosProductSelect();
+    if (id === 'modalCreateEmployee') populateEmpDeptAndJobSelects();
+    if (id === 'modalCreatePayslip') populatePayslipEmployeeSelect();
+    if (id === 'modalCreateLead') populateLeadPartnerSelect();
+    if (id === 'modalCreateProject') populateProjectPartnerSelect();
+    if (id === 'modalCreateTask') populateTaskProjectSelect();
+    if (id === 'modalCreateAsset') populateAssetModalSelects();
+    if (id === 'modalCreateTransfer') populateTransferModalSelects();
+    if (id === 'modalAttendanceCheckIn') { populateAttendanceEmployeeDropdowns(); loadShifts(); }
+    if (id === 'modalSyncPayroll') { populateAttendanceEmployeeDropdowns(); }
+}
+
+function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+}
+
+// Initialize Application
+document.addEventListener('DOMContentLoaded', async () => {
+    setupNavigation();
+    if (!state.token) {
+        await autoLogin();
+    } else {
+        try {
+            const me = await api('/auth/me');
+            state.user = me;
+            updateUserUI();
+        } catch {
+            await autoLogin();
+        }
+    }
+    loadCurrentTab();
+});
+
+// Setup Tab Navigation
+function setupNavigation() {
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            navItems.forEach(n => n.classList.remove('active'));
+            item.classList.add('active');
+            
+            const tab = item.dataset.tab;
+            state.currentTab = tab;
+            
+            document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            
+            updateHeaderTitles(tab);
+            loadCurrentTab();
+        });
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.removeItem('odoo_token');
+        state.token = '';
+        state.user = null;
+        autoLogin().then(() => loadCurrentTab());
+    });
+}
+
+function updateHeaderTitles(tab) {
+    const titleMap = {
+        dashboard: { title: 'Executive Dashboard', sub: 'Real-time overview of business performance and workflows' },
+        contacts: { title: 'Contacts & Partners', sub: 'Customers, Vendors and Business Contacts' },
+        products: { title: 'Product Catalog', sub: 'Inventory items, services and pricing master data' },
+        sales: { title: 'Sales Orders & Quotations', sub: 'Manage customer quotations, confirmations, and deliveries' },
+        purchases: { title: 'Purchase Orders & RFQs', sub: 'Vendor requests, purchase confirmations, and warehouse receiving' },
+        inventory: { title: 'Inventory & Double-Entry Stock', sub: 'Real-time stock quants, transfers, and warehouse pickings' },
+        invoicing: { title: 'Invoicing & Accounting', sub: 'Customer Invoices, Vendor Bills, and Ledger Entries' },
+        reports: { title: 'Laporan Keuangan & Akuntansi', sub: 'Laba Rugi (Profit & Loss), Neraca Keuangan (Balance Sheet) & Neraca Saldo (Trial Balance)' },
+        crm: { title: 'CRM & Sales Pipeline', sub: 'Opportunities pipeline, conversion stages, and lead-to-quotation workflow' },
+        projects: { title: 'Projects & Task Management', sub: 'Agile milestone tracking, task kanban stages and employee timesheet logs' },
+        mrp: { title: 'Manufacturing & Work Orders', sub: 'Bill of Materials (BOM) & production order execution' },
+        pos: { title: 'Point of Sale (POS)', sub: 'Fast retail checkout, cashier shifts and real-time inventory deductions' },
+        hr: { title: 'Human Resources & Payroll', sub: 'Employee directory, organization departments, and monthly payslips' },
+        assets: { title: 'Fixed Assets & Depreciation', sub: 'Manajemen Aset Tetap, Jadwal Depresiasi Otomatis & Integrasi General Ledger (account.asset)' },
+        helpdesk: { title: 'Helpdesk & Customer Support', sub: 'Customer ticketing system, multi-tier team escalation, stages & audit chatter (helpdesk.ticket)' },
+        maintenance: { title: 'Maintenance & Equipment Management', sub: 'Plant machinery tracking, preventive maintenance automation, corrective work orders & GL asset sync (maintenance.equipment)' },
+        fleet: { title: 'Fleet & Delivery Vehicle Management', sub: 'Manajemen armada kendaraan, log odometer KM, histori servis & integrasi aset tetap (fleet.vehicle)' },
+        leave: { title: 'Leave & Time Off Management', sub: 'Pengajuan cuti karyawan, persetujuan berjenjang, kuota tahunan & pemotongan payroll (hr.leave)' },
+        expenses: { title: 'Expenses & Reimbursement Management', sub: 'Klaim biaya operasional, approval bertingkat, tagging armada/proyek & integrasi General Ledger (hr.expense)' },
+        quality: { title: 'Quality Control & Inspection Management', sub: 'Standar Operasional Mutu, inspeksi toleransi WH/IN & MO, serta investigasi ketidaksesuaian CAPA (quality.point, quality.check, quality.alert)' },
+        attachments: { title: 'Pusat Dokumen & R2 Storage Hub', sub: 'Penyimpanan Objek Cloud Zero-Egress R2 & Pemindaian Struk Cerdas dengan Cloudflare Workers AI Vision OCR (ir.attachment)' },
+        attendance: { title: 'Presensi & Telemetri Edge Cloudflare', sub: 'Sistem kehadiran GPS geofencing, shift kerja fleksibel, deteksi anomali Edge & sinkronisasi lembur payroll (hr.attendance)' },
+        recruitment: { title: 'Rekrutmen & AI Talent Acquisition', sub: 'Manajemen lowongan kerja, pipeline seleksi pelamar, screening otomatis CV Cloudflare Workers AI & 1-Click Hire (hr.recruitment)' },
+        'stock-inventory': { title: 'Stock Opname & Inventaris Fisik', sub: 'Pemeriksaan fisik saldo gudang berkala, Cloudflare Workers AI Shrinkage Audit & GL Posting (stock.inventory)' },
+        payroll: { title: 'Enterprise Payroll & Aturan Gaji', sub: 'Multi-tier Salary Structures, Batch Payslip Runs, Cloudflare Workers AI Tax Auditor & Double-Entry GL Posting (hr.payroll)' },
+        budget: { title: 'Enterprise Budgeting & Akuntansi Analitik', sub: 'Manajemen Rencana Anggaran Biaya (RKAB), Akun Analitik / Cost Center, Dynamic Variance Analysis & Cloudflare Workers AI Burn-Rate Auditor (account.budget)' },
+        barcode: { title: 'Barcode & QR Code Engine, Lot/Serial Tracking', sub: 'Pemindai Cerdas Universal, Pencetakan Label Pure Go Vector SVG Code 128, Pelacakan Lot & Operasi Seluler (stock.production.lot)' },
+        'purchase-requisitions': { title: 'Purchase Requisitions, Tender & Blanket Orders', sub: 'Permintaan Pembelian Internal, Lelang Multi-Vendor (Call for Bids) & Kontrak Pasokan Jangka Panjang (purchase.requisition)' },
+        currency: { title: 'Multi-Valas & Kurs Forex (PSAK 10)', sub: 'Multi-Currency Revaluation, Spot Rates JISDOR/BI, Unrealized & Realized Gain/Loss, dan Treasury AI Copilot (res.currency)' },
+        'tax-efaktur': { title: 'Pajak & e-Faktur Elektronik DJP', sub: 'Kepatuhan Pajak UU HPP & PMK 112/2022 - NSFP, Faktur Pajak Keluaran/Masukan, SPT Masa 1111, CSV & AI Compliance (account.tax.invoice)' },
+        'bank-reconcile': { title: 'Rekonsiliasi Bank & Impor Rekening Koran', sub: 'Odoo 17/18 Style Auto-Match Engine, Impor CSV Multi-Format (BCA/Mandiri/BRI), Aturan Write-Off Biaya Bank, dan AI Statement Audit Copilot (account.bank.statement)' }
+    };
+    const t = titleMap[tab] || titleMap.dashboard;
+    document.getElementById('pageTitle').textContent = t.title;
+    document.getElementById('pageSubtitle').textContent = t.sub;
+}
+
+function loadCurrentTab() {
+    switch (state.currentTab) {
+        case 'dashboard': loadDashboard(); break;
+        case 'contacts': loadPartners('all'); break;
+        case 'products': loadProducts(); break;
+        case 'sales': loadSales(); break;
+        case 'purchases': loadPurchases(); break;
+        case 'inventory': loadInventory(); break;
+        case 'invoicing': loadInvoices(); break;
+        case 'reports': loadFinancialReports(); break;
+        case 'crm': loadCRM(state.currentCrmStage); break;
+        case 'projects': loadProjects(); break;
+        case 'mrp': loadMRP(); break;
+        case 'pos': loadPOS(); break;
+        case 'hr': loadHR(); break;
+        case 'assets': loadAssets(); break;
+        case 'helpdesk': loadHelpdesk(); break;
+        case 'maintenance': loadMaintenance(); break;
+        case 'fleet': loadFleet(); break;
+        case 'leave': loadLeave(); break;
+        case 'expenses': loadExpenses(); break;
+        case 'quality': loadQuality(); break;
+        case 'approvals': loadApprovals(); break;
+        case 'attendance': loadAttendances(); loadAttendanceStats(); loadShifts(); populateAttendanceEmployeeDropdowns(); initLiveClockTicker(); break;
+        case 'recruitment': loadRecruitmentData(); break;
+        case 'stock-inventory': loadStockInventoryData(); break;
+        case 'payroll': loadPayrollData(); break;
+        case 'budget': loadBudgetData(); break;
+        case 'barcode': loadBarcodeData(); break;
+        case 'purchase-requisitions': loadPurchaseRequisitionsData(); break;
+        case 'currency': loadCurrencyData(); break;
+        case 'tax-efaktur': loadTaxEFakturData(); break;
+        case 'bank-reconcile': loadBankReconcileData(); break;
+        case 'landed-cost': loadLandedCostData(); break;
+        case 'traceability': loadTraceabilityData(); break;
+        case 'subscription': loadSubscriptionData(); break;
+        case 'audit-trail': loadAuditTrailData(); break;
+        case 'webhook': loadWebhookData(); break;
+        case 'inbound-webhook': loadInboundWebhookData(); break;
+        case 'intercompany': loadIntercompanyData(); break;
+        case 'treasury': loadTreasuryData(); break;
+        case 'mrp-advanced': loadMRPAdvancedData(); break;
+        case 'tax-ebupot': loadTaxEbupotData(); break;
+        case 'esignature': loadEsignData(); break;
+        case 'wms': loadWMSData(); break;
+        case 'vendor-portal': loadVendorPortalData(); break;
+        case 'customer-portal': loadCustomerPortalData(); break;
+        case 'customs-bonded': loadCustomsBondedData(); break;
+        case 'lowcode-studio': loadLowCodeStudioData(); break;
+    }
+}
+
+// 1. DASHBOARD
+async function loadDashboard() {
+    try {
+        const stats = await api('/dashboard/stats');
+        document.getElementById('statTotalSales').textContent = formatCurrency(stats.total_sales);
+        document.getElementById('statSalesOrders').textContent = stats.sales_orders;
+        document.getElementById('statPurchaseOrders').textContent = stats.purchase_orders;
+        document.getElementById('statPickings').textContent = stats.pickings;
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+// 2. CONTACTS / PARTNERS
+async function loadPartners(type = 'all') {
+    const url = type === 'all' ? '/partners' : `/partners?type=${type}`;
+    try {
+        const partners = await api(url);
+        state.partners = partners;
+        const tbody = document.getElementById('partnersTableBody');
+        tbody.innerHTML = '';
+        if (partners.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center">No contacts found</td></tr>`;
+            return;
+        }
+        partners.forEach(p => {
+            const roleBadge = p.customer_rank > 0 && p.supplier_rank > 0
+                ? '<span class="badge badge-info">Customer & Vendor</span>'
+                : p.customer_rank > 0
+                ? '<span class="badge badge-success">Customer</span>'
+                : p.supplier_rank > 0
+                ? '<span class="badge badge-warning">Vendor</span>'
+                : '<span class="badge badge-draft">Contact</span>';
+
+            const typeBadge = p.is_company ? '🏢 Company' : '👤 Individual';
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${p.name}</strong></td>
+                    <td>${typeBadge}</td>
+                    <td>${p.email || '-'}</td>
+                    <td>${p.phone || '-'}</td>
+                    <td>${p.city || '-'}</td>
+                    <td>${roleBadge}</td>
+                </tr>
+            `;
+        });
+    } catch (e) {
+        showToast('Failed to load partners: ' + e.message, 'danger');
+    }
+}
+
+async function handleCreatePartner(e) {
+    e.preventDefault();
+    const type = document.getElementById('partnerTypeSelect').value;
+    const body = {
+        name: document.getElementById('partnerName').value,
+        email: document.getElementById('partnerEmail').value,
+        phone: document.getElementById('partnerPhone').value,
+        city: document.getElementById('partnerCity').value,
+        customer_rank: (type === 'customer' || type === 'both') ? 1 : 0,
+        supplier_rank: (type === 'supplier' || type === 'both') ? 1 : 0,
+        is_company: true
+    };
+    try {
+        await api('/partners', 'POST', body);
+        showToast('Contact created successfully', 'success');
+        closeModal('modalCreatePartner');
+        loadPartners('all');
+    } catch (err) {
+        showToast(err.message, 'danger');
+    }
+}
+
+// 3. PRODUCTS
+async function loadProducts() {
+    try {
+        const products = await api('/products');
+        state.products = products;
+        const tbody = document.getElementById('productsTableBody');
+        tbody.innerHTML = '';
+        if (products.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center">No products found</td></tr>`;
+            return;
+        }
+        products.forEach(p => {
+            const typeBadge = p.type === 'product'
+                ? '<span class="badge badge-success">Storable</span>'
+                : p.type === 'service'
+                ? '<span class="badge badge-info">Service</span>'
+                : '<span class="badge badge-draft">Consumable</span>';
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><code>${p.default_code || '-'}</code></td>
+                    <td><strong>${p.name}</strong></td>
+                    <td>${typeBadge}</td>
+                    <td>${formatCurrency(p.list_price)}</td>
+                    <td>${formatCurrency(p.standard_price)}</td>
+                    <td><strong class="${p.qty_available > 0 ? 'text-success' : 'text-warning'}">${p.qty_available}</strong></td>
+                    <td>${p.uom?.name || 'Unit'}</td>
+                </tr>
+            `;
+        });
+    } catch (e) {
+        showToast('Failed to load products: ' + e.message, 'danger');
+    }
+}
+
+async function handleCreateProduct(e) {
+    e.preventDefault();
+    const body = {
+        name: document.getElementById('prodName').value,
+        default_code: document.getElementById('prodCode').value,
+        type: document.getElementById('prodType').value,
+        list_price: parseFloat(document.getElementById('prodListPrice').value) || 0,
+        standard_price: parseFloat(document.getElementById('prodStandardPrice').value) || 0,
+        category_id: 1,
+        uom_id: 1
+    };
+    try {
+        await api('/products', 'POST', body);
+        showToast('Product added successfully', 'success');
+        closeModal('modalCreateProduct');
+        loadProducts();
+    } catch (err) {
+        showToast(err.message, 'danger');
+    }
+}
+
+// 4. SALES
+async function loadSales() {
+    try {
+        const orders = await api('/sales/orders');
+        state.salesOrders = orders;
+        const tbody = document.getElementById('salesTableBody');
+        tbody.innerHTML = '';
+        if (orders.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center">No sales orders found</td></tr>`;
+            return;
+        }
+        orders.forEach(so => {
+            const stateBadge = so.state === 'sale'
+                ? '<span class="badge badge-primary">Sales Order</span>'
+                : so.state === 'draft'
+                ? '<span class="badge badge-draft">Quotation</span>'
+                : `<span class="badge badge-info">${so.state}</span>`;
+
+            let actionBtn = '';
+            if (so.state === 'draft') {
+                actionBtn = `<button class="btn btn-sm btn-primary" onclick="confirmSaleOrder(${so.id})">Confirm SO</button>`;
+            } else {
+                actionBtn = `<span class="text-success font-semibold">✓ Confirmed</span>`;
+            }
+
+            const deliveryInfo = so.delivery_id 
+                ? `<span class="badge badge-info">Picking #${so.delivery_id}</span>` 
+                : `<span class="text-muted">-</span>`;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${so.name}</strong></td>
+                    <td>${so.partner?.name || 'Customer'}</td>
+                    <td>${so.date_order}</td>
+                    <td><strong>${formatCurrency(so.amount_total)}</strong></td>
+                    <td>${stateBadge}</td>
+                    <td>${deliveryInfo}</td>
+                    <td>${actionBtn}</td>
+                </tr>
+            `;
+        });
+    } catch (e) {
+        showToast('Failed to load sales: ' + e.message, 'danger');
+    }
+}
+
+async function confirmSaleOrder(id) {
+    try {
+        const res = await api(`/sales/orders/${id}/confirm`, 'POST');
+        showToast(`SO Confirmed! Delivery Order ${res.delivery ? res.delivery.name : ''} generated automatically.`, 'success');
+        loadSales();
+    } catch (err) {
+        showToast(err.message, 'danger');
+    }
+}
+
+function populateSoPartnerAndProductSelects() {
+    api('/partners?type=customer').then(partners => {
+        const select = document.getElementById('soPartnerSelect');
+        select.innerHTML = partners.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    });
+    api('/products').then(prods => {
+        const select = document.getElementById('soProductSelect');
+        select.innerHTML = prods.map(p => `<option value="${p.id}" data-price="${p.list_price}">${p.name} (${formatCurrency(p.list_price)})</option>`).join('');
+        updateSoProductPrice();
+    });
+}
+
+function updateSoProductPrice() {
+    const sel = document.getElementById('soProductSelect');
+    const selectedOption = sel.options[sel.selectedIndex];
+    if (selectedOption) {
+        document.getElementById('soUnitPrice').value = selectedOption.dataset.price;
+        calculateSoTotal();
+    }
+}
+
+function calculateSoTotal() {
+    const qty = parseFloat(document.getElementById('soQty').value) || 0;
+    const price = parseFloat(document.getElementById('soUnitPrice').value) || 0;
+    const subtotal = qty * price;
+    const tax = subtotal * 0.11;
+    const total = subtotal + tax;
+
+    document.getElementById('soSubtotalDisplay').textContent = formatCurrency(subtotal);
+    document.getElementById('soTaxDisplay').textContent = formatCurrency(tax);
+    document.getElementById('soTotalDisplay').textContent = formatCurrency(total);
+}
+
+async function handleCreateSaleOrder(e) {
+    e.preventDefault();
+    const prodSelect = document.getElementById('soProductSelect');
+    const prodName = prodSelect.options[prodSelect.selectedIndex].text.split(' (')[0];
+    const body = {
+        partner_id: parseInt(document.getElementById('soPartnerSelect').value),
+        tax_rate: 11,
+        order_lines: [
+            {
+                product_id: parseInt(prodSelect.value),
+                name: prodName,
+                product_uom_qty: parseFloat(document.getElementById('soQty').value),
+                price_unit: parseFloat(document.getElementById('soUnitPrice').value)
+            }
+        ]
+    };
+    try {
+        await api('/sales/orders', 'POST', body);
+        showToast('Quotation created successfully', 'success');
+        closeModal('modalCreateSaleOrder');
+        loadSales();
+    } catch (err) {
+        showToast(err.message, 'danger');
+    }
+}
+
+// 5. PURCHASES
+async function loadPurchases() {
+    try {
+        const orders = await api('/purchases/orders');
+        state.purchaseOrders = orders;
+        const tbody = document.getElementById('purchasesTableBody');
+        tbody.innerHTML = '';
+        if (orders.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center">No purchase orders found</td></tr>`;
+            return;
+        }
+        orders.forEach(po => {
+            const stateBadge = po.state === 'purchase'
+                ? '<span class="badge badge-primary">Purchase Order</span>'
+                : po.state === 'draft'
+                ? '<span class="badge badge-draft">RFQ</span>'
+                : `<span class="badge badge-info">${po.state}</span>`;
+
+            let actionBtn = '';
+            if (po.state === 'draft') {
+                actionBtn = `<button class="btn btn-sm btn-primary" onclick="confirmPurchaseOrder(${po.id})">Confirm PO</button>`;
+            } else {
+                actionBtn = `<span class="text-success font-semibold">✓ Confirmed</span>`;
+            }
+
+            const receiptInfo = po.receipt_id 
+                ? `<span class="badge badge-info">Receipt #${po.receipt_id}</span>` 
+                : `<span class="text-muted">-</span>`;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${po.name}</strong></td>
+                    <td>${po.partner?.name || 'Vendor'}</td>
+                    <td>${po.date_order}</td>
+                    <td><strong>${formatCurrency(po.amount_total)}</strong></td>
+                    <td>${stateBadge}</td>
+                    <td>${receiptInfo}</td>
+                    <td>${actionBtn}</td>
+                </tr>
+            `;
+        });
+    } catch (e) {
+        showToast('Failed to load purchases: ' + e.message, 'danger');
+    }
+}
+
+async function confirmPurchaseOrder(id) {
+    try {
+        const res = await api(`/purchases/orders/${id}/confirm`, 'POST');
+        showToast(`PO Confirmed! Warehouse Receipt ${res.receipt ? res.receipt.name : ''} generated automatically.`, 'success');
+        loadPurchases();
+    } catch (err) {
+        showToast(err.message, 'danger');
+    }
+}
+
+function populatePoPartnerAndProductSelects() {
+    api('/partners?type=supplier').then(partners => {
+        const select = document.getElementById('poPartnerSelect');
+        select.innerHTML = partners.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    });
+    api('/products').then(prods => {
+        const select = document.getElementById('poProductSelect');
+        select.innerHTML = prods.map(p => `<option value="${p.id}" data-cost="${p.standard_price}">${p.name} (Cost: ${formatCurrency(p.standard_price)})</option>`).join('');
+        updatePoProductCost();
+    });
+}
+
+function updatePoProductCost() {
+    const sel = document.getElementById('poProductSelect');
+    const selectedOption = sel.options[sel.selectedIndex];
+    if (selectedOption) {
+        document.getElementById('poUnitPrice').value = selectedOption.dataset.cost;
+        calculatePoTotal();
+    }
+}
+
+function calculatePoTotal() {
+    const qty = parseFloat(document.getElementById('poQty').value) || 0;
+    const price = parseFloat(document.getElementById('poUnitPrice').value) || 0;
+    const subtotal = qty * price;
+    const tax = subtotal * 0.11;
+    const total = subtotal + tax;
+
+    document.getElementById('poSubtotalDisplay').textContent = formatCurrency(subtotal);
+    document.getElementById('poTaxDisplay').textContent = formatCurrency(tax);
+    document.getElementById('poTotalDisplay').textContent = formatCurrency(total);
+}
+
+async function handleCreatePurchaseOrder(e) {
+    e.preventDefault();
+    const prodSelect = document.getElementById('poProductSelect');
+    const prodName = prodSelect.options[prodSelect.selectedIndex].text.split(' (')[0];
+    const body = {
+        partner_id: parseInt(document.getElementById('poPartnerSelect').value),
+        tax_rate: 11,
+        order_lines: [
+            {
+                product_id: parseInt(prodSelect.value),
+                name: prodName,
+                product_uom_qty: parseFloat(document.getElementById('poQty').value),
+                price_unit: parseFloat(document.getElementById('poUnitPrice').value)
+            }
+        ]
+    };
+    try {
+        await api('/purchases/orders', 'POST', body);
+        showToast('Purchase RFQ created successfully', 'success');
+        closeModal('modalCreatePurchaseOrder');
+        loadPurchases();
+    } catch (err) {
+        showToast(err.message, 'danger');
+    }
+}
+
+// 6. INVENTORY & MULTI-WAREHOUSE MANAGEMENT
+async function loadInventory() {
+    try {
+        const [pickings, quants, warehouses, locations] = await Promise.all([
+            api('/stock/pickings'),
+            api('/stock/quants'),
+            api('/stock/warehouses'),
+            api('/stock/locations')
+        ]);
+
+        state.pickings = pickings || [];
+        state.quants = quants || [];
+        state.warehouses = warehouses || [];
+        state.locations = locations || [];
+
+        renderWarehouseSummary(state.warehouses, state.quants);
+        populateQuantWarehouseFilter(state.warehouses);
+        renderPickingsTable();
+        renderQuantsTable();
+        loadOrderpoints();
+    } catch (e) {
+        showToast('Failed to load inventory: ' + e.message, 'danger');
+    }
+}
+
+function renderWarehouseSummary(warehouses, quants) {
+    const grid = document.getElementById('warehousesSummaryGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    if (!warehouses || warehouses.length === 0) {
+        grid.innerHTML = `<div class="card p-3 text-muted">No warehouses configured yet.</div>`;
+        return;
+    }
+
+    const icons = {
+        'WH-JKT': '🏢',
+        'WH-SBY': '🚢',
+        'WH-BDG': '⛰️'
+    };
+
+    warehouses.forEach(w => {
+        let totalQty = 0;
+        let skuCount = 0;
+        quants.forEach(q => {
+            const locWhId = q.location?.warehouse_id;
+            const locId = q.location_id;
+            if (locWhId === w.id || locId === w.lot_stock_id) {
+                totalQty += q.quantity;
+                if (q.quantity > 0) skuCount++;
+            }
+        });
+
+        const icon = icons[w.code] || '🏬';
+        const card = document.createElement('div');
+        card.className = 'stat-card';
+        card.innerHTML = `
+            <div class="stat-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">${icon}</div>
+            <div class="stat-content" style="flex:1;">
+                <div class="flex-between">
+                    <span class="stat-label"><strong>${w.code}</strong></span>
+                    <span class="badge badge-success" style="font-size:0.7rem;">Active Hub</span>
+                </div>
+                <h3 style="font-size:1.15rem; margin: 4px 0;">${w.name}</h3>
+                <div class="text-muted" style="font-size:0.8rem;">
+                    Total Stock: <strong class="text-success">${totalQty} units</strong> (${skuCount} SKUs)<br>
+                    <span style="opacity:0.75;">📍 ${w.lot_stock?.name || w.code + '/Stock'}</span>
+                </div>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+function filterPickings(type, btn) {
+    state.currentPickingFilter = type;
+    if (btn) {
+        btn.parentElement.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+    renderPickingsTable();
+}
+
+function renderPickingsTable() {
+    const pTbody = document.getElementById('pickingsTableBody');
+    if (!pTbody) return;
+    pTbody.innerHTML = '';
+
+    let list = state.pickings || [];
+    if (state.currentPickingFilter !== 'all') {
+        list = list.filter(p => p.picking_type === state.currentPickingFilter);
+    }
+
+    if (list.length === 0) {
+        pTbody.innerHTML = `<tr><td colspan="8" class="text-center">No stock pickings found for filter: ${state.currentPickingFilter}</td></tr>`;
+        return;
+    }
+
+    list.forEach(p => {
+        const typeBadge = p.picking_type === 'outgoing'
+            ? '<span class="badge badge-warning">📤 Delivery</span>'
+            : p.picking_type === 'incoming'
+            ? '<span class="badge badge-info">📥 Receipt</span>'
+            : '<span class="badge badge-primary">🔄 Inter-Warehouse</span>';
+
+        const stateBadge = p.state === 'done'
+            ? '<span class="badge badge-success">Done</span>'
+            : p.state === 'assigned'
+            ? '<span class="badge badge-primary">Ready</span>'
+            : `<span class="badge badge-draft">${p.state}</span>`;
+
+        let actionBtn = '';
+        if (p.state !== 'done' && p.state !== 'cancel') {
+            actionBtn = `<button class="btn btn-sm btn-success" onclick="validatePicking(${p.id})">Validate Move</button>`;
+        } else {
+            actionBtn = `<span class="text-success font-semibold">✓ Moved</span>`;
+        }
+        actionBtn += ` <button class="btn btn-sm btn-outline" onclick="printPicking(${p.id})">🖨️ Cetak</button>`;
+
+        pTbody.innerHTML += `
+            <tr>
+                <td><strong>${p.name}</strong></td>
+                <td><code>${p.origin || '-'}</code></td>
+                <td>${typeBadge}</td>
+                <td>${p.partner_name || '-'}</td>
+                <td><span class="badge badge-secondary">${p.location?.name || 'Source'}</span></td>
+                <td><span class="badge badge-secondary">${p.location_dest?.name || 'Dest'}</span></td>
+                <td>${stateBadge}</td>
+                <td>${actionBtn}</td>
+            </tr>
+        `;
+    });
+}
+
+function populateQuantWarehouseFilter(warehouses) {
+    const sel = document.getElementById('quantWarehouseFilter');
+    if (!sel) return;
+    const currentVal = sel.value;
+    sel.innerHTML = `<option value="all">🏢 All Warehouses & Locations</option>`;
+    warehouses.forEach(w => {
+        sel.innerHTML += `<option value="${w.id}">🏬 [${w.code}] ${w.name}</option>`;
+    });
+    if (currentVal) sel.value = currentVal;
+}
+
+function filterQuantsByWarehouse(whVal) {
+    state.currentWarehouseFilter = whVal;
+    renderQuantsTable();
+}
+
+function renderQuantsTable() {
+    const qTbody = document.getElementById('quantsTableBody');
+    if (!qTbody) return;
+    qTbody.innerHTML = '';
+
+    let list = state.quants || [];
+    if (state.currentWarehouseFilter && state.currentWarehouseFilter !== 'all') {
+        const whId = parseInt(state.currentWarehouseFilter);
+        const wh = state.warehouses.find(w => w.id === whId);
+        list = list.filter(q => (q.location?.warehouse_id === whId) || (wh && q.location_id === wh.lot_stock_id));
+    }
+
+    if (list.length === 0) {
+        qTbody.innerHTML = `<tr><td colspan="5" class="text-center">No inventory quants found in this warehouse selection</td></tr>`;
+        return;
+    }
+
+    list.forEach(q => {
+        const whCode = q.location?.warehouse ? q.location.warehouse.code :
+                       (q.location?.name?.startsWith('WH-SBY') ? 'WH-SBY' :
+                        q.location?.name?.startsWith('WH-BDG') ? 'WH-BDG' : 'WH-JKT');
+        
+        qTbody.innerHTML += `
+            <tr>
+                <td><strong>${q.product?.name || 'Product'}</strong> (<code>${q.product?.default_code || '-'}</code>)</td>
+                <td><span class="badge badge-info">${whCode}</span></td>
+                <td>${q.location?.complete_name || q.location?.name || '-'}</td>
+                <td><span class="badge badge-draft">${q.location?.usage || 'internal'}</span></td>
+                <td><strong class="${q.quantity > 0 ? 'text-success' : 'text-danger'}">${q.quantity}</strong></td>
+            </tr>
+        `;
+    });
+}
+
+async function populateTransferModalSelects() {
+    // Populate locations
+    const srcSelect = document.getElementById('transferSourceLocSelect');
+    const destSelect = document.getElementById('transferDestLocSelect');
+    srcSelect.innerHTML = '';
+    destSelect.innerHTML = '';
+
+    const internalLocs = (state.locations || []).filter(l => l.usage === 'internal');
+    internalLocs.forEach(l => {
+        const whPrefix = l.warehouse ? `[${l.warehouse.code}] ` : '';
+        const opt = `<option value="${l.id}">${whPrefix}${l.complete_name || l.name}</option>`;
+        srcSelect.innerHTML += opt;
+        destSelect.innerHTML += opt;
+    });
+
+    if (destSelect.options.length > 1) {
+        destSelect.selectedIndex = 1;
+    }
+
+    // Populate products
+    const prodSelect = document.getElementById('transferProductSelect');
+    prodSelect.innerHTML = '';
+    (state.products || []).forEach(p => {
+        if (p.type === 'product') {
+            prodSelect.innerHTML += `<option value="${p.id}">${p.name} (Code: ${p.default_code || '-'}, On-Hand: ${p.qty_available})</option>`;
+        }
+    });
+}
+
+async function handleCreateTransfer(e) {
+    e.preventDefault();
+    const srcId = parseInt(document.getElementById('transferSourceLocSelect').value);
+    const destId = parseInt(document.getElementById('transferDestLocSelect').value);
+    const prodId = parseInt(document.getElementById('transferProductSelect').value);
+    const qty = parseFloat(document.getElementById('transferQty').value) || 1;
+    const note = document.getElementById('transferNote').value;
+
+    if (srcId === destId) {
+        showToast('Source and Destination locations must be different!', 'warning');
+        return;
+    }
+
+    try {
+        const selectedProd = (state.products || []).find(p => p.id === prodId);
+        const body = {
+            source_location_id: srcId,
+            dest_location_id: destId,
+            origin: 'MANUAL/INT',
+            note: note || 'Inter-warehouse transfer',
+            lines: [
+                {
+                    product_id: prodId,
+                    product_name: selectedProd ? selectedProd.name : 'Product',
+                    product_uom_qty: qty
+                }
+            ]
+        };
+
+        const picking = await api('/stock/transfers', 'POST', body);
+        // Automatically validate the transfer
+        await api(`/stock/pickings/${picking.id}/validate`, 'POST');
+
+        closeModal('modalCreateTransfer');
+        document.getElementById('formCreateTransfer').reset();
+        showToast(`Inter-Warehouse Transfer ${picking.name} executed & validated successfully!`, 'success');
+        loadInventory();
+    } catch (err) {
+        showToast('Transfer failed: ' + err.message, 'danger');
+    }
+}
+
+async function validatePicking(id) {
+    try {
+        await api(`/stock/pickings/${id}/validate`, 'POST');
+        showToast('Stock picking validated! Real-time double-entry balances updated.', 'success');
+        loadInventory();
+    } catch (err) {
+        showToast(err.message, 'danger');
+    }
+}
+
+// 7. INVOICING & ACCOUNTING
+async function loadInvoices() {
+    try {
+        const moves = await api('/accounting/moves');
+        state.invoices = moves;
+        const tbody = document.getElementById('invoicesTableBody');
+        tbody.innerHTML = '';
+        if (moves.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center">No invoices found</td></tr>`;
+            return;
+        }
+        moves.forEach(m => {
+            const typeBadge = m.move_type === 'out_invoice'
+                ? '<span class="badge badge-success">Customer Invoice</span>'
+                : m.move_type === 'in_invoice'
+                ? '<span class="badge badge-warning">Vendor Bill</span>'
+                : '<span class="badge badge-draft">Journal Entry</span>';
+
+            const stateBadge = m.state === 'posted'
+                ? '<span class="badge badge-primary">Posted</span>'
+                : '<span class="badge badge-draft">Draft</span>';
+
+            const payBadge = m.payment_state === 'paid'
+                ? '<span class="badge badge-success">Paid</span>'
+                : '<span class="badge badge-danger">Not Paid</span>';
+
+            let actionBtn = '';
+            if (m.state === 'draft') {
+                actionBtn = `<button class="btn btn-sm btn-primary" onclick="postInvoice(${m.id})">Post to Ledger</button>`;
+            } else if (m.payment_state !== 'paid') {
+                actionBtn = `<button class="btn btn-sm btn-success" onclick="openPayModal(${m.id}, '${m.name}', ${m.amount_residual})">Pay</button>`;
+            } else {
+                actionBtn = `<span class="text-success font-semibold">✓ Fully Paid</span>`;
+            }
+            actionBtn += ` <button class="btn btn-sm btn-outline" onclick="printInvoice(${m.id})">🖨️ Cetak</button>`;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${m.name}</strong></td>
+                    <td>${typeBadge}</td>
+                    <td>${m.partner?.name || '-'}</td>
+                    <td>${m.invoice_date}</td>
+                    <td><strong>${formatCurrency(m.amount_total)}</strong></td>
+                    <td><strong class="text-warning">${formatCurrency(m.amount_residual)}</strong></td>
+                    <td>${stateBadge}</td>
+                    <td>${payBadge}</td>
+                    <td>${actionBtn}</td>
+                </tr>
+            `;
+        });
+    } catch (e) {
+        showToast('Failed to load invoices: ' + e.message, 'danger');
+    }
+}
+
+async function postInvoice(id) {
+    try {
+        await api(`/accounting/moves/${id}/post`, 'POST');
+        showToast('Invoice validated and posted to General Ledger (Debit == Credit verified)!', 'success');
+        loadInvoices();
+    } catch (err) {
+        showToast(err.message, 'danger');
+    }
+}
+
+function openPayModal(id, name, residual) {
+    document.getElementById('payMoveId').value = id;
+    document.getElementById('payInvoiceName').value = name;
+    document.getElementById('payResidual').value = formatCurrency(residual);
+    document.getElementById('payAmount').value = residual;
+    openModal('modalRegisterPayment');
+}
+
+async function handleRegisterPayment(e) {
+    e.preventDefault();
+    const moveId = document.getElementById('payMoveId').value;
+    const body = {
+        amount: parseFloat(document.getElementById('payAmount').value),
+        journal_id: parseInt(document.getElementById('payJournalSelect').value),
+        memo: document.getElementById('payMemo').value || 'Payment via Web Dashboard'
+    };
+    try {
+        await api(`/accounting/moves/${moveId}/pay`, 'POST', body);
+        showToast('Payment registered successfully! Invoice status updated to Paid.', 'success');
+        closeModal('modalRegisterPayment');
+        loadInvoices();
+    } catch (err) {
+        showToast(err.message, 'danger');
+    }
+}
+
+// 8. MANUFACTURING (MRP)
+async function loadMRP() {
+    try {
+        const mos = await api('/mrp/productions');
+        const boms = await api('/mrp/boms');
+
+        // Render MOs
+        const moTbody = document.getElementById('mrpTableBody');
+        moTbody.innerHTML = '';
+        if (mos.length === 0) {
+            moTbody.innerHTML = `<tr><td colspan="6" class="text-center">No manufacturing orders found</td></tr>`;
+        } else {
+            mos.forEach(mo => {
+                const stateBadge = mo.state === 'done'
+                    ? '<span class="badge badge-success">Done</span>'
+                    : '<span class="badge badge-primary">Confirmed</span>';
+
+                let actionBtn = '';
+                if (mo.state !== 'done') {
+                    actionBtn = `<button class="btn btn-sm btn-success" onclick="actionProduce(${mo.id})">Produce & Consume</button>`;
+                } else {
+                    actionBtn = `<span class="text-success font-semibold">✓ Completed</span>`;
+                }
+
+                moTbody.innerHTML += `
+                    <tr>
+                        <td><strong>${mo.name}</strong></td>
+                        <td>${mo.product?.name || 'Product'}</td>
+                        <td><code>${mo.bom?.code || 'BOM'}</code></td>
+                        <td><strong>${mo.product_qty}</strong> units</td>
+                        <td>${stateBadge}</td>
+                        <td>${actionBtn}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Render BOMs
+        const bomTbody = document.getElementById('bomsTableBody');
+        bomTbody.innerHTML = '';
+        if (boms.length === 0) {
+            bomTbody.innerHTML = `<tr><td colspan="4" class="text-center">No BOMs found</td></tr>`;
+        } else {
+            boms.forEach(b => {
+                const components = (b.lines || []).map(l => `${l.product_name} (${l.product_qty}x)`).join(', ');
+                bomTbody.innerHTML += `
+                    <tr>
+                        <td><code>${b.code}</code></td>
+                        <td><strong>${b.product?.name || 'Product'}</strong></td>
+                        <td>${b.product_qty} unit</td>
+                        <td><small>${components}</small></td>
+                    </tr>
+                `;
+            });
+        }
+    } catch (e) {
+        showToast('Failed to load MRP: ' + e.message, 'danger');
+    }
+}
+
+async function actionProduce(id) {
+    try {
+        const res = await api(`/mrp/productions/${id}/produce`, 'POST');
+        showToast(res.message, 'success');
+        loadMRP();
+    } catch (err) {
+        showToast(err.message, 'danger');
+    }
+}
+
+function populateMoBomSelect() {
+    api('/mrp/boms').then(boms => {
+        const sel = document.getElementById('moBomSelect');
+        sel.innerHTML = boms.map(b => `<option value="${b.id}" data-prod="${b.product_id}">${b.code} - ${b.product?.name}</option>`).join('');
+    });
+}
+
+async function handleCreateMO(e) {
+    e.preventDefault();
+    const bomSel = document.getElementById('moBomSelect');
+    const selected = bomSel.options[bomSel.selectedIndex];
+    const body = {
+        bom_id: parseInt(bomSel.value),
+        product_id: parseInt(selected.dataset.prod),
+        product_qty: parseFloat(document.getElementById('moQty').value),
+        note: document.getElementById('moNote').value
+    };
+    try {
+        await api('/mrp/productions', 'POST', body);
+        showToast('Manufacturing Order created successfully', 'success');
+        closeModal('modalCreateMO');
+        loadMRP();
+    } catch (err) {
+        showToast(err.message, 'danger');
+    }
+}
+
+// 9. POINT OF SALE (POS)
+async function loadPOS() {
+    try {
+        const sessions = await api('/pos/sessions');
+        const orders = await api('/pos/orders');
+
+        // Sessions
+        const sTbody = document.getElementById('posSessionsTableBody');
+        sTbody.innerHTML = '';
+        if (sessions.length === 0) {
+            sTbody.innerHTML = `<tr><td colspan="7" class="text-center">No POS sessions found</td></tr>`;
+        } else {
+            sessions.forEach(s => {
+                const stateBadge = s.state === 'opened'
+                    ? '<span class="badge badge-success">Open</span>'
+                    : '<span class="badge badge-draft">Closed</span>';
+
+                sTbody.innerHTML += `
+                    <tr>
+                        <td><strong>${s.name}</strong></td>
+                        <td>${s.config?.name || 'Main Cashier'}</td>
+                        <td>${s.user?.name || 'Cashier'}</td>
+                        <td>${formatCurrency(s.cash_register_balance_start)}</td>
+                        <td><strong>${s.total_orders}</strong></td>
+                        <td><strong>${formatCurrency(s.total_revenue)}</strong></td>
+                        <td>${stateBadge}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Orders
+        const oTbody = document.getElementById('posOrdersTableBody');
+        oTbody.innerHTML = '';
+        if (orders.length === 0) {
+            oTbody.innerHTML = `<tr><td colspan="7" class="text-center">No retail orders found</td></tr>`;
+        } else {
+            orders.forEach(o => {
+                oTbody.innerHTML += `
+                    <tr>
+                        <td><strong>${o.name}</strong></td>
+                        <td>${o.date_order}</td>
+                        <td><strong>${formatCurrency(o.amount_total)}</strong></td>
+                        <td>${formatCurrency(o.amount_paid)}</td>
+                        <td>${formatCurrency(o.amount_change)}</td>
+                        <td><span class="badge badge-info">${o.payment_method.toUpperCase()}</span></td>
+                        <td><span class="badge badge-success">PAID</span></td>
+                    </tr>
+                `;
+            });
+        }
+    } catch (e) {
+        showToast('Failed to load POS: ' + e.message, 'danger');
+    }
+}
+
+function populatePosProductSelect() {
+    api('/products').then(prods => {
+        const sel = document.getElementById('posProductSelect');
+        sel.innerHTML = prods.map(p => `<option value="${p.id}" data-price="${p.list_price}">${p.name} (${formatCurrency(p.list_price)})</option>`).join('');
+        updatePosPrice();
+    });
+}
+
+function updatePosPrice() {
+    const sel = document.getElementById('posProductSelect');
+    const opt = sel.options[sel.selectedIndex];
+    if (opt) {
+        document.getElementById('posPrice').value = opt.dataset.price;
+        calcPosTotal();
+    }
+}
+
+function calcPosTotal() {
+    const qty = parseFloat(document.getElementById('posQty').value) || 0;
+    const price = parseFloat(document.getElementById('posPrice').value) || 0;
+    const total = qty * price;
+    document.getElementById('posTotalDisplay').textContent = formatCurrency(total);
+    calcPosChange();
+}
+
+function calcPosChange() {
+    const qty = parseFloat(document.getElementById('posQty').value) || 0;
+    const price = parseFloat(document.getElementById('posPrice').value) || 0;
+    const total = qty * price;
+    const paid = parseFloat(document.getElementById('posAmountPaid').value) || 0;
+    const change = Math.max(0, paid - total);
+    document.getElementById('posChangeDisplay').textContent = formatCurrency(change);
+}
+
+async function handlePosCheckout(e) {
+    e.preventDefault();
+    const sel = document.getElementById('posProductSelect');
+    const prodName = sel.options[sel.selectedIndex].text.split(' (')[0];
+    const qty = parseFloat(document.getElementById('posQty').value);
+    const price = parseFloat(document.getElementById('posPrice').value);
+    const paid = parseFloat(document.getElementById('posAmountPaid').value);
+
+    const body = {
+        session_id: 1, // Active session
+        payment_method: document.getElementById('posPayMethod').value,
+        amount_paid: paid,
+        lines: [
+            {
+                product_id: parseInt(sel.value),
+                product_name: prodName,
+                qty: qty,
+                price_unit: price
+            }
+        ]
+    };
+
+    try {
+        const res = await api('/pos/orders', 'POST', body);
+        showToast(`POS Order ${res.name} completed! Change: ${formatCurrency(res.amount_change)}. Stock deducted immediately.`, 'success');
+        closeModal('modalPosCheckout');
+        loadPOS();
+    } catch (err) {
+        showToast(err.message, 'danger');
+    }
+}
+
+// 10. HUMAN RESOURCES & PAYROLL (HR)
+async function loadHR() {
+    try {
+        const emps = await api('/hr/employees');
+        const slips = await api('/hr/payslips');
+
+        // Employees
+        const eTbody = document.getElementById('employeesTableBody');
+        eTbody.innerHTML = '';
+        if (emps.length === 0) {
+            eTbody.innerHTML = `<tr><td colspan="6" class="text-center">No employees found</td></tr>`;
+        } else {
+            emps.forEach(emp => {
+                eTbody.innerHTML += `
+                    <tr>
+                        <td><strong>${emp.name}</strong></td>
+                        <td>${emp.department?.name || '-'}</td>
+                        <td>${emp.job?.name || '-'}</td>
+                        <td>${emp.work_email}</td>
+                        <td><strong>${formatCurrency(emp.basic_salary)}</strong></td>
+                        <td><span class="badge badge-success">Active</span></td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Payslips
+        const pTbody = document.getElementById('payslipsTableBody');
+        pTbody.innerHTML = '';
+        if (slips.length === 0) {
+            pTbody.innerHTML = `<tr><td colspan="9" class="text-center">No payslips found</td></tr>`;
+        } else {
+            slips.forEach(slip => {
+                const stateBadge = slip.state === 'paid'
+                    ? '<span class="badge badge-success">Paid</span>'
+                    : slip.state === 'confirmed'
+                    ? '<span class="badge badge-primary">Confirmed</span>'
+                    : '<span class="badge badge-draft">Draft</span>';
+
+                let actionBtn = '';
+                if (slip.state === 'draft') {
+                    actionBtn = `<button class="btn btn-sm btn-primary" onclick="confirmPayslip(${slip.id})">Confirm</button>`;
+                } else if (slip.state === 'confirmed') {
+                    actionBtn = `<button class="btn btn-sm btn-success" onclick="payPayslip(${slip.id})">Pay Salary</button>`;
+                } else {
+                    actionBtn = `<span class="text-success font-semibold">✓ Paid</span>`;
+                }
+
+                pTbody.innerHTML += `
+                    <tr>
+                        <td><strong>${slip.name}</strong></td>
+                        <td>${slip.employee?.name || 'Employee'}</td>
+                        <td>${slip.period}</td>
+                        <td>${formatCurrency(slip.basic_salary)}</td>
+                        <td>${formatCurrency(slip.allowances)}</td>
+                        <td>${formatCurrency(slip.deductions)}</td>
+                        <td><strong class="text-primary">${formatCurrency(slip.net_salary)}</strong></td>
+                        <td>${stateBadge}</td>
+                        <td>${actionBtn}</td>
+                    </tr>
+                `;
+            });
+        }
+    } catch (e) {
+        showToast('Failed to load HR: ' + e.message, 'danger');
+    }
+}
+
+async function confirmPayslip(id) {
+    try {
+        await api(`/hr/payslips/${id}/confirm`, 'POST');
+        showToast('Payslip confirmed', 'success');
+        loadHR();
+    } catch (err) {
+        showToast(err.message, 'danger');
+    }
+}
+
+async function payPayslip(id) {
+    try {
+        await api(`/hr/payslips/${id}/pay`, 'POST');
+        showToast('Salary transfer completed and payslip marked as Paid!', 'success');
+        loadHR();
+    } catch (err) {
+        showToast(err.message, 'danger');
+    }
+}
+
+function populateEmpDeptAndJobSelects() {
+    api('/hr/departments').then(depts => {
+        document.getElementById('empDeptSelect').innerHTML = depts.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+    });
+    api('/hr/jobs').then(jobs => {
+        document.getElementById('empJobSelect').innerHTML = jobs.map(j => `<option value="${j.id}">${j.name}</option>`).join('');
+    });
+}
+
+async function handleCreateEmployee(e) {
+    e.preventDefault();
+    const body = {
+        name: document.getElementById('empName').value,
+        work_email: document.getElementById('empEmail').value,
+        work_phone: document.getElementById('empPhone').value,
+        department_id: parseInt(document.getElementById('empDeptSelect').value),
+        job_id: parseInt(document.getElementById('empJobSelect').value),
+        basic_salary: parseFloat(document.getElementById('empSalary').value)
+    };
+    try {
+        await api('/hr/employees', 'POST', body);
+        showToast('Employee added successfully', 'success');
+        closeModal('modalCreateEmployee');
+        loadHR();
+    } catch (err) {
+        showToast(err.message, 'danger');
+    }
+}
+
+function populatePayslipEmployeeSelect() {
+    api('/hr/employees').then(emps => {
+        document.getElementById('slipEmpSelect').innerHTML = emps.map(e => `<option value="${e.id}">${e.name} (${e.job?.name || 'Staff'}) - ${formatCurrency(e.basic_salary)}</option>`).join('');
+    });
+}
+
+async function handleCreatePayslip(e) {
+    e.preventDefault();
+    const body = {
+        employee_id: parseInt(document.getElementById('slipEmpSelect').value),
+        period: document.getElementById('slipPeriod').value,
+        allowances: parseFloat(document.getElementById('slipAllowances').value) || 0,
+        deductions: parseFloat(document.getElementById('slipDeductions').value) || 0
+    };
+    try {
+        await api('/hr/payslips/generate', 'POST', body);
+        showToast('Payslip generated successfully', 'success');
+        closeModal('modalCreatePayslip');
+        loadHR();
+    } catch (err) {
+        showToast(err.message, 'danger');
+    }
+}
+
+// 8. PRINT HELPERS
+function printInvoice(id) {
+    window.open(`/api/v1/accounting/moves/${id}/print`, '_blank');
+}
+
+function printPicking(id) {
+    window.open(`/api/v1/stock/pickings/${id}/print`, '_blank');
+}
+
+// 9. REORDERING RULES (STOCK MIN/MAX)
+async function loadOrderpoints() {
+    try {
+        const rules = await api('/stock/orderpoints');
+        const tbody = document.getElementById('orderpointsTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        if (!rules || rules.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center">Belum ada aturan stok minimum</td></tr>`;
+            return;
+        }
+        rules.forEach(r => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${r.name}</strong></td>
+                    <td>${r.product ? r.product.name : 'Product #' + r.product_id}</td>
+                    <td>${r.location ? r.location.name : 'WH/Stock'}</td>
+                    <td><strong class="text-danger">${r.product_min_qty}</strong></td>
+                    <td><strong class="text-success">${r.product_max_qty}</strong></td>
+                    <td>${r.qty_multiple}</td>
+                    <td><span class="badge badge-primary">${r.trigger}</span></td>
+                </tr>
+            `;
+        });
+    } catch (e) {
+        console.error('Failed to load orderpoints:', e);
+    }
+}
+
+async function triggerReorderingRules() {
+    try {
+        const res = await api('/purchases/reordering/run', 'POST');
+        showToast(res.message, 'success');
+        loadOrderpoints();
+        if (state.currentTab === 'purchases') loadPurchases();
+    } catch (e) {
+        showToast(e.message, 'danger');
+    }
+}
+
+// 10. FINANCIAL REPORTS (PROFIT & LOSS, BALANCE SHEET, TRIAL BALANCE)
+async function loadFinancialReports() {
+    try {
+        const [pnl, bs, tb] = await Promise.all([
+            api('/accounting/reports/profit-loss'),
+            api('/accounting/reports/balance-sheet'),
+            api('/accounting/reports/trial-balance')
+        ]);
+
+        // 1. Metric Cards
+        document.getElementById('reportRevenue').textContent = formatCurrency(pnl.total_revenue);
+        document.getElementById('reportCogs').textContent = formatCurrency(pnl.total_cogs);
+        document.getElementById('reportNetProfit').textContent = formatCurrency(pnl.net_profit);
+        
+        const statusEl = document.getElementById('reportBalanceStatus');
+        if (bs.is_balanced) {
+            statusEl.textContent = 'SEIMBANG (BALANCED) ✅';
+            statusEl.style.color = '#10b981';
+        } else {
+            statusEl.textContent = 'TIDAK SEIMBANG ⚠️';
+            statusEl.style.color = '#ef4444';
+        }
+
+        // 2. Profit & Loss Table
+        const pnlBody = document.getElementById('pnlTableBody');
+        let pnlRows = '';
+        pnlRows += `
+            <tr style="background:#f9fafb;">
+                <td><strong>1. TOTAL PENDAPATAN (REVENUE)</strong></td>
+                <td style="text-align:right; font-weight:bold; color:#10b981;">${formatCurrency(pnl.total_revenue)}</td>
+            </tr>
+        `;
+        (pnl.revenue_lines || []).forEach(l => {
+            pnlRows += `
+                <tr>
+                    <td style="padding-left:25px;">${l.code} - ${l.name}</td>
+                    <td style="text-align:right;">${formatCurrency(l.balance)}</td>
+                </tr>
+            `;
+        });
+
+        pnlRows += `
+            <tr style="background:#f9fafb;">
+                <td><strong>2. HARGA POKOK PENJUALAN (COGS)</strong></td>
+                <td style="text-align:right; font-weight:bold; color:#f59e0b;">${formatCurrency(pnl.total_cogs)}</td>
+            </tr>
+        `;
+        (pnl.cogs_lines || []).forEach(l => {
+            pnlRows += `
+                <tr>
+                    <td style="padding-left:25px;">${l.code} - ${l.name}</td>
+                    <td style="text-align:right;">${formatCurrency(l.balance)}</td>
+                </tr>
+            `;
+        });
+
+        pnlRows += `
+            <tr style="border-top:2px solid #3b82f6;">
+                <td><strong>LABA KOTOR (GROSS PROFIT)</strong></td>
+                <td style="text-align:right; font-weight:bold; font-size:15px; color:#2563eb;">${formatCurrency(pnl.gross_profit)}</td>
+            </tr>
+            <tr style="background:#f9fafb;">
+                <td><strong>3. TOTAL BEBAN OPERASIONAL</strong></td>
+                <td style="text-align:right; font-weight:bold; color:#ef4444;">${formatCurrency(pnl.total_operating_expenses)}</td>
+            </tr>
+        `;
+        (pnl.operating_expenses || []).forEach(l => {
+            pnlRows += `
+                <tr>
+                    <td style="padding-left:25px;">${l.code} - ${l.name}</td>
+                    <td style="text-align:right;">${formatCurrency(l.balance)}</td>
+                </tr>
+            `;
+        });
+
+        pnlRows += `
+            <tr style="border-top:2px solid #10b981; background:#ecfdf5;">
+                <td><strong style="color:#047857; font-size:15px;">LABA BERSIH (NET INCOME)</strong></td>
+                <td style="text-align:right; font-weight:bold; font-size:16px; color:#047857;">${formatCurrency(pnl.net_profit)}</td>
+            </tr>
+        `;
+        pnlBody.innerHTML = pnlRows;
+
+        // 3. Balance Sheet Table
+        const bsBody = document.getElementById('bsTableBody');
+        let bsRows = '';
+        bsRows += `
+            <tr style="background:#f9fafb;">
+                <td><strong>ASET LANCAR (CURRENT ASSETS)</strong></td>
+                <td style="text-align:right; font-weight:bold; color:#10b981;">${formatCurrency(bs.total_current_assets)}</td>
+            </tr>
+        `;
+        (bs.current_asset_lines || []).forEach(l => {
+            bsRows += `
+                <tr>
+                    <td style="padding-left:25px;">${l.code} - ${l.name}</td>
+                    <td style="text-align:right;">${formatCurrency(l.balance)}</td>
+                </tr>
+            `;
+        });
+
+        bsRows += `
+            <tr style="border-top:2px solid #3b82f6; background:#eff6ff;">
+                <td><strong style="color:#1e40af;">TOTAL ASET (TOTAL ASSETS)</strong></td>
+                <td style="text-align:right; font-weight:bold; font-size:15px; color:#1e40af;">${formatCurrency(bs.total_assets)}</td>
+            </tr>
+            <tr style="background:#f9fafb;">
+                <td><strong>KEWAJIBAN / HUTANG (LIABILITIES)</strong></td>
+                <td style="text-align:right; font-weight:bold; color:#ef4444;">${formatCurrency(bs.total_liabilities)}</td>
+            </tr>
+        `;
+        (bs.liability_lines || []).forEach(l => {
+            bsRows += `
+                <tr>
+                    <td style="padding-left:25px;">${l.code} - ${l.name}</td>
+                    <td style="text-align:right;">${formatCurrency(l.balance)}</td>
+                </tr>
+            `;
+        });
+
+        bsRows += `
+            <tr style="background:#f9fafb;">
+                <td><strong>EKUITAS & LABA BERJALAN (EQUITY)</strong></td>
+                <td style="text-align:right; font-weight:bold; color:#8b5cf6;">${formatCurrency(bs.total_equity)}</td>
+            </tr>
+            <tr>
+                <td style="padding-left:25px;">Laba Tahun Berjalan (Net Income)</td>
+                <td style="text-align:right;">${formatCurrency(bs.current_year_profit)}</td>
+            </tr>
+            <tr style="border-top:2px solid #10b981; background:#ecfdf5;">
+                <td><strong style="color:#047857;">TOTAL KEWAJIBAN & EKUITAS</strong></td>
+                <td style="text-align:right; font-weight:bold; font-size:15px; color:#047857;">${formatCurrency(bs.total_liabilities_and_equity)}</td>
+            </tr>
+        `;
+        bsBody.innerHTML = bsRows;
+
+        // 4. Trial Balance Table
+        const tbBody = document.getElementById('tbTableBody');
+        let tbRows = '';
+        (tb.lines || []).forEach(l => {
+            tbRows += `
+                <tr>
+                    <td><strong>${l.code}</strong></td>
+                    <td>${l.name}</td>
+                    <td><span class="badge badge-draft">${l.type}</span></td>
+                    <td style="text-align:right;">${formatCurrency(l.debit)}</td>
+                    <td style="text-align:right;">${formatCurrency(l.credit)}</td>
+                    <td style="text-align:right; font-weight:bold; color:${l.balance >= 0 ? '#10b981' : '#ef4444'};">${formatCurrency(l.balance)}</td>
+                </tr>
+            `;
+        });
+
+        tbRows += `
+            <tr style="background:#f3f4f6; font-weight:bold; border-top:2px solid #374151;">
+                <td colspan="3" style="text-align:center;">TOTAL KESELURUHAN (BERIMBANG / BALANCED)</td>
+                <td style="text-align:right; color:#1e40af; font-size:14px;">${formatCurrency(tb.total_debit)}</td>
+                <td style="text-align:right; color:#1e40af; font-size:14px;">${formatCurrency(tb.total_credit)}</td>
+                <td style="text-align:right; color:#10b981; font-size:14px;">Selisih: ${formatCurrency(tb.difference)}</td>
+            </tr>
+        `;
+        tbBody.innerHTML = tbRows;
+
+    } catch (e) {
+        showToast('Failed to load financial reports: ' + e.message, 'danger');
+    }
+}
+
+// ==========================================
+// 12. CRM & SALES PIPELINE (crm.lead)
+// ==========================================
+async function loadCRM(stage = 'all') {
+    try {
+        state.currentCrmStage = stage;
+        const query = stage && stage !== 'all' ? `?stage=${stage}` : '';
+        const leads = await api(`/crm/leads${query}`);
+        state.leads = leads || [];
+
+        // Fetch all leads if we filtered, to get overall pipeline metrics accurately
+        let allLeads = state.leads;
+        if (stage !== 'all') {
+            allLeads = await api('/crm/leads');
+        }
+
+        // Calculate Pipeline Metrics
+        let totalVal = 0;
+        let wonVal = 0;
+        let activeCount = 0;
+        let wonCount = 0;
+
+        (allLeads || []).forEach(l => {
+            totalVal += (l.expected_revenue || 0);
+            if (l.stage === 'won') {
+                wonVal += (l.expected_revenue || 0);
+                wonCount++;
+            } else if (l.stage !== 'lost') {
+                activeCount++;
+            }
+        });
+
+        const totalCount = (allLeads || []).length;
+        const winRate = totalCount > 0 ? Math.round((wonCount / totalCount) * 100) : 0;
+
+        document.getElementById('crmTotalValue').textContent = formatCurrency(totalVal);
+        document.getElementById('crmWonRevenue').textContent = formatCurrency(wonVal);
+        document.getElementById('crmActiveCount').textContent = activeCount;
+        document.getElementById('crmWinRate').textContent = `${winRate}%`;
+
+        // Render Table
+        const tbody = document.getElementById('crmTableBody');
+        if (!state.leads || state.leads.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center" style="padding:2rem;">No opportunities found for this stage. Klik "➕ New Opportunity" untuk membuat lead baru.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = state.leads.map(lead => {
+            const partnerName = lead.partner ? lead.partner.name : (lead.partner_name || '-');
+            const contactInfo = lead.contact_name || lead.email || lead.phone || '-';
+            
+            const priorityBadges = {
+                '0': '<span style="color:#94a3b8;">☆ Low</span>',
+                '1': '<span style="color:#38bdf8;">★ Medium</span>',
+                '2': '<span style="color:#f59e0b;">★★ High</span>',
+                '3': '<span style="color:#ef4444; font-weight:bold;">★★★ Urgent</span>'
+            };
+            const priorityHtml = priorityBadges[lead.priority] || '<span style="color:#38bdf8;">★ Normal</span>';
+
+            const stageBadgeClass = `badge-stage-${lead.stage}`;
+            const probWidth = Math.min(100, Math.max(5, lead.probability || 0));
+
+            // Stage switcher options
+            const stageOptions = ['new', 'qualified', 'proposition', 'won', 'lost']
+                .map(s => `<option value="${s}" ${s === lead.stage ? 'selected' : ''}>${s.toUpperCase()}</option>`)
+                .join('');
+
+            let actionButtons = `
+                <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                    <select class="form-control" style="width:115px; padding:3px 6px; font-size:11px;" onchange="changeLeadStage(${lead.id}, this.value)">
+                        ${stageOptions}
+                    </select>
+            `;
+
+            if (lead.stage !== 'won' && lead.stage !== 'lost') {
+                actionButtons += `
+                    <button class="btn btn-sm btn-primary" style="padding:3px 8px; font-size:11px;" onclick="convertLeadToQuotation(${lead.id})" title="Convert to Quotation (SO)">
+                        🛒 Convert
+                    </button>
+                `;
+            } else if (lead.stage === 'won' && lead.sale_order_id) {
+                actionButtons += `
+                    <span class="badge badge-success" style="font-size:10px;">SO #${lead.sale_order_id}</span>
+                `;
+            }
+
+            actionButtons += `
+                    <button class="btn btn-sm btn-secondary" style="padding:3px 8px; font-size:11px;" onclick="openChatter('crm.lead', ${lead.id}, '${(lead.name || '').replace(/'/g, "\\'")}')">
+                        💬 Chatter
+                    </button>
+                </div>
+            `;
+
+            return `
+                <tr>
+                    <td>
+                        <strong style="color:var(--text-main);">${lead.name}</strong>
+                        ${lead.description ? `<br><small style="color:var(--text-muted);">${lead.description}</small>` : ''}
+                    </td>
+                    <td>${partnerName}</td>
+                    <td>${contactInfo}</td>
+                    <td style="font-weight:600; color:#38bdf8;">${formatCurrency(lead.expected_revenue)}</td>
+                    <td>
+                        <span class="crm-probability-bar" style="width:${probWidth * 0.4}px;"></span>
+                        <span style="font-size:12px; font-weight:600;">${lead.probability}%</span>
+                    </td>
+                    <td>${priorityHtml}</td>
+                    <td><span class="badge ${stageBadgeClass}">${lead.stage}</span></td>
+                    <td>${actionButtons}</td>
+                </tr>
+            `;
+        }).join('');
+
+    } catch (e) {
+        showToast('Failed to load CRM leads: ' + e.message, 'danger');
+    }
+}
+
+function filterCrmStage(stage, btnEl) {
+    if (btnEl) {
+        btnEl.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btnEl.classList.add('active');
+    }
+    loadCRM(stage);
+}
+
+function populateLeadPartnerSelect() {
+    const sel = document.getElementById('leadPartnerSelect');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">-- Direct Lead / No Partner Yet --</option>' +
+        (state.partners || []).map(p => `<option value="${p.id}">${p.name} (${p.city || 'Indonesia'})</option>`).join('');
+}
+
+async function handleCreateLead(e) {
+    e.preventDefault();
+    try {
+        const partnerVal = document.getElementById('leadPartnerSelect').value;
+        const body = {
+            name: document.getElementById('leadName').value,
+            partner_id: partnerVal ? parseInt(partnerVal) : null,
+            contact_name: document.getElementById('leadContactName').value,
+            email: document.getElementById('leadEmail').value,
+            phone: document.getElementById('leadPhone').value,
+            expected_revenue: parseFloat(document.getElementById('leadExpectedRevenue').value) || 0,
+            probability: parseFloat(document.getElementById('leadProbability').value) || 20,
+            priority: document.getElementById('leadPriority').value,
+            stage: 'new',
+            description: document.getElementById('leadDescription').value
+        };
+
+        await api('/crm/leads', 'POST', body);
+        closeModal('modalCreateLead');
+        document.getElementById('formCreateLead').reset();
+        showToast('Lead / Opportunity created successfully!', 'success');
+        loadCRM(state.currentCrmStage);
+    } catch (err) {
+        showToast('Failed to create lead: ' + err.message, 'danger');
+    }
+}
+
+async function changeLeadStage(id, stage) {
+    try {
+        await api(`/crm/leads/${id}/stage`, 'PUT', { stage });
+        showToast(`Lead stage updated to ${stage.toUpperCase()}`, 'success');
+        loadCRM(state.currentCrmStage);
+    } catch (err) {
+        showToast('Failed to update stage: ' + err.message, 'danger');
+    }
+}
+
+async function convertLeadToQuotation(id) {
+    if (!confirm('Convert this Opportunity into a Sales Quotation (Sale Order)?')) return;
+    try {
+        const res = await api(`/crm/leads/${id}/convert`, 'POST');
+        showToast(`Successfully converted to Sales Quotation #${res.sales_order ? res.sales_order.name : ''}!`, 'success');
+        loadCRM(state.currentCrmStage);
+    } catch (err) {
+        showToast('Failed to convert opportunity: ' + err.message, 'danger');
+    }
+}
+
+// ==========================================
+// 13. CHATTER & AUDIT TRAIL MODAL (mail.message)
+// ==========================================
+let currentChatter = { model: '', resId: 0 };
+
+async function openChatter(model, resId, title) {
+    currentChatter = { model, resId };
+    document.getElementById('chatterModel').value = model;
+    document.getElementById('chatterResId').value = resId;
+    document.getElementById('chatterModalTitle').textContent = `💬 Chatter: ${title || model + ' #' + resId}`;
+    document.getElementById('chatterModalSubtitle').textContent = `Audit trail & internal collaboration for ${model} ID: ${resId}`;
+    
+    openModal('modalChatter');
+    await loadChatterMessages(model, resId);
+}
+
+async function loadChatterMessages(model, resId) {
+    const container = document.getElementById('chatterTimeline');
+    try {
+        const messages = await api(`/chatter/${model}/${resId}`);
+        if (!messages || messages.length === 0) {
+            container.innerHTML = `
+                <div class="text-center" style="color: var(--text-muted); padding: 2rem;">
+                    No chatter activity recorded yet. Post an internal note below!
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = messages.map(msg => {
+            const isSystem = msg.message_type === 'notification';
+            const author = msg.author_name || 'System';
+            const initial = author.charAt(0).toUpperCase();
+            const dateStr = new Date(msg.created_at).toLocaleString('id-ID', {
+                dateStyle: 'medium',
+                timeStyle: 'short'
+            });
+
+            return `
+                <div class="chatter-item ${isSystem ? 'chatter-system' : ''}">
+                    <div class="chatter-avatar ${isSystem ? 'system-avatar' : ''}">
+                        ${isSystem ? '⚙️' : initial}
+                    </div>
+                    <div class="chatter-content">
+                        <div class="chatter-header">
+                            <span class="chatter-author">${author}</span>
+                            <span class="chatter-time">${dateStr}</span>
+                        </div>
+                        <div class="chatter-body">${msg.body}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Auto-scroll to bottom of chatter
+        container.scrollTop = container.scrollHeight;
+    } catch (err) {
+        container.innerHTML = `<div class="text-center text-danger" style="padding:1rem;">Error loading chatter: ${err.message}</div>`;
+    }
+}
+
+async function handlePostChatter(e) {
+    e.preventDefault();
+    const model = document.getElementById('chatterModel').value;
+    const resId = document.getElementById('chatterResId').value;
+    const bodyInput = document.getElementById('chatterBody');
+    const bodyText = bodyInput.value.trim();
+
+    if (!bodyText) return;
+
+    try {
+        await api(`/chatter/${model}/${resId}`, 'POST', { body: bodyText });
+        bodyInput.value = '';
+        showToast('Note posted to chatter', 'success');
+        await loadChatterMessages(model, resId);
+    } catch (err) {
+        showToast('Failed to post note: ' + err.message, 'danger');
+    }
+}
+
+// ==========================================
+// CSV EXPORT HELPER (Streamed with UTF-8 BOM)
+// ==========================================
+async function exportData(endpoint) {
+    try {
+        showToast('Preparing CSV export...', 'info');
+        const headers = {};
+        if (state.token) {
+            headers['Authorization'] = `Bearer ${state.token}`;
+        }
+        const res = await fetch(`/api/v1${endpoint}`, { headers });
+        if (!res.ok) throw new Error('Failed to export data');
+
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        
+        const disposition = res.headers.get('content-disposition');
+        let filename = 'export.csv';
+        if (disposition && disposition.indexOf('filename=') !== -1) {
+            filename = disposition.split('filename=')[1].replace(/"/g, '').trim();
+        }
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+        showToast(`Downloaded ${filename} successfully!`, 'success');
+    } catch (e) {
+        showToast('Export failed: ' + e.message, 'danger');
+    }
+}
+
+// ==========================================
+// 14. PROJECTS & TASKS (project.project & project.task)
+// ==========================================
+async function loadProjects() {
+    try {
+        const [projects, tasks] = await Promise.all([
+            api('/projects'),
+            api('/tasks')
+        ]);
+        state.projects = projects || [];
+        state.tasks = tasks || [];
+
+        // Populate Project filter select
+        const projFilter = document.getElementById('taskProjectFilter');
+        if (projFilter) {
+            const currentVal = projFilter.value || '0';
+            projFilter.innerHTML = '<option value="0">All Projects</option>' +
+                state.projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            projFilter.value = currentVal;
+        }
+
+        // Metrics
+        const activeProjects = state.projects.filter(p => p.status === 'active').length;
+        const totalTasks = state.tasks.length;
+        let totalHours = 0;
+        let completedTasks = 0;
+
+        state.tasks.forEach(t => {
+            totalHours += (t.effective_hours || 0);
+            if (t.stage === 'done') completedTasks++;
+        });
+
+        const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+        document.getElementById('projActiveCount').textContent = activeProjects;
+        document.getElementById('projTotalTasks').textContent = totalTasks;
+        document.getElementById('projLoggedHours').textContent = `${totalHours.toFixed(1)} h`;
+        document.getElementById('projCompletionRate').textContent = `${completionRate}%`;
+
+        renderTasksTable();
+    } catch (err) {
+        showToast('Failed to load projects: ' + err.message, 'danger');
+    }
+}
+
+async function loadTasks() {
+    const projId = document.getElementById('taskProjectFilter')?.value || '0';
+    const stage = state.currentTaskStage || 'all';
+    let query = `?stage=${stage}`;
+    if (projId !== '0') {
+        query += `&project_id=${projId}`;
+    }
+
+    try {
+        const tasks = await api(`/tasks${query}`);
+        state.tasks = tasks || [];
+        renderTasksTable();
+    } catch (err) {
+        showToast('Failed to filter tasks: ' + err.message, 'danger');
+    }
+}
+
+function filterTaskStage(stage, btnEl) {
+    if (btnEl) {
+        btnEl.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btnEl.classList.add('active');
+    }
+    state.currentTaskStage = stage;
+    loadTasks();
+}
+
+function renderTasksTable() {
+    const tbody = document.getElementById('tasksTableBody');
+    if (!tbody) return;
+
+    if (!state.tasks || state.tasks.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center" style="padding:2rem;">No tasks found. Klik "📌 New Task" untuk menambahkan tugas baru.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = state.tasks.map(t => {
+        const projName = t.project ? t.project.name : '-';
+        const assignee = t.user ? t.user.name : (t.partner ? t.partner.name : 'Unassigned');
+        const stageBadgeClass = `badge-stage-${t.stage}`;
+
+        const priorityMap = {
+            '0': '<span style="color:#94a3b8;">Normal</span>',
+            '1': '<span style="color:#38bdf8;">Medium</span>',
+            '2': '<span style="color:#f59e0b;">High</span>',
+            '3': '<span style="color:#ef4444; font-weight:bold;">Urgent</span>'
+        };
+        const priorityHtml = priorityMap[t.priority] || 'Medium';
+
+        const stageOptions = ['todo', 'in_progress', 'review', 'done']
+            .map(s => `<option value="${s}" ${s === t.stage ? 'selected' : ''}>${s.replace('_', ' ').toUpperCase()}</option>`)
+            .join('');
+
+        const progressPercent = Math.min(100, Math.round(t.progress || 0));
+
+        return `
+            <tr>
+                <td>
+                    <strong style="color:var(--text-main);">${t.name}</strong>
+                    ${t.description ? `<br><small style="color:var(--text-muted);">${t.description}</small>` : ''}
+                </td>
+                <td><span style="font-weight:600; color:#818cf8;">${projName}</span></td>
+                <td>${assignee}</td>
+                <td>${t.planned_hours || 0} h</td>
+                <td style="font-weight:600; color:#f59e0b;">${(t.effective_hours || 0).toFixed(1)} h</td>
+                <td>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <div style="flex:1; background:rgba(255,255,255,0.1); height:6px; border-radius:3px; overflow:hidden;">
+                            <div style="background:#10b981; height:100%; width:${progressPercent}%;"></div>
+                        </div>
+                        <span style="font-size:11px; font-weight:600;">${progressPercent}%</span>
+                    </div>
+                </td>
+                <td>${priorityHtml}</td>
+                <td><span class="badge ${stageBadgeClass}">${t.stage.replace('_', ' ')}</span></td>
+                <td>
+                    <div style="display:flex; gap:6px; align-items:center;">
+                        <select class="form-control" style="width:115px; padding:3px 6px; font-size:11px;" onchange="changeTaskStage(${t.id}, this.value)">
+                            ${stageOptions}
+                        </select>
+                        <button class="btn btn-sm btn-primary" style="padding:3px 8px; font-size:11px;" onclick="openLogTimesheetModal(${t.id}, '${(t.name || '').replace(/'/g, "\\'")}')" title="Log Timesheet">
+                            ⏱️ Log
+                        </button>
+                        <button class="btn btn-sm btn-secondary" style="padding:3px 8px; font-size:11px;" onclick="openChatter('project.task', ${t.id}, '${(t.name || '').replace(/'/g, "\\'")}')">
+                            💬
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function populateProjectPartnerSelect() {
+    const sel = document.getElementById('projPartnerSelect');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">-- Internal Company Project --</option>' +
+        (state.partners || []).map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+}
+
+function populateTaskProjectSelect() {
+    const sel = document.getElementById('taskProjectSelect');
+    if (!sel) return;
+    sel.innerHTML = (state.projects || []).map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+}
+
+async function handleCreateProject(e) {
+    e.preventDefault();
+    try {
+        const partnerVal = document.getElementById('projPartnerSelect').value;
+        const body = {
+            name: document.getElementById('projName').value,
+            partner_id: partnerVal ? parseInt(partnerVal) : null,
+            color: document.getElementById('projColor').value,
+            description: document.getElementById('projDescription').value,
+            status: 'active'
+        };
+
+        await api('/projects', 'POST', body);
+        closeModal('modalCreateProject');
+        document.getElementById('formCreateProject').reset();
+        showToast('Project created successfully!', 'success');
+        loadProjects();
+    } catch (err) {
+        showToast('Failed to create project: ' + err.message, 'danger');
+    }
+}
+
+async function handleCreateTask(e) {
+    e.preventDefault();
+    try {
+        const body = {
+            project_id: parseInt(document.getElementById('taskProjectSelect').value),
+            name: document.getElementById('taskName').value,
+            priority: document.getElementById('taskPriority').value,
+            planned_hours: parseFloat(document.getElementById('taskPlannedHours').value) || 0,
+            stage: 'todo',
+            description: document.getElementById('taskDescription').value
+        };
+
+        await api('/tasks', 'POST', body);
+        closeModal('modalCreateTask');
+        document.getElementById('formCreateTask').reset();
+        showToast('Task added successfully!', 'success');
+        loadProjects();
+    } catch (err) {
+        showToast('Failed to create task: ' + err.message, 'danger');
+    }
+}
+
+function openLogTimesheetModal(taskId, taskName) {
+    document.getElementById('tsTaskId').value = taskId;
+    document.getElementById('tsTaskTitle').value = taskName;
+    document.getElementById('tsDate').value = new Date().toISOString().split('T')[0];
+    openModal('modalLogTimesheet');
+}
+
+async function handleLogTimesheet(e) {
+    e.preventDefault();
+    const taskId = document.getElementById('tsTaskId').value;
+    try {
+        const body = {
+            date: document.getElementById('tsDate').value,
+            unit_amount: parseFloat(document.getElementById('tsHours').value) || 1.0,
+            name: document.getElementById('tsDescription').value
+        };
+
+        await api(`/tasks/${taskId}/timesheets`, 'POST', body);
+        closeModal('modalLogTimesheet');
+        document.getElementById('formLogTimesheet').reset();
+        showToast('Timesheet logged & task progress updated!', 'success');
+        loadProjects();
+    } catch (err) {
+        showToast('Failed to log timesheet: ' + err.message, 'danger');
+    }
+}
+
+async function changeTaskStage(taskId, stage) {
+    try {
+        await api(`/tasks/${taskId}/stage`, 'PUT', { stage });
+        showToast(`Task stage updated to ${stage.replace('_', ' ').toUpperCase()}`, 'success');
+        loadProjects();
+    } catch (err) {
+        showToast('Failed to update stage: ' + err.message, 'danger');
+    }
+}
+
+// ==========================================
+// 15. FIXED ASSETS MANAGEMENT (account.asset)
+// ==========================================
+async function loadAssets() {
+    try {
+        const assets = await api('/assets');
+        state.assets = assets || [];
+        renderAssetsTable(state.assets);
+        updateAssetMetrics(state.assets);
+    } catch (e) {
+        console.error('Failed to load assets:', e);
+        showToast('Failed to load fixed assets: ' + e.message, 'danger');
+    }
+}
+
+function updateAssetMetrics(assets) {
+    let totalOrig = 0;
+    let totalDepr = 0;
+    let totalBook = 0;
+    let runningCount = 0;
+
+    assets.forEach(a => {
+        totalOrig += a.original_value || 0;
+        totalDepr += a.value_depreciated || 0;
+        totalBook += a.book_value || 0;
+        if (a.state === 'running') runningCount++;
+    });
+
+    document.getElementById('statTotalAssetVal').textContent = formatCurrency(totalOrig);
+    document.getElementById('statAccumDepr').textContent = formatCurrency(totalDepr);
+    document.getElementById('statNetBookVal').textContent = formatCurrency(totalBook);
+    document.getElementById('statRunningAssets').textContent = runningCount;
+}
+
+function renderAssetsTable(assets) {
+    const tbody = document.getElementById('assetsTableBody');
+    tbody.innerHTML = '';
+    if (!assets || assets.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center">No fixed assets registered yet. Click "+ Register New Asset" to begin.</td></tr>`;
+        return;
+    }
+
+    assets.forEach(a => {
+        const tr = document.createElement('tr');
+        const stateBadge = a.state === 'running' ? 'badge-success' :
+                           a.state === 'draft' ? 'badge-warning' : 'badge-secondary';
+        const partnerName = a.partner ? a.partner.name : '-';
+        const categoryBadge = `<span class="badge badge-secondary" style="font-size:0.75rem; text-transform:uppercase;">${a.category || 'asset'}</span>`;
+
+        let actionBtns = `
+            <button class="btn btn-sm btn-secondary" onclick="viewDepreciationBoard(${a.id})" title="View Depreciation Schedule">📅 Schedule</button>
+        `;
+
+        if (a.state === 'draft') {
+            actionBtns += `
+                <button class="btn btn-sm btn-success" onclick="confirmAsset(${a.id})" title="Confirm & Start Depreciation">✓ Confirm</button>
+                <button class="btn btn-sm btn-secondary" onclick="recomputeAsset(${a.id})" title="Recompute schedule">🔄</button>
+            `;
+        }
+
+        tr.innerHTML = `
+            <td><strong>${a.code}</strong></td>
+            <td>
+                <div><strong>${a.name}</strong></div>
+                <div class="text-muted" style="font-size:0.8rem;">${categoryBadge} | Vendor: ${partnerName}</div>
+            </td>
+            <td>${a.purchase_date}</td>
+            <td><strong>${formatCurrency(a.original_value)}</strong></td>
+            <td class="text-danger">${formatCurrency(a.value_depreciated)}</td>
+            <td class="text-success"><strong>${formatCurrency(a.book_value)}</strong></td>
+            <td>${a.method} (${a.method_number} ${a.method_period})</td>
+            <td><span class="badge ${stateBadge}">${a.state.toUpperCase()}</span></td>
+            <td>${actionBtns}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function filterAssets() {
+    const q = (document.getElementById('assetSearchInput').value || '').toLowerCase();
+    if (!q) {
+        renderAssetsTable(state.assets);
+        return;
+    }
+    const filtered = state.assets.filter(a =>
+        a.name.toLowerCase().includes(q) ||
+        a.code.toLowerCase().includes(q) ||
+        (a.category && a.category.toLowerCase().includes(q))
+    );
+    renderAssetsTable(filtered);
+}
+
+async function viewDepreciationBoard(assetId) {
+    try {
+        const asset = await api(`/assets/${assetId}`);
+        state.currentAsset = asset;
+        const container = document.getElementById('depreciationBoardContainer');
+        container.style.display = 'block';
+
+        document.getElementById('depreciationBoardTitle').textContent = `📅 Depreciation Schedule: ${asset.name} (${asset.code})`;
+        document.getElementById('depreciationBoardSubtitle').textContent = 
+            `Original: ${formatCurrency(asset.original_value)} | Salvage: ${formatCurrency(asset.salvage_value)} | Depreciated: ${formatCurrency(asset.value_depreciated)} | Net Book Value: ${formatCurrency(asset.book_value)} | Status: ${asset.state.toUpperCase()}`;
+
+        const tbody = document.getElementById('depreciationLinesTableBody');
+        tbody.innerHTML = '';
+
+        if (!asset.depreciation_lines || asset.depreciation_lines.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center">No schedule computed yet.</td></tr>`;
+            return;
+        }
+
+        asset.depreciation_lines.forEach(l => {
+            const tr = document.createElement('tr');
+            const statusBadge = l.is_posted ? 
+                '<span class="badge badge-success">POSTED TO GL</span>' : 
+                '<span class="badge badge-warning">DRAFT</span>';
+            
+            const moveInfo = l.move ? 
+                `<span class="badge badge-info" style="cursor:pointer;" onclick="openMoveDetail(${l.move.id})">🏛️ ${l.move.name}</span>` : 
+                '<span class="text-muted">-</span>';
+
+            let actionBtn = '';
+            if (!l.is_posted) {
+                if (asset.state === 'running') {
+                    actionBtn = `<button class="btn btn-sm btn-primary" onclick="postDepreciationLine(${l.id}, ${asset.id})">⚡ Post Entry</button>`;
+                } else {
+                    actionBtn = `<span class="text-muted" style="font-size:0.8rem;">Confirm asset to post</span>`;
+                }
+            } else {
+                actionBtn = `<span class="text-success" style="font-size:0.85rem;">✓ Recorded</span>`;
+            }
+
+            tr.innerHTML = `
+                <td>${l.sequence}</td>
+                <td><strong>${l.depreciation_date}</strong></td>
+                <td><strong class="text-danger">${formatCurrency(l.amount)}</strong></td>
+                <td>${formatCurrency(l.depreciated_value)}</td>
+                <td><strong>${formatCurrency(l.remaining_value)}</strong></td>
+                <td>${statusBadge}</td>
+                <td>${moveInfo}</td>
+                <td>${actionBtn}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // Scroll to container
+        container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (e) {
+        showToast('Failed to view depreciation board: ' + e.message, 'danger');
+    }
+}
+
+function closeDepreciationBoard() {
+    document.getElementById('depreciationBoardContainer').style.display = 'none';
+    state.currentAsset = null;
+}
+
+async function confirmAsset(assetId) {
+    try {
+        await api(`/assets/${assetId}/confirm`, 'POST');
+        showToast('Asset confirmed and depreciation activated!', 'success');
+        await loadAssets();
+        if (state.currentAsset && state.currentAsset.id === assetId) {
+            viewDepreciationBoard(assetId);
+        }
+    } catch (e) {
+        showToast('Failed to confirm asset: ' + e.message, 'danger');
+    }
+}
+
+async function recomputeAsset(assetId) {
+    try {
+        await api(`/assets/${assetId}/compute`, 'POST');
+        showToast('Depreciation schedule recomputed successfully!', 'success');
+        await loadAssets();
+        if (state.currentAsset && state.currentAsset.id === assetId) {
+            viewDepreciationBoard(assetId);
+        }
+    } catch (e) {
+        showToast('Failed to recompute schedule: ' + e.message, 'danger');
+    }
+}
+
+async function postDepreciationLine(lineId, assetId) {
+    try {
+        const res = await api(`/assets/lines/${lineId}/post`, 'POST');
+        showToast(`Depreciation posted to GL! Entry ${res.move_id ? '#' + res.move_id : ''} created & balanced.`, 'success');
+        await loadAssets();
+        viewDepreciationBoard(assetId);
+    } catch (e) {
+        showToast('Failed to post depreciation line: ' + e.message, 'danger');
+    }
+}
+
+async function handleAutoDepreciate() {
+    try {
+        const res = await api('/assets/auto-depreciate', 'POST');
+        showToast(`Auto-Depreciation Complete: ${res.posted_count} scheduled entries posted to GL.`, 'success');
+        await loadAssets();
+        if (state.currentAsset) {
+            viewDepreciationBoard(state.currentAsset.id);
+        }
+    } catch (e) {
+        showToast('Failed to run auto-depreciation: ' + e.message, 'danger');
+    }
+}
+
+async function populateAssetModalSelects() {
+    // Set default date
+    document.getElementById('assetPurchaseDate').value = new Date().toISOString().split('T')[0];
+
+    // Populate Partner Select
+    try {
+        const partners = await api('/partners');
+        state.partners = partners || [];
+        const partnerSelect = document.getElementById('assetPartnerSelect');
+        partnerSelect.innerHTML = `<option value="">-- No Vendor Assigned --</option>`;
+        partners.forEach(p => {
+            partnerSelect.innerHTML += `<option value="${p.id}">${p.name} (${p.type})</option>`;
+        });
+    } catch (e) {
+        console.error('Error fetching partners for asset modal:', e);
+    }
+
+    // Populate Accounts
+    try {
+        const accounts = await api('/accounting/accounts');
+        const assetAccSelect = document.getElementById('assetAccountSelect');
+        const deprAccSelect = document.getElementById('assetDeprAccountSelect');
+        const accumAccSelect = document.getElementById('assetAccumAccountSelect');
+
+        assetAccSelect.innerHTML = '';
+        deprAccSelect.innerHTML = '';
+        accumAccSelect.innerHTML = '';
+
+        accounts.forEach(acc => {
+            const opt = `<option value="${acc.id}">${acc.code} - ${acc.name} (${acc.type})</option>`;
+            assetAccSelect.innerHTML += opt;
+            deprAccSelect.innerHTML += opt;
+            accumAccSelect.innerHTML += opt;
+        });
+
+        // Set defaults if matching codes exist
+        const fixedAcc = accounts.find(a => a.code === '150100');
+        if (fixedAcc) assetAccSelect.value = fixedAcc.id;
+
+        const expenseAcc = accounts.find(a => a.code === '610100');
+        if (expenseAcc) deprAccSelect.value = expenseAcc.id;
+
+        const accumAcc = accounts.find(a => a.code === '150900');
+        if (accumAcc) accumAccSelect.value = accumAcc.id;
+    } catch (e) {
+        console.error('Error fetching accounts for asset modal:', e);
+    }
+
+    // Populate Journals
+    try {
+        const journals = await api('/accounting/journals');
+        const journalSelect = document.getElementById('assetJournalSelect');
+        journalSelect.innerHTML = '';
+        journals.forEach(j => {
+            journalSelect.innerHTML += `<option value="${j.id}">[${j.code}] ${j.name} (${j.type})</option>`;
+        });
+        const miscJournal = journals.find(j => j.code === 'MISC' || j.code === 'AST' || j.code === 'ASTJ');
+        if (miscJournal) journalSelect.value = miscJournal.id;
+    } catch (e) {
+        console.error('Error fetching journals for asset modal:', e);
+    }
+}
+
+async function handleCreateAsset(e) {
+    e.preventDefault();
+    try {
+        const partnerVal = document.getElementById('assetPartnerSelect').value;
+        const body = {
+            name: document.getElementById('assetName').value,
+            category: document.getElementById('assetCategory').value,
+            partner_id: partnerVal ? parseInt(partnerVal) : null,
+            purchase_date: document.getElementById('assetPurchaseDate').value,
+            original_value: parseFloat(document.getElementById('assetOriginalValue').value) || 0,
+            salvage_value: parseFloat(document.getElementById('assetSalvageValue').value) || 0,
+            method: document.getElementById('assetMethod').value,
+            method_number: parseInt(document.getElementById('assetMethodNumber').value) || 36,
+            method_period: document.getElementById('assetMethodPeriod').value,
+            asset_account_id: parseInt(document.getElementById('assetAccountSelect').value),
+            depreciation_account_id: parseInt(document.getElementById('assetDeprAccountSelect').value),
+            accumulated_account_id: parseInt(document.getElementById('assetAccumAccountSelect').value),
+            journal_id: parseInt(document.getElementById('assetJournalSelect').value)
+        };
+
+        const res = await api('/assets', 'POST', body);
+        closeModal('modalCreateAsset');
+        document.getElementById('formCreateAsset').reset();
+        showToast(`Asset '${res.name}' created with ${res.depreciation_lines ? res.depreciation_lines.length : body.method_number} schedule periods!`, 'success');
+        await loadAssets();
+        viewDepreciationBoard(res.id);
+    } catch (err) {
+        showToast('Failed to create asset: ' + err.message, 'danger');
+    }
+}
+
+// ==========================================
+// 15. HELPDESK & SUPPORT TICKETING (helpdesk.ticket)
+// ==========================================
+async function loadHelpdesk() {
+    try {
+        // 1. Fetch teams
+        const teams = await api('/helpdesk/teams');
+        state.teams = teams || [];
+        const pillsContainer = document.getElementById('helpdeskTeamsPills');
+        if (pillsContainer) {
+            pillsContainer.innerHTML = '';
+            if (state.teams.length === 0) {
+                pillsContainer.innerHTML = '<span class="text-muted" style="font-size: 0.85rem;">No teams registered</span>';
+            } else {
+                state.teams.forEach(t => {
+                    pillsContainer.innerHTML += `<span class="badge" style="background: ${t.color || '#3b82f6'}; color: white; padding: 4px 10px; border-radius: 14px; font-size: 0.8rem; font-weight: 500;">🏢 ${t.name} (${t.code})</span>`;
+                });
+            }
+        }
+
+        // 2. Fetch filtered tickets
+        const stage = document.getElementById('helpdeskStageFilter').value;
+        const priority = document.getElementById('helpdeskPriorityFilter').value;
+        const category = document.getElementById('helpdeskCategoryFilter').value;
+
+        const tickets = await api(`/helpdesk/tickets?stage=${stage}&priority=${priority}&category=${category}`);
+        state.tickets = tickets || [];
+
+        // 3. Update KPI Counters
+        let openCount = 0;
+        let solvedCount = 0;
+        let urgentCount = 0;
+
+        state.tickets.forEach(t => {
+            if (t.stage === 'new' || t.stage === 'in_progress' || t.stage === 'waiting') openCount++;
+            if (t.stage === 'solved') solvedCount++;
+            if (t.priority === '3') urgentCount++;
+        });
+
+        document.getElementById('statHelpdeskTotal').textContent = state.tickets.length;
+        document.getElementById('statHelpdeskOpen').textContent = openCount;
+        document.getElementById('statHelpdeskSolved').textContent = solvedCount;
+        document.getElementById('statHelpdeskUrgent').textContent = urgentCount;
+
+        renderHelpdeskTable();
+    } catch (err) {
+        console.error('Error loading helpdesk tickets:', err);
+        showToast('Failed to load tickets: ' + err.message, 'danger');
+    }
+}
+
+function renderHelpdeskTable() {
+    const tbody = document.getElementById('helpdeskTableBody');
+    const search = (document.getElementById('helpdeskSearchInput').value || '').toLowerCase();
+
+    let filtered = state.tickets || [];
+    if (search) {
+        filtered = filtered.filter(t => 
+            (t.ticket_number && t.ticket_number.toLowerCase().includes(search)) ||
+            (t.name && t.name.toLowerCase().includes(search)) ||
+            (t.partner_name && t.partner_name.toLowerCase().includes(search)) ||
+            (t.partner && t.partner.name && t.partner.name.toLowerCase().includes(search)) ||
+            (t.category && t.category.toLowerCase().includes(search))
+        );
+    }
+
+    document.getElementById('helpdeskCountBadge').textContent = `${filtered.length} Tickets`;
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center" style="padding: 2rem;">No support tickets match the current filters.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = '';
+    filtered.forEach(t => {
+        const tr = document.createElement('tr');
+
+        // Priority Badge
+        let priorityBadge = '<span class="badge badge-secondary">⚪ Low</span>';
+        if (t.priority === '1') priorityBadge = '<span class="badge badge-info">🟡 Medium</span>';
+        else if (t.priority === '2') priorityBadge = '<span class="badge badge-warning">🟠 High</span>';
+        else if (t.priority === '3') priorityBadge = '<span class="badge badge-danger">🔴 Urgent</span>';
+
+        // Stage Badge
+        let stageBadge = `<span class="badge badge-info">${t.stage}</span>`;
+        if (t.stage === 'in_progress') stageBadge = '<span class="badge badge-warning">⚡ In Progress</span>';
+        else if (t.stage === 'waiting') stageBadge = '<span class="badge badge-secondary">⏳ Waiting</span>';
+        else if (t.stage === 'solved') stageBadge = '<span class="badge badge-success">✓ Solved</span>';
+        else if (t.stage === 'cancelled') stageBadge = '<span class="badge badge-danger">✕ Cancelled</span>';
+
+        // Team Badge
+        const teamBadge = t.team ? `<span class="badge" style="background:${t.team.color || '#3b82f6'}; color:#fff; font-size:0.75rem;">${t.team.name}</span>` : '<span class="text-muted">-</span>';
+
+        // Customer Name
+        const custName = t.partner ? t.partner.name : (t.partner_name || '<span class="text-muted">General</span>');
+
+        // Agent Name
+        const agentName = t.user ? `👤 ${t.user.name}` : '<span class="text-muted">Unassigned</span>';
+
+        const escapedName = (t.name || '').replace(/'/g, "\\'");
+
+        tr.innerHTML = `
+            <td><strong>${t.ticket_number}</strong></td>
+            <td>
+                <div style="font-weight: 600; color: var(--text-main);">${t.name}</div>
+                ${t.description ? `<div class="text-muted" style="font-size: 0.78rem; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${t.description}</div>` : ''}
+                ${t.resolution ? `<div class="text-success" style="font-size: 0.78rem;"><strong>Solusi:</strong> ${t.resolution}</div>` : ''}
+            </td>
+            <td>${custName}</td>
+            <td><span class="badge badge-secondary" style="text-transform: capitalize;">${t.category}</span></td>
+            <td>${teamBadge}</td>
+            <td>${priorityBadge}</td>
+            <td>${agentName}</td>
+            <td>${stageBadge}</td>
+            <td>
+                <div style="display: flex; gap: 0.35rem; align-items: center;">
+                    <button class="btn btn-sm btn-secondary" style="padding: 3px 8px; font-size: 11px;" onclick="openChatter('helpdesk.ticket', ${t.id}, '${escapedName}')" title="Activity Chatter & Notes">
+                        💬 Chatter
+                    </button>
+                    <button class="btn btn-sm btn-outline" style="padding: 3px 8px; font-size: 11px;" onclick="openAssignTicketModal(${t.id}, '${escapedName}')" title="Assign Support Agent">
+                        👤 Assign
+                    </button>
+                    ${t.stage !== 'solved' ? `
+                    <button class="btn btn-sm btn-success" style="padding: 3px 8px; font-size: 11px;" onclick="openResolveTicketModal(${t.id}, '${escapedName}')" title="Resolve & Mark Solved">
+                        ✅ Resolve
+                    </button>
+                    ` : ''}
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+async function openCreateTicketModal() {
+    // Populate teams
+    try {
+        const teams = await api('/helpdesk/teams');
+        const teamSelect = document.getElementById('ticketTeamSelect');
+        teamSelect.innerHTML = '';
+        (teams || []).forEach(t => {
+            teamSelect.innerHTML += `<option value="${t.id}">${t.name} (${t.code})</option>`;
+        });
+    } catch (e) {
+        console.error(e);
+    }
+
+    // Populate partners
+    try {
+        const partners = await api('/contacts?type=customer');
+        const partnerSelect = document.getElementById('ticketPartnerSelect');
+        partnerSelect.innerHTML = '<option value="">-- Non-partner / General --</option>';
+        (partners || []).forEach(p => {
+            partnerSelect.innerHTML += `<option value="${p.id}">${p.name} (${p.email || p.phone || 'No contact'})</option>`;
+        });
+    } catch (e) {
+        console.error(e);
+    }
+
+    // Populate user/agents
+    try {
+        const emps = await api('/hr/employees');
+        const userSelect = document.getElementById('ticketUserSelect');
+        userSelect.innerHTML = '<option value="">-- Assign later (Unassigned) --</option>';
+        userSelect.innerHTML += `<option value="1">Administrator (IT & Support)</option>`;
+        (emps || []).forEach(emp => {
+            if (emp.id !== 1) {
+                userSelect.innerHTML += `<option value="${emp.id}">${emp.name} (${emp.job ? emp.job.name : 'Staff'})</option>`;
+            }
+        });
+    } catch (e) {
+        console.error(e);
+    }
+
+    openModal('modalCreateTicket');
+}
+
+async function handleCreateTicket(e) {
+    e.preventDefault();
+    try {
+        const teamVal = document.getElementById('ticketTeamSelect').value;
+        const partnerVal = document.getElementById('ticketPartnerSelect').value;
+        const userVal = document.getElementById('ticketUserSelect').value;
+
+        const body = {
+            name: document.getElementById('ticketName').value,
+            team_id: teamVal ? parseInt(teamVal) : null,
+            partner_id: partnerVal ? parseInt(partnerVal) : null,
+            user_id: userVal ? parseInt(userVal) : null,
+            category: document.getElementById('ticketCategorySelect').value,
+            priority: document.getElementById('ticketPrioritySelect').value,
+            description: document.getElementById('ticketDescription').value,
+            stage: userVal ? 'in_progress' : 'new'
+        };
+
+        const res = await api('/helpdesk/tickets', 'POST', body);
+        closeModal('modalCreateTicket');
+        document.getElementById('formCreateTicket').reset();
+        showToast(`Ticket '${res.ticket_number}' created successfully!`, 'success');
+        await loadHelpdesk();
+    } catch (err) {
+        showToast('Failed to create ticket: ' + err.message, 'danger');
+    }
+}
+
+function openAssignTicketModal(id, name) {
+    document.getElementById('assignTicketId').value = id;
+    document.getElementById('assignTicketSubject').value = name;
+
+    const userSelect = document.getElementById('assignTicketUserSelect');
+    userSelect.innerHTML = `
+        <option value="1">Administrator (IT Support Lead)</option>
+        <option value="2">Budi Santoso (Senior Technical Specialist)</option>
+        <option value="3">Siti Rahma (Customer Care Specialist)</option>
+    `;
+
+    openModal('modalAssignTicket');
+}
+
+async function handleAssignTicket(e) {
+    e.preventDefault();
+    const id = document.getElementById('assignTicketId').value;
+    const userId = document.getElementById('assignTicketUserSelect').value;
+
+    try {
+        await api(`/helpdesk/tickets/${id}/assign`, 'PUT', { user_id: parseInt(userId) });
+        closeModal('modalAssignTicket');
+        showToast('Ticket assigned and stage set to In Progress!', 'success');
+        await loadHelpdesk();
+    } catch (err) {
+        showToast('Failed to assign ticket: ' + err.message, 'danger');
+    }
+}
+
+function openResolveTicketModal(id, name) {
+    document.getElementById('resolveTicketId').value = id;
+    document.getElementById('resolveTicketSubject').value = name;
+    document.getElementById('resolveTicketResolution').value = '';
+    openModal('modalResolveTicket');
+}
+
+async function handleResolveTicket(e) {
+    e.preventDefault();
+    const id = document.getElementById('resolveTicketId').value;
+    const resolution = document.getElementById('resolveTicketResolution').value;
+
+    try {
+        await api(`/helpdesk/tickets/${id}/resolve`, 'PUT', { resolution });
+        closeModal('modalResolveTicket');
+        showToast('Support ticket resolved and closed!', 'success');
+        await loadHelpdesk();
+    } catch (err) {
+        showToast('Failed to resolve ticket: ' + err.message, 'danger');
+    }
+}
+
+// ==========================================
+// 16. MAINTENANCE & EQUIPMENT MANAGEMENT (maintenance.equipment)
+// ==========================================
+async function loadMaintenance() {
+    try {
+        // 1. Fetch categories
+        const cats = await api('/maintenance/categories');
+        state.equipmentCategories = cats || [];
+        const pillsContainer = document.getElementById('maintCategoryPills');
+        if (pillsContainer) {
+            pillsContainer.innerHTML = '';
+            if (state.equipmentCategories.length === 0) {
+                pillsContainer.innerHTML = '<span class="text-muted" style="font-size: 0.85rem;">No categories registered</span>';
+            } else {
+                state.equipmentCategories.forEach(c => {
+                    pillsContainer.innerHTML += `<span class="badge" style="background: ${c.color || '#ef4444'}; color: white; padding: 4px 10px; border-radius: 14px; font-size: 0.8rem; font-weight: 500;">⚙️ ${c.name}</span>`;
+                });
+            }
+        }
+
+        // 2. Fetch equipments
+        const eqStatus = document.getElementById('equipmentStatusFilter') ? document.getElementById('equipmentStatusFilter').value : 'all';
+        const equipments = await api(`/maintenance/equipments?status=${eqStatus}`);
+        state.equipments = equipments || [];
+
+        // 3. Fetch maintenance requests
+        const mType = document.getElementById('maintTypeFilter') ? document.getElementById('maintTypeFilter').value : 'all';
+        const mStage = document.getElementById('maintStageFilter') ? document.getElementById('maintStageFilter').value : 'all';
+        const requests = await api(`/maintenance/requests?maintenance_type=${mType}&stage=${mStage}`);
+        state.maintenanceRequests = requests || [];
+
+        // 4. Update KPI counters
+        const today = new Date().toISOString().split('T')[0];
+        let downCount = 0;
+        let overdueCount = 0;
+        let repairedCount = 0;
+
+        state.equipments.forEach(eq => {
+            if (eq.status === 'maintenance') downCount++;
+            if (eq.next_action_date && eq.next_action_date <= today && eq.status !== 'scrapped') overdueCount++;
+        });
+
+        state.maintenanceRequests.forEach(req => {
+            if (req.stage === 'repaired') repairedCount++;
+        });
+
+        document.getElementById('statMaintTotalEquip').textContent = state.equipments.length;
+        document.getElementById('statMaintActiveDown').textContent = downCount;
+        document.getElementById('statMaintOverdue').textContent = overdueCount;
+        document.getElementById('statMaintRepaired').textContent = repairedCount;
+
+        renderEquipmentsTable();
+        renderMaintenanceRequestsTable();
+    } catch (err) {
+        console.error('Error loading maintenance:', err);
+        showToast('Failed to load maintenance data: ' + err.message, 'danger');
+    }
+}
+
+function renderEquipmentsTable() {
+    const tbody = document.getElementById('equipmentTableBody');
+    const search = (document.getElementById('equipmentSearchInput').value || '').toLowerCase();
+
+    let filtered = state.equipments || [];
+    if (search) {
+        filtered = filtered.filter(eq =>
+            (eq.equipment_number && eq.equipment_number.toLowerCase().includes(search)) ||
+            (eq.name && eq.name.toLowerCase().includes(search)) ||
+            (eq.serial_number && eq.serial_number.toLowerCase().includes(search)) ||
+            (eq.model && eq.model.toLowerCase().includes(search)) ||
+            (eq.location && eq.location.toLowerCase().includes(search))
+        );
+    }
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center" style="padding: 2rem;">No equipments found matching criteria.</td></tr>';
+        return;
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    tbody.innerHTML = '';
+    filtered.forEach(eq => {
+        const tr = document.createElement('tr');
+
+        // Status badge
+        let statusBadge = '<span class="badge badge-success">✓ Operational</span>';
+        if (eq.status === 'maintenance') statusBadge = '<span class="badge badge-danger">⚡ In Maintenance</span>';
+        else if (eq.status === 'scrapped') statusBadge = '<span class="badge badge-secondary">Scrapped</span>';
+
+        // Next action date badge
+        let nextActionBadge = `<span class="badge badge-secondary">${eq.next_action_date || '-'}</span>`;
+        if (eq.next_action_date) {
+            if (eq.next_action_date <= today) {
+                nextActionBadge = `<span class="badge badge-danger" title="Overdue for preventive inspection!">⚠️ ${eq.next_action_date} (Due)</span>`;
+            } else {
+                nextActionBadge = `<span class="badge badge-success">${eq.next_action_date}</span>`;
+            }
+        }
+
+        // Category badge
+        const catBadge = eq.category ? `<span class="badge" style="background:${eq.category.color || '#ef4444'}; color:#fff; font-size:0.75rem;">${eq.category.name}</span>` : '-';
+
+        // Asset link badge
+        const assetBadge = eq.asset ? `🏛️ <span class="badge badge-info" style="font-size:0.75rem;">${eq.asset.code}</span>` : '<span class="text-muted">-</span>';
+
+        const escapedName = (eq.name || '').replace(/'/g, "\\'");
+
+        tr.innerHTML = `
+            <td><strong>${eq.equipment_number}</strong></td>
+            <td>
+                <div style="font-weight: 600; color: var(--text-main);">${eq.name}</div>
+                ${eq.note ? `<div class="text-muted" style="font-size: 0.78rem; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${eq.note}</div>` : ''}
+            </td>
+            <td>${eq.serial_number || '-'}<br><small class="text-muted">${eq.model || ''}</small></td>
+            <td>${catBadge}</td>
+            <td>${assetBadge}</td>
+            <td>${eq.location || '-'}</td>
+            <td>Every ${eq.maintenance_period_days || 30} days</td>
+            <td>${nextActionBadge}</td>
+            <td>${statusBadge}</td>
+            <td>
+                <div style="display: flex; gap: 0.35rem; align-items: center;">
+                    <button class="btn btn-sm btn-primary" style="padding: 3px 8px; font-size: 11px;" onclick="openCreateMaintenanceRequestModal(${eq.id})" title="Create Service / Repair Request">
+                        🛠️ Service
+                    </button>
+                    <button class="btn btn-sm btn-secondary" style="padding: 3px 8px; font-size: 11px;" onclick="openChatter('maintenance.equipment', ${eq.id}, '${escapedName}')" title="Activity Chatter">
+                        💬 Chatter
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function renderMaintenanceRequestsTable() {
+    const tbody = document.getElementById('maintenanceRequestTableBody');
+    const requests = state.maintenanceRequests || [];
+
+    if (requests.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center" style="padding: 2rem;">No maintenance requests found matching criteria.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = '';
+    requests.forEach(req => {
+        const tr = document.createElement('tr');
+
+        // Type Badge
+        const typeBadge = req.maintenance_type === 'preventive' ?
+            '<span class="badge badge-info">📅 Preventive</span>' :
+            '<span class="badge badge-warning">⚡ Corrective</span>';
+
+        // Priority Badge
+        let priorityBadge = '<span class="badge badge-secondary">⚪ Low</span>';
+        if (req.priority === '1') priorityBadge = '<span class="badge badge-info">🟡 Medium</span>';
+        else if (req.priority === '2') priorityBadge = '<span class="badge badge-warning">🟠 High</span>';
+        else if (req.priority === '3') priorityBadge = '<span class="badge badge-danger">🔴 Urgent</span>';
+
+        // Stage Badge
+        let stageBadge = `<span class="badge badge-info">${req.stage}</span>`;
+        if (req.stage === 'in_progress') stageBadge = '<span class="badge badge-warning">⚡ In Progress</span>';
+        else if (req.stage === 'repaired') stageBadge = '<span class="badge badge-success">✓ Repaired</span>';
+        else if (req.stage === 'scrap') stageBadge = '<span class="badge badge-danger">✕ Scrapped</span>';
+
+        // Technician
+        const techName = req.user ? `👤 ${req.user.name}` : '<span class="text-muted">Unassigned</span>';
+
+        // Equipment Name
+        const equipName = req.equipment ? `<strong>${req.equipment.name}</strong> (${req.equipment.equipment_number})` : '-';
+
+        const escapedName = (req.name || '').replace(/'/g, "\\'");
+
+        tr.innerHTML = `
+            <td><strong>${req.request_number}</strong></td>
+            <td>
+                <div style="font-weight: 600; color: var(--text-main);">${req.name}</div>
+                ${req.description ? `<div class="text-muted" style="font-size: 0.78rem; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${req.description}</div>` : ''}
+                ${req.resolution ? `<div class="text-success" style="font-size: 0.78rem;"><strong>Perbaikan (${req.duration_hours || 0} jam):</strong> ${req.resolution}</div>` : ''}
+            </td>
+            <td>${equipName}</td>
+            <td>${typeBadge}</td>
+            <td>${priorityBadge}</td>
+            <td>${techName}</td>
+            <td>${req.schedule_date || req.request_date || '-'}</td>
+            <td>${stageBadge}</td>
+            <td>
+                <div style="display: flex; gap: 0.35rem; align-items: center;">
+                    <button class="btn btn-sm btn-secondary" style="padding: 3px 8px; font-size: 11px;" onclick="openChatter('maintenance.request', ${req.id}, '${escapedName}')" title="Activity Chatter">
+                        💬 Chatter
+                    </button>
+                    ${req.stage !== 'repaired' ? `
+                    <button class="btn btn-sm btn-success" style="padding: 3px 8px; font-size: 11px;" onclick="openCompleteMaintenanceModal(${req.id}, '${escapedName}')" title="Complete Repair & Mark Repaired">
+                        ✅ Complete
+                    </button>
+                    ` : ''}
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+async function runAutoPreventiveScheduler() {
+    try {
+        const res = await api('/maintenance/requests/auto-preventive', 'POST');
+        showToast(res.message + (res.scheduled_count > 0 ? ` (${res.scheduled_count} work orders generated)` : ' (All machines up to date)'), 'success');
+        await loadMaintenance();
+    } catch (err) {
+        showToast('Auto preventive scheduler failed: ' + err.message, 'danger');
+    }
+}
+
+async function openCreateEquipmentModal() {
+    // Populate categories
+    try {
+        const cats = await api('/maintenance/categories');
+        const catSelect = document.getElementById('equipCategorySelect');
+        catSelect.innerHTML = '';
+        (cats || []).forEach(c => {
+            catSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+        });
+    } catch (e) { console.error(e); }
+
+    // Populate fixed assets
+    try {
+        const assets = await api('/assets');
+        const assetSelect = document.getElementById('equipAssetSelect');
+        assetSelect.innerHTML = '<option value="">-- No fixed asset linked --</option>';
+        (assets || []).forEach(a => {
+            assetSelect.innerHTML += `<option value="${a.id}">[${a.code}] ${a.name} (${formatCurrency(a.original_value)})</option>`;
+        });
+    } catch (e) { console.error(e); }
+
+    // Populate technicians
+    try {
+        const emps = await api('/hr/employees');
+        const techSelect = document.getElementById('equipTechnicianSelect');
+        techSelect.innerHTML = '<option value="">-- Unassigned technician --</option>';
+        techSelect.innerHTML += `<option value="1">Administrator (Chief Engineer)</option>`;
+        (emps || []).forEach(emp => {
+            if (emp.id !== 1) {
+                techSelect.innerHTML += `<option value="${emp.id}">${emp.name} (${emp.job ? emp.job.name : 'Maintenance'})</option>`;
+            }
+        });
+    } catch (e) { console.error(e); }
+
+    openModal('modalCreateEquipment');
+}
+
+async function handleCreateEquipment(e) {
+    e.preventDefault();
+    try {
+        const catVal = document.getElementById('equipCategorySelect').value;
+        const assetVal = document.getElementById('equipAssetSelect').value;
+        const techVal = document.getElementById('equipTechnicianSelect').value;
+
+        const body = {
+            name: document.getElementById('equipName').value,
+            category_id: catVal ? parseInt(catVal) : null,
+            asset_id: assetVal ? parseInt(assetVal) : null,
+            technician_user_id: techVal ? parseInt(techVal) : null,
+            serial_number: document.getElementById('equipSerial').value,
+            model: document.getElementById('equipModel').value,
+            location: document.getElementById('equipLocation').value,
+            cost: parseFloat(document.getElementById('equipCost').value) || 0,
+            maintenance_period_days: parseInt(document.getElementById('equipPeriodDays').value) || 30,
+            note: document.getElementById('equipNote').value
+        };
+
+        const res = await api('/maintenance/equipments', 'POST', body);
+        closeModal('modalCreateEquipment');
+        document.getElementById('formCreateEquipment').reset();
+        showToast(`Equipment '${res.equipment_number}' registered successfully!`, 'success');
+        await loadMaintenance();
+    } catch (err) {
+        showToast('Failed to register equipment: ' + err.message, 'danger');
+    }
+}
+
+async function openCreateMaintenanceRequestModal(defaultEquipId = null) {
+    // Populate equipments
+    try {
+        const eqs = await api('/maintenance/equipments');
+        const eqSelect = document.getElementById('maintReqEquipSelect');
+        eqSelect.innerHTML = '';
+        (eqs || []).forEach(eq => {
+            const selected = (defaultEquipId && eq.id === defaultEquipId) ? 'selected' : '';
+            eqSelect.innerHTML += `<option value="${eq.id}" ${selected}>${eq.name} (${eq.equipment_number}) - [${eq.status}]</option>`;
+        });
+    } catch (e) { console.error(e); }
+
+    // Populate technicians
+    try {
+        const emps = await api('/hr/employees');
+        const techSelect = document.getElementById('maintReqTechnicianSelect');
+        techSelect.innerHTML = '<option value="">-- Unassigned technician --</option>';
+        techSelect.innerHTML += `<option value="1">Administrator (Lead Engineer)</option>`;
+        (emps || []).forEach(emp => {
+            if (emp.id !== 1) {
+                techSelect.innerHTML += `<option value="${emp.id}">${emp.name}</option>`;
+            }
+        });
+    } catch (e) { console.error(e); }
+
+    openModal('modalCreateMaintenanceRequest');
+}
+
+async function handleCreateMaintenanceRequest(e) {
+    e.preventDefault();
+    try {
+        const equipVal = document.getElementById('maintReqEquipSelect').value;
+        const techVal = document.getElementById('maintReqTechnicianSelect').value;
+
+        const body = {
+            name: document.getElementById('maintReqName').value,
+            equipment_id: parseInt(equipVal),
+            maintenance_type: document.getElementById('maintReqType').value,
+            priority: document.getElementById('maintReqPriority').value,
+            user_id: techVal ? parseInt(techVal) : null,
+            description: document.getElementById('maintReqDesc').value,
+            stage: techVal ? 'in_progress' : 'new'
+        };
+
+        const res = await api('/maintenance/requests', 'POST', body);
+        closeModal('modalCreateMaintenanceRequest');
+        document.getElementById('formCreateMaintenanceRequest').reset();
+        showToast(`Maintenance Work Order '${res.request_number}' created!`, 'success');
+        await loadMaintenance();
+    } catch (err) {
+        showToast('Failed to create maintenance request: ' + err.message, 'danger');
+    }
+}
+
+function openCompleteMaintenanceModal(id, name) {
+    document.getElementById('completeMaintId').value = id;
+    document.getElementById('completeMaintSubject').value = name;
+    document.getElementById('completeMaintResolution').value = '';
+    document.getElementById('completeMaintDuration').value = '1.0';
+    openModal('modalCompleteMaintenance');
+}
+
+async function handleCompleteMaintenance(e) {
+    e.preventDefault();
+    const id = document.getElementById('completeMaintId').value;
+    const resolution = document.getElementById('completeMaintResolution').value;
+    const duration = parseFloat(document.getElementById('completeMaintDuration').value) || 1.0;
+
+    try {
+        await api(`/maintenance/requests/${id}/complete`, 'PUT', {
+            resolution,
+            duration_hours: duration
+        });
+        closeModal('modalCompleteMaintenance');
+        showToast('Maintenance work order marked as Repaired and equipment operational!', 'success');
+        await loadMaintenance();
+    } catch (err) {
+        showToast('Failed to complete maintenance work order: ' + err.message, 'danger');
+    }
+}
+
+// ==========================================
+// 17. FLEET & DELIVERY VEHICLE MANAGEMENT (fleet.vehicle)
+// ==========================================
+async function loadFleet() {
+    try {
+        const statusFilter = document.getElementById('fleetStatusFilter')?.value || 'all';
+        const typeFilter = state.currentFleetTypeFilter || 'all';
+        
+        let url = `/fleet/vehicles?status=${statusFilter}`;
+        if (typeFilter !== 'all') {
+            url += `&vehicle_type=${typeFilter}`;
+        }
+
+        const [vehicles, models, services] = await Promise.all([
+            api(url),
+            api('/fleet/models'),
+            api('/fleet/services')
+        ]);
+
+        state.vehicles = vehicles || [];
+        state.fleetModels = models || [];
+        state.serviceLogs = services || [];
+
+        // Update Fleet KPIs
+        const totalFleet = state.vehicles.length;
+        const activeFleet = state.vehicles.filter(v => v.status === 'active').length;
+        const inServiceFleet = state.vehicles.filter(v => v.status === 'in_service').length;
+        const totalMileage = state.vehicles.reduce((acc, v) => acc + (v.last_odometer || 0), 0);
+
+        if (document.getElementById('statFleetTotal')) document.getElementById('statFleetTotal').textContent = totalFleet;
+        if (document.getElementById('statFleetActive')) document.getElementById('statFleetActive').textContent = activeFleet;
+        if (document.getElementById('statFleetService')) document.getElementById('statFleetService').textContent = inServiceFleet;
+        if (document.getElementById('statFleetMileage')) document.getElementById('statFleetMileage').textContent = totalMileage.toLocaleString('id-ID') + ' KM';
+
+        renderVehiclesTable();
+        renderFleetServicesTable();
+    } catch (err) {
+        console.error('Failed to load fleet:', err);
+        showToast('Gagal memuat data armada: ' + err.message, 'danger');
+    }
+}
+
+function filterFleetType(type) {
+    state.currentFleetTypeFilter = type;
+    const pills = document.querySelectorAll('#fleetTypePills button');
+    pills.forEach(btn => {
+        if (btn.getAttribute('onclick')?.includes(`'${type}'`)) {
+            btn.className = 'btn btn-sm btn-primary';
+        } else {
+            btn.className = 'btn btn-sm btn-outline';
+        }
+    });
+    loadFleet();
+}
+
+function renderVehiclesTable() {
+    const tbody = document.getElementById('fleetVehicleTableBody');
+    if (!tbody) return;
+
+    const searchTerm = (document.getElementById('fleetSearchInput')?.value || '').toLowerCase();
+    const filtered = (state.vehicles || []).filter(v => {
+        const plate = (v.license_plate || '').toLowerCase();
+        const brand = (v.model?.brand || '').toLowerCase();
+        const modelName = (v.model?.model_name || '').toLowerCase();
+        const driver = (v.driver?.name || '').toLowerCase();
+        const location = (v.location || '').toLowerCase();
+        return plate.includes(searchTerm) || brand.includes(searchTerm) ||
+               modelName.includes(searchTerm) || driver.includes(searchTerm) || location.includes(searchTerm);
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted" style="padding: 2rem;">Tidak ada armada kendaraan yang sesuai filter.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(v => {
+        const statusBadge = v.status === 'active' 
+            ? '<span class="badge badge-success">Active (Siap Jalan)</span>' 
+            : (v.status === 'in_service' 
+                ? '<span class="badge badge-warning">In Service (Bengkel)</span>' 
+                : '<span class="badge badge-secondary">Inactive</span>');
+
+        const modelStr = v.model ? `${v.model.brand} ${v.model.model_name}` : '-';
+        const typeBadge = `<span class="badge badge-outline">${v.model?.vehicle_type || 'van'}</span> <span class="badge badge-outline" style="text-transform: capitalize;">${v.fuel_type || 'diesel'}</span>`;
+        const driverName = v.driver ? `<span style="font-weight: 500;">👤 ${escapeHtml(v.driver.name)}</span>` : '<span class="text-muted">Belum Ditugaskan</span>';
+        const assetLink = v.asset ? `<span title="Asset ID #${v.asset.id}">🏛️ ${escapeHtml(v.asset.name)}</span>` : '<span class="text-muted">-</span>';
+        const odoStr = (v.last_odometer || 0).toLocaleString('id-ID') + ' KM';
+
+        return `
+            <tr>
+                <td><strong style="font-size: 1.05rem; letter-spacing: 0.5px; color: var(--primary);">${escapeHtml(v.license_plate)}</strong></td>
+                <td><strong>${escapeHtml(modelStr)}</strong></td>
+                <td>${typeBadge}</td>
+                <td>${driverName}</td>
+                <td>${assetLink}</td>
+                <td>${escapeHtml(v.location || '-')}</td>
+                <td><strong style="color: var(--text-heading);">${odoStr}</strong></td>
+                <td>${statusBadge}</td>
+                <td>
+                    <div style="display: flex; gap: 0.35rem;">
+                        <button class="btn btn-sm btn-outline" onclick="openLogOdometerModal(${v.id})" title="Catat angka odometer KM terkini">⏱️ KM</button>
+                        <button class="btn btn-sm btn-outline" onclick="openCreateFleetServiceModal(${v.id})" title="Catat servis / perbaikan bengkel">🔧 Servis</button>
+                        <button class="btn btn-sm btn-secondary" onclick="openChatterModal('fleet.vehicle', ${v.id}, '${escapeHtml(v.license_plate)}')" title="Audit Log & Universal Chatter">💬</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderFleetServicesTable() {
+    const tbody = document.getElementById('fleetServiceTableBody');
+    if (!tbody) return;
+
+    const typeFilter = document.getElementById('fleetServiceTypeFilter')?.value || 'all';
+    const filtered = (state.serviceLogs || []).filter(srv => {
+        return typeFilter === 'all' || srv.service_type === typeFilter;
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted" style="padding: 2rem;">Belum ada riwayat servis tercatat.</td></tr>';
+        return;
+    }
+
+    const serviceTypeLabels = {
+        oil_change: '🛢️ Ganti Oli',
+        tire_replacement: '🛞 Ganti Ban',
+        general_servicing: '⚙️ Servis Berkala',
+        periodic_inspection_kir: '📋 Uji KIR Dishub',
+        repair: '⚠️ Perbaikan Kerusakan'
+    };
+
+    tbody.innerHTML = filtered.map(srv => {
+        const vehiclePlate = srv.vehicle?.license_plate || `ID #${srv.vehicle_id}`;
+        const typeLabel = serviceTypeLabels[srv.service_type] || srv.service_type;
+        const vendorName = srv.vendor?.name ? escapeHtml(srv.vendor.name) : '<span class="text-muted">-</span>';
+        const costStr = formatCurrency(srv.cost || 0);
+        const odoStr = srv.odometer ? `${srv.odometer.toLocaleString('id-ID')} KM` : '-';
+        const stageBadge = srv.stage === 'done'
+            ? '<span class="badge badge-success">Done</span>'
+            : '<span class="badge badge-secondary">Draft</span>';
+
+        return `
+            <tr>
+                <td><strong>${escapeHtml(srv.service_number)}</strong></td>
+                <td><span class="badge badge-outline">${escapeHtml(vehiclePlate)}</span></td>
+                <td>${srv.date}</td>
+                <td><span class="badge badge-info">${typeLabel}</span></td>
+                <td><strong style="color: var(--primary);">${costStr}</strong></td>
+                <td>${vendorName}</td>
+                <td>${odoStr}</td>
+                <td>${stageBadge}</td>
+                <td><span style="font-size: 0.85rem;" title="${escapeHtml(srv.description)}">${escapeHtml(srv.description)}</span></td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function loadFleetServices() {
+    try {
+        const typeFilter = document.getElementById('fleetServiceTypeFilter')?.value || 'all';
+        const services = await api(`/fleet/services?service_type=${typeFilter}`);
+        state.serviceLogs = services || [];
+        renderFleetServicesTable();
+    } catch (err) {
+        console.error('Failed to load fleet services:', err);
+    }
+}
+
+async function openCreateVehicleModal() {
+    try {
+        // Fetch models, employees for drivers, and fixed assets
+        const [models, employees, assets] = await Promise.all([
+            state.fleetModels.length ? Promise.resolve(state.fleetModels) : api('/fleet/models'),
+            api('/hr/employees'),
+            api('/assets')
+        ]);
+
+        const modelSelect = document.getElementById('vehicleModelSelect');
+        modelSelect.innerHTML = (models || []).map(m => 
+            `<option value="${m.id}">${escapeHtml(m.brand)} ${escapeHtml(m.model_name)} (${m.vehicle_type})</option>`
+        ).join('');
+
+        const driverSelect = document.getElementById('vehicleDriverSelect');
+        driverSelect.innerHTML = '<option value="">-- Tanpa Driver Khusus --</option>' + 
+            (employees || []).map(e => `<option value="${e.id}">${escapeHtml(e.name)}</option>`).join('');
+
+        const assetSelect = document.getElementById('vehicleAssetSelect');
+        assetSelect.innerHTML = '<option value="">-- Tanpa Link Fixed Asset --</option>' + 
+            (assets || []).map(a => `<option value="${a.id}">#${a.id} ${escapeHtml(a.name)} (${formatCurrency(a.original_value)})</option>`).join('');
+
+        document.getElementById('formCreateVehicle').reset();
+        openModal('modalCreateVehicle');
+    } catch (err) {
+        showToast('Gagal menyiapkan form armada: ' + err.message, 'danger');
+    }
+}
+
+async function handleCreateVehicle(e) {
+    e.preventDefault();
+    try {
+        const modelId = parseInt(document.getElementById('vehicleModelSelect').value);
+        const driverIdVal = document.getElementById('vehicleDriverSelect').value;
+        const assetIdVal = document.getElementById('vehicleAssetSelect').value;
+
+        const body = {
+            license_plate: document.getElementById('vehiclePlate').value.trim().toUpperCase(),
+            model_id: modelId,
+            driver_employee_id: driverIdVal ? parseInt(driverIdVal) : null,
+            asset_id: assetIdVal ? parseInt(assetIdVal) : null,
+            location: document.getElementById('vehicleLocation').value.trim(),
+            last_odometer: parseFloat(document.getElementById('vehicleOdometer').value) || 0,
+            fuel_type: document.getElementById('vehicleFuelType').value,
+            status: document.getElementById('vehicleStatus').value,
+            vin_sn: document.getElementById('vehicleVin').value.trim(),
+            engine_number: document.getElementById('vehicleEngine').value.trim(),
+            color: document.getElementById('vehicleColor').value.trim(),
+            note: document.getElementById('vehicleNote').value.trim()
+        };
+
+        await api('/fleet/vehicles', 'POST', body);
+        closeModal('modalCreateVehicle');
+        document.getElementById('formCreateVehicle').reset();
+        showToast(`Armada ${body.license_plate} berhasil didaftarkan!`, 'success');
+        await loadFleet();
+    } catch (err) {
+        showToast('Gagal mendaftarkan armada: ' + err.message, 'danger');
+    }
+}
+
+async function openLogOdometerModal(preselectedVehicleId = null) {
+    try {
+        const [vehicles, employees] = await Promise.all([
+            state.vehicles.length ? Promise.resolve(state.vehicles) : api('/fleet/vehicles'),
+            api('/hr/employees')
+        ]);
+
+        const vSelect = document.getElementById('odoVehicleSelect');
+        vSelect.innerHTML = (vehicles || []).map(v => 
+            `<option value="${v.id}" ${v.id === preselectedVehicleId ? 'selected' : ''}>${escapeHtml(v.license_plate)} - ${v.model ? v.model.brand + ' ' + v.model.model_name : ''} (Odo: ${v.last_odometer || 0} KM)</option>`
+        ).join('');
+
+        const dSelect = document.getElementById('odoDriverSelect');
+        dSelect.innerHTML = '<option value="">-- Supir Bertugas --</option>' + 
+            (employees || []).map(e => `<option value="${e.id}">${escapeHtml(e.name)}</option>`).join('');
+
+        // Find selected vehicle to default driver & odometer suggestion
+        if (preselectedVehicleId) {
+            const v = (vehicles || []).find(x => x.id === preselectedVehicleId);
+            if (v && v.driver_employee_id) {
+                dSelect.value = v.driver_employee_id;
+            }
+            if (v) {
+                document.getElementById('odoValue').value = (v.last_odometer || 0) + 100;
+            }
+        }
+
+        document.getElementById('odoDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('odoNote').value = '';
+
+        openModal('modalLogOdometer');
+    } catch (err) {
+        showToast('Gagal membuka log odometer: ' + err.message, 'danger');
+    }
+}
+
+async function handleLogOdometer(e) {
+    e.preventDefault();
+    try {
+        const vehicleId = parseInt(document.getElementById('odoVehicleSelect').value);
+        const driverIdVal = document.getElementById('odoDriverSelect').value;
+
+        const body = {
+            vehicle_id: vehicleId,
+            value: parseFloat(document.getElementById('odoValue').value) || 0,
+            date: document.getElementById('odoDate').value,
+            driver_employee_id: driverIdVal ? parseInt(driverIdVal) : null,
+            note: document.getElementById('odoNote').value.trim()
+        };
+
+        await api('/fleet/odometer', 'POST', body);
+        closeModal('modalLogOdometer');
+        showToast(`Odometer ${body.value.toLocaleString('id-ID')} KM berhasil dicatat!`, 'success');
+        await loadFleet();
+    } catch (err) {
+        showToast('Gagal mencatat odometer: ' + err.message, 'danger');
+    }
+}
+
+async function openCreateFleetServiceModal(preselectedVehicleId = null) {
+    try {
+        const [vehicles, partners] = await Promise.all([
+            state.vehicles.length ? Promise.resolve(state.vehicles) : api('/fleet/vehicles'),
+            state.partners.length ? Promise.resolve(state.partners) : api('/partners')
+        ]);
+
+        const vSelect = document.getElementById('serviceVehicleSelect');
+        vSelect.innerHTML = (vehicles || []).map(v => 
+            `<option value="${v.id}" ${v.id === preselectedVehicleId ? 'selected' : ''}>${escapeHtml(v.license_plate)} - ${v.model ? v.model.brand + ' ' + v.model.model_name : ''}</option>`
+        ).join('');
+
+        const vendorSelect = document.getElementById('serviceVendorSelect');
+        vendorSelect.innerHTML = '<option value="">-- Pilih Bengkel Rekanan / Vendor --</option>' + 
+            (partners || []).map(p => 
+                `<option value="${p.id}">${escapeHtml(p.name)}</option>`
+            ).join('');
+
+        if (preselectedVehicleId) {
+            const v = (vehicles || []).find(x => x.id === preselectedVehicleId);
+            if (v) {
+                document.getElementById('serviceOdometer').value = v.last_odometer || 0;
+            }
+        }
+
+        document.getElementById('serviceDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('serviceCost').value = '';
+        document.getElementById('serviceDesc').value = '';
+        document.getElementById('serviceNotes').value = '';
+
+        openModal('modalCreateFleetService');
+    } catch (err) {
+        showToast('Gagal membuka modal servis armada: ' + err.message, 'danger');
+    }
+}
+
+async function handleCreateFleetService(e) {
+    e.preventDefault();
+    try {
+        const vehicleId = parseInt(document.getElementById('serviceVehicleSelect').value);
+        const vendorIdVal = document.getElementById('serviceVendorSelect').value;
+        const odoVal = document.getElementById('serviceOdometer').value;
+
+        const body = {
+            vehicle_id: vehicleId,
+            service_type: document.getElementById('serviceTypeSelect').value,
+            date: document.getElementById('serviceDate').value,
+            cost: parseFloat(document.getElementById('serviceCost').value) || 0,
+            vendor_partner_id: vendorIdVal ? parseInt(vendorIdVal) : null,
+            odometer: odoVal ? parseFloat(odoVal) : 0,
+            description: document.getElementById('serviceDesc').value.trim(),
+            notes: document.getElementById('serviceNotes').value.trim(),
+            stage: 'done'
+        };
+
+        const res = await api('/fleet/services', 'POST', body);
+        closeModal('modalCreateFleetService');
+        showToast(`Log servis '${res.service_number}' berhasil disimpan!`, 'success');
+        await loadFleet();
+    } catch (err) {
+        showToast('Gagal mencatat servis armada: ' + err.message, 'danger');
+    }
+}
+
+// ==========================================
+// 18. HR LEAVE & TIME OFF MANAGEMENT (hr.leave)
+// ==========================================
+async function loadLeave() {
+    try {
+        const stateFilter = document.getElementById('leaveStateFilter')?.value || 'all';
+        const typeFilter = state.currentLeaveTypeFilter || 'all';
+
+        let url = `/leave/requests?state=${stateFilter}`;
+        if (typeFilter !== 'all') {
+            url += `&type=${typeFilter}`;
+        }
+
+        const [requests, types, allocations, summary] = await Promise.all([
+            api(url),
+            api('/leave/types'),
+            api('/leave/allocations?year=2026'),
+            api('/leave/summary')
+        ]);
+
+        state.leaveRequests = requests || [];
+        state.leaveTypes = types || [];
+        state.leaveAllocations = allocations || [];
+
+        // Update KPIs
+        const totalReq = (requests || []).length;
+        const pendingReq = (requests || []).filter(r => r.state === 'confirm').length;
+        const approvedReq = (requests || []).filter(r => r.state === 'validate').length;
+        const totalRemainingDays = (allocations || []).reduce((acc, a) => acc + (a.remaining_days || 0), 0);
+
+        if (document.getElementById('statLeaveTotal')) document.getElementById('statLeaveTotal').textContent = totalReq;
+        if (document.getElementById('statLeavePending')) document.getElementById('statLeavePending').textContent = pendingReq;
+        if (document.getElementById('statLeaveApproved')) document.getElementById('statLeaveApproved').textContent = approvedReq;
+        if (document.getElementById('statLeaveRemaining')) document.getElementById('statLeaveRemaining').textContent = totalRemainingDays + ' Hari';
+
+        renderLeaveRequestsTable();
+        renderLeaveAllocationsTable();
+    } catch (err) {
+        console.error('Failed to load leave data:', err);
+        showToast('Gagal memuat data cuti: ' + err.message, 'danger');
+    }
+}
+
+function filterLeaveType(typeCode) {
+    state.currentLeaveTypeFilter = typeCode;
+    const pills = document.querySelectorAll('#leaveTypePills button');
+    pills.forEach(btn => {
+        if (btn.getAttribute('onclick')?.includes(`'${typeCode}'`)) {
+            btn.className = 'btn btn-sm btn-primary';
+        } else {
+            btn.className = 'btn btn-sm btn-outline';
+        }
+    });
+    loadLeave();
+}
+
+function renderLeaveRequestsTable() {
+    const tbody = document.getElementById('leaveRequestTableBody');
+    if (!tbody) return;
+
+    const searchTerm = (document.getElementById('leaveSearchInput')?.value || '').toLowerCase();
+    const filtered = (state.leaveRequests || []).filter(r => {
+        const num = (r.request_number || '').toLowerCase();
+        const emp = (r.employee?.name || '').toLowerCase();
+        const desc = (r.description || '').toLowerCase();
+        const typeName = (r.leave_type?.name || '').toLowerCase();
+        return num.includes(searchTerm) || emp.includes(searchTerm) || desc.includes(searchTerm) || typeName.includes(searchTerm);
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted" style="padding: 2rem;">Tidak ada permohonan cuti yang sesuai filter.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(r => {
+        const empName = r.employee ? escapeHtml(r.employee.name) : '-';
+        const deptName = r.employee?.department?.name ? escapeHtml(r.employee.department.name) : '-';
+        const typeBadge = r.leave_type 
+            ? `<span class="badge" style="background: ${r.leave_type.color || '#10b981'}22; color: ${r.leave_type.color || '#10b981'}; border: 1px solid ${r.leave_type.color || '#10b981'};">${escapeHtml(r.leave_type.name)}</span>`
+            : '-';
+
+        let stateBadge = '';
+        if (r.state === 'confirm') {
+            stateBadge = '<span class="badge badge-warning">⏳ Menunggu Persetujuan</span>';
+        } else if (r.state === 'validate') {
+            stateBadge = '<span class="badge badge-success">✅ Disetujui (Approved)</span>';
+        } else if (r.state === 'refuse') {
+            stateBadge = '<span class="badge badge-danger">❌ Ditolak (Refused)</span>';
+        } else {
+            stateBadge = '<span class="badge badge-secondary">Draft</span>';
+        }
+
+        const dateRangeStr = `${r.date_from} s/d ${r.date_to}`;
+        const durationStr = `<strong>${r.number_of_days}</strong> Hari`;
+        const approverInfo = r.approver ? `${escapeHtml(r.approver.name)} <br><small class="text-muted">${r.approval_date || ''}</small>` : '<span class="text-muted">-</span>';
+
+        let actionBtns = '';
+        if (r.state === 'confirm') {
+            actionBtns += `
+                <button class="btn btn-sm btn-success" onclick="approveLeaveRequest(${r.id})" title="Setujui permohonan cuti">✅</button>
+                <button class="btn btn-sm btn-danger" onclick="openRefuseLeaveModal(${r.id}, '${escapeHtml(r.request_number)} - ${escapeHtml(empName)}')" title="Tolak permohonan cuti">❌</button>
+            `;
+        }
+        actionBtns += `
+            <button class="btn btn-sm btn-secondary" onclick="openChatterModal('hr.leave', ${r.id}, '${escapeHtml(r.request_number)}')" title="Universal Chatter & Catatan">💬</button>
+        `;
+
+        return `
+            <tr>
+                <td><strong>${escapeHtml(r.request_number)}</strong></td>
+                <td><strong>👤 ${empName}</strong></td>
+                <td>${deptName}</td>
+                <td>${typeBadge}</td>
+                <td>${dateRangeStr}</td>
+                <td>${durationStr}</td>
+                <td><span style="font-size: 0.85rem;" title="${escapeHtml(r.description)}">${escapeHtml(r.description)}</span></td>
+                <td>${stateBadge}</td>
+                <td>${approverInfo}</td>
+                <td><div style="display: flex; gap: 0.35rem;">${actionBtns}</div></td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderLeaveAllocationsTable() {
+    const tbody = document.getElementById('leaveAllocationTableBody');
+    if (!tbody) return;
+
+    if (!state.leaveAllocations || state.leaveAllocations.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted" style="padding: 2rem;">Belum ada alokasi jatah cuti untuk tahun ini.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = state.leaveAllocations.map(a => {
+        const empName = a.employee ? escapeHtml(a.employee.name) : '-';
+        const typeName = a.leave_type ? escapeHtml(a.leave_type.name) : '-';
+        const statusBadge = a.state === 'approved' 
+            ? '<span class="badge badge-success">Approved</span>' 
+            : '<span class="badge badge-secondary">Draft</span>';
+
+        return `
+            <tr>
+                <td><strong>👤 ${empName}</strong></td>
+                <td>${typeName}</td>
+                <td><span class="badge badge-outline">${a.year}</span></td>
+                <td><strong>${a.allocated_days}</strong> Hari</td>
+                <td>${a.used_days} Hari</td>
+                <td><strong style="color: var(--primary); font-size: 1.05rem;">${a.remaining_days}</strong> Hari</td>
+                <td>${statusBadge}</td>
+                <td><span class="text-muted" style="font-size: 0.85rem;">${escapeHtml(a.notes || '-')}</span></td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function loadLeaveAllocations() {
+    try {
+        const year = document.getElementById('allocationYearFilter')?.value || 2026;
+        const allocs = await api(`/leave/allocations?year=${year}`);
+        state.leaveAllocations = allocs || [];
+        renderLeaveAllocationsTable();
+    } catch (err) {
+        console.error('Failed to load leave allocations:', err);
+    }
+}
+
+async function openCreateLeaveModal() {
+    try {
+        const [employees, types] = await Promise.all([
+            api('/hr/employees'),
+            state.leaveTypes.length ? Promise.resolve(state.leaveTypes) : api('/leave/types')
+        ]);
+
+        const empSelect = document.getElementById('leaveEmployeeSelect');
+        empSelect.innerHTML = (employees || []).map(e => 
+            `<option value="${e.id}">${escapeHtml(e.name)} (${e.department ? escapeHtml(e.department.name) : 'No Dept'})</option>`
+        ).join('');
+
+        const typeSelect = document.getElementById('leaveTypeSelect');
+        typeSelect.innerHTML = (types || []).map(t => 
+            `<option value="${t.id}" data-req-alloc="${t.requires_allocation}" data-unpaid="${t.is_unpaid}">${escapeHtml(t.name)}</option>`
+        ).join('');
+
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('leaveDateFrom').value = today;
+        document.getElementById('leaveDateTo').value = today;
+        document.getElementById('leaveDaysCount').value = '1.0';
+        document.getElementById('leaveDesc').value = '';
+
+        updateLeaveQuotaHint();
+        openModal('modalCreateLeaveRequest');
+    } catch (err) {
+        showToast('Gagal menyiapkan form pengajuan cuti: ' + err.message, 'danger');
+    }
+}
+
+function calculateLeaveDays() {
+    const dFrom = document.getElementById('leaveDateFrom').value;
+    const dTo = document.getElementById('leaveDateTo').value;
+    if (!dFrom || !dTo) return;
+
+    const t1 = new Date(dFrom).getTime();
+    const t2 = new Date(dTo).getTime();
+    if (t2 < t1) {
+        document.getElementById('leaveDateTo').value = dFrom;
+        document.getElementById('leaveDaysCount').value = '1.0';
+        return;
+    }
+
+    const diffDays = Math.round((t2 - t1) / (1000 * 3600 * 24)) + 1;
+    document.getElementById('leaveDaysCount').value = diffDays.toFixed(1);
+}
+
+function updateLeaveQuotaHint() {
+    const typeSelect = document.getElementById('leaveTypeSelect');
+    const opt = typeSelect.selectedOptions[0];
+    const hint = document.getElementById('leaveQuotaHint');
+    if (!opt || !hint) return;
+
+    const reqAlloc = opt.getAttribute('data-req-alloc') === 'true';
+    const isUnpaid = opt.getAttribute('data-unpaid') === 'true';
+
+    if (isUnpaid) {
+        hint.innerHTML = '<span class="text-danger">⚠️ Cuti tanpa gaji akan memotong kalkulasi gaji prorata kehadiran pada slip gaji bulanan.</span>';
+    } else if (reqAlloc) {
+        hint.innerHTML = '<span class="text-primary">ℹ️ Mengurangi kuota jatah cuti tahunan aktif karyawan di tahun berjalan.</span>';
+    } else {
+        hint.innerHTML = '<span class="text-muted">ℹ️ Tidak memotong jatah cuti tahunan (Izin khusus / sakit).</span>';
+    }
+}
+
+async function handleCreateLeaveRequest(e) {
+    e.preventDefault();
+    try {
+        const empId = parseInt(document.getElementById('leaveEmployeeSelect').value);
+        const typeId = parseInt(document.getElementById('leaveTypeSelect').value);
+        const days = parseFloat(document.getElementById('leaveDaysCount').value) || 1.0;
+
+        const body = {
+            employee_id: empId,
+            leave_type_id: typeId,
+            date_from: document.getElementById('leaveDateFrom').value,
+            date_to: document.getElementById('leaveDateTo').value,
+            number_of_days: days,
+            description: document.getElementById('leaveDesc').value.trim()
+        };
+
+        const res = await api('/leave/requests', 'POST', body);
+        closeModal('modalCreateLeaveRequest');
+        showToast(`Permohonan cuti '${res.request_number}' berhasil diajukan!`, 'success');
+        await loadLeave();
+    } catch (err) {
+        showToast('Gagal mengajukan cuti: ' + err.message, 'danger');
+    }
+}
+
+async function approveLeaveRequest(id) {
+    if (!confirm('Apakah Anda yakin menyetujui permohonan cuti ini?')) return;
+    try {
+        await api(`/leave/requests/${id}/approve`, 'PUT');
+        showToast('Permohonan cuti berhasil disetujui (Approved)!', 'success');
+        await loadLeave();
+    } catch (err) {
+        showToast('Gagal menyetujui cuti: ' + err.message, 'danger');
+    }
+}
+
+function openRefuseLeaveModal(id, subject) {
+    document.getElementById('refuseLeaveId').value = id;
+    document.getElementById('refuseLeaveSubject').value = subject;
+    document.getElementById('refuseLeaveReason').value = '';
+    openModal('modalRefuseLeave');
+}
+
+async function handleRefuseLeave(e) {
+    e.preventDefault();
+    const id = document.getElementById('refuseLeaveId').value;
+    const reason = document.getElementById('refuseLeaveReason').value.trim();
+
+    try {
+        await api(`/leave/requests/${id}/refuse`, 'PUT', { reason });
+        closeModal('modalRefuseLeave');
+        showToast('Permohonan cuti ditolak.', 'warning');
+        await loadLeave();
+    } catch (err) {
+        showToast('Gagal menolak permohonan cuti: ' + err.message, 'danger');
+    }
+}
+
+async function openCreateAllocationModal() {
+    try {
+        const [employees, types] = await Promise.all([
+            api('/hr/employees'),
+            state.leaveTypes.length ? Promise.resolve(state.leaveTypes) : api('/leave/types')
+        ]);
+
+        const empSelect = document.getElementById('allocEmployeeSelect');
+        empSelect.innerHTML = (employees || []).map(e => 
+            `<option value="${e.id}">${escapeHtml(e.name)}</option>`
+        ).join('');
+
+        const typeSelect = document.getElementById('allocLeaveTypeSelect');
+        typeSelect.innerHTML = (types || []).filter(t => t.requires_allocation).map(t => 
+            `<option value="${t.id}">${escapeHtml(t.name)}</option>`
+        ).join('');
+
+        document.getElementById('allocYear').value = new Date().getFullYear();
+        document.getElementById('allocDays').value = '12';
+        document.getElementById('allocNotes').value = '';
+
+        openModal('modalCreateLeaveAllocation');
+    } catch (err) {
+        showToast('Gagal membuka form alokasi cuti: ' + err.message, 'danger');
+    }
+}
+
+async function handleCreateLeaveAllocation(e) {
+    e.preventDefault();
+    try {
+        const empId = parseInt(document.getElementById('allocEmployeeSelect').value);
+        const typeId = parseInt(document.getElementById('allocLeaveTypeSelect').value);
+        const year = parseInt(document.getElementById('allocYear').value) || 2026;
+        const days = parseFloat(document.getElementById('allocDays').value) || 12;
+
+        const body = {
+            name: `Alokasi Cuti ${year} - ID #${empId}`,
+            employee_id: empId,
+            leave_type_id: typeId,
+            year: year,
+            allocated_days: days,
+            remaining_days: days,
+            used_days: 0,
+            state: 'approved',
+            notes: document.getElementById('allocNotes').value.trim()
+        };
+
+        await api('/leave/allocations', 'POST', body);
+        closeModal('modalCreateLeaveAllocation');
+        showToast(`Alokasi cuti ${days} hari berhasil ditetapkan!`, 'success');
+        await loadLeave();
+    } catch (err) {
+        showToast('Gagal menetapkan alokasi cuti: ' + err.message, 'danger');
+    }
+}
+
+// =========================================================================
+// 19. EXPENSES & REIMBURSEMENT MANAGEMENT (hr.expense & hr.expense.sheet)
+// =========================================================================
+
+async function loadExpenses() {
+    try {
+        const [stats, categories, sheets, items] = await Promise.all([
+            api('/expenses/stats'),
+            api('/expenses/categories'),
+            api('/expenses/sheets'),
+            api('/expenses/items')
+        ]);
+
+        state.expenseCategories = categories || [];
+        state.expenseSheets = sheets || [];
+        state.expenses = items || [];
+
+        // 1. Update KPI Metrics
+        document.getElementById('statExpenseTotal').textContent = formatCurrency(stats.total_item_amount || 0);
+        document.getElementById('statExpenseItemCount').textContent = `${stats.total_items || 0} Item Pengeluaran (${stats.total_sheets || 0} Laporan)`;
+
+        document.getElementById('statExpensePending').textContent = formatCurrency(stats.pending_amount || 0);
+        document.getElementById('statExpensePendingCount').textContent = `${stats.pending_count || 0} Laporan Pending Approval`;
+
+        document.getElementById('statExpenseApproved').textContent = formatCurrency(stats.approved_amount || 0);
+        document.getElementById('statExpenseApprovedCount').textContent = `${stats.approved_count || 0} Laporan Approved / Posted GL`;
+
+        document.getElementById('statExpensePaid').textContent = formatCurrency(stats.paid_amount || 0);
+        document.getElementById('statExpensePaidCount').textContent = `${stats.paid_count || 0} Laporan Selesai Ditransfer`;
+
+        // 2. Render Tables according to view
+        renderExpenseSheetsTable();
+        renderExpenseItemsTable();
+        renderExpenseCategoriesTable(stats.categories);
+    } catch (err) {
+        console.error('Error loading expenses:', err);
+        showToast('Gagal memuat data modul expense: ' + err.message, 'danger');
+    }
+}
+
+function switchExpenseView(view) {
+    state.currentExpenseView = view;
+    document.getElementById('expenseSheetsContainer').style.display = view === 'sheets' ? 'block' : 'none';
+    document.getElementById('expenseItemsContainer').style.display = view === 'items' ? 'block' : 'none';
+    document.getElementById('expenseCategoriesContainer').style.display = view === 'categories' ? 'block' : 'none';
+
+    document.getElementById('btnExpViewSheets').className = view === 'sheets' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline';
+    document.getElementById('btnExpViewItems').className = view === 'items' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline';
+    document.getElementById('btnExpViewCategories').className = view === 'categories' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline';
+}
+
+function renderExpenseSheetsTable() {
+    const tbody = document.getElementById('expenseSheetsTableBody');
+    const search = (document.getElementById('expenseSheetSearch')?.value || '').toLowerCase();
+    const stateFilter = document.getElementById('expenseSheetStateFilter')?.value || 'all';
+
+    let list = state.expenseSheets || [];
+    if (stateFilter !== 'all') {
+        list = list.filter(s => s.state === stateFilter);
+    }
+    if (search) {
+        list = list.filter(s => 
+            (s.sheet_number || '').toLowerCase().includes(search) ||
+            (s.name || '').toLowerCase().includes(search) ||
+            (s.employee?.name || '').toLowerCase().includes(search)
+        );
+    }
+
+    if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">Belum ada laporan pengajuan pengeluaran.</td></tr>';
+        return;
+    }
+
+    const stateBadges = {
+        draft: '<span class="badge badge-secondary">Draft</span>',
+        submit: '<span class="badge badge-warning">⏳ Diajukan</span>',
+        approve: '<span class="badge badge-info">✓ Disetujui (Ready GL)</span>',
+        post: '<span class="badge badge-primary">🏛️ Dibukukan GL</span>',
+        done: '<span class="badge badge-success">✅ Lunas / Paid</span>',
+        refuse: '<span class="badge badge-danger">❌ Ditolak</span>'
+    };
+
+    tbody.innerHTML = list.map(s => {
+        const empName = s.employee ? escapeHtml(s.employee.name) : '-';
+        const paymentLabel = s.payment_mode === 'company_account' 
+            ? '<span class="badge badge-secondary" style="font-size: 0.75rem;">Kas Perusahaan</span>'
+            : '<span class="badge badge-warning" style="font-size: 0.75rem;">Reimburse Karyawan</span>';
+        
+        let glEntryBadge = '<span class="text-muted" style="font-size: 0.8rem;">-</span>';
+        if (s.account_move) {
+            glEntryBadge = `<span class="badge badge-primary" style="font-size: 0.75rem;" title="${escapeHtml(s.account_move.name)}">📖 ${escapeHtml(s.account_move.name)}</span>`;
+        }
+
+        let approverInfo = '-';
+        if (s.approver) {
+            approverInfo = `${escapeHtml(s.approver.name)}<br><small class="text-muted">${escapeHtml(s.approval_date || '')}</small>`;
+        }
+
+        let actionBtns = `<button class="btn btn-xs btn-outline" onclick="viewExpenseSheetDetails(${s.id})">🔍 Rincian</button> `;
+        if (s.state === 'draft') {
+            actionBtns += `<button class="btn btn-xs btn-primary" onclick="submitExpenseSheet(${s.id})">🚀 Ajukan</button>`;
+        } else if (s.state === 'submit') {
+            actionBtns += `<button class="btn btn-xs btn-success" onclick="approveExpenseSheet(${s.id})">✓ Setujui</button> `;
+            actionBtns += `<button class="btn btn-xs btn-danger" onclick="openRefuseExpenseSheetModal(${s.id}, '${escapeHtml(s.sheet_number)}')">✕ Tolak</button>`;
+        } else if (s.state === 'approve') {
+            actionBtns += `<button class="btn btn-xs btn-primary" onclick="postExpenseSheetToGL(${s.id})">🏛️ Bukukan GL</button> `;
+            actionBtns += `<button class="btn btn-xs btn-danger" onclick="openRefuseExpenseSheetModal(${s.id}, '${escapeHtml(s.sheet_number)}')">✕ Tolak</button>`;
+        } else if (s.state === 'post') {
+            actionBtns += `<button class="btn btn-xs btn-success" onclick="payExpenseSheet(${s.id})">💳 Bayar / Reimburse</button>`;
+        }
+
+        return `
+            <tr>
+                <td style="font-weight: 600;">${escapeHtml(s.sheet_number)}</td>
+                <td><strong>${escapeHtml(s.name)}</strong></td>
+                <td>${empName}</td>
+                <td>${paymentLabel}</td>
+                <td style="font-weight: 600; color: var(--primary);">${formatCurrency(s.total_amount)}</td>
+                <td>${s.expenses ? s.expenses.length : 0} item</td>
+                <td>${stateBadges[s.state] || s.state}</td>
+                <td>${glEntryBadge}</td>
+                <td style="font-size: 0.85rem;">${approverInfo}</td>
+                <td style="white-space: nowrap;">${actionBtns}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderExpenseItemsTable() {
+    const tbody = document.getElementById('expenseItemsTableBody');
+    const search = (document.getElementById('expenseItemSearch')?.value || '').toLowerCase();
+    const stateFilter = document.getElementById('expenseItemStateFilter')?.value || 'all';
+
+    let list = state.expenses || [];
+    if (stateFilter !== 'all') {
+        list = list.filter(i => i.state === stateFilter);
+    }
+    if (search) {
+        list = list.filter(i => 
+            (i.expense_number || '').toLowerCase().includes(search) ||
+            (i.name || '').toLowerCase().includes(search) ||
+            (i.receipt_ref || '').toLowerCase().includes(search) ||
+            (i.employee?.name || '').toLowerCase().includes(search)
+        );
+    }
+
+    if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="13" class="text-center text-muted">Belum ada item klaim pengeluaran.</td></tr>';
+        return;
+    }
+
+    const stateBadges = {
+        draft: '<span class="badge badge-secondary">Draft</span>',
+        reported: '<span class="badge badge-info">📑 Di Laporan</span>',
+        approved: '<span class="badge badge-primary">✓ Disetujui</span>',
+        done: '<span class="badge badge-success">✅ Lunas</span>',
+        refused: '<span class="badge badge-danger">❌ Ditolak</span>'
+    };
+
+    tbody.innerHTML = list.map(item => {
+        const empName = item.employee ? escapeHtml(item.employee.name) : '-';
+        const catName = item.category ? `<span class="badge" style="background: ${item.category.color || '#3b82f6'}; color: #fff;">${escapeHtml(item.category.name)}</span>` : '-';
+        
+        let tagInfo = '<span class="text-muted">-</span>';
+        if (item.project) {
+            tagInfo = `<span class="badge badge-outline" style="font-size: 0.75rem;" title="Proyek">${escapeHtml(item.project.name)}</span>`;
+        } else if (item.vehicle) {
+            tagInfo = `<span class="badge badge-outline" style="font-size: 0.75rem;" title="Armada Logistik">🚛 ${escapeHtml(item.vehicle.license_plate)}</span>`;
+        }
+
+        let sheetInfo = '<span class="badge badge-secondary" style="font-size: 0.75rem;">Belum Direkap</span>';
+        if (item.sheet_id) {
+            sheetInfo = `<span class="badge badge-info" style="font-size: 0.75rem;">Sheet #${item.sheet_id}</span>`;
+        }
+
+        let actionBtns = '-';
+        if (item.state === 'draft') {
+            actionBtns = `<button class="btn btn-xs btn-danger" onclick="deleteExpenseItem(${item.id})">🗑️ Hapus</button>`;
+        }
+
+        return `
+            <tr>
+                <td style="font-weight: 600;">${escapeHtml(item.expense_number)}</td>
+                <td>${escapeHtml(item.date)}</td>
+                <td>${empName}</td>
+                <td>${catName}</td>
+                <td><strong>${escapeHtml(item.name)}</strong></td>
+                <td>${formatCurrency(item.unit_price)}</td>
+                <td>${item.quantity}</td>
+                <td style="font-weight: 600; color: var(--primary);">${formatCurrency(item.total_amount)}</td>
+                <td>${tagInfo}</td>
+                <td><small class="text-muted">${escapeHtml(item.receipt_ref || '-')}</small></td>
+                <td>${stateBadges[item.state] || item.state}</td>
+                <td>${sheetInfo}</td>
+                <td>${actionBtns}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderExpenseCategoriesTable(catStats) {
+    const tbody = document.getElementById('expenseCategoriesTableBody');
+    const categories = state.expenseCategories || [];
+
+    if (categories.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Belum ada master kategori pengeluaran.</td></tr>';
+        return;
+    }
+
+    const statMap = {};
+    (catStats || []).forEach(cs => {
+        statMap[cs.code] = cs;
+    });
+
+    tbody.innerHTML = categories.map(cat => {
+        const cs = statMap[cat.code] || { total_amount: 0, item_count: 0 };
+        return `
+            <tr>
+                <td><span class="badge" style="background: ${cat.color || '#3b82f6'}; color: #fff;">${escapeHtml(cat.name)}</span></td>
+                <td><code>${escapeHtml(cat.code)}</code></td>
+                <td><strong>${escapeHtml(cat.account_code || '620100')}</strong></td>
+                <td>${escapeHtml(cat.description || '-')}</td>
+                <td style="font-weight: 600; color: var(--primary);">${formatCurrency(cs.total_amount)}</td>
+                <td>${cs.item_count} transaksi</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function openCreateExpenseModal() {
+    try {
+        const [employees, categories, projects, fleetRes] = await Promise.all([
+            api('/hr/employees'),
+            state.expenseCategories.length ? Promise.resolve(state.expenseCategories) : api('/expenses/categories'),
+            api('/projects'),
+            api('/fleet/vehicles')
+        ]);
+
+        const empSelect = document.getElementById('expItemEmployeeSelect');
+        empSelect.innerHTML = (employees || []).map(e => 
+            `<option value="${e.id}">${escapeHtml(e.name)} (${escapeHtml(e.department ? e.department.name : 'HR')})</option>`
+        ).join('');
+
+        const catSelect = document.getElementById('expItemCategorySelect');
+        catSelect.innerHTML = (categories || []).map(c => 
+            `<option value="${c.id}">${escapeHtml(c.name)} (${escapeHtml(c.code)})</option>`
+        ).join('');
+
+        const prjSelect = document.getElementById('expItemProjectSelect');
+        prjSelect.innerHTML = '<option value="">-- Tidak Terikat Proyek --</option>' + 
+            (projects || []).map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+
+        const vhcSelect = document.getElementById('expItemVehicleSelect');
+        const vehicles = fleetRes.vehicles || fleetRes || [];
+        vhcSelect.innerHTML = '<option value="">-- Tidak Terikat Armada --</option>' + 
+            vehicles.map(v => `<option value="${v.id}">${escapeHtml(v.license_plate)} (${escapeHtml(v.model ? v.model.brand + ' ' + v.model.model_name : '')})</option>`).join('');
+
+        document.getElementById('expItemDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('expItemUnitPrice').value = '';
+        document.getElementById('expItemQuantity').value = '1';
+        document.getElementById('expItemTotalAmount').value = 'Rp 0';
+        document.getElementById('expItemName').value = '';
+        document.getElementById('expItemReceiptRef').value = '';
+        document.getElementById('expItemNotes').value = '';
+
+        openModal('modalCreateExpense');
+    } catch (err) {
+        showToast('Gagal memuat form pengeluaran: ' + err.message, 'danger');
+    }
+}
+
+function calcExpItemTotal() {
+    const price = parseFloat(document.getElementById('expItemUnitPrice').value) || 0;
+    const qty = parseFloat(document.getElementById('expItemQuantity').value) || 1;
+    document.getElementById('expItemTotalAmount').value = formatCurrency(price * qty);
+}
+
+async function handleCreateExpense(e) {
+    e.preventDefault();
+    try {
+        const empId = parseInt(document.getElementById('expItemEmployeeSelect').value);
+        const catId = parseInt(document.getElementById('expItemCategorySelect').value);
+        const price = parseFloat(document.getElementById('expItemUnitPrice').value) || 0;
+        const qty = parseFloat(document.getElementById('expItemQuantity').value) || 1;
+        const prjIdStr = document.getElementById('expItemProjectSelect').value;
+        const vhcIdStr = document.getElementById('expItemVehicleSelect').value;
+
+        const body = {
+            employee_id: empId,
+            category_id: catId,
+            name: document.getElementById('expItemName').value.trim(),
+            date: document.getElementById('expItemDate').value,
+            payment_mode: document.getElementById('expItemPaymentMode').value,
+            unit_price: price,
+            quantity: qty,
+            receipt_ref: document.getElementById('expItemReceiptRef').value.trim(),
+            notes: document.getElementById('expItemNotes').value.trim()
+        };
+
+        if (prjIdStr) body.project_id = parseInt(prjIdStr);
+        if (vhcIdStr) body.vehicle_id = parseInt(vhcIdStr);
+
+        const res = await api('/expenses/items', 'POST', body);
+        closeModal('modalCreateExpense');
+        showToast(`Item pengeluaran '${res.expense_number}' berhasil dicatat!`, 'success');
+        await loadExpenses();
+    } catch (err) {
+        showToast('Gagal mencatat pengeluaran: ' + err.message, 'danger');
+    }
+}
+
+async function openCreateExpenseSheetModal() {
+    try {
+        const employees = await api('/hr/employees');
+        const empSelect = document.getElementById('expSheetEmployeeSelect');
+        empSelect.innerHTML = (employees || []).map(e => 
+            `<option value="${e.id}">${escapeHtml(e.name)}</option>`
+        ).join('');
+
+        document.getElementById('expSheetName').value = '';
+        document.getElementById('expSheetNotes').value = '';
+
+        loadUnattachedExpensesForSheet();
+        openModal('modalCreateExpenseSheet');
+    } catch (err) {
+        showToast('Gagal memuat form rekap: ' + err.message, 'danger');
+    }
+}
+
+function loadUnattachedExpensesForSheet() {
+    const empId = parseInt(document.getElementById('expSheetEmployeeSelect').value);
+    const container = document.getElementById('expSheetItemsCheckboxContainer');
+
+    const unattached = (state.expenses || []).filter(item => 
+        item.employee_id === empId && (!item.sheet_id || item.sheet_id === 0) && item.state === 'draft'
+    );
+
+    if (unattached.length === 0) {
+        container.innerHTML = '<span class="text-muted" style="font-size: 0.85rem;">Tidak ada item pengeluaran draft yang belum direkap untuk karyawan ini. Silakan catat item pengeluaran terlebih dahulu.</span>';
+        return;
+    }
+
+    container.innerHTML = unattached.map(item => `
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border-color);">
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9rem;">
+                <input type="checkbox" name="sheetExpenseItem" value="${item.id}" checked>
+                <span><strong>${escapeHtml(item.name)}</strong> (${escapeHtml(item.date)})</span>
+            </label>
+            <span style="font-weight: 600; color: var(--primary); font-size: 0.9rem;">${formatCurrency(item.total_amount)}</span>
+        </div>
+    `).join('');
+}
+
+async function handleCreateExpenseSheet(e) {
+    e.preventDefault();
+    try {
+        const empId = parseInt(document.getElementById('expSheetEmployeeSelect').value);
+        const name = document.getElementById('expSheetName').value.trim();
+        const paymentMode = document.getElementById('expSheetPaymentMode').value;
+        const notes = document.getElementById('expSheetNotes').value.trim();
+
+        const checkboxes = document.querySelectorAll('input[name="sheetExpenseItem"]:checked');
+        const expenseIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+        if (expenseIds.length === 0) {
+            alert('Silakan pilih minimal 1 item pengeluaran untuk direkap dalam laporan ini.');
+            return;
+        }
+
+        const body = {
+            name: name,
+            employee_id: empId,
+            payment_mode: paymentMode,
+            notes: notes,
+            expense_ids: expenseIds
+        };
+
+        const res = await api('/expenses/sheets', 'POST', body);
+        closeModal('modalCreateExpenseSheet');
+        showToast(`Laporan '${res.sheet_number}' berhasil dibuat dengan ${expenseIds.length} item pengeluaran!`, 'success');
+        await loadExpenses();
+    } catch (err) {
+        showToast('Gagal membuat rekap laporan: ' + err.message, 'danger');
+    }
+}
+
+async function submitExpenseSheet(id) {
+    if (!confirm('Ajukan laporan pengeluaran ini untuk verifikasi dan persetujuan?')) return;
+    try {
+        await api(`/expenses/sheets/${id}/submit`, 'PUT');
+        showToast('Laporan berhasil diajukan untuk approval!', 'success');
+        await loadExpenses();
+    } catch (err) {
+        showToast('Gagal mengajukan laporan: ' + err.message, 'danger');
+    }
+}
+
+async function approveExpenseSheet(id) {
+    if (!confirm('Apakah Anda menyetujui laporan pengeluaran ini?')) return;
+    try {
+        await api(`/expenses/sheets/${id}/approve`, 'PUT');
+        showToast('Laporan pengeluaran berhasil disetujui! Siap dibukukan ke General Ledger Akuntansi.', 'success');
+        await loadExpenses();
+    } catch (err) {
+        showToast('Gagal menyetujui laporan: ' + err.message, 'danger');
+    }
+}
+
+async function postExpenseSheetToGL(id) {
+    if (!confirm('Bukukan pengeluaran ini langsung ke Jurnal Akuntansi General Ledger (account.move)?')) return;
+    try {
+        const res = await api(`/expenses/sheets/${id}/post`, 'POST');
+        const moveName = res.move ? res.move.name : 'posted';
+        showToast(`Laporan berhasil dibukukan ke General Ledger dengan Entri Jurnal '${moveName}'!`, 'success');
+        await loadExpenses();
+    } catch (err) {
+        showToast('Gagal membukukan ke General Ledger: ' + err.message, 'danger');
+    }
+}
+
+async function payExpenseSheet(id) {
+    if (!confirm('Tandai reimbursement ini sebagai selesai / telah dibayarkan kepada karyawan?')) return;
+    try {
+        await api(`/expenses/sheets/${id}/pay`, 'PUT');
+        showToast('Reimbursement selesai dibayarkan dan status ditandai LUNAS (Done)!', 'success');
+        await loadExpenses();
+    } catch (err) {
+        showToast('Gagal menandai lunas: ' + err.message, 'danger');
+    }
+}
+
+function openRefuseExpenseSheetModal(id, title) {
+    document.getElementById('refuseExpenseSheetId').value = id;
+    document.getElementById('refuseExpenseSheetTitle').value = title;
+    document.getElementById('refuseExpenseSheetReason').value = '';
+    openModal('modalRefuseExpenseSheet');
+}
+
+async function handleRefuseExpenseSheet(e) {
+    e.preventDefault();
+    const id = document.getElementById('refuseExpenseSheetId').value;
+    const reason = document.getElementById('refuseExpenseSheetReason').value.trim();
+
+    try {
+        await api(`/expenses/sheets/${id}/refuse`, 'PUT', { reason });
+        closeModal('modalRefuseExpenseSheet');
+        showToast('Laporan pengeluaran ditolak.', 'warning');
+        await loadExpenses();
+    } catch (err) {
+        showToast('Gagal menolak laporan: ' + err.message, 'danger');
+    }
+}
+
+async function viewExpenseSheetDetails(id) {
+    try {
+        const sheet = await api(`/expenses/sheets/${id}`);
+        document.getElementById('viewSheetModalTitle').textContent = `📋 Detail Laporan: ${sheet.sheet_number} - ${sheet.name}`;
+
+        const empName = sheet.employee ? escapeHtml(sheet.employee.name) : '-';
+        const glInfo = sheet.account_move ? `
+            <div style="background: var(--bg-hover); padding: 0.75rem 1rem; border-radius: var(--border-radius); border-left: 4px solid var(--primary); margin-bottom: 1rem;">
+                <strong>🏛️ Entri Jurnal Akuntansi (GL):</strong> <code>${escapeHtml(sheet.account_move.name)}</code><br>
+                <small class="text-muted">Total: ${formatCurrency(sheet.account_move.amount_total)} | Tanggal: ${escapeHtml(sheet.account_move.invoice_date || '')} | Status: <strong>${escapeHtml(sheet.account_move.state)}</strong></small>
+            </div>
+        ` : '';
+
+        const linesHtml = (sheet.expenses || []).map(exp => `
+            <tr>
+                <td><strong>${escapeHtml(exp.name)}</strong><br><small class="text-muted">${escapeHtml(exp.expense_number)}</small></td>
+                <td><span class="badge" style="background: ${exp.category ? exp.category.color : '#3b82f6'}; color: #fff;">${escapeHtml(exp.category ? exp.category.name : '-')}</span></td>
+                <td>${escapeHtml(exp.date)}</td>
+                <td>${formatCurrency(exp.unit_price)} x ${exp.quantity}</td>
+                <td style="font-weight: 600;">${formatCurrency(exp.total_amount)}</td>
+                <td><small class="text-muted">${escapeHtml(exp.receipt_ref || '-')}</small></td>
+            </tr>
+        `).join('');
+
+        document.getElementById('viewSheetModalBody').innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0 0.5rem;">
+                <div>
+                    <h4 style="margin: 0;">${escapeHtml(sheet.name)}</h4>
+                    <span class="text-muted">Pemohon: <strong>${empName}</strong> | Metode: ${sheet.payment_mode === 'company_account' ? 'Kas Perusahaan' : 'Reimburse Karyawan'}</span>
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-size: 1.25rem; font-weight: 700; color: var(--primary);">${formatCurrency(sheet.total_amount)}</span>
+                </div>
+            </div>
+            ${glInfo}
+            <div class="table-responsive">
+                <table class="data-table" style="font-size: 0.9rem;">
+                    <thead>
+                        <tr>
+                            <th>Uraian Pengeluaran</th>
+                            <th>Kategori</th>
+                            <th>Tanggal</th>
+                            <th>Biaya Satuan</th>
+                            <th>Total</th>
+                            <th>No. Kwitansi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${linesHtml || '<tr><td colspan="6" class="text-center text-muted">Tidak ada rincian baris.</td></tr>'}
+                    </tbody>
+                </table>
+            </div>
+            ${sheet.refusal_reason ? `
+                <div style="margin-top: 1rem; padding: 0.75rem 1rem; background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; border-radius: var(--border-radius);">
+                    <strong style="color: #ef4444;">Alasan Penolakan:</strong> ${escapeHtml(sheet.refusal_reason)}
+                </div>
+            ` : ''}
+        `;
+
+        openModal('modalViewExpenseSheet');
+    } catch (err) {
+        showToast('Gagal membuka rincian laporan: ' + err.message, 'danger');
+    }
+}
+
+async function deleteExpenseItem(id) {
+    if (!confirm('Hapus item pengeluaran ini?')) return;
+    try {
+        await api(`/expenses/items/${id}`, 'DELETE');
+        showToast('Item pengeluaran berhasil dihapus.', 'success');
+        await loadExpenses();
+    } catch (err) {
+        showToast('Gagal menghapus item: ' + err.message, 'danger');
+    }
+}
+
+// =========================================================================
+// 19. QUALITY CONTROL & INSPECTION MANAGEMENT (quality.point, quality.check, quality.alert)
+// =========================================================================
+
+function switchQualityView(view) {
+    state.currentQualityView = view;
+    const checksContainer = document.getElementById('qualityChecksContainer');
+    const alertsContainer = document.getElementById('qualityAlertsContainer');
+    const pointsContainer = document.getElementById('qualityPointsContainer');
+
+    const btnChecks = document.getElementById('btnQualityViewChecks');
+    const btnAlerts = document.getElementById('btnQualityViewAlerts');
+    const btnPoints = document.getElementById('btnQualityViewPoints');
+
+    if (checksContainer) checksContainer.style.display = view === 'checks' ? 'block' : 'none';
+    if (alertsContainer) alertsContainer.style.display = view === 'alerts' ? 'block' : 'none';
+    if (pointsContainer) pointsContainer.style.display = view === 'points' ? 'block' : 'none';
+
+    if (btnChecks) {
+        btnChecks.className = view === 'checks' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline';
+    }
+    if (btnAlerts) {
+        btnAlerts.className = view === 'alerts' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline';
+    }
+    if (btnPoints) {
+        btnPoints.className = view === 'points' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline';
+    }
+
+    if (view === 'checks') renderQualityChecksTable();
+    else if (view === 'alerts') renderQualityAlertsTable();
+    else if (view === 'points') renderQualityPointsTable();
+}
+
+async function loadQuality() {
+    try {
+        const [stats, checks, alerts, points] = await Promise.all([
+            api('/quality/stats'),
+            api('/quality/checks'),
+            api('/quality/alerts'),
+            api('/quality/points')
+        ]);
+
+        state.qualityStats = stats || {};
+        state.qualityChecks = checks || [];
+        state.qualityAlerts = alerts || [];
+        state.qualityPoints = points || [];
+
+        // Update KPIs
+        const statTotalChecks = document.getElementById('qualityStatTotalChecks');
+        const statTotalPoints = document.getElementById('qualityStatTotalPoints');
+        const statPending = document.getElementById('qualityStatPendingChecks');
+        const statPassed = document.getElementById('qualityStatPassedChecks');
+        const statPassRate = document.getElementById('qualityStatPassRate');
+        const statFailed = document.getElementById('qualityStatFailedChecks');
+        const statActiveAlerts = document.getElementById('qualityStatActiveAlerts');
+
+        if (statTotalChecks) statTotalChecks.textContent = stats.total_checks || 0;
+        if (statTotalPoints) statTotalPoints.textContent = `${stats.total_points || 0} SOP Titik Kontrol`;
+        if (statPending) statPending.textContent = stats.pending_checks || 0;
+        if (statPassed) statPassed.textContent = stats.passed_checks || 0;
+        if (statPassRate) statPassRate.textContent = `Tingkat Lolos: ${stats.pass_rate_pct || 0}%`;
+        if (statFailed) statFailed.textContent = stats.failed_checks || 0;
+        if (statActiveAlerts) statActiveAlerts.textContent = `${stats.active_alerts || 0} Ketidaksesuaian Aktif`;
+
+        // Populate product select dropdowns in modals
+        populateQualityDropdowns();
+
+        // Render current view
+        switchQualityView(state.currentQualityView || 'checks');
+    } catch (err) {
+        console.error('Error loading quality module:', err);
+        showToast('Gagal memuat data Quality Control: ' + err.message, 'danger');
+    }
+}
+
+async function populateQualityDropdowns() {
+    try {
+        if (!state.products || state.products.length === 0) {
+            state.products = await api('/products');
+        }
+        if (!state.partners || state.partners.length === 0) {
+            state.partners = await api('/partners');
+        }
+
+        const qpProd = document.getElementById('qpProductId');
+        const qcProd = document.getElementById('qcProductId');
+        const qaProd = document.getElementById('qaProductId');
+        const qaPart = document.getElementById('qaPartnerId');
+
+        if (qpProd && qpProd.options.length <= 1) {
+            state.products.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = `${p.name} (${p.code || 'PRD'})`;
+                qpProd.appendChild(opt);
+            });
+        }
+        if (qcProd && qcProd.options.length <= 1) {
+            state.products.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = `${p.name} (${p.code || 'PRD'})`;
+                qcProd.appendChild(opt);
+            });
+        }
+        if (qaProd && qaProd.options.length <= 1) {
+            state.products.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = `${p.name} (${p.code || 'PRD'})`;
+                qaProd.appendChild(opt);
+            });
+        }
+        if (qaPart && qaPart.options.length <= 1) {
+            const vendors = state.partners.filter(pt => pt.is_vendor || pt.supplier_rank > 0);
+            vendors.forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = v.id;
+                opt.textContent = `${v.name} (Vendor)`;
+                qaPart.appendChild(opt);
+            });
+        }
+    } catch (e) {
+        console.error('Error populating quality dropdowns:', e);
+    }
+}
+
+async function loadQualityChecks() {
+    const stateFilter = document.getElementById('qualityCheckStateFilter')?.value || '';
+    try {
+        let url = '/quality/checks';
+        if (stateFilter) url += `?state=${stateFilter}`;
+        state.qualityChecks = await api(url);
+        renderQualityChecksTable();
+    } catch (err) {
+        showToast('Gagal memuat checks: ' + err.message, 'danger');
+    }
+}
+
+function renderQualityChecksTable() {
+    const tbody = document.getElementById('qualityChecksTableBody');
+    if (!tbody) return;
+
+    const search = (document.getElementById('qualityCheckSearch')?.value || '').toLowerCase();
+    let checks = state.qualityChecks || [];
+
+    if (search) {
+        checks = checks.filter(c => 
+            (c.name && c.name.toLowerCase().includes(search)) ||
+            (c.title && c.title.toLowerCase().includes(search)) ||
+            (c.product && c.product.name && c.product.name.toLowerCase().includes(search)) ||
+            (c.notes && c.notes.toLowerCase().includes(search))
+        );
+    }
+
+    if (checks.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">Tidak ada pemeriksaan mutu ditemukan.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = checks.map(c => {
+        let stateBadge = '<span class="badge badge-warning">⏳ Menunggu (Pending)</span>';
+        if (c.quality_state === 'pass') {
+            stateBadge = '<span class="badge badge-success">✓ Lolos (Pass)</span>';
+        } else if (c.quality_state === 'fail') {
+            stateBadge = '<span class="badge badge-danger">❌ Gagal (Fail)</span>';
+        }
+
+        let sourceDoc = '-';
+        if (c.picking) {
+            sourceDoc = `<span class="badge badge-info">WH/IN: ${escapeHtml(c.picking.name || 'Receipt')}</span>`;
+        } else if (c.production) {
+            sourceDoc = `<span class="badge badge-primary">MO: ${escapeHtml(c.production.name || 'Perakitan')}</span>`;
+        }
+
+        let testStandard = 'Visual Pass/Fail';
+        if (c.test_type === 'measure') {
+            testStandard = `Target: <strong>${c.norm} ${c.norm_unit || ''}</strong><br><small class="text-muted">[${c.tolerance_min} - ${c.tolerance_max} ${c.norm_unit || ''}]</small>`;
+        } else if (c.test_type === 'instructions') {
+            testStandard = `<small class="text-muted">${escapeHtml(c.notes || 'Instruksi SOP Khusus')}</small>`;
+        }
+
+        let measuredVal = '-';
+        if (c.test_type === 'measure' && c.measure !== undefined && c.measure !== 0) {
+            const isOutOfTol = (c.tolerance_min > 0 && c.measure < c.tolerance_min) || (c.tolerance_max > 0 && c.measure > c.tolerance_max);
+            const valColor = isOutOfTol ? 'color: #ef4444; font-weight: bold;' : 'color: #10b981; font-weight: bold;';
+            measuredVal = `<span style="${valColor}">${c.measure} ${c.norm_unit || ''}</span>`;
+        }
+
+        const inspectorName = c.inspector ? escapeHtml(c.inspector.name) : '-';
+
+        let actionBtns = '';
+        if (c.quality_state === 'none') {
+            actionBtns = `
+                <button class="btn btn-sm btn-primary" onclick="openExecuteQualityCheckModal(${c.id})">🔍 Periksa</button>
+            `;
+        } else {
+            actionBtns = `
+                <button class="btn btn-sm btn-outline" onclick="openExecuteQualityCheckModal(${c.id})">👁️ Detail</button>
+            `;
+        }
+
+        return `
+            <tr>
+                <td><strong>${escapeHtml(c.name)}</strong></td>
+                <td>
+                    <div style="font-weight: 600;">${escapeHtml(c.title)}</div>
+                    ${c.lot_number ? `<small class="badge badge-draft">Lot: ${escapeHtml(c.lot_number)}</small>` : ''}
+                </td>
+                <td>${c.product ? escapeHtml(c.product.name) : '-'}</td>
+                <td>${sourceDoc}</td>
+                <td>${testStandard}</td>
+                <td>${measuredVal}</td>
+                <td>${stateBadge}</td>
+                <td><small>${inspectorName}<br><span class="text-muted">${c.check_date ? c.check_date.substring(0, 10) : ''}</span></small></td>
+                <td>${actionBtns}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function loadQualityAlerts() {
+    const stage = document.getElementById('qualityAlertStageFilter')?.value || '';
+    const priority = document.getElementById('qualityAlertPriorityFilter')?.value || '';
+
+    try {
+        let url = '/quality/alerts';
+        const params = [];
+        if (stage) params.push(`stage=${stage}`);
+        if (priority) params.push(`priority=${priority}`);
+        if (params.length > 0) url += `?${params.join('&')}`;
+
+        state.qualityAlerts = await api(url);
+        renderQualityAlertsTable();
+    } catch (err) {
+        showToast('Gagal memuat quality alerts: ' + err.message, 'danger');
+    }
+}
+
+function renderQualityAlertsTable() {
+    const tbody = document.getElementById('qualityAlertsTableBody');
+    if (!tbody) return;
+
+    const alerts = state.qualityAlerts || [];
+    if (alerts.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Tidak ada laporan ketidaksesuaian mutu (NCR).</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = alerts.map(a => {
+        let priorityBadge = '<span class="badge badge-info">1 - Sedang</span>';
+        if (a.priority === '0') priorityBadge = '<span class="badge badge-draft">0 - Rendah</span>';
+        else if (a.priority === '2') priorityBadge = '<span class="badge badge-warning">2 - Tinggi</span>';
+        else if (a.priority === '3') priorityBadge = '<span class="badge badge-danger">3 - Kritis (Blocker)</span>';
+
+        let stageBadge = '<span class="badge badge-primary">Baru (New)</span>';
+        if (a.stage === 'confirmed') stageBadge = '<span class="badge badge-info">🔍 Terkonfirmasi</span>';
+        else if (a.stage === 'in_progress') stageBadge = '<span class="badge badge-warning">⚙️ In Progress</span>';
+        else if (a.stage === 'resolved') stageBadge = '<span class="badge badge-success">✅ Resolved</span>';
+        else if (a.stage === 'closed') stageBadge = '<span class="badge badge-draft">🔒 Closed</span>';
+
+        let actionLabel = 'Karantina';
+        if (a.action_type === 'rework') actionLabel = 'Rework';
+        else if (a.action_type === 'return') actionLabel = 'Retur Vendor';
+        else if (a.action_type === 'scrap') actionLabel = 'Scrap Afkir';
+
+        let linkedRef = '-';
+        if (a.check) linkedRef = `QC: ${a.check.name}`;
+        else if (a.picking) linkedRef = `WH: ${a.picking.name}`;
+        else if (a.production) linkedRef = `MO: ${a.production.name}`;
+
+        return `
+            <tr>
+                <td><strong>${escapeHtml(a.name)}</strong></td>
+                <td>
+                    <div style="font-weight: 600;">${escapeHtml(a.title)}</div>
+                    ${a.root_cause ? `<small class="text-muted">RCA: ${escapeHtml(a.root_cause.substring(0, 50))}...</small>` : ''}
+                </td>
+                <td>
+                    ${a.product ? escapeHtml(a.product.name) : '-'}<br>
+                    <small class="badge badge-draft">${linkedRef}</small>
+                </td>
+                <td>${priorityBadge}</td>
+                <td><span class="badge badge-danger">${actionLabel}</span></td>
+                <td>${stageBadge}</td>
+                <td><small>${a.user ? escapeHtml(a.user.name) : '-'}</small></td>
+                <td>
+                    <button class="btn btn-sm btn-outline" onclick="openUpdateAlertStageModal(${a.id})">🔄 Ubah Tahapan</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function loadQualityPoints() {
+    const opFilter = document.getElementById('qualityPointOpFilter')?.value || '';
+    try {
+        let url = '/quality/points';
+        if (opFilter) url += `?operation_type=${opFilter}`;
+        state.qualityPoints = await api(url);
+        renderQualityPointsTable();
+    } catch (err) {
+        showToast('Gagal memuat titik kontrol kualitas: ' + err.message, 'danger');
+    }
+}
+
+function renderQualityPointsTable() {
+    const tbody = document.getElementById('qualityPointsTableBody');
+    if (!tbody) return;
+
+    const points = state.qualityPoints || [];
+    if (points.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">Belum ada titik kontrol mutu yang dikonfigurasi.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = points.map(p => {
+        let opLabel = 'Penerimaan WH/IN';
+        if (p.operation_type === 'mrp_operation') opLabel = 'Perakitan MO';
+        else if (p.operation_type === 'outgoing') opLabel = 'Pengiriman WH/OUT';
+
+        let targetNorm = '-';
+        if (p.test_type === 'measure') {
+            targetNorm = `<strong>${p.norm} ${p.norm_unit || ''}</strong> (Toleransi: ${p.tolerance_min} - ${p.tolerance_max} ${p.norm_unit || ''})`;
+        }
+
+        return `
+            <tr>
+                <td><strong>${escapeHtml(p.code)}</strong></td>
+                <td><div style="font-weight: 600;">${escapeHtml(p.title)}</div></td>
+                <td><span class="badge badge-info">${opLabel}</span></td>
+                <td>${p.product ? escapeHtml(p.product.name) : '<span class="text-muted">Semua Produk</span>'}</td>
+                <td><span class="badge badge-primary">${p.test_type}</span></td>
+                <td>${targetNorm}</td>
+                <td><small class="text-muted">${escapeHtml((p.instructions || '-').substring(0, 70))}...</small></td>
+                <td><span class="badge badge-success">Aktif</span></td>
+                <td>
+                    <button class="btn btn-sm btn-danger" onclick="deleteQualityPoint(${p.id})">🗑️</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function toggleQualityPointMeasureFields() {
+    const testType = document.getElementById('qpTestType')?.value;
+    const group = document.getElementById('qpMeasureGroup');
+    if (group) {
+        group.style.display = testType === 'measure' ? 'block' : 'none';
+    }
+}
+
+function toggleQualityCheckMeasureFields() {
+    const testType = document.getElementById('qcTestType')?.value;
+    const group = document.getElementById('qcMeasureGroup');
+    if (group) {
+        group.style.display = testType === 'measure' ? 'block' : 'none';
+    }
+}
+
+async function handleCreateQualityPoint(e) {
+    e.preventDefault();
+    const title = document.getElementById('qpTitle').value.trim();
+    const operationType = document.getElementById('qpOperationType').value;
+    const testType = document.getElementById('qpTestType').value;
+    const productVal = document.getElementById('qpProductId').value;
+    const instructions = document.getElementById('qpInstructions').value.trim();
+
+    const body = {
+        title,
+        operation_type: operationType,
+        test_type: testType,
+        instructions
+    };
+
+    if (productVal) {
+        body.product_id = parseInt(productVal);
+    }
+
+    if (testType === 'measure') {
+        body.norm = parseFloat(document.getElementById('qpNorm').value || 0);
+        body.tolerance_min = parseFloat(document.getElementById('qpTolMin').value || 0);
+        body.tolerance_max = parseFloat(document.getElementById('qpTolMax').value || 0);
+        body.norm_unit = document.getElementById('qpUnit').value.trim();
+    }
+
+    try {
+        await api('/quality/points', 'POST', body);
+        showToast('Titik kontrol mutu SOP berhasil ditambahkan!', 'success');
+        closeModal('modalCreateQualityPoint');
+        e.target.reset();
+        await loadQuality();
+    } catch (err) {
+        showToast('Gagal membuat quality point: ' + err.message, 'danger');
+    }
+}
+
+async function handleCreateQualityCheck(e) {
+    e.preventDefault();
+    const title = document.getElementById('qcTitle').value.trim();
+    const productVal = document.getElementById('qcProductId').value;
+    const testType = document.getElementById('qcTestType').value;
+    const lotNumber = document.getElementById('qcLotNumber').value.trim();
+    const notes = document.getElementById('qcNotes').value.trim();
+
+    if (!productVal) {
+        showToast('Pilih produk yang diperiksa.', 'warning');
+        return;
+    }
+
+    const body = {
+        title,
+        product_id: parseInt(productVal),
+        test_type: testType,
+        lot_number: lotNumber,
+        notes
+    };
+
+    if (testType === 'measure') {
+        body.norm = parseFloat(document.getElementById('qcNorm').value || 0);
+        body.tolerance_min = parseFloat(document.getElementById('qcTolMin').value || 0);
+        body.tolerance_max = parseFloat(document.getElementById('qcTolMax').value || 0);
+        body.norm_unit = document.getElementById('qcUnit').value.trim();
+    }
+
+    try {
+        await api('/quality/checks', 'POST', body);
+        showToast('Lembar pemeriksaan mutu berhasil dibuat!', 'success');
+        closeModal('modalCreateQualityCheck');
+        e.target.reset();
+        await loadQuality();
+    } catch (err) {
+        showToast('Gagal membuat quality check: ' + err.message, 'danger');
+    }
+}
+
+async function openExecuteQualityCheckModal(checkId) {
+    try {
+        const check = await api(`/quality/checks/${checkId}`);
+        state.currentQualityCheck = check;
+
+        document.getElementById('execCheckModalTitle').textContent = `🔬 ${check.name}: ${check.title}`;
+
+        let detailsHtml = `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span><strong>Produk:</strong> ${check.product ? escapeHtml(check.product.name) : '-'}</span>
+                <span class="badge ${check.quality_state === 'pass' ? 'badge-success' : check.quality_state === 'fail' ? 'badge-danger' : 'badge-warning'}">Status: ${check.quality_state.toUpperCase()}</span>
+            </div>
+            ${check.lot_number ? `<div><strong>Lot/Batch:</strong> ${escapeHtml(check.lot_number)}</div>` : ''}
+            <div style="margin-top: 0.5rem; padding: 0.5rem; background: var(--bg-card); border-radius: 4px; font-size: 0.85rem;">
+                <strong>Panduan SOP:</strong> ${escapeHtml(check.notes || 'Lakukan verifikasi sesuai standar instruksi kerja.')}
+            </div>
+        `;
+
+        if (check.test_type === 'measure') {
+            detailsHtml += `
+                <div style="margin-top: 0.5rem; font-size: 0.9rem;">
+                    <strong>Spesifikasi Target:</strong> ${check.norm} ${check.norm_unit || ''} 
+                    (Rentang Toleransi: <span style="color: #10b981; font-weight: bold;">${check.tolerance_min} - ${check.tolerance_max} ${check.norm_unit || ''}</span>)
+                </div>
+            `;
+        }
+
+        document.getElementById('execCheckDetails').innerHTML = detailsHtml;
+
+        const measureSec = document.getElementById('execCheckMeasureSection');
+        const measureInput = document.getElementById('execCheckMeasureInput');
+        const unitBadge = document.getElementById('execCheckUnitBadge');
+        const tolHint = document.getElementById('execCheckToleranceHint');
+
+        if (check.test_type === 'measure') {
+            measureSec.style.display = 'block';
+            measureInput.value = check.measure || '';
+            unitBadge.textContent = check.norm_unit || 'Unit';
+            tolHint.textContent = `Batas aman toleransi: ${check.tolerance_min} sampai ${check.tolerance_max} ${check.norm_unit || ''}`;
+        } else {
+            measureSec.style.display = 'none';
+        }
+
+        document.getElementById('execCheckNotesInput').value = check.failure_reason || check.notes || '';
+
+        openModal('modalExecuteQualityCheck');
+    } catch (err) {
+        showToast('Gagal memuat detail pemeriksaan: ' + err.message, 'danger');
+    }
+}
+
+async function submitQualityCheckPass() {
+    if (!state.currentQualityCheck) return;
+    const check = state.currentQualityCheck;
+    const body = {
+        notes: document.getElementById('execCheckNotesInput').value.trim()
+    };
+
+    if (check.test_type === 'measure') {
+        const val = parseFloat(document.getElementById('execCheckMeasureInput').value);
+        if (isNaN(val)) {
+            showToast('Nilai pengukuran kuantitatif wajib diisi.', 'warning');
+            return;
+        }
+        body.measure = val;
+    }
+
+    try {
+        await api(`/quality/checks/${check.id}/pass`, 'POST', body);
+        showToast(`Pemeriksaan '${check.name}' DINYATAKAN LOLOS (Pass)!`, 'success');
+        closeModal('modalExecuteQualityCheck');
+        await loadQuality();
+    } catch (err) {
+        showToast('Gagal menetapkan Pass: ' + err.message, 'danger');
+    }
+}
+
+async function submitQualityCheckFailure() {
+    if (!state.currentQualityCheck) return;
+    const check = state.currentQualityCheck;
+    const reason = document.getElementById('execCheckNotesInput').value.trim() || 'Hasil inspeksi tidak memenuhi standar mutu spesifikasi teknis.';
+    const autoAlert = document.getElementById('execCheckAutoAlert').checked;
+
+    const body = {
+        reason: reason,
+        auto_alert: autoAlert
+    };
+
+    if (check.test_type === 'measure') {
+        const val = parseFloat(document.getElementById('execCheckMeasureInput').value);
+        if (!isNaN(val)) {
+            body.measure = val;
+        }
+    }
+
+    try {
+        const res = await api(`/quality/checks/${check.id}/fail`, 'POST', body);
+        let alertMsg = '';
+        if (res.alert) {
+            alertMsg = ` Diterbitkan Quality Alert NCR: ${res.alert.name}`;
+        }
+        showToast(`Pemeriksaan '${check.name}' DINYATAKAN GAGAL (Fail).${alertMsg}`, 'warning');
+        closeModal('modalExecuteQualityCheck');
+        await loadQuality();
+    } catch (err) {
+        showToast('Gagal menetapkan Fail: ' + err.message, 'danger');
+    }
+}
+
+async function handleCreateQualityAlert(e) {
+    e.preventDefault();
+    const title = document.getElementById('qaTitle').value.trim();
+    const productVal = document.getElementById('qaProductId').value;
+    const priority = document.getElementById('qaPriority').value;
+    const actionType = document.getElementById('qaActionType').value;
+    const partnerVal = document.getElementById('qaPartnerId').value;
+    const rootCause = document.getElementById('qaRootCause').value.trim();
+    const preventiveAction = document.getElementById('qaPreventiveAction').value.trim();
+
+    const body = {
+        title,
+        priority,
+        action_type: actionType,
+        root_cause: rootCause,
+        preventive_action: preventiveAction
+    };
+
+    if (productVal) body.product_id = parseInt(productVal);
+    if (partnerVal) body.partner_id = parseInt(partnerVal);
+
+    try {
+        const res = await api('/quality/alerts', 'POST', body);
+        showToast(`Quality Alert '${res.name}' berhasil diterbitkan dengan tindakan '${actionType}'!`, 'success');
+        closeModal('modalCreateQualityAlert');
+        e.target.reset();
+        await loadQuality();
+    } catch (err) {
+        showToast('Gagal menerbitkan Quality Alert: ' + err.message, 'danger');
+    }
+}
+
+async function openUpdateAlertStageModal(alertId) {
+    try {
+        const alert = await api(`/quality/alerts/${alertId}`);
+        document.getElementById('updateAlertId').value = alert.id;
+        document.getElementById('updateAlertTitle').value = `${alert.name} - ${alert.title}`;
+        document.getElementById('updateAlertStageSelect').value = alert.stage || 'new';
+        document.getElementById('updateAlertActionType').value = alert.action_type || 'quarantine';
+        document.getElementById('updateAlertRootCause').value = alert.root_cause || '';
+        document.getElementById('updateAlertPreventiveAction').value = alert.preventive_action || '';
+
+        openModal('modalUpdateAlertStage');
+    } catch (err) {
+        showToast('Gagal memuat alert: ' + err.message, 'danger');
+    }
+}
+
+async function handleUpdateAlertStage(e) {
+    e.preventDefault();
+    const alertId = document.getElementById('updateAlertId').value;
+    const stage = document.getElementById('updateAlertStageSelect').value;
+    const actionType = document.getElementById('updateAlertActionType').value;
+    const rootCause = document.getElementById('updateAlertRootCause').value.trim();
+    const preventiveAction = document.getElementById('updateAlertPreventiveAction').value.trim();
+
+    const body = {
+        stage,
+        action_type: actionType,
+        root_cause: rootCause,
+        preventive_action: preventiveAction
+    };
+
+    try {
+        await api(`/quality/alerts/${alertId}/stage`, 'PUT', body);
+        showToast('Tahapan Quality Alert berhasil diperbarui ke: ' + stage, 'success');
+        closeModal('modalUpdateAlertStage');
+        await loadQuality();
+    } catch (err) {
+        showToast('Gagal memperbarui tahapan: ' + err.message, 'danger');
+    }
+}
+
+async function deleteQualityPoint(pointId) {
+    if (!confirm('Hapus aturan titik kontrol mutu ini?')) return;
+    try {
+        await api(`/quality/points/${pointId}`, 'DELETE');
+        showToast('Titik kontrol mutu berhasil dihapus.', 'success');
+        await loadQuality();
+    } catch (err) {
+        showToast('Gagal menghapus quality point: ' + err.message, 'danger');
+    }
+}
+
+// =========================================================================
+// 20. CLOUDFLARE WORKERS AI COPILOT HELPERS
+// =========================================================================
+
+function openAskERPAIModal() {
+    const input = document.getElementById('askERPAIInput');
+    if (input) input.value = '';
+    const resBox = document.getElementById('askERPAIResult');
+    if (resBox) resBox.style.display = 'none';
+    openModal('modalAskERPAI');
+}
+
+function quickAskERP(query) {
+    const input = document.getElementById('askERPAIInput');
+    if (input) input.value = query;
+    submitAskERPAI();
+}
+
+async function submitAskERPAI() {
+    const query = document.getElementById('askERPAIInput')?.value.trim();
+    if (!query) {
+        showToast('Ketikkan pertanyaan untuk ERP AI.', 'warning');
+        return;
+    }
+
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Sedang menganalisis data bisnis via Cloudflare Workers AI...';
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const resp = await api('/ai/ask-erp', 'POST', { query });
+        if (answerEl) answerEl.textContent = resp.answer;
+        if (badge) {
+            badge.textContent = resp.source === 'cloudflare_workers_ai' ? '⚡ Cloudflare Edge GPU' : '🧠 Smart Local Heuristic';
+            badge.className = resp.source === 'cloudflare_workers_ai' ? 'badge badge-primary' : 'badge badge-info';
+        }
+        if (actionsList && resp.suggested_actions) {
+            actionsList.innerHTML = resp.suggested_actions.map(act => `<li>${escapeHtml(act)}</li>`).join('');
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memanggil AI: ' + err.message;
+    }
+}
+
+async function triggerTicketAITriage() {
+    const title = document.getElementById('ticketName')?.value.trim();
+    const desc = document.getElementById('ticketDescription')?.value.trim() || '';
+
+    if (!title) {
+        showToast('Masukkan subjek tiket terlebih dahulu.', 'warning');
+        return;
+    }
+
+    showToast('AI menganalisis sentimen & draf solusi...', 'info');
+
+    try {
+        const resp = await api('/ai/ticket-triage', 'POST', { title, description: desc });
+
+        // Set suggested priority
+        const prioSelect = document.getElementById('ticketPrioritySelect');
+        if (prioSelect) {
+            if (resp.suggested_priority === 'urgent') prioSelect.value = '3';
+            else if (resp.suggested_priority === 'high') prioSelect.value = '2';
+            else if (resp.suggested_priority === 'medium') prioSelect.value = '1';
+            else prioSelect.value = '0';
+        }
+
+        // Set suggested category
+        const catSelect = document.getElementById('ticketCategorySelect');
+        if (catSelect && resp.suggested_category) {
+            catSelect.value = resp.suggested_category;
+        }
+
+        // Append draft resolution in description
+        const descEl = document.getElementById('ticketDescription');
+        if (descEl && !descEl.value.includes('[Draf Solusi AI]')) {
+            descEl.value = (descEl.value ? descEl.value + '\n\n' : '') +
+                `[Draf Solusi AI]:\n${resp.draft_response}\n\n[Rekomendasi Tindakan]:\n- ` +
+                resp.action_recommendations.join('\n- ');
+        }
+
+        showToast(`AI Triage Selesai: Sentimen ${resp.sentiment.toUpperCase()}, Prioritas ${resp.suggested_priority.toUpperCase()} diterapkan!`, 'success');
+    } catch (err) {
+        showToast('Gagal memproses AI Triage: ' + err.message, 'danger');
+    }
+}
+
+async function triggerQualityAIRCA() {
+    const title = document.getElementById('updateAlertTitle')?.value.trim();
+    const currentRootCause = document.getElementById('updateAlertRootCause')?.value.trim();
+
+    if (!title) {
+        showToast('Quality alert tidak valid.', 'warning');
+        return;
+    }
+
+    showToast('AI menganalisis akar masalah (RCA 5-Whys) & CAPA...', 'info');
+
+    try {
+        const resp = await api('/ai/quality-rca', 'POST', {
+            title,
+            root_cause: currentRootCause || '',
+            notes: ''
+        });
+
+        const rcEl = document.getElementById('updateAlertRootCause');
+        const capaEl = document.getElementById('updateAlertPreventiveAction');
+        const actSelect = document.getElementById('updateAlertActionType');
+
+        if (rcEl) rcEl.value = resp.root_cause_analysis;
+        if (capaEl) capaEl.value = resp.preventive_action;
+        if (actSelect && resp.suggested_action_type) actSelect.value = resp.suggested_action_type;
+
+        showToast(`AI RCA Selesai! Tingkat Risiko: ${resp.risk_level}, Tindakan: ${resp.suggested_action_type.toUpperCase()}`, 'success');
+    } catch (err) {
+        showToast('Gagal memproses AI RCA: ' + err.message, 'danger');
+    }
+}
+
+async function triggerExpenseAICategorize() {
+    const desc = document.getElementById('expItemName')?.value.trim();
+    const amount = parseFloat(document.getElementById('expItemUnitPrice')?.value || 0);
+
+    if (!desc) {
+        showToast('Ketikkan uraian pengeluaran terlebih dahulu.', 'warning');
+        return;
+    }
+
+    showToast('AI menganalisis kategori & akun Buku Besar GL...', 'info');
+
+    try {
+        const resp = await api('/ai/expense-categorize', 'POST', { description: desc, amount });
+
+        const catSelect = document.getElementById('expItemCategorySelect');
+        if (catSelect && resp.suggested_category_id) {
+            catSelect.value = resp.suggested_category_id;
+        }
+
+        showToast(`AI Auto-Kategori: Terpetakan ke '${resp.suggested_category_name}' (Akun GL ${resp.suggested_gl_account})!`, 'success');
+    } catch (err) {
+        showToast('Gagal memproses AI Expense: ' + err.message, 'danger');
+    }
+}
+
+// ==========================================
+// 20. APPROVAL WORKFLOW MATRIX & AI COPILOT
+// ==========================================
+let approvalCategoriesCache = [];
+let currentViewingApproval = null;
+
+async function loadApprovalCategories() {
+    try {
+        const cats = await api('/approvals/categories');
+        approvalCategoriesCache = cats || [];
+        
+        // Populate filter
+        const filterSel = document.getElementById('approvalCategoryFilter');
+        if (filterSel) {
+            const curVal = filterSel.value;
+            filterSel.innerHTML = '<option value="">Semua Kategori</option>' + 
+                approvalCategoriesCache.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+            filterSel.value = curVal;
+        }
+
+        // Populate modal select
+        const modalSel = document.getElementById('createApprovalCategorySelect');
+        if (modalSel) {
+            modalSel.innerHTML = '<option value="">Pilih Kategori...</option>' + 
+                approvalCategoriesCache.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+        }
+    } catch (err) {
+        console.error('Failed to load approval categories:', err);
+    }
+}
+
+async function loadApprovals() {
+    await loadApprovalCategories();
+
+    // 1. Load Stats
+    try {
+        const stats = await api('/approvals/stats');
+        document.getElementById('kpiApprovalTotal').textContent = stats.total || 0;
+        document.getElementById('kpiApprovalPending').textContent = stats.pending || 0;
+        document.getElementById('kpiApprovalApproved').textContent = stats.approved || 0;
+        document.getElementById('kpiApprovalRefused').textContent = stats.refused || 0;
+    } catch (err) {
+        console.error('Failed to load approval stats:', err);
+    }
+
+    // 2. Load Requests List
+    const tbody = document.getElementById('approvalRequestsTableBody');
+    if (!tbody) return;
+
+    tbody.innerHTML = '<tr><td colspan="9" class="text-center">Memuat permohonan persetujuan...</td></tr>';
+
+    const catId = document.getElementById('approvalCategoryFilter')?.value || '';
+    const stage = document.getElementById('approvalStageFilter')?.value || '';
+
+    let url = '/approvals/requests?';
+    if (catId) url += `category_id=${encodeURIComponent(catId)}&`;
+    if (stage) url += `stage=${encodeURIComponent(stage)}&`;
+
+    try {
+        const requests = await api(url);
+        if (!requests || requests.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">Belum ada permohonan persetujuan. Klik tombol "+ Ajukan Permohonan" untuk membuat baru.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = requests.map(r => {
+            const stageBadges = {
+                new: '<span class="badge badge-draft">Draft (New)</span>',
+                pending: '<span class="badge badge-warning">⏳ Menunggu Review</span>',
+                approved: '<span class="badge badge-success">✅ Disetujui Penuh</span>',
+                refused: '<span class="badge badge-danger">❌ Ditolak</span>',
+                cancelled: '<span class="badge badge-secondary">Dibatalkan</span>'
+            };
+
+            // Progress approver badges
+            const approversHtml = (r.approvers || []).map(a => {
+                let statusBadge = '';
+                if (a.status === 'approved') statusBadge = '<span class="badge badge-success" style="font-size: 0.7rem;">✓ L' + a.sequence + ': Disetujui</span>';
+                else if (a.status === 'waiting') statusBadge = '<span class="badge badge-warning" style="font-size: 0.7rem;">⏳ L' + a.sequence + ': Review</span>';
+                else if (a.status === 'refused') statusBadge = '<span class="badge badge-danger" style="font-size: 0.7rem;">✕ L' + a.sequence + ': Ditolak</span>';
+                else statusBadge = '<span class="badge badge-secondary" style="font-size: 0.7rem;">L' + a.sequence + '</span>';
+                return statusBadge;
+            }).join(' ');
+
+            return `
+                <tr>
+                    <td><strong>${escapeHtml(r.code)}</strong></td>
+                    <td>
+                        <a href="javascript:void(0)" onclick="openApprovalDetail(${r.id})" style="font-weight: 600; text-decoration: none; color: var(--primary);">
+                            ${escapeHtml(r.name)}
+                        </a>
+                    </td>
+                    <td><span class="badge badge-info">${escapeHtml(r.category?.name || '-')}</span></td>
+                    <td>${escapeHtml(r.request_owner?.name || 'User ' + r.request_owner_id)}</td>
+                    <td style="font-weight: 600;">${r.amount > 0 ? formatCurrency(r.amount) : '-'}</td>
+                    <td><code>${escapeHtml(r.reference || '-')}</code></td>
+                    <td>${stageBadges[r.stage] || r.stage}</td>
+                    <td>${approversHtml || '-'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline" onclick="openApprovalDetail(${r.id})">🔍 Detail</button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center text-danger">Gagal memuat: ${escapeHtml(err.message)}</td></tr>`;
+    }
+}
+
+function openCreateApprovalModal() {
+    const form = document.getElementById('formCreateApproval');
+    if (form) form.reset();
+    const prev = document.getElementById('createApprovalAIPreview');
+    if (prev) prev.style.display = 'none';
+
+    loadApprovalCategories().then(() => {
+        openModal('modalCreateApproval');
+    });
+}
+
+function onApprovalCategoryChange() {
+    const catId = parseInt(document.getElementById('createApprovalCategorySelect')?.value || 0);
+    const cat = approvalCategoriesCache.find(c => c.id === catId);
+    const groupAmt = document.getElementById('groupApprovalAmount');
+    if (cat && groupAmt) {
+        if (!cat.has_amount) {
+            document.getElementById('createApprovalAmount').value = 0;
+            groupAmt.style.opacity = '0.5';
+        } else {
+            groupAmt.style.opacity = '1';
+        }
+    }
+}
+
+async function triggerApprovalDraftAI() {
+    const title = document.getElementById('createApprovalTitle')?.value.trim();
+    const catId = parseInt(document.getElementById('createApprovalCategorySelect')?.value || 0);
+    const cat = approvalCategoriesCache.find(c => c.id === catId);
+    const amount = parseFloat(document.getElementById('createApprovalAmount')?.value || 0);
+    const reason = document.getElementById('createApprovalReason')?.value.trim();
+    const ref = document.getElementById('createApprovalReference')?.value.trim() || '';
+
+    if (!title) {
+        showToast('Ketikkan judul permohonan terlebih dahulu.', 'warning');
+        return;
+    }
+
+    const prev = document.getElementById('createApprovalAIPreview');
+    if (prev) {
+        prev.style.display = 'block';
+        prev.innerHTML = '<em>Sedang menganalisis matriks risiko via AI...</em>';
+    }
+
+    try {
+        const resp = await api('/ai/approval-risk', 'POST', {
+            title: title,
+            category_name: cat?.name || 'General',
+            amount: amount,
+            reason: reason || 'Pengajuan kebutuhan operasional',
+            reference: ref
+        });
+
+        if (prev) {
+            const riskColors = { Low: '#10b981', Medium: '#f59e0b', High: '#ef4444', Critical: '#dc2626' };
+            prev.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                    <strong>AI Risk Level: <span style="color: ${riskColors[resp.risk_level] || '#8b5cf6'};">${resp.risk_level}</span></strong>
+                    <span class="badge badge-draft">${resp.source === 'cloudflare_workers_ai' ? '⚡ Cloudflare Edge GPU' : '🧠 Smart Local Heuristic'}</span>
+                </div>
+                <div>${escapeHtml(resp.policy_compliance)}</div>
+                <div style="margin-top: 0.25rem; font-style: italic; color: var(--text-muted);">${escapeHtml(resp.recommendation)}</div>
+            `;
+        }
+    } catch (err) {
+        if (prev) prev.innerHTML = '<span class="text-danger">Gagal evaluasi AI: ' + escapeHtml(err.message) + '</span>';
+    }
+}
+
+async function handleCreateApproval(e) {
+    e.preventDefault();
+    const catId = parseInt(document.getElementById('createApprovalCategorySelect').value);
+    const title = document.getElementById('createApprovalTitle').value.trim();
+    const amount = parseFloat(document.getElementById('createApprovalAmount').value || 0);
+    const ref = document.getElementById('createApprovalReference').value.trim();
+    const reason = document.getElementById('createApprovalReason').value.trim();
+
+    try {
+        const created = await api('/approvals/requests', 'POST', {
+            name: title,
+            category_id: catId,
+            amount: amount,
+            reference: ref,
+            reason: reason
+        });
+
+        showToast(`Permohonan ${created.code} berhasil dibuat!`, 'success');
+        closeModal('modalCreateApproval');
+        await loadApprovals();
+        openApprovalDetail(created.id);
+    } catch (err) {
+        showToast('Gagal membuat permohonan: ' + err.message, 'danger');
+    }
+}
+
+async function openApprovalDetail(id) {
+    try {
+        const req = await api(`/approvals/requests/${id}`);
+        currentViewingApproval = req;
+
+        document.getElementById('apprDetailId').value = req.id;
+        document.getElementById('apprDetailCode').textContent = req.code;
+        document.getElementById('apprDetailTitle').textContent = req.name;
+        document.getElementById('apprDetailCategory').textContent = req.category?.name || '-';
+        document.getElementById('apprDetailAmount').textContent = req.amount > 0 ? formatCurrency(req.amount) : '-';
+        document.getElementById('apprDetailRef').textContent = req.reference || '-';
+        document.getElementById('apprDetailReason').textContent = req.reason || '(Tidak ada uraian alasan)';
+
+        const stageBadges = {
+            new: '<span class="badge badge-draft">Draft (New)</span>',
+            pending: '<span class="badge badge-warning">⏳ Menunggu Review</span>',
+            approved: '<span class="badge badge-success">✅ Disetujui Penuh</span>',
+            refused: '<span class="badge badge-danger">❌ Ditolak</span>',
+            cancelled: '<span class="badge badge-secondary">Dibatalkan</span>'
+        };
+        document.getElementById('apprDetailStageBadge').innerHTML = stageBadges[req.stage] || req.stage;
+
+        // Render Multi-Tier Approver Step Cards
+        const appContainer = document.getElementById('apprDetailApproversList');
+        if (appContainer) {
+            appContainer.innerHTML = (req.approvers || []).map(a => {
+                let badge = '<span class="badge badge-secondary">Belum Aktif</span>';
+                let borderStyle = 'border-left: 4px solid var(--border-color);';
+                if (a.status === 'approved') {
+                    badge = '<span class="badge badge-success">✓ Disetujui (' + (a.approval_date ? formatDate(a.approval_date) : '') + ')</span>';
+                    borderStyle = 'border-left: 4px solid #10b981;';
+                } else if (a.status === 'waiting') {
+                    badge = '<span class="badge badge-warning">⏳ Sedang Menunggu Otorisasi</span>';
+                    borderStyle = 'border-left: 4px solid #f59e0b; background: rgba(245, 158, 11, 0.05);';
+                } else if (a.status === 'refused') {
+                    badge = '<span class="badge badge-danger">✕ Ditolak</span>';
+                    borderStyle = 'border-left: 4px solid #ef4444;';
+                }
+
+                return `
+                    <div style="padding: 0.6rem 0.85rem; border-radius: var(--border-radius); ${borderStyle} background: var(--bg-hover);">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>Level ${a.sequence}: ${escapeHtml(a.user?.name || 'Approver ' + a.user_id)}</strong>
+                                <span class="text-muted" style="font-size: 0.8rem; margin-left: 0.5rem;">(${escapeHtml(a.user?.role || 'Staff')})</span>
+                            </div>
+                            <div>${badge}</div>
+                        </div>
+                        ${a.comment ? `<div style="margin-top: 0.35rem; font-size: 0.85rem; font-style: italic; color: var(--text-muted);">"${escapeHtml(a.comment)}"</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Toggle action buttons
+        const btnSubmit = document.getElementById('btnApprSubmit');
+        const btnApprove = document.getElementById('btnApprApprove');
+        const btnRefuse = document.getElementById('btnApprRefuse');
+
+        if (btnSubmit) btnSubmit.style.display = req.stage === 'new' ? 'inline-block' : 'none';
+        if (btnApprove) btnApprove.style.display = req.stage === 'pending' ? 'inline-block' : 'none';
+        if (btnRefuse) btnRefuse.style.display = req.stage === 'pending' ? 'inline-block' : 'none';
+
+        // Reset AI panel
+        const aiPanel = document.getElementById('apprDetailAIPanel');
+        if (aiPanel) aiPanel.style.display = 'none';
+
+        openModal('modalApprovalDetail');
+    } catch (err) {
+        showToast('Gagal memuat detail permohonan: ' + err.message, 'danger');
+    }
+}
+
+async function submitCurrentApproval() {
+    if (!currentViewingApproval) return;
+    try {
+        const updated = await api(`/approvals/requests/${currentViewingApproval.id}/submit`, 'POST');
+        showToast(`Permohonan ${updated.code} berhasil diajukan untuk review!`, 'success');
+        openApprovalDetail(updated.id);
+        loadApprovals();
+    } catch (err) {
+        showToast('Gagal mengajukan permohonan: ' + err.message, 'danger');
+    }
+}
+
+async function promptApproveCurrentApproval() {
+    if (!currentViewingApproval) return;
+    const comment = prompt('Catatan persetujuan (opsional):', 'Disetujui sesuai spesifikasi dan anggaran.');
+    if (comment === null) return; // User cancelled prompt
+
+    try {
+        const updated = await api(`/approvals/requests/${currentViewingApproval.id}/approve`, 'POST', { comment: comment });
+        showToast(`Persetujuan berhasil dicatat! Status: ${updated.stage.toUpperCase()}`, 'success');
+        openApprovalDetail(updated.id);
+        loadApprovals();
+    } catch (err) {
+        showToast('Gagal menyetujui: ' + err.message, 'danger');
+    }
+}
+
+async function promptRefuseCurrentApproval() {
+    if (!currentViewingApproval) return;
+    const reason = prompt('Masukkan alasan penolakan permohonan:');
+    if (!reason) {
+        showToast('Alasan penolakan wajib diisi.', 'warning');
+        return;
+    }
+
+    try {
+        const updated = await api(`/approvals/requests/${currentViewingApproval.id}/refuse`, 'POST', { refusal_reason: reason });
+        showToast(`Permohonan ${updated.code} ditolak.`, 'info');
+        openApprovalDetail(updated.id);
+        loadApprovals();
+    } catch (err) {
+        showToast('Gagal menolak: ' + err.message, 'danger');
+    }
+}
+
+async function triggerApprovalDetailAIRisk() {
+    if (!currentViewingApproval) return;
+    const aiPanel = document.getElementById('apprDetailAIPanel');
+    if (aiPanel) {
+        aiPanel.style.display = 'block';
+        document.getElementById('apprDetailAICompliance').textContent = 'Menganalisis matriks risiko otorisasi via Cloudflare Workers AI...';
+        document.getElementById('apprDetailAIRecommendations').innerHTML = '';
+    }
+
+    try {
+        const resp = await api('/ai/approval-risk', 'POST', {
+            title: currentViewingApproval.name,
+            category_name: currentViewingApproval.category?.name || 'General',
+            amount: currentViewingApproval.amount,
+            reason: currentViewingApproval.reason,
+            reference: currentViewingApproval.reference
+        });
+
+        const badge = document.getElementById('apprDetailAIRiskBadge');
+        if (badge) {
+            badge.textContent = `Tingkat Risiko: ${resp.risk_level} (${resp.source === 'cloudflare_workers_ai' ? '⚡ Edge GPU' : '🧠 Local Heuristic'})`;
+            badge.className = resp.risk_level === 'Low' ? 'badge badge-success' : (resp.risk_level === 'Medium' ? 'badge badge-warning' : 'badge badge-danger');
+        }
+
+        document.getElementById('apprDetailAICompliance').textContent = resp.policy_compliance;
+
+        const recContainer = document.getElementById('apprDetailAIRecommendations');
+        if (recContainer && resp.audit_recommendations) {
+            recContainer.innerHTML = `
+                <strong>Pertanyaan Kunci Audit Sebelum Menyetujui:</strong>
+                <ul style="margin: 0.25rem 0 0.5rem 1.25rem; line-height: 1.4;">
+                    ${resp.audit_recommendations.map(q => `<li>${escapeHtml(q)}</li>`).join('')}
+                </ul>
+                <div style="background: rgba(139, 92, 246, 0.1); padding: 0.5rem; border-radius: 4px; color: #8b5cf6;">
+                    <strong>Rekomendasi Eksekutif:</strong> ${escapeHtml(resp.recommendation)}
+                </div>
+            `;
+        }
+    } catch (err) {
+        if (aiPanel) document.getElementById('apprDetailAICompliance').textContent = 'Gagal memproses AI: ' + err.message;
+    }
+}
+
+// =========================================================================
+// 21. ATTACHMENT HUB & CLOUDFLARE R2 OCR ENGINE
+// =========================================================================
+
+let debounceAttachmentTimer = null;
+function debounceLoadAttachments() {
+    clearTimeout(debounceAttachmentTimer);
+    debounceAttachmentTimer = setTimeout(loadAttachments, 300);
+}
+
+async function loadAttachments() {
+    const tbody = document.getElementById('attachmentsTableBody');
+    if (!tbody) return;
+
+    const resModel = document.getElementById('attachmentModelFilter')?.value || '';
+    const ocrStatus = document.getElementById('attachmentOCRFilter')?.value || '';
+    const search = document.getElementById('attachmentSearchInput')?.value || '';
+
+    try {
+        let url = '/attachments?limit=50';
+        if (resModel) url += `&res_model=${encodeURIComponent(resModel)}`;
+        if (ocrStatus) url += `&ocr_status=${encodeURIComponent(ocrStatus)}`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+
+        const resp = await api(url);
+        state.attachments = resp.data || [];
+
+        if (state.attachments.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted" style="padding: 2rem;">Tidak ada dokumen ditemukan. Klik tombol "+ Upload Dokumen Baru" untuk mengunggah berkas.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = state.attachments.map(att => {
+            const isImage = att.mimetype && att.mimetype.startsWith('image/');
+            const isPdf = att.mimetype && att.mimetype.includes('pdf');
+            const fileIcon = isImage ? '🖼️' : (isPdf ? '📕' : '📄');
+
+            let sizeStr = `${att.file_size} B`;
+            if (att.file_size > 1024 * 1024) {
+                sizeStr = `${(att.file_size / (1024 * 1024)).toFixed(2)} MB`;
+            } else if (att.file_size > 1024) {
+                sizeStr = `${(att.file_size / 1024).toFixed(1)} KB`;
+            }
+
+            const storageBadge = att.storage_type === 'r2'
+                ? `<span class="badge" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">⚡ Cloudflare R2</span>`
+                : `<span class="badge badge-draft">💾 Local Disk</span>`;
+
+            let ocrBadge = `<span class="badge badge-draft">⏳ Belum Scan</span>`;
+            if (att.ocr_status === 'processed') {
+                ocrBadge = `<span class="badge badge-success">✅ Selesai OCR</span>`;
+            } else if (att.ocr_status === 'failed') {
+                ocrBadge = `<span class="badge badge-danger">❌ Gagal</span>`;
+            }
+
+            const uploadDate = att.created_at ? new Date(att.created_at).toLocaleDateString('id-ID', {
+                year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            }) : '-';
+
+            return `
+                <tr>
+                    <td style="font-size: 1.3rem; text-align: center;">${fileIcon}</td>
+                    <td>
+                        <a href="/api/v1/attachments/${att.id}/download" target="_blank" style="font-weight: 600; text-decoration: none; color: var(--primary);">
+                            ${escapeHtml(att.name)}
+                        </a>
+                        ${att.description ? `<br><small class="text-muted">${escapeHtml(att.description)}</small>` : ''}
+                    </td>
+                    <td>
+                        <span class="badge badge-info">${escapeHtml(att.res_model || 'document')}</span>
+                        ${att.res_name ? `<br><small style="font-weight: 600;">${escapeHtml(att.res_name)}</small>` : ''}
+                    </td>
+                    <td>
+                        <strong>${sizeStr}</strong>
+                        <br><small class="text-muted">${escapeHtml(att.mimetype || 'unknown')}</small>
+                    </td>
+                    <td>${storageBadge}</td>
+                    <td>${ocrBadge}</td>
+                    <td><small>${escapeHtml(att.created_by_name || 'Admin')}</small></td>
+                    <td><small>${uploadDate}</small></td>
+                    <td>
+                        <div style="display: flex; gap: 0.35rem; align-items: center;">
+                            <a href="/api/v1/attachments/${att.id}/download" target="_blank" class="btn btn-sm btn-outline" title="Download Berkas">
+                                ⬇️
+                            </a>
+                            <button class="btn btn-sm btn-outline" onclick="viewOrRunReceiptOCR(${att.id})" title="Pindai / Lihat AI OCR" style="border-color: #8b5cf6; color: #8b5cf6;">
+                                ✨ OCR
+                            </button>
+                            ${att.ocr_status === 'processed' ? `
+                                <button class="btn btn-sm btn-outline" onclick="promptCreateExpenseFromAttachment(${att.id})" title="Buat Klaim Biaya" style="border-color: #10b981; color: #10b981;">
+                                    🧾 Klaim
+                                </button>
+                            ` : ''}
+                            <button class="btn btn-sm btn-danger" onclick="deleteAttachment(${att.id})" title="Hapus Berkas">
+                                🗑️
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center text-danger">Gagal memuat dokumen: ${err.message}</td></tr>`;
+    }
+}
+
+async function loadAttachmentStats() {
+    try {
+        const stats = await api('/attachments/stats');
+        if (document.getElementById('kpiDocTotal')) {
+            document.getElementById('kpiDocTotal').textContent = stats.total_documents || 0;
+        }
+        if (document.getElementById('kpiDocStorage')) {
+            const mb = (stats.total_megabytes || 0).toFixed(2);
+            document.getElementById('kpiDocStorage').textContent = `${mb} MB`;
+        }
+        if (document.getElementById('kpiDocOCR')) {
+            document.getElementById('kpiDocOCR').textContent = stats.ocr_processed || 0;
+        }
+        if (document.getElementById('kpiDocExpense')) {
+            document.getElementById('kpiDocExpense').textContent = stats.expense_receipts || 0;
+        }
+
+        // Check health endpoint for backend name
+        const health = await api('/health').catch(() => ({}));
+        if (document.getElementById('kpiDocBackend')) {
+            document.getElementById('kpiDocBackend').textContent = health.storage === 'r2' ? 'Cloudflare R2 (Edge)' : 'Local Disk (/uploads)';
+        }
+    } catch (err) {
+        console.warn('Failed loading attachment stats:', err);
+    }
+}
+
+function openUploadAttachmentModal(defaultModel = 'document', defaultResId = 0, defaultResName = '') {
+    const form = document.getElementById('formUploadAttachment');
+    if (form) form.reset();
+
+    const modelSelect = document.getElementById('attachmentResModelSelect');
+    if (modelSelect) modelSelect.value = defaultModel;
+
+    const resNameInput = document.getElementById('attachmentResNameInput');
+    if (resNameInput) resNameInput.value = defaultResName;
+
+    const ocrCheckbox = document.getElementById('attachmentAutoOCRCheckbox');
+    if (ocrCheckbox) {
+        // Auto check if expense receipt
+        ocrCheckbox.checked = defaultModel === 'hr.expense' || defaultModel === 'document';
+    }
+
+    openModal('modalUploadAttachment');
+}
+
+function handleAttachmentFileSelected(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const nameInput = document.getElementById('attachmentNameInput');
+        if (nameInput && !nameInput.value) {
+            nameInput.value = file.name;
+        }
+    }
+}
+
+async function handleUploadAttachment(event) {
+    event.preventDefault();
+    const fileInput = document.getElementById('attachmentFileInput');
+    if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+        showToast('Pilih file dokumen terlebih dahulu', 'warning');
+        return;
+    }
+
+    const file = fileInput.files[0];
+    const name = document.getElementById('attachmentNameInput').value || file.name;
+    const resModel = document.getElementById('attachmentResModelSelect').value || 'document';
+    const resName = document.getElementById('attachmentResNameInput').value || '';
+    const description = document.getElementById('attachmentDescInput').value || '';
+    const autoOCR = document.getElementById('attachmentAutoOCRCheckbox')?.checked ? 'true' : 'false';
+
+    const submitBtn = document.getElementById('btnSubmitUpload');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = '⏳ Mengunggah berkas...';
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('name', name);
+        formData.append('res_model', resModel);
+        formData.append('res_name', resName);
+        formData.append('description', description);
+        formData.append('auto_ocr', autoOCR);
+
+        const headers = {};
+        if (state.token) {
+            headers['Authorization'] = `Bearer ${state.token}`;
+        }
+
+        const resp = await fetch('/api/v1/attachments/upload', {
+            method: 'POST',
+            headers,
+            body: formData
+        });
+
+        const data = await resp.json();
+        if (!resp.ok) {
+            throw new Error(data.error || 'Gagal mengunggah dokumen');
+        }
+
+        showToast(`Dokumen "${data.name}" berhasil diunggah ke storage!`, 'success');
+        closeModal('modalUploadAttachment');
+        loadAttachments();
+        loadAttachmentStats();
+
+        // If auto OCR was enabled and processed, open OCR viewer immediately
+        if (autoOCR === 'true' && data.ocr_status === 'processed') {
+            viewOrRunReceiptOCR(data.id);
+        }
+    } catch (err) {
+        showToast('Upload gagal: ' + err.message, 'danger');
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '🚀 Unggah ke R2 Storage';
+        }
+    }
+}
+
+async function viewOrRunReceiptOCR(attId) {
+    try {
+        showToast('Memuat pemindaian AI Vision OCR...', 'info');
+        const att = await api(`/attachments/${attId}`);
+
+        let ocrData = null;
+        if (att.ocr_status === 'processed' && att.ocr_data) {
+            try {
+                ocrData = JSON.parse(att.ocr_data);
+            } catch (e) {
+                console.warn('JSON parse ocr_data failed, rerunning...');
+            }
+        }
+
+        if (!ocrData) {
+            // Trigger OCR
+            ocrData = await api(`/attachments/${attId}/ocr`, 'POST', {});
+            showToast('AI Vision OCR selesai memproses berkas!', 'success');
+            loadAttachments();
+            loadAttachmentStats();
+        }
+
+        state.currentAttachmentOCR = { att, ocr: ocrData };
+
+        document.getElementById('ocrViewerAttId').value = att.id;
+        document.getElementById('ocrViewerFileName').textContent = `${att.name} (${att.res_model || 'document'})`;
+        document.getElementById('ocrViewerVendor').textContent = ocrData.vendor_name || '-';
+        document.getElementById('ocrViewerDate').textContent = ocrData.invoice_date || '-';
+        document.getElementById('ocrViewerTotal').textContent = formatCurrency(ocrData.total_amount || 0);
+        document.getElementById('ocrViewerConfidence').textContent = `${Math.round((ocrData.confidence_score || 0.9) * 100)}%`;
+        document.getElementById('ocrViewerCategory').textContent = ocrData.category_suggestion || 'Operasional';
+        document.getElementById('ocrViewerTax').textContent = formatCurrency(ocrData.tax_amount || 0);
+        document.getElementById('ocrViewerSource').textContent = ocrData.source === 'cloudflare_workers_ai_vision' ? '⚡ Cloudflare Vision AI' : '🧠 Local Smart OCR Engine';
+
+        const tbody = document.getElementById('ocrViewerItemsTableBody');
+        if (tbody) {
+            if (ocrData.line_items && ocrData.line_items.length > 0) {
+                tbody.innerHTML = ocrData.line_items.map(item => `
+                    <tr>
+                        <td><strong>${escapeHtml(item.description)}</strong></td>
+                        <td>${item.qty}</td>
+                        <td>${formatCurrency(item.unit_price)}</td>
+                        <td><strong>${formatCurrency(item.subtotal)}</strong></td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Item tidak terinci secara spesifik</td></tr>`;
+            }
+        }
+
+        const rawPre = document.getElementById('ocrViewerRawText');
+        if (rawPre) {
+            rawPre.textContent = ocrData.raw_extracted_text || JSON.stringify(ocrData, null, 2);
+        }
+
+        openModal('modalReceiptOCRViewer');
+    } catch (err) {
+        showToast('Gagal memproses AI OCR: ' + err.message, 'danger');
+    }
+}
+
+async function quickCreateExpenseFromCurrentOCR() {
+    if (!state.currentAttachmentOCR) return;
+    const attId = state.currentAttachmentOCR.att.id;
+
+    // Pick first active employee or prompt
+    let empId = 1;
+    if (state.user && state.user.id) {
+        empId = state.user.id;
+    }
+
+    try {
+        const createdExp = await api(`/attachments/${attId}/create-expense`, 'POST', {
+            employee_id: empId
+        });
+        showToast(`Klaim biaya "${createdExp.name}" sebesar ${formatCurrency(createdExp.total_amount)} berhasil dibuat!`, 'success');
+        closeModal('modalReceiptOCRViewer');
+        loadAttachments();
+        loadAttachmentStats();
+    } catch (err) {
+        showToast('Gagal membuat expense: ' + err.message, 'danger');
+    }
+}
+
+async function promptCreateExpenseFromAttachment(attId) {
+    try {
+        const createdExp = await api(`/attachments/${attId}/create-expense`, 'POST', {
+            employee_id: state.user?.id || 1
+        });
+        showToast(`Klaim pengeluaran berhasil dibuat dari struk: ${createdExp.name}`, 'success');
+        loadAttachments();
+        loadAttachmentStats();
+    } catch (err) {
+        showToast('Gagal membuat klaim: ' + err.message, 'danger');
+    }
+}
+
+function openExpenseModalFromOCR() {
+    if (!state.currentAttachmentOCR) return;
+    const { att, ocr } = state.currentAttachmentOCR;
+    closeModal('modalReceiptOCRViewer');
+
+    // Switch to expenses tab if not active
+    const navExpenses = document.querySelector('.nav-item[data-tab="expenses"]');
+    if (navExpenses) navExpenses.click();
+
+    setTimeout(() => {
+        openCreateExpenseModal();
+        // Prefill fields
+        const nameInput = document.getElementById('expItemName');
+        if (nameInput) nameInput.value = `[${ocr.vendor_name}] ${ocr.category_suggestion}`;
+
+        const dateInput = document.getElementById('expItemDate');
+        if (dateInput && ocr.invoice_date) dateInput.value = ocr.invoice_date;
+
+        const priceInput = document.getElementById('expItemUnitPrice');
+        if (priceInput && ocr.total_amount) {
+            priceInput.value = ocr.total_amount;
+            calcExpItemTotal();
+        }
+
+        const refInput = document.getElementById('expItemReceiptRef');
+        if (refInput) refInput.value = `STRUK-${att.id}`;
+
+        const notesInput = document.getElementById('expItemNotes');
+        if (notesInput) notesInput.value = `Dipindai otomatis via Cloudflare AI Vision OCR dari lampiran: ${att.name}`;
+    }, 250);
+}
+
+async function deleteAttachment(id) {
+    if (!confirm('Apakah Anda yakin ingin menghapus berkas dokumen ini dari storage?')) {
+        return;
+    }
+
+    try {
+        await api(`/attachments/${id}`, 'DELETE');
+        showToast('Dokumen berhasil dihapus dari storage.', 'info');
+        loadAttachments();
+        loadAttachmentStats();
+    } catch (err) {
+        showToast('Gagal menghapus dokumen: ' + err.message, 'danger');
+    }
+}
+
+// =========================================================================
+// 22. MODUL KEHADIRAN, PRESENSI GPS & SHIFT LEMBUR (hr.attendance)
+// =========================================================================
+
+let attendanceDebounceTimer = null;
+let liveClockInterval = null;
+let currentDetectedGPS = { lat: 0, lng: 0, address: '' };
+
+function debounceLoadAttendances() {
+    clearTimeout(attendanceDebounceTimer);
+    attendanceDebounceTimer = setTimeout(loadAttendances, 300);
+}
+
+function initLiveClockTicker() {
+    if (liveClockInterval) clearInterval(liveClockInterval);
+    const updateTime = () => {
+        const el = document.getElementById('liveClockDisplay');
+        if (el) {
+            const now = new Date();
+            el.textContent = '🕒 ' + now.toLocaleTimeString('id-ID', { hour12: false });
+        }
+    };
+    updateTime();
+    liveClockInterval = setInterval(updateTime, 1000);
+}
+
+async function loadAttendanceStats() {
+    try {
+        const stats = await api('/attendance/stats');
+        const todayEl = document.getElementById('attStatToday');
+        if (todayEl) todayEl.textContent = stats.total_today || 0;
+
+        const activeEl = document.getElementById('attStatActive');
+        if (activeEl) activeEl.textContent = stats.currently_checked_in || 0;
+
+        const lateEl = document.getElementById('attStatLate');
+        if (lateEl) lateEl.textContent = stats.late_today || 0;
+
+        const otEl = document.getElementById('attStatOvertime');
+        if (otEl) otEl.textContent = (stats.total_overtime_hours || 0).toFixed(1) + ' Jam';
+
+        const anomEl = document.getElementById('attStatAnomaly');
+        if (anomEl) anomEl.textContent = stats.anomaly_count || 0;
+    } catch (err) {
+        console.error('Failed to load attendance stats:', err);
+    }
+}
+
+async function loadShifts() {
+    try {
+        const shifts = await api('/attendance/shifts');
+        const kioskSelect = document.getElementById('kioskShiftSelect');
+        const manualSelect = document.getElementById('manualModalShiftSelect');
+
+        let options = '<option value="">-- Shift Reguler (Default) --</option>';
+        if (Array.isArray(shifts)) {
+            shifts.forEach(s => {
+                const flexibleTag = s.is_flexible ? ' (WFH/Fleksibel)' : '';
+                options += `<option value="${s.id}">${s.name} [${s.start_time}-${s.end_time}]${flexibleTag}</option>`;
+            });
+        }
+
+        if (kioskSelect) kioskSelect.innerHTML = options;
+        if (manualSelect) manualSelect.innerHTML = options;
+    } catch (err) {
+        console.error('Failed to load shifts:', err);
+    }
+}
+
+async function populateAttendanceEmployeeDropdowns() {
+    try {
+        let employees = state.employees;
+        if (!employees || employees.length === 0) {
+            employees = await api('/hr/employees');
+            state.employees = employees;
+        }
+
+        const kioskSelect = document.getElementById('kioskEmployeeSelect');
+        const manualSelect = document.getElementById('manualModalEmployeeSelect');
+        const syncSelect = document.getElementById('syncPayrollEmployeeSelect');
+
+        let options = '<option value="">-- Pilih Nama Karyawan --</option>';
+        if (Array.isArray(employees)) {
+            employees.forEach(e => {
+                options += `<option value="${e.id}">${e.name} (${e.job ? e.job.name : 'Staf'})</option>`;
+            });
+        }
+
+        if (kioskSelect) kioskSelect.innerHTML = options;
+        if (manualSelect) manualSelect.innerHTML = options;
+        if (syncSelect) syncSelect.innerHTML = options;
+    } catch (err) {
+        console.error('Failed to populate attendance employees:', err);
+    }
+}
+
+function detectUserGPS() {
+    const locInput = document.getElementById('kioskLocationInput');
+    if (!navigator.geolocation) {
+        if (locInput) locInput.value = 'GPS tidak didukung oleh browser';
+        return;
+    }
+
+    if (locInput) locInput.value = 'Mendeteksi koordinat satelit...';
+
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            currentDetectedGPS.lat = pos.coords.latitude;
+            currentDetectedGPS.lng = pos.coords.longitude;
+            currentDetectedGPS.address = `Lat: ${pos.coords.latitude.toFixed(5)}, Lng: ${pos.coords.longitude.toFixed(5)} (Akurasi: ${Math.round(pos.coords.accuracy)}m)`;
+            if (locInput) locInput.value = currentDetectedGPS.address;
+            showToast('Lokasi GPS berhasil dikunci.', 'success');
+        },
+        (err) => {
+            currentDetectedGPS.lat = -6.200050;
+            currentDetectedGPS.lng = 106.816680;
+            currentDetectedGPS.address = 'Kantor Pusat Sudirman (Simulasi Satelit)';
+            if (locInput) locInput.value = currentDetectedGPS.address;
+            showToast('GPS simulasi kantor diaktifkan: ' + err.message, 'info');
+        },
+        { enableHighAccuracy: true, timeout: 6000 }
+    );
+}
+
+function detectManualModalGPS() {
+    const addrInput = document.getElementById('manualModalAddress');
+    if (addrInput) addrInput.value = 'Mendeteksi...';
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            currentDetectedGPS.lat = pos.coords.latitude;
+            currentDetectedGPS.lng = pos.coords.longitude;
+            currentDetectedGPS.address = `Lat: ${pos.coords.latitude.toFixed(5)}, Lng: ${pos.coords.longitude.toFixed(5)}`;
+            if (addrInput) addrInput.value = currentDetectedGPS.address;
+            showToast('GPS berhasil dideteksi.', 'success');
+        },
+        () => {
+            currentDetectedGPS.lat = -6.200050;
+            currentDetectedGPS.lng = 106.816680;
+            currentDetectedGPS.address = 'Menara Sudirman Lantai 18, Jakarta Pusat';
+            if (addrInput) addrInput.value = currentDetectedGPS.address;
+        }
+    );
+}
+
+async function checkEmployeeActiveAttendance() {
+    const empSelect = document.getElementById('kioskEmployeeSelect');
+    const empId = empSelect ? empSelect.value : '';
+    const alertBox = document.getElementById('kioskActiveStatusAlert');
+    const btnIn = document.getElementById('btnKioskCheckIn');
+    const btnOut = document.getElementById('btnKioskCheckOut');
+
+    if (!empId) {
+        if (alertBox) alertBox.style.display = 'none';
+        if (btnIn) btnIn.disabled = false;
+        if (btnOut) btnOut.disabled = true;
+        return;
+    }
+
+    try {
+        const res = await api(`/attendance/active/${empId}`);
+        if (res.active && res.attendance) {
+            const att = res.attendance;
+            const inTime = new Date(att.check_in).toLocaleTimeString('id-ID');
+            if (alertBox) {
+                alertBox.style.display = 'block';
+                alertBox.className = 'badge badge-warning';
+                alertBox.style.padding = '0.5rem 0.75rem';
+                alertBox.innerHTML = `🟢 Karyawan sedang <strong>AKTIF Bekerja</strong> sejak ${inTime} (Tanggal: ${att.date}). Silakan tekan Check-Out untuk menyelesaikan jam kerja.`;
+            }
+            if (btnIn) btnIn.disabled = true;
+            if (btnOut) btnOut.disabled = false;
+        } else {
+            if (alertBox) {
+                alertBox.style.display = 'block';
+                alertBox.className = 'badge badge-draft';
+                alertBox.style.padding = '0.5rem 0.75rem';
+                alertBox.innerHTML = `⚪ Belum ada sesi check-in aktif hari ini. Tekan Check-In untuk mencatat kehadiran.`;
+            }
+            if (btnIn) btnIn.disabled = false;
+            if (btnOut) btnOut.disabled = true;
+        }
+    } catch (err) {
+        console.error('Error checking active attendance:', err);
+    }
+}
+
+async function checkManualModalActiveAttendance() {
+    const empSelect = document.getElementById('manualModalEmployeeSelect');
+    const empId = empSelect ? empSelect.value : '';
+    const infoBox = document.getElementById('manualModalStatusInfo');
+    const btnIn = document.getElementById('btnManualModalCheckIn');
+    const btnOut = document.getElementById('btnManualModalCheckOut');
+
+    if (!empId) {
+        if (infoBox) infoBox.style.display = 'none';
+        return;
+    }
+
+    try {
+        const res = await api(`/attendance/active/${empId}`);
+        if (res.active && res.attendance) {
+            const inTime = new Date(res.attendance.check_in).toLocaleTimeString('id-ID');
+            if (infoBox) {
+                infoBox.style.display = 'block';
+                infoBox.innerHTML = `🟢 <strong>Aktif:</strong> Check-in tercatat ${inTime} (${res.attendance.date}).`;
+            }
+            if (btnIn) btnIn.disabled = true;
+            if (btnOut) btnOut.disabled = false;
+        } else {
+            if (infoBox) {
+                infoBox.style.display = 'block';
+                infoBox.innerHTML = `⚪ Tidak ada sesi check-in aktif. Siap untuk Check-In.`;
+            }
+            if (btnIn) btnIn.disabled = false;
+            if (btnOut) btnOut.disabled = true;
+        }
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+async function executeKioskCheckIn() {
+    const empSelect = document.getElementById('kioskEmployeeSelect');
+    const shiftSelect = document.getElementById('kioskShiftSelect');
+    const empId = empSelect ? parseInt(empSelect.value) : 0;
+    if (!empId) {
+        showToast('Silakan pilih karyawan terlebih dahulu.', 'warning');
+        return;
+    }
+
+    const shiftId = shiftSelect && shiftSelect.value ? parseInt(shiftSelect.value) : null;
+    const payload = {
+        employee_id: empId,
+        shift_id: shiftId,
+        latitude: currentDetectedGPS.lat,
+        longitude: currentDetectedGPS.lng,
+        address: currentDetectedGPS.address || 'Terminal Kiosk Edge',
+        device: 'Web Client Terminal',
+        note: 'Check-in via Kiosk Terminal'
+    };
+
+    try {
+        const res = await api('/attendance/check-in', 'POST', payload);
+        showToast(res.message || 'Check-in berhasil dicatat!', 'success');
+        checkEmployeeActiveAttendance();
+        loadAttendances();
+        loadAttendanceStats();
+    } catch (err) {
+        showToast('Gagal Check-In: ' + err.message, 'danger');
+    }
+}
+
+async function executeKioskCheckOut() {
+    const empSelect = document.getElementById('kioskEmployeeSelect');
+    const empId = empSelect ? parseInt(empSelect.value) : 0;
+    if (!empId) {
+        showToast('Silakan pilih karyawan terlebih dahulu.', 'warning');
+        return;
+    }
+
+    const payload = {
+        employee_id: empId,
+        latitude: currentDetectedGPS.lat,
+        longitude: currentDetectedGPS.lng,
+        address: currentDetectedGPS.address || 'Terminal Kiosk Edge',
+        note: 'Check-out via Kiosk Terminal'
+    };
+
+    try {
+        const res = await api('/attendance/check-out', 'POST', payload);
+        const att = res.attendance;
+        const msg = `Check-out berhasil! Total Jam: ${att.worked_hours} jam (Lembur: ${att.overtime_hours} jam)`;
+        showToast(msg, 'success');
+        checkEmployeeActiveAttendance();
+        loadAttendances();
+        loadAttendanceStats();
+    } catch (err) {
+        showToast('Gagal Check-Out: ' + err.message, 'danger');
+    }
+}
+
+async function submitManualCheckIn() {
+    const empId = parseInt(document.getElementById('manualModalEmployeeSelect').value);
+    if (!empId) {
+        showToast('Silakan pilih karyawan.', 'warning');
+        return;
+    }
+    const shiftIdVal = document.getElementById('manualModalShiftSelect').value;
+    const shiftId = shiftIdVal ? parseInt(shiftIdVal) : null;
+    const address = document.getElementById('manualModalAddress').value;
+    const note = document.getElementById('manualModalNote').value;
+
+    try {
+        await api('/attendance/check-in', 'POST', {
+            employee_id: empId,
+            shift_id: shiftId,
+            latitude: currentDetectedGPS.lat,
+            longitude: currentDetectedGPS.lng,
+            address: address || 'Kantor Pusat',
+            device: 'Manual Admin Portal',
+            note: note
+        });
+        showToast('Check-In berhasil dicatat!', 'success');
+        closeModal('modalAttendanceCheckIn');
+        loadAttendances();
+        loadAttendanceStats();
+    } catch (err) {
+        showToast('Gagal Check-In: ' + err.message, 'danger');
+    }
+}
+
+async function submitManualCheckOut() {
+    const empId = parseInt(document.getElementById('manualModalEmployeeSelect').value);
+    if (!empId) {
+        showToast('Silakan pilih karyawan.', 'warning');
+        return;
+    }
+    const address = document.getElementById('manualModalAddress').value;
+    const note = document.getElementById('manualModalNote').value;
+
+    try {
+        const res = await api('/attendance/check-out', 'POST', {
+            employee_id: empId,
+            latitude: currentDetectedGPS.lat,
+            longitude: currentDetectedGPS.lng,
+            address: address || 'Kantor Pusat',
+            note: note
+        });
+        showToast(`Check-Out sukses! Jam Kerja: ${res.attendance.worked_hours} jam`, 'success');
+        closeModal('modalAttendanceCheckIn');
+        loadAttendances();
+        loadAttendanceStats();
+    } catch (err) {
+        showToast('Gagal Check-Out: ' + err.message, 'danger');
+    }
+}
+
+async function loadAttendances() {
+    const tbody = document.getElementById('attendancesTableBody');
+    if (!tbody) return;
+
+    const statusFilter = document.getElementById('attendanceStatusFilter') ? document.getElementById('attendanceStatusFilter').value : '';
+    const anomalyOnly = document.getElementById('attendanceAnomalyOnly') ? document.getElementById('attendanceAnomalyOnly').checked : false;
+    const searchVal = document.getElementById('attendanceSearchInput') ? document.getElementById('attendanceSearchInput').value : '';
+
+    let url = '/attendance?limit=50';
+    if (statusFilter) url += `&status=${encodeURIComponent(statusFilter)}`;
+    if (anomalyOnly) url += '&anomaly_only=true';
+    if (searchVal) url += `&search=${encodeURIComponent(searchVal)}`;
+
+    try {
+        const res = await api(url);
+        const data = res.data || [];
+        tbody.innerHTML = '';
+
+        if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">Belum ada riwayat kehadiran tercatat.</td></tr>';
+            return;
+        }
+
+        data.forEach(a => {
+            const empName = a.employee ? a.employee.name : `Karyawan #${a.employee_id}`;
+            const deptName = a.employee && a.employee.department ? a.employee.department.name : '-';
+            const shiftName = a.shift ? `<span class="badge" style="background: ${a.shift.color}22; color: ${a.shift.color}; border: 1px solid ${a.shift.color}55;">${a.shift.name}</span>` : '<span class="badge badge-draft">Reguler</span>';
+
+            const inTimeStr = new Date(a.check_in).toLocaleTimeString('id-ID');
+            const outTimeStr = a.check_out ? new Date(a.check_out).toLocaleTimeString('id-ID') : '<span class="badge badge-warning">Sedang Aktif</span>';
+
+            let statusBadge = '<span class="badge badge-info">Checked In</span>';
+            if (a.status === 'checked_out') statusBadge = '<span class="badge badge-success">Selesai</span>';
+            if (a.status === 'late') statusBadge = '<span class="badge badge-danger">Terlambat</span>';
+            if (a.status === 'overtime') statusBadge = '<span class="badge badge-warning">Lembur</span>';
+
+            let anomalyBadge = '';
+            if (a.anomaly_flag) {
+                anomalyBadge = `<div style="font-size: 0.75rem; color: #ef4444; margin-top: 0.2rem;" title="${a.anomaly_reason || ''}">⚠️ Anomali Lokasi/IP</div>`;
+            }
+
+            const otLateText = [];
+            if (a.overtime_hours > 0) otLateText.push(`<span style="color: #f59e0b; font-weight: 600;">+${a.overtime_hours}j Lembur</span>`);
+            if (a.late_minutes > 0) otLateText.push(`<span style="color: #ef4444; font-weight: 600;">-${a.late_minutes}m Telat</span>`);
+            const otLateDisplay = otLateText.length > 0 ? otLateText.join('<br>') : '<span class="text-muted">Tepat Waktu</span>';
+
+            const edgeInfo = a.ip_address ? `<div style="font-size: 0.75rem; color: var(--text-muted);">IP: ${a.ip_address} (${a.country || 'ID'})</div>` : '';
+            const locationDisplay = `<div style="max-width: 180px; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${a.in_address || ''}">${a.in_address || 'Kantor'}</div>${edgeInfo}${anomalyBadge}`;
+
+            let actionsHtml = `<button class="btn btn-sm btn-outline" onclick="deleteAttendanceRecord(${a.id})" title="Hapus">🗑️</button>`;
+            if (!a.check_out) {
+                actionsHtml = `<button class="btn btn-sm btn-primary" onclick="quickCheckOut(${a.id}, ${a.employee_id})" style="background: #ef4444; border-color: #ef4444; margin-right: 0.25rem;">Out</button>` + actionsHtml;
+            }
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>
+                        <strong>${a.date}</strong>
+                        <div style="margin-top: 0.25rem;">${shiftName}</div>
+                    </td>
+                    <td>
+                        <strong>${empName}</strong>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">${deptName}</div>
+                    </td>
+                    <td><span style="font-weight: 600;">${inTimeStr}</span></td>
+                    <td>${outTimeStr}</td>
+                    <td><strong>${a.worked_hours.toFixed(2)} Jam</strong></td>
+                    <td>${otLateDisplay}</td>
+                    <td>${statusBadge}</td>
+                    <td>${locationDisplay}</td>
+                    <td>${actionsHtml}</td>
+                </tr>
+            `;
+        });
+    } catch (err) {
+        showToast('Gagal memuat presensi: ' + err.message, 'danger');
+    }
+}
+
+async function quickCheckOut(attId, empId) {
+    if (!confirm('Catat waktu check-out untuk karyawan sekarang?')) return;
+    try {
+        const res = await api('/attendance/check-out', 'POST', {
+            attendance_id: attId,
+            employee_id: empId,
+            note: 'Quick Check-Out via Table Row'
+        });
+        showToast(`Check-out berhasil! Durasi: ${res.attendance.worked_hours} jam`, 'success');
+        loadAttendances();
+        loadAttendanceStats();
+    } catch (err) {
+        showToast('Gagal Check-Out: ' + err.message, 'danger');
+    }
+}
+
+async function deleteAttendanceRecord(id) {
+    if (!confirm('Hapus baris data presensi ini?')) return;
+    try {
+        await api(`/attendance/${id}`, 'DELETE');
+        showToast('Data presensi dihapus.', 'info');
+        loadAttendances();
+        loadAttendanceStats();
+    } catch (err) {
+        showToast('Gagal menghapus: ' + err.message, 'danger');
+    }
+}
+
+// AI Anomaly & Burnout Audit
+function openAttendanceAIModal() {
+    openModal('modalAttendanceAI');
+    loadAttendanceAIAnalysis();
+}
+
+async function loadAttendanceAIAnalysis() {
+    const sumEl = document.getElementById('aiAttSummary');
+    if (sumEl) sumEl.textContent = 'Menghubungkan ke Cloudflare Workers AI edge model (@cf/meta/llama-3.1-8b-instruct)...';
+
+    try {
+        const res = await api('/attendance/ai-anomaly-check', 'POST');
+        const anEl = document.getElementById('aiAttAnalyzed');
+        if (anEl) anEl.textContent = res.analyzed_attendances;
+
+        const amEl = document.getElementById('aiAttAnomalies');
+        if (amEl) amEl.textContent = res.anomalies_detected;
+
+        const confEl = document.getElementById('aiAttConfidence');
+        if (confEl) confEl.textContent = Math.round(res.ai_confidence * 100) + '%';
+
+        const srcEl = document.getElementById('aiAttSource');
+        if (srcEl) srcEl.textContent = res.source === 'cloudflare_workers_ai' ? '⚡ Cloudflare Workers AI' : '⚙️ Smart Heuristic Engine';
+
+        if (sumEl) sumEl.textContent = res.summary;
+
+        // Burnout list
+        const bList = document.getElementById('aiAttBurnoutList');
+        if (bList) {
+            bList.innerHTML = '';
+            if (res.burnout_risk_employees && res.burnout_risk_employees.length > 0) {
+                res.burnout_risk_employees.forEach(item => {
+                    bList.innerHTML += `<li style="color: #ef4444; margin-bottom: 0.25rem;">${item}</li>`;
+                });
+            } else {
+                bList.innerHTML = '<li class="text-muted">Tidak ditemukan indikasi risiko burnout (&lt; 8 jam lembur).</li>';
+            }
+        }
+
+        // Tardiness list
+        const tList = document.getElementById('aiAttLateList');
+        if (tList) {
+            tList.innerHTML = '';
+            if (res.excessive_tardiness && res.excessive_tardiness.length > 0) {
+                res.excessive_tardiness.forEach(item => {
+                    tList.innerHTML += `<li style="color: #f59e0b; margin-bottom: 0.25rem;">${item}</li>`;
+                });
+            } else {
+                tList.innerHTML = '<li class="text-muted">Kedisiplinan sangat baik (tidak ada akumulasi telat &gt; 30 menit).</li>';
+            }
+        }
+
+        // Suspicious locations
+        const lList = document.getElementById('aiAttLocationsList');
+        if (lList) {
+            lList.innerHTML = '';
+            if (res.suspicious_locations && res.suspicious_locations.length > 0) {
+                res.suspicious_locations.forEach(item => {
+                    lList.innerHTML += `<li style="color: #3b82f6; margin-bottom: 0.25rem;">${item}</li>`;
+                });
+            } else {
+                lList.innerHTML = '<li class="text-muted">Semua presensi berada dalam radius kantor & IP terpercaya.</li>';
+            }
+        }
+
+        // Recommendations
+        const rList = document.getElementById('aiAttRecommendationsList');
+        if (rList) {
+            rList.innerHTML = '';
+            if (res.recommendations && res.recommendations.length > 0) {
+                res.recommendations.forEach(rec => {
+                    rList.innerHTML += `<li style="margin-bottom: 0.35rem;">${rec}</li>`;
+                });
+            }
+        }
+    } catch (err) {
+        if (sumEl) sumEl.textContent = 'Gagal menjalankan audit AI: ' + err.message;
+        showToast('Gagal audit AI: ' + err.message, 'danger');
+    }
+}
+
+// Sync Attendance to Payroll
+function openSyncPayrollModal() {
+    openModal('modalSyncPayroll');
+    populateAttendanceEmployeeDropdowns();
+}
+
+async function submitSyncPayroll() {
+    const empId = parseInt(document.getElementById('syncPayrollEmployeeSelect').value);
+    if (!empId) {
+        showToast('Silakan pilih karyawan.', 'warning');
+        return;
+    }
+    const period = document.getElementById('syncPayrollPeriod').value;
+    const otRate = parseFloat(document.getElementById('syncPayrollOtRate').value) || 50000;
+    const latePenalty = parseFloat(document.getElementById('syncPayrollLatePenalty').value) || 1000;
+
+    try {
+        const res = await api('/attendance/sync-payroll', 'POST', {
+            employee_id: empId,
+            period: period,
+            overtime_rate_per_hour: otRate,
+            late_penalty_per_minute: latePenalty
+        });
+        showToast(`Sinkronisasi sukses! Slip Gaji: ${res.payslip.name} (Gaji Bersih: Rp ${formatNumber(res.payslip.net_salary)})`, 'success');
+        closeModal('modalSyncPayroll');
+        loadAttendances();
+    } catch (err) {
+        showToast('Gagal sinkron slip gaji: ' + err.message, 'danger');
+    }
+}
+
+// Create Shift
+async function submitCreateShift() {
+    const name = document.getElementById('shiftNameInput').value;
+    const code = document.getElementById('shiftCodeInput').value;
+    const startTime = document.getElementById('shiftStartInput').value;
+    const endTime = document.getElementById('shiftEndInput').value;
+    const hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8.0;
+    const grace = parseInt(document.getElementById('shiftGraceInput').value) || 15;
+    const flexible = document.getElementById('shiftFlexibleInput').checked;
+    const desc = document.getElementById('shiftDescInput').value;
+
+    if (!name || !code) {
+        showToast('Nama dan kode shift wajib diisi.', 'warning');
+        return;
+    }
+
+    try {
+        await api('/attendance/shifts', 'POST', {
+            name: name,
+            code: code,
+            start_time: startTime,
+            end_time: endTime,
+            standard_hours: hours,
+            grace_period_minutes: grace,
+            is_flexible: flexible,
+            description: desc,
+            color: flexible ? '#10b981' : '#3b82f6'
+        });
+        showToast('Shift kerja berhasil dibuat!', 'success');
+        closeModal('modalCreateShift');
+        loadShifts();
+    } catch (err) {
+        showToast('Gagal membuat shift: ' + err.message, 'danger');
+    }
+}
+
+// =========================================================================
+// 23. HR RECRUITMENT & CLOUDFLARE WORKERS AI TALENT ACQUISITION
+// =========================================================================
+let recruitmentStages = [];
+let jobOpeningsList = [];
+let activeApplicantId = null;
+let applicantDebounceTimer = null;
+
+function debounceLoadApplicants() {
+    clearTimeout(applicantDebounceTimer);
+    applicantDebounceTimer = setTimeout(loadApplicants, 300);
+}
+
+async function loadRecruitmentData() {
+    await Promise.all([
+        loadRecruitmentStats(),
+        loadRecruitmentStages(),
+        loadJobOpenings(),
+        populateJobDepartmentsDropdown()
+    ]);
+    loadApplicants();
+}
+
+async function loadRecruitmentStats() {
+    try {
+        const stats = await api('/recruitment/stats');
+        const opEl = document.getElementById('recStatOpenings');
+        if (opEl) opEl.textContent = stats.total_openings;
+
+        const apEl = document.getElementById('recStatApplicants');
+        if (apEl) apEl.textContent = stats.total_applicants;
+
+        const inEl = document.getElementById('recStatInProgress');
+        if (inEl) inEl.textContent = stats.in_progress_count;
+
+        const hiEl = document.getElementById('recStatHired');
+        if (hiEl) hiEl.textContent = stats.hired_count;
+
+        const avgEl = document.getElementById('recStatAvgAIScore');
+        if (avgEl) avgEl.textContent = Math.round(stats.average_ai_score) + '%';
+    } catch (err) {
+        console.error('Failed to load recruitment stats:', err);
+    }
+}
+
+async function loadRecruitmentStages() {
+    try {
+        recruitmentStages = await api('/recruitment/stages');
+    } catch (err) {
+        console.error('Failed to load recruitment stages:', err);
+    }
+}
+
+async function loadJobOpenings() {
+    try {
+        jobOpeningsList = await api('/recruitment/openings');
+        const container = document.getElementById('jobOpeningsChipsContainer');
+        const filterSelect = document.getElementById('applicantOpeningFilter');
+        const modalSelect = document.getElementById('appOpeningSelect');
+        const countBadge = document.getElementById('recOpeningsCountBadge');
+
+        if (countBadge) {
+            const openCount = jobOpeningsList.filter(j => j.state === 'open').length;
+            countBadge.textContent = openCount + ' Posisi Dibuka';
+        }
+
+        if (container) {
+            container.innerHTML = '';
+            if (jobOpeningsList.length === 0) {
+                container.innerHTML = '<div class="text-muted">Belum ada lowongan pekerjaan dibuka.</div>';
+            } else {
+                jobOpeningsList.forEach(job => {
+                    const isOpen = job.state === 'open';
+                    const badgeBg = isOpen ? 'rgba(16, 185, 129, 0.15)' : 'rgba(100, 116, 139, 0.15)';
+                    const badgeCol = isOpen ? '#10b981' : '#94a3b8';
+                    const deptName = job.department ? job.department.name : 'All Dept';
+                    container.innerHTML += `
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem 1rem; min-width: 250px; flex: 1;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.35rem;">
+                                <strong style="font-size: 0.95rem; color: var(--text-color);">${job.title}</strong>
+                                <span style="background: ${badgeBg}; color: ${badgeCol}; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">
+                                    ${isOpen ? 'AKTIF' : 'DITUTUP'}
+                                </span>
+                            </div>
+                            <div class="text-muted" style="font-size: 0.8rem; margin-bottom: 0.4rem;">📁 ${deptName}</div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
+                                <span>Terpenuhi: <strong>${job.current_hired} / ${job.expected_employees}</strong></span>
+                                <span style="color: #a78bfa;">Rp ${(job.salary_min/1000000).toFixed(0)}jt - ${(job.salary_max/1000000).toFixed(0)}jt</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        if (filterSelect) {
+            filterSelect.innerHTML = '<option value="">Semua Posisi</option>';
+            jobOpeningsList.forEach(j => {
+                filterSelect.innerHTML += `<option value="${j.id}">${j.title}</option>`;
+            });
+        }
+
+        if (modalSelect) {
+            modalSelect.innerHTML = '<option value="">Pilih Lowongan...</option>';
+            jobOpeningsList.filter(j => j.state === 'open').forEach(j => {
+                modalSelect.innerHTML += `<option value="${j.id}">${j.title}</option>`;
+            });
+        }
+    } catch (err) {
+        console.error('Failed to load job openings:', err);
+    }
+}
+
+async function populateJobDepartmentsDropdown() {
+    try {
+        const depts = await api('/hr/departments');
+        const sel = document.getElementById('jobDepartmentSelect');
+        if (sel) {
+            sel.innerHTML = '<option value="">Pilih Departemen...</option>';
+            depts.forEach(d => {
+                sel.innerHTML += `<option value="${d.id}">${d.name}</option>`;
+            });
+        }
+    } catch (err) {
+        console.error('Failed to load departments for recruitment:', err);
+    }
+}
+
+async function loadApplicants() {
+    const tbody = document.getElementById('applicantsTableBody');
+    if (!tbody) return;
+
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center">Memuat daftar pelamar...</td></tr>';
+
+    const openingId = document.getElementById('applicantOpeningFilter')?.value || '';
+    const state = document.getElementById('applicantStateFilter')?.value || '';
+    const search = document.getElementById('applicantSearchInput')?.value || '';
+
+    let url = `/recruitment/applicants?limit=100`;
+    if (openingId) url += `&job_opening_id=${openingId}`;
+    if (state) url += `&state=${state}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+
+    try {
+        const res = await api(url);
+        const list = res.data || [];
+
+        if (list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted" style="padding: 2rem;">Belum ada pelamar yang cocok dengan kriteria pencarian.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = '';
+        list.forEach(app => {
+            const jobTitle = app.job_opening ? app.job_opening.title : '-';
+            const stageName = app.stage ? app.stage.name : '-';
+            const salaryFmt = app.salary_expected > 0 ? formatCurrency(app.salary_expected) : '-';
+
+            // AI Match Badge
+            let aiBadge = '<span class="text-muted" style="font-size: 0.8rem;">Belum di-scan</span>';
+            if (app.ai_score > 0) {
+                let badgeColor = '#ef4444';
+                let badgeBg = 'rgba(239, 68, 68, 0.15)';
+                if (app.ai_score >= 80) {
+                    badgeColor = '#10b981';
+                    badgeBg = 'rgba(16, 185, 129, 0.15)';
+                } else if (app.ai_score >= 60) {
+                    badgeColor = '#f59e0b';
+                    badgeBg = 'rgba(245, 158, 11, 0.15)';
+                }
+                aiBadge = `
+                    <div style="display: flex; flex-direction: column; gap: 0.2rem;">
+                        <span style="background: ${badgeBg}; color: ${badgeColor}; padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 700; font-size: 0.82rem; width: fit-content;">
+                            ⚡ ${Math.round(app.ai_score)}%
+                        </span>
+                        <span style="font-size: 0.72rem; color: var(--text-muted);">${app.ai_recommendation || ''}</span>
+                    </div>
+                `;
+            }
+
+            // Status Badge
+            let statusBadge = '<span class="badge badge-secondary">New</span>';
+            if (app.state === 'in_progress') {
+                statusBadge = '<span class="badge badge-warning">Proses</span>';
+            } else if (app.state === 'hired') {
+                statusBadge = '<span class="badge badge-success">Diterima</span>';
+            } else if (app.state === 'refused') {
+                statusBadge = '<span class="badge badge-danger">Ditolak</span>';
+            }
+
+            // Actions
+            let hireBtn = '';
+            if (app.state !== 'hired' && app.state !== 'refused') {
+                hireBtn = `
+                    <button class="btn btn-sm btn-secondary" onclick="openHireModal(${app.id})" title="1-Click Rekrut ke Karyawan" style="background: #10b981; border-color: #10b981; color: white;">
+                        🎉 Rekrut
+                    </button>
+                `;
+            }
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>
+                        <strong style="color: var(--text-color); font-size: 0.95rem;">${app.name}</strong>
+                        <div class="text-muted" style="font-size: 0.8rem;">✉️ ${app.email}</div>
+                        ${app.phone ? `<div class="text-muted" style="font-size: 0.78rem;">📞 ${app.phone}</div>` : ''}
+                    </td>
+                    <td>
+                        <div style="font-weight: 600;">${jobTitle}</div>
+                    </td>
+                    <td>
+                        <span style="background: rgba(139, 92, 246, 0.1); color: #a78bfa; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">
+                            ${stageName}
+                        </span>
+                    </td>
+                    <td>${salaryFmt}</td>
+                    <td>${aiBadge}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <div style="display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap;">
+                            <button class="btn btn-sm btn-primary" onclick="executeAIScreening(${app.id})" title="Scan Kecocokan CV dengan Cloudflare Workers AI">
+                                ✨ Scan AI
+                            </button>
+                            <button class="btn btn-sm btn-secondary" onclick="openApplicantDetail(${app.id})" title="Lihat CV & Evaluasi AI Lengkap">
+                                👁️ Detail
+                            </button>
+                            ${hireBtn}
+                            ${app.state !== 'hired' ? `
+                                <button class="btn btn-sm btn-secondary" onclick="deleteApplicantRecord(${app.id})" title="Hapus Pelamar" style="color: #ef4444;">
+                                    🗑️
+                                </button>
+                            ` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger">Gagal memuat pelamar: ${err.message}</td></tr>`;
+    }
+}
+
+async function submitCreateJobOpening() {
+    const title = document.getElementById('jobTitleInput')?.value?.trim();
+    const deptId = document.getElementById('jobDepartmentSelect')?.value;
+    const expected = parseInt(document.getElementById('jobExpectedInput')?.value || '1', 10);
+    const salMin = parseFloat(document.getElementById('jobSalaryMinInput')?.value || '0');
+    const salMax = parseFloat(document.getElementById('jobSalaryMaxInput')?.value || '0');
+    const reqs = document.getElementById('jobReqsInput')?.value?.trim();
+    const desc = document.getElementById('jobDescInput')?.value?.trim();
+
+    if (!title || !deptId) {
+        showToast('Judul lowongan dan departemen wajib diisi!', 'warning');
+        return;
+    }
+
+    try {
+        await api('/recruitment/openings', 'POST', {
+            title: title,
+            department_id: parseInt(deptId, 10),
+            expected_employees: expected,
+            salary_min: salMin,
+            salary_max: salMax,
+            requirements: reqs,
+            description: desc
+        });
+        showToast('Lowongan pekerjaan baru berhasil dibuka!', 'success');
+        closeModal('modalCreateJobOpening');
+        loadJobOpenings();
+        loadRecruitmentStats();
+    } catch (err) {
+        showToast('Gagal membuat lowongan: ' + err.message, 'danger');
+    }
+}
+
+async function submitCreateApplicant() {
+    const name = document.getElementById('appNameInput')?.value?.trim();
+    const email = document.getElementById('appEmailInput')?.value?.trim();
+    const phone = document.getElementById('appPhoneInput')?.value?.trim();
+    const openingId = document.getElementById('appOpeningSelect')?.value;
+    const salary = parseFloat(document.getElementById('appSalaryInput')?.value || '0');
+    const resume = document.getElementById('appResumeInput')?.value?.trim();
+
+    if (!name || !email || !openingId || !resume) {
+        showToast('Nama, email, lowongan, dan resume CV wajib diisi!', 'warning');
+        return;
+    }
+
+    try {
+        await api('/recruitment/applicants', 'POST', {
+            name: name,
+            email: email,
+            phone: phone,
+            job_opening_id: parseInt(openingId, 10),
+            salary_expected: salary,
+            resume_text: resume
+        });
+        showToast('Kandidat pelamar berhasil didaftarkan!', 'success');
+        closeModal('modalCreateApplicant');
+        loadApplicants();
+        loadRecruitmentStats();
+    } catch (err) {
+        showToast('Gagal mendaftarkan pelamar: ' + err.message, 'danger');
+    }
+}
+
+async function executeAIScreening(id) {
+    showToast('Menghubungkan ke Cloudflare Workers AI edge model (@cf/meta/llama-3.1-8b-instruct)...', 'info');
+    try {
+        const res = await api(`/recruitment/applicants/${id}/ai-screening`, 'POST');
+        showToast(`AI Screening Selesai! Skor: ${Math.round(res.ai_score)}% (${res.ai_recommendation})`, 'success');
+        loadApplicants();
+        loadRecruitmentStats();
+    } catch (err) {
+        showToast('Gagal menjalankan AI screening: ' + err.message, 'danger');
+    }
+}
+
+async function openApplicantDetail(id) {
+    activeApplicantId = id;
+    try {
+        const app = await api(`/recruitment/applicants/${id}`);
+        document.getElementById('appDetailName').textContent = app.name;
+        document.getElementById('appDetailSub').textContent = `Posisi: ${app.job_opening ? app.job_opening.title : '-'} | Email: ${app.email} | Tel: ${app.phone || '-'}`;
+        document.getElementById('appDetailResumePre').textContent = app.resume_text || '(Tidak ada resume teks)';
+
+        // Populate stage select
+        const stageSel = document.getElementById('appDetailStageSelect');
+        if (stageSel) {
+            stageSel.innerHTML = '';
+            recruitmentStages.forEach(st => {
+                const isSelected = st.id === app.stage_id ? 'selected' : '';
+                stageSel.innerHTML += `<option value="${st.id}" ${isSelected}>${st.name}</option>`;
+            });
+        }
+
+        // AI assessment box
+        const badgeEl = document.getElementById('appDetailAIBadge');
+        const summaryEl = document.getElementById('appDetailAISummary');
+        const strList = document.getElementById('appDetailStrengthsList');
+        const weakList = document.getElementById('appDetailWeaknessesList');
+        const qList = document.getElementById('appDetailQuestionsList');
+
+        if (app.ai_score > 0) {
+            if (badgeEl) badgeEl.innerHTML = `<span style="color: ${app.ai_score >= 80 ? '#10b981' : (app.ai_score >= 60 ? '#f59e0b' : '#ef4444')};">⚡ ${Math.round(app.ai_score)}% - ${app.ai_recommendation}</span>`;
+            if (summaryEl) summaryEl.textContent = app.ai_summary || app.ai_fit_analysis || '-';
+
+            if (strList) {
+                strList.innerHTML = '';
+                const items = (app.key_strengths || '').split('\n').filter(Boolean);
+                if (items.length > 0) {
+                    items.forEach(it => strList.innerHTML += `<li>${it}</li>`);
+                } else {
+                    strList.innerHTML = '<li class="text-muted">-</li>';
+                }
+            }
+
+            if (weakList) {
+                weakList.innerHTML = '';
+                const items = (app.key_weaknesses || '').split('\n').filter(Boolean);
+                if (items.length > 0) {
+                    items.forEach(it => weakList.innerHTML += `<li>${it}</li>`);
+                } else {
+                    weakList.innerHTML = '<li class="text-muted">-</li>';
+                }
+            }
+
+            if (qList) {
+                qList.innerHTML = '';
+                const items = (app.suggested_questions || '').split('\n').filter(Boolean);
+                if (items.length > 0) {
+                    items.forEach(it => qList.innerHTML += `<li style="margin-bottom: 0.35rem;">${it}</li>`);
+                } else {
+                    qList.innerHTML = '<li class="text-muted">-</li>';
+                }
+            }
+        } else {
+            if (badgeEl) badgeEl.textContent = 'Belum di-scan';
+            if (summaryEl) summaryEl.textContent = 'Kandidat belum di-screening oleh Cloudflare Workers AI. Klik tombol "Scan dengan AI" di atas.';
+            if (strList) strList.innerHTML = '<li class="text-muted">-</li>';
+            if (weakList) weakList.innerHTML = '<li class="text-muted">-</li>';
+            if (qList) qList.innerHTML = '<li class="text-muted">-</li>';
+        }
+
+        // Toggle hire/refuse button visibility
+        const hireBtn = document.getElementById('btnDetailHire');
+        const refuseBtn = document.getElementById('btnDetailRefuse');
+        if (hireBtn) hireBtn.style.display = app.state === 'hired' ? 'none' : 'inline-block';
+        if (refuseBtn) refuseBtn.style.display = app.state === 'refused' || app.state === 'hired' ? 'none' : 'inline-block';
+
+        openModal('modalApplicantDetail');
+    } catch (err) {
+        showToast('Gagal memuat detail pelamar: ' + err.message, 'danger');
+    }
+}
+
+async function executeAIScreeningForDetail(id) {
+    await executeAIScreening(id);
+    openApplicantDetail(id);
+}
+
+async function submitUpdateApplicantStage(id, stageId) {
+    if (!id || !stageId) return;
+    try {
+        await api(`/recruitment/applicants/${id}/stage`, 'PUT', { stage_id: parseInt(stageId, 10) });
+        showToast('Tahapan seleksi pelamar diperbarui!', 'success');
+        loadApplicants();
+        loadRecruitmentStats();
+    } catch (err) {
+        showToast('Gagal memperbarui tahapan: ' + err.message, 'danger');
+    }
+}
+
+async function openHireModal(id) {
+    activeApplicantId = id;
+    try {
+        const app = await api(`/recruitment/applicants/${id}`);
+        document.getElementById('hireCandidateName').value = `${app.name} (${app.job_opening ? app.job_opening.title : '-'})`;
+        document.getElementById('hireBasicSalaryInput').value = app.salary_expected || (app.job_opening ? app.job_opening.salary_min : 10000000);
+        openModal('modalHireApplicant');
+    } catch (err) {
+        showToast('Gagal memuat data kandidat: ' + err.message, 'danger');
+    }
+}
+
+async function submitHireApplicant() {
+    if (!activeApplicantId) return;
+    const salary = parseFloat(document.getElementById('hireBasicSalaryInput')?.value || '0');
+    const bankName = document.getElementById('hireBankNameInput')?.value?.trim();
+    const bankAcc = document.getElementById('hireBankAccountInput')?.value?.trim();
+
+    try {
+        const res = await api(`/recruitment/applicants/${activeApplicantId}/hire`, 'POST', {
+            basic_salary: salary,
+            bank_name: bankName,
+            bank_account: bankAcc
+        });
+        showToast(res.message || 'Kandidat resmi direkrut sebagai karyawan!', 'success');
+        closeModal('modalHireApplicant');
+        closeModal('modalApplicantDetail');
+        loadApplicants();
+        loadJobOpenings();
+        loadRecruitmentStats();
+    } catch (err) {
+        showToast('Gagal merekrut kandidat: ' + err.message, 'danger');
+    }
+}
+
+async function openRefuseModal(id) {
+    activeApplicantId = id;
+    openModal('modalRefuseApplicant');
+}
+
+async function submitRefuseApplicant() {
+    if (!activeApplicantId) return;
+    const reason = document.getElementById('refuseReasonInput')?.value?.trim();
+    if (!reason) {
+        showToast('Alasan penolakan wajib disertakan!', 'warning');
+        return;
+    }
+
+    try {
+        await api(`/recruitment/applicants/${activeApplicantId}/refuse`, 'POST', { reason: reason });
+        showToast('Status kandidat diperbarui menjadi ditolak.', 'info');
+        closeModal('modalRefuseApplicant');
+        closeModal('modalApplicantDetail');
+        loadApplicants();
+        loadRecruitmentStats();
+    } catch (err) {
+        showToast('Gagal menolak pelamar: ' + err.message, 'danger');
+    }
+}
+
+async function deleteApplicantRecord(id) {
+    if (!confirm('Apakah Anda yakin ingin menghapus data pelamar ini?')) return;
+    try {
+        await api(`/recruitment/applicants/${id}`, 'DELETE');
+        showToast('Pelamar berhasil dihapus', 'success');
+        loadApplicants();
+        loadRecruitmentStats();
+    } catch (err) {
+        showToast('Gagal menghapus pelamar: ' + err.message, 'danger');
+    }
+}
+
+// =========================================================================
+// 24. MODUL STOCK OPNAME & INVENTARIS FISIK (stock.inventory)
+// =========================================================================
+let activeStockOpnameId = null;
+let cachedStockOpname = null;
+
+async function loadStockInventoryData() {
+    loadStockInventoryStats();
+    loadStockInventories();
+    loadLocationsForStockOpname();
+    loadProductsForStockOpname();
+}
+
+async function loadStockInventoryStats() {
+    try {
+        const stats = await api('/stock-inventory/stats');
+        document.getElementById('stockInvStatTotal').textContent = stats.total_inventories || 0;
+        document.getElementById('stockInvStatDraft').textContent = stats.draft_count || 0;
+        document.getElementById('stockInvStatConfirm').textContent = stats.confirmed_count || 0;
+        document.getElementById('stockInvStatDone').textContent = stats.done_count || 0;
+        document.getElementById('stockInvStatLoss').textContent = formatCurrency(stats.total_loss_value || 0);
+        document.getElementById('stockInvStatGain').textContent = formatCurrency(stats.total_gain_value || 0);
+    } catch (err) {
+        console.error('Failed to load stock inventory stats:', err);
+    }
+}
+
+async function loadStockInventories() {
+    const tbody = document.getElementById('stockInventoriesTableBody');
+    if (!tbody) return;
+
+    const stateFilter = document.getElementById('stockInvFilterState')?.value || '';
+    const search = document.getElementById('stockInvSearchInput')?.value?.trim() || '';
+
+    let url = '/stock-inventory/inventories?';
+    if (stateFilter) url += `state=${encodeURIComponent(stateFilter)}&`;
+    if (search) url += `search=${encodeURIComponent(search)}&`;
+
+    try {
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center">Memuat daftar stock opname...</td></tr>';
+        const list = await api(url);
+
+        if (!list || list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">Belum ada dokumen stock opname. Klik "+ Buat Stock Opname Baru" untuk memulai.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = list.map(inv => {
+            const locName = inv.location ? inv.location.name : `Lokasi #${inv.location_id}`;
+            const stateBadges = {
+                draft: '<span class="badge" style="background: rgba(100,116,139,0.2); color: #94a3b8; border: 1px solid #64748b;">Draf</span>',
+                confirm: '<span class="badge" style="background: rgba(245,158,11,0.2); color: #f59e0b; border: 1px solid #f59e0b;">Dalam Proses</span>',
+                done: '<span class="badge" style="background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid #10b981;">Selesai (Done)</span>',
+                cancel: '<span class="badge" style="background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid #ef4444;">Dibatalkan</span>'
+            };
+            const badge = stateBadges[inv.state] || `<span class="badge">${inv.state}</span>`;
+
+            let diffBadge = '<span class="badge" style="background:rgba(255,255,255,0.05); color:var(--text-color);">0</span>';
+            if (inv.total_difference_qty < 0) {
+                diffBadge = `<span class="badge" style="background: rgba(239,68,68,0.15); color: #ef4444;">${inv.total_difference_qty.toFixed(1)}</span>`;
+            } else if (inv.total_difference_qty > 0) {
+                diffBadge = `<span class="badge" style="background: rgba(16,185,129,0.15); color: #10b981;">+${inv.total_difference_qty.toFixed(1)}</span>`;
+            }
+
+            const riskBadges = {
+                none: '<span class="text-muted" style="font-size:0.8rem;">-</span>',
+                low: '<span class="badge" style="background: rgba(16,185,129,0.15); color: #10b981;">Low Risk</span>',
+                medium: '<span class="badge" style="background: rgba(245,158,11,0.15); color: #f59e0b;">Medium Risk</span>',
+                high: '<span class="badge" style="background: rgba(239,68,68,0.2); color: #ef4444; font-weight:700;">High Risk</span>'
+            };
+            const riskBadge = riskBadges[inv.ai_risk_level] || '<span class="text-muted">-</span>';
+            const glEntry = inv.accounting_move_name ? `<code>${inv.accounting_move_name}</code>` : '<span class="text-muted">-</span>';
+
+            return `
+                <tr>
+                    <td><strong>${inv.name}</strong></td>
+                    <td>${locName}</td>
+                    <td>${inv.date}</td>
+                    <td>${badge}</td>
+                    <td>${diffBadge}</td>
+                    <td style="color: #ef4444; font-weight: 600;">${inv.total_loss_value > 0 ? formatCurrency(inv.total_loss_value) : '-'}</td>
+                    <td style="color: #10b981; font-weight: 600;">${inv.total_gain_value > 0 ? formatCurrency(inv.total_gain_value) : '-'}</td>
+                    <td>${riskBadge}</td>
+                    <td>${glEntry}</td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary" onclick="openStockOpnameDetail(${inv.id})">
+                            🔍 Buka / Hitung
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center text-danger">Gagal memuat stock opname: ${err.message}</td></tr>`;
+    }
+}
+
+async function loadLocationsForStockOpname() {
+    const select = document.getElementById('createOpnameLocationSelect');
+    if (!select) return;
+    try {
+        const locations = await api('/stock/locations');
+        const internalLocs = (locations || []).filter(l => l.usage === 'internal');
+        select.innerHTML = '<option value="">-- Pilih Lokasi Gudang --</option>' +
+            internalLocs.map(l => `<option value="${l.id}">${l.name} (${l.complete_name || l.name})</option>`).join('');
+    } catch (e) {
+        console.error('Failed to load locations for opname:', e);
+    }
+}
+
+async function loadProductsForStockOpname() {
+    const select = document.getElementById('opnameAddLineProductSelect');
+    if (!select) return;
+    try {
+        const products = await api('/products');
+        select.innerHTML = '<option value="">-- Pilih Produk --</option>' +
+            (products || []).filter(p => p.type === 'product').map(p =>
+                `<option value="${p.id}">${p.name} (Modal: ${formatCurrency(p.standard_price)})</option>`
+            ).join('');
+    } catch (e) {
+        console.error('Failed to load products for opname:', e);
+    }
+}
+
+async function submitCreateStockOpname() {
+    const locationId = document.getElementById('createOpnameLocationSelect')?.value;
+    if (!locationId) {
+        showToast('Pilih lokasi gudang terlebih dahulu!', 'warning');
+        return;
+    }
+    const name = document.getElementById('createOpnameNameInput')?.value?.trim();
+    const date = document.getElementById('createOpnameDateInput')?.value || new Date().toISOString().split('T')[0];
+    const notes = document.getElementById('createOpnameNotesInput')?.value?.trim();
+
+    try {
+        const res = await api('/stock-inventory/inventories', 'POST', {
+            name: name,
+            location_id: parseInt(locationId, 10),
+            date: date,
+            notes: notes
+        });
+        showToast(`Stock Opname '${res.name}' berhasil dibuat!`, 'success');
+        closeModal('modalCreateStockOpname');
+        loadStockInventoryStats();
+        loadStockInventories();
+        openStockOpnameDetail(res.id);
+    } catch (err) {
+        showToast('Gagal membuat stock opname: ' + err.message, 'danger');
+    }
+}
+
+async function openStockOpnameDetail(id) {
+    activeStockOpnameId = id;
+    try {
+        const inv = await api(`/stock-inventory/inventories/${id}`);
+        cachedStockOpname = inv;
+
+        document.getElementById('opnameDetailName').textContent = inv.name;
+        document.getElementById('opnameDetailLocation').textContent = inv.location ? inv.location.name : `Lokasi #${inv.location_id}`;
+        document.getElementById('opnameDetailDate').textContent = inv.date;
+        document.getElementById('opnameDetailGLMove').textContent = inv.accounting_move_name || 'Belum diposting';
+
+        const stateBadges = {
+            draft: '<span class="badge" style="background: rgba(100,116,139,0.2); color: #94a3b8; border: 1px solid #64748b;">Draft</span>',
+            confirm: '<span class="badge" style="background: rgba(245,158,11,0.2); color: #f59e0b; border: 1px solid #f59e0b;">Dalam Proses Lapangan</span>',
+            done: '<span class="badge" style="background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid #10b981;">Selesai (Done)</span>',
+            cancel: '<span class="badge" style="background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid #ef4444;">Dibatalkan</span>'
+        };
+        document.getElementById('opnameDetailStateBadge').outerHTML = `<span id="opnameDetailStateBadge">${stateBadges[inv.state] || inv.state}</span>`;
+
+        // Configure Toolbar Buttons based on state
+        const btnStart = document.getElementById('btnOpnameStart');
+        const btnValidate = document.getElementById('btnOpnameValidate');
+        const btnCancel = document.getElementById('btnOpnameCancel');
+        const btnAI = document.getElementById('btnOpnameAIAudit');
+        const addLineCard = document.getElementById('opnameDetailAddLineCard');
+
+        if (inv.state === 'draft') {
+            btnStart.style.display = 'inline-block';
+            btnValidate.style.display = 'none';
+            btnCancel.style.display = 'inline-block';
+            btnAI.style.display = 'none';
+            if (addLineCard) addLineCard.style.display = 'block';
+        } else if (inv.state === 'confirm') {
+            btnStart.style.display = 'none';
+            btnValidate.style.display = 'inline-block';
+            btnCancel.style.display = 'inline-block';
+            btnAI.style.display = 'inline-block';
+            if (addLineCard) addLineCard.style.display = 'block';
+        } else {
+            // Done or Cancel
+            btnStart.style.display = 'none';
+            btnValidate.style.display = 'none';
+            btnCancel.style.display = 'none';
+            btnAI.style.display = 'inline-block';
+            if (addLineCard) addLineCard.style.display = 'none';
+        }
+
+        // Totals
+        document.getElementById('opnameDetailTotalDiff').textContent = inv.total_difference_qty.toFixed(1);
+        document.getElementById('opnameDetailTotalLoss').textContent = formatCurrency(inv.total_loss_value || 0);
+        document.getElementById('opnameDetailTotalGain').textContent = formatCurrency(inv.total_gain_value || 0);
+
+        // AI Banner
+        const aiBanner = document.getElementById('opnameDetailAIBanner');
+        if (inv.ai_audit_summary) {
+            aiBanner.style.display = 'block';
+            const riskBadges = {
+                low: '<span class="badge" style="background: rgba(16,185,129,0.2); color: #10b981;">Tingkat Risiko: RENDAH</span>',
+                medium: '<span class="badge" style="background: rgba(245,158,11,0.2); color: #f59e0b;">Tingkat Risiko: SEDANG</span>',
+                high: '<span class="badge" style="background: rgba(239,68,68,0.2); color: #ef4444; font-weight:700;">Tingkat Risiko: TINGGI (PERHATIAN KHUSUS)</span>'
+            };
+            document.getElementById('opnameDetailAIRiskBadge').outerHTML = `<span id="opnameDetailAIRiskBadge">${riskBadges[inv.ai_risk_level] || inv.ai_risk_level}</span>`;
+            document.getElementById('opnameDetailAISummary').textContent = inv.ai_audit_summary;
+        } else {
+            aiBanner.style.display = 'none';
+        }
+
+        // Render Lines Table
+        const linesTbody = document.getElementById('opnameDetailLinesTableBody');
+        const lines = inv.lines || [];
+        if (lines.length === 0) {
+            linesTbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Belum ada baris produk. Klik "Mulai Perhitungan Fisik" untuk mengambil saldo quant saat ini.</td></tr>';
+        } else {
+            linesTbody.innerHTML = lines.map(l => {
+                const pName = l.product ? l.product.name : `Produk ID #${l.product_id}`;
+                const diff = l.difference_qty;
+                let diffColor = 'var(--text-color)';
+                if (diff < 0) diffColor = '#ef4444';
+                else if (diff > 0) diffColor = '#10b981';
+
+                const varValColor = l.variance_value < 0 ? '#ef4444' : (l.variance_value > 0 ? '#10b981' : 'var(--text-color)');
+                const isEditable = inv.state === 'confirm' || inv.state === 'draft';
+
+                return `
+                    <tr>
+                        <td><strong>${pName}</strong></td>
+                        <td style="font-weight:600;">${l.theoretical_qty.toFixed(1)}</td>
+                        <td>
+                            <input type="number" id="line_counted_${l.id}" value="${l.counted_qty}" step="any"
+                                   style="width: 85px; padding: 0.35rem; font-size: 0.85rem;" class="form-control"
+                                   ${!isEditable ? 'disabled readonly' : ''}>
+                        </td>
+                        <td style="color: ${diffColor}; font-weight: 700;">${diff > 0 ? '+' : ''}${diff.toFixed(1)}</td>
+                        <td style="color: ${varValColor}; font-weight: 600;">${formatCurrency(l.variance_value)}</td>
+                        <td>
+                            <input type="text" id="line_reason_${l.id}" value="${l.reason || ''}" placeholder="Alasan selisih..."
+                                   style="width: 170px; padding: 0.35rem; font-size: 0.82rem;" class="form-control"
+                                   ${!isEditable ? 'disabled readonly' : ''}>
+                        </td>
+                        <td>
+                            ${isEditable ? `
+                                <button class="btn btn-sm btn-primary" onclick="saveStockOpnameLine(${l.id})">
+                                    💾 Simpan
+                                </button>
+                            ` : '<span class="text-muted" style="font-size:0.8rem;">Terkunci</span>'}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        openModal('modalStockOpnameDetail');
+    } catch (err) {
+        showToast('Gagal memuat detail stock opname: ' + err.message, 'danger');
+    }
+}
+
+async function startStockOpname() {
+    if (!activeStockOpnameId) return;
+    try {
+        const res = await api(`/stock-inventory/inventories/${activeStockOpnameId}/start`, 'POST');
+        showToast(`Penghitungan fisik untuk '${res.name}' telah dimulai!`, 'success');
+        openStockOpnameDetail(activeStockOpnameId);
+        loadStockInventoryStats();
+        loadStockInventories();
+    } catch (err) {
+        showToast('Gagal memulai opname: ' + err.message, 'danger');
+    }
+}
+
+async function saveStockOpnameLine(lineId) {
+    if (!activeStockOpnameId) return;
+    const countedInput = document.getElementById(`line_counted_${lineId}`);
+    const reasonInput = document.getElementById(`line_reason_${lineId}`);
+
+    const counted = parseFloat(countedInput?.value || 0);
+    const reason = reasonInput?.value?.trim() || '';
+
+    try {
+        await api(`/stock-inventory/inventories/${activeStockOpnameId}/lines/${lineId}`, 'PUT', {
+            counted_qty: counted,
+            reason: reason
+        });
+        showToast('Hasil hitung fisik berhasil disimpan', 'success');
+        openStockOpnameDetail(activeStockOpnameId);
+        loadStockInventoryStats();
+    } catch (err) {
+        showToast('Gagal menyimpan baris: ' + err.message, 'danger');
+    }
+}
+
+async function addStockOpnameLine() {
+    if (!activeStockOpnameId) return;
+    const prodId = document.getElementById('opnameAddLineProductSelect')?.value;
+    const qtyInput = document.getElementById('opnameAddLineQtyInput')?.value;
+    const reason = document.getElementById('opnameAddLineReasonInput')?.value?.trim();
+
+    if (!prodId) {
+        showToast('Pilih produk yang ditemukan terlebih dahulu!', 'warning');
+        return;
+    }
+    const counted = parseFloat(qtyInput || 0);
+
+    try {
+        await api(`/stock-inventory/inventories/${activeStockOpnameId}/lines`, 'POST', {
+            product_id: parseInt(prodId, 10),
+            counted_qty: counted,
+            reason: reason
+        });
+        showToast('Produk temuan fisik berhasil ditambahkan!', 'success');
+        document.getElementById('opnameAddLineQtyInput').value = '';
+        document.getElementById('opnameAddLineReasonInput').value = '';
+        openStockOpnameDetail(activeStockOpnameId);
+        loadStockInventoryStats();
+    } catch (err) {
+        showToast('Gagal menambah item produk: ' + err.message, 'danger');
+    }
+}
+
+async function runStockOpnameAIAudit() {
+    if (!activeStockOpnameId) return;
+    showToast('Sedang menjalankan Cloudflare Workers AI Loss Prevention Auditor...', 'info');
+    try {
+        const audit = await api(`/stock-inventory/inventories/${activeStockOpnameId}/ai-audit`, 'POST');
+        showToast(`Audit AI selesai! Tingkat Risiko: ${audit.risk_level.toUpperCase()}`, 'success');
+
+        const aiBanner = document.getElementById('opnameDetailAIBanner');
+        aiBanner.style.display = 'block';
+
+        const riskBadges = {
+            low: '<span class="badge" style="background: rgba(16,185,129,0.2); color: #10b981;">Tingkat Risiko: RENDAH</span>',
+            medium: '<span class="badge" style="background: rgba(245,158,11,0.2); color: #f59e0b;">Tingkat Risiko: SEDANG</span>',
+            high: '<span class="badge" style="background: rgba(239,68,68,0.2); color: #ef4444; font-weight:700;">Tingkat Risiko: TINGGI</span>'
+        };
+        document.getElementById('opnameDetailAIRiskBadge').outerHTML = `<span id="opnameDetailAIRiskBadge">${riskBadges[audit.risk_level] || audit.risk_level}</span>`;
+        document.getElementById('opnameDetailAISummary').textContent = audit.summary;
+
+        const suspList = document.getElementById('opnameDetailAISuspiciousList');
+        if (audit.suspicious_items && audit.suspicious_items.length > 0) {
+            suspList.innerHTML = audit.suspicious_items.map(s => `<li>${s}</li>`).join('');
+        } else {
+            suspList.innerHTML = '<li class="text-muted">Tidak ada temuan mencurigakan</li>';
+        }
+
+        const recList = document.getElementById('opnameDetailAIRecommendationsList');
+        if (audit.recommended_actions && audit.recommended_actions.length > 0) {
+            recList.innerHTML = audit.recommended_actions.map(r => `<li>${r}</li>`).join('');
+        } else {
+            recList.innerHTML = '<li class="text-muted">Lanjutkan prosedur standar</li>';
+        }
+
+        loadStockInventories();
+    } catch (err) {
+        showToast('Gagal menjalankan AI audit: ' + err.message, 'danger');
+    }
+}
+
+async function validateStockOpname() {
+    if (!activeStockOpnameId) return;
+    if (!confirm('Apakah Anda yakin ingin memvalidasi hasil stock opname ini? Saldo stok gudang akan disesuaikan secara permanen dan entri jurnal Buku Besar GL akan otomatis diposting.')) {
+        return;
+    }
+
+    try {
+        const res = await api(`/stock-inventory/inventories/${activeStockOpnameId}/validate`, 'POST');
+        showToast(`Stock Opname '${res.name}' berhasil divalidasi & dibukukan ke GL!`, 'success');
+        openStockOpnameDetail(activeStockOpnameId);
+        loadStockInventoryStats();
+        loadStockInventories();
+    } catch (err) {
+        showToast('Gagal memvalidasi stock opname: ' + err.message, 'danger');
+    }
+}
+
+async function cancelStockOpname() {
+    if (!activeStockOpnameId) return;
+    if (!confirm('Apakah Anda yakin ingin membatalkan stock opname ini?')) return;
+
+    try {
+        await api(`/stock-inventory/inventories/${activeStockOpnameId}/cancel`, 'POST');
+        showToast('Stock Opname berhasil dibatalkan', 'info');
+        openStockOpnameDetail(activeStockOpnameId);
+        loadStockInventoryStats();
+        loadStockInventories();
+    } catch (err) {
+        showToast('Gagal membatalkan stock opname: ' + err.message, 'danger');
+    }
+}
+
+// ==========================================
+// 25. ENTERPRISE PAYROLL & SALARY RULES ENGINE
+// ==========================================
+let activePayrollPayslipId = null;
+
+async function loadPayrollData() {
+    await Promise.all([
+        loadPayrollStats(),
+        loadPayrollPayslips()
+    ]);
+}
+
+async function loadPayrollStats() {
+    try {
+        const res = await api('/payroll/stats');
+        const stats = (res && res.data) ? res.data : (res || {});
+        document.getElementById('payrollStatTotalSlips').textContent = stats.total_payslips ?? stats.total_slips ?? 0;
+        document.getElementById('payrollStatPaidSlips').textContent = stats.total_paid_slips ?? stats.paid_slips ?? 0;
+        document.getElementById('payrollStatGrossExpenditure').textContent = formatCurrency(stats.total_gross_expenditure ?? stats.total_gross ?? 0);
+        document.getElementById('payrollStatDeductionsWithheld').textContent = formatCurrency(stats.total_deductions_withheld ?? stats.total_deductions ?? 0);
+        document.getElementById('payrollStatNetPaid').textContent = formatCurrency(stats.total_net_paid ?? stats.total_net ?? 0);
+        document.getElementById('payrollStatOvertimeHours').textContent = `${(stats.total_overtime_hours ?? 0).toFixed(1)} Jam`;
+    } catch (err) {
+        console.error('Failed to load payroll stats:', err);
+    }
+}
+
+async function loadPayrollPayslips() {
+    const tbody = document.getElementById('payrollPayslipsTableBody');
+    if (!tbody) return;
+
+    const stateFilter = document.getElementById('payrollFilterState') ? document.getElementById('payrollFilterState').value : '';
+    const periodFilter = document.getElementById('payrollFilterPeriod') ? document.getElementById('payrollFilterPeriod').value.trim() : '';
+    const searchFilter = document.getElementById('payrollSearchInput') ? document.getElementById('payrollSearchInput').value.trim() : '';
+
+    let url = '/payroll/payslips?';
+    if (stateFilter) url += `state=${encodeURIComponent(stateFilter)}&`;
+    if (periodFilter) url += `period=${encodeURIComponent(periodFilter)}&`;
+    if (searchFilter) url += `search=${encodeURIComponent(searchFilter)}&`;
+
+    try {
+        const res = await api(url);
+        const slips = (res && res.data) ? res.data : (Array.isArray(res) ? res : []);
+        if (!slips || slips.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="11" class="text-center text-muted" style="padding: 1.5rem;">Tidak ada slip gaji yang sesuai dengan filter.</td></tr>';
+            return;
+        }
+
+        const stateBadges = {
+            draft: '<span class="badge badge-secondary">Draf</span>',
+            verify: '<span class="badge" style="background: rgba(59,130,246,0.15); color: #3b82f6;">Verifikasi</span>',
+            done: '<span class="badge" style="background: rgba(245,158,11,0.15); color: #f59e0b;">Disetujui GL</span>',
+            paid: '<span class="badge" style="background: rgba(16,185,129,0.15); color: #10b981;">Lunas (Paid)</span>',
+            cancel: '<span class="badge" style="background: rgba(239,68,68,0.15); color: #ef4444;">Batal</span>'
+        };
+
+        const riskBadges = {
+            low: '<span class="badge" style="background: rgba(16,185,129,0.15); color: #10b981; font-weight:600;">90%+ [LOW]</span>',
+            medium: '<span class="badge" style="background: rgba(245,158,11,0.15); color: #f59e0b; font-weight:600;">MED RISK</span>',
+            high: '<span class="badge" style="background: rgba(239,68,68,0.15); color: #ef4444; font-weight:600;">HIGH RISK</span>'
+        };
+
+        tbody.innerHTML = slips.map(slip => {
+            const empName = slip.employee ? slip.employee.name : (slip.employee_name || '-');
+            const stateBadge = stateBadges[slip.state] || `<span class="badge">${slip.state}</span>`;
+            
+            const aiScore = slip.ai_risk_score || slip.ai_audit_score || (slip.ai_check_status === 'low' ? 90 : 0);
+            const aiRisk = slip.ai_check_status || slip.ai_audit_risk || 'low';
+            let aiBadge = '<span class="badge badge-secondary" style="font-size: 0.72rem;">Belum Audit</span>';
+            if (aiScore > 0 || slip.ai_notes) {
+                const rStyle = riskBadges[aiRisk] || `<span class="badge">${aiRisk}</span>`;
+                aiBadge = `${rStyle} <small style="color:var(--text-muted); font-size:0.7rem;">(${aiScore > 0 ? aiScore + '%' : 'OK'})</small>`;
+            }
+
+            const glMove = slip.accounting_move_ref ? `<code>${slip.accounting_move_ref}</code>` : (slip.move ? `<code>${slip.move.name}</code>` : (slip.accounting_move_id || slip.move_id ? `<code>Move #${slip.accounting_move_id || slip.move_id}</code>` : '<span class="text-muted">-</span>'));
+
+            return `
+                <tr>
+                    <td><strong>${slip.number}</strong></td>
+                    <td>${empName}</td>
+                    <td>${slip.period}</td>
+                    <td>${stateBadge}</td>
+                    <td>${formatCurrency(slip.basic_salary)}</td>
+                    <td style="color: #10b981; font-weight:600;">${formatCurrency(slip.gross_salary)}</td>
+                    <td style="color: #ef4444;">${formatCurrency(slip.total_deductions)}</td>
+                    <td style="font-weight: 700; color: #818cf8;">${formatCurrency(slip.net_salary)}</td>
+                    <td>${aiBadge}</td>
+                    <td>${glMove}</td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary" onclick="openPayslipDetail(${slip.id})" title="Buka Detail">
+                            🔍 Rincian
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="11" class="text-center text-danger">Gagal memuat slip gaji: ${err.message}</td></tr>`;
+    }
+}
+
+async function openCreatePayslipModal() {
+    try {
+        const [empRes, structRes] = await Promise.all([
+            api('/hr/employees'),
+            api('/payroll/structures')
+        ]);
+
+        const employees = (empRes && empRes.data) ? empRes.data : (Array.isArray(empRes) ? empRes : []);
+        const structs = (structRes && structRes.data) ? structRes.data : (Array.isArray(structRes) ? structRes : []);
+
+        const empSelect = document.getElementById('createSlipEmployeeSelect');
+        empSelect.innerHTML = '<option value="">-- Pilih Karyawan --</option>' + 
+            (employees || []).map(e => `<option value="${e.id}">${e.name} (${e.job_title || 'Staff'})</option>`).join('');
+
+        const structSelect = document.getElementById('createSlipStructureSelect');
+        structSelect.innerHTML = '<option value="">-- Pilih Struktur Gaji --</option>' + 
+            (structs || []).map(s => `<option value="${s.id}">${s.name} (${s.code})</option>`).join('');
+
+        // Defaults
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        
+        document.getElementById('createSlipPeriodInput').value = `${monthNames[now.getMonth()]} ${year}`;
+        document.getElementById('createSlipDateFromInput').value = `${year}-${month}-01`;
+        
+        const lastDay = new Date(year, now.getMonth() + 1, 0).getDate();
+        document.getElementById('createSlipDateToInput').value = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
+        document.getElementById('createSlipWorkingDaysInput').value = 22;
+        document.getElementById('createSlipNotesInput').value = '';
+
+        if (structs && structs.length > 0) {
+            structSelect.value = structs[0].id;
+        }
+
+        openModal('modalCreatePayrollPayslip');
+    } catch (err) {
+        showToast('Gagal mempersiapkan form slip gaji: ' + err.message, 'danger');
+    }
+}
+
+async function submitCreatePayslip(e) {
+    e.preventDefault();
+    try {
+        const empId = parseInt(document.getElementById('createSlipEmployeeSelect').value);
+        const structId = parseInt(document.getElementById('createSlipStructureSelect').value);
+        const period = document.getElementById('createSlipPeriodInput').value.trim();
+        const dateFrom = document.getElementById('createSlipDateFromInput').value;
+        const dateTo = document.getElementById('createSlipDateToInput').value;
+        const workingDays = parseInt(document.getElementById('createSlipWorkingDaysInput').value) || 22;
+        const notes = document.getElementById('createSlipNotesInput').value.trim();
+
+        if (!empId || !structId || !period || !dateFrom || !dateTo) {
+            showToast('Harap lengkapi semua field wajib bertanda bintang (*)', 'warning');
+            return;
+        }
+
+        const body = {
+            employee_id: empId,
+            structure_id: structId,
+            struct_id: structId,
+            period: period,
+            date_from: dateFrom,
+            date_to: dateTo,
+            working_days: workingDays,
+            notes: notes
+        };
+
+        const res = await api('/payroll/payslips', 'POST', body);
+        const slip = (res && res.data) ? res.data : res;
+        
+        // Auto-compute lines right after creation
+        await api(`/payroll/payslips/${slip.id}/compute`, 'POST', {});
+
+        closeModal('modalCreatePayrollPayslip');
+        showToast(`Slip gaji '${slip.number}' berhasil dibuat dan dihitung otomatis!`, 'success');
+
+        loadPayrollStats();
+        loadPayrollPayslips();
+        openPayslipDetail(slip.id);
+    } catch (err) {
+        showToast('Gagal membuat slip gaji: ' + err.message, 'danger');
+    }
+}
+
+function openCreatePayslipRunModal() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+    document.getElementById('createRunNameInput').value = `BATCH/PAY/${year}/${month}`;
+    document.getElementById('createRunPeriodInput').value = `${monthNames[now.getMonth()]} ${year}`;
+    document.getElementById('createRunDateStartInput').value = `${year}-${month}-01`;
+
+    const lastDay = new Date(year, now.getMonth() + 1, 0).getDate();
+    document.getElementById('createRunDateEndInput').value = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
+    document.getElementById('createRunNotesInput').value = `Proses batch penggajian bulanan periode ${monthNames[now.getMonth()]} ${year}`;
+
+    openModal('modalCreatePayslipRun');
+}
+
+async function submitCreatePayslipRun(e) {
+    e.preventDefault();
+    try {
+        const name = document.getElementById('createRunNameInput').value.trim();
+        const period = document.getElementById('createRunPeriodInput').value.trim();
+        const dateStart = document.getElementById('createRunDateStartInput').value;
+        const dateEnd = document.getElementById('createRunDateEndInput').value;
+        const notes = document.getElementById('createRunNotesInput').value.trim();
+
+        if (!name || !period || !dateStart || !dateEnd) {
+            showToast('Lengkapi nama batch, periode, dan tanggal awal/akhir', 'warning');
+            return;
+        }
+
+        const body = {
+            name: name,
+            period: period,
+            date_start: dateStart,
+            date_end: dateEnd,
+            notes: notes
+        };
+
+        const res = await api('/payroll/runs', 'POST', body);
+        const run = (res && res.data) ? res.data : res;
+        
+        // Trigger auto mass payslip generation
+        const genRes = await api(`/payroll/runs/${run.id}/generate`, 'POST', {});
+        const genData = (genRes && genRes.data) ? genRes.data : genRes;
+
+        closeModal('modalCreatePayslipRun');
+        showToast(`Batch Penggajian '${run.name}' berhasil digenerate (${genData.generated_slips || 0} slip karyawan dibuat)!`, 'success');
+
+        loadPayrollStats();
+        loadPayrollPayslips();
+    } catch (err) {
+        showToast('Gagal memproses batch penggajian: ' + err.message, 'danger');
+    }
+}
+
+async function openPayrollStructuresModal() {
+    try {
+        const res = await api('/payroll/structures');
+        const structs = (res && res.data) ? res.data : (Array.isArray(res) ? res : []);
+        const container = document.getElementById('payrollStructuresListContainer');
+
+        if (!structs || structs.length === 0) {
+            container.innerHTML = '<div class="text-center p-3 text-muted">Belum ada struktur gaji terdaftar.</div>';
+        } else {
+            container.innerHTML = structs.map(s => `
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <div>
+                            <h4 style="margin: 0; font-size: 1rem;">${s.name} <span class="badge badge-info" style="font-size: 0.75rem;">${s.code}</span></h4>
+                            <small style="color: var(--text-muted);">${s.notes || s.description || 'Struktur standar aturan kompensasi & potongan'}</small>
+                        </div>
+                        <span class="badge" style="background: rgba(16,185,129,0.15); color: #10b981;">${(s.rules || []).length} Aturan Gaji Aktif</span>
+                    </div>
+                    <table class="data-table" style="font-size: 0.8rem;">
+                        <thead>
+                            <tr>
+                                <th style="width: 45px;">Seq</th>
+                                <th>Kode</th>
+                                <th>Komponen Gaji</th>
+                                <th>Kategori</th>
+                                <th>Metode Hitung</th>
+                                <th>Akun GL Default</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${(s.rules || []).map(r => `
+                                <tr>
+                                    <td>${r.sequence}</td>
+                                    <td><code>${r.code}</code></td>
+                                    <td><strong>${r.name}</strong></td>
+                                    <td><span class="badge badge-secondary">${r.category ? (r.category.code || r.category) : '-'}</span></td>
+                                    <td>${r.condition_type || 'fix'} / ${r.amount_type || 'code'}</td>
+                                    <td>${r.debit_account_code || r.credit_account_code || (r.account ? `${r.account.code} - ${r.account.name}` : '<span class="text-muted">-</span>')}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `).join('');
+        }
+
+        openModal('modalPayrollStructures');
+    } catch (err) {
+        showToast('Gagal memuat aturan struktur gaji: ' + err.message, 'danger');
+    }
+}
+
+async function openPayslipDetail(id) {
+    activePayrollPayslipId = id;
+    try {
+        const res = await api(`/payroll/payslips/${id}`);
+        const slip = (res && res.data) ? res.data : res;
+
+        document.getElementById('payslipDetailNumber').textContent = slip.number;
+        const empName = slip.employee ? slip.employee.name : (slip.employee_name || '-');
+        const structName = slip.structure ? slip.structure.name : (slip.struct ? slip.struct.name : '-');
+        document.getElementById('payslipDetailSubheader').textContent = `Karyawan: ${empName} | Periode: ${slip.period} | Struktur: ${structName}`;
+
+        const stateBadges = {
+            draft: '<span class="badge badge-secondary">Draf (Draft)</span>',
+            verify: '<span class="badge" style="background: rgba(59,130,246,0.15); color: #3b82f6;">Terverifikasi (Verify)</span>',
+            done: '<span class="badge" style="background: rgba(245,158,11,0.15); color: #f59e0b;">Disetujui GL (Done)</span>',
+            paid: '<span class="badge" style="background: rgba(16,185,129,0.15); color: #10b981;">Lunas (Paid)</span>',
+            cancel: '<span class="badge" style="background: rgba(239,68,68,0.15); color: #ef4444;">Dibatalkan</span>'
+        };
+        document.getElementById('payslipDetailStateBadge').outerHTML = `<span id="payslipDetailStateBadge">${stateBadges[slip.state] || slip.state}</span>`;
+
+        // Info Grid
+        document.getElementById('payslipInfoEmpName').textContent = empName;
+        const jobOrDept = slip.employee && slip.employee.job ? slip.employee.job.name : (slip.employee && slip.employee.job_title ? slip.employee.job_title : (slip.employee && slip.employee.department ? slip.employee.department.name : '-'));
+        document.getElementById('payslipInfoEmpJob').textContent = jobOrDept;
+        document.getElementById('payslipInfoEmpBank').textContent = slip.employee && slip.employee.bank_account ? `${slip.employee.bank_name || 'Bank'} ${slip.employee.bank_account}` : 'BCA 1234567890';
+        document.getElementById('payslipInfoOvertime').textContent = `${(slip.overtime_hours || 0).toFixed(1)} Jam`;
+        document.getElementById('payslipInfoWorkingDays').textContent = `${slip.working_days || slip.standard_working_days || 22} Hari Kerja`;
+        document.getElementById('payslipInfoUnpaidLeave').textContent = `${(slip.unpaid_leave_days || 0).toFixed(1)} Hari`;
+
+        // Totals
+        document.getElementById('payslipSumBasic').textContent = formatCurrency(slip.basic_salary);
+        document.getElementById('payslipSumGross').textContent = formatCurrency(slip.gross_salary);
+        document.getElementById('payslipSumDeductions').textContent = formatCurrency(slip.total_deductions);
+        document.getElementById('payslipSumNet').textContent = formatCurrency(slip.net_salary);
+
+        // AI Banner
+        const aiBanner = document.getElementById('payslipAIBanner');
+        const aiScore = slip.ai_risk_score || slip.ai_audit_score || (slip.ai_check_status === 'low' ? 90 : 0);
+        const aiRisk = slip.ai_check_status || slip.ai_audit_risk || 'low';
+        const aiSummary = slip.ai_notes || slip.ai_audit_summary;
+
+        if (aiScore > 0 || aiSummary) {
+            aiBanner.style.display = 'block';
+            const riskColors = {
+                low: { bg: 'rgba(16,185,129,0.15)', text: '#10b981', label: 'TINGKAT RISIKO: RENDAH' },
+                medium: { bg: 'rgba(245,158,11,0.15)', text: '#f59e0b', label: 'TINGKAT RISIKO: SEDANG' },
+                high: { bg: 'rgba(239,68,68,0.15)', text: '#ef4444', label: 'TINGKAT RISIKO: TINGGI' }
+            };
+            const rc = riskColors[aiRisk] || riskColors.low;
+            document.getElementById('payslipAIRiskBadge').outerHTML = `<span id="payslipAIRiskBadge" class="badge" style="background:${rc.bg}; color:${rc.text}; font-weight:700;">${rc.label} (Skor: ${aiScore}%)</span>`;
+            document.getElementById('payslipAISummaryText').textContent = aiSummary || 'Audit Kepatuhan Pajak & Jam Kerja selesai.';
+            document.getElementById('payslipAIRecommendations').textContent = slip.ai_audit_recommendations ? `Rekomendasi Tindakan: ${slip.ai_audit_recommendations}` : '';
+        } else {
+            aiBanner.style.display = 'none';
+        }
+
+        // Lines Breakdown
+        const linesTbody = document.getElementById('payslipLinesTableBody');
+        if (!slip.lines || slip.lines.length === 0) {
+            linesTbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted" style="padding: 1.25rem;">Belum ada rincian aturan gaji. Klik "Hitung Ulang & Sync" untuk kalkulasi otomatis.</td></tr>';
+        } else {
+            linesTbody.innerHTML = slip.lines.map(l => {
+                const cat = (typeof l.category === 'object' && l.category) ? (l.category.code || l.category.name) : (l.category || '');
+                const isDeduction = cat === 'DED' || l.total < 0;
+                const isNet = cat === 'NET';
+                const col = isDeduction ? '#ef4444' : (isNet ? '#818cf8' : '#10b981');
+                const displayAmt = isDeduction && l.total > 0 ? `-${formatCurrency(l.total)}` : formatCurrency(l.total);
+                const acct = l.debit_account_code || l.credit_account_code || l.account_code || '';
+
+                return `
+                    <tr>
+                        <td>${l.sequence}</td>
+                        <td><code>${l.code}</code></td>
+                        <td><strong>${l.name}</strong></td>
+                        <td><span class="badge badge-secondary">${cat}</span></td>
+                        <td style="text-align: right; font-weight: 600; color: ${col};">${displayAmt}</td>
+                        <td>${acct ? `<span class="badge" style="background: rgba(255,255,255,0.06);">${acct}</span>` : '<span class="text-muted">-</span>'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // GL Move Reference
+        const glContainer = document.getElementById('payslipGLMoveRefContainer');
+        const glRef = slip.accounting_move_ref || (slip.move ? slip.move.name : (slip.accounting_move_id || slip.move_id ? `Account Move #${slip.accounting_move_id || slip.move_id}` : ''));
+        if (glRef) {
+            glContainer.style.display = 'block';
+            document.getElementById('payslipGLMoveRefText').textContent = glRef;
+        } else {
+            glContainer.style.display = 'none';
+        }
+
+        // Button Visibility
+        const btnConfirm = document.getElementById('btnConfirmPayslip');
+        const btnPay = document.getElementById('btnPayPayslip');
+        if (btnConfirm) btnConfirm.style.display = (slip.state === 'draft' || slip.state === 'verify') ? 'inline-block' : 'none';
+        if (btnPay) btnPay.style.display = (slip.state === 'done') ? 'inline-block' : 'none';
+
+        openModal('modalPayslipDetail');
+    } catch (err) {
+        showToast('Gagal memuat rincian slip gaji: ' + err.message, 'danger');
+    }
+}
+
+async function recomputeCurrentPayslip() {
+    if (!activePayrollPayslipId) return;
+    try {
+        await api(`/payroll/payslips/${activePayrollPayslipId}/compute`, 'POST', {});
+        showToast('Kalkulasi slip gaji dan sinkronisasi lembur & cuti berhasil diperbarui!', 'success');
+        openPayslipDetail(activePayrollPayslipId);
+        loadPayrollStats();
+        loadPayrollPayslips();
+    } catch (err) {
+        showToast('Gagal menghitung ulang: ' + err.message, 'danger');
+    }
+}
+
+async function runPayrollAIAudit() {
+    if (!activePayrollPayslipId) return;
+    try {
+        showToast('Mengirim data ke Cloudflare Workers AI Tax & Compliance Auditor...', 'info');
+        const res = await api(`/payroll/payslips/${activePayrollPayslipId}/ai-audit`, 'POST', {});
+        const audit = (res && res.data) ? res.data : res;
+        showToast(`AI Audit selesai: Kepatuhan ${audit.compliance_score || 90}%, Tingkat Risiko ${(audit.risk_level || 'LOW').toUpperCase()}`, 'success');
+        openPayslipDetail(activePayrollPayslipId);
+        loadPayrollStats();
+        loadPayrollPayslips();
+    } catch (err) {
+        showToast('Gagal melakukan audit AI: ' + err.message, 'danger');
+    }
+}
+
+async function confirmCurrentPayslip() {
+    if (!activePayrollPayslipId) return;
+    if (!confirm('Apakah Anda yakin ingin menyetujui slip gaji ini dan memposting Entri Jurnal Berimbang ke Buku Besar GL (Account Move)?')) {
+        return;
+    }
+    try {
+        const res = await api(`/payroll/payslips/${activePayrollPayslipId}/confirm`, 'POST', {});
+        const slip = (res && res.data) ? res.data : res;
+        showToast(`Slip gaji disetujui & Entri Jurnal GL ${slip.accounting_move_ref || res.move_name || 'Buku Besar'} berhasil diposting berimbang!`, 'success');
+        openPayslipDetail(activePayrollPayslipId);
+        loadPayrollStats();
+        loadPayrollPayslips();
+    } catch (err) {
+        showToast('Gagal menyetujui slip gaji: ' + err.message, 'danger');
+    }
+}
+
+async function payCurrentPayslip() {
+    if (!activePayrollPayslipId) return;
+    if (!confirm('Apakah Anda yakin ingin mencatat pembayaran transfer bank untuk slip gaji ini? Jurnal Bank (BNK) akan dibukukan secara otomatis.')) {
+        return;
+    }
+    try {
+        await api(`/payroll/payslips/${activePayrollPayslipId}/pay`, 'POST', {});
+        showToast('Pembayaran slip gaji via Transfer Bank berhasil diselesaikan!', 'success');
+        openPayslipDetail(activePayrollPayslipId);
+        loadPayrollStats();
+        loadPayrollPayslips();
+    } catch (err) {
+        showToast('Gagal mencatat pembayaran: ' + err.message, 'danger');
+    }
+}
+
+// ==========================================
+// 26. ENTERPRISE BUDGETING & ANALYTIC ACCOUNTING
+// ==========================================
+let activeBudgetId = null;
+let cachedAnalyticAccounts = [];
+let cachedBudgetaryPositions = [];
+let cachedGLAccounts = [];
+
+async function loadBudgetData() {
+    await Promise.all([
+        loadBudgetStats(),
+        loadBudgets()
+    ]);
+}
+
+async function loadBudgetStats() {
+    try {
+        const stats = await api('/budget/stats');
+        document.getElementById('budgetStatTotalBudgets').textContent = stats.total_budgets ?? 0;
+        document.getElementById('budgetStatValidatedBudgets').textContent = stats.validated_budgets ?? 0;
+        document.getElementById('budgetStatTotalPlanned').textContent = formatCurrency(stats.total_planned ?? 0);
+        document.getElementById('budgetStatTotalPractical').textContent = formatCurrency(stats.total_practical ?? 0);
+        document.getElementById('budgetStatOverspentLines').textContent = stats.overspent_lines ?? 0;
+        document.getElementById('budgetStatHighRiskBudgets').textContent = stats.high_risk_budgets ?? 0;
+    } catch (err) {
+        console.error('Failed to load budget stats:', err);
+    }
+}
+
+async function loadBudgets() {
+    const tbody = document.getElementById('budgetsTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="11" class="text-center">Memuat dokumen anggaran...</td></tr>';
+
+    const stateFilter = document.getElementById('budgetFilterState') ? document.getElementById('budgetFilterState').value : '';
+    const searchFilter = document.getElementById('budgetSearchInput') ? document.getElementById('budgetSearchInput').value.trim() : '';
+
+    let url = '/budget/budgets?';
+    if (stateFilter) url += `state=${encodeURIComponent(stateFilter)}&`;
+    if (searchFilter) url += `search=${encodeURIComponent(searchFilter)}&`;
+
+    try {
+        const budgets = await api(url);
+        if (!budgets || budgets.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="11" class="text-center" style="padding: 2rem; color: var(--text-muted);">Belum ada dokumen rencana anggaran belanja (RKAB). Klik <strong>"+ Buat Dokumen Anggaran"</strong> untuk memulai.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = budgets.map(b => {
+            const planned = b.total_planned_amount || 0;
+            const practical = b.total_practical_amount || 0;
+            const variance = b.total_variance_amount || (planned - practical);
+            const percentage = planned > 0 ? (practical / planned) * 100 : 0;
+
+            let pctColor = '#10b981'; // Green
+            if (percentage >= 100) pctColor = '#ef4444'; // Red overbudget
+            else if (percentage >= 80) pctColor = '#f59e0b'; // Yellow warning
+
+            let stateBadgeClass = 'badge-secondary';
+            let stateLabel = b.state;
+            if (b.state === 'draft') { stateBadgeClass = 'badge-secondary'; stateLabel = 'Draft'; }
+            else if (b.state === 'confirm') { stateBadgeClass = 'badge-warning'; stateLabel = 'Terkonfirmasi'; }
+            else if (b.state === 'validate') { stateBadgeClass = 'badge-success'; stateLabel = 'Aktif (Validate)'; }
+            else if (b.state === 'done') { stateBadgeClass = 'badge-info'; stateLabel = 'Selesai (Done)'; }
+            else if (b.state === 'cancel') { stateBadgeClass = 'badge-danger'; stateLabel = 'Dibatalkan'; }
+
+            let riskBadge = '<span class="badge badge-secondary" style="font-size:0.75rem;">-</span>';
+            if (b.ai_risk_level) {
+                let rClass = 'badge-success';
+                let rLabel = 'Low Risk';
+                if (b.ai_risk_level === 'critical') { rClass = 'badge-danger'; rLabel = 'Critical'; }
+                else if (b.ai_risk_level === 'high') { rClass = 'badge-danger'; rLabel = 'High'; }
+                else if (b.ai_risk_level === 'medium') { rClass = 'badge-warning'; rLabel = 'Medium'; }
+                riskBadge = `<span class="badge ${rClass}" style="font-size:0.75rem;" title="AI Score: ${(b.ai_risk_score || 0).toFixed(0)}">${rLabel}</span>`;
+            }
+
+            const picName = (b.user && b.user.name) ? b.user.name : 'Administrator';
+
+            return `
+                <tr>
+                    <td><strong>${escapeHtml(b.code || ('BDG-' + b.id))}</strong></td>
+                    <td>
+                        <div style="font-weight: 500;">${escapeHtml(b.name)}</div>
+                        <small style="color: var(--text-muted); font-size: 0.75rem;">${b.lines ? b.lines.length : 0} Pos Anggaran</small>
+                    </td>
+                    <td style="font-size: 0.82rem; white-space: nowrap;">${b.date_from || '-'} s/d ${b.date_to || '-'}</td>
+                    <td style="font-size: 0.85rem;">${escapeHtml(picName)}</td>
+                    <td style="text-align: right; font-weight: 600; color: #6366f1;">${formatCurrency(planned)}</td>
+                    <td style="text-align: right; font-weight: 600; color: #f59e0b;">${formatCurrency(practical)}</td>
+                    <td style="text-align: center;">
+                        <div style="font-size: 0.8rem; font-weight: 600; color: ${pctColor};">${percentage.toFixed(1)}%</div>
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 4px; height: 5px; width: 100%; overflow: hidden; margin-top: 3px;">
+                            <div style="background: ${pctColor}; width: ${Math.min(percentage, 100)}%; height: 100%;"></div>
+                        </div>
+                    </td>
+                    <td style="text-align: right; font-weight: 600; color: ${variance >= 0 ? '#10b981' : '#ef4444'};">${formatCurrency(variance)}</td>
+                    <td><span class="badge ${stateBadgeClass}">${stateLabel}</span></td>
+                    <td>${riskBadge}</td>
+                    <td>
+                        <div style="display: flex; gap: 0.35rem; align-items: center;">
+                            <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.78rem;" onclick="openBudgetDetail(${b.id})" title="Buka Detail">
+                                Detail
+                            </button>
+                            <button class="btn btn-secondary" style="padding: 0.25rem 0.4rem; font-size: 0.78rem;" onclick="computeBudgetQuick(${b.id})" title="Sinkronkan GL">
+                                🔄
+                            </button>
+                            <button class="btn btn-secondary" style="padding: 0.25rem 0.4rem; font-size: 0.78rem; color: #ec4899;" onclick="auditBudgetQuick(${b.id})" title="Audit AI">
+                                🤖
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error('Failed to load budgets:', err);
+        tbody.innerHTML = `<tr><td colspan="11" class="text-center" style="color: #ef4444;">Gagal memuat dokumen anggaran: ${escapeHtml(err.message)}</td></tr>`;
+    }
+}
+
+function handleBudgetSearch(event) {
+    if (event.key === 'Enter') {
+        loadBudgets();
+    }
+}
+
+// ------------------------------------------
+// Create Budget Modal Handlers
+// ------------------------------------------
+async function openCreateBudgetModal() {
+    try {
+        const [analytics, positions] = await Promise.all([
+            api('/budget/analytic-accounts'),
+            api('/budget/budgetary-positions')
+        ]);
+        cachedAnalyticAccounts = analytics || [];
+        cachedBudgetaryPositions = positions || [];
+
+        // Set default dates (Current Quarter)
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        let qStartMonth = Math.floor(month / 3) * 3;
+        let qEndMonth = qStartMonth + 2;
+
+        const dStart = new Date(year, qStartMonth, 1);
+        const dEnd = new Date(year, qEndMonth + 1, 0);
+
+        document.getElementById('budgetInputName').value = `Rencana Kerja & Anggaran Biaya (RKAB) Q${Math.floor(month / 3) + 1} ${year}`;
+        document.getElementById('budgetInputCode').value = '';
+        document.getElementById('budgetInputDateFrom').value = dStart.toISOString().split('T')[0];
+        document.getElementById('budgetInputDateTo').value = dEnd.toISOString().split('T')[0];
+        document.getElementById('budgetInputNotes').value = '';
+
+        const tbody = document.getElementById('createBudgetLinesTableBody');
+        tbody.innerHTML = '';
+        addBudgetLineRow(); // Add 1st empty line
+
+        openModal('modalCreateBudget');
+    } catch (err) {
+        showToast('Gagal memuat data master anggaran: ' + err.message, 'danger');
+    }
+}
+
+function addBudgetLineRow() {
+    const tbody = document.getElementById('createBudgetLinesTableBody');
+    if (!tbody) return;
+
+    const rowId = 'bline_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+    const dFrom = document.getElementById('budgetInputDateFrom').value || '';
+    const dTo = document.getElementById('budgetInputDateTo').value || '';
+
+    let posOptions = cachedBudgetaryPositions.map(p => `<option value="${p.id}">${escapeHtml(p.code)} - ${escapeHtml(p.name)}</option>`).join('');
+    if (cachedBudgetaryPositions.length === 0) {
+        posOptions = '<option value="">Belum ada pos anggaran</option>';
+    }
+
+    let anOptions = cachedAnalyticAccounts.map(a => `<option value="${a.id}">${escapeHtml(a.code)} - ${escapeHtml(a.name)}</option>`).join('');
+    if (cachedAnalyticAccounts.length === 0) {
+        anOptions = '<option value="">(Opsional / Umum)</option>';
+    } else {
+        anOptions = '<option value="">-- Tanpa Akun Analitik --</option>' + anOptions;
+    }
+
+    const tr = document.createElement('tr');
+    tr.id = rowId;
+    tr.innerHTML = `
+        <td>
+            <select class="form-control bline-pos" required style="font-size: 0.8rem;">
+                ${posOptions}
+            </select>
+        </td>
+        <td>
+            <select class="form-control bline-analytic" style="font-size: 0.8rem;">
+                ${anOptions}
+            </select>
+        </td>
+        <td>
+            <input type="date" class="form-control bline-date-from" value="${dFrom}" required style="font-size: 0.8rem;">
+        </td>
+        <td>
+            <input type="date" class="form-control bline-date-to" value="${dTo}" required style="font-size: 0.8rem;">
+        </td>
+        <td>
+            <input type="number" class="form-control bline-amount" placeholder="0" min="0" step="1000" required style="font-size: 0.8rem; text-align: right;" oninput="updateCreateBudgetTotal()">
+        </td>
+        <td>
+            <input type="text" class="form-control bline-notes" placeholder="Catatan pos..." style="font-size: 0.8rem;">
+        </td>
+        <td style="text-align: center;">
+            <button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.4rem; color: #ef4444; font-size: 0.8rem;" onclick="removeBudgetLineRow('${rowId}')">✕</button>
+        </td>
+    `;
+    tbody.appendChild(tr);
+    updateCreateBudgetTotal();
+}
+
+function removeBudgetLineRow(rowId) {
+    const row = document.getElementById(rowId);
+    if (row) {
+        row.remove();
+        updateCreateBudgetTotal();
+    }
+}
+
+function updateCreateBudgetTotal() {
+    const inputs = document.querySelectorAll('#createBudgetLinesTableBody .bline-amount');
+    let total = 0;
+    inputs.forEach(inp => {
+        total += parseFloat(inp.value) || 0;
+    });
+    const label = document.getElementById('createBudgetTotalPlannedLabel');
+    if (label) label.textContent = formatCurrency(total);
+}
+
+async function handleCreateBudget(event) {
+    event.preventDefault();
+    const rows = document.querySelectorAll('#createBudgetLinesTableBody tr');
+    if (rows.length === 0) {
+        showToast('Tambahkan minimal 1 pos anggaran belanja ke dalam dokumen.', 'warning');
+        return;
+    }
+
+    const lines = [];
+    for (const r of rows) {
+        const posId = parseInt(r.querySelector('.bline-pos').value);
+        const anVal = r.querySelector('.bline-analytic').value;
+        const anId = anVal ? parseInt(anVal) : 0;
+        const dFrom = r.querySelector('.bline-date-from').value;
+        const dTo = r.querySelector('.bline-date-to').value;
+        const amount = parseFloat(r.querySelector('.bline-amount').value) || 0;
+        const notes = r.querySelector('.bline-notes').value.trim();
+
+        if (!posId || amount <= 0) {
+            showToast('Semua pos anggaran harus memiliki plafon lebih besar dari 0.', 'warning');
+            return;
+        }
+
+        lines.push({
+            budgetary_position_id: posId,
+            analytic_account_id: anId,
+            date_from: dFrom,
+            date_to: dTo,
+            planned_amount: amount,
+            notes: notes
+        });
+    }
+
+    const body = {
+        name: document.getElementById('budgetInputName').value.trim(),
+        code: document.getElementById('budgetInputCode').value.trim(),
+        date_from: document.getElementById('budgetInputDateFrom').value,
+        date_to: document.getElementById('budgetInputDateTo').value,
+        notes: document.getElementById('budgetInputNotes').value.trim(),
+        lines: lines
+    };
+
+    try {
+        const res = await api('/budget/budgets', 'POST', body);
+        showToast(`Dokumen Anggaran '${res.name}' berhasil disimpan sebagai Draft!`, 'success');
+        closeModal('modalCreateBudget');
+        // Automatically calculate initial variance
+        try { await api(`/budget/budgets/${res.id}/compute`, 'POST', {}); } catch (e) {}
+        loadBudgetStats();
+        loadBudgets();
+        openBudgetDetail(res.id);
+    } catch (err) {
+        showToast('Gagal membuat dokumen anggaran: ' + err.message, 'danger');
+    }
+}
+
+// ------------------------------------------
+// Budget Detail & Action Handlers
+// ------------------------------------------
+async function openBudgetDetail(id) {
+    activeBudgetId = id;
+    try {
+        const b = await api(`/budget/budgets/${id}`);
+        if (!b) return;
+
+        document.getElementById('budgetDetailTitle').textContent = `${b.code || ('BDG-' + b.id)}: ${b.name}`;
+        document.getElementById('budgetDetailSubtitle').textContent = b.notes || 'Dokumen Rencana Kerja & Anggaran Biaya (RKAB)';
+
+        // State Badge
+        const badge = document.getElementById('budgetDetailStateBadge');
+        let stateBadgeClass = 'badge-secondary';
+        let stateLabel = b.state;
+        if (b.state === 'draft') { stateBadgeClass = 'badge-secondary'; stateLabel = 'Draft (Konsep)'; }
+        else if (b.state === 'confirm') { stateBadgeClass = 'badge-warning'; stateLabel = 'Terkonfirmasi (Confirm)'; }
+        else if (b.state === 'validate') { stateBadgeClass = 'badge-success'; stateLabel = 'Aktif (Divalidasi)'; }
+        else if (b.state === 'done') { stateBadgeClass = 'badge-info'; stateLabel = 'Selesai (Done)'; }
+        else if (b.state === 'cancel') { stateBadgeClass = 'badge-danger'; stateLabel = 'Dibatalkan'; }
+        badge.className = `badge ${stateBadgeClass}`;
+        badge.textContent = stateLabel;
+
+        // Lifecycle action buttons
+        const btnContainer = document.getElementById('budgetDetailLifecycleButtons');
+        btnContainer.innerHTML = '';
+        if (b.state === 'draft') {
+            btnContainer.innerHTML = `
+                <button class="btn btn-warning" style="font-size: 0.8rem;" onclick="confirmCurrentBudget()">Ajukan Konfirmasi</button>
+                <button class="btn btn-danger" style="font-size: 0.8rem;" onclick="cancelCurrentBudget()">Batalkan</button>
+            `;
+        } else if (b.state === 'confirm') {
+            btnContainer.innerHTML = `
+                <button class="btn btn-success" style="font-size: 0.8rem;" onclick="validateCurrentBudget()">Validasi & Aktifkan</button>
+                <button class="btn btn-secondary" style="font-size: 0.8rem;" onclick="resetDraftCurrentBudget()">Reset ke Draft</button>
+                <button class="btn btn-danger" style="font-size: 0.8rem;" onclick="cancelCurrentBudget()">Batalkan</button>
+            `;
+        } else if (b.state === 'validate') {
+            btnContainer.innerHTML = `
+                <button class="btn btn-info" style="font-size: 0.8rem;" onclick="doneCurrentBudget()">Tutup Anggaran (Done)</button>
+                <button class="btn btn-secondary" style="font-size: 0.8rem;" onclick="resetDraftCurrentBudget()">Reset ke Draft</button>
+                <button class="btn btn-danger" style="font-size: 0.8rem;" onclick="cancelCurrentBudget()">Batalkan</button>
+            `;
+        } else {
+            btnContainer.innerHTML = `
+                <button class="btn btn-secondary" style="font-size: 0.8rem;" onclick="resetDraftCurrentBudget()">Reset ke Draft</button>
+            `;
+        }
+
+        // Info Cards
+        document.getElementById('budgetDetailPeriod').textContent = `${b.date_from || '-'} s/d ${b.date_to || '-'}`;
+        document.getElementById('budgetDetailDaysRemaining').textContent = `Status: ${b.state.toUpperCase()}`;
+        document.getElementById('budgetDetailPIC').textContent = (b.user && b.user.name) ? b.user.name : 'Administrator';
+
+        const planned = b.total_planned_amount || 0;
+        const practical = b.total_practical_amount || 0;
+        const variance = b.total_variance_amount || (planned - practical);
+        const percentage = planned > 0 ? (practical / planned) * 100 : 0;
+
+        document.getElementById('budgetDetailPlanned').textContent = formatCurrency(planned);
+        document.getElementById('budgetDetailPractical').textContent = formatCurrency(practical);
+        document.getElementById('budgetDetailConsumption').textContent = `${percentage.toFixed(1)}% Terpakai`;
+
+        const varElem = document.getElementById('budgetDetailVariance');
+        varElem.textContent = formatCurrency(variance);
+        varElem.style.color = variance >= 0 ? '#10b981' : '#ef4444';
+        document.getElementById('budgetDetailVarianceStatus').textContent = variance >= 0 ? 'Favorable (Surplus/Sisa)' : 'Defisit (Overspend)';
+
+        // AI Audit Box
+        const aiBox = document.getElementById('budgetAIAuditBox');
+        if (b.ai_summary) {
+            aiBox.style.display = 'block';
+            document.getElementById('budgetAIRiskBadge').textContent = `Risk: ${(b.ai_risk_level || 'low').toUpperCase()} (${(b.ai_risk_score || 0).toFixed(0)}/100)`;
+            document.getElementById('budgetAIBurnRateBadge').textContent = `Burn Rate: ${(b.ai_burn_rate || 'normal').toUpperCase()}`;
+            document.getElementById('budgetAISummaryText').textContent = b.ai_summary;
+            document.getElementById('budgetAIEngineText').textContent = b.ai_engine || '@cf/meta/llama-3.1-8b-instruct';
+
+            const findContainer = document.getElementById('budgetAIFindingsContainer');
+            if (b.ai_findings) {
+                const parts = b.ai_findings.split(';').map(p => p.trim()).filter(p => p.length > 0);
+                findContainer.innerHTML = parts.map(p => `<div>⚠️ ${escapeHtml(p)}</div>`).join('');
+            } else {
+                findContainer.innerHTML = '';
+            }
+
+            const mitContainer = document.getElementById('budgetAIMitigationsContainer');
+            if (b.ai_mitigations) {
+                const parts = b.ai_mitigations.split(';').map(p => p.trim()).filter(p => p.length > 0);
+                mitContainer.innerHTML = parts.map(p => `<div>💡 ${escapeHtml(p)}</div>`).join('');
+            } else {
+                mitContainer.innerHTML = '';
+            }
+        } else {
+            aiBox.style.display = 'none';
+        }
+
+        // Lines Breakdown
+        const linesTbody = document.getElementById('budgetDetailLinesTableBody');
+        if (!b.lines || b.lines.length === 0) {
+            linesTbody.innerHTML = '<tr><td colspan="9" class="text-center">Tidak ada pos anggaran terdaftar.</td></tr>';
+        } else {
+            linesTbody.innerHTML = b.lines.map(l => {
+                const lPlanned = l.planned_amount || 0;
+                const lTheor = l.theoritical_amount || 0;
+                const lPract = l.practical_amount || 0;
+                const lVar = l.variance_amount || (lPlanned - lPract);
+                const lPct = l.percentage || (lPlanned > 0 ? (lPract / lPlanned) * 100 : 0);
+
+                let pColor = '#10b981';
+                let indicator = '<span class="badge badge-success" style="font-size:0.75rem;">Aman</span>';
+                if (lPct > 100) {
+                    pColor = '#ef4444';
+                    indicator = '<span class="badge badge-danger" style="font-size:0.75rem;">Defisit / Over</span>';
+                } else if (lPct >= 80) {
+                    pColor = '#f59e0b';
+                    indicator = '<span class="badge badge-warning" style="font-size:0.75rem;">Waspada</span>';
+                }
+
+                const bpName = l.budgetary_position ? `${l.budgetary_position.name} (${l.budgetary_position.code})` : 'Pos #' + l.budgetary_position_id;
+                const anName = l.analytic_account ? `${l.analytic_account.name} (${l.analytic_account.code})` : '-';
+
+                return `
+                    <tr>
+                        <td><strong>${escapeHtml(bpName)}</strong></td>
+                        <td>${escapeHtml(anName)}</td>
+                        <td style="font-size: 0.8rem; white-space: nowrap;">${l.date_from || '-'} s/d ${l.date_to || '-'}</td>
+                        <td style="text-align: right; font-weight: 500; color: #6366f1;">${formatCurrency(lPlanned)}</td>
+                        <td style="text-align: right; color: var(--text-muted);">${formatCurrency(lTheor)}</td>
+                        <td style="text-align: right; font-weight: 600; color: #f59e0b;">${formatCurrency(lPract)}</td>
+                        <td style="text-align: center;">
+                            <div style="font-size: 0.8rem; font-weight: 600; color: ${pColor};">${lPct.toFixed(1)}%</div>
+                            <div style="background: rgba(255,255,255,0.1); border-radius: 4px; height: 5px; width: 100%; overflow: hidden; margin-top: 2px;">
+                                <div style="background: ${pColor}; width: ${Math.min(lPct, 100)}%; height: 100%;"></div>
+                            </div>
+                        </td>
+                        <td style="text-align: right; font-weight: 600; color: ${lVar >= 0 ? '#10b981' : '#ef4444'};">${formatCurrency(lVar)}</td>
+                        <td>${indicator}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Load Chatter
+        loadBudgetChatter(id);
+
+        openModal('modalBudgetDetail');
+    } catch (err) {
+        showToast('Gagal memuat detail anggaran: ' + err.message, 'danger');
+    }
+}
+
+async function computeCurrentBudget() {
+    if (!activeBudgetId) return;
+    try {
+        await api(`/budget/budgets/${activeBudgetId}/compute`, 'POST', {});
+        showToast('Realisasi pengeluaran dari entri buku besar GL berhasil disinkronisasikan!', 'success');
+        openBudgetDetail(activeBudgetId);
+        loadBudgetStats();
+        loadBudgets();
+    } catch (err) {
+        showToast('Gagal menghitung realisasi anggaran: ' + err.message, 'danger');
+    }
+}
+
+async function computeBudgetQuick(id) {
+    try {
+        await api(`/budget/budgets/${id}/compute`, 'POST', {});
+        showToast('Sinkronisasi GL anggaran selesai!', 'success');
+        loadBudgetStats();
+        loadBudgets();
+    } catch (err) {
+        showToast('Gagal menghitung anggaran: ' + err.message, 'danger');
+    }
+}
+
+async function runBudgetAIAudit() {
+    if (!activeBudgetId) return;
+    try {
+        showToast('Menjalankan Cloudflare Workers AI Burn-Rate Audit...', 'info');
+        const res = await api(`/budget/budgets/${activeBudgetId}/ai-audit`, 'POST', {});
+        showToast(`Audit AI selesai! Tingkat Risiko: ${(res.risk_level || 'low').toUpperCase()} (Skor: ${(res.risk_score || 0).toFixed(0)})`, 'success');
+        openBudgetDetail(activeBudgetId);
+        loadBudgetStats();
+        loadBudgets();
+    } catch (err) {
+        showToast('Gagal menjalankan AI Audit: ' + err.message, 'danger');
+    }
+}
+
+async function auditBudgetQuick(id) {
+    try {
+        showToast('Menjalankan AI Audit...', 'info');
+        const res = await api(`/budget/budgets/${id}/ai-audit`, 'POST', {});
+        showToast(`Audit AI: Risiko ${(res.risk_level || 'low').toUpperCase()}`, 'success');
+        loadBudgetStats();
+        loadBudgets();
+    } catch (err) {
+        showToast('Gagal audit AI: ' + err.message, 'danger');
+    }
+}
+
+async function confirmCurrentBudget() {
+    if (!activeBudgetId) return;
+    try {
+        await api(`/budget/budgets/${activeBudgetId}/confirm`, 'POST', {});
+        showToast('Dokumen anggaran berhasil diajukan untuk konfirmasi!', 'success');
+        openBudgetDetail(activeBudgetId);
+        loadBudgetStats();
+        loadBudgets();
+    } catch (err) {
+        showToast('Gagal konfirmasi anggaran: ' + err.message, 'danger');
+    }
+}
+
+async function validateCurrentBudget() {
+    if (!activeBudgetId) return;
+    try {
+        await api(`/budget/budgets/${activeBudgetId}/validate`, 'POST', {});
+        showToast('Dokumen anggaran divalidasi dan aktif memantau realisasi pengeluaran!', 'success');
+        openBudgetDetail(activeBudgetId);
+        loadBudgetStats();
+        loadBudgets();
+    } catch (err) {
+        showToast('Gagal memvalidasi anggaran: ' + err.message, 'danger');
+    }
+}
+
+async function doneCurrentBudget() {
+    if (!activeBudgetId) return;
+    if (!confirm('Apakah Anda yakin ingin menutup dokumen anggaran ini (Done)?')) return;
+    try {
+        await api(`/budget/budgets/${activeBudgetId}/done`, 'POST', {});
+        showToast('Dokumen anggaran resmi ditutup (Done)!', 'success');
+        openBudgetDetail(activeBudgetId);
+        loadBudgetStats();
+        loadBudgets();
+    } catch (err) {
+        showToast('Gagal menutup anggaran: ' + err.message, 'danger');
+    }
+}
+
+async function cancelCurrentBudget() {
+    if (!activeBudgetId) return;
+    if (!confirm('Batalkan dokumen anggaran ini?')) return;
+    try {
+        await api(`/budget/budgets/${activeBudgetId}/cancel`, 'POST', {});
+        showToast('Dokumen anggaran dibatalkan.', 'warning');
+        openBudgetDetail(activeBudgetId);
+        loadBudgetStats();
+        loadBudgets();
+    } catch (err) {
+        showToast('Gagal membatalkan anggaran: ' + err.message, 'danger');
+    }
+}
+
+async function resetDraftCurrentBudget() {
+    if (!activeBudgetId) return;
+    try {
+        await api(`/budget/budgets/${activeBudgetId}/reset-draft`, 'POST', {});
+        showToast('Status anggaran dikembalikan ke Draft.', 'info');
+        openBudgetDetail(activeBudgetId);
+        loadBudgetStats();
+        loadBudgets();
+    } catch (err) {
+        showToast('Gagal reset anggaran: ' + err.message, 'danger');
+    }
+}
+
+// ------------------------------------------
+// Chatter for Budgeting
+// ------------------------------------------
+async function loadBudgetChatter(budgetId) {
+    const list = document.getElementById('budgetChatterMessagesList');
+    if (!list) return;
+    try {
+        const msgs = await api(`/chatter/messages?model=account.budget&res_id=${budgetId}`);
+        if (!msgs || msgs.length === 0) {
+            list.innerHTML = '<div style="text-align: center; font-size: 0.8rem; color: var(--text-muted); padding: 0.5rem;">Belum ada catatan aktivitas.</div>';
+            return;
+        }
+        list.innerHTML = msgs.map(m => {
+            const author = m.author ? m.author.name : 'Sistem';
+            const dateStr = new Date(m.created_at).toLocaleString('id-ID');
+            return `
+                <div style="font-size: 0.8rem; margin-bottom: 0.4rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.3rem;">
+                    <div style="display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.72rem;">
+                        <strong>${escapeHtml(author)}</strong>
+                        <span>${dateStr}</span>
+                    </div>
+                    <div style="margin-top: 0.15rem; color: var(--text-primary);">${escapeHtml(m.body)}</div>
+                </div>
+            `;
+        }).join('');
+    } catch (err) {
+        list.innerHTML = '<div style="font-size: 0.8rem; color: var(--text-muted);">Gagal memuat catatan chatter.</div>';
+    }
+}
+
+function handleBudgetChatterKey(event) {
+    if (event.key === 'Enter') {
+        postBudgetChatter();
+    }
+}
+
+async function postBudgetChatter() {
+    if (!activeBudgetId) return;
+    const input = document.getElementById('budgetChatterInput');
+    const text = input ? input.value.trim() : '';
+    if (!text) return;
+
+    try {
+        await api('/chatter/messages', 'POST', {
+            model: 'account.budget',
+            res_id: activeBudgetId,
+            body: text,
+            type: 'comment'
+        });
+        input.value = '';
+        loadBudgetChatter(activeBudgetId);
+    } catch (err) {
+        showToast('Gagal mengirim catatan: ' + err.message, 'danger');
+    }
+}
+
+// ------------------------------------------
+// Manage Analytic Accounts (Cost Centers)
+// ------------------------------------------
+async function openAnalyticAccountsModal() {
+    try {
+        const list = await api('/budget/analytic-accounts');
+        cachedAnalyticAccounts = list || [];
+        renderAnalyticAccountsTable(cachedAnalyticAccounts);
+        openModal('modalAnalyticAccounts');
+    } catch (err) {
+        showToast('Gagal memuat akun analitik: ' + err.message, 'danger');
+    }
+}
+
+function renderAnalyticAccountsTable(list) {
+    const tbody = document.getElementById('analyticAccountsTableBody');
+    if (!tbody) return;
+    if (!list || list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center">Belum ada akun analitik (Cost Center).</td></tr>';
+        return;
+    }
+    tbody.innerHTML = list.map(a => `
+        <tr>
+            <td><strong>${escapeHtml(a.code)}</strong></td>
+            <td>${escapeHtml(a.name)}</td>
+            <td><small style="color: var(--text-muted);">${escapeHtml(a.description || '-')}</small></td>
+            <td style="text-align: right; font-weight: 600; color: #10b981;">${formatCurrency(a.balance || 0)}</td>
+            <td><span class="badge ${a.active ? 'badge-success' : 'badge-secondary'}">${a.active ? 'Aktif' : 'Non-Aktif'}</span></td>
+        </tr>
+    `).join('');
+}
+
+async function handleCreateAnalyticAccount(event) {
+    event.preventDefault();
+    const code = document.getElementById('analyticInputCode').value.trim();
+    const name = document.getElementById('analyticInputName').value.trim();
+    const desc = document.getElementById('analyticInputDesc').value.trim();
+
+    try {
+        await api('/budget/analytic-accounts', 'POST', {
+            code: code,
+            name: name,
+            description: desc,
+            active: true
+        });
+        showToast(`Akun analitik '${code}' berhasil ditambahkan!`, 'success');
+        document.getElementById('analyticInputCode').value = '';
+        document.getElementById('analyticInputName').value = '';
+        document.getElementById('analyticInputDesc').value = '';
+
+        const updated = await api('/budget/analytic-accounts');
+        cachedAnalyticAccounts = updated || [];
+        renderAnalyticAccountsTable(cachedAnalyticAccounts);
+    } catch (err) {
+        showToast('Gagal membuat akun analitik: ' + err.message, 'danger');
+    }
+}
+
+// ------------------------------------------
+// Manage Budgetary Positions
+// ------------------------------------------
+async function openBudgetaryPositionsModal() {
+    try {
+        const [positions, accounts] = await Promise.all([
+            api('/budget/budgetary-positions'),
+            api('/invoicing/accounts')
+        ]);
+        cachedBudgetaryPositions = positions || [];
+        cachedGLAccounts = accounts || [];
+
+        renderBudgetaryPositionsTable(cachedBudgetaryPositions);
+        renderGLAccountCheckboxes(cachedGLAccounts);
+
+        openModal('modalBudgetaryPositions');
+    } catch (err) {
+        showToast('Gagal memuat pos anggaran: ' + err.message, 'danger');
+    }
+}
+
+function renderGLAccountCheckboxes(accounts) {
+    const container = document.getElementById('budgetPostAccountCheckboxes');
+    if (!container) return;
+    if (!accounts || accounts.length === 0) {
+        container.innerHTML = '<span style="color: var(--text-muted);">Tidak ada akun GL ditemukan.</span>';
+        return;
+    }
+    // Filter expense / liability / asset accounts or show all
+    container.innerHTML = accounts.map(a => `
+        <label style="display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+            <input type="checkbox" value="${a.id}" class="bp-acct-checkbox">
+            <span><strong>${escapeHtml(a.code)}</strong> - ${escapeHtml(a.name)}</span>
+        </label>
+    `).join('');
+}
+
+function renderBudgetaryPositionsTable(list) {
+    const tbody = document.getElementById('budgetaryPositionsTableBody');
+    if (!tbody) return;
+    if (!list || list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center">Belum ada pos anggaran.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = list.map(p => {
+        let acctStr = p.accounts ? p.accounts.map(a => a.code).join(', ') : '-';
+        return `
+            <tr>
+                <td><strong>${escapeHtml(p.code)}</strong></td>
+                <td>${escapeHtml(p.name)}</td>
+                <td><small style="color: var(--text-muted);">${escapeHtml(p.description || '-')}</small></td>
+                <td><span style="font-family: monospace; font-size: 0.8rem; color: #6366f1;">${escapeHtml(acctStr)}</span></td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function handleCreateBudgetaryPosition(event) {
+    event.preventDefault();
+    const code = document.getElementById('budgetPostInputCode').value.trim();
+    const name = document.getElementById('budgetPostInputName').value.trim();
+    const desc = document.getElementById('budgetPostInputDesc').value.trim();
+
+    const checked = document.querySelectorAll('#budgetPostAccountCheckboxes .bp-acct-checkbox:checked');
+    const accountIds = Array.from(checked).map(c => parseInt(c.value));
+    if (accountIds.length === 0) {
+        showToast('Pilih minimal 1 akun buku besar (GL Account) untuk pos anggaran ini.', 'warning');
+        return;
+    }
+
+    try {
+        await api('/budget/budgetary-positions', 'POST', {
+            code: code,
+            name: name,
+            description: desc,
+            account_ids: accountIds
+        });
+        showToast(`Pos anggaran '${code}' berhasil disimpan!`, 'success');
+        document.getElementById('budgetPostInputCode').value = '';
+        document.getElementById('budgetPostInputName').value = '';
+        document.getElementById('budgetPostInputDesc').value = '';
+        document.querySelectorAll('#budgetPostAccountCheckboxes .bp-acct-checkbox').forEach(c => c.checked = false);
+
+        const updated = await api('/budget/budgetary-positions');
+        cachedBudgetaryPositions = updated || [];
+        renderBudgetaryPositionsTable(cachedBudgetaryPositions);
+    } catch (err) {
+        showToast('Gagal membuat pos anggaran: ' + err.message, 'danger');
+    }
+}
+
+// ============================================================================
+// 27. BARCODE & QR CODE ENGINE, LOT/SERIAL TRACKING & MOBILE OPERATIONS
+// ============================================================================
+
+let cachedLots = [];
+let currentBarcodeSVG = '';
+let currentBarcodeLabelInfo = { type: 'product', id: 0, title: '' };
+
+// Audio Beep Synthesizer using Web Audio API (Hardware Scanner Gun Emulation)
+function playBarcodeBeep(success = true) {
+    try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'sine';
+        if (success) {
+            osc.frequency.setValueAtTime(1760, ctx.currentTime); // High pitch crisp scanner beep (A6)
+            gain.gain.setValueAtTime(0.15, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.09);
+        } else {
+            osc.frequency.setValueAtTime(320, ctx.currentTime); // Low buzz for error
+            gain.gain.setValueAtTime(0.2, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.22);
+        }
+    } catch (e) {
+        // AudioContext may be restricted by browser policy before first user gesture
+    }
+}
+
+// Load Barcode Data & KPI Stats
+async function loadBarcodeData() {
+    try {
+        const [statsRes, lotsRes, prodsRes] = await Promise.all([
+            api('/barcode/stats'),
+            api('/barcode/lots'),
+            api('/products')
+        ]);
+
+        // 1. Update KPI Cards
+        if (statsRes && statsRes.data) {
+            const st = statsRes.data;
+            document.getElementById('barcodeStatProducts').textContent = st.products_barcoded || 0;
+            document.getElementById('barcodeStatLots').textContent = st.total_lots || 0;
+            document.getElementById('barcodeStatActiveLots').textContent = st.active_lots_with_stock || 0;
+            document.getElementById('barcodeStatLocations').textContent = st.locations_barcoded || 0;
+        }
+
+        // 2. Cache Data
+        cachedLots = (lotsRes && lotsRes.data) ? lotsRes.data : [];
+        if (prodsRes && Array.isArray(prodsRes)) {
+            state.products = prodsRes;
+        }
+
+        // 3. Populate Product Filter Dropdown
+        const prodSelect = document.getElementById('lotFilterProduct');
+        if (prodSelect) {
+            const currentVal = prodSelect.value;
+            let options = '<option value="">Semua Produk</option>';
+            state.products.forEach(p => {
+                options += `<option value="${p.id}" ${currentVal == p.id ? 'selected' : ''}>${escapeHtml(p.name)} (${escapeHtml(p.default_code || '-')})</option>`;
+            });
+            prodSelect.innerHTML = options;
+        }
+
+        // 4. Render Table
+        renderLotsFiltered();
+    } catch (err) {
+        console.error('Error loading barcode data:', err);
+        showToast('Gagal memuat data barcode & lot: ' + err.message, 'danger');
+    }
+}
+
+function renderLotsFiltered() {
+    const prodFilter = document.getElementById('lotFilterProduct') ? document.getElementById('lotFilterProduct').value : '';
+    const searchVal = document.getElementById('lotSearchInput') ? document.getElementById('lotSearchInput').value.trim().toLowerCase() : '';
+
+    let filtered = cachedLots || [];
+    if (prodFilter) {
+        filtered = filtered.filter(l => l.product_id == prodFilter);
+    }
+    if (searchVal) {
+        filtered = filtered.filter(l => 
+            (l.name && l.name.toLowerCase().includes(searchVal)) ||
+            (l.barcode && l.barcode.toLowerCase().includes(searchVal)) ||
+            (l.ref && l.ref.toLowerCase().includes(searchVal)) ||
+            (l.product && l.product.name && l.product.name.toLowerCase().includes(searchVal))
+        );
+    }
+
+    const badge = document.getElementById('lotCountBadge');
+    if (badge) badge.textContent = `${filtered.length} Lot Terdaftar`;
+
+    const tbody = document.getElementById('lotsTableBody');
+    if (!tbody) return;
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center" style="padding: 2rem; color: var(--text-muted);">Tidak ada nomor lot atau serial yang cocok.</td></tr>';
+        return;
+    }
+
+    const now = new Date();
+    tbody.innerHTML = filtered.map(lot => {
+        let isExpired = false;
+        let isNearAlert = false;
+        if (lot.expiration_date) {
+            const expDate = new Date(lot.expiration_date);
+            if (expDate < now) isExpired = true;
+        }
+        if (lot.alert_date && !isExpired) {
+            const alertDate = new Date(lot.alert_date);
+            if (alertDate <= now) isNearAlert = true;
+        }
+
+        let statusBadge = '';
+        if (isExpired) {
+            statusBadge = '<span class="badge badge-danger">Kadaluwarsa</span>';
+        } else if (isNearAlert) {
+            statusBadge = '<span class="badge badge-warning">Peringatan Mutu</span>';
+        } else if (lot.qty > 0) {
+            statusBadge = '<span class="badge badge-success">Stok Tersedia</span>';
+        } else {
+            statusBadge = '<span class="badge badge-secondary">Saldo Kosong</span>';
+        }
+
+        const prodName = lot.product ? lot.product.name : `Product #${lot.product_id}`;
+        const locName = lot.location ? (lot.location.complete_name || lot.location.name) : 'Gudang Utama';
+
+        return `
+            <tr>
+                <td><strong>${escapeHtml(lot.name)}</strong></td>
+                <td>${escapeHtml(prodName)}</td>
+                <td><code style="color: #38bdf8; background: rgba(6, 182, 212, 0.1); padding: 0.2rem 0.4rem; border-radius: 4px;">${escapeHtml(lot.barcode || '-')}</code></td>
+                <td><small style="color: var(--text-muted);">${escapeHtml(lot.ref || '-')}</small></td>
+                <td style="text-align: right; font-weight: 700; color: ${lot.qty > 0 ? '#10b981' : '#94a3b8'};">${lot.qty || 0}</td>
+                <td><small>${escapeHtml(locName)}</small></td>
+                <td><small>${escapeHtml(lot.expiration_date || '-')}</small></td>
+                <td>${statusBadge}</td>
+                <td style="text-align: center;">
+                    <div style="display: flex; gap: 0.35rem; justify-content: center;">
+                        <button class="btn btn-sm btn-outline" onclick="openPrintBarcodeModal('lot', ${lot.id}, '${escapeHtml(lot.name)}')" title="Cetak Label Vektor SVG" style="font-size: 0.75rem; padding: 0.25rem 0.5rem; border-color: #38bdf8; color: #38bdf8;">
+                            🖨️ Cetak
+                        </button>
+                        <button class="btn btn-sm btn-outline" onclick="quickTestBarcode('${escapeHtml(lot.barcode || lot.name)}')" title="Uji Scan Cepat" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                            🔍 Test
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function handleLotSearch(event) {
+    renderLotsFiltered();
+}
+
+// ----------------------------------------------------------------------------
+// Universal Barcode Scanner Modal Controller
+// ----------------------------------------------------------------------------
+
+function openBarcodeScannerModal(context = 'general', targetId = 0) {
+    state.currentBarcodeContext = context;
+    state.currentBarcodeTargetId = targetId;
+
+    const modal = document.getElementById('modalBarcodeScanner');
+    if (!modal) return;
+
+    // Set Context Select & Badge
+    const contextSelect = document.getElementById('barcodeScanModalContext');
+    if (contextSelect) contextSelect.value = context;
+    updateBarcodeContextBadge();
+
+    // Reset Inputs & Result
+    const input = document.getElementById('barcodeScanModalInput');
+    if (input) {
+        input.value = '';
+        setTimeout(() => input.focus(), 150);
+    }
+    clearBarcodeScanResult();
+
+    openModal('modalBarcodeScanner');
+}
+
+function updateBarcodeContextBadge() {
+    const contextSelect = document.getElementById('barcodeScanModalContext');
+    const badge = document.getElementById('barcodeScannerContextBadge');
+    if (!contextSelect || !badge) return;
+
+    const ctx = contextSelect.value;
+    state.currentBarcodeContext = ctx;
+
+    if (ctx === 'pos') {
+        badge.textContent = 'Mode Kasir POS';
+        badge.className = 'badge badge-warning';
+    } else if (ctx === 'stock_inventory') {
+        badge.textContent = 'Mode Stock Opname';
+        badge.className = 'badge badge-success';
+    } else {
+        badge.textContent = 'Mode Umum / Master Data';
+        badge.className = 'badge badge-info';
+    }
+}
+
+function injectModalBarcode(code) {
+    const input = document.getElementById('barcodeScanModalInput');
+    if (input) {
+        input.value = code;
+        handleBarcodeScannerModalSubmit(new Event('submit'));
+    }
+}
+
+function clearBarcodeScanResult() {
+    const resultBox = document.getElementById('barcodeScannerLiveResult');
+    if (resultBox) {
+        resultBox.style.display = 'none';
+        resultBox.innerHTML = '';
+    }
+    const input = document.getElementById('barcodeScanModalInput');
+    if (input) input.focus();
+}
+
+async function handleBarcodeScannerModalSubmit(event) {
+    if (event && event.preventDefault) event.preventDefault();
+
+    const input = document.getElementById('barcodeScanModalInput');
+    const qtyInput = document.getElementById('barcodeScanModalQty');
+    const contextSelect = document.getElementById('barcodeScanModalContext');
+    const resultBox = document.getElementById('barcodeScannerLiveResult');
+
+    if (!input || !input.value.trim()) return;
+
+    const code = input.value.trim();
+    const qty = qtyInput ? parseFloat(qtyInput.value) || 1.0 : 1.0;
+    const context = contextSelect ? contextSelect.value : state.currentBarcodeContext || 'general';
+
+    try {
+        const payload = {
+            barcode: code,
+            context: context,
+            qty: qty,
+            action: 'increment'
+        };
+        if (state.currentBarcodeTargetId) {
+            payload.target_id = state.currentBarcodeTargetId;
+        }
+
+        const res = await api('/barcode/scan', 'POST', payload);
+        const scanData = res.data;
+
+        // Play Sound
+        playBarcodeBeep(scanData && scanData.found);
+
+        // Render Live Result Box
+        if (resultBox) {
+            resultBox.style.display = 'block';
+
+            if (!scanData || !scanData.found) {
+                resultBox.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.75rem; color: #ef4444;">
+                        <span style="font-size: 1.5rem;">❌</span>
+                        <div>
+                            <strong>Barcode Tidak Dikenal</strong>
+                            <div style="font-size: 0.85rem; color: #cbd5e1;">Kode '<code>${escapeHtml(code)}</code>' tidak terdaftar pada katalog produk, lot, maupun lokasi rak gudang.</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                let entityBadge = `<span class="badge badge-info">${escapeHtml(scanData.type).toUpperCase()}</span>`;
+                let detailsHtml = '';
+
+                if (scanData.type === 'product' && scanData.product) {
+                    const p = scanData.product;
+                    detailsHtml = `
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 0.5rem;">
+                            <div>
+                                <h4 style="margin: 0; font-size: 1.1rem; color: #38bdf8;">${escapeHtml(p.name)}</h4>
+                                <div style="font-size: 0.85rem; color: #94a3b8;">SKU: ${escapeHtml(p.default_code || '-')} | Barcode: ${escapeHtml(p.barcode || code)}</div>
+                                <div style="font-size: 0.85rem; color: #10b981; font-weight: 600; margin-top: 0.25rem;">Harga Jual: ${formatCurrency(p.list_price || 0)}</div>
+                            </div>
+                            <button class="btn btn-sm btn-outline" onclick="openPrintBarcodeModal('product', ${p.id}, '${escapeHtml(p.name)}')" style="font-size: 0.75rem;">
+                                🖨️ Cetak Label
+                            </button>
+                        </div>
+                    `;
+                } else if (scanData.type === 'lot' && scanData.lot) {
+                    const l = scanData.lot;
+                    const pName = l.product ? l.product.name : 'Produk Terkait';
+                    detailsHtml = `
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 0.5rem;">
+                            <div>
+                                <h4 style="margin: 0; font-size: 1.1rem; color: #818cf8;">Lot: ${escapeHtml(l.name)}</h4>
+                                <div style="font-size: 0.85rem; color: #94a3b8;">Produk: ${escapeHtml(pName)} | Saldo: ${l.qty || 0} unit</div>
+                                <div style="font-size: 0.85rem; color: #f59e0b; margin-top: 0.25rem;">Kadaluwarsa: ${escapeHtml(l.expiration_date || 'Tidak Ada')}</div>
+                            </div>
+                            <button class="btn btn-sm btn-outline" onclick="openPrintBarcodeModal('lot', ${l.id}, '${escapeHtml(l.name)}')" style="font-size: 0.75rem;">
+                                🖨️ Cetak Label
+                            </button>
+                        </div>
+                    `;
+                } else if (scanData.type === 'location' && scanData.location) {
+                    const loc = scanData.location;
+                    detailsHtml = `
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 0.5rem;">
+                            <div>
+                                <h4 style="margin: 0; font-size: 1.1rem; color: #fbbf24;">Lokasi Rak: ${escapeHtml(loc.complete_name || loc.name)}</h4>
+                                <div style="font-size: 0.85rem; color: #94a3b8;">Tipe Rak / Usage: ${escapeHtml(loc.usage || '-')}</div>
+                            </div>
+                            <button class="btn btn-sm btn-outline" onclick="openPrintBarcodeModal('location', ${loc.id}, '${escapeHtml(loc.complete_name || loc.name)}')" style="font-size: 0.75rem;">
+                                🖨️ Cetak Label
+                            </button>
+                        </div>
+                    `;
+                }
+
+                let actionNotice = '';
+                if (scanData.action_taken === 'pos_item_prepared') {
+                    actionNotice = `
+                        <div style="margin-top: 0.75rem; padding: 0.5rem; background: rgba(16, 185, 129, 0.15); border-left: 3px solid #10b981; border-radius: 4px; font-size: 0.85rem;">
+                            ✅ <strong>Item Kasir Siap:</strong> Subtotal ${formatCurrency(scanData.data.price_subtotal || 0)} untuk ${qty} unit.
+                            <button class="btn btn-sm btn-success" onclick="applyScannedItemToPos(${scanData.product.id}, ${qty}, ${scanData.product.list_price})" style="font-size: 0.75rem; margin-left: 0.5rem; padding: 0.2rem 0.5rem;">
+                                Masukkan ke Checkout POS
+                            </button>
+                        </div>
+                    `;
+                } else if (scanData.action_taken && scanData.action_taken.startsWith('inventory_line_')) {
+                    actionNotice = `
+                        <div style="margin-top: 0.75rem; padding: 0.5rem; background: rgba(59, 130, 246, 0.15); border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.85rem;">
+                            📊 <strong>Stock Opname Terupdate:</strong> ${escapeHtml(scanData.message)}
+                        </div>
+                    `;
+                }
+
+                resultBox.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem;">
+                        <span style="font-size: 0.85rem; color: #10b981; font-weight: 600;">✓ Barcode Teridentifikasi</span>
+                        ${entityBadge}
+                    </div>
+                    ${detailsHtml}
+                    ${actionNotice}
+                `;
+            }
+        }
+
+        // Auto re-focus for continuous barcode scanner gun shooting
+        input.value = '';
+        input.focus();
+    } catch (err) {
+        playBarcodeBeep(false);
+        showToast('Gagal memproses barcode: ' + err.message, 'danger');
+    }
+}
+
+function applyScannedItemToPos(productId, qty, price) {
+    closeModal('modalBarcodeScanner');
+    openModal('modalPosCheckout');
+    
+    const sel = document.getElementById('posProductSelect');
+    if (sel) {
+        sel.value = productId;
+        updatePosPrice();
+    }
+    const qInput = document.getElementById('posQty');
+    if (qInput) {
+        qInput.value = qty;
+        calcPosTotal();
+    }
+    showToast('Produk hasil scan barcode berhasil dimasukkan ke form checkout POS!', 'success');
+}
+
+// ----------------------------------------------------------------------------
+// Quick Playground & Vector SVG Tester
+// ----------------------------------------------------------------------------
+
+function quickTestBarcode(code) {
+    const input = document.getElementById('barcodePlaygroundInput');
+    if (input) {
+        input.value = code;
+        executeQuickBarcodeScan();
+    }
+}
+
+async function executeQuickBarcodeScan() {
+    const input = document.getElementById('barcodePlaygroundInput');
+    const resultBox = document.getElementById('barcodePlaygroundResult');
+    if (!input || !input.value.trim()) return;
+
+    const code = input.value.trim();
+    try {
+        const res = await api('/barcode/scan', 'POST', { barcode: code, context: 'general' });
+        const scanData = res.data;
+        playBarcodeBeep(scanData && scanData.found);
+
+        if (resultBox) {
+            resultBox.style.display = 'block';
+            if (!scanData || !scanData.found) {
+                resultBox.innerHTML = `
+                    <div style="color: #ef4444; font-size: 0.9rem;">
+                        ❌ Barcode <code>${escapeHtml(code)}</code> tidak ditemukan dalam sistem.
+                    </div>
+                `;
+                return;
+            }
+
+            let previewUrl = '';
+            let entityName = '';
+            let entityType = scanData.type;
+            let entityId = 0;
+
+            if (scanData.type === 'product' && scanData.product) {
+                entityName = scanData.product.name;
+                entityId = scanData.product.id;
+            } else if (scanData.type === 'lot' && scanData.lot) {
+                entityName = scanData.lot.name;
+                entityId = scanData.lot.id;
+            } else if (scanData.type === 'location' && scanData.location) {
+                entityName = scanData.location.complete_name || scanData.location.name;
+                entityId = scanData.location.id;
+            }
+
+            // Fetch live SVG
+            let svgMarkup = '';
+            try {
+                const labelRes = await api(`/barcode/label/${entityType}/${entityId}?format=json`);
+                if (labelRes && labelRes.data && labelRes.data.svg) {
+                    svgMarkup = labelRes.data.svg;
+                }
+            } catch (svgErr) {
+                console.error(svgErr);
+            }
+
+            resultBox.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; align-items: center;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <span class="badge badge-success">Ditemukan</span>
+                            <span class="badge badge-info">${escapeHtml(entityType).toUpperCase()}</span>
+                        </div>
+                        <h4 style="margin: 0 0 0.5rem 0; font-size: 1.15rem; color: #38bdf8;">${escapeHtml(entityName)}</h4>
+                        <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.75rem;">${escapeHtml(scanData.message)}</div>
+                        <button class="btn btn-sm btn-primary" onclick="openPrintBarcodeModal('${entityType}', ${entityId}, '${escapeHtml(entityName)}')" style="font-size: 0.8rem;">
+                            🖨️ Buka Modal Cetak Label
+                        </button>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="background: #ffffff; padding: 0.75rem; border-radius: 6px; display: inline-block; max-width: 100%;">
+                            ${svgMarkup || '<span style="color: #64748b;">Memuat label vektor SVG...</span>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    } catch (err) {
+        playBarcodeBeep(false);
+        showToast('Gagal memindai barcode: ' + err.message, 'danger');
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Pure Go Vector SVG Label Printing & Download
+// ----------------------------------------------------------------------------
+
+async function openPrintBarcodeModal(type, id, title = '') {
+    try {
+        currentBarcodeLabelInfo = { type, id, title };
+        const titleEl = document.getElementById('barcodeLabelModalTitle');
+        if (titleEl) {
+            titleEl.textContent = `Label Barcode: ${title || type.toUpperCase() + ' #' + id}`;
+        }
+
+        const container = document.getElementById('barcodeLabelPreviewContainer');
+        if (container) {
+            container.innerHTML = '<span style="color: #64748b;">Menghasilkan vektor SVG Code 128 murni...</span>';
+        }
+
+        openModal('modalPrintBarcodeLabel');
+
+        const res = await api(`/barcode/label/${type}/${id}?format=json`);
+        if (res && res.data && res.data.svg) {
+            currentBarcodeSVG = res.data.svg;
+            if (container) {
+                container.innerHTML = currentBarcodeSVG;
+            }
+        }
+    } catch (err) {
+        showToast('Gagal membuat label barcode: ' + err.message, 'danger');
+    }
+}
+
+function triggerPrintBarcodeLabel() {
+    if (!currentBarcodeSVG) {
+        showToast('Tidak ada label SVG untuk dicetak.', 'warning');
+        return;
+    }
+
+    const printWin = window.open('', '_blank', 'width=450,height=400');
+    if (!printWin) {
+        window.print();
+        return;
+    }
+
+    printWin.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Cetak Barcode Label - Odoo-Go ERP</title>
+            <style>
+                @page { size: auto; margin: 4mm; }
+                body {
+                    margin: 0;
+                    padding: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: #ffffff;
+                }
+                .label-wrap {
+                    display: inline-block;
+                    text-align: center;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="label-wrap">
+                ${currentBarcodeSVG}
+            </div>
+            <script>
+                window.onload = function() {
+                    window.print();
+                    setTimeout(function() { window.close(); }, 500);
+                };
+            <\/script>
+        </body>
+        </html>
+    `);
+    printWin.document.close();
+}
+
+function downloadBarcodeSVG() {
+    if (!currentBarcodeSVG) return;
+    const blob = new Blob([currentBarcodeSVG], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `label-${currentBarcodeLabelInfo.type}-${currentBarcodeLabelInfo.id}.svg`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('File label SVG berhasil diunduh.', 'success');
+}
+
+// ----------------------------------------------------------------------------
+// Create Lot / Serial Number
+// ----------------------------------------------------------------------------
+
+function openCreateLotModal() {
+    const sel = document.getElementById('createLotProductSelect');
+    if (sel && state.products) {
+        sel.innerHTML = state.products.map(p => `
+            <option value="${p.id}">${escapeHtml(p.name)} (${escapeHtml(p.default_code || '-')})</option>
+        `).join('');
+    }
+    document.getElementById('createLotNameInput').value = '';
+    document.getElementById('createLotBarcodeInput').value = '';
+    document.getElementById('createLotRefInput').value = '';
+    document.getElementById('createLotQtyInput').value = '100';
+    document.getElementById('createLotExpDateInput').value = '';
+    document.getElementById('createLotAlertDateInput').value = '';
+    document.getElementById('createLotNotesInput').value = '';
+
+    openModal('modalCreateLot');
+}
+
+async function handleCreateLot(event) {
+    event.preventDefault();
+
+    const productId = parseInt(document.getElementById('createLotProductSelect').value);
+    const name = document.getElementById('createLotNameInput').value.trim();
+    const barcodeCode = document.getElementById('createLotBarcodeInput').value.trim();
+    const ref = document.getElementById('createLotRefInput').value.trim();
+    const qty = parseFloat(document.getElementById('createLotQtyInput').value) || 0;
+    const expDate = document.getElementById('createLotExpDateInput').value;
+    const alertDate = document.getElementById('createLotAlertDateInput').value;
+    const notes = document.getElementById('createLotNotesInput').value.trim();
+
+    try {
+        await api('/barcode/lots', 'POST', {
+            product_id: productId,
+            name: name,
+            barcode: barcodeCode,
+            ref: ref,
+            qty: qty,
+            expiration_date: expDate,
+            alert_date: alertDate,
+            notes: notes
+        });
+
+        showToast(`Nomor Lot/Serial '${name}' berhasil didaftarkan!`, 'success');
+        closeModal('modalCreateLot');
+        loadBarcodeData();
+    } catch (err) {
+        showToast('Gagal mendaftarkan nomor lot: ' + err.message, 'danger');
+    }
+}
+
+// ==========================================
+// 28. PURCHASE REQUISITIONS, CALL FOR BIDS & BLANKET ORDERS
+// ==========================================
+
+let activeRequisitionId = null;
+let cachedRequisitionProducts = [];
+let cachedRequisitionVendors = [];
+
+async function loadPurchaseRequisitionsData() {
+    try {
+        // 1. Load Stats
+        const statsRes = await api('/purchase-requisitions/stats');
+        const stats = statsRes.data || {};
+        document.getElementById('reqStatTotal').textContent = stats.total_requisitions || 0;
+        document.getElementById('reqStatTenders').textContent = stats.active_tenders_count ?? stats.tenders ?? 0;
+        document.getElementById('reqStatBlankets').textContent = stats.blanket_orders_count ?? stats.blanket_orders ?? 0;
+        document.getElementById('reqStatDone').textContent = stats.done_count ?? stats.done_requisitions ?? 0;
+        document.getElementById('reqStatTotalEstimated').textContent = formatCurrency(stats.total_estimated_value || 0);
+
+        // 2. Load Table List with Filters
+        const typeFilter = document.getElementById('reqFilterType')?.value || '';
+        const stateFilter = document.getElementById('reqFilterState')?.value || '';
+        const searchInput = document.getElementById('reqSearchInput')?.value || '';
+
+        let queryParams = [];
+        if (typeFilter) queryParams.push(`type=${encodeURIComponent(typeFilter)}`);
+        if (stateFilter) queryParams.push(`state=${encodeURIComponent(stateFilter)}`);
+        if (searchInput) queryParams.push(`search=${encodeURIComponent(searchInput)}`);
+        const queryStr = queryParams.length > 0 ? '?' + queryParams.join('&') : '';
+
+        const listRes = await api(`/purchase-requisitions${queryStr}`);
+        const requisitions = listRes.data || [];
+
+        const countBadge = document.getElementById('reqTableCountBadge');
+        if (countBadge) countBadge.textContent = `${requisitions.length} Dokumen`;
+
+        const tbody = document.getElementById('requisitionsTableBody');
+        tbody.innerHTML = '';
+
+        if (requisitions.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center" style="padding: 2rem; color: var(--text-muted);">Tidak ada purchase requisition atau blanket order yang cocok dengan filter.</td></tr>`;
+            return;
+        }
+
+        requisitions.forEach(r => {
+            const isTender = r.type === 'purchase_tender';
+            const typeBadge = isTender 
+                ? `<span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #6366f1; border: 1px solid rgba(99, 102, 241, 0.3);">📢 Tender / Bidding</span>`
+                : `<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">📜 Blanket Order</span>`;
+
+            let stateBadge = '';
+            switch (r.state) {
+                case 'draft':
+                    stateBadge = `<span class="badge badge-secondary">Draft</span>`;
+                    break;
+                case 'confirmed':
+                    stateBadge = `<span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">Disetujui</span>`;
+                    break;
+                case 'in_progress':
+                    stateBadge = `<span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">Dalam Proses</span>`;
+                    break;
+                case 'done':
+                    stateBadge = `<span class="badge badge-primary">Selesai (Done)</span>`;
+                    break;
+                case 'cancel':
+                    stateBadge = `<span class="badge badge-danger">Dibatalkan</span>`;
+                    break;
+                default:
+                    stateBadge = `<span class="badge badge-secondary">${r.state}</span>`;
+            }
+
+            const vendorLabel = r.vendor?.name ? `<strong>${r.vendor.name}</strong>` : `<span style="color: var(--text-muted); font-style: italic;">Multi-Vendor (Lelang)</span>`;
+            const dateEndLabel = r.date_end ? r.date_end.substring(0, 10) : '-';
+            const orderDateLabel = r.ordering_date ? r.ordering_date.substring(0, 10) : '-';
+
+            let actionButtons = `
+                <button class="btn btn-sm btn-secondary" onclick="viewRequisitionDetail(${r.id})" title="Lihat Detail & Baris">
+                    👁️ Detail
+                </button>
+            `;
+
+            if (isTender && r.state === 'in_progress') {
+                actionButtons += `
+                    <button class="btn btn-sm btn-primary" onclick="openGenerateRFQModal(${r.id})" style="background: #6366f1; border: none; margin-left: 0.25rem;" title="Terbitkan RFQ Penawaran Rekanan">
+                        + RFQ
+                    </button>
+                `;
+            } else if (!isTender && (r.state === 'confirmed' || r.state === 'in_progress')) {
+                actionButtons += `
+                    <button class="btn btn-sm btn-primary" onclick="openReleaseBlanketModal(${r.id})" style="background: #10b981; border: none; margin-left: 0.25rem;" title="Rilis Parsial / Penuh Purchase Order">
+                        + Rilis PO
+                    </button>
+                `;
+            }
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${r.name}</strong></td>
+                <td>${typeBadge}</td>
+                <td>${vendorLabel}</td>
+                <td>${orderDateLabel}</td>
+                <td>${dateEndLabel}</td>
+                <td>
+                    <div>${r.description || '-'}</div>
+                    ${r.origin ? `<small style="color: var(--text-muted);">Asal: ${r.origin}</small>` : ''}
+                </td>
+                <td style="text-align: right; font-weight: 600; color: #10b981;">${formatCurrency(r.estimated_total_amount || 0)}</td>
+                <td style="text-align: center;">${stateBadge}</td>
+                <td style="text-align: center; white-space: nowrap;">${actionButtons}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (err) {
+        console.error('loadPurchaseRequisitionsData error:', err);
+        showToast('Gagal memuat data purchase requisition: ' + err.message, 'danger');
+    }
+}
+
+function handleReqSearch(event) {
+    if (event.key === 'Enter') {
+        loadPurchaseRequisitionsData();
+    }
+}
+
+async function viewRequisitionDetail(id) {
+    try {
+        const res = await api(`/purchase-requisitions/${id}`);
+        const r = res.data;
+        if (!r) return;
+
+        activeRequisitionId = r.id;
+        const detailCard = document.getElementById('reqDetailCard');
+        detailCard.style.display = 'block';
+
+        // Scroll to detail smoothly
+        detailCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // Populate Header
+        document.getElementById('reqDetailTitle').textContent = `${r.name} - ${r.description || 'Pengadaan Tanpa Keterangan'}`;
+        document.getElementById('reqDetailSubtitle').textContent = `Dibuat oleh: ${r.user?.name || 'Administrator'} | Referensi Asal: ${r.origin || '-'}`;
+
+        const isTender = r.type === 'purchase_tender';
+        const typeBadge = document.getElementById('reqDetailTypeBadge');
+        typeBadge.textContent = isTender ? 'Call for Bids / Tender' : 'Blanket Order';
+        typeBadge.className = isTender ? 'badge badge-info' : 'badge badge-primary';
+
+        const stateBadge = document.getElementById('reqDetailStateBadge');
+        stateBadge.textContent = r.state.toUpperCase();
+        stateBadge.className = r.state === 'done' ? 'badge badge-primary' : r.state === 'cancel' ? 'badge badge-danger' : 'badge badge-secondary';
+
+        // Summary Cards
+        document.getElementById('reqDetailVendor').textContent = r.vendor?.name || 'Multi-Vendor Rekanan';
+        document.getElementById('reqDetailOrderDate').textContent = r.ordering_date ? r.ordering_date.substring(0, 10) : '-';
+        document.getElementById('reqDetailDateEnd').textContent = r.date_end ? r.date_end.substring(0, 10) : '-';
+        document.getElementById('reqDetailScheduleDate').textContent = r.schedule_date ? r.schedule_date.substring(0, 10) : '-';
+        document.getElementById('reqDetailTotalAmount').textContent = formatCurrency(r.estimated_total_amount || 0);
+
+        // Lifecycle Actions Container
+        const actionsDiv = document.getElementById('reqDetailActions');
+        actionsDiv.innerHTML = '';
+
+        if (r.state === 'draft') {
+            actionsDiv.innerHTML += `
+                <button class="btn btn-sm btn-primary" onclick="confirmRequisition(${r.id})">
+                    ✓ Setujui Pengadaan
+                </button>
+            `;
+        } else if (isTender && r.state === 'confirmed') {
+            actionsDiv.innerHTML += `
+                <button class="btn btn-sm btn-primary" onclick="openTenderRequisition(${r.id})" style="background: #6366f1; border: none;">
+                    📢 Buka Tender Rekanan (Open Bids)
+                </button>
+            `;
+        } else if (isTender && r.state === 'in_progress') {
+            actionsDiv.innerHTML += `
+                <button class="btn btn-sm btn-primary" onclick="openGenerateRFQModal(${r.id})" style="background: #6366f1; border: none;">
+                    + Terbitkan RFQ Vendor
+                </button>
+            `;
+        } else if (!isTender && (r.state === 'confirmed' || r.state === 'in_progress')) {
+            actionsDiv.innerHTML += `
+                <button class="btn btn-sm btn-primary" onclick="openReleaseBlanketModal(${r.id})" style="background: #10b981; border: none;">
+                    + Rilis Blanket Purchase Order
+                </button>
+            `;
+        }
+
+        if (r.state !== 'cancel' && r.state !== 'done') {
+            actionsDiv.innerHTML += `
+                <button class="btn btn-sm btn-danger" onclick="cancelRequisition(${r.id})">
+                    ✕ Batalkan
+                </button>
+            `;
+        } else if (r.state === 'cancel') {
+            actionsDiv.innerHTML += `
+                <button class="btn btn-sm btn-secondary" onclick="resetDraftRequisition(${r.id})">
+                    ↺ Reset ke Draft
+                </button>
+            `;
+        }
+
+        // Render Lines
+        const linesBody = document.getElementById('reqDetailLinesBody');
+        linesBody.innerHTML = '';
+
+        if (!r.lines || r.lines.length === 0) {
+            linesBody.innerHTML = `<tr><td colspan="8" class="text-center" style="color: var(--text-muted);">Tidak ada baris item dalam dokumen ini.</td></tr>`;
+        } else {
+            r.lines.forEach((line, idx) => {
+                const remaining = Math.max(0, line.product_qty - line.qty_ordered);
+                const percent = line.product_qty > 0 ? Math.min(100, Math.round((line.qty_ordered / line.product_qty) * 100)) : 0;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${idx + 1}</td>
+                    <td><strong>${line.product?.name || `Produk #${line.product_id}`}</strong></td>
+                    <td>${line.description || '-'}</td>
+                    <td style="text-align: right; font-weight: 600;">${line.product_qty}</td>
+                    <td style="text-align: right; color: #3b82f6;">${line.qty_ordered} (${percent}%)</td>
+                    <td style="text-align: right; color: ${remaining === 0 ? '#10b981' : '#f59e0b'}; font-weight: 600;">${remaining}</td>
+                    <td style="text-align: right;">${formatCurrency(line.price_unit || 0)}</td>
+                    <td style="text-align: right; font-weight: 600;">${formatCurrency((line.product_qty * line.price_unit) || 0)}</td>
+                `;
+                linesBody.appendChild(tr);
+            });
+        }
+
+        // Render Child Purchase Orders
+        const posBody = document.getElementById('reqDetailPOsBody');
+        posBody.innerHTML = '';
+        const poTitle = document.getElementById('reqChildPOsTitle');
+        poTitle.textContent = isTender 
+            ? 'Penawaran Harga Vendor (Tender RFQ Bids):' 
+            : 'Riwayat Rilis Purchase Orders (Blanket Releases):';
+
+        if (!r.purchase_orders || r.purchase_orders.length === 0) {
+            posBody.innerHTML = `<tr><td colspan="6" class="text-center" style="color: var(--text-muted);">Belum ada Purchase Order atau RFQ penawaran yang diterbitkan untuk dokumen ini.</td></tr>`;
+        } else {
+            r.purchase_orders.forEach(po => {
+                let poStateBadge = '';
+                switch (po.state) {
+                    case 'draft':
+                        poStateBadge = `<span class="badge badge-secondary">Draft / RFQ</span>`;
+                        break;
+                    case 'purchase':
+                        poStateBadge = `<span class="badge badge-primary">Confirmed PO (Pemenang)</span>`;
+                        break;
+                    case 'cancel':
+                        poStateBadge = `<span class="badge badge-danger">Gugur / Cancel</span>`;
+                        break;
+                    default:
+                        poStateBadge = `<span class="badge badge-secondary">${po.state}</span>`;
+                }
+
+                let selectBidBtn = '-';
+                if (isTender && (r.state === 'in_progress' || r.state === 'confirmed') && po.state === 'draft') {
+                    selectBidBtn = `
+                        <button class="btn btn-sm btn-primary" onclick="selectWinningBid(${r.id}, ${po.id})" style="background: linear-gradient(135deg, #10b981, #059669); border: none;">
+                            🏆 Pilih Pemenang
+                        </button>
+                    `;
+                } else if (po.state === 'purchase') {
+                    selectBidBtn = `<span style="color: #10b981; font-weight: 600;">✓ Terpilih / Aktif</span>`;
+                }
+
+                const poTr = document.createElement('tr');
+                poTr.innerHTML = `
+                    <td><strong>${po.name}</strong></td>
+                    <td>${po.partner?.name || 'Vendor'}</td>
+                    <td>${po.date_order ? po.date_order.substring(0, 10) : '-'}</td>
+                    <td style="text-align: right; font-weight: 600;">${formatCurrency(po.amount_total || 0)}</td>
+                    <td style="text-align: center;">${poStateBadge}</td>
+                    <td style="text-align: center;">${selectBidBtn}</td>
+                `;
+                posBody.appendChild(poTr);
+            });
+        }
+
+        // Load Chatter Messages
+        loadReqChatterMessages(r.id);
+
+    } catch (err) {
+        console.error('viewRequisitionDetail error:', err);
+        showToast('Gagal membuka detail requisition: ' + err.message, 'danger');
+    }
+}
+
+// Action Handlers
+async function confirmRequisition(id) {
+    try {
+        await api(`/purchase-requisitions/${id}/confirm`, 'PUT');
+        showToast('Dokumen pengadaan berhasil disetujui!', 'success');
+        loadPurchaseRequisitionsData();
+        viewRequisitionDetail(id);
+    } catch (err) {
+        showToast('Gagal menyetujui pengadaan: ' + err.message, 'danger');
+    }
+}
+
+async function openTenderRequisition(id) {
+    try {
+        await api(`/purchase-requisitions/${id}/open-tender`, 'PUT');
+        showToast('Tender pengadaan dibuka untuk rekanan! Anda sekarang dapat menerbitkan RFQ.', 'success');
+        loadPurchaseRequisitionsData();
+        viewRequisitionDetail(id);
+    } catch (err) {
+        showToast('Gagal membuka tender: ' + err.message, 'danger');
+    }
+}
+
+async function cancelRequisition(id) {
+    if (!confirm('Apakah Anda yakin ingin membatalkan dokumen pengadaan ini?')) return;
+    try {
+        await api(`/purchase-requisitions/${id}/cancel`, 'PUT');
+        showToast('Dokumen pengadaan berhasil dibatalkan', 'warning');
+        loadPurchaseRequisitionsData();
+        viewRequisitionDetail(id);
+    } catch (err) {
+        showToast('Gagal membatalkan pengadaan: ' + err.message, 'danger');
+    }
+}
+
+async function resetDraftRequisition(id) {
+    try {
+        await api(`/purchase-requisitions/${id}/draft`, 'PUT');
+        showToast('Dokumen pengadaan dikembalikan ke status draft', 'info');
+        loadPurchaseRequisitionsData();
+        viewRequisitionDetail(id);
+    } catch (err) {
+        showToast('Gagal me-reset status: ' + err.message, 'danger');
+    }
+}
+
+async function selectWinningBid(reqId, poId) {
+    if (!confirm('Pilih vendor ini sebagai pemenang lelang tender? Purchase Order pemenang akan otomatis dikonfirmasi, dan seluruh RFQ kompetitor lainnya akan dibatalkan otomatis.')) {
+        return;
+    }
+
+    try {
+        await api(`/purchase-requisitions/${reqId}/select-bid`, 'POST', {
+            winning_po_id: poId
+        });
+        showToast('Pemenang lelang tender berhasil ditetapkan dan PO otomatis dikonfirmasi!', 'success');
+        loadPurchaseRequisitionsData();
+        viewRequisitionDetail(reqId);
+    } catch (err) {
+        showToast('Gagal memilih pemenang tender: ' + err.message, 'danger');
+    }
+}
+
+// Modal Handlers
+async function openCreateRequisitionModal(defaultType = 'purchase_tender') {
+    try {
+        // Load products & vendors if not cached
+        if (cachedRequisitionProducts.length === 0) {
+            const prodRes = await api('/products');
+            cachedRequisitionProducts = prodRes || [];
+        }
+        if (cachedRequisitionVendors.length === 0) {
+            const partRes = await api('/partners');
+            cachedRequisitionVendors = (partRes || []).filter(p => p.supplier_rank > 0 || !p.customer_rank);
+        }
+
+        const vendorSelect = document.getElementById('createReqVendorSelect');
+        vendorSelect.innerHTML = '<option value="">Pilih Vendor Rekanan...</option>';
+        cachedRequisitionVendors.forEach(v => {
+            vendorSelect.innerHTML += `<option value="${v.id}">${v.name}</option>`;
+        });
+
+        // Set type & form fields
+        document.getElementById('createReqType').value = defaultType;
+        handleReqTypeChange();
+
+        const today = new Date().toISOString().substring(0, 10);
+        document.getElementById('createReqOrderingDate').value = today;
+        document.getElementById('createReqOrigin').value = '';
+        document.getElementById('createReqDateEnd').value = '';
+        document.getElementById('createReqScheduleDate').value = '';
+        document.getElementById('createReqDescription').value = '';
+
+        // Initial 1 item row
+        const itemsBody = document.getElementById('createReqItemsBody');
+        itemsBody.innerHTML = '';
+        addReqItemRow();
+
+        openModal('modalCreateRequisition');
+    } catch (err) {
+        console.error('openCreateRequisitionModal error:', err);
+        showToast('Gagal menyiapkan formulir pengadaan: ' + err.message, 'danger');
+    }
+}
+
+function handleReqTypeChange() {
+    const type = document.getElementById('createReqType').value;
+    const vendorGroup = document.getElementById('createReqVendorGroup');
+    const helpText = document.getElementById('createReqTypeHelp');
+    const modalTitle = document.getElementById('modalCreateRequisitionTitle');
+
+    if (type === 'blanket_order') {
+        vendorGroup.style.display = 'block';
+        document.getElementById('createReqVendorSelect').required = true;
+        helpText.textContent = 'Blanket Order mengikat kesepakatan harga & kuota kuantitas dengan 1 vendor pilihan.';
+        modalTitle.textContent = 'Buat Blanket Purchase Agreement Baru';
+    } else {
+        vendorGroup.style.display = 'none';
+        document.getElementById('createReqVendorSelect').required = false;
+        helpText.textContent = 'Tender mengundang penawaran harga dari banyak rekanan (Call for Bids).';
+        modalTitle.textContent = 'Buat Permintaan Pembelian / Tender Baru';
+    }
+}
+
+function addReqItemRow() {
+    const tbody = document.getElementById('createReqItemsBody');
+    const tr = document.createElement('tr');
+
+    let prodOptions = '<option value="">Pilih Produk...</option>';
+    cachedRequisitionProducts.forEach(p => {
+        prodOptions += `<option value="${p.id}" data-name="${p.name}" data-price="${p.standard_price || p.list_price || 0}">${p.name}</option>`;
+    });
+
+    tr.innerHTML = `
+        <td>
+            <select class="form-control req-item-prod" onchange="handleReqItemProdChange(this)" required>
+                ${prodOptions}
+            </select>
+        </td>
+        <td>
+            <input type="text" class="form-control req-item-desc" placeholder="Spesifikasi teknis...">
+        </td>
+        <td>
+            <input type="number" class="form-control req-item-qty" value="10" min="0.01" step="any" style="text-align: right;" required>
+        </td>
+        <td>
+            <input type="number" class="form-control req-item-price" value="0" min="0" step="any" style="text-align: right;" required>
+        </td>
+        <td style="text-align: center;">
+            <button type="button" class="btn btn-sm btn-danger" onclick="removeReqItemRow(this)" title="Hapus baris">✕</button>
+        </td>
+    `;
+    tbody.appendChild(tr);
+}
+
+function handleReqItemProdChange(selectEl) {
+    const opt = selectEl.options[selectEl.selectedIndex];
+    const row = selectEl.closest('tr');
+    if (opt && opt.value) {
+        const descInput = row.querySelector('.req-item-desc');
+        const priceInput = row.querySelector('.req-item-price');
+        if (descInput && !descInput.value) descInput.value = opt.getAttribute('data-name') || '';
+        if (priceInput) priceInput.value = opt.getAttribute('data-price') || 0;
+    }
+}
+
+function removeReqItemRow(btn) {
+    const tbody = document.getElementById('createReqItemsBody');
+    if (tbody.children.length <= 1) {
+        showToast('Minimal harus ada 1 baris item dalam dokumen pengadaan', 'warning');
+        return;
+    }
+    btn.closest('tr').remove();
+}
+
+async function handleCreateRequisitionSubmit(event) {
+    event.preventDefault();
+
+    const type = document.getElementById('createReqType').value;
+    const vendorIdVal = document.getElementById('createReqVendorSelect').value;
+    const origin = document.getElementById('createReqOrigin').value.trim();
+    const orderingDate = document.getElementById('createReqOrderingDate').value;
+    const dateEnd = document.getElementById('createReqDateEnd').value;
+    const scheduleDate = document.getElementById('createReqScheduleDate').value;
+    const description = document.getElementById('createReqDescription').value.trim();
+
+    if (type === 'blanket_order' && !vendorIdVal) {
+        showToast('Vendor wajib dipilih untuk Blanket Order', 'warning');
+        return;
+    }
+
+    const rows = document.querySelectorAll('#createReqItemsBody tr');
+    let lines = [];
+    rows.forEach(r => {
+        const prodId = parseInt(r.querySelector('.req-item-prod')?.value);
+        const desc = r.querySelector('.req-item-desc')?.value.trim() || '';
+        const qty = parseFloat(r.querySelector('.req-item-qty')?.value) || 0;
+        const price = parseFloat(r.querySelector('.req-item-price')?.value) || 0;
+
+        if (prodId && qty > 0) {
+            lines.push({
+                product_id: prodId,
+                description: desc,
+                product_qty: qty,
+                price_unit: price
+            });
+        }
+    });
+
+    if (lines.length === 0) {
+        showToast('Harap pilih minimal 1 produk dengan kuantitas lebih dari 0', 'warning');
+        return;
+    }
+
+    const payload = {
+        origin: origin,
+        type: type,
+        ordering_date: orderingDate,
+        date_end: dateEnd,
+        schedule_date: scheduleDate,
+        description: description,
+        lines: lines
+    };
+    if (vendorIdVal) {
+        payload.vendor_id = parseInt(vendorIdVal);
+    }
+
+    try {
+        const res = await api('/purchase-requisitions', 'POST', payload);
+        showToast(`Dokumen pengadaan '${res.data?.name}' berhasil didaftarkan!`, 'success');
+        closeModal('modalCreateRequisition');
+        loadPurchaseRequisitionsData();
+        if (res.data?.id) {
+            viewRequisitionDetail(res.data.id);
+        }
+    } catch (err) {
+        showToast('Gagal membuat pengadaan: ' + err.message, 'danger');
+    }
+}
+
+// Generate RFQ Modal
+async function openGenerateRFQModal(reqId) {
+    try {
+        const res = await api(`/purchase-requisitions/${reqId}`);
+        const r = res.data;
+        if (!r) return;
+
+        document.getElementById('genRfqRequisitionID').value = r.id;
+        document.getElementById('genRfqDocCode').textContent = `${r.name} (Tender)`;
+        document.getElementById('genRfqDocDesc').textContent = r.description || 'Pengadaan barang/material';
+
+        if (cachedRequisitionVendors.length === 0) {
+            const partRes = await api('/partners');
+            cachedRequisitionVendors = (partRes || []).filter(p => p.supplier_rank > 0 || !p.customer_rank);
+        }
+
+        const vendorSelect = document.getElementById('genRfqVendorSelect');
+        vendorSelect.innerHTML = '<option value="">Pilih Vendor Calon Peserta...</option>';
+        cachedRequisitionVendors.forEach(v => {
+            vendorSelect.innerHTML += `<option value="${v.id}">${v.name}</option>`;
+        });
+
+        openModal('modalGenerateRFQ');
+    } catch (err) {
+        showToast('Gagal membuka form RFQ: ' + err.message, 'danger');
+    }
+}
+
+async function handleGenerateRFQSubmit(event) {
+    event.preventDefault();
+    const reqId = document.getElementById('genRfqRequisitionID').value;
+    const vendorId = parseInt(document.getElementById('genRfqVendorSelect').value);
+
+    if (!vendorId) {
+        showToast('Pilih vendor terlebih dahulu', 'warning');
+        return;
+    }
+
+    try {
+        const res = await api(`/purchase-requisitions/${reqId}/generate-rfq`, 'POST', {
+            vendor_id: vendorId
+        });
+        showToast(`RFQ '${res.data?.name}' berhasil diterbitkan untuk vendor!`, 'success');
+        closeModal('modalGenerateRFQ');
+        loadPurchaseRequisitionsData();
+        viewRequisitionDetail(reqId);
+    } catch (err) {
+        showToast('Gagal menerbitkan RFQ: ' + err.message, 'danger');
+    }
+}
+
+// Release Blanket Modal
+async function openReleaseBlanketModal(reqId) {
+    try {
+        const res = await api(`/purchase-requisitions/${reqId}`);
+        const r = res.data;
+        if (!r) return;
+
+        document.getElementById('releaseBlanketReqID').value = r.id;
+        document.getElementById('releaseBlanketDocCode').textContent = r.name;
+        document.getElementById('releaseBlanketVendor').textContent = r.vendor?.name || 'Vendor';
+
+        const today = new Date().toISOString().substring(0, 10);
+        document.getElementById('releaseBlanketDate').value = today;
+
+        const tbody = document.getElementById('releaseBlanketLinesBody');
+        tbody.innerHTML = '';
+
+        if (!r.lines || r.lines.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center" style="color: var(--text-muted);">Tidak ada baris item dalam perjanjian ini.</td></tr>`;
+        } else {
+            r.lines.forEach(l => {
+                const remaining = Math.max(0, l.product_qty - l.qty_ordered);
+                const defaultReleaseQty = remaining > 0 ? (remaining >= 10 ? 10 : remaining) : 0;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <strong>${l.product?.name || `Produk #${l.product_id}`}</strong>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">${l.description || ''}</div>
+                    </td>
+                    <td style="text-align: right; font-weight: 600; color: ${remaining === 0 ? '#10b981' : '#f59e0b'};">
+                        ${remaining}
+                    </td>
+                    <td style="text-align: right;">
+                        ${formatCurrency(l.price_unit || 0)}
+                    </td>
+                    <td style="text-align: right;">
+                        <input type="number" class="form-control release-line-qty" 
+                               data-product-id="${l.product_id}" 
+                               data-max-qty="${remaining}" 
+                               value="${defaultReleaseQty}" 
+                               min="0" max="${remaining}" step="any" 
+                               style="text-align: right; width: 120px; display: inline-block;" 
+                               ${remaining === 0 ? 'disabled' : ''}>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        openModal('modalReleaseBlanket');
+    } catch (err) {
+        showToast('Gagal membuka dialog rilis blanket: ' + err.message, 'danger');
+    }
+}
+
+async function handleReleaseBlanketSubmit(event) {
+    event.preventDefault();
+    const reqId = document.getElementById('releaseBlanketReqID').value;
+    const orderDate = document.getElementById('releaseBlanketDate').value;
+
+    const inputEls = document.querySelectorAll('.release-line-qty');
+    let lines = [];
+    let hasOverQuota = false;
+
+    inputEls.forEach(el => {
+        const prodId = parseInt(el.getAttribute('data-product-id'));
+        const maxQty = parseFloat(el.getAttribute('data-max-qty')) || 0;
+        const qty = parseFloat(el.value) || 0;
+
+        if (qty > maxQty) {
+            hasOverQuota = true;
+        }
+
+        if (prodId && qty > 0) {
+            lines.push({
+                product_id: prodId,
+                qty: qty
+            });
+        }
+    });
+
+    if (hasOverQuota) {
+        showToast('Kuantitas yang dimasukkan melebihi sisa quota perjanjian!', 'danger');
+        return;
+    }
+
+    if (lines.length === 0) {
+        showToast('Harap tentukan minimal 1 item dengan kuantitas rilis lebih dari 0', 'warning');
+        return;
+    }
+
+    try {
+        const res = await api(`/purchase-requisitions/${reqId}/release-blanket`, 'POST', {
+            date_order: orderDate,
+            lines: lines
+        });
+        showToast(`Purchase Order '${res.data?.name}' berhasil dirilis dari Blanket Order!`, 'success');
+        closeModal('modalReleaseBlanket');
+        loadPurchaseRequisitionsData();
+        viewRequisitionDetail(reqId);
+    } catch (err) {
+        showToast('Gagal merilis blanket order: ' + err.message, 'danger');
+    }
+}
+
+// Chatter Audit Trail for Purchase Requisition
+async function loadReqChatterMessages(reqId) {
+    const listDiv = document.getElementById('reqChatterMessagesList');
+    if (!listDiv) return;
+
+    try {
+        const msgs = await api(`/chatter/messages?model=purchase.requisition&res_id=${reqId}`);
+        listDiv.innerHTML = '';
+
+        if (!msgs || msgs.length === 0) {
+            listDiv.innerHTML = `<small style="color: var(--text-muted); font-style: italic;">Belum ada catatan aktivitas.</small>`;
+            return;
+        }
+
+        msgs.forEach(m => {
+            const timeStr = m.created_at ? new Date(m.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '';
+            const isSystem = m.message_type === 'notification' || (m.body && m.body.startsWith('•'));
+            const bubble = document.createElement('div');
+            bubble.style.cssText = `margin-bottom: 0.4rem; padding: 0.35rem 0.6rem; border-radius: 4px; font-size: 0.8rem; background: ${isSystem ? 'rgba(255,255,255,0.03)' : 'rgba(99, 102, 241, 0.1)'}; border-left: 3px solid ${isSystem ? '#64748b' : '#6366f1'};`;
+            bubble.innerHTML = `
+                <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted);">
+                    <span>${m.author?.name || 'Sistem ERP'}</span>
+                    <span>${timeStr}</span>
+                </div>
+                <div style="margin-top: 0.15rem; line-height: 1.3;">${m.body}</div>
+            `;
+            listDiv.appendChild(bubble);
+        });
+        listDiv.scrollTop = listDiv.scrollHeight;
+    } catch (err) {
+        console.error('loadReqChatterMessages error:', err);
+    }
+}
+
+async function postReqChatterMessage() {
+    if (!activeRequisitionId) return;
+    const input = document.getElementById('reqChatterInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    try {
+        await api('/chatter/messages', 'POST', {
+            model: 'purchase.requisition',
+            res_id: activeRequisitionId,
+            body: text,
+            message_type: 'comment'
+        });
+        input.value = '';
+        loadReqChatterMessages(activeRequisitionId);
+    } catch (err) {
+        showToast('Gagal mengirim catatan: ' + err.message, 'danger');
+    }
+}
+
+function handleReqChatterKey(event) {
+    if (event.key === 'Enter') {
+        postReqChatterMessage();
+    }
+}
+
+// ============================================================
+// 29. MULTI-CURRENCY REVALUATION & FOREX ENGINE (PSAK 10)
+// ============================================================
+
+let currencyListCache = [];
+let activeRevalId = null;
+let currentCurrencySubTab = 'currencies';
+
+function switchCurrencySubTab(tabName) {
+    currentCurrencySubTab = tabName;
+    const viewCurrs = document.getElementById('currSubViewCurrencies');
+    const viewRevals = document.getElementById('currSubViewRevaluations');
+    const viewRiskAI = document.getElementById('currSubViewRiskAI');
+
+    const btnCurrs = document.getElementById('currTabBtnCurrencies');
+    const btnRevals = document.getElementById('currTabBtnRevaluations');
+    const btnRiskAI = document.getElementById('currTabBtnRiskAI');
+
+    if (viewCurrs) viewCurrs.style.display = tabName === 'currencies' ? 'block' : 'none';
+    if (viewRevals) viewRevals.style.display = tabName === 'revaluations' ? 'block' : 'none';
+    if (viewRiskAI) viewRiskAI.style.display = tabName === 'risk-ai' ? 'block' : 'none';
+
+    if (btnCurrs) {
+        btnCurrs.className = tabName === 'currencies' ? 'btn btn-sm active' : 'btn btn-sm btn-secondary';
+    }
+    if (btnRevals) {
+        btnRevals.className = tabName === 'revaluations' ? 'btn btn-sm active' : 'btn btn-sm btn-secondary';
+    }
+    if (btnRiskAI) {
+        btnRiskAI.className = tabName === 'risk-ai' ? 'btn btn-sm active' : 'btn btn-sm btn-secondary';
+    }
+
+    if (tabName === 'revaluations') {
+        loadForexRevaluations();
+    } else if (tabName === 'risk-ai') {
+        populateRiskAICurrencyDropdown();
+    }
+}
+
+async function loadCurrencyData() {
+    try {
+        // 1. Fetch Executive KPI Stats
+        const stats = await api('/currencies/stats');
+        if (stats) {
+            document.getElementById('currStatTotalCurrencies').textContent = stats.total_currencies || 0;
+            document.getElementById('currStatUSDRate').textContent = 'Rp ' + (stats.latest_usd_rate ? stats.latest_usd_rate.toLocaleString('id-ID') : '0');
+            document.getElementById('currStatEURRate').textContent = 'Rp ' + (stats.latest_eur_rate ? stats.latest_eur_rate.toLocaleString('id-ID') : '0');
+            document.getElementById('currStatRevalsDone').textContent = stats.total_revaluations_done || 0;
+            
+            const ytdGain = stats.ytd_unrealized_gain_loss || 0;
+            const ytdEl = document.getElementById('currStatYTDGainLoss');
+            ytdEl.textContent = 'Rp ' + Math.abs(ytdGain).toLocaleString('id-ID');
+            ytdEl.style.color = ytdGain >= 0 ? '#10b981' : '#ef4444';
+            document.getElementById('currStatYTDSubtext').textContent = ytdGain >= 0 ? 'Surplus Laba Valas (+)' : 'Defisit Rugi Valas (-)';
+        }
+
+        // 2. Fetch Master Currencies
+        const currs = await api('/currencies');
+        currencyListCache = Array.isArray(currs) ? currs : [];
+
+        // Update count badge
+        const badge = document.getElementById('currTableCountBadge');
+        if (badge) badge.textContent = `${currencyListCache.length} Mata Uang`;
+
+        // Render table
+        renderCurrencyTable(currencyListCache);
+
+        // Populate converter dropdowns
+        populateConverterDropdowns();
+
+        // Populate Risk AI dropdown
+        populateRiskAICurrencyDropdown();
+
+        // If on revaluations subtab, reload revaluations
+        if (currentCurrencySubTab === 'revaluations') {
+            loadForexRevaluations();
+        }
+    } catch (err) {
+        console.error('loadCurrencyData error:', err);
+        showToast('Gagal memuat data valas: ' + err.message, 'danger');
+    }
+}
+
+function renderCurrencyTable(currs) {
+    const tbody = document.getElementById('currencyTableBody');
+    if (!tbody) return;
+
+    if (!currs || currs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 2rem; color: var(--text-muted);">Belum ada mata uang terdaftar.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = currs.map(c => {
+        const isBaseBadge = c.is_base ?
+            `<span class="badge badge-primary" style="background:#0ea5e9;">Base Currency</span>` :
+            `<span class="badge badge-secondary">Valas Asing</span>`;
+        
+        const activeBadge = c.active ?
+            `<span class="badge badge-success">Aktif</span>` :
+            `<span class="badge badge-danger">Non-Aktif</span>`;
+
+        const spotRateText = c.latest_spot_rate ?
+            `Rp ${c.latest_spot_rate.toLocaleString('id-ID')}` :
+            (c.is_base ? '1.00 (Basis)' : '<span style="color:var(--text-muted); font-style:italic;">Belum ada kurs</span>');
+
+        const dateText = c.latest_rate_date ? c.latest_rate_date : '-';
+
+        return `
+            <tr>
+                <td><strong>${escapeHtml(c.name)}</strong></td>
+                <td><span style="font-weight: 600; font-size: 1.1rem; color: #0ea5e9;">${escapeHtml(c.symbol || '')}</span></td>
+                <td>${escapeHtml(c.full_name || c.name)}</td>
+                <td style="text-align: center;">${c.decimal_places}</td>
+                <td style="text-align: right; font-weight: 600;">${spotRateText}</td>
+                <td><small style="color: var(--text-muted);">${escapeHtml(dateText)}</small></td>
+                <td style="text-align: center;">${isBaseBadge}</td>
+                <td style="text-align: center;">${activeBadge}</td>
+                <td style="text-align: center;">
+                    <div style="display: flex; gap: 0.35rem; justify-content: center;">
+                        ${!c.is_base ? `
+                            <button class="btn btn-sm btn-secondary" onclick="openAddCurrencyRateModal(${c.id})" title="Catat Kurs Baru">
+                                📈 Kurs Baru
+                            </button>
+                            <button class="btn btn-sm btn-secondary" onclick="viewCurrencyRateHistory(${c.id}, '${escapeHtml(c.name)}')" title="Riwayat Kurs">
+                                📜 Histori
+                            </button>
+                            <button class="btn btn-sm btn-secondary" onclick="runAIForexRiskAudit(${c.id})" title="Audit Risiko Valas AI" style="color: #ec4899;">
+                                ✨ Audit AI
+                            </button>
+                        ` : `
+                            <button class="btn btn-sm btn-secondary" onclick="viewCurrencyRateHistory(${c.id}, '${escapeHtml(c.name)}')" title="Riwayat Kurs">
+                                📜 Histori
+                            </button>
+                        `}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function populateConverterDropdowns() {
+    const fromSel = document.getElementById('convFromCurrency');
+    const toSel = document.getElementById('convToCurrency');
+    const dateInp = document.getElementById('convDate');
+
+    if (!fromSel || !toSel) return;
+
+    if (!dateInp.value) {
+        dateInp.value = new Date().toISOString().split('T')[0];
+    }
+
+    const options = currencyListCache.map(c => 
+        `<option value="${c.id}">${c.name} - ${c.symbol} (${c.full_name || c.name})</option>`
+    ).join('');
+
+    fromSel.innerHTML = options;
+    toSel.innerHTML = options;
+
+    // Default: From USD to IDR
+    const usd = currencyListCache.find(c => c.name === 'USD');
+    const idr = currencyListCache.find(c => c.is_base || c.name === 'IDR');
+
+    if (usd) fromSel.value = usd.id;
+    if (idr) toSel.value = idr.id;
+}
+
+function populateRiskAICurrencyDropdown() {
+    const sel = document.getElementById('riskAICurrencySelect');
+    if (!sel) return;
+
+    const foreigns = currencyListCache.filter(c => !c.is_base);
+    if (foreigns.length === 0) {
+        sel.innerHTML = '<option value="">Tidak ada valas asing</option>';
+        return;
+    }
+
+    sel.innerHTML = foreigns.map(c => 
+        `<option value="${c.id}">${c.name} (${c.full_name || c.name})</option>`
+    ).join('');
+}
+
+async function handleQuickConvert() {
+    const amt = parseFloat(document.getElementById('convAmount').value);
+    const fromId = parseInt(document.getElementById('convFromCurrency').value);
+    const toId = parseInt(document.getElementById('convToCurrency').value);
+    const date = document.getElementById('convDate').value || new Date().toISOString().split('T')[0];
+    const resBox = document.getElementById('convResultBox');
+
+    if (!amt || isNaN(amt) || amt <= 0 || !fromId || !toId) {
+        showToast('Masukkan nominal dan pilih mata uang konversi.', 'warning');
+        return;
+    }
+
+    try {
+        resBox.textContent = 'Menghitung...';
+        const res = await api('/currencies/convert', 'POST', {
+            amount: amt,
+            from_currency_id: fromId,
+            to_currency_id: toId,
+            date: date
+        });
+
+        if (res) {
+            const formatted = res.converted_amount.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+            resBox.innerHTML = `Hasil: <strong>${formatted}</strong> <small style="color:var(--text-muted);">(Kurs: ${res.applied_rate.toLocaleString('id-ID')})</small>`;
+        }
+    } catch (err) {
+        resBox.textContent = 'Gagal konversi';
+        showToast('Konversi gagal: ' + err.message, 'danger');
+    }
+}
+
+// ------------------------------------------------------------
+// MODAL: CREATE CURRENCY
+// ------------------------------------------------------------
+function openCreateCurrencyModal() {
+    document.getElementById('formCreateCurrency').reset();
+    document.getElementById('currDecimals').value = '2';
+    document.getElementById('currRounding').value = '0.01';
+    document.getElementById('currIsBase').checked = false;
+    openModal('modalCreateCurrency');
+}
+
+async function handleCreateCurrencySubmit(e) {
+    e.preventDefault();
+    const payload = {
+        name: document.getElementById('currName').value.trim().toUpperCase(),
+        symbol: document.getElementById('currSymbol').value.trim(),
+        full_name: document.getElementById('currFullName').value.trim(),
+        decimal_places: parseInt(document.getElementById('currDecimals').value) || 2,
+        rounding: parseFloat(document.getElementById('currRounding').value) || 0.01,
+        is_base: document.getElementById('currIsBase').checked
+    };
+
+    try {
+        await api('/currencies', 'POST', payload);
+        showToast(`Mata uang ${payload.name} berhasil ditambahkan!`, 'success');
+        closeModal('modalCreateCurrency');
+        loadCurrencyData();
+    } catch (err) {
+        showToast('Gagal menyimpan mata uang: ' + err.message, 'danger');
+    }
+}
+
+// ------------------------------------------------------------
+// MODAL: ADD CURRENCY RATE
+// ------------------------------------------------------------
+function openAddCurrencyRateModal(currId) {
+    const sel = document.getElementById('rateCurrencySelect');
+    sel.innerHTML = currencyListCache.map(c => 
+        `<option value="${c.id}" ${c.id === currId ? 'selected' : ''}>${c.name} - ${c.full_name || c.name}</option>`
+    ).join('');
+
+    if (currId) sel.value = currId;
+    document.getElementById('rateDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('rateDirectRate').value = '';
+    document.getElementById('rateSource').value = 'Bank Indonesia JISDOR';
+
+    openModal('modalAddCurrencyRate');
+}
+
+async function handleAddCurrencyRateSubmit(e) {
+    e.preventDefault();
+    const currId = parseInt(document.getElementById('rateCurrencySelect').value);
+    const payload = {
+        currency_id: currId,
+        date: document.getElementById('rateDate').value,
+        direct_rate: parseFloat(document.getElementById('rateDirectRate').value),
+        source: document.getElementById('rateSource').value.trim()
+    };
+
+    try {
+        await api(`/currencies/${currId}/rates`, 'POST', payload);
+        showToast('Kurs valas berhasil dicatat!', 'success');
+        closeModal('modalAddCurrencyRate');
+        loadCurrencyData();
+    } catch (err) {
+        showToast('Gagal menyimpan kurs: ' + err.message, 'danger');
+    }
+}
+
+// ------------------------------------------------------------
+// MODAL: RATE HISTORY
+// ------------------------------------------------------------
+async function viewCurrencyRateHistory(currId, currName) {
+    try {
+        document.getElementById('modalRateHistoryTitle').textContent = `Riwayat Kurs Valas: ${currName}`;
+        const tbody = document.getElementById('rateHistoryTableBody');
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 1.5rem;">Memuat riwayat kurs...</td></tr>';
+        openModal('modalCurrencyRateHistory');
+
+        const rates = await api(`/currencies/${currId}/rates`);
+        if (!rates || rates.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 1.5rem; color: var(--text-muted);">Belum ada kurs tercatat untuk valas ini.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = rates.map(r => `
+            <tr>
+                <td><strong>${escapeHtml(r.name || '')}</strong></td>
+                <td style="text-align: right; font-weight: 600; color: #10b981;">Rp ${r.direct_rate.toLocaleString('id-ID')}</td>
+                <td style="text-align: right; color: var(--text-muted); font-size: 0.8rem;">${r.rate.toFixed(8)}</td>
+                <td><small>${escapeHtml(r.source || 'Spot Market')}</small></td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        showToast('Gagal memuat riwayat kurs: ' + err.message, 'danger');
+    }
+}
+
+// ------------------------------------------------------------
+// REVALUATIONS (PSAK 10 / IAS 21)
+// ------------------------------------------------------------
+async function loadForexRevaluations() {
+    try {
+        const tbody = document.getElementById('revalTableBody');
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 2rem;">Memuat daftar revaluasi...</td></tr>';
+
+        const list = await api('/currencies/revaluations');
+        const revals = Array.isArray(list) ? list : [];
+
+        const badge = document.getElementById('revalTableCountBadge');
+        if (badge) badge.textContent = `${revals.length} Dokumen`;
+
+        if (revals.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 2rem; color: var(--text-muted);">Belum ada revaluasi kurs bulanan. Klik "⚡ Revaluasi Kurs Bulanan" untuk menghitung draf penyesuaian.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = revals.map(r => {
+            let statusBadge = '<span class="badge badge-warning">Draft</span>';
+            if (r.state === 'posted') statusBadge = '<span class="badge badge-success">Posted ke GL</span>';
+            if (r.state === 'cancel') statusBadge = '<span class="badge badge-danger">Cancelled</span>';
+
+            const netGain = r.net_gain_loss || 0;
+            const netColor = netGain >= 0 ? '#10b981' : '#ef4444';
+            const netSign = netGain >= 0 ? '+' : '';
+
+            const currName = r.currency ? r.currency.name : '-';
+            const glEntryName = r.journal_entry ? r.journal_entry.name : (r.journal_entry_id ? `#${r.journal_entry_id}` : '-');
+
+            return `
+                <tr>
+                    <td><strong>${escapeHtml(r.name)}</strong></td>
+                    <td>${escapeHtml(r.revaluation_date)}</td>
+                    <td><span class="badge badge-secondary">${escapeHtml(currName)}</span></td>
+                    <td style="text-align: right; font-weight: 600;">Rp ${r.closing_rate.toLocaleString('id-ID')}</td>
+                    <td style="text-align: right; color: #10b981;">Rp ${r.total_gain.toLocaleString('id-ID')}</td>
+                    <td style="text-align: right; color: #ef4444;">Rp ${r.total_loss.toLocaleString('id-ID')}</td>
+                    <td style="text-align: right; font-weight: 700; color: ${netColor};">${netSign}Rp ${Math.abs(netGain).toLocaleString('id-ID')}</td>
+                    <td style="text-align: center;">${statusBadge}</td>
+                    <td>${glEntryName !== '-' ? `<span style="font-family: monospace; font-weight: 600; color: #8b5cf6;">${escapeHtml(glEntryName)}</span>` : '<small style="color:var(--text-muted);">Belum di-post</small>'}</td>
+                    <td style="text-align: center;">
+                        <div style="display: flex; gap: 0.35rem; justify-content: center;">
+                            <button class="btn btn-sm btn-secondary" onclick="viewRevaluationDetail(${r.id})" title="Lihat Rincian Faktur">
+                                🔍 Detail
+                            </button>
+                            ${r.state === 'draft' ? `
+                                <button class="btn btn-sm btn-primary" onclick="handlePostRevaluation(${r.id})" title="Posting Jurnal GL" style="background:#8b5cf6; border:none;">
+                                    ⚡ Post GL
+                                </button>
+                                <button class="btn btn-sm btn-secondary" onclick="handleCancelRevaluation(${r.id})" title="Batalkan Draf" style="color:#ef4444;">
+                                    ✕ Batal
+                                </button>
+                            ` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        showToast('Gagal memuat revaluasi kurs: ' + err.message, 'danger');
+    }
+}
+
+function openCreateRevaluationModal() {
+    const sel = document.getElementById('revalCurrencySelect');
+    const foreigns = currencyListCache.filter(c => !c.is_base);
+    sel.innerHTML = foreigns.map(c => 
+        `<option value="${c.id}">${c.name} - ${c.full_name || c.name} (Spot: Rp ${c.latest_spot_rate ? c.latest_spot_rate.toLocaleString('id-ID') : '-'})</option>`
+    ).join('');
+
+    document.getElementById('revalDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('revalNotes').value = `Penyesuaian Nilai Wajar Kurs Valas Akhir Bulan ${new Date().toLocaleString('id-ID', { month: 'long', year: 'numeric' })} (PSAK 10)`;
+    
+    handleRevalCurrencyChange();
+    openModal('modalCreateRevaluation');
+}
+
+function handleRevalCurrencyChange() {
+    const sel = document.getElementById('revalCurrencySelect');
+    const currId = parseInt(sel.value);
+    const curr = currencyListCache.find(c => c.id === currId);
+    if (curr && curr.latest_spot_rate) {
+        document.getElementById('revalClosingRate').value = curr.latest_spot_rate;
+    } else {
+        document.getElementById('revalClosingRate').value = '';
+    }
+}
+
+async function handleCreateRevaluationSubmit(e) {
+    e.preventDefault();
+    const payload = {
+        currency_id: parseInt(document.getElementById('revalCurrencySelect').value),
+        revaluation_date: document.getElementById('revalDate').value,
+        closing_rate: parseFloat(document.getElementById('revalClosingRate').value),
+        notes: document.getElementById('revalNotes').value.trim()
+    };
+
+    try {
+        const doc = await api('/currencies/revaluations', 'POST', payload);
+        showToast(`Draf Revaluasi ${doc.name} berhasil dihitung!`, 'success');
+        closeModal('modalCreateRevaluation');
+        switchCurrencySubTab('revaluations');
+        loadForexRevaluations();
+        viewRevaluationDetail(doc.id);
+    } catch (err) {
+        showToast('Gagal menghitung revaluasi kurs: ' + err.message, 'danger');
+    }
+}
+
+async function viewRevaluationDetail(id) {
+    activeRevalId = id;
+    try {
+        const doc = await api(`/currencies/revaluations/${id}`);
+        if (!doc) return;
+
+        const sec = document.getElementById('revalDetailSection');
+        sec.style.display = 'block';
+
+        document.getElementById('revalDetailTitle').textContent = `Rincian Dokumen Revaluasi Kurs: ${doc.name} (${doc.currency ? doc.currency.name : ''})`;
+        document.getElementById('revalDetailSubtitle').textContent = `Tanggal Cut-off: ${doc.revaluation_date} | Kurs Penutupan: Rp ${doc.closing_rate.toLocaleString('id-ID')} | Status: ${doc.state.toUpperCase()}`;
+
+        // Action buttons
+        const actionsEl = document.getElementById('revalDetailActions');
+        actionsEl.innerHTML = `
+            ${doc.state === 'draft' ? `
+                <button class="btn btn-primary" onclick="handlePostRevaluation(${doc.id})" style="background:#8b5cf6; border:none; font-size:0.85rem;">
+                    ⚡ Posting Jurnal ke General Ledger
+                </button>
+                <button class="btn btn-secondary" onclick="handleCancelRevaluation(${doc.id})" style="color:#ef4444; font-size:0.85rem;">
+                    ✕ Batalkan
+                </button>
+            ` : ''}
+            <button class="btn btn-secondary" onclick="document.getElementById('revalDetailSection').style.display='none'" style="font-size:0.85rem;">
+                ✕ Tutup
+            </button>
+        `;
+
+        // Render Lines
+        const linesBody = document.getElementById('revalDetailLinesBody');
+        const lines = doc.lines || [];
+        if (lines.length === 0) {
+            linesBody.innerHTML = '<tr><td colspan="11" style="text-align:center; padding: 1.5rem; color: var(--text-muted);">Tidak ada transaksi valas terbuka yang membutuhkan penyesuaian nilai wajar.</td></tr>';
+        } else {
+            linesBody.innerHTML = lines.map(l => {
+                const isGain = l.gain_loss_type === 'gain';
+                const glColor = isGain ? '#10b981' : '#ef4444';
+                const glSign = isGain ? '+' : '-';
+                const typeBadge = l.move_type === 'out_invoice' ?
+                    '<span class="badge badge-info">Faktur AR (Piutang)</span>' :
+                    '<span class="badge badge-warning">Tagihan AP (Hutang)</span>';
+
+                return `
+                    <tr>
+                        <td><strong>${escapeHtml(l.move_name || '')}</strong></td>
+                        <td>${typeBadge}</td>
+                        <td>${escapeHtml(l.partner_name || '-')}</td>
+                        <td><small style="font-family: monospace;">${escapeHtml(l.account_code || '')}</small></td>
+                        <td style="text-align: right; font-weight: 600;">${l.amount_currency.toLocaleString('id-ID', { minimumFractionDigits: 2 })}</td>
+                        <td style="text-align: right;">Rp ${l.historical_rate.toLocaleString('id-ID')}</td>
+                        <td style="text-align: right;">Rp ${l.historical_amount.toLocaleString('id-ID')}</td>
+                        <td style="text-align: right;">Rp ${l.closing_rate.toLocaleString('id-ID')}</td>
+                        <td style="text-align: right;">Rp ${l.revalued_amount.toLocaleString('id-ID')}</td>
+                        <td style="text-align: right; font-weight: 700; color: ${glColor};">${glSign}Rp ${Math.abs(l.gain_loss).toLocaleString('id-ID')}</td>
+                        <td style="text-align: center;">
+                            <span class="badge ${isGain ? 'badge-success' : 'badge-danger'}">
+                                ${isGain ? 'Laba Kurs' : 'Rugi Kurs'}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Load Chatter
+        loadRevalChatterMessages(doc.id);
+        sec.scrollIntoView({ behavior: 'smooth' });
+    } catch (err) {
+        showToast('Gagal memuat rincian revaluasi: ' + err.message, 'danger');
+    }
+}
+
+async function handlePostRevaluation(id) {
+    if (!confirm('Apakah Anda yakin ingin memposting jurnal selisih kurs ini ke General Ledger? Entri jurnal seimbang akan dibentuk secara permanen.')) {
+        return;
+    }
+
+    try {
+        const posted = await api(`/currencies/revaluations/${id}/post`, 'PUT');
+        showToast(`Revaluasi ${posted.name} berhasil diposting ke General Ledger!`, 'success');
+        loadCurrencyData();
+        loadForexRevaluations();
+        viewRevaluationDetail(id);
+    } catch (err) {
+        showToast('Gagal posting revaluasi: ' + err.message, 'danger');
+    }
+}
+
+async function handleCancelRevaluation(id) {
+    if (!confirm('Batalkan draf revaluasi kurs ini?')) return;
+    try {
+        await api(`/currencies/revaluations/${id}/cancel`, 'PUT');
+        showToast('Revaluasi berhasil dibatalkan.', 'info');
+        loadForexRevaluations();
+        document.getElementById('revalDetailSection').style.display = 'none';
+    } catch (err) {
+        showToast('Gagal membatalkan: ' + err.message, 'danger');
+    }
+}
+
+// ------------------------------------------------------------
+// CHATTER AUDIT TRAIL FOR REVALUATION
+// ------------------------------------------------------------
+async function loadRevalChatterMessages(id) {
+    const listEl = document.getElementById('revalChatterMessagesList');
+    if (!listEl) return;
+    try {
+        const res = await api(`/chatter/messages?model=account.multicurrency.revaluation&res_id=${id}`);
+        const msgs = Array.isArray(res) ? res : (res && res.messages ? res.messages : []);
+        if (msgs.length === 0) {
+            listEl.innerHTML = '<small style="color: var(--text-muted);">Belum ada catatan aktivitas.</small>';
+            return;
+        }
+        listEl.innerHTML = msgs.map(m => `
+            <div style="margin-bottom: 0.5rem; padding-bottom: 0.4rem; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.8rem;">
+                <div style="display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.72rem;">
+                    <strong>${escapeHtml(m.author_name || 'System')}</strong>
+                    <span>${escapeHtml(m.created_at ? m.created_at.substring(0, 16).replace('T', ' ') : '')}</span>
+                </div>
+                <div style="margin-top: 0.2rem; color: var(--text-main);">${escapeHtml(m.body || '')}</div>
+            </div>
+        `).join('');
+    } catch (err) {
+        listEl.innerHTML = '<small style="color: var(--text-muted);">Gagal memuat catatan aktivitas.</small>';
+    }
+}
+
+async function postRevalChatterMessage() {
+    if (!activeRevalId) return;
+    const input = document.getElementById('revalChatterInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    try {
+        await api('/chatter/messages', 'POST', {
+            model: 'account.multicurrency.revaluation',
+            res_id: activeRevalId,
+            body: text,
+            message_type: 'comment'
+        });
+        input.value = '';
+        loadRevalChatterMessages(activeRevalId);
+    } catch (err) {
+        showToast('Gagal mengirim catatan: ' + err.message, 'danger');
+    }
+}
+
+function handleRevalChatterKey(event) {
+    if (event.key === 'Enter') {
+        postRevalChatterMessage();
+    }
+}
+
+// ------------------------------------------------------------
+// TREASURY AI COPILOT: FOREX RISK & SENSITIVITY STRESS TEST
+// ------------------------------------------------------------
+function runAIForexRiskAudit(currId) {
+    switchCurrencySubTab('risk-ai');
+    const sel = document.getElementById('riskAICurrencySelect');
+    if (currId && sel) {
+        sel.value = currId;
+    }
+    loadAIForexRiskAuditReport();
+}
+
+async function loadAIForexRiskAuditReport() {
+    const sel = document.getElementById('riskAICurrencySelect');
+    const currId = parseInt(sel.value);
+    if (!currId) {
+        showToast('Pilih valas asing terlebih dahulu.', 'warning');
+        return;
+    }
+
+    try {
+        const sumEl = document.getElementById('riskAIExecutiveSummary');
+        sumEl.textContent = 'Menghubungkan ke Cloudflare Workers AI Llama-3.1 & Model Finansial Treasury...';
+
+        const report = await api(`/currencies/${currId}/ai-risk-audit`);
+        if (!report) return;
+
+        // Render KPI exposures
+        const symbol = report.foreign_currency === 'USD' ? '$' : (report.foreign_currency === 'EUR' ? '€' : report.foreign_currency + ' ');
+        document.getElementById('riskAIOpenAR').textContent = symbol + report.open_receivables_fc.toLocaleString('id-ID', { minimumFractionDigits: 2 });
+        document.getElementById('riskAIOpenARIDR').textContent = 'Rp ' + (report.open_receivables_fc * report.spot_rate).toLocaleString('id-ID');
+
+        document.getElementById('riskAIOpenAP').textContent = symbol + report.open_payables_fc.toLocaleString('id-ID', { minimumFractionDigits: 2 });
+        document.getElementById('riskAIOpenAPIDR').textContent = 'Rp ' + (report.open_payables_fc * report.spot_rate).toLocaleString('id-ID');
+
+        const netSign = report.net_exposure_fc >= 0 ? '+' : '';
+        document.getElementById('riskAINetExposureFC').textContent = netSign + symbol + report.net_exposure_fc.toLocaleString('id-ID', { minimumFractionDigits: 2 });
+        document.getElementById('riskAINetExposureIDR').textContent = netSign + 'Rp ' + report.net_exposure_idr.toLocaleString('id-ID');
+
+        // Risk Level Badge
+        let badgeClass = 'badge-success';
+        if (report.risk_level === 'medium') badgeClass = 'badge-warning';
+        if (report.risk_level === 'high' || report.risk_level === 'critical') badgeClass = 'badge-danger';
+
+        document.getElementById('riskAIRiskLevelBadge').innerHTML = `<span class="badge ${badgeClass}" style="font-size: 0.9rem; padding: 0.35rem 0.75rem;">${report.risk_level.toUpperCase()} RISK</span>`;
+        document.getElementById('riskAIEngineBadge').textContent = report.engine || 'local_heuristic_engine';
+
+        // Sensitivity Shock Rows
+        const rate = report.spot_rate;
+        document.getElementById('shockRate2').textContent = `Rp ${(rate * 1.02).toLocaleString('id-ID')} / Rp ${(rate * 0.98).toLocaleString('id-ID')}`;
+        document.getElementById('shockImpact2').textContent = '±Rp ' + report.sensitivity_shock_2pct.toLocaleString('id-ID');
+        document.getElementById('shockImpact2').style.color = '#0ea5e9';
+
+        document.getElementById('shockRate5').textContent = `Rp ${(rate * 1.05).toLocaleString('id-ID')} / Rp ${(rate * 0.95).toLocaleString('id-ID')}`;
+        document.getElementById('shockImpact5').textContent = '±Rp ' + report.sensitivity_shock_5pct.toLocaleString('id-ID');
+        document.getElementById('shockImpact5').style.color = '#f59e0b';
+
+        document.getElementById('shockRate10').textContent = `Rp ${(rate * 1.10).toLocaleString('id-ID')} / Rp ${(rate * 0.90).toLocaleString('id-ID')}`;
+        document.getElementById('shockImpact10').textContent = '±Rp ' + report.sensitivity_shock_10pct.toLocaleString('id-ID');
+        document.getElementById('shockImpact10').style.color = '#ef4444';
+
+        // Executive Summary
+        sumEl.textContent = report.executive_summary;
+
+        // Recommendations
+        const recList = document.getElementById('riskAIRecommendationsList');
+        const recs = report.action_recommendations || [];
+        if (recs.length === 0) {
+            recList.innerHTML = '<li>Pertahankan strategi operasional berjalan saat ini.</li>';
+        } else {
+            recList.innerHTML = recs.map(r => `<li style="margin-bottom: 0.35rem;">${escapeHtml(r)}</li>`).join('');
+        }
+
+        showToast(`Audit Risiko Valas ${report.foreign_currency} berhasil diselesaikan!`, 'success');
+    } catch (err) {
+        showToast('Gagal menjalankan AI Risk Audit: ' + err.message, 'danger');
+    }
+}
+
+// ==========================================
+// 30. INDONESIAN E-FAKTUR & TAX ENGINE (DJP)
+// ==========================================
+
+async function loadTaxEFakturData() {
+    await Promise.all([
+        loadTaxStats(),
+        loadTaxInvoices(),
+        loadTaxNSFP(),
+        loadSPTPeriodSummary()
+    ]);
+}
+
+async function loadTaxStats() {
+    try {
+        const stats = await api('/tax-efaktur/stats');
+        if (!stats) return;
+
+        document.getElementById('taxStatPPNKeluaran').textContent = 'Rp ' + (stats.total_ppn_keluaran || 0).toLocaleString('id-ID');
+        document.getElementById('taxStatDPPKeluaran').textContent = 'DPP Penyerahan: Rp ' + (stats.total_dpp_out_tax || 0).toLocaleString('id-ID');
+
+        document.getElementById('taxStatPPNMasukan').textContent = 'Rp ' + (stats.total_ppn_masukan || 0).toLocaleString('id-ID');
+        document.getElementById('taxStatDPPMasukan').textContent = 'DPP Perolehan: Rp ' + (stats.total_dpp_in_tax || 0).toLocaleString('id-ID');
+
+        const net = stats.net_ppn_kurang_bayar || 0;
+        const netEl = document.getElementById('taxStatNetKurangBayar');
+        const statusEl = document.getElementById('taxStatStatusFiskal');
+
+        if (net > 0) {
+            netEl.textContent = 'Rp ' + net.toLocaleString('id-ID');
+            netEl.style.color = '#f43f5e';
+            statusEl.textContent = 'Status: Kurang Bayar';
+            statusEl.style.color = '#f43f5e';
+        } else if (net < 0) {
+            netEl.textContent = 'Rp ' + Math.abs(net).toLocaleString('id-ID');
+            netEl.style.color = '#10b981';
+            statusEl.textContent = 'Status: Lebih Bayar';
+            statusEl.style.color = '#10b981';
+        } else {
+            netEl.textContent = 'Rp 0';
+            netEl.style.color = '#f59e0b';
+            statusEl.textContent = 'Status: Nihil';
+            statusEl.style.color = '#f59e0b';
+        }
+
+        document.getElementById('taxStatRemainingNSFP').textContent = (stats.remaining_nsfp_quota || 0).toLocaleString('id-ID');
+        document.getElementById('taxStatTotalNSFP').textContent = `Total Jatah: ${(stats.total_nsfp_allocated || 0).toLocaleString('id-ID')} nomor`;
+
+        const totalInvs = (stats.total_out_tax_invoices || 0) + (stats.total_in_tax_invoices || 0);
+        document.getElementById('taxStatTotalInvoices').textContent = totalInvs.toLocaleString('id-ID');
+        document.getElementById('taxStatInvoicesBreakdown').textContent = `Keluaran: ${stats.total_out_tax_invoices || 0} | Masukan: ${stats.total_in_tax_invoices || 0}`;
+    } catch (err) {
+        console.error('Failed to load tax stats:', err);
+    }
+}
+
+async function loadTaxInvoices() {
+    const tbody = document.getElementById('taxInvoicesTableBody');
+    if (!tbody) return;
+
+    const type = document.getElementById('taxFilterType')?.value || '';
+    const period = document.getElementById('taxFilterPeriod')?.value || '0';
+    const year = document.getElementById('taxFilterYear')?.value || '2026';
+    const stateFilter = document.getElementById('taxFilterState')?.value || '';
+
+    let url = `/tax-efaktur/invoices?year=${year}`;
+    if (type) url += `&type=${type}`;
+    if (period && period !== '0') url += `&period=${period}`;
+    if (stateFilter) url += `&state=${stateFilter}`;
+
+    try {
+        const invoices = await api(url);
+        if (!invoices || invoices.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 2rem; color: var(--text-muted);">Belum ada faktur pajak untuk kriteria filter ini.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = invoices.map(inv => {
+            const isOut = inv.tax_invoice_type === 'out_tax';
+            const typeBadge = isOut 
+                ? '<span class="badge" style="background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.3);">Keluaran (Sales)</span>'
+                : '<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">Masukan (Purchase)</span>';
+
+            let stateBadge = '<span class="badge badge-warning">Draft</span>';
+            if (inv.state === 'generated') stateBadge = '<span class="badge badge-success">Generated</span>';
+            else if (inv.state === 'reported') stateBadge = '<span class="badge" style="background: rgba(14, 165, 233, 0.2); color: #0ea5e9;">Dilaporkan</span>';
+            else if (inv.state === 'cancelled') stateBadge = '<span class="badge badge-danger">Batal</span>';
+
+            const qrBtn = inv.qr_url 
+                ? `<a href="${escapeHtml(inv.qr_url)}" target="_blank" class="btn btn-sm btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; text-decoration: none;" title="Validasi barcode di portal DJP">QR DJP 🔗</a>`
+                : '';
+
+            return `
+                <tr>
+                    <td style="font-weight: 600; font-family: monospace;">${escapeHtml(inv.nsfp_number)}</td>
+                    <td>${typeBadge}</td>
+                    <td>${escapeHtml(inv.invoice_date)}</td>
+                    <td>Masa ${inv.tax_period} / ${inv.tax_year}</td>
+                    <td><strong>${escapeHtml(inv.partner_name || '-')}</strong></td>
+                    <td style="font-family: monospace; font-size: 0.8rem;">${escapeHtml(inv.npwp || '-')}</td>
+                    <td style="text-align: right; font-weight: 500;">Rp ${(inv.dpp || 0).toLocaleString('id-ID')}</td>
+                    <td style="text-align: right; font-weight: 600; color: ${isOut ? '#f43f5e' : '#10b981'};">Rp ${(inv.ppn || 0).toLocaleString('id-ID')}</td>
+                    <td>${stateBadge}</td>
+                    <td style="text-align: center; white-space: nowrap;">
+                        <button class="btn btn-sm btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="showTaxInvoiceDetail(${inv.id})">👁️ Detail</button>
+                        ${qrBtn}
+                        ${inv.state === 'generated' ? `<button class="btn btn-sm btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="updateTaxInvoiceState(${inv.id}, 'reported')">✅ Lapor</button>` : ''}
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: var(--danger); padding: 1.5rem;">Gagal memuat faktur pajak: ${escapeHtml(err.message)}</td></tr>`;
+    }
+}
+
+async function loadTaxNSFP() {
+    const tbody = document.getElementById('taxNSFPTableBody');
+    if (!tbody) return;
+
+    try {
+        const list = await api('/tax-efaktur/nsfp');
+        if (!list || list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-muted);">Belum ada rentang jatah NSFP. Klik "+ Tambah Jatah NSFP" untuk mendaftarkan.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = list.map(item => {
+            let stateBadge = '<span class="badge badge-success">Aktif</span>';
+            if (item.state === 'depleted') stateBadge = '<span class="badge badge-danger">Habis</span>';
+            else if (item.state === 'expired') stateBadge = '<span class="badge badge-secondary">Kadaluwarsa</span>';
+
+            return `
+                <tr>
+                    <td style="font-weight: 600;">${escapeHtml(item.prefix)}</td>
+                    <td>${item.year}</td>
+                    <td style="font-family: monospace;">${escapeHtml(item.start_number)}</td>
+                    <td style="font-family: monospace;">${escapeHtml(item.end_number)}</td>
+                    <td style="font-family: monospace; font-weight: 600; color: #0ea5e9;">${escapeHtml(item.current_number)}</td>
+                    <td style="text-align: right; font-weight: 500;">${(item.total_quota || 0).toLocaleString('id-ID')}</td>
+                    <td style="text-align: right; color: #f59e0b;">${(item.used_quota || 0).toLocaleString('id-ID')}</td>
+                    <td style="text-align: right; font-weight: 700; color: #10b981;">${(item.remaining_quota || 0).toLocaleString('id-ID')}</td>
+                    <td>${stateBadge}</td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--danger); padding: 1.5rem;">Gagal memuat NSFP: ${escapeHtml(err.message)}</td></tr>`;
+    }
+}
+
+async function loadSPTPeriodSummary() {
+    const period = document.getElementById('sptSelectPeriod')?.value || '10';
+    const year = document.getElementById('sptSelectYear')?.value || '2026';
+
+    try {
+        const spt = await api(`/tax-efaktur/spt-summary?period=${period}&year=${year}`);
+        if (!spt) return;
+
+        document.getElementById('sptBadgeOutCount').textContent = `${spt.total_out_tax_invoices || 0} Faktur`;
+        document.getElementById('sptDPPKeluaran').textContent = 'Rp ' + (spt.dpp_penyerahan_keluaran || 0).toLocaleString('id-ID');
+        document.getElementById('sptPPNKeluaran').textContent = 'Rp ' + (spt.ppn_keluaran_dipungut || 0).toLocaleString('id-ID');
+
+        document.getElementById('sptBadgeInCount').textContent = `${spt.total_in_tax_invoices || 0} Faktur`;
+        document.getElementById('sptDPPMasukan').textContent = 'Rp ' + (spt.dpp_perolehan_masukan || 0).toLocaleString('id-ID');
+        document.getElementById('sptPPNMasukan').textContent = 'Rp ' + (spt.ppn_masukan_dikreditkan || 0).toLocaleString('id-ID');
+
+        const net = spt.ppn_kurang_lebih_bayar || 0;
+        const netEl = document.getElementById('sptNetPayable');
+        const badgeEl = document.getElementById('sptFiscalBadge');
+        const noteEl = document.getElementById('sptPaymentNote');
+
+        if (net > 0) {
+            netEl.textContent = 'Rp ' + net.toLocaleString('id-ID') + ' (Kurang Bayar)';
+            netEl.style.color = '#f43f5e';
+            badgeEl.textContent = 'Kurang Bayar';
+            badgeEl.style.background = 'rgba(244, 63, 94, 0.2)';
+            badgeEl.style.color = '#f43f5e';
+            noteEl.textContent = '* Pembayaran PPN Kurang Bayar wajib disetor via NTPN sebelum pelaporan SPT Masa 1111.';
+        } else if (net < 0) {
+            netEl.textContent = 'Rp ' + Math.abs(net).toLocaleString('id-ID') + ' (Lebih Bayar)';
+            netEl.style.color = '#10b981';
+            badgeEl.textContent = 'Lebih Bayar';
+            badgeEl.style.background = 'rgba(16, 185, 129, 0.2)';
+            badgeEl.style.color = '#10b981';
+            noteEl.textContent = '* Kelebihan bayar PPN dapat dikompensasikan ke masa pajak berikutnya atau dimintakan restitusi.';
+        } else {
+            netEl.textContent = 'Rp 0 (Nihil)';
+            netEl.style.color = '#f59e0b';
+            badgeEl.textContent = 'Nihil';
+            badgeEl.style.background = 'rgba(245, 158, 11, 0.2)';
+            badgeEl.style.color = '#f59e0b';
+            noteEl.textContent = '* Tidak ada PPN yang perlu disetorkan untuk masa pajak ini.';
+        }
+    } catch (err) {
+        console.error('Failed to load SPT summary:', err);
+    }
+}
+
+function switchTaxSubtab(tabName) {
+    const tabs = ['invoices', 'nsfp', 'spt', 'ai'];
+    tabs.forEach(t => {
+        const btn = document.getElementById(`taxSubtabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        const pane = document.getElementById(`taxPane${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        if (btn) btn.classList.remove('active');
+        if (pane) pane.style.display = 'none';
+    });
+
+    const activeBtn = document.getElementById(`taxSubtabBtn${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
+    const activePane = document.getElementById(`taxPane${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
+    if (activeBtn) activeBtn.classList.add('active');
+    if (activePane) activePane.style.display = 'block';
+
+    if (tabName === 'invoices') loadTaxInvoices();
+    else if (tabName === 'nsfp') loadTaxNSFP();
+    else if (tabName === 'spt') loadSPTPeriodSummary();
+    else if (tabName === 'ai') runTaxComplianceAIAudit();
+}
+
+function openCreateNSFPModal() {
+    document.getElementById('nsfpYear').value = new Date().getFullYear();
+    document.getElementById('nsfpStartNumber').value = '';
+    document.getElementById('nsfpEndNumber').value = '';
+    openModal('modalCreateNSFP');
+}
+
+async function handleCreateNSFPSubmit(e) {
+    e.preventDefault();
+    const payload = {
+        prefix: document.getElementById('nsfpPrefix').value,
+        year: parseInt(document.getElementById('nsfpYear').value, 10),
+        start_number: document.getElementById('nsfpStartNumber').value.trim(),
+        end_number: document.getElementById('nsfpEndNumber').value.trim()
+    };
+
+    try {
+        await api('/tax-efaktur/nsfp', 'POST', payload);
+        showToast('Jatah NSFP berhasil didaftarkan!', 'success');
+        closeModal('modalCreateNSFP');
+        await loadTaxStats();
+        await loadTaxNSFP();
+    } catch (err) {
+        showToast('Gagal mendaftarkan NSFP: ' + err.message, 'danger');
+    }
+}
+
+async function openGenerateTaxInvoiceModal() {
+    const selectMove = document.getElementById('genTaxMoveID');
+    selectMove.innerHTML = '<option value="">Memuat dokumen faktur komersial...</option>';
+
+    openModal('modalGenerateTaxInvoice');
+
+    try {
+        const moves = await api('/accounting/moves');
+        const type = document.getElementById('genTaxInvoiceType').value;
+        const targetType = type === 'out_tax' ? 'out_invoice' : 'in_invoice';
+
+        const filtered = (moves || []).filter(m => m.move_type === targetType && m.state === 'posted');
+        if (filtered.length === 0) {
+            selectMove.innerHTML = `<option value="">Tidak ada dokumen komersial bertipe '${targetType}' berstatus 'posted'</option>`;
+            return;
+        }
+
+        selectMove.innerHTML = filtered.map(m => {
+            const partnerName = m.partner ? m.partner.name : 'No Partner';
+            return `<option value="${m.id}">${escapeHtml(m.name)} - ${escapeHtml(partnerName)} (Rp ${(m.amount_total || 0).toLocaleString('id-ID')})</option>`;
+        }).join('');
+    } catch (err) {
+        selectMove.innerHTML = `<option value="">Gagal memuat dokumen: ${escapeHtml(err.message)}</option>`;
+    }
+}
+
+function toggleCustomNSFPField() {
+    const type = document.getElementById('genTaxInvoiceType').value;
+    const customGroup = document.getElementById('customNSFPGroup');
+    if (type === 'in_tax') {
+        customGroup.style.display = 'block';
+        document.getElementById('genTaxCustomNSFP').required = true;
+    } else {
+        customGroup.style.display = 'none';
+        document.getElementById('genTaxCustomNSFP').required = false;
+    }
+    // Refresh moves list based on type
+    openGenerateTaxInvoiceModal();
+}
+
+async function handleGenerateTaxInvoiceSubmit(e) {
+    e.preventDefault();
+    const type = document.getElementById('genTaxInvoiceType').value;
+    const moveID = parseInt(document.getElementById('genTaxMoveID').value, 10);
+    if (!moveID) {
+        showToast('Pilih dokumen faktur komersial terlebih dahulu', 'warning');
+        return;
+    }
+
+    const payload = {
+        move_id: moveID,
+        tax_invoice_type: type,
+        custom_nsfp: document.getElementById('genTaxCustomNSFP').value.trim(),
+        tax_period: parseInt(document.getElementById('genTaxPeriod').value, 10),
+        tax_year: parseInt(document.getElementById('genTaxYear').value, 10),
+        tax_rate_ppn: parseFloat(document.getElementById('genTaxRatePPN').value),
+        pph_type: document.getElementById('genTaxPPhType').value,
+        notes: document.getElementById('genTaxNotes').value.trim()
+    };
+
+    const endpoint = type === 'out_tax' ? '/tax-efaktur/invoices/out' : '/tax-efaktur/invoices/in';
+
+    try {
+        const res = await api(endpoint, 'POST', payload);
+        showToast(`Faktur Pajak ${res.nsfp_number || ''} berhasil diterbitkan!`, 'success');
+        closeModal('modalGenerateTaxInvoice');
+        await loadTaxEFakturData();
+    } catch (err) {
+        showToast('Gagal menerbitkan faktur pajak: ' + err.message, 'danger');
+    }
+}
+
+async function showTaxInvoiceDetail(id) {
+    try {
+        const inv = await api(`/tax-efaktur/invoices/${id}`);
+        if (!inv) return;
+
+        document.getElementById('taxInvoiceDetailTitle').textContent = `Detail Faktur Pajak: ${inv.nsfp_number}`;
+        document.getElementById('taxDetPartnerName').textContent = inv.partner_name || '-';
+        document.getElementById('taxDetNPWP').textContent = inv.npwp || '-';
+        document.getElementById('taxDetAddress').textContent = inv.address || '-';
+        document.getElementById('taxDetDate').textContent = inv.invoice_date || '-';
+        document.getElementById('taxDetPeriod').textContent = `Masa ${inv.tax_period} / ${inv.tax_year}`;
+
+        const qrLink = document.getElementById('taxDetQRLink');
+        if (inv.qr_url) {
+            qrLink.href = inv.qr_url;
+            qrLink.style.display = 'inline';
+        } else {
+            qrLink.style.display = 'none';
+        }
+
+        const linesBody = document.getElementById('taxInvoiceLinesBody');
+        const lines = inv.lines || [];
+        if (lines.length === 0) {
+            linesBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Tidak ada detail item BKP/JKP.</td></tr>';
+        } else {
+            linesBody.innerHTML = lines.map(l => `
+                <tr>
+                    <td>${escapeHtml(l.product_name)}</td>
+                    <td style="text-align: right;">Rp ${(l.price_unit || 0).toLocaleString('id-ID')}</td>
+                    <td style="text-align: right;">${l.quantity || 1}</td>
+                    <td style="text-align: right;">Rp ${(l.dpp || 0).toLocaleString('id-ID')}</td>
+                    <td style="text-align: right; color: #f43f5e;">Rp ${(l.ppn || 0).toLocaleString('id-ID')}</td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('taxDetTotalDPP').textContent = 'Rp ' + (inv.dpp || 0).toLocaleString('id-ID');
+        document.getElementById('taxDetTotalPPN').textContent = 'Rp ' + (inv.ppn || 0).toLocaleString('id-ID');
+        document.getElementById('taxDetGrandTotal').textContent = 'Rp ' + (inv.total_amount || 0).toLocaleString('id-ID');
+
+        openModal('modalTaxInvoiceDetail');
+    } catch (err) {
+        showToast('Gagal memuat detail faktur: ' + err.message, 'danger');
+    }
+}
+
+async function updateTaxInvoiceState(id, newState) {
+    if (!confirm(`Konfirmasi pembaruan status faktur pajak menjadi '${newState}'?`)) return;
+
+    try {
+        await api(`/tax-efaktur/invoices/${id}/state`, 'PUT', { state: newState });
+        showToast(`Status faktur diperbarui menjadi '${newState}'`, 'success');
+        await loadTaxEFakturData();
+    } catch (err) {
+        showToast('Gagal memperbarui status: ' + err.message, 'danger');
+    }
+}
+
+async function downloadEFakturCSV() {
+    const period = document.getElementById('sptSelectPeriod')?.value || '10';
+    const year = document.getElementById('sptSelectYear')?.value || '2026';
+
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/v1/tax-efaktur/export-csv?type=out_tax&period=${period}&year=${year}`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || 'Gagal mengunduh CSV');
+        }
+
+        const text = await res.text();
+        const blob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `EFaktur_DJP_Masa_${period}_${year}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        showToast(`File CSV e-Faktur Masa ${period}/${year} berhasil diunduh!`, 'success');
+    } catch (err) {
+        showToast('Gagal mengunduh file CSV: ' + err.message, 'danger');
+    }
+}
+
+async function runTaxComplianceAIAudit() {
+    const period = document.getElementById('taxFilterPeriod')?.value || document.getElementById('sptSelectPeriod')?.value || '10';
+    const year = document.getElementById('taxFilterYear')?.value || document.getElementById('sptSelectYear')?.value || '2026';
+
+    try {
+        const report = await api(`/tax-efaktur/ai-audit?period=${period}&year=${year}`);
+        if (!report) return;
+
+        const scoreEl = document.getElementById('taxAIScore');
+        scoreEl.textContent = (report.compliance_score || 100).toFixed(1) + '%';
+        if (report.compliance_score >= 85) scoreEl.style.color = '#10b981';
+        else if (report.compliance_score >= 65) scoreEl.style.color = '#f59e0b';
+        else scoreEl.style.color = '#f43f5e';
+
+        const riskEl = document.getElementById('taxAIRiskLevel');
+        riskEl.textContent = (report.risk_level || 'LOW').toUpperCase();
+        if (report.risk_level === 'low') riskEl.style.color = '#10b981';
+        else if (report.risk_level === 'medium') riskEl.style.color = '#f59e0b';
+        else riskEl.style.color = '#f43f5e';
+
+        document.getElementById('taxAIInvalidNPWP').textContent = `${report.invalid_npwp_count || 0} Dokumen`;
+        document.getElementById('taxAIDateDiscrepancies').textContent = `${report.date_discrepancies || 0} Kasus`;
+
+        document.getElementById('taxAIExecutiveSummary').textContent = report.executive_summary || '-';
+
+        const recList = document.getElementById('taxAIRecommendationsList');
+        const recs = report.action_recommendations || [];
+        if (recs.length === 0) {
+            recList.innerHTML = '<li>Semua dokumen faktur pajak telah memenuhi regulasi DJP.</li>';
+        } else {
+            recList.innerHTML = recs.map(r => `<li style="margin-bottom: 0.35rem;">${escapeHtml(r)}</li>`).join('');
+        }
+
+        showToast(`Audit Kepatuhan Pajak AI Masa ${period}/${year} selesai!`, 'success');
+    } catch (err) {
+        showToast('Gagal menjalankan AI Tax Audit: ' + err.message, 'danger');
+    }
+}
+
+// =========================================================================
+// 35. BANK RECONCILIATION & STATEMENT IMPORT CONTROLLER (MODUL KE-31)
+// =========================================================================
+
+state.currentBankStatement = null;
+state.bankStatements = [];
+state.bankRules = [];
+state.bankSuggestions = [];
+state.activeBankLine = null;
+state.bankJournals = [];
+state.openInvoices = [];
+state.glAccounts = [];
+
+async function loadBankReconcileData() {
+    try {
+        // 1. Fetch Stats
+        const statsRes = await api('/bank-reconcile/stats');
+        renderBankReconcileKPIs(statsRes.data || statsRes);
+
+        // 2. Fetch Statements
+        const stmtsRes = await api('/bank-reconcile/statements');
+        state.bankStatements = stmtsRes.data || stmtsRes || [];
+        renderBankStatementsTable(state.bankStatements);
+
+        // 3. Preload Journals & Accounts for Modals
+        loadBankJournalsForModals();
+        loadGLAccountsForModals();
+
+        // 4. Auto-select first statement if exists and none selected
+        if (!state.currentBankStatement && state.bankStatements.length > 0) {
+            selectBankStatement(state.bankStatements[0].id);
+        }
+    } catch (err) {
+        console.error('Failed to load bank reconcile data:', err);
+        showToast('Gagal memuat data rekonsiliasi bank: ' + err.message, 'danger');
+    }
+}
+
+function renderBankReconcileKPIs(stats) {
+    if (!stats) return;
+    document.getElementById('bankStatTotalStatements').textContent = stats.total_statements || 0;
+    document.getElementById('bankStatStatementsBreakdown').textContent = `Terbuka: ${stats.open_statements || 0} | Ditutup: ${stats.confirmed_statements || 0}`;
+    
+    const pct = (stats.reconciled_percentage || 0).toFixed(1);
+    document.getElementById('bankStatReconciledRate').textContent = `${pct}%`;
+    document.getElementById('bankStatLinesBreakdown').textContent = `${stats.reconciled_lines || 0} / ${stats.total_lines || 0} transaksi cocok`;
+
+    document.getElementById('bankStatTotalInflow').textContent = formatCurrency(stats.total_inflow || 0);
+    document.getElementById('bankStatTotalOutflow').textContent = formatCurrency(stats.total_outflow || 0);
+    
+    document.getElementById('bankStatNetMovement').textContent = formatCurrency(stats.net_movement || 0);
+    const diff = Math.abs(stats.difference_sum || 0);
+    const diffEl = document.getElementById('bankStatTotalDiff');
+    if (diff < 0.01) {
+        diffEl.textContent = 'Total Selisih: Rp 0.00 (Seimbang)';
+        diffEl.style.color = '#10b981';
+    } else {
+        diffEl.textContent = `Total Selisih: ${formatCurrency(stats.difference_sum)}`;
+        diffEl.style.color = '#f59e0b';
+    }
+}
+
+function renderBankStatementsTable(statements) {
+    const tbody = document.getElementById('bankStatementsTableBody');
+    if (!statements || statements.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada rekening koran bank. Klik "+ Buat Rekening Koran" atau "Impor CSV Mutasi Bank".</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = statements.map(s => {
+        const jName = (s.journal && s.journal.name) ? s.journal.name : `Jurnal #${s.journal_id}`;
+        const isConfirm = s.state === 'confirm';
+        const statusBadge = isConfirm 
+            ? '<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Terkonfirmasi</span>'
+            : '<span class="badge" style="background: rgba(14, 165, 233, 0.15); color: #0ea5e9;">Draft / Open</span>';
+
+        const diff = Math.abs(s.difference || 0);
+        const diffDisplay = diff < 0.01 
+            ? '<span style="color: #10b981; font-weight: 600;">Rp 0.00</span>'
+            : `<span style="color: #f43f5e; font-weight: 600;">${formatCurrency(s.difference)}</span>`;
+
+        const totalLines = s.total_lines || 0;
+        const recLines = s.reconciled_lines || 0;
+        const linePct = totalLines > 0 ? Math.round((recLines / totalLines) * 100) : 0;
+
+        return `
+            <tr style="cursor: pointer;" onclick="selectBankStatement(${s.id})">
+                <td style="font-weight: 600; color: #0ea5e9;">${escapeHtml(s.name)}</td>
+                <td>${escapeHtml(jName)}</td>
+                <td>${escapeHtml(s.date)}</td>
+                <td style="text-align: right;">${formatCurrency(s.balance_start)}</td>
+                <td style="text-align: right;">${formatCurrency(s.balance_end)}</td>
+                <td style="text-align: right; font-weight: 600;">${formatCurrency(s.balance_end_real)}</td>
+                <td style="text-align: right;">${diffDisplay}</td>
+                <td style="min-width: 110px;">
+                    <div style="font-size: 0.75rem; margin-bottom: 0.2rem;">${recLines}/${totalLines} (${linePct}%)</div>
+                    <div style="background: rgba(255,255,255,0.08); border-radius: 4px; height: 6px; overflow: hidden;">
+                        <div style="background: ${linePct === 100 ? '#10b981' : '#0ea5e9'}; width: ${linePct}%; height: 100%;"></div>
+                    </div>
+                </td>
+                <td>${statusBadge}</td>
+                <td style="text-align: center;" onclick="event.stopPropagation()">
+                    <button class="btn btn-secondary btn-sm" onclick="selectBankStatement(${s.id})" title="Buka Workspace Rekonsiliasi" style="padding: 0.2rem 0.5rem; font-size: 0.78rem;">
+                        ⚡ Rekon
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="exportStatementCSV(${s.id})" title="Unduh CSV" style="padding: 0.2rem 0.5rem; font-size: 0.78rem;">
+                        📥
+                    </button>
+                    ${!isConfirm ? `
+                        <button class="btn btn-secondary btn-sm" onclick="deleteBankStatement(${s.id})" title="Hapus" style="padding: 0.2rem 0.5rem; font-size: 0.78rem; color: #f43f5e;">
+                            🗑️
+                        </button>
+                    ` : ''}
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function selectBankStatement(stmtId) {
+    try {
+        const stmtRes = await api(`/bank-reconcile/statements/${stmtId}`);
+        state.currentBankStatement = stmtRes.data || stmtRes;
+        
+        // Fetch Suggestions
+        const suggRes = await api(`/bank-reconcile/statements/${stmtId}/suggestions`);
+        state.bankSuggestions = suggRes.data || suggRes || [];
+
+        // Preload Open Invoices
+        loadOpenInvoicesForReconcile();
+
+        // Render Workspace
+        renderBankWorkspace(state.currentBankStatement, state.bankSuggestions);
+
+        const wsCard = document.getElementById('bankWorkspaceCard');
+        wsCard.style.display = 'block';
+        wsCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (err) {
+        showToast('Gagal membuka workspace rekening koran: ' + err.message, 'danger');
+    }
+}
+
+function renderBankWorkspace(stmt, suggestions) {
+    if (!stmt) return;
+    const jName = (stmt.journal && stmt.journal.name) ? stmt.journal.name : `Jurnal #${stmt.journal_id}`;
+    document.getElementById('wsStatementTitle').textContent = `🏦 Workspace: ${stmt.name} (${stmt.state.toUpperCase()})`;
+    document.getElementById('wsStatementSubtitle').textContent = `Jurnal: ${jName} | Tgl: ${stmt.date} | Saldo Awal: ${formatCurrency(stmt.balance_start)} | Saldo Fisik Target: ${formatCurrency(stmt.balance_end_real)}`;
+
+    // Difference Alert Banner
+    const diff = stmt.difference || 0;
+    const diffAlert = document.getElementById('wsDifferenceAlert');
+    const btnConfirm = document.getElementById('btnConfirmStatement');
+    
+    if (stmt.state === 'confirm') {
+        diffAlert.style.background = 'rgba(16, 185, 129, 0.15)';
+        diffAlert.style.border = '1px solid #10b981';
+        diffAlert.style.color = '#10b981';
+        diffAlert.innerHTML = `<span>✅ Rekening koran ini telah dikonfirmasi dan ditutup dengan saldo akhir ${formatCurrency(stmt.balance_end)}.</span>`;
+        if (btnConfirm) btnConfirm.style.display = 'none';
+    } else if (Math.abs(diff) < 0.01) {
+        diffAlert.style.background = 'rgba(16, 185, 129, 0.15)';
+        diffAlert.style.border = '1px solid #10b981';
+        diffAlert.style.color = '#10b981';
+        diffAlert.innerHTML = `<span>🎉 <strong>Saldo Seimbang!</strong> Saldo buku (${formatCurrency(stmt.balance_end)}) sama persis dengan rekening koran fisik (${formatCurrency(stmt.balance_end_real)}). Siap untuk dikonfirmasi.</span>`;
+        if (btnConfirm) btnConfirm.style.display = 'inline-block';
+    } else {
+        diffAlert.style.background = 'rgba(244, 63, 94, 0.15)';
+        diffAlert.style.border = '1px solid #f43f5e';
+        diffAlert.style.color = '#f43f5e';
+        diffAlert.innerHTML = `<span>⚠️ <strong>Terdapat Selisih ${formatCurrency(diff)}</strong> antara Saldo Buku (${formatCurrency(stmt.balance_end)}) dan Rekening Koran Fisik (${formatCurrency(stmt.balance_end_real)}). Lakukan rekonsiliasi mutasi atau buat penyesuaian biaya bank.</span>`;
+        if (btnConfirm) btnConfirm.style.display = 'inline-block';
+    }
+
+    // Lines list
+    renderBankWorkspaceLines(stmt, suggestions);
+}
+
+function renderBankWorkspaceLines(stmt, suggestions) {
+    const lines = stmt.line_ids || [];
+    document.getElementById('wsLineCountBadge').textContent = `${lines.length} Baris Transaksi`;
+
+    const tbody = document.getElementById('bankStatementLinesBody');
+    if (lines.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada baris transaksi. Impor CSV atau tambah mutasi.</td></tr>';
+        return;
+    }
+
+    const suggMap = {};
+    (suggestions || []).forEach(s => { suggMap[s.line_id] = s; });
+
+    tbody.innerHTML = lines.map(l => {
+        const sugg = suggMap[l.id];
+        const isInflow = l.amount > 0;
+        const amtColor = isInflow ? '#10b981' : '#f43f5e';
+        const amtSign = isInflow ? '+' : '';
+        const isRec = l.is_reconciled;
+        const statusBadge = isRec 
+            ? '<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; font-size: 0.72rem;">Cocok ✓</span>'
+            : '<span class="badge" style="background: rgba(255,255,255,0.06); color: var(--text-muted); font-size: 0.72rem;">Belum</span>';
+
+        let matchBadge = '<span style="color: var(--text-muted); font-size: 0.72rem;">-</span>';
+        if (isRec) {
+            matchBadge = '<span style="color: #10b981; font-size: 0.75rem;">Terekon</span>';
+        } else if (sugg && sugg.confidence >= 0.90) {
+            matchBadge = `<span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; font-size: 0.72rem;">⚡ ${(sugg.confidence * 100).toFixed(0)}% Cocok</span>`;
+        } else if (sugg && sugg.confidence >= 0.75) {
+            matchBadge = `<span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; font-size: 0.72rem;">~ ${(sugg.confidence * 100).toFixed(0)}% Cocok</span>`;
+        }
+
+        const isSelected = state.activeBankLine && state.activeBankLine.id === l.id;
+        const rowBg = isSelected ? 'background: rgba(14, 165, 233, 0.15);' : '';
+
+        return `
+            <tr style="cursor: pointer; ${rowBg}" onclick="selectActiveBankLine(${l.id})">
+                <td style="white-space: nowrap; font-size: 0.78rem;">${escapeHtml(l.date)}</td>
+                <td style="font-weight: 500;">
+                    <div>${escapeHtml(l.name)}</div>
+                    ${l.ref ? `<small style="color: var(--text-muted); font-size: 0.7rem;">Ref: ${escapeHtml(l.ref)}</small>` : ''}
+                </td>
+                <td style="text-align: right; font-weight: 600; color: ${amtColor}; white-space: nowrap;">
+                    ${amtSign}${formatCurrency(l.amount)}
+                </td>
+                <td>${statusBadge}</td>
+                <td>${matchBadge}</td>
+            </tr>
+        `;
+    }).join('');
+
+    // If an active line was selected, refresh its detail panel
+    if (state.activeBankLine) {
+        selectActiveBankLine(state.activeBankLine.id);
+    } else if (lines.length > 0) {
+        selectActiveBankLine(lines[0].id);
+    }
+}
+
+function selectActiveBankLine(lineId) {
+    if (!state.currentBankStatement) return;
+    const lines = state.currentBankStatement.line_ids || [];
+    const line = lines.find(l => l.id === lineId);
+    if (!line) return;
+
+    state.activeBankLine = line;
+    document.getElementById('wsActiveLineBadge').textContent = `Baris #${line.id}`;
+
+    // Highlight row
+    const rows = document.querySelectorAll('#bankStatementLinesBody tr');
+    rows.forEach(r => r.style.background = '');
+
+    const sugg = (state.bankSuggestions || []).find(s => s.line_id === line.id);
+    const container = document.getElementById('bankMatchDetailsContainer');
+
+    const isInflow = line.amount > 0;
+    const amtColor = isInflow ? '#10b981' : '#f43f5e';
+    const amtSign = isInflow ? '+' : '';
+
+    if (line.is_reconciled) {
+        container.innerHTML = `
+            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; border-radius: 8px; padding: 1.25rem; text-align: center;">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">✅</div>
+                <h4 style="margin: 0 0 0.5rem; color: #10b981;">Baris Transaksi Sudah Direkonsiliasi</h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0 0 1rem;">
+                    <strong>${escapeHtml(line.name)}</strong> (${amtSign}${formatCurrency(line.amount)})
+                </p>
+                <div style="font-size: 0.8rem; background: rgba(0,0,0,0.15); padding: 0.5rem; border-radius: 6px;">
+                    Telah dibukukan ke General Ledger dan/atau memotong tagihan faktur terkait.
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    // Unreconciled panel
+    let suggestionHtml = '';
+    if (sugg && sugg.confidence > 0) {
+        const confBadge = `<span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">${(sugg.confidence * 100).toFixed(0)}% Akurasi</span>`;
+        let targetText = '';
+        let btnAction = '';
+
+        if (sugg.suggested_move_id) {
+            targetText = `Faktur Terdeteksi: <strong>${escapeHtml(sugg.suggested_move_name)}</strong> (Sisa Tagihan: ${formatCurrency(sugg.suggested_residual)}) ${sugg.suggested_partner ? `• Partner: ${escapeHtml(sugg.suggested_partner)}` : ''}`;
+            btnAction = `<button class="btn btn-primary" onclick="reconcileActiveLineWithMove(${sugg.suggested_move_id})" style="background: linear-gradient(135deg, #10b981, #059669); border: none; font-size: 0.82rem; margin-top: 0.75rem; width: 100%;">⚡ Rekonsiliasi dengan Faktur Ini</button>`;
+        } else if (sugg.suggested_account_id) {
+            targetText = `Aturan Biaya Bank: <strong>${escapeHtml(sugg.suggested_account)}</strong>`;
+            btnAction = `<button class="btn btn-primary" onclick="reconcileActiveLineWithWriteOff(${sugg.suggested_account_id})" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9); border: none; font-size: 0.82rem; margin-top: 0.75rem; width: 100%;">⚡ Bukukan ke Akun Biaya Ini</button>`;
+        }
+
+        suggestionHtml = `
+            <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <span style="font-size: 0.82rem; font-weight: 600; color: #10b981;">💡 Rekomendasi Pencocokan Otomatis</span>
+                    ${confBadge}
+                </div>
+                <div style="font-size: 0.85rem; line-height: 1.5;">${targetText}</div>
+                <small style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-top: 0.25rem;">${escapeHtml(sugg.reason)}</small>
+                ${btnAction}
+            </div>
+        `;
+    }
+
+    // Manual Options
+    const invoiceOptions = (state.openInvoices || []).map(inv => {
+        const partnerName = (inv.partner && inv.partner.name) ? ` - ${inv.partner.name}` : '';
+        return `<option value="${inv.id}">${inv.name} (Sisa: ${formatCurrency(inv.amount_residual)}${partnerName})</option>`;
+    }).join('');
+
+    const accountOptions = (state.glAccounts || []).map(acc => {
+        return `<option value="${acc.id}">${acc.code} - ${acc.name} (${acc.type})</option>`;
+    }).join('');
+
+    container.innerHTML = `
+        <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem; border: 1px solid var(--border-color);">
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Mutasi Terpilih:</div>
+            <div style="font-weight: 600; font-size: 0.95rem; margin-top: 0.2rem;">${escapeHtml(line.name)}</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.4rem; font-size: 0.85rem;">
+                <span>Tgl: ${escapeHtml(line.date)} ${line.ref ? `• Ref: ${escapeHtml(line.ref)}` : ''}</span>
+                <strong style="color: ${amtColor}; font-size: 1rem;">${amtSign}${formatCurrency(line.amount)}</strong>
+            </div>
+        </div>
+
+        ${suggestionHtml}
+
+        <div style="border-top: 1px dashed var(--border-color); padding-top: 1rem;">
+            <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; color: var(--text-color);">Manual Matching / Penyesuaian</div>
+            
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-size: 0.78rem;">Opsi A: Cocokkan dengan Faktur Terbuka</label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <select id="selManualInvoice" class="form-control" style="font-size: 0.82rem;">
+                        <option value="">-- Pilih Faktur Pelanggan / Vendor --</option>
+                        ${invoiceOptions}
+                    </select>
+                    <button class="btn btn-secondary btn-sm" onclick="reconcileWithSelectedInvoice()" style="font-size: 0.78rem; white-space: nowrap;">
+                        Cocokkan
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label style="font-size: 0.78rem;">Opsi B: Write-off ke Akun Beban / Pendapatan Bank</label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <select id="selManualWriteOff" class="form-control" style="font-size: 0.82rem;">
+                        <option value="">-- Pilih Akun GL Write-Off --</option>
+                        ${accountOptions}
+                    </select>
+                    <button class="btn btn-secondary btn-sm" onclick="reconcileWithSelectedWriteOff()" style="font-size: 0.78rem; white-space: nowrap;">
+                        Write-Off
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+async function reconcileActiveLineWithMove(moveId) {
+    if (!state.activeBankLine) return;
+    try {
+        await api('/bank-reconcile/reconcile', 'POST', {
+            statement_line_id: state.activeBankLine.id,
+            move_id: moveId
+        });
+        showToast('Transaksi berhasil direkonsiliasi dengan faktur!', 'success');
+        await selectBankStatement(state.currentBankStatement.id);
+        const statsRes = await api('/bank-reconcile/stats');
+        renderBankReconcileKPIs(statsRes.data || statsRes);
+    } catch (err) {
+        showToast('Gagal rekonsiliasi: ' + err.message, 'danger');
+    }
+}
+
+async function reconcileActiveLineWithWriteOff(accId) {
+    if (!state.activeBankLine) return;
+    try {
+        await api('/bank-reconcile/reconcile', 'POST', {
+            statement_line_id: state.activeBankLine.id,
+            write_off_account_id: accId
+        });
+        showToast('Transaksi berhasil dibukukan ke GL Write-Off!', 'success');
+        await selectBankStatement(state.currentBankStatement.id);
+        const statsRes = await api('/bank-reconcile/stats');
+        renderBankReconcileKPIs(statsRes.data || statsRes);
+    } catch (err) {
+        showToast('Gagal write-off: ' + err.message, 'danger');
+    }
+}
+
+function reconcileWithSelectedInvoice() {
+    const moveId = parseInt(document.getElementById('selManualInvoice').value);
+    if (!moveId) {
+        showToast('Pilih faktur terbuka terlebih dahulu', 'warning');
+        return;
+    }
+    reconcileActiveLineWithMove(moveId);
+}
+
+function reconcileWithSelectedWriteOff() {
+    const accId = parseInt(document.getElementById('selManualWriteOff').value);
+    if (!accId) {
+        showToast('Pilih akun GL penyesuaian terlebih dahulu', 'warning');
+        return;
+    }
+    reconcileActiveLineWithWriteOff(accId);
+}
+
+async function autoReconcileCurrentStatement() {
+    if (!state.currentBankStatement) return;
+    try {
+        const res = await api(`/bank-reconcile/statements/${state.currentBankStatement.id}/auto-reconcile?min_confidence=0.85`, 'POST');
+        showToast(res.message || 'Auto-reconcile selesai!', 'success');
+        await selectBankStatement(state.currentBankStatement.id);
+        const statsRes = await api('/bank-reconcile/stats');
+        renderBankReconcileKPIs(statsRes.data || statsRes);
+    } catch (err) {
+        showToast('Gagal auto-reconcile: ' + err.message, 'danger');
+    }
+}
+
+async function confirmCurrentStatement() {
+    if (!state.currentBankStatement) return;
+    try {
+        await api(`/bank-reconcile/statements/${state.currentBankStatement.id}/confirm`, 'POST');
+        showToast('Rekening koran berhasil dikonfirmasi dan ditutup!', 'success');
+        await selectBankStatement(state.currentBankStatement.id);
+        loadBankReconcileData();
+    } catch (err) {
+        showToast('Gagal konfirmasi: ' + err.message, 'danger');
+    }
+}
+
+async function deleteBankStatement(id) {
+    if (!confirm('Yakin ingin menghapus rekening koran ini?')) return;
+    try {
+        await api(`/bank-reconcile/statements/${id}`, 'DELETE');
+        showToast('Rekening koran berhasil dihapus', 'success');
+        if (state.currentBankStatement && state.currentBankStatement.id === id) {
+            state.currentBankStatement = null;
+            document.getElementById('bankWorkspaceCard').style.display = 'none';
+        }
+        loadBankReconcileData();
+    } catch (err) {
+        showToast('Gagal menghapus rekening koran: ' + err.message, 'danger');
+    }
+}
+
+function exportCurrentStatementCSV() {
+    if (!state.currentBankStatement) return;
+    exportStatementCSV(state.currentBankStatement.id);
+}
+
+function exportStatementCSV(id) {
+    window.open(`/api/v1/bank-reconcile/statements/${id}/export`, '_blank');
+}
+
+async function runAIBankAuditForCurrent() {
+    if (!state.currentBankStatement) return;
+    try {
+        showToast('Menjalankan Cloudflare Workers AI Bank Copilot audit...', 'info');
+        const res = await api(`/bank-reconcile/statements/${state.currentBankStatement.id}/ai-audit`);
+        const report = res.data || res;
+        
+        document.getElementById('aiBankRiskBadge').textContent = report.risk_assessment || 'Low Risk';
+        const riskEl = document.getElementById('aiBankRiskBadge');
+        if (report.risk_assessment === 'High Risk') {
+            riskEl.style.background = 'rgba(244, 63, 94, 0.2)';
+            riskEl.style.color = '#f43f5e';
+        } else if (report.risk_assessment === 'Medium Risk') {
+            riskEl.style.background = 'rgba(245, 158, 11, 0.2)';
+            riskEl.style.color = '#f59e0b';
+        } else {
+            riskEl.style.background = 'rgba(16, 185, 129, 0.2)';
+            riskEl.style.color = '#10b981';
+        }
+
+        document.getElementById('aiBankEngineBadge').textContent = report.engine || 'local_heuristic_engine';
+        document.getElementById('aiBankSummaryText').textContent = report.executive_summary || '-';
+
+        const discList = document.getElementById('aiBankDiscrepanciesList');
+        const discs = report.discrepancy_notes || [];
+        if (discs.length === 0) {
+            discList.innerHTML = '<li>Tidak ada diskrepansi material saldo buku vs fisik.</li>';
+        } else {
+            discList.innerHTML = discs.map(d => `<li style="color: #f43f5e;">${escapeHtml(d)}</li>`).join('');
+        }
+
+        const recList = document.getElementById('aiBankRecommendationsList');
+        const recs = report.action_recommendations || [];
+        if (recs.length === 0) {
+            recList.innerHTML = '<li>Semua mutasi telah sesuai dengan tata kelola keuangan Odoo.</li>';
+        } else {
+            recList.innerHTML = recs.map(r => `<li>${escapeHtml(r)}</li>`).join('');
+        }
+
+        openModal('modalAIBankReport');
+    } catch (err) {
+        showToast('Gagal menjalankan AI Copilot Audit: ' + err.message, 'danger');
+    }
+}
+
+// Modal Form Handlers
+
+async function loadBankJournalsForModals() {
+    try {
+        const res = await api('/accounting/journals');
+        const list = res.data || res || [];
+        state.bankJournals = list.filter(j => j.type === 'bank' || j.type === 'cash');
+        
+        const opts = state.bankJournals.map(j => `<option value="${j.id}">${escapeHtml(j.name)} (${j.code})</option>`).join('');
+        const cbSel = document.getElementById('cbBankJournalSelect');
+        const impSel = document.getElementById('impBankJournalSelect');
+        if (cbSel) cbSel.innerHTML = opts || '<option value="3">Bank BCA</option>';
+        if (impSel) impSel.innerHTML = opts || '<option value="3">Bank BCA</option>';
+    } catch (e) {
+        console.warn('Could not load journals for modals:', e);
+    }
+}
+
+async function loadGLAccountsForModals() {
+    try {
+        const res = await api('/accounting/accounts');
+        const list = res.data || res || [];
+        state.glAccounts = list;
+        const opts = list.map(a => `<option value="${a.id}">${a.code} - ${escapeHtml(a.name)} (${a.type})</option>`).join('');
+        const ruleSel = document.getElementById('ruleAccountSelect');
+        if (ruleSel) ruleSel.innerHTML = `<option value="">-- Pilih Akun GL --</option>` + opts;
+    } catch (e) {
+        console.warn('Could not load accounts:', e);
+    }
+}
+
+async function loadOpenInvoicesForReconcile() {
+    try {
+        const res = await api('/accounting/moves?state=posted');
+        const list = res.data || res || [];
+        state.openInvoices = list.filter(m => m.payment_state !== 'paid' && m.amount_residual > 0);
+    } catch (e) {
+        console.warn('Could not load open moves:', e);
+    }
+}
+
+function openCreateBankStatementModal() {
+    document.getElementById('formCreateBankStatement').reset();
+    document.getElementById('cbStatementDate').value = new Date().toISOString().split('T')[0];
+    openModal('modalCreateBankStatement');
+}
+
+async function handleCreateBankStatement(e) {
+    e.preventDefault();
+    try {
+        const payload = {
+            journal_id: parseInt(document.getElementById('cbBankJournalSelect').value),
+            name: document.getElementById('cbStatementName').value.trim(),
+            date: document.getElementById('cbStatementDate').value,
+            balance_start: parseFloat(document.getElementById('cbBalanceStart').value) || 0,
+            balance_end_real: parseFloat(document.getElementById('cbBalanceEndReal').value) || 0,
+            note: document.getElementById('cbStatementNote').value.trim()
+        };
+
+        const res = await api('/bank-reconcile/statements', 'POST', payload);
+        closeModal('modalCreateBankStatement');
+        showToast('Rekening koran berhasil dibuat!', 'success');
+        loadBankReconcileData();
+        if (res.data && res.data.id) {
+            selectBankStatement(res.data.id);
+        }
+    } catch (err) {
+        showToast('Gagal membuat rekening koran: ' + err.message, 'danger');
+    }
+}
+
+function openImportBankCSVModal() {
+    document.getElementById('formImportBankCSV').reset();
+    openModal('modalImportBankCSV');
+}
+
+async function handleImportBankCSV(e) {
+    e.preventDefault();
+    try {
+        const payload = {
+            journal_id: parseInt(document.getElementById('impBankJournalSelect').value),
+            name: document.getElementById('impStatementName').value.trim(),
+            format: document.getElementById('impCSVFormat').value,
+            balance_start: parseFloat(document.getElementById('impBalanceStart').value) || 0,
+            balance_end_real: parseFloat(document.getElementById('impBalanceEndReal').value) || 0,
+            csv_content: document.getElementById('impCSVContent').value.trim()
+        };
+
+        if (state.currentBankStatement && confirm(`Impor ke rekening koran aktif (${state.currentBankStatement.name})?`)) {
+            payload.statement_id = state.currentBankStatement.id;
+        }
+
+        const res = await api('/bank-reconcile/import-csv', 'POST', payload);
+        closeModal('modalImportBankCSV');
+        showToast(res.message || 'Impor CSV mutasi berhasil!', 'success');
+        loadBankReconcileData();
+        if (res.data && res.data.id) {
+            selectBankStatement(res.data.id);
+        }
+    } catch (err) {
+        showToast('Gagal mengimpor CSV: ' + err.message, 'danger');
+    }
+}
+
+async function openBankRulesModal() {
+    openModal('modalBankRules');
+    loadBankRules();
+}
+
+async function loadBankRules() {
+    try {
+        const res = await api('/bank-reconcile/rules');
+        state.bankRules = res.data || res || [];
+        const tbody = document.getElementById('bankRulesTableBody');
+        if (state.bankRules.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Belum ada aturan rekonsiliasi.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = state.bankRules.map(r => `
+            <tr>
+                <td style="font-weight: 600;">${escapeHtml(r.rule_name)}</td>
+                <td><span class="badge" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">${escapeHtml(r.match_type)}</span></td>
+                <td><code>${escapeHtml(r.match_text)}</code></td>
+                <td>Akun #${r.account_id}</td>
+            </tr>
+        `).join('');
+    } catch (e) {
+        showToast('Gagal memuat aturan: ' + e.message, 'danger');
+    }
+}
+
+async function handleCreateBankRule(e) {
+    e.preventDefault();
+    try {
+        const payload = {
+            rule_name: document.getElementById('ruleNameInput').value.trim(),
+            match_type: document.getElementById('ruleMatchTypeSelect').value,
+            match_text: document.getElementById('ruleMatchTextInput').value.trim(),
+            rule_type: 'write_off',
+            account_id: parseInt(document.getElementById('ruleAccountSelect').value)
+        };
+
+        await api('/bank-reconcile/rules', 'POST', payload);
+        showToast('Aturan rekonsiliasi berhasil disimpan!', 'success');
+        document.getElementById('formCreateBankRule').reset();
+        loadBankRules();
+    } catch (err) {
+        showToast('Gagal menyimpan aturan: ' + err.message, 'danger');
+    }
+}
+
+// =========================================================================
+// 32. LANDED COST ENGINE & IMPORT LOGISTICS ALLOCATION
+// =========================================================================
+state.currentLandedCost = null;
+state.landedCosts = [];
+state.eligiblePickings = [];
+
+async function loadLandedCostData() {
+    try {
+        const statsPromise = api('/landed-costs/stats');
+        const stateFilter = document.getElementById('filterLandedCostState') ? document.getElementById('filterLandedCostState').value : '';
+        const query = stateFilter ? `?state=${encodeURIComponent(stateFilter)}` : '';
+        const listPromise = api('/landed-costs' + query);
+
+        const [statsRes, listRes] = await Promise.all([statsPromise, listPromise]);
+
+        // 1. KPI Stats
+        const stats = statsRes.data || statsRes || {};
+        if (document.getElementById('lcKpiTotal')) document.getElementById('lcKpiTotal').textContent = stats.total_landed_costs || 0;
+        if (document.getElementById('lcKpiDone')) document.getElementById('lcKpiDone').textContent = stats.done_count || 0;
+        if (document.getElementById('lcKpiAllocated')) document.getElementById('lcKpiAllocated').textContent = formatCurrency(stats.total_cost_allocated || 0);
+        if (document.getElementById('lcKpiRatio')) document.getElementById('lcKpiRatio').textContent = (stats.average_cost_ratio || 0).toFixed(1) + '%';
+
+        // 2. Render List
+        state.landedCosts = listRes.data || listRes || [];
+        renderLandedCostsTable(state.landedCosts);
+
+        // Auto-select first item if none active
+        if (!state.currentLandedCost && state.landedCosts.length > 0) {
+            selectLandedCost(state.landedCosts[0].id);
+        } else if (state.currentLandedCost) {
+            const found = state.landedCosts.find(c => c.id === state.currentLandedCost.id);
+            if (found) selectLandedCost(found.id);
+        }
+    } catch (err) {
+        console.error('Error loading landed costs:', err);
+        showToast('Gagal memuat data landed cost: ' + err.message, 'danger');
+    }
+}
+
+function renderLandedCostsTable(costs) {
+    const tbody = document.getElementById('landedCostsTableBody');
+    if (!tbody) return;
+
+    if (!costs || costs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada dokumen landed cost. Klik "+ Buat Landed Cost Baru" untuk memulai.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = costs.map(c => {
+        let stateBadge = '';
+        if (c.state === 'draft') {
+            stateBadge = '<span class="badge" style="background: rgba(148, 163, 184, 0.15); color: #94a3b8;">Draf</span>';
+        } else if (c.state === 'computed') {
+            stateBadge = '<span class="badge" style="background: rgba(2, 132, 199, 0.15); color: #0284c7;">Telah Dihitung</span>';
+        } else if (c.state === 'done') {
+            stateBadge = '<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Selesai (Posted)</span>';
+        } else {
+            stateBadge = '<span class="badge" style="background: rgba(244, 63, 94, 0.15); color: #f43f5e;">Batal</span>';
+        }
+
+        const isSelected = state.currentLandedCost && state.currentLandedCost.id === c.id;
+        const rowStyle = isSelected ? 'background: rgba(2, 132, 199, 0.08); font-weight: 500;' : '';
+        const pickingName = c.picking ? escapeHtml(c.picking.name) : `Picking #${c.picking_id}`;
+        const moveRef = c.account_move ? escapeHtml(c.account_move.name) : '-';
+
+        return `
+            <tr style="cursor: pointer; ${rowStyle}" onclick="selectLandedCost(${c.id})">
+                <td style="font-weight: 600; color: #0284c7;">${escapeHtml(c.name)}</td>
+                <td>${escapeHtml(c.date)}</td>
+                <td><span class="badge" style="background: rgba(255,255,255,0.06);">${pickingName}</span></td>
+                <td style="font-weight: 600;">${formatCurrency(c.total_amount)}</td>
+                <td><code>${moveRef}</code></td>
+                <td>${stateBadge}</td>
+                <td style="text-align: center;">
+                    <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); selectLandedCost(${c.id})" title="Lihat Detail & Alokasi" style="padding: 0.2rem 0.5rem; font-size: 0.78rem;">
+                        👁️ Detail
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); runAILandedCostAudit(${c.id})" title="AI Margin Copilot" style="padding: 0.2rem 0.5rem; font-size: 0.78rem; color: #8b5cf6;">
+                        🤖 AI
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function selectLandedCost(id) {
+    try {
+        const res = await api(`/landed-costs/${id}`);
+        state.currentLandedCost = res.data || res;
+        renderLandedCostWorkspace(state.currentLandedCost);
+        renderLandedCostsTable(state.landedCosts);
+    } catch (err) {
+        showToast('Gagal memuat detail landed cost: ' + err.message, 'danger');
+    }
+}
+
+function renderLandedCostWorkspace(c) {
+    const wsCard = document.getElementById('landedCostWorkspaceCard');
+    if (!wsCard || !c) return;
+    wsCard.style.display = 'block';
+
+    const titleEl = document.getElementById('lcWsTitle');
+    const subEl = document.getElementById('lcWsSubtitle');
+    const summaryBar = document.getElementById('lcWsSummaryBar');
+
+    titleEl.textContent = `🚢 Workspace Alokasi: ${c.name}`;
+    const pickingName = c.picking ? c.picking.name : `Picking #${c.picking_id}`;
+    subEl.textContent = `Penerimaan Barang: ${pickingName} | Tanggal: ${c.date} | Total Biaya: ${formatCurrency(c.total_amount)}`;
+
+    // Status badge
+    let stateBadgeHtml = '';
+    if (c.state === 'draft') stateBadgeHtml = '<span class="badge" style="background: rgba(148, 163, 184, 0.15); color: #94a3b8;">DRAF</span>';
+    else if (c.state === 'computed') stateBadgeHtml = '<span class="badge" style="background: rgba(2, 132, 199, 0.15); color: #0284c7;">TELAH DIHITUNG</span>';
+    else if (c.state === 'done') stateBadgeHtml = '<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">SELESAI (POSTED)</span>';
+    else stateBadgeHtml = '<span class="badge" style="background: rgba(244, 63, 94, 0.15); color: #f43f5e;">DIBATALKAN</span>';
+
+    const moveName = c.account_move ? c.account_move.name : '-';
+    summaryBar.innerHTML = `
+        <div><span style="color: var(--text-muted); display: block; font-size: 0.75rem;">Status:</span> ${stateBadgeHtml}</div>
+        <div><span style="color: var(--text-muted); display: block; font-size: 0.75rem;">Penerimaan Barang:</span> <strong>${escapeHtml(pickingName)}</strong></div>
+        <div><span style="color: var(--text-muted); display: block; font-size: 0.75rem;">Tanggal Dokumen:</span> <strong>${escapeHtml(c.date)}</strong></div>
+        <div><span style="color: var(--text-muted); display: block; font-size: 0.75rem;">Total Biaya Tambahan:</span> <strong style="color: #0284c7;">${formatCurrency(c.total_amount)}</strong></div>
+        <div><span style="color: var(--text-muted); display: block; font-size: 0.75rem;">Jurnal Penyesuaian GL:</span> <code>${escapeHtml(moveName)}</code></div>
+        <div><span style="color: var(--text-muted); display: block; font-size: 0.75rem;">Deskripsi:</span> <span>${escapeHtml(c.description || '-')}</span></div>
+    `;
+
+    // Action button visibility
+    const btnCompute = document.getElementById('btnComputeLC');
+    const btnValidate = document.getElementById('btnValidateLC');
+    const btnCancel = document.getElementById('btnCancelLC');
+
+    if (btnCompute) btnCompute.style.display = (c.state === 'draft' || c.state === 'computed') ? 'inline-flex' : 'none';
+    if (btnValidate) btnValidate.style.display = (c.state === 'draft' || c.state === 'computed') ? 'inline-flex' : 'none';
+    if (btnCancel) btnCancel.style.display = (c.state === 'draft' || c.state === 'computed') ? 'inline-flex' : 'none';
+
+    // Render Cost Lines
+    const costLinesBody = document.getElementById('lcCostLinesTableBody');
+    const costLines = c.cost_lines || [];
+    if (costLines.length === 0) {
+        costLinesBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Tidak ada baris komponen biaya.</td></tr>';
+    } else {
+        costLinesBody.innerHTML = costLines.map(cl => {
+            let splitLabel = cl.split_method;
+            if (cl.split_method === 'by_value') splitLabel = 'Berdasarkan Nilai (by_value)';
+            else if (cl.split_method === 'by_quantity') splitLabel = 'Berdasarkan Kuantitas (by_quantity)';
+            else if (cl.split_method === 'by_weight') splitLabel = 'Berdasarkan Bobot Kotor (by_weight)';
+            else if (cl.split_method === 'by_volume') splitLabel = 'Berdasarkan Kubikasi (by_volume)';
+            else if (cl.split_method === 'equal') splitLabel = 'Dibagi Rata (equal)';
+
+            return `
+                <tr>
+                    <td style="font-weight: 600;">${escapeHtml(cl.name)}</td>
+                    <td><span class="badge" style="background: rgba(2, 132, 199, 0.12); color: #0284c7;">${escapeHtml(splitLabel)}</span></td>
+                    <td>Akun #${cl.account_id}</td>
+                    <td style="text-align: right; font-weight: 600;">${formatCurrency(cl.price_unit)}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // Render Valuation Adjustment Lines
+    const valLinesBody = document.getElementById('lcValuationLinesTableBody');
+    const valLines = c.valuation_lines || [];
+    if (valLines.length === 0) {
+        valLinesBody.innerHTML = `
+            <tr>
+                <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">
+                    Belum ada hasil simulasi alokasi. Klik tombol <strong>🧮 Hitung Alokasi</strong> di atas untuk membagikan biaya ke item barang.
+                </td>
+            </tr>
+        `;
+    } else {
+        valLinesBody.innerHTML = valLines.map(vl => {
+            const incPct = vl.former_cost > 0 ? ((vl.additional_landed_cost / vl.former_cost) * 100).toFixed(1) : '0.0';
+            return `
+                <tr>
+                    <td style="font-weight: 600;">${escapeHtml(vl.product_name)}</td>
+                    <td><span style="font-size: 0.78rem; color: var(--text-muted);">${escapeHtml(vl.cost_line_name || '-')}</span></td>
+                    <td style="text-align: right;">${vl.quantity}</td>
+                    <td style="text-align: right;">${(vl.weight || 0).toFixed(1)}</td>
+                    <td style="text-align: right;">${formatCurrency(vl.former_cost)}</td>
+                    <td style="text-align: right; font-weight: 600; color: #0284c7;">+${formatCurrency(vl.additional_landed_cost)}</td>
+                    <td style="text-align: right; font-weight: 600; color: #10b981;">${formatCurrency(vl.final_cost)}</td>
+                    <td style="text-align: right; font-weight: 600; color: #10b981;">${formatCurrency(vl.final_cost_per_unit)} <small style="color: var(--text-muted);">(+${incPct}%)</small></td>
+                </tr>
+            `;
+        }).join('');
+    }
+}
+
+async function computeCurrentLandedCost() {
+    if (!state.currentLandedCost) return;
+    try {
+        const res = await api(`/landed-costs/${state.currentLandedCost.id}/compute`, 'POST');
+        showToast(res.message || 'Kalkulasi alokasi berhasil dihitung!', 'success');
+        await loadLandedCostData();
+        await selectLandedCost(state.currentLandedCost.id);
+    } catch (err) {
+        showToast('Gagal menghitung alokasi: ' + err.message, 'danger');
+    }
+}
+
+async function validateCurrentLandedCost() {
+    if (!state.currentLandedCost) return;
+    if (!confirm(`Validasi dan posting jurnal akuntansi untuk ${state.currentLandedCost.name}? Harga pokok standar produk akan diperbarui secara permanen.`)) {
+        return;
+    }
+    try {
+        const res = await api(`/landed-costs/${state.currentLandedCost.id}/validate`, 'POST');
+        showToast(res.message || 'Landed cost berhasil divalidasi!', 'success');
+        await loadLandedCostData();
+        await selectLandedCost(state.currentLandedCost.id);
+    } catch (err) {
+        showToast('Gagal memvalidasi landed cost: ' + err.message, 'danger');
+    }
+}
+
+async function cancelCurrentLandedCost() {
+    if (!state.currentLandedCost) return;
+    if (!confirm(`Batalkan dokumen landed cost ${state.currentLandedCost.name}?`)) return;
+    try {
+        const res = await api(`/landed-costs/${state.currentLandedCost.id}/cancel`, 'POST');
+        showToast(res.message || 'Dokumen berhasil dibatalkan.', 'info');
+        await loadLandedCostData();
+        await selectLandedCost(state.currentLandedCost.id);
+    } catch (err) {
+        showToast('Gagal membatalkan dokumen: ' + err.message, 'danger');
+    }
+}
+
+async function runAILandedCostAudit(targetId) {
+    const id = targetId || (state.currentLandedCost ? state.currentLandedCost.id : null);
+    if (!id) {
+        showToast('Pilih dokumen landed cost terlebih dahulu', 'warning');
+        return;
+    }
+
+    try {
+        showToast('Menjalankan audit margin & profitabilitas Cloudflare Workers AI...', 'info');
+        const res = await api(`/landed-costs/${id}/ai-audit`);
+        const report = res.data || res;
+
+        // Populate modal
+        const riskEl = document.getElementById('aiLCRiskBadge');
+        if (report.risk_level === 'HIGH') {
+            riskEl.className = 'badge';
+            riskEl.style.background = 'rgba(244, 63, 94, 0.2)';
+            riskEl.style.color = '#f43f5e';
+            riskEl.textContent = 'HIGH RISK (Risiko Margin Tinggi)';
+        } else if (report.risk_level === 'MEDIUM') {
+            riskEl.className = 'badge';
+            riskEl.style.background = 'rgba(245, 158, 11, 0.2)';
+            riskEl.style.color = '#f59e0b';
+            riskEl.textContent = 'MEDIUM RISK (Perlu Pengawasan)';
+        } else {
+            riskEl.className = 'badge';
+            riskEl.style.background = 'rgba(16, 185, 129, 0.2)';
+            riskEl.style.color = '#10b981';
+            riskEl.textContent = 'LOW RISK (Margin Aman & Terjaga)';
+        }
+
+        document.getElementById('aiLCOverheadBadge').textContent = (report.overall_overhead_pct || 0).toFixed(1) + '%';
+        document.getElementById('aiLCEngineBadge').textContent = report.ai_provider || 'Cloudflare Workers AI';
+        document.getElementById('aiLCSummaryText').textContent = report.summary || '-';
+
+        // Products Impact Table
+        const tbody = document.getElementById('aiLCProductImpactsTableBody');
+        const impacts = report.product_impacts || [];
+        tbody.innerHTML = impacts.map(p => {
+            let statusBadge = '';
+            if (p.margin_status === 'HEALTHY') {
+                statusBadge = '<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">HEALTHY</span>';
+            } else if (p.margin_status === 'TIGHT') {
+                statusBadge = '<span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">TIGHT (<20%)</span>';
+            } else {
+                statusBadge = '<span class="badge" style="background: rgba(244, 63, 94, 0.15); color: #f43f5e;">NEGATIVE</span>';
+            }
+
+            return `
+                <tr>
+                    <td style="font-weight: 600;">${escapeHtml(p.product_name)}</td>
+                    <td style="text-align: right;">${formatCurrency(p.old_cost_per_unit)}</td>
+                    <td style="text-align: right; font-weight: 600; color: #10b981;">${formatCurrency(p.new_cost_per_unit)}</td>
+                    <td style="text-align: right; color: #0284c7;">+${p.cost_increase_pct}%</td>
+                    <td style="text-align: right;">${formatCurrency(p.selling_price)}</td>
+                    <td style="text-align: right; font-weight: 600;">${p.estimated_gross_margin_pct}%</td>
+                    <td>${statusBadge}</td>
+                </tr>
+            `;
+        }).join('');
+
+        // Recommendations
+        const recList = document.getElementById('aiLCRecommendationsList');
+        const recs = report.recommendations || [];
+        recList.innerHTML = recs.map(r => `<li style="margin-bottom: 0.4rem;">${escapeHtml(r)}</li>`).join('');
+
+        openModal('modalAILandedCostReport');
+    } catch (err) {
+        showToast('Gagal menjalankan AI Copilot: ' + err.message, 'danger');
+    }
+}
+
+async function openCreateLandedCostModal() {
+    document.getElementById('formCreateLandedCost').reset();
+    document.getElementById('lcCreateDate').value = new Date().toISOString().split('T')[0];
+
+    // Load incoming pickings
+    const select = document.getElementById('lcCreatePickingSelect');
+    select.innerHTML = '<option value="">Memuat daftar penerimaan barang...</option>';
+
+    try {
+        const res = await api('/landed-costs/pickings');
+        state.eligiblePickings = res.data || res || [];
+        if (state.eligiblePickings.length === 0) {
+            select.innerHTML = '<option value="">Tidak ada penerimaan barang (incoming picking)</option>';
+        } else {
+            select.innerHTML = '<option value="">-- Pilih Penerimaan Barang --</option>' +
+                state.eligiblePickings.map(p => `
+                    <option value="${p.id}">${escapeHtml(p.name)} - ${escapeHtml(p.partner_name || p.origin || 'Incoming')} (${p.state})</option>
+                `).join('');
+        }
+    } catch (e) {
+        select.innerHTML = '<option value="">Gagal memuat penerimaan barang</option>';
+    }
+
+    // Initialize 2 default cost lines
+    const tbody = document.getElementById('lcCreateCostLinesTableBody');
+    tbody.innerHTML = '';
+    addLCCostLineRow('Ocean Freight & Shipping Line', 'by_value', 2500000);
+    addLCCostLineRow('Bea Masuk & Pajak Impor DJBC', 'by_quantity', 1500000);
+    updateLCCreateTotal();
+
+    openModal('modalCreateLandedCost');
+}
+
+function addLCCostLineRow(defaultName = '', defaultSplit = 'by_value', defaultAmount = 0) {
+    const tbody = document.getElementById('lcCreateCostLinesTableBody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td>
+            <input type="text" class="form-control lc-line-name" value="${escapeHtml(defaultName)}" placeholder="e.g. Freight / Bea Cukai / Handling" required style="font-size: 0.82rem; padding: 0.35rem 0.5rem;">
+        </td>
+        <td>
+            <select class="form-control lc-line-split" style="font-size: 0.82rem; padding: 0.35rem 0.5rem;">
+                <option value="by_value" ${defaultSplit === 'by_value' ? 'selected' : ''}>Nilai Barang (by_value)</option>
+                <option value="by_quantity" ${defaultSplit === 'by_quantity' ? 'selected' : ''}>Kuantitas (by_quantity)</option>
+                <option value="by_weight" ${defaultSplit === 'by_weight' ? 'selected' : ''}>Bobot Kotor (by_weight)</option>
+                <option value="by_volume" ${defaultSplit === 'by_volume' ? 'selected' : ''}>Kubikasi (by_volume)</option>
+                <option value="equal" ${defaultSplit === 'equal' ? 'selected' : ''}>Dibagi Rata (equal)</option>
+            </select>
+        </td>
+        <td>
+            <input type="number" class="form-control lc-line-amount" value="${defaultAmount}" min="0" step="1000" oninput="updateLCCreateTotal()" required style="font-size: 0.82rem; padding: 0.35rem 0.5rem; text-align: right;">
+        </td>
+        <td style="text-align: center;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="this.closest('tr').remove(); updateLCCreateTotal();" style="color: #f43f5e; padding: 0.15rem 0.4rem; font-size: 0.75rem;">✕</button>
+        </td>
+    `;
+    tbody.appendChild(tr);
+    updateLCCreateTotal();
+}
+
+function updateLCCreateTotal() {
+    const amountInputs = document.querySelectorAll('.lc-line-amount');
+    let total = 0;
+    amountInputs.forEach(inp => {
+        total += parseFloat(inp.value) || 0;
+    });
+    const label = document.getElementById('lcCreateTotalAmountLabel');
+    if (label) label.textContent = formatCurrency(total);
+}
+
+async function handleCreateLandedCost(e) {
+    e.preventDefault();
+    try {
+        const pickingID = parseInt(document.getElementById('lcCreatePickingSelect').value);
+        if (!pickingID) {
+            showToast('Silakan pilih penerimaan barang', 'warning');
+            return;
+        }
+
+        const date = document.getElementById('lcCreateDate').value;
+        const description = document.getElementById('lcCreateDescription').value.trim();
+
+        const costLines = [];
+        const rows = document.querySelectorAll('#lcCreateCostLinesTableBody tr');
+        rows.forEach(tr => {
+            const name = tr.querySelector('.lc-line-name').value.trim();
+            const splitMethod = tr.querySelector('.lc-line-split').value;
+            const priceUnit = parseFloat(tr.querySelector('.lc-line-amount').value) || 0;
+            if (name && priceUnit > 0) {
+                costLines.push({
+                    name: name,
+                    split_method: splitMethod,
+                    price_unit: priceUnit
+                });
+            }
+        });
+
+        if (costLines.length === 0) {
+            showToast('Minimal harus ada 1 baris komponen biaya bernilai lebih dari 0', 'warning');
+            return;
+        }
+
+        const payload = {
+            picking_id: pickingID,
+            date: date,
+            description: description,
+            cost_lines: costLines
+        };
+
+        const res = await api('/landed-costs', 'POST', payload);
+        closeModal('modalCreateLandedCost');
+        showToast(res.message || 'Landed cost berhasil dibuat!', 'success');
+        await loadLandedCostData();
+        if (res.data && res.data.id) {
+            selectLandedCost(res.data.id);
+        }
+    } catch (err) {
+        showToast('Gagal membuat landed cost: ' + err.message, 'danger');
+    }
+}
+
+// ===========================================================================
+// 33. UPSTREAM & DOWNSTREAM LOT TRACEABILITY & FEFO PICKING ENGINE
+// ===========================================================================
+
+state.traceabilityLots = [];
+state.selectedLotID = null;
+state.selectedTreeDirection = 'full';
+state.currentTreeData = null;
+state.traceRecalls = [];
+state.currentRecall = null;
+
+async function loadTraceabilityData() {
+    try {
+        // 1. Fetch Executive Stats
+        const statsRes = await api('/traceability/stats');
+        if (statsRes && statsRes.data) {
+            const s = statsRes.data;
+            document.getElementById('traceKpiTotalLots').textContent = s.total_lots || 0;
+            document.getElementById('traceKpiActiveLots').textContent = s.active_lots_with_stock || 0;
+            document.getElementById('traceKpiExpiredLots').textContent = s.expired_lots || 0;
+            document.getElementById('traceKpiNearExpiryLots').textContent = s.near_expiry_lots || 0;
+            document.getElementById('traceKpiTotalTraces').textContent = s.total_trace_records || 0;
+            document.getElementById('traceKpiActiveRecalls').textContent = s.active_recalls || 0;
+        }
+
+        // 2. Fetch Lots List
+        const lotsRes = await api('/barcode/lots');
+        state.traceabilityLots = (lotsRes && lotsRes.data) ? lotsRes.data : [];
+        renderTraceLots(state.traceabilityLots);
+
+        // Auto select first lot if none selected
+        if (!state.selectedLotID && state.traceabilityLots.length > 0) {
+            selectLotForTree(state.traceabilityLots[0].id);
+        }
+
+        // 3. Load Recalls list
+        await loadTraceRecalls();
+
+        // 4. Load Movement Timeline
+        await loadMovementTimeline();
+    } catch (err) {
+        console.error('Failed to load traceability data:', err);
+        showToast('Gagal memuat data penelusuran lot: ' + err.message, 'danger');
+    }
+}
+
+function renderTraceLots(lots) {
+    const tbody = document.getElementById('traceLotsTableBody');
+    if (!tbody) return;
+
+    if (!lots || lots.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Tidak ada lot/serial number terdaftar</td></tr>';
+        return;
+    }
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    let html = '';
+    lots.forEach(lot => {
+        const isSelected = state.selectedLotID === lot.id;
+        let expBadge = '<span class="badge" style="background: rgba(100,116,139,0.2); color: #94a3b8;">-</span>';
+        let statusBadge = '<span class="badge badge-success">Fresh</span>';
+
+        if (lot.expiration_date) {
+            const expDate = new Date(lot.expiration_date);
+            const diffDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 0) {
+                expBadge = `<span class="badge badge-danger">${lot.expiration_date}</span>`;
+                statusBadge = '<span class="badge badge-danger">EXPIRED</span>';
+            } else if (diffDays <= 30) {
+                expBadge = `<span class="badge badge-warning">${lot.expiration_date}</span>`;
+                statusBadge = `<span class="badge badge-warning">${diffDays} Hari</span>`;
+            } else {
+                expBadge = `<span class="badge" style="background: rgba(16,185,129,0.15); color: #10b981;">${lot.expiration_date}</span>`;
+                statusBadge = `<span class="badge badge-success">${diffDays} Hari</span>`;
+            }
+        }
+
+        const isQuarantined = lot.notes && lot.notes.includes('[QUARANTINED');
+        if (isQuarantined) {
+            statusBadge = '<span class="badge badge-danger" style="background: #991b1b; color: white;">QUARANTINE</span>';
+        }
+
+        const prodName = lot.product ? lot.product.name : ('Produk #' + lot.product_id);
+
+        html += `
+            <tr style="cursor: pointer; ${isSelected ? 'background: rgba(2,132,199,0.15); font-weight: 500;' : ''}" onclick="selectLotForTree(${lot.id})">
+                <td>
+                    <strong style="color: #0284c7;">${lot.name}</strong>
+                    ${lot.barcode && lot.barcode !== lot.name ? `<br><small style="color: var(--text-muted); font-size: 0.72rem;">${lot.barcode}</small>` : ''}
+                </td>
+                <td>
+                    <span>${prodName}</span>
+                </td>
+                <td style="text-align: right; font-weight: 600;">
+                    ${(lot.qty || 0).toLocaleString('id-ID')}
+                </td>
+                <td>${expBadge}</td>
+                <td>${statusBadge}</td>
+                <td style="text-align: center;">
+                    <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); selectLotForTree(${lot.id})" title="Tampilkan Silsilah" style="font-size: 0.75rem; padding: 0.2rem 0.5rem;">
+                        🌳 Silsilah
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = html;
+}
+
+function filterTraceLots() {
+    const query = (document.getElementById('traceLotSearchInput').value || '').toLowerCase().trim();
+    if (!query) {
+        renderTraceLots(state.traceabilityLots);
+        return;
+    }
+
+    const filtered = state.traceabilityLots.filter(l => {
+        const name = (l.name || '').toLowerCase();
+        const ref = (l.ref || '').toLowerCase();
+        const barcode = (l.barcode || '').toLowerCase();
+        const prod = (l.product ? l.product.name : '').toLowerCase();
+        return name.includes(query) || ref.includes(query) || barcode.includes(query) || prod.includes(query);
+    });
+
+    renderTraceLots(filtered);
+}
+
+async function selectLotForTree(lotID) {
+    state.selectedLotID = lotID;
+    renderTraceLots(state.traceabilityLots);
+
+    const container = document.getElementById('traceTreeContainer');
+    const label = document.getElementById('traceSelectedLotLabel');
+    const metricsBar = document.getElementById('traceTreeMetricsBar');
+
+    if (!container) return;
+
+    container.innerHTML = '<div style="text-align: center; padding: 3rem; color: var(--text-muted);"><span class="spinner"></span> Menelusuri silsilah lot (up & downstream)...</div>';
+
+    try {
+        const res = await api(`/traceability/tree/${lotID}?direction=${state.selectedTreeDirection}`);
+        if (!res || !res.data) {
+            container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">Tidak ditemukan data silsilah untuk lot ini.</div>';
+            return;
+        }
+
+        const data = res.data;
+        state.currentTreeData = data;
+
+        if (label) {
+            label.innerHTML = `Lot Target: <strong style="color: #10b981;">${data.target_lot_name}</strong> (${data.target_product_name}) — Stok Gudang: <strong>${(data.current_lot_qty || 0).toLocaleString('id-ID')}</strong>`;
+        }
+
+        if (metricsBar) {
+            metricsBar.style.display = 'grid';
+            document.getElementById('treeSuppliersCount').textContent = data.total_suppliers_involved || 0;
+            document.getElementById('treeMOCount').textContent = data.total_manufacturing_orders_involved || 0;
+            document.getElementById('treeDeliveriesCount').textContent = data.total_customer_deliveries_involved || 0;
+            document.getElementById('treeCustomersCount').textContent = (data.impacted_customers ? data.impacted_customers.length : 0);
+        }
+
+        let treeHtml = '';
+
+        if (state.selectedTreeDirection === 'upstream' || state.selectedTreeDirection === 'full') {
+            if (data.upstream_tree) {
+                treeHtml += '<div style="margin-bottom: 1.5rem;">';
+                treeHtml += '<h4 style="font-size: 0.95rem; color: #10b981; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;"><span>⬆️</span> Asal-Usul Bahan Baku & Pemasok (Upstream Traceability)</h4>';
+                treeHtml += renderTreeNode(data.upstream_tree, 0);
+                treeHtml += '</div>';
+            }
+        }
+
+        if (state.selectedTreeDirection === 'downstream' || state.selectedTreeDirection === 'full') {
+            if (data.downstream_tree) {
+                treeHtml += '<div>';
+                treeHtml += '<h4 style="font-size: 0.95rem; color: #8b5cf6; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;"><span>⬇️</span> Distribusi Produksi & Pelanggan (Downstream Traceability / Recall Path)</h4>';
+                treeHtml += renderTreeNode(data.downstream_tree, 0);
+                treeHtml += '</div>';
+            }
+        }
+
+        if (!treeHtml) {
+            treeHtml = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">Belum ada pergerakan terhubung untuk arah silsilah ini.</div>';
+        }
+
+        container.innerHTML = treeHtml;
+    } catch (err) {
+        container.innerHTML = `<div style="text-align: center; padding: 2rem; color: #ef4444;">Gagal memuat pohon silsilah: ${err.message}</div>`;
+    }
+}
+
+function renderTreeNode(node, depth) {
+    if (!node) return '';
+
+    let icon = '📦';
+    let borderColor = '#0284c7';
+    let bg = 'rgba(2, 132, 199, 0.08)';
+
+    switch (node.node_type) {
+        case 'receipt':
+            icon = '📥';
+            borderColor = '#10b981';
+            bg = 'rgba(16, 185, 129, 0.08)';
+            break;
+        case 'raw_lot':
+            icon = '🧪';
+            borderColor = '#06b6d4';
+            bg = 'rgba(6, 182, 212, 0.08)';
+            break;
+        case 'production':
+            icon = '🏭';
+            borderColor = '#3b82f6';
+            bg = 'rgba(59, 130, 246, 0.08)';
+            break;
+        case 'finished_lot':
+            icon = '💊';
+            borderColor = '#6366f1';
+            bg = 'rgba(99, 102, 241, 0.08)';
+            break;
+        case 'delivery':
+            icon = '🚚';
+            borderColor = '#8b5cf6';
+            bg = 'rgba(139, 92, 246, 0.08)';
+            break;
+        case 'lot':
+            icon = '🏷️';
+            borderColor = '#f59e0b';
+            bg = 'rgba(245, 158, 11, 0.08)';
+            break;
+    }
+
+    const indentPx = depth * 22;
+
+    let html = `
+        <div style="margin-left: ${indentPx}px; margin-bottom: 0.6rem; border-left: 3px solid ${borderColor}; background: ${bg}; border-radius: 0 8px 8px 0; padding: 0.6rem 0.85rem; font-size: 0.83rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 1.1rem;">${icon}</span>
+                    <strong>${node.title || node.reference}</strong>
+                    ${node.status ? `<span class="badge" style="font-size: 0.7rem; background: rgba(255,255,255,0.1);">${node.status}</span>` : ''}
+                </div>
+                <div style="text-align: right; font-size: 0.78rem; color: var(--text-muted);">
+                    ${node.quantity ? `<strong style="color: var(--text-color);">${(node.quantity).toLocaleString('id-ID')} unit</strong> | ` : ''}
+                    <span>${node.date || '-'}</span>
+                </div>
+            </div>
+            ${node.partner_name ? `<div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">Rekanan: <strong style="color: var(--text-color);">${node.partner_name}</strong></div>` : ''}
+            ${node.expiration_date ? `<div style="font-size: 0.75rem; color: #f59e0b; margin-top: 0.2rem;">Tgl Kadaluwarsa: ${node.expiration_date}</div>` : ''}
+        </div>
+    `;
+
+    if (node.children && node.children.length > 0) {
+        node.children.forEach(child => {
+            html += renderTreeNode(child, depth + 1);
+        });
+    }
+
+    return html;
+}
+
+function changeTreeDirection(dir) {
+    state.selectedTreeDirection = dir;
+
+    ['btnTreeFull', 'btnTreeUpstream', 'btnTreeDownstream'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.classList.remove('active');
+    });
+
+    if (dir === 'full') document.getElementById('btnTreeFull').classList.add('active');
+    if (dir === 'upstream') document.getElementById('btnTreeUpstream').classList.add('active');
+    if (dir === 'downstream') document.getElementById('btnTreeDownstream').classList.add('active');
+
+    if (state.selectedLotID) {
+        selectLotForTree(state.selectedLotID);
+    }
+}
+
+function switchTraceSubtab(subtab) {
+    const tabRecalls = document.getElementById('traceSubtabRecalls');
+    const tabExpiry = document.getElementById('traceSubtabExpiry');
+    const tabMovement = document.getElementById('traceSubtabMovement');
+
+    const btnRecalls = document.getElementById('subtabBtnRecalls');
+    const btnExpiry = document.getElementById('subtabBtnExpiry');
+    const btnMovement = document.getElementById('subtabBtnMovement');
+
+    if (tabRecalls) tabRecalls.style.display = subtab === 'recalls' ? 'block' : 'none';
+    if (tabExpiry) tabExpiry.style.display = subtab === 'expiry' ? 'block' : 'none';
+    if (tabMovement) tabMovement.style.display = subtab === 'movement' ? 'block' : 'none';
+
+    btnRecalls.className = subtab === 'recalls' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-secondary';
+    btnExpiry.className = subtab === 'expiry' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-secondary';
+    btnMovement.className = subtab === 'movement' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-secondary';
+
+    if (subtab === 'recalls') loadTraceRecalls();
+    if (subtab === 'movement') loadMovementTimeline();
+}
+
+async function loadTraceRecalls() {
+    const tbody = document.getElementById('traceRecallsTableBody');
+    if (!tbody) return;
+
+    try {
+        const res = await api('/traceability/recalls');
+        state.traceRecalls = (res && res.data) ? res.data : [];
+
+        if (state.traceRecalls.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Belum ada kampanye penarikan produk (recall) yang diterbitkan</td></tr>';
+            return;
+        }
+
+        let html = '';
+        state.traceRecalls.forEach(r => {
+            let sevBadge = '<span class="badge badge-warning">Medium</span>';
+            if (r.severity === 'critical') sevBadge = '<span class="badge badge-danger">Kelas I (Kritis)</span>';
+            if (r.severity === 'high') sevBadge = '<span class="badge badge-danger">Kelas II (Tinggi)</span>';
+
+            let stateBadge = `<span class="badge">${r.state}</span>`;
+            if (r.state === 'quarantined') stateBadge = '<span class="badge badge-danger">Dikarantina</span>';
+            if (r.state === 'completed') stateBadge = '<span class="badge badge-success">Selesai</span>';
+
+            html += `
+                <tr>
+                    <td><strong style="color: #ef4444;">${r.recall_code}</strong></td>
+                    <td><strong>${r.target_lot_name}</strong></td>
+                    <td>${r.product_name}</td>
+                    <td><span style="font-size: 0.8rem; max-width: 200px; display: inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${r.reason}</span></td>
+                    <td>${sevBadge}</td>
+                    <td>${stateBadge}</td>
+                    <td style="text-align: right; font-weight: 600; color: #f59e0b;">${(r.affected_stock_quarantined || 0).toLocaleString('id-ID')}</td>
+                    <td style="text-align: center;"><span class="badge badge-danger">${r.affected_customers_count || 0}</span></td>
+                    <td style="text-align: right; color: #ef4444;">${formatCurrency(r.financial_risk || 0)}</td>
+                    <td style="text-align: center;">
+                        <button class="btn btn-sm btn-secondary" onclick="viewRecallDetail(${r.id})" style="font-size: 0.75rem; padding: 0.2rem 0.5rem;">
+                            📑 Surat & Regulasi
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: #ef4444;">Gagal memuat recalls: ${err.message}</td></tr>`;
+    }
+}
+
+async function viewRecallDetail(recallID) {
+    try {
+        const res = await api(`/traceability/recalls/${recallID}`);
+        if (!res || !res.data) return;
+
+        const recall = res.data;
+        state.currentRecall = recall;
+
+        document.getElementById('rdCodeLabel').textContent = recall.recall_code;
+        document.getElementById('rdLotProductLabel').textContent = `${recall.target_lot_name} (${recall.product_name})`;
+        document.getElementById('rdQuarantinedLabel').textContent = `${(recall.affected_stock_quarantined || 0).toLocaleString('id-ID')} unit`;
+        document.getElementById('rdCustomersCountLabel').textContent = `${recall.affected_customers_count || 0} Pelanggan`;
+
+        const btnComplete = document.getElementById('btnCompleteRecallAction');
+        if (btnComplete) {
+            btnComplete.style.display = recall.state === 'completed' ? 'none' : 'inline-block';
+        }
+
+        switchRecallDetailTab('notice');
+        openModal('modalRecallDetail');
+    } catch (err) {
+        showToast('Gagal memuat detail recall: ' + err.message, 'danger');
+    }
+}
+
+function switchRecallDetailTab(tab) {
+    const pre = document.getElementById('recallNoticeContent');
+    const btnNotice = document.getElementById('btnRecallTabNotice');
+    const btnReg = document.getElementById('btnRecallTabReg');
+    const btnSOP = document.getElementById('btnRecallTabSOP');
+
+    if (!pre || !state.currentRecall) return;
+
+    btnNotice.className = tab === 'notice' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-secondary';
+    btnReg.className = tab === 'reg' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-secondary';
+    btnSOP.className = tab === 'sop' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-secondary';
+
+    if (tab === 'notice') {
+        pre.textContent = state.currentRecall.customer_notice_text || 'Tidak ada draf surat pelanggan.';
+    } else if (tab === 'reg') {
+        pre.textContent = state.currentRecall.regulatory_notice_text || 'Tidak ada draf laporan regulasi.';
+    } else if (tab === 'sop') {
+        pre.textContent = state.currentRecall.resolution_notes || 'Tidak ada catatan SOP resolusi.';
+    }
+}
+
+async function completeCurrentRecall() {
+    if (!state.currentRecall) return;
+
+    const notes = prompt('Masukkan catatan penyelesaian penarikan produk (CAPA & verifikasi fisik):', 'Pemusnahan limbah bersertifikasi selesai dan batch pengganti dikirimkan.');
+    if (!notes) return;
+
+    try {
+        const res = await api(`/traceability/recalls/${state.currentRecall.id}/complete`, 'POST', { resolution_notes: notes });
+        showToast(res.message || 'Penarikan produk berhasil diselesaikan!', 'success');
+        closeModal('modalRecallDetail');
+        await loadTraceabilityData();
+    } catch (err) {
+        showToast('Gagal menyelesaikan penarikan: ' + err.message, 'danger');
+    }
+}
+
+async function runExpiryRiskAudit() {
+    switchTraceSubtab('expiry');
+    const container = document.getElementById('traceExpiryAuditContainer');
+    if (!container) return;
+
+    container.innerHTML = '<div style="text-align: center; padding: 2.5rem; color: var(--text-muted);"><span class="spinner"></span> Menjalankan audit risiko kadaluwarsa & Cloudflare Workers AI copilot...</div>';
+
+    try {
+        const res = await api('/traceability/expiry-audit');
+        if (!res || !res.data) {
+            container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem;">Tidak ada data audit.</div>';
+            return;
+        }
+
+        const rep = res.data;
+
+        let riskBadgeColor = '#10b981';
+        if (rep.overall_risk_level === 'CRITICAL') riskBadgeColor = '#ef4444';
+        if (rep.overall_risk_level === 'ELEVATED') riskBadgeColor = '#f59e0b';
+
+        let html = `
+            <div style="background: rgba(0,0,0,0.15); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 1.25rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+                    <div>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">Status Risiko Keseluruhan:</span>
+                        <strong class="badge" style="background: ${riskBadgeColor}; color: white; font-size: 0.95rem; margin-left: 0.5rem;">${rep.overall_risk_level}</strong>
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">
+                        Engine: <strong style="color: #0284c7;">${rep.ai_provider || 'Cloudflare Workers AI'}</strong>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; text-align: center; font-size: 0.82rem; margin-bottom: 1rem;">
+                    <div style="background: rgba(255,255,255,0.03); padding: 0.5rem; border-radius: 6px;">
+                        <span style="color: var(--text-muted); display: block;">Lot Terlacak</span>
+                        <strong>${rep.total_lots_tracked}</strong>
+                    </div>
+                    <div style="background: rgba(239,68,68,0.1); padding: 0.5rem; border-radius: 6px;">
+                        <span style="color: #ef4444; display: block;">Kadaluwarsa</span>
+                        <strong style="color: #ef4444;">${rep.expired_lots_count} (${formatCurrency(rep.expired_lots_value || 0)})</strong>
+                    </div>
+                    <div style="background: rgba(245,158,11,0.1); padding: 0.5rem; border-radius: 6px;">
+                        <span style="color: #f59e0b; display: block;">Mendekati Expired (&le;30h)</span>
+                        <strong style="color: #f59e0b;">${rep.near_expiry_lots_count} (${formatCurrency(rep.near_expiry_lots_value || 0)})</strong>
+                    </div>
+                    <div style="background: rgba(16,185,129,0.1); padding: 0.5rem; border-radius: 6px;">
+                        <span style="color: #10b981; display: block;">Lot Segar</span>
+                        <strong style="color: #10b981;">${rep.fresh_lots_count}</strong>
+                    </div>
+                </div>
+                <div style="background: rgba(255,255,255,0.02); border-left: 3px solid #0284c7; padding: 0.75rem 1rem; border-radius: 4px;">
+                    <h5 style="margin: 0 0 0.35rem 0; font-size: 0.85rem; color: #0284c7;">🤖 Ringkasan Audit & Rekomendasi AI</h5>
+                    <p style="margin: 0; font-size: 0.83rem; line-height: 1.6; white-space: pre-wrap;">${rep.ai_insights}</p>
+                </div>
+            </div>
+        `;
+
+        if (rep.critical_lots && rep.critical_lots.length > 0) {
+            html += `
+                <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem; color: #ef4444;">⚠️ Rincian Lot Berisiko Tinggi (Prioritas Tindakan)</h4>
+                <div class="table-responsive">
+                    <table class="table" style="font-size: 0.82rem;">
+                        <thead>
+                            <tr>
+                                <th>Nomor Lot</th>
+                                <th>Produk</th>
+                                <th style="text-align: right;">Stok</th>
+                                <th>Tgl Kadaluwarsa</th>
+                                <th>Sisa Waktu</th>
+                                <th>Status</th>
+                                <th style="text-align: right;">Potensi Nilai Risiko</th>
+                                <th style="text-align: center;">Tindakan Cepat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            rep.critical_lots.forEach(cl => {
+                let statusLabel = '<span class="badge badge-warning">Near Expiry</span>';
+                if (cl.status === 'EXPIRED') statusLabel = '<span class="badge badge-danger">EXPIRED</span>';
+
+                html += `
+                    <tr>
+                        <td><strong style="color: #0284c7;">${cl.lot_name}</strong></td>
+                        <td>${cl.product_name}</td>
+                        <td style="text-align: right; font-weight: 600;">${(cl.qty || 0).toLocaleString('id-ID')}</td>
+                        <td>${cl.expiration_date}</td>
+                        <td style="font-weight: 600; color: ${cl.days_remaining < 0 ? '#ef4444' : '#f59e0b'};">${cl.days_remaining < 0 ? 'Sudah lewat ' + Math.abs(cl.days_remaining) + ' hari' : cl.days_remaining + ' hari tersisa'}</td>
+                        <td>${statusLabel}</td>
+                        <td style="text-align: right; font-weight: 600; color: #ef4444;">${formatCurrency(cl.total_loss_risk || 0)}</td>
+                        <td style="text-align: center;">
+                            <button class="btn btn-sm btn-danger" onclick="openModalCreateRecall(${cl.lot_id})" style="font-size: 0.72rem; padding: 0.2rem 0.4rem;">
+                                🚨 Recall / Karantina
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            html += `</tbody></table></div>`;
+        }
+
+        container.innerHTML = html;
+        showToast('Audit risiko kadaluwarsa selesai dianalisis', 'success');
+    } catch (err) {
+        container.innerHTML = `<div style="text-align: center; color: #ef4444; padding: 2rem;">Gagal menjalankan audit: ${err.message}</div>`;
+    }
+}
+
+async function loadMovementTimeline() {
+    const tbody = document.getElementById('traceMovementTableBody');
+    if (!tbody) return;
+
+    const eventType = document.getElementById('traceFilterEventType') ? document.getElementById('traceFilterEventType').value : '';
+
+    try {
+        const query = eventType ? `?event_type=${eventType}` : '';
+        const res = await api('/traceability/traces' + query);
+        const list = (res && res.data) ? res.data : [];
+
+        if (list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Belum ada rekam jejak pergerakan tercatat</td></tr>';
+            return;
+        }
+
+        let html = '';
+        list.forEach(m => {
+            let typeBadge = `<span class="badge">${m.event_type}</span>`;
+            if (m.event_type === 'receipt') typeBadge = '<span class="badge" style="background: rgba(16,185,129,0.15); color: #10b981;">Penerimaan (Receipt)</span>';
+            if (m.event_type === 'mo_consume') typeBadge = '<span class="badge" style="background: rgba(6,182,212,0.15); color: #06b6d4;">Konsumsi MO</span>';
+            if (m.event_type === 'mo_produce') typeBadge = '<span class="badge" style="background: rgba(59,130,246,0.15); color: #3b82f6;">Produksi Selesai</span>';
+            if (m.event_type === 'delivery') typeBadge = '<span class="badge" style="background: rgba(139,92,246,0.15); color: #8b5cf6;">Pengiriman (DO)</span>';
+            if (m.event_type === 'scrap') typeBadge = '<span class="badge badge-danger">Scrap / Karantina</span>';
+
+            html += `
+                <tr>
+                    <td><small style="color: var(--text-muted);">${m.date}</small></td>
+                    <td>${typeBadge}</td>
+                    <td><strong style="color: #0284c7;">${m.reference}</strong></td>
+                    <td><strong>${m.lot_name}</strong></td>
+                    <td>${m.product_name}</td>
+                    <td style="text-align: right; font-weight: 600;">${(m.quantity || 0).toLocaleString('id-ID')} ${m.uom || ''}</td>
+                    <td>${m.partner_name || '-'}</td>
+                    <td><small style="color: var(--text-muted);">${m.notes || '-'}</small></td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #ef4444;">Gagal memuat timeline: ${err.message}</td></tr>`;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Modals Handlers
+// ---------------------------------------------------------------------------
+
+async function openModalFEFOAllocation() {
+    const sel = document.getElementById('fefoProductSelect');
+    if (!sel) return;
+
+    sel.innerHTML = '<option value="">-- Memuat Produk... --</option>';
+
+    try {
+        const res = await api('/products');
+        const prods = (res && res.data) ? res.data : [];
+        let optHtml = '<option value="">-- Pilih Produk Terlacak --</option>';
+        prods.forEach(p => {
+            optHtml += `<option value="${p.id}">${p.name} (${p.default_code || 'SKU-' + p.id})</option>`;
+        });
+        sel.innerHTML = optHtml;
+
+        document.getElementById('fefoResultsSection').style.display = 'none';
+        openModal('modalFEFOAllocation');
+    } catch (err) {
+        showToast('Gagal memuat produk: ' + err.message, 'danger');
+    }
+}
+
+async function handleCalculateFEFO(e) {
+    e.preventDefault();
+
+    const prodID = parseInt(document.getElementById('fefoProductSelect').value);
+    const qty = parseFloat(document.getElementById('fefoRequestedQty').value);
+    const cutoff = parseInt(document.getElementById('fefoCutoffDays').value || '30');
+    const allowNear = document.getElementById('fefoAllowNearExpiry').checked;
+
+    if (!prodID || !qty) {
+        showToast('Pilih produk dan masukkan jumlah permintaan', 'warning');
+        return;
+    }
+
+    try {
+        const payload = {
+            product_id: prodID,
+            requested_qty: qty,
+            expiry_cutoff_days: cutoff,
+            allow_near_expiry: allowNear
+        };
+
+        const res = await api('/traceability/fefo', 'POST', payload);
+        if (!res || !res.data) return;
+
+        const data = res.data;
+        const resSec = document.getElementById('fefoResultsSection');
+        resSec.style.display = 'block';
+
+        document.getElementById('fefoTotalRequestedLabel').textContent = `${data.requested_qty} unit`;
+        document.getElementById('fefoTotalAllocatedLabel').textContent = `${data.total_allocated_qty} unit`;
+        document.getElementById('fefoShortageLabel').textContent = `${data.shortage_qty} unit`;
+
+        const badge = document.getElementById('fefoStatusBadge');
+        if (data.is_fully_allocated) {
+            badge.className = 'badge badge-success';
+            badge.textContent = '100% Teralokasi Penuh Sesuai FEFO';
+        } else {
+            badge.className = 'badge badge-warning';
+            badge.textContent = `Kekurangan ${data.shortage_qty} Unit`;
+        }
+
+        const tbody = document.getElementById('fefoAllocationsTableBody');
+        if (!data.allocations || data.allocations.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Tidak ada lot yang memenuhi kriteria FEFO</td></tr>';
+            return;
+        }
+
+        let html = '';
+        data.allocations.forEach((item, idx) => {
+            let statusBadge = '<span class="badge badge-success">Fresh</span>';
+            if (item.status === 'warning_near_expiry') statusBadge = '<span class="badge badge-warning">Near Expiry</span>';
+            if (item.status === 'expired') statusBadge = '<span class="badge badge-danger">Expired</span>';
+
+            html += `
+                <tr>
+                    <td style="text-align: center;"><span class="badge" style="background: #0284c7; color: white;">#${idx + 1}</span></td>
+                    <td><strong style="color: #0284c7;">${item.lot_name}</strong></td>
+                    <td>${item.expiration_date || '-'}</td>
+                    <td style="font-weight: 500;">${item.days_until_expiry < 9999 ? item.days_until_expiry + ' hari' : '-'}</td>
+                    <td>${statusBadge}</td>
+                    <td style="text-align: right;">${item.available_qty}</td>
+                    <td style="text-align: right; font-weight: 600; color: #10b981;">${item.allocated_qty}</td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+        showToast('Alokasi FEFO berhasil dihitung', 'success');
+    } catch (err) {
+        showToast('Gagal menghitung alokasi FEFO: ' + err.message, 'danger');
+    }
+}
+
+async function openModalCreateRecall(preselectedLotID) {
+    const sel = document.getElementById('recallLotSelect');
+    if (!sel) return;
+
+    sel.innerHTML = '<option value="">-- Memuat Lot... --</option>';
+
+    try {
+        const res = await api('/barcode/lots');
+        const lots = (res && res.data) ? res.data : [];
+
+        let optHtml = '<option value="">-- Pilih Nomor Lot Bermasalah --</option>';
+        lots.forEach(l => {
+            const pName = l.product ? l.product.name : ('Produk #' + l.product_id);
+            const isSel = preselectedLotID && preselectedLotID === l.id;
+            optHtml += `<option value="${l.id}" ${isSel ? 'selected' : ''}>${l.name} — ${pName} (Stok: ${l.qty})</option>`;
+        });
+        sel.innerHTML = optHtml;
+
+        openModal('modalCreateRecall');
+    } catch (err) {
+        showToast('Gagal memuat daftar lot: ' + err.message, 'danger');
+    }
+}
+
+async function handleCreateRecall(e) {
+    e.preventDefault();
+
+    const lotID = parseInt(document.getElementById('recallLotSelect').value);
+    const reason = document.getElementById('recallReasonInput').value.trim();
+    const severity = document.getElementById('recallSeveritySelect').value;
+
+    if (!lotID || !reason) {
+        showToast('Lengkapi lot dan alasan penarikan', 'warning');
+        return;
+    }
+
+    try {
+        const res = await api('/traceability/recalls', 'POST', {
+            lot_id: lotID,
+            reason: reason,
+            severity: severity
+        });
+
+        closeModal('modalCreateRecall');
+        showToast(res.message || 'Recall darurat berhasil diterbitkan!', 'success');
+        await loadTraceabilityData();
+
+        if (res.data && res.data.id) {
+            viewRecallDetail(res.data.id);
+        }
+    } catch (err) {
+        showToast('Gagal menerbitkan recall: ' + err.message, 'danger');
+    }
+}
+
+async function openModalRecordMovement() {
+    const sel = document.getElementById('recordMovLotSelect');
+    if (!sel) return;
+
+    sel.innerHTML = '<option value="">-- Memuat Lot... --</option>';
+
+    try {
+        const res = await api('/barcode/lots');
+        const lots = (res && res.data) ? res.data : [];
+
+        let optHtml = '<option value="">-- Pilih Nomor Lot --</option>';
+        lots.forEach(l => {
+            const pName = l.product ? l.product.name : ('Produk #' + l.product_id);
+            optHtml += `<option value="${l.id}" data-prodid="${l.product_id}">${l.name} — ${pName}</option>`;
+        });
+        sel.innerHTML = optHtml;
+
+        openModal('modalRecordMovement');
+    } catch (err) {
+        showToast('Gagal memuat lot: ' + err.message, 'danger');
+    }
+}
+
+function onRecordMovLotChange() {
+    // optional helper
+}
+
+async function handleRecordMovement(e) {
+    e.preventDefault();
+
+    const sel = document.getElementById('recordMovLotSelect');
+    const lotID = parseInt(sel.value);
+    const opt = sel.options[sel.selectedIndex];
+    const prodID = parseInt(opt ? opt.getAttribute('data-prodid') : '0');
+
+    const eventType = document.getElementById('recordMovEventType').value;
+    const ref = document.getElementById('recordMovReference').value.trim();
+    const qty = parseFloat(document.getElementById('recordMovQty').value);
+    const partner = document.getElementById('recordMovPartnerName').value.trim();
+    const notes = document.getElementById('recordMovNotes').value.trim();
+
+    if (!lotID || !ref || !qty) {
+        showToast('Lengkapi lot, referensi, dan jumlah', 'warning');
+        return;
+    }
+
+    try {
+        const payload = {
+            lot_id: lotID,
+            product_id: prodID,
+            event_type: eventType,
+            reference: ref,
+            quantity: qty,
+            partner_name: partner,
+            notes: notes
+        };
+
+        const res = await api('/traceability/record', 'POST', payload);
+        closeModal('modalRecordMovement');
+        showToast(res.message || 'Pergerakan lot berhasil dicatat!', 'success');
+        await loadTraceabilityData();
+    } catch (err) {
+        showToast('Gagal mencatat pergerakan: ' + err.message, 'danger');
+    }
+}
+
+// =========================================================================
+// 34. SUBSCRIPTION & RECURRING INVOICING ENGINE CONTROLLER
+// =========================================================================
+
+let subscriptionCache = [];
+let subscriptionTemplatesCache = [];
+let subscriptionProductsCache = [];
+let currentSubDetail = null;
+
+async function loadSubscriptionData() {
+    try {
+        await Promise.all([
+            loadSubscriptionMetrics(),
+            fetchSubscriptionsList(),
+            loadSubscriptionTemplates()
+        ]);
+    } catch (e) {
+        console.error('Error loading subscription data:', e);
+        showToast('Gagal memuat data langganan: ' + e.message, 'danger');
+    }
+}
+
+async function loadSubscriptionMetrics() {
+    try {
+        const metrics = await api('/subscriptions/metrics');
+        if (!metrics) return;
+
+        const mrrEl = document.getElementById('subKpiMRR');
+        const arrEl = document.getElementById('subKpiARR');
+        const activeEl = document.getElementById('subKpiActive');
+        const totalEl = document.getElementById('subKpiTotal');
+        const arpuEl = document.getElementById('subKpiARPU');
+        const churnEl = document.getElementById('subKpiChurn');
+        const revChurnEl = document.getElementById('subKpiRevChurn');
+        const ltvEl = document.getElementById('subKpiLTV');
+        const invoicedEl = document.getElementById('subKpiInvoiced');
+        const invCountEl = document.getElementById('subKpiInvCount');
+
+        if (mrrEl) mrrEl.textContent = formatCurrency(metrics.total_live_mrr || 0);
+        if (arrEl) arrEl.textContent = 'ARR: ' + formatCurrency(metrics.total_live_arr || 0) + ' / th';
+        if (activeEl) activeEl.textContent = (metrics.active_subscriptions || 0) + ' Aktif';
+        if (totalEl) totalEl.textContent = 'Total: ' + (metrics.total_subscriptions || 0) + ' kontrak';
+        if (arpuEl) arpuEl.textContent = formatCurrency(metrics.arpu || 0);
+        if (churnEl) churnEl.textContent = (metrics.logo_churn_rate_pct || 0).toFixed(1) + '%';
+        if (revChurnEl) revChurnEl.textContent = 'Rev Churn: ' + (metrics.revenue_churn_rate_pct || 0).toFixed(1) + '%';
+        if (ltvEl) ltvEl.textContent = formatCurrency(metrics.estimated_ltv || 0);
+        if (invoicedEl) invoicedEl.textContent = formatCurrency(metrics.total_invoiced_lifetime || 0);
+        if (invCountEl) invCountEl.textContent = (metrics.total_invoices_count || 0) + ' faktur terbit';
+    } catch (err) {
+        console.error('Failed to load SaaS metrics:', err);
+    }
+}
+
+async function fetchSubscriptionsList() {
+    try {
+        const subs = await api('/subscriptions');
+        subscriptionCache = subs || [];
+        renderSubscriptionTable(subscriptionCache);
+    } catch (err) {
+        console.error('Failed to fetch subscriptions:', err);
+    }
+}
+
+function renderSubscriptionTable(subs) {
+    const tbody = document.getElementById('subTableBody');
+    if (!tbody) return;
+
+    if (!subs || subs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada kontrak langganan yang terdaftar. Klik <strong>+ Kontrak Berlangganan Baru</strong> untuk memulai.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = subs.map(sub => {
+        let stateBadge = '';
+        switch (sub.state) {
+            case 'in_progress':
+                stateBadge = `<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">In Progress</span>`;
+                break;
+            case 'draft':
+                stateBadge = `<span class="badge" style="background: rgba(100, 116, 139, 0.15); color: #64748b; border: 1px solid rgba(100, 116, 139, 0.3);">Draft</span>`;
+                break;
+            case 'paused':
+                stateBadge = `<span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3);">Paused</span>`;
+                break;
+            case 'churned':
+                stateBadge = `<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">Churned</span>`;
+                break;
+            case 'closed':
+                stateBadge = `<span class="badge" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.3);">Closed</span>`;
+                break;
+            default:
+                stateBadge = `<span class="badge">${escapeHtml(sub.state)}</span>`;
+        }
+
+        const partnerName = (sub.partner && sub.partner.name) ? sub.partner.name : ('Customer #' + sub.partner_id);
+        const templateName = (sub.template && sub.template.name) ? sub.template.name : (sub.recurring_interval || 'Monthly');
+
+        // Check if invoice date is overdue
+        const todayStr = new Date().toISOString().split('T')[0];
+        const isDue = (sub.state === 'in_progress' && sub.next_invoice_date && sub.next_invoice_date <= todayStr);
+        const nextDateDisplay = sub.next_invoice_date ? 
+            (isDue ? `<span style="color: #ef4444; font-weight: 700;">⚠️ ${sub.next_invoice_date} (Jatuh Tempo)</span>` : sub.next_invoice_date) 
+            : '-';
+
+        return `
+            <tr>
+                <td style="font-weight: 600; color: var(--primary);">${escapeHtml(sub.code)}</td>
+                <td>
+                    <div style="font-weight: 600;">${escapeHtml(sub.name)}</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted);">👤 ${escapeHtml(partnerName)}</div>
+                </td>
+                <td><span style="font-size: 0.82rem; background: var(--bg-surface); padding: 0.2rem 0.5rem; border-radius: 4px; border: 1px solid var(--border-color);">${escapeHtml(templateName)}</span></td>
+                <td><span style="text-transform: capitalize;">${escapeHtml(sub.recurring_interval)}</span> (${sub.recurring_interval_count}x)</td>
+                <td style="text-align: right; font-weight: 600;">${formatCurrency(sub.recurring_amount)}</td>
+                <td style="text-align: right; font-weight: 700; color: #10b981;">${formatCurrency(sub.total_mrr)}</td>
+                <td>${nextDateDisplay}</td>
+                <td>${stateBadge}</td>
+                <td style="text-align: center;">
+                    <div style="display: flex; gap: 0.35rem; justify-content: center; align-items: center;">
+                        <button class="btn btn-secondary btn-sm" onclick="viewSubscriptionDetail(${sub.id})" title="Lihat Detail Kontrak">🔍 Detail</button>
+                        ${sub.state === 'in_progress' ? `
+                            <button class="btn btn-sm" style="background: #10b981; color: #fff; border: none; padding: 0.25rem 0.5rem;" onclick="generateSingleInvoiceNow(${sub.id})" title="Terbitkan Faktur Siklus Ini">⚡ Tagih</button>
+                        ` : ''}
+                        <button class="btn btn-sm" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; border: none; padding: 0.25rem 0.5rem;" onclick="openAIChurnModal(${sub.id})" title="AI Churn Copilot">🤖 Copilot</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function filterSubscriptionTable() {
+    const searchVal = (document.getElementById('subSearchInput')?.value || '').toLowerCase().trim();
+    const statusVal = document.getElementById('subStatusFilter')?.value || '';
+
+    const filtered = subscriptionCache.filter(sub => {
+        const matchesStatus = !statusVal || sub.state === statusVal;
+        const pName = (sub.partner && sub.partner.name) ? sub.partner.name.toLowerCase() : '';
+        const matchesSearch = !searchVal ||
+            sub.code.toLowerCase().includes(searchVal) ||
+            sub.name.toLowerCase().includes(searchVal) ||
+            pName.includes(searchVal);
+        return matchesStatus && matchesSearch;
+    });
+
+    renderSubscriptionTable(filtered);
+}
+
+function switchSubscriptionSubtab(subtab) {
+    const btnContracts = document.getElementById('subSubtabBtnContracts');
+    const btnTemplates = document.getElementById('subSubtabBtnTemplates');
+    const btnInvoices = document.getElementById('subSubtabBtnInvoices');
+
+    const viewContracts = document.getElementById('subSubtabViewContracts');
+    const viewTemplates = document.getElementById('subSubtabViewTemplates');
+    const viewInvoices = document.getElementById('subSubtabViewInvoices');
+
+    if (btnContracts) {
+        btnContracts.classList.toggle('active', subtab === 'contracts');
+        btnContracts.style.borderBottom = subtab === 'contracts' ? '2px solid var(--primary)' : '2px solid transparent';
+        btnContracts.style.color = subtab === 'contracts' ? 'var(--text-main)' : 'var(--text-muted)';
+    }
+    if (btnTemplates) {
+        btnTemplates.classList.toggle('active', subtab === 'templates');
+        btnTemplates.style.borderBottom = subtab === 'templates' ? '2px solid var(--primary)' : '2px solid transparent';
+        btnTemplates.style.color = subtab === 'templates' ? 'var(--text-main)' : 'var(--text-muted)';
+    }
+    if (btnInvoices) {
+        btnInvoices.classList.toggle('active', subtab === 'invoices');
+        btnInvoices.style.borderBottom = subtab === 'invoices' ? '2px solid var(--primary)' : '2px solid transparent';
+        btnInvoices.style.color = subtab === 'invoices' ? 'var(--text-main)' : 'var(--text-muted)';
+    }
+
+    if (viewContracts) viewContracts.style.display = subtab === 'contracts' ? 'block' : 'none';
+    if (viewTemplates) viewTemplates.style.display = subtab === 'templates' ? 'block' : 'none';
+    if (viewInvoices) viewInvoices.style.display = subtab === 'invoices' ? 'block' : 'none';
+
+    if (subtab === 'templates') {
+        loadSubscriptionTemplates();
+    } else if (subtab === 'invoices') {
+        loadSubscriptionInvoiceHistory();
+    }
+}
+
+async function loadSubscriptionTemplates() {
+    try {
+        const tmpls = await api('/subscriptions/templates');
+        subscriptionTemplatesCache = tmpls || [];
+        renderSubscriptionTemplatesTable(subscriptionTemplatesCache);
+    } catch (e) {
+        console.error('Failed to load subscription templates:', e);
+    }
+}
+
+function renderSubscriptionTemplatesTable(tmpls) {
+    const tbody = document.getElementById('subTemplatesTableBody');
+    if (!tbody) return;
+
+    if (!tmpls || tmpls.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Belum ada template paket langganan.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = tmpls.map(t => `
+        <tr>
+            <td style="font-weight: 600; color: var(--primary);">${escapeHtml(t.code)}</td>
+            <td style="font-weight: 600;">${escapeHtml(t.name)}</td>
+            <td style="text-transform: capitalize;">${escapeHtml(t.recurring_interval)}</td>
+            <td>Setiap ${t.recurring_rule_count} ${escapeHtml(t.recurring_interval)}</td>
+            <td>${t.auto_post_invoice ? '<span style="color: #10b981; font-weight: 600;">✓ Ya (Auto-Post)</span>' : '<span style="color: var(--text-muted);">Draft</span>'}</td>
+            <td><span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Aktif</span></td>
+            <td style="font-size: 0.82rem; color: var(--text-muted);">${escapeHtml(t.description || '-')}</td>
+        </tr>
+    `).join('');
+}
+
+async function loadSubscriptionInvoiceHistory() {
+    try {
+        const logs = await api('/subscriptions/invoices');
+        const tbody = document.getElementById('subInvoicesTableBody');
+        if (!tbody) return;
+
+        if (!logs || logs.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Belum ada riwayat faktur berulang yang diterbitkan.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = logs.map(l => `
+            <tr>
+                <td>${escapeHtml(l.invoice_date)}</td>
+                <td style="font-weight: 600; color: var(--primary);">${escapeHtml(l.invoice_number)}</td>
+                <td>Kontrak #${l.subscription_id}</td>
+                <td style="text-align: right; font-weight: 600; color: #10b981;">${formatCurrency(l.amount)}</td>
+                <td><span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">${escapeHtml(l.status)}</span></td>
+                <td>${escapeHtml(l.next_invoice_date_set || '-')}</td>
+            </tr>
+        `).join('');
+    } catch (e) {
+        console.error('Failed to load invoice history:', e);
+    }
+}
+
+async function openModalCreateSubscription() {
+    try {
+        // Load partners & products if not loaded
+        const [partners, products, tmpls] = await Promise.all([
+            api('/partners'),
+            api('/products'),
+            api('/subscriptions/templates')
+        ]);
+
+        subscriptionProductsCache = products || [];
+        subscriptionTemplatesCache = tmpls || [];
+
+        const partnerSelect = document.getElementById('subNewPartnerSelect');
+        if (partnerSelect) {
+            const customers = (partners || []).filter(p => p.customer_rank > 0 || !p.supplier_rank);
+            partnerSelect.innerHTML = '<option value="">-- Pilih Pelanggan --</option>' +
+                customers.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+        }
+
+        const templateSelect = document.getElementById('subNewTemplateSelect');
+        if (templateSelect) {
+            templateSelect.innerHTML = '<option value="">-- Pilih Template --</option>' +
+                subscriptionTemplatesCache.map(t => `<option value="${t.id}" data-interval="${t.recurring_interval}" data-count="${t.recurring_rule_count}">${escapeHtml(t.name)} (${t.recurring_interval})</option>`).join('');
+        }
+
+        const todayStr = new Date().toISOString().split('T')[0];
+        const startEl = document.getElementById('subNewStartDate');
+        const nextEl = document.getElementById('subNewNextInvoiceDate');
+        if (startEl) startEl.value = todayStr;
+        if (nextEl) nextEl.value = todayStr;
+
+        // Reset lines table with 1 initial row
+        const linesTbody = document.getElementById('subLinesTableBody');
+        if (linesTbody) {
+            linesTbody.innerHTML = '';
+            addSubLineRow();
+        }
+
+        openModal('modalCreateSubscription');
+    } catch (e) {
+        showToast('Gagal membuka form kontrak: ' + e.message, 'danger');
+    }
+}
+
+function onSubTemplateChange() {
+    const sel = document.getElementById('subNewTemplateSelect');
+    if (!sel || !sel.value) return;
+
+    const opt = sel.options[sel.selectedIndex];
+    const interval = opt.getAttribute('data-interval');
+
+    const intEl = document.getElementById('subNewInterval');
+    if (intEl && interval) {
+        intEl.value = interval;
+    }
+}
+
+function addSubLineRow(line) {
+    const tbody = document.getElementById('subLinesTableBody');
+    if (!tbody) return;
+
+    const rowId = 'subLineRow_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+    const prodOptions = subscriptionProductsCache.map(p =>
+        `<option value="${p.id}" data-price="${p.list_price || 0}" ${line && line.product_id === p.id ? 'selected' : ''}>${escapeHtml(p.name)}</option>`
+    ).join('');
+
+    const defaultPrice = (line && line.price_unit) ? line.price_unit : (subscriptionProductsCache[0] ? subscriptionProductsCache[0].list_price : 1000000);
+    const defaultQty = (line && line.quantity) ? line.quantity : 1;
+    const defaultDisc = (line && line.discount) ? line.discount : 0;
+    const defaultName = (line && line.name) ? line.name : (subscriptionProductsCache[0] ? subscriptionProductsCache[0].name : 'Lisensi Layanan');
+
+    const tr = document.createElement('tr');
+    tr.id = rowId;
+    tr.innerHTML = `
+        <td>
+            <select class="form-control sub-line-prod" style="font-size: 0.83rem;" onchange="onSubLineProductChange('${rowId}')">
+                ${prodOptions}
+            </select>
+        </td>
+        <td>
+            <input type="text" class="form-control sub-line-name" style="font-size: 0.83rem;" value="${escapeHtml(defaultName)}" placeholder="Keterangan baris...">
+        </td>
+        <td>
+            <input type="number" class="form-control sub-line-qty" style="font-size: 0.83rem;" value="${defaultQty}" min="0.01" step="any" required>
+        </td>
+        <td>
+            <input type="number" class="form-control sub-line-price" style="font-size: 0.83rem;" value="${defaultPrice}" min="0" step="any" required>
+        </td>
+        <td>
+            <input type="number" class="form-control sub-line-disc" style="font-size: 0.83rem;" value="${defaultDisc}" min="0" max="100" step="any">
+        </td>
+        <td style="text-align: center;">
+            <button type="button" class="btn btn-sm btn-secondary" style="color: #ef4444; padding: 0.2rem 0.4rem;" onclick="removeSubLineRow('${rowId}')">✕</button>
+        </td>
+    `;
+    tbody.appendChild(tr);
+}
+
+function onSubLineProductChange(rowId) {
+    const row = document.getElementById(rowId);
+    if (!row) return;
+
+    const prodSel = row.querySelector('.sub-line-prod');
+    const nameInp = row.querySelector('.sub-line-name');
+    const priceInp = row.querySelector('.sub-line-price');
+
+    if (prodSel && prodSel.selectedIndex >= 0) {
+        const opt = prodSel.options[prodSel.selectedIndex];
+        const prodPrice = parseFloat(opt.getAttribute('data-price') || 0);
+        if (priceInp && prodPrice > 0) priceInp.value = prodPrice;
+        if (nameInp) nameInp.value = opt.text;
+    }
+}
+
+function removeSubLineRow(rowId) {
+    const row = document.getElementById(rowId);
+    if (row) row.remove();
+}
+
+async function handleCreateSubscription(e) {
+    e.preventDefault();
+
+    const name = document.getElementById('subNewName').value.trim();
+    const partnerID = parseInt(document.getElementById('subNewPartnerSelect').value);
+    const templateID = parseInt(document.getElementById('subNewTemplateSelect').value);
+    const startDate = document.getElementById('subNewStartDate').value;
+    const nextDate = document.getElementById('subNewNextInvoiceDate').value;
+    const endDate = document.getElementById('subNewEndDate').value;
+    const interval = document.getElementById('subNewInterval').value;
+    const payMethod = document.getElementById('subNewPaymentMethod').value;
+    const autoRenew = document.getElementById('subNewAutoRenew').checked;
+    const notes = document.getElementById('subNewNotes').value.trim();
+
+    if (!name || !partnerID || !templateID || !startDate || !nextDate) {
+        showToast('Lengkapi nama kontrak, pelanggan, template, dan tanggal', 'warning');
+        return;
+    }
+
+    // Collect lines
+    const lineRows = document.querySelectorAll('#subLinesTableBody tr');
+    if (lineRows.length === 0) {
+        showToast('Tambahkan minimal 1 baris layanan kontrak', 'warning');
+        return;
+    }
+
+    const lines = [];
+    for (const r of lineRows) {
+        const prodID = parseInt(r.querySelector('.sub-line-prod').value);
+        const lName = r.querySelector('.sub-line-name').value.trim();
+        const qty = parseFloat(r.querySelector('.sub-line-qty').value) || 1;
+        const price = parseFloat(r.querySelector('.sub-line-price').value) || 0;
+        const disc = parseFloat(r.querySelector('.sub-line-disc').value) || 0;
+
+        lines.push({
+            product_id: prodID,
+            name: lName,
+            quantity: qty,
+            price_unit: price,
+            discount: disc,
+            uom: 'Units'
+        });
+    }
+
+    const payload = {
+        name: name,
+        partner_id: partnerID,
+        template_id: templateID,
+        start_date: startDate,
+        next_invoice_date: nextDate,
+        end_date: endDate || undefined,
+        recurring_interval: interval,
+        recurring_interval_count: 1,
+        payment_method: payMethod,
+        auto_renew: autoRenew,
+        notes: notes,
+        lines: lines
+    };
+
+    try {
+        const res = await api('/subscriptions', 'POST', payload);
+        closeModal('modalCreateSubscription');
+        showToast(`Kontrak langganan ${res.code || ''} berhasil dibuat!`, 'success');
+        await loadSubscriptionData();
+    } catch (err) {
+        showToast('Gagal membuat langganan: ' + err.message, 'danger');
+    }
+}
+
+async function viewSubscriptionDetail(id) {
+    try {
+        const sub = await api(`/subscriptions/${id}`);
+        if (!sub) return;
+        currentSubDetail = sub;
+
+        document.getElementById('subDetailTitle').textContent = sub.name;
+        document.getElementById('subDetailCode').textContent = sub.code;
+
+        let badgeHtml = '';
+        switch (sub.state) {
+            case 'in_progress':
+                badgeHtml = `<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">In Progress (Aktif)</span>`;
+                break;
+            case 'draft':
+                badgeHtml = `<span class="badge" style="background: rgba(100, 116, 139, 0.15); color: #64748b;">Draft</span>`;
+                break;
+            case 'paused':
+                badgeHtml = `<span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">Paused (Dijeda)</span>`;
+                break;
+            case 'churned':
+                badgeHtml = `<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">Churned (${escapeHtml(sub.churn_reason || 'Batal')})</span>`;
+                break;
+            case 'closed':
+                badgeHtml = `<span class="badge" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">Closed</span>`;
+                break;
+            default:
+                badgeHtml = `<span class="badge">${escapeHtml(sub.state)}</span>`;
+        }
+        document.getElementById('subDetailStateBadge').innerHTML = badgeHtml;
+
+        document.getElementById('subDetailRecurringAmount').textContent = formatCurrency(sub.recurring_amount);
+        document.getElementById('subDetailInterval').textContent = 'Per ' + sub.recurring_interval;
+        document.getElementById('subDetailMRR').textContent = formatCurrency(sub.total_mrr);
+        document.getElementById('subDetailARR').textContent = 'ARR: ' + formatCurrency(sub.total_arr);
+        document.getElementById('subDetailNextDate').textContent = sub.next_invoice_date || '-';
+        document.getElementById('subDetailInvoicedCount').textContent = (sub.invoiced_count || 0) + ' faktur terbit';
+        document.getElementById('subDetailTotalInvoiced').textContent = formatCurrency(sub.total_invoiced_amount || 0);
+        document.getElementById('subDetailAutoRenew').textContent = sub.auto_renew ? '✓ Auto-Renew Aktif' : 'Non-Auto Renew';
+
+        // Render Action buttons bar
+        const actionsBar = document.getElementById('subDetailActionsBar');
+        if (actionsBar) {
+            let btnsHtml = '';
+            if (sub.state === 'draft') {
+                btnsHtml += `<button class="btn btn-primary btn-sm" onclick="handleStartSubscription(${sub.id})">🚀 Aktifkan Kontrak (Start)</button>`;
+            } else if (sub.state === 'in_progress') {
+                btnsHtml += `<button class="btn btn-sm" style="background: #10b981; color: #fff;" onclick="generateSingleInvoiceNow(${sub.id})">⚡ Terbitkan Faktur Sekarang</button>`;
+                btnsHtml += `<button class="btn btn-secondary btn-sm" onclick="handlePauseSubscription(${sub.id})">⏸️ Jeda Kontrak (Pause)</button>`;
+                btnsHtml += `<button class="btn btn-sm" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);" onclick="handleCancelSubscription(${sub.id})">❌ Hentikan (Churn)</button>`;
+            } else if (sub.state === 'paused') {
+                btnsHtml += `<button class="btn btn-primary btn-sm" onclick="handleResumeSubscription(${sub.id})">▶️ Lanjutkan Kontrak (Resume)</button>`;
+                btnsHtml += `<button class="btn btn-sm" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);" onclick="handleCancelSubscription(${sub.id})">❌ Hentikan (Churn)</button>`;
+            }
+            btnsHtml += `<button class="btn btn-sm" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff;" onclick="openAIChurnModal(${sub.id})">🤖 AI Churn Risk Copilot</button>`;
+            actionsBar.innerHTML = btnsHtml;
+        }
+
+        // Render Lines Table
+        const linesTbody = document.getElementById('subDetailLinesTableBody');
+        if (linesTbody) {
+            if (!sub.lines || sub.lines.length === 0) {
+                linesTbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Tidak ada baris layanan.</td></tr>`;
+            } else {
+                linesTbody.innerHTML = sub.lines.map(l => `
+                    <tr>
+                        <td style="font-weight: 600;">${escapeHtml(l.name)}</td>
+                        <td>${l.quantity} ${escapeHtml(l.uom || 'Units')}</td>
+                        <td style="text-align: right;">${formatCurrency(l.price_unit)}</td>
+                        <td style="text-align: right;">${l.discount > 0 ? l.discount + '%' : '-'}</td>
+                        <td style="text-align: right; font-weight: 600; color: #10b981;">${formatCurrency(l.subtotal)}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // Render Invoices Table
+        const invTbody = document.getElementById('subDetailInvoicesTableBody');
+        if (invTbody) {
+            if (!sub.invoices || sub.invoices.length === 0) {
+                invTbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 1rem;">Belum ada faktur yang diterbitkan untuk kontrak ini.</td></tr>`;
+            } else {
+                invTbody.innerHTML = sub.invoices.map(inv => `
+                    <tr>
+                        <td>${escapeHtml(inv.invoice_date)}</td>
+                        <td style="font-weight: 600; color: var(--primary);">${escapeHtml(inv.invoice_number)}</td>
+                        <td style="text-align: right; font-weight: 600;">${formatCurrency(inv.amount)}</td>
+                        <td><span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">${escapeHtml(inv.status)}</span></td>
+                        <td>${escapeHtml(inv.next_invoice_date_set || '-')}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        openModal('modalSubscriptionDetail');
+    } catch (err) {
+        showToast('Gagal memuat detail kontrak: ' + err.message, 'danger');
+    }
+}
+
+async function handleStartSubscription(id) {
+    try {
+        await api(`/subscriptions/${id}/start`, 'POST');
+        showToast('Kontrak berhasil diaktifkan (In Progress)!', 'success');
+        closeModal('modalSubscriptionDetail');
+        await loadSubscriptionData();
+    } catch (e) {
+        showToast('Gagal mengaktifkan kontrak: ' + e.message, 'danger');
+    }
+}
+
+async function handlePauseSubscription(id) {
+    const reason = prompt('Masukkan alasan penjedaan kontrak:', 'Permintaan penyesuaian layanan oleh pelanggan');
+    if (reason === null) return;
+
+    try {
+        await api(`/subscriptions/${id}/pause`, 'POST', { reason: reason });
+        showToast('Kontrak berhasil dijeda (Paused)', 'warning');
+        closeModal('modalSubscriptionDetail');
+        await loadSubscriptionData();
+    } catch (e) {
+        showToast('Gagal menjeda kontrak: ' + e.message, 'danger');
+    }
+}
+
+async function handleResumeSubscription(id) {
+    try {
+        await api(`/subscriptions/${id}/resume`, 'POST');
+        showToast('Kontrak berhasil diaktifkan kembali (Resumed)!', 'success');
+        closeModal('modalSubscriptionDetail');
+        await loadSubscriptionData();
+    } catch (e) {
+        showToast('Gagal melanjutkan kontrak: ' + e.message, 'danger');
+    }
+}
+
+async function handleCancelSubscription(id) {
+    const reason = prompt('Masukkan alasan pembatalan / churn kontrak:', 'Pindah ke alternatif lain');
+    if (reason === null) return;
+
+    try {
+        await api(`/subscriptions/${id}/cancel`, 'POST', { reason: reason });
+        showToast('Kontrak ditandai sebagai Churned', 'danger');
+        closeModal('modalSubscriptionDetail');
+        await loadSubscriptionData();
+    } catch (e) {
+        showToast('Gagal membatalkan kontrak: ' + e.message, 'danger');
+    }
+}
+
+async function generateSingleInvoiceNow(id) {
+    if (!confirm('Terbitkan faktur tagihan untuk siklus periode saat ini sekarang?')) return;
+
+    try {
+        const invLog = await api(`/subscriptions/${id}/generate-invoice`, 'POST');
+        showToast(`Faktur ${invLog.invoice_number || ''} senilai ${formatCurrency(invLog.amount)} berhasil diterbitkan!`, 'success');
+        if (currentSubDetail && currentSubDetail.id === id) {
+            await viewSubscriptionDetail(id);
+        }
+        await loadSubscriptionData();
+    } catch (e) {
+        showToast('Gagal menerbitkan faktur: ' + e.message, 'danger');
+    }
+}
+
+function openModalRunBilling() {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const targetEl = document.getElementById('subBatchTargetDate');
+    if (targetEl) targetEl.value = todayStr;
+
+    const resBox = document.getElementById('subBatchResultBox');
+    if (resBox) resBox.style.display = 'none';
+
+    openModal('modalRunBilling');
+}
+
+async function handleRunBatchBilling(e) {
+    e.preventDefault();
+
+    const targetDate = document.getElementById('subBatchTargetDate').value;
+    const btn = document.getElementById('btnSubmitRunBilling');
+    if (btn) btn.disabled = true;
+
+    try {
+        const res = await api('/subscriptions/run-billing', 'POST', { target_date: targetDate });
+        const resBox = document.getElementById('subBatchResultBox');
+        if (resBox) {
+            resBox.style.display = 'block';
+            resBox.innerHTML = `
+                <div style="font-weight: 700; color: #10b981; margin-bottom: 0.5rem;">✓ Batch Billing Selesai!</div>
+                <div style="font-size: 0.85rem; line-height: 1.5;">
+                    • Kontrak Diproses: <strong>${res.processed_subscriptions || 0}</strong><br>
+                    • Faktur Diterbitkan: <strong>${res.invoices_generated || 0}</strong><br>
+                    • Total Pendapatan Ditagihkan: <strong>${formatCurrency(res.total_billed_revenue || 0)}</strong>
+                </div>
+            `;
+        }
+        showToast(`Batch Billing berhasil menerbitkan ${res.invoices_generated || 0} faktur!`, 'success');
+        await loadSubscriptionData();
+    } catch (err) {
+        showToast('Gagal menjalankan billing batch: ' + err.message, 'danger');
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+}
+
+async function openAIChurnModal(id) {
+    openModal('modalAIChurnRisk');
+
+    document.getElementById('aiChurnRiskBadge').textContent = 'MENGANALISIS...';
+    document.getElementById('aiChurnProbValue').textContent = '...';
+    document.getElementById('aiChurnSummaryText').textContent = 'Memproses data retensi kontrak via Cloudflare Workers AI...';
+
+    try {
+        const report = await api(`/subscriptions/${id}/ai-churn-analysis`, 'POST');
+        if (!report) return;
+
+        document.getElementById('aiChurnSubSubtitle').textContent = `Kontrak: ${report.subscription_code} | Pelanggan: ${report.partner_name}`;
+
+        const riskBadge = document.getElementById('aiChurnRiskBadge');
+        if (riskBadge) {
+            riskBadge.textContent = report.risk_level + ' RISK';
+            if (report.risk_level === 'CRITICAL') {
+                riskBadge.style.color = '#dc2626';
+            } else if (report.risk_level === 'HIGH') {
+                riskBadge.style.color = '#ef4444';
+            } else if (report.risk_level === 'MEDIUM') {
+                riskBadge.style.color = '#f59e0b';
+            } else {
+                riskBadge.style.color = '#10b981';
+            }
+        }
+
+        const probVal = document.getElementById('aiChurnProbValue');
+        if (probVal) probVal.textContent = (report.churn_probability_pct || 0).toFixed(1) + '%';
+
+        const pBar = document.getElementById('aiChurnProgressBar');
+        if (pBar) {
+            pBar.style.width = Math.min(100, Math.max(5, report.churn_probability_pct || 10)) + '%';
+        }
+
+        const sumEl = document.getElementById('aiChurnSummaryText');
+        if (sumEl) sumEl.textContent = report.executive_summary || '-';
+
+        const driversList = document.getElementById('aiChurnDriversList');
+        if (driversList) {
+            if (!report.key_risk_drivers || report.key_risk_drivers.length === 0) {
+                driversList.innerHTML = '<li>Tidak terdeteksi anomali atau risiko signifikan</li>';
+            } else {
+                driversList.innerHTML = report.key_risk_drivers.map(d => `<li>${escapeHtml(d)}</li>`).join('');
+            }
+        }
+
+        const actionsList = document.getElementById('aiChurnActionsList');
+        if (actionsList) {
+            if (!report.retention_action_plan || report.retention_action_plan.length === 0) {
+                actionsList.innerHTML = '<li>Pertahankan interaksi akun dan pantau tingkat adopsi</li>';
+            } else {
+                actionsList.innerHTML = report.retention_action_plan.map(a => `<li>${escapeHtml(a)}</li>`).join('');
+            }
+        }
+
+        const discTag = document.getElementById('aiChurnDiscountTag');
+        if (discTag) discTag.textContent = (report.recommended_discount_pct || 0) + '%';
+
+        const provTag = document.getElementById('aiChurnProviderTag');
+        if (provTag) provTag.textContent = report.ai_provider || 'Local Heuristic';
+
+    } catch (e) {
+        showToast('Gagal menjalankan AI Churn Copilot: ' + e.message, 'danger');
+    }
+}
+
+function openModalCreateTemplate() {
+    openModal('modalCreateTemplate');
+}
+
+async function handleCreateTemplate(e) {
+    e.preventDefault();
+
+    const code = document.getElementById('tmplNewCode').value.trim();
+    const name = document.getElementById('tmplNewName').value.trim();
+    const interval = document.getElementById('tmplNewInterval').value;
+    const ruleCount = parseInt(document.getElementById('tmplNewRuleCount').value) || 1;
+    const autoPost = document.getElementById('tmplNewAutoPost').checked;
+    const desc = document.getElementById('tmplNewDesc').value.trim();
+
+    if (!code || !name) {
+        showToast('Lengkapi kode dan nama template', 'warning');
+        return;
+    }
+
+    try {
+        await api('/subscriptions/templates', 'POST', {
+            code: code,
+            name: name,
+            recurring_interval: interval,
+            recurring_rule_count: ruleCount,
+            auto_post_invoice: autoPost,
+            description: desc
+        });
+        closeModal('modalCreateTemplate');
+        showToast('Template paket langganan berhasil dibuat!', 'success');
+        await loadSubscriptionTemplates();
+    } catch (err) {
+        showToast('Gagal membuat template: ' + err.message, 'danger');
+    }
+}
+
+// ===========================================================================
+// MODUL 35: ENTERPRISE AUDIT TRAIL & CDC (CHANGE DATA CAPTURE) ENGINE
+// ===========================================================================
+
+let currentAuditLogs = [];
+let currentAuditRules = [];
+
+async function loadAuditTrailData() {
+    try {
+        // 1. Load Stats
+        const stats = await api('/audit-trail/stats');
+        if (stats) {
+            document.getElementById('atKpiTotalLogs').textContent = (stats.total_logs || 0).toLocaleString();
+            document.getElementById('atKpiTrackedModels').textContent = `${stats.tracked_models_count || 0} model dipantau aktif`;
+            document.getElementById('atKpiUpdate').textContent = (stats.update_count || 0).toLocaleString();
+            document.getElementById('atKpiCreate').textContent = (stats.create_count || 0).toLocaleString();
+            document.getElementById('atKpiDelete').textContent = (stats.delete_count || 0).toLocaleString();
+            document.getElementById('atKpiSuspicious').textContent = (stats.suspicious_count || 0).toLocaleString();
+            document.getElementById('atKpiRollback').textContent = (stats.rollback_count || 0).toLocaleString();
+        }
+
+        // 2. Load Logs List
+        const res = await api('/audit-trail/logs?limit=200');
+        currentAuditLogs = (res && res.data) ? res.data : [];
+        renderAuditLogsTable(currentAuditLogs);
+
+        const countBadge = document.getElementById('atLogCountBadge');
+        if (countBadge) {
+            countBadge.textContent = `${currentAuditLogs.length} log`;
+        }
+    } catch (err) {
+        console.error('Error loading audit trail:', err);
+        showToast('Gagal memuat log audit: ' + err.message, 'danger');
+    }
+}
+
+function renderAuditLogsTable(logs) {
+    const tbody = document.getElementById('auditTableBody');
+    if (!tbody) return;
+
+    if (!logs || logs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">Tidak ada log audit atau rekaman perubahan data yang ditemukan.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = logs.map(l => {
+        // Action Badge
+        let actionBadge = `<span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">UPDATE</span>`;
+        if (l.action === 'CREATE') {
+            actionBadge = `<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">CREATE</span>`;
+        } else if (l.action === 'DELETE') {
+            actionBadge = `<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">DELETE</span>`;
+        } else if (l.action === 'ROLLBACK') {
+            actionBadge = `<span class="badge" style="background: rgba(20, 184, 166, 0.15); color: #14b8a6;">ROLLBACK</span>`;
+        }
+
+        // Risk / Anomaly Badge
+        let riskBadge = `<span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">Normal (${l.risk_score})</span>`;
+        if (l.is_suspicious || l.risk_score >= 50) {
+            riskBadge = `<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);" title="${escapeHtml(l.anomaly_reason || 'Peringatan risiko tinggi')}">⚠️ Suspicious (${l.risk_score})</span>`;
+        }
+
+        // Field Diff Preview (up to 2 diffs)
+        let diffPreview = '<span style="color: var(--text-muted); font-size: 0.78rem;">-</span>';
+        if (l.diffs && l.diffs.length > 0) {
+            const pills = l.diffs.slice(0, 2).map(d => {
+                const sensStyle = d.is_sensitive ? 'border: 1px solid rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.08); color: #ef4444;' : 'background: var(--bg-main); color: var(--text-muted);';
+                return `<span style="font-size: 0.72rem; padding: 0.15rem 0.4rem; border-radius: 4px; ${sensStyle} margin-right: 0.25rem;"><strong>${escapeHtml(d.field_name)}:</strong> ${escapeHtml(d.old_value)} → ${escapeHtml(d.new_value)}</span>`;
+            });
+            if (l.diffs.length > 2) {
+                pills.push(`<span style="font-size: 0.72rem; color: var(--text-muted);">+${l.diffs.length - 2} lagi</span>`);
+            }
+            diffPreview = `<div style="display: flex; flex-wrap: wrap; gap: 0.2rem;">${pills.join('')}</div>`;
+        }
+
+        const isRollback = l.action === 'ROLLBACK';
+        const targetDesc = l.res_name ? `${escapeHtml(l.model_name)} <br><small style="color: var(--text-muted);">${escapeHtml(l.res_name)} (#${l.res_id})</small>` : `${escapeHtml(l.model_name)} #${l.res_id}`;
+
+        return `
+            <tr style="${l.is_suspicious ? 'background: rgba(239, 68, 68, 0.03);' : ''}">
+                <td>
+                    <a href="javascript:void(0)" onclick="openAuditLogDiff(${l.id})" style="font-family: monospace; font-weight: 700; color: #6366f1;">
+                        ${escapeHtml(l.log_code)}
+                    </a>
+                </td>
+                <td style="font-size: 0.8rem;">
+                    <div>${escapeHtml(l.timestamp)}</div>
+                    <small style="color: var(--text-muted); font-family: monospace;">${escapeHtml(l.ip_address || '-')}</small>
+                </td>
+                <td style="font-size: 0.85rem;">
+                    ${targetDesc}
+                </td>
+                <td>${actionBadge}</td>
+                <td style="font-size: 0.85rem;">
+                    <div style="font-weight: 600;">${escapeHtml(l.user_name || 'System')}</div>
+                    <small style="color: var(--text-muted);">${escapeHtml(l.user_email || '-')}</small>
+                </td>
+                <td>${riskBadge}</td>
+                <td style="font-size: 0.8rem; max-width: 250px;">
+                    <div style="white-space: normal; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                        ${escapeHtml(l.summary || '-')}
+                    </div>
+                </td>
+                <td style="max-width: 200px;">${diffPreview}</td>
+                <td style="text-align: center; white-space: nowrap;">
+                    <button class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="openAuditLogDiff(${l.id})">
+                        🔍 Diff
+                    </button>
+                    ${!isRollback ? `
+                        <button class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; color: #ef4444; border-color: rgba(239, 68, 68, 0.3);" onclick="promptRollbackLog(${l.id}, '${escapeHtml(l.log_code)}', '${escapeHtml(l.model_name)}')">
+                            🔄 Rollback
+                        </button>
+                    ` : ''}
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function filterAuditTable() {
+    const search = (document.getElementById('atSearchInput')?.value || '').toLowerCase().trim();
+    const model = document.getElementById('atModelFilter')?.value || '';
+    const action = document.getElementById('atActionFilter')?.value || '';
+    const suspicious = document.getElementById('atSuspiciousFilter')?.value || '';
+
+    const filtered = currentAuditLogs.filter(l => {
+        if (search) {
+            const code = (l.log_code || '').toLowerCase();
+            const mdl = (l.model_name || '').toLowerCase();
+            const res = (l.res_name || '').toLowerCase();
+            const user = (l.user_name || '').toLowerCase();
+            const sum = (l.summary || '').toLowerCase();
+            if (!code.includes(search) && !mdl.includes(search) && !res.includes(search) && !user.includes(search) && !sum.includes(search)) {
+                return false;
+            }
+        }
+        if (model && l.model_name !== model) return false;
+        if (action && l.action !== action) return false;
+        if (suspicious === 'suspicious' && (!l.is_suspicious && l.risk_score < 50)) return false;
+        if (suspicious === 'normal' && (l.is_suspicious || l.risk_score >= 50)) return false;
+        return true;
+    });
+
+    renderAuditLogsTable(filtered);
+    const countBadge = document.getElementById('atLogCountBadge');
+    if (countBadge) {
+        countBadge.textContent = `${filtered.length} log`;
+    }
+}
+
+async function openAuditLogDiff(id) {
+    try {
+        let entry = currentAuditLogs.find(l => l.id === id);
+        if (!entry || !entry.diffs) {
+            entry = await api(`/audit-trail/logs/${id}`);
+        }
+        if (!entry) return;
+
+        document.getElementById('atDiffModalTitle').textContent = `Log ${entry.log_code} (${entry.action})`;
+        document.getElementById('atDiffModalSubtitle').textContent = entry.summary || `Mutasi pada ${entry.model_name} #${entry.res_id}`;
+
+        document.getElementById('atDiffMetaTime').textContent = `${entry.timestamp}`;
+        document.getElementById('atDiffMetaUser').textContent = `${entry.user_name || 'System'} (${entry.ip_address || '-'})`;
+        document.getElementById('atDiffMetaTarget').textContent = `${entry.model_name} #${entry.res_id} ${entry.res_name ? '(' + entry.res_name + ')' : ''}`;
+
+        const riskEl = document.getElementById('atDiffMetaRisk');
+        if (entry.is_suspicious || entry.risk_score >= 50) {
+            riskEl.innerHTML = `<span style="color: #ef4444;">⚠️ Suspicious (${entry.risk_score}/100)</span>`;
+        } else {
+            riskEl.innerHTML = `<span style="color: #10b981;">✅ Normal (${entry.risk_score}/100)</span>`;
+        }
+
+        const anomalyAlert = document.getElementById('atDiffAnomalyAlert');
+        const anomalyText = document.getElementById('atDiffAnomalyText');
+        if (entry.is_suspicious && entry.anomaly_reason) {
+            anomalyAlert.style.display = 'block';
+            anomalyText.textContent = entry.anomaly_reason;
+        } else {
+            anomalyAlert.style.display = 'none';
+        }
+
+        // Render Diffs Table
+        const diffTbody = document.getElementById('atDiffTableBody');
+        if (entry.diffs && entry.diffs.length > 0) {
+            diffTbody.innerHTML = entry.diffs.map(d => `
+                <tr style="${d.is_sensitive ? 'background: rgba(239, 68, 68, 0.05);' : ''}">
+                    <td style="font-family: monospace; font-weight: 700;">${escapeHtml(d.field_name)}</td>
+                    <td style="font-size: 0.8rem; color: var(--text-muted);">${escapeHtml(d.value_type)}</td>
+                    <td style="color: #ef4444; font-family: monospace; font-size: 0.85rem;">${escapeHtml(d.old_value)}</td>
+                    <td style="color: #10b981; font-family: monospace; font-size: 0.85rem; font-weight: 600;">${escapeHtml(d.new_value)}</td>
+                    <td>${d.is_sensitive ? '<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">🔒 Sensitif</span>' : '<span style="color: var(--text-muted); font-size: 0.75rem;">Standar</span>'}</td>
+                </tr>
+            `).join('');
+        } else {
+            diffTbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Tidak ada perubahan field individual (Snapshot log terlampir).</td></tr>`;
+        }
+
+        // Prettify JSON snapshots
+        let oldJsonStr = entry.old_values_json || '{}';
+        let newJsonStr = entry.new_values_json || '{}';
+        try { oldJsonStr = JSON.stringify(JSON.parse(oldJsonStr), null, 2); } catch (_) {}
+        try { newJsonStr = JSON.stringify(JSON.parse(newJsonStr), null, 2); } catch (_) {}
+        document.getElementById('atDiffOldJSON').textContent = oldJsonStr;
+        document.getElementById('atDiffNewJSON').textContent = newJsonStr;
+
+        // Footer Action
+        const footerAction = document.getElementById('atDiffFooterAction');
+        if (entry.action !== 'ROLLBACK') {
+            footerAction.innerHTML = `
+                <button class="btn btn-secondary" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.4);" onclick="closeModal('modalAuditLogDiff'); promptRollbackLog(${entry.id}, '${escapeHtml(entry.log_code)}', '${escapeHtml(entry.model_name)}');">
+                    🔄 Rollback Rekaman Ini
+                </button>
+            `;
+        } else {
+            footerAction.innerHTML = `<span style="font-size: 0.8rem; color: #14b8a6; font-weight: 600;">Log ini merupakan rekaman pemulihan (Compensating Rollback).</span>`;
+        }
+
+        openModal('modalAuditLogDiff');
+    } catch (err) {
+        showToast('Gagal memuat detail diff: ' + err.message, 'danger');
+    }
+}
+
+function promptRollbackLog(id, code, model) {
+    document.getElementById('atRollbackEntryID').value = id;
+    document.getElementById('atRollbackTargetCode').textContent = code;
+    document.getElementById('atRollbackTargetModel').textContent = model;
+    document.getElementById('atRollbackReason').value = '';
+    openModal('modalAuditRollback');
+}
+
+async function handleExecuteRollback(e) {
+    e.preventDefault();
+    const id = document.getElementById('atRollbackEntryID').value;
+    const reason = document.getElementById('atRollbackReason').value.trim();
+    if (!reason) {
+        showToast('Alasan rollback wajib diisi', 'warning');
+        return;
+    }
+
+    try {
+        const res = await api(`/audit-trail/logs/${id}/rollback`, {
+            method: 'POST',
+            body: JSON.stringify({ reason: reason })
+        });
+        closeModal('modalAuditRollback');
+        showToast(res.message || 'Berhasil melakukan rollback data!', 'success');
+        await loadAuditTrailData();
+    } catch (err) {
+        showToast('Gagal rollback: ' + err.message, 'danger');
+    }
+}
+
+async function openModalAuditRules() {
+    try {
+        const rules = await api('/audit-trail/rules');
+        currentAuditRules = rules || [];
+        renderAuditRulesTable(currentAuditRules);
+        hideCreateRuleForm();
+        openModal('modalAuditRules');
+    } catch (err) {
+        showToast('Gagal memuat aturan audit: ' + err.message, 'danger');
+    }
+}
+
+function renderAuditRulesTable(rules) {
+    const tbody = document.getElementById('atRulesTableBody');
+    if (!tbody) return;
+
+    if (!rules || rules.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">Belum ada aturan audit aktif.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = rules.map(r => {
+        const ops = [];
+        if (r.log_create) ops.push('CREATE');
+        if (r.log_write) ops.push('UPDATE');
+        if (r.log_unlink) ops.push('DELETE');
+        if (r.log_read) ops.push('READ');
+
+        return `
+            <tr>
+                <td style="font-weight: 600;">${escapeHtml(r.name)}</td>
+                <td><code style="background: var(--bg-main); padding: 0.15rem 0.4rem; border-radius: 4px;">${escapeHtml(r.model_name)}</code></td>
+                <td><span style="font-size: 0.78rem; font-weight: 600; color: #6366f1;">${ops.join(', ')}</span></td>
+                <td style="font-size: 0.8rem; font-family: monospace; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(r.track_fields || '*')}">${escapeHtml(r.track_fields || '*')}</td>
+                <td style="font-size: 0.8rem;">${r.retention_days} hari</td>
+                <td>${r.active ? '<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Aktif</span>' : '<span class="badge" style="background: rgba(156, 163, 175, 0.15); color: #9ca3af;">Non-Aktif</span>'}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function showCreateRuleForm() {
+    document.getElementById('createRuleFormWrap').style.display = 'block';
+}
+
+function hideCreateRuleForm() {
+    document.getElementById('createRuleFormWrap').style.display = 'none';
+}
+
+async function handleCreateAuditRule(e) {
+    e.preventDefault();
+    const name = document.getElementById('newRuleName').value.trim();
+    const model = document.getElementById('newRuleModel').value.trim();
+    const fields = document.getElementById('newRuleFields').value.trim();
+    const retention = parseInt(document.getElementById('newRuleRetention').value) || 1095;
+    const logCreate = document.getElementById('newRuleCreate').checked;
+    const logWrite = document.getElementById('newRuleWrite').checked;
+    const logUnlink = document.getElementById('newRuleUnlink').checked;
+
+    try {
+        await api('/audit-trail/rules', {
+            method: 'POST',
+            body: JSON.stringify({
+                name: name,
+                model_name: model,
+                track_fields: fields,
+                retention_days: retention,
+                log_create: logCreate,
+                log_write: logWrite,
+                log_unlink: logUnlink,
+                log_read: false
+            })
+        });
+        showToast(`Aturan audit untuk ${model} berhasil dibuat!`, 'success');
+        hideCreateRuleForm();
+        const rules = await api('/audit-trail/rules');
+        currentAuditRules = rules || [];
+        renderAuditRulesTable(currentAuditRules);
+        loadAuditTrailData();
+    } catch (err) {
+        showToast('Gagal membuat aturan audit: ' + err.message, 'danger');
+    }
+}
+
+async function openModalAIAuditAnomaly() {
+    try {
+        showToast('Menjalankan AI Security & Forensic Audit Copilot...', 'info');
+        const report = await api('/audit-trail/anomaly-audit');
+        if (!report) return;
+
+        document.getElementById('aiAuditScore').textContent = `${report.overall_security_score}/100`;
+        const statusEl = document.getElementById('aiAuditStatus');
+        statusEl.textContent = report.compliance_status;
+        if (report.compliance_status === 'COMPLIANT') {
+            statusEl.style.color = '#10b981';
+        } else if (report.compliance_status === 'AUDIT_WARNING') {
+            statusEl.style.color = '#f59e0b';
+        } else {
+            statusEl.style.color = '#ef4444';
+        }
+
+        document.getElementById('aiAuditEngine').textContent = report.ai_provider || 'Cloudflare Workers AI';
+        document.getElementById('aiAuditFlaggedCount').textContent = report.suspicious_count;
+        document.getElementById('aiAuditAnalyzedCount').textContent = `dari total ${report.total_analyzed} log dianalisis`;
+        document.getElementById('aiAuditExecutiveSummary').textContent = report.executive_summary || '-';
+
+        // Observations
+        const obsList = document.getElementById('aiAuditObservationsList');
+        if (report.key_observations && report.key_observations.length > 0) {
+            obsList.innerHTML = report.key_observations.map(o => `<li>${escapeHtml(o)}</li>`).join('');
+        } else {
+            obsList.innerHTML = `<li>Tidak ditemukan observasi anomali kritis.</li>`;
+        }
+
+        // Remediations
+        const remList = document.getElementById('aiAuditRemediationsList');
+        if (report.remediation_actions && report.remediation_actions.length > 0) {
+            remList.innerHTML = report.remediation_actions.map(r => `<li>${escapeHtml(r)}</li>`).join('');
+        } else {
+            remList.innerHTML = `<li>Pertahankan kontrol internal dan konfigurasi audit rule saat ini.</li>`;
+        }
+
+        openModal('modalAIAuditAnomaly');
+    } catch (err) {
+        showToast('Gagal menjalankan AI Anomaly Audit: ' + err.message, 'danger');
+    }
+}
+
+function exportAuditCSV() {
+    const token = localStorage.getItem('token');
+    const url = `/api/v1/audit-trail/export`;
+    
+    // Create an authenticated download link
+    fetch(url, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(resp => {
+        if (!resp.ok) throw new Error('Gagal mengunduh file ekspor');
+        return resp.blob();
+    })
+    .then(blob => {
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = downloadUrl;
+        a.download = `audit_trail_export_${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(downloadUrl);
+        document.body.removeChild(a);
+        showToast('File CSV Audit Trail berhasil diunduh!', 'success');
+    })
+    .catch(err => {
+        showToast('Gagal ekspor CSV: ' + err.message, 'danger');
+    });
+}
+
+// -------------------------------------------------------------
+// 36. WEBHOOK ENGINE & EVENT-DRIVEN OUTBOUND INTEGRATION CONTROLLER
+// -------------------------------------------------------------
+let currentWebhookSubscriptions = [];
+let currentWebhookDeliveries = [];
+let currentActiveDelivery = null;
+
+async function loadWebhookData() {
+    try {
+        // 1. Fetch Stats & KPIs
+        const stats = await api('/webhooks/stats');
+        if (stats) {
+            const totalSubsEl = document.getElementById('whKpiTotalSubs');
+            if (totalSubsEl) totalSubsEl.textContent = (stats.total_subscriptions || 0).toLocaleString();
+
+            const activeSubsEl = document.getElementById('whKpiActiveSubs');
+            if (activeSubsEl) activeSubsEl.textContent = `${stats.active_subscriptions || 0} endpoint aktif`;
+
+            const totalDeliveriesEl = document.getElementById('whKpiTotalDeliveries');
+            if (totalDeliveriesEl) totalDeliveriesEl.textContent = (stats.total_deliveries || 0).toLocaleString();
+
+            const successDeliveriesEl = document.getElementById('whKpiSuccessDeliveries');
+            if (successDeliveriesEl) successDeliveriesEl.textContent = (stats.success_deliveries || 0).toLocaleString();
+
+            const successRateEl = document.getElementById('whKpiSuccessRate');
+            if (successRateEl) successRateEl.textContent = `${(stats.success_rate_pct || 0).toFixed(1)}% success rate`;
+
+            const retryingDeliveriesEl = document.getElementById('whKpiRetryingDeliveries');
+            if (retryingDeliveriesEl) retryingDeliveriesEl.textContent = (stats.retrying_deliveries || 0).toLocaleString();
+
+            const failedDeliveriesEl = document.getElementById('whKpiFailedDeliveries');
+            if (failedDeliveriesEl) failedDeliveriesEl.textContent = (stats.failed_deliveries || 0).toLocaleString();
+
+            const avgDurationEl = document.getElementById('whKpiAvgDuration');
+            if (avgDurationEl) avgDurationEl.textContent = `${(stats.avg_duration_ms || 0).toFixed(1)} ms`;
+        }
+
+        // 2. Fetch Subscriptions
+        const subs = await api('/webhooks');
+        currentWebhookSubscriptions = Array.isArray(subs) ? subs : [];
+        renderWebhookSubscriptionsTable(currentWebhookSubscriptions);
+        const countEndp = document.getElementById('whCountEndpoints');
+        if (countEndp) countEndp.textContent = currentWebhookSubscriptions.length;
+
+        // 3. Fetch Deliveries
+        const dlvRes = await api('/webhooks/deliveries?limit=100');
+        currentWebhookDeliveries = (dlvRes && dlvRes.data) ? dlvRes.data : [];
+        renderWebhookDeliveriesTable(currentWebhookDeliveries);
+        const countDlv = document.getElementById('whCountDeliveries');
+        if (countDlv) countDlv.textContent = currentWebhookDeliveries.length;
+
+    } catch (err) {
+        console.error('Error loading webhook data:', err);
+        showToast('Gagal memuat data webhook: ' + err.message, 'danger');
+    }
+}
+
+function switchWebhookSubtab(tab) {
+    const endpDiv = document.getElementById('whSubtabEndpoints');
+    const dlvDiv = document.getElementById('whSubtabDeliveries');
+    const evtDiv = document.getElementById('whSubtabEvents');
+
+    const btnEndp = document.getElementById('whSubtabBtnEndpoints');
+    const btnDlv = document.getElementById('whSubtabBtnDeliveries');
+    const btnEvt = document.getElementById('whSubtabBtnEvents');
+
+    if (!endpDiv || !dlvDiv || !evtDiv) return;
+
+    endpDiv.style.display = (tab === 'endpoints') ? 'block' : 'none';
+    dlvDiv.style.display = (tab === 'deliveries') ? 'block' : 'none';
+    evtDiv.style.display = (tab === 'events') ? 'block' : 'none';
+
+    btnEndp.style.borderBottomColor = (tab === 'endpoints') ? '#0ea5e9' : 'transparent';
+    btnEndp.style.color = (tab === 'endpoints') ? '#0ea5e9' : 'var(--text-muted)';
+    btnEndp.style.fontWeight = (tab === 'endpoints') ? '700' : '600';
+
+    btnDlv.style.borderBottomColor = (tab === 'deliveries') ? '#0ea5e9' : 'transparent';
+    btnDlv.style.color = (tab === 'deliveries') ? '#0ea5e9' : 'var(--text-muted)';
+    btnDlv.style.fontWeight = (tab === 'deliveries') ? '700' : '600';
+
+    btnEvt.style.borderBottomColor = (tab === 'events') ? '#0ea5e9' : 'transparent';
+    btnEvt.style.color = (tab === 'events') ? '#0ea5e9' : 'var(--text-muted)';
+    btnEvt.style.fontWeight = (tab === 'events') ? '700' : '600';
+}
+
+function renderWebhookSubscriptionsTable(subs) {
+    const tbody = document.getElementById('whSubscriptionsTableBody');
+    if (!tbody) return;
+
+    if (!subs || subs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">Belum ada endpoint webhook yang didaftarkan. Klik "+ Endpoint Baru" untuk menambahkan integrasi.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = subs.map(s => {
+        const topics = (s.event_topics || '').split(',').map(t => `<span class="badge" style="background: rgba(14, 165, 233, 0.15); color: #0ea5e9; font-family: monospace; font-size: 0.75rem; margin: 2px;">${escapeHtml(t.trim())}</span>`).join(' ');
+        
+        const activeBadge = s.is_active 
+            ? `<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Aktif</span>`
+            : `<span class="badge" style="background: rgba(148, 163, 184, 0.2); color: #94a3b8;">Nonaktif</span>`;
+
+        let lastStatusBadge = `<span class="badge" style="background: rgba(148, 163, 184, 0.15); color: #94a3b8;">idle</span>`;
+        if (s.last_status === 'success') {
+            lastStatusBadge = `<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">success</span>`;
+        } else if (s.last_status === 'failed') {
+            lastStatusBadge = `<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">failed</span>`;
+        } else if (s.last_status === 'retrying') {
+            lastStatusBadge = `<span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">retrying</span>`;
+        }
+
+        const lastFired = s.last_fired_at ? new Date(s.last_fired_at).toLocaleString('id-ID') : '-';
+        const maskedSecret = s.secret_token ? (s.secret_token.substring(0, 8) + '••••••••') : '-';
+
+        return `
+            <tr>
+                <td>
+                    <div style="font-weight: 700; color: var(--text-main);">${escapeHtml(s.name)}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHtml(s.description || '')}</div>
+                </td>
+                <td style="max-width: 250px;">
+                    <div style="font-family: monospace; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #38bdf8;" title="${escapeHtml(s.target_url)}">
+                        ${escapeHtml(s.target_url)}
+                    </div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted);">Timeout: ${s.timeout_sec || 10}s</div>
+                </td>
+                <td style="max-width: 220px;">
+                    ${topics}
+                </td>
+                <td>
+                    <span style="font-family: monospace; font-size: 0.78rem; background: var(--bg-main); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border-color);">${maskedSecret}</span>
+                </td>
+                <td>
+                    <div style="display: flex; gap: 0.35rem; align-items: center;">
+                        ${activeBadge}
+                        ${lastStatusBadge}
+                    </div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 3px;">Max retry: ${s.max_retries} (${s.retry_delay_sec}s delay)</div>
+                </td>
+                <td style="font-size: 0.8rem; color: var(--text-muted);">${lastFired}</td>
+                <td style="text-align: center; white-space: nowrap;">
+                    <button class="btn btn-sm btn-outline" style="border-color: #0ea5e9; color: #0ea5e9;" onclick="testPingWebhook(${s.id})" title="Kirim Webhook Test Ping">
+                        ⚡ Ping
+                    </button>
+                    <button class="btn btn-sm btn-outline" style="border-color: #ef4444; color: #ef4444; margin-left: 4px;" onclick="deleteWebhook(${s.id})" title="Hapus Webhook">
+                        🗑️
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderWebhookDeliveriesTable(deliveries) {
+    const tbody = document.getElementById('whDeliveriesTableBody');
+    if (!tbody) return;
+
+    if (!deliveries || deliveries.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">Belum ada riwayat pengiriman event webhook.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = deliveries.map(d => {
+        let statusBadge = `<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">SUCCESS</span>`;
+        if (d.status === 'retrying') {
+            statusBadge = `<span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">RETRYING</span>`;
+        } else if (d.status === 'failed') {
+            statusBadge = `<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">FAILED</span>`;
+        } else if (d.status === 'cancelled') {
+            statusBadge = `<span class="badge" style="background: rgba(148, 163, 184, 0.2); color: #94a3b8;">CANCELLED</span>`;
+        }
+
+        let codeBadge = `<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">${d.status_code}</span>`;
+        if (d.status_code >= 400 || d.status_code === 0) {
+            codeBadge = `<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">${d.status_code || 'ERR'}</span>`;
+        } else if (d.status_code >= 300) {
+            codeBadge = `<span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">${d.status_code}</span>`;
+        }
+
+        const formattedDate = d.created_at ? new Date(d.created_at).toLocaleString('id-ID') : '-';
+        const retryBtn = (d.status !== 'success') 
+            ? `<button class="btn btn-sm btn-outline" style="border-color: #f59e0b; color: #f59e0b; margin-left: 4px;" onclick="retryDeliveryManual(${d.id})" title="Coba kirim ulang">⚡ Retry</button>` 
+            : '';
+
+        return `
+            <tr>
+                <td style="font-family: monospace; font-weight: 700; color: #0ea5e9;">${escapeHtml(d.delivery_code)}</td>
+                <td style="font-size: 0.8rem; color: var(--text-muted);">${formattedDate}</td>
+                <td>
+                    <span class="badge" style="background: rgba(14, 165, 233, 0.15); color: #0ea5e9; font-family: monospace; font-size: 0.78rem;">${escapeHtml(d.event_name)}</span>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">${escapeHtml(d.model_name || '')} #${d.res_id || 0}</div>
+                </td>
+                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: monospace; font-size: 0.78rem;" title="${escapeHtml(d.target_url)}">
+                    ${escapeHtml(d.target_url)}
+                </td>
+                <td>${codeBadge}</td>
+                <td style="font-size: 0.8rem; font-weight: 600;">${d.duration_ms} ms</td>
+                <td>${statusBadge}</td>
+                <td style="font-size: 0.8rem; text-align: center;">Ke-${d.attempt_count}</td>
+                <td style="text-align: center; white-space: nowrap;">
+                    <button class="btn btn-sm btn-outline" onclick="openDeliveryDetail(${d.id})">🔍 Detail</button>
+                    ${retryBtn}
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function filterWebhookDeliveries() {
+    const status = document.getElementById('whFilterDeliveryStatus')?.value || '';
+    const query = (document.getElementById('whSearchDelivery')?.value || '').toLowerCase().trim();
+
+    const filtered = currentWebhookDeliveries.filter(d => {
+        const matchesStatus = !status || d.status === status;
+        const matchesQuery = !query || 
+            (d.delivery_code || '').toLowerCase().includes(query) ||
+            (d.event_name || '').toLowerCase().includes(query) ||
+            (d.target_url || '').toLowerCase().includes(query);
+        return matchesStatus && matchesQuery;
+    });
+
+    renderWebhookDeliveriesTable(filtered);
+}
+
+function openModalCreateWebhook() {
+    document.getElementById('formCreateWebhook')?.reset();
+    const maxRetries = document.getElementById('whMaxRetries');
+    if (maxRetries) maxRetries.value = "3";
+    const retryDelay = document.getElementById('whRetryDelay');
+    if (retryDelay) retryDelay.value = "60";
+    const timeout = document.getElementById('whTimeout');
+    if (timeout) timeout.value = "10";
+    const topics = document.getElementById('whEventTopics');
+    if (topics) topics.value = "sale.order.confirmed,stock.picking.done";
+    generateRandomWebhookSecret();
+    openModal('modalCreateWebhook');
+}
+
+function generateRandomWebhookSecret() {
+    const chars = '0123456789abcdef';
+    let rand = '';
+    for (let i = 0; i < 32; i++) {
+        rand += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const secret = 'whsec_' + rand;
+    const inp = document.getElementById('whSecretToken');
+    if (inp) inp.value = secret;
+}
+
+function appendWebhookTopic(topic) {
+    const inp = document.getElementById('whEventTopics');
+    if (!inp) return;
+    let current = inp.value.trim();
+    if (current === '*' || !current) {
+        inp.value = topic;
+    } else {
+        const list = current.split(',').map(s => s.trim()).filter(Boolean);
+        if (!list.includes(topic)) {
+            list.push(topic);
+            inp.value = list.join(',');
+        }
+    }
+}
+
+function setWebhookTopicWildcard() {
+    const inp = document.getElementById('whEventTopics');
+    if (inp) inp.value = '*';
+}
+
+async function handleCreateWebhook(event) {
+    event.preventDefault();
+    try {
+        const req = {
+            name: document.getElementById('whName').value.trim(),
+            target_url: document.getElementById('whTargetURL').value.trim(),
+            secret_token: document.getElementById('whSecretToken').value.trim(),
+            event_topics: document.getElementById('whEventTopics').value.trim(),
+            custom_headers: document.getElementById('whCustomHeaders').value.trim(),
+            max_retries: parseInt(document.getElementById('whMaxRetries').value, 10) || 3,
+            retry_delay_sec: parseInt(document.getElementById('whRetryDelay').value, 10) || 60,
+            timeout_sec: parseInt(document.getElementById('whTimeout').value, 10) || 10,
+            description: document.getElementById('whDescription').value.trim()
+        };
+
+        await api('/webhooks', 'POST', req);
+        showToast('Endpoint webhook berhasil didaftarkan!', 'success');
+        closeModal('modalCreateWebhook');
+        loadWebhookData();
+    } catch (err) {
+        showToast('Gagal membuat webhook: ' + err.message, 'danger');
+    }
+}
+
+async function testPingWebhook(id) {
+    try {
+        showToast('Mengirim webhook test ping...', 'info');
+        const dlv = await api(`/webhooks/${id}/test`, 'POST');
+        if (dlv && dlv.status === 'success') {
+            showToast(`Test ping sukses! HTTP ${dlv.status_code} (${dlv.duration_ms}ms)`, 'success');
+        } else {
+            showToast(`Test ping gagal: HTTP ${dlv.status_code} - ${dlv.error_message || 'Error'}`, 'warning');
+        }
+        loadWebhookData();
+    } catch (err) {
+        showToast('Test ping gagal: ' + err.message, 'danger');
+    }
+}
+
+async function deleteWebhook(id) {
+    if (!confirm('Apakah Anda yakin ingin menghapus endpoint webhook ini?')) return;
+    try {
+        await api(`/webhooks/${id}`, 'DELETE');
+        showToast('Endpoint webhook berhasil dihapus', 'success');
+        loadWebhookData();
+    } catch (err) {
+        showToast('Gagal menghapus webhook: ' + err.message, 'danger');
+    }
+}
+
+async function openDeliveryDetail(id) {
+    try {
+        const dlv = await api(`/webhooks/deliveries/${id}`);
+        if (!dlv) return;
+
+        currentActiveDelivery = dlv;
+
+        document.getElementById('dlvModalTitle').textContent = `Detail Pengiriman: ${dlv.delivery_code}`;
+        document.getElementById('dlvModalStatus').textContent = (dlv.status || '').toUpperCase();
+        document.getElementById('dlvModalStatusCode').textContent = dlv.status_code ? `HTTP ${dlv.status_code}` : 'Network Failure';
+        document.getElementById('dlvModalLatency').textContent = `${dlv.duration_ms} ms`;
+        document.getElementById('dlvModalAttempts').textContent = `Percobaan ke-${dlv.attempt_count} / Max retries`;
+
+        document.getElementById('dlvModalURL').textContent = dlv.target_url;
+        document.getElementById('dlvModalSignature').textContent = dlv.hmac_signature ? `sha256=${dlv.hmac_signature}` : '-';
+
+        let parsedPayload = dlv.payload_json;
+        try {
+            parsedPayload = JSON.stringify(JSON.parse(dlv.payload_json), null, 2);
+        } catch (_) {}
+        document.getElementById('dlvModalPayload').textContent = parsedPayload;
+
+        let parsedResp = dlv.response_body || 'Tidak ada konten respons';
+        try {
+            parsedResp = JSON.stringify(JSON.parse(dlv.response_body), null, 2);
+        } catch (_) {}
+        document.getElementById('dlvModalResponse').textContent = parsedResp;
+
+        const errBox = document.getElementById('dlvModalErrorBox');
+        const errText = document.getElementById('dlvModalErrorText');
+        if (dlv.error_message) {
+            errBox.style.display = 'block';
+            errText.textContent = dlv.error_message;
+        } else {
+            errBox.style.display = 'none';
+        }
+
+        const retryBtn = document.getElementById('dlvModalRetryBtn');
+        if (retryBtn) {
+            retryBtn.style.display = (dlv.status !== 'success') ? 'inline-block' : 'none';
+        }
+
+        openModal('modalDeliveryDetail');
+    } catch (err) {
+        showToast('Gagal memuat detail pengiriman: ' + err.message, 'danger');
+    }
+}
+
+async function retryCurrentDeliveryModal() {
+    if (!currentActiveDelivery) return;
+    await retryDeliveryManual(currentActiveDelivery.id);
+    closeModal('modalDeliveryDetail');
+}
+
+async function retryDeliveryManual(id) {
+    try {
+        showToast('Menjalankan retry pengiriman webhook...', 'info');
+        const res = await api(`/webhooks/deliveries/${id}/retry`, 'POST');
+        if (res && res.status === 'success') {
+            showToast(`Retry berhasil! HTTP ${res.status_code} (${res.duration_ms}ms)`, 'success');
+        } else {
+            showToast(`Retry gagal: status ${res.status} (HTTP ${res.status_code})`, 'warning');
+        }
+        loadWebhookData();
+    } catch (err) {
+        showToast('Gagal retry delivery: ' + err.message, 'danger');
+    }
+}
+
+async function triggerRetryQueueManual() {
+    try {
+        showToast('Menjalankan worker retry queue...', 'info');
+        const res = await api('/webhooks/run-retries', 'POST');
+        showToast(`Worker selesai memproses ${res.retried_count || 0} pengiriman dalam antrean`, 'success');
+        loadWebhookData();
+    } catch (err) {
+        showToast('Gagal menjalankan antrean retry: ' + err.message, 'danger');
+    }
+}
+
+async function openModalAIWebhookDiagnostic() {
+    try {
+        showToast('Menganalisis performa webhook dengan AI Reliability Copilot...', 'info');
+        const report = await api('/webhooks/ai-diagnostic');
+        if (!report) return;
+
+        document.getElementById('aiWhStatus').textContent = report.health_status || 'UNKNOWN';
+        document.getElementById('aiWhEngine').textContent = report.ai_provider || 'Cloudflare Workers AI';
+        document.getElementById('aiWhFailedCount').textContent = (report.failed_deliveries || 0).toLocaleString();
+        document.getElementById('aiWhAnalyzedCount').textContent = `dari ${report.total_analyzed || 0} total log terkini`;
+
+        document.getElementById('aiWhExecutiveSummary').textContent = report.executive_summary || '-';
+
+        const issuesList = document.getElementById('aiWhIssuesList');
+        if (issuesList) {
+            const issues = report.identified_issues || [];
+            if (issues.length === 0) {
+                issuesList.innerHTML = `<li style="color: #10b981;">Tidak ada kendala kritis atau anomali jaringan yang terdeteksi. Semua webhook berjalan andal.</li>`;
+            } else {
+                issuesList.innerHTML = issues.map(issue => `<li>${escapeHtml(issue)}</li>`).join('');
+            }
+        }
+
+        const remList = document.getElementById('aiWhRemediationsList');
+        if (remList) {
+            const rems = report.remediation_actions || [];
+            if (rems.length === 0) {
+                remList.innerHTML = `<li>Pertahankan konfigurasi saat ini dan pantau latensi jaringan downstream.</li>`;
+            } else {
+                remList.innerHTML = rems.map(action => `<li>${escapeHtml(action)}</li>`).join('');
+            }
+        }
+
+        const optText = document.getElementById('aiWhPayloadOptimization');
+        if (optText) {
+            optText.textContent = report.payload_optimization || 'Payload format sudah teroptimasi sesuai standar webhook Odoo.';
+        }
+
+        openModal('modalAIWebhookDiagnostic');
+    } catch (err) {
+        showToast('Gagal memuat AI Diagnostic Copilot: ' + err.message, 'danger');
+    }
+}
+
+async function testEmitEventModal(eventName, modelName) {
+    try {
+        showToast(`Memancarkan event ${eventName}...`, 'info');
+        const res = await api('/webhooks/publish-event', 'POST', {
+            event_name: eventName,
+            model_name: modelName,
+            res_id: 1,
+            data: {
+                simulated: true,
+                triggered_at: new Date().toISOString(),
+                source: "ERP Web Dashboard Test Console"
+            }
+        });
+        showToast(`Event berhasil dipancarkan ke ${res.length || 0} endpoint subscriber!`, 'success');
+        loadWebhookData();
+    } catch (err) {
+        showToast('Gagal memancarkan event: ' + err.message, 'danger');
+    }
+}
+
+// ========================================================
+// 41. INBOUND WEBHOOKS & PARTNER INGESTION GATEWAY (MODUL KE-37)
+// ========================================================
+
+let currentInboundEndpoints = [];
+let currentInboundLogs = [];
+let lastAIInboundReport = null;
+
+async function loadInboundWebhookData() {
+    try {
+        // 1. Fetch Stats
+        const stats = await api('/inbound-webhooks/stats');
+        if (stats) {
+            document.getElementById('inwhKpiTotalEndpoints').textContent = stats.total_endpoints || 0;
+            document.getElementById('inwhKpiActiveEndpoints').textContent = `${stats.active_endpoints || 0} endpoint aktif`;
+            document.getElementById('inwhKpiTotalLogs').textContent = stats.total_inbound_logs || 0;
+            document.getElementById('inwhKpiProcessed').textContent = stats.processed_logs || 0;
+            
+            const total = stats.total_inbound_logs || 0;
+            const proc = stats.processed_logs || 0;
+            const procRate = total > 0 ? ((proc / total) * 100).toFixed(1) : '100.0';
+            document.getElementById('inwhKpiProcessedRate').textContent = `${procRate}% processed rate`;
+            
+            document.getElementById('inwhKpiRejected').textContent = stats.rejected_logs || 0;
+            document.getElementById('inwhKpiValidSig').textContent = `${(stats.valid_sig_percent || 100).toFixed(1)}%`;
+            document.getElementById('inwhKpiAvgDuration').textContent = `${(stats.avg_duration_ms || 0).toFixed(1)} ms`;
+        }
+
+        // 2. Fetch Endpoints
+        currentInboundEndpoints = await api('/inbound-webhooks/endpoints') || [];
+        document.getElementById('inwhCountEndpoints').textContent = currentInboundEndpoints.length;
+        renderInboundEndpointsTable(currentInboundEndpoints);
+        populateSimEndpointsDropdown(currentInboundEndpoints);
+
+        // 3. Fetch Logs
+        currentInboundLogs = await api('/inbound-webhooks/logs') || [];
+        document.getElementById('inwhCountLogs').textContent = currentInboundLogs.length;
+        renderInboundLogsTable(currentInboundLogs);
+
+    } catch (err) {
+        console.error('Failed to load inbound webhook data:', err);
+        showToast('Gagal memuat data Inbound Webhook: ' + err.message, 'danger');
+    }
+}
+
+function switchInboundSubtab(tab) {
+    const tabs = ['endpoints', 'logs', 'guides'];
+    tabs.forEach(t => {
+        const pane = document.getElementById(`inwhSubtab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        const btn = document.getElementById(`inwhSubtabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        if (pane) pane.style.display = (t === tab) ? 'block' : 'none';
+        if (btn) {
+            if (t === tab) {
+                btn.style.borderBottom = '2px solid #10b981';
+                btn.style.color = '#10b981';
+                btn.style.fontWeight = '700';
+            } else {
+                btn.style.borderBottom = '2px solid transparent';
+                btn.style.color = 'var(--text-muted)';
+                btn.style.fontWeight = '600';
+            }
+        }
+    });
+}
+
+function renderInboundEndpointsTable(endpoints) {
+    const tbody = document.getElementById('inwhEndpointsTableBody');
+    if (!tbody) return;
+
+    if (!endpoints || endpoints.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada endpoint inbound webhook terdaftar. Klik '➕ Endpoint Inbound Baru' untuk menambahkan.</td></tr>`;
+        return;
+    }
+
+    const origin = window.location.origin || 'http://localhost:8080';
+
+    tbody.innerHTML = endpoints.map(ep => {
+        const fullURL = `${origin}/api/v1/inbound-webhooks/gateway/${ep.endpoint_key}`;
+        
+        let providerBadge = '<span class="badge" style="background: rgba(14, 165, 233, 0.15); color: #0ea5e9;">Generic</span>';
+        if (ep.provider_type === 'midtrans') {
+            providerBadge = '<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">💳 Midtrans Snap</span>';
+        } else if (ep.provider_type === 'xendit') {
+            providerBadge = '<span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">💳 Xendit PG</span>';
+        } else if (ep.provider_type === 'logistics_3pl') {
+            providerBadge = '<span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">🚚 Logistik 3PL</span>';
+        } else if (ep.provider_type === 'crm_leads') {
+            providerBadge = '<span class="badge" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">🎯 CRM Form Leads</span>';
+        }
+
+        let authBadge = `<span class="badge" style="background: rgba(100, 116, 139, 0.15); color: #64748b;">${ep.auth_type}</span>`;
+        if (ep.auth_type === 'sha512') {
+            authBadge = '<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; font-weight: 700;">SHA512 (Midtrans)</span>';
+        } else if (ep.auth_type === 'hmac_sha256') {
+            authBadge = '<span class="badge" style="background: rgba(14, 165, 233, 0.15); color: #0ea5e9; font-weight: 700;">HMAC-SHA256</span>';
+        } else if (ep.auth_type === 'bearer_token') {
+            authBadge = '<span class="badge" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6; font-weight: 700;">Bearer Token</span>';
+        }
+
+        let actionLabel = ep.auto_action;
+        if (ep.auto_action === 'mark_invoice_paid') actionLabel = '✅ Lunasi Faktur (account.move)';
+        else if (ep.auto_action === 'update_tracking_status') actionLabel = '📦 Update Resi (stock.picking)';
+        else if (ep.auto_action === 'create_lead') actionLabel = '👤 Buat Prospek (crm.lead)';
+        else if (ep.auto_action === 'log_only') actionLabel = '📝 Audit Log Only';
+
+        const lastCalled = ep.last_called_at ? formatDate(ep.last_called_at) : 'Belum pernah';
+
+        return `
+            <tr>
+                <td>
+                    <div style="font-weight: 700; color: var(--text-main);">${escapeHtml(ep.name)}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">${escapeHtml(ep.endpoint_code)}</div>
+                </td>
+                <td>${providerBadge}</td>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 0.4rem;">
+                        <code style="font-size: 0.75rem; background: var(--bg-main); padding: 0.25rem 0.5rem; border-radius: 4px; border: 1px solid var(--border-color);">${escapeHtml(fullURL)}</code>
+                        <button class="btn btn-sm btn-outline" onclick="copyInboundGatewayURL('${escapeHtml(ep.endpoint_key)}')" title="Copy URL">📋</button>
+                    </div>
+                </td>
+                <td>${authBadge}</td>
+                <td>
+                    <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-main);">${escapeHtml(actionLabel)}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Model: ${escapeHtml(ep.target_model || '-')}</div>
+                </td>
+                <td>
+                    <div style="font-weight: 700; color: var(--text-main);">${ep.total_calls || 0}x</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted);">${lastCalled}</div>
+                </td>
+                <td style="text-align: center;">
+                    <div style="display: flex; gap: 0.35rem; justify-content: center;">
+                        <button class="btn btn-sm btn-primary" onclick="openModalInboundSimulator('${escapeHtml(ep.endpoint_key)}')" title="Test Simulator">🧪 Test</button>
+                        <button class="btn btn-sm btn-outline" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.3);" onclick="deleteInboundEndpoint(${ep.id})" title="Hapus Endpoint">🗑️</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderInboundLogsTable(logs) {
+    const tbody = document.getElementById('inwhLogsTableBody');
+    if (!tbody) return;
+
+    if (!logs || logs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada log aktivitas inbound webhook. Jalankan simulator atau terima callback eksternal.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = logs.map(l => {
+        let statusBadge = '<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">200 Processed</span>';
+        if (l.process_status === 'rejected') {
+            statusBadge = '<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">401 Rejected</span>';
+        } else if (l.process_status === 'error') {
+            statusBadge = '<span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">500 Error</span>';
+        }
+
+        const sigBadge = l.signature_valid
+            ? '<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; font-weight: 700;">✓ Valid</span>'
+            : '<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; font-weight: 700;">✗ Mismatch</span>';
+
+        const actionText = l.action_taken || (l.error_message ? `Gagal: ${l.error_message}` : '-');
+
+        return `
+            <tr>
+                <td>
+                    <div style="font-weight: 700; font-family: monospace; font-size: 0.8rem; color: var(--text-main);">${escapeHtml(l.log_code)}</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted);">${formatDate(l.CreatedAt)}</div>
+                </td>
+                <td><code style="font-size: 0.8rem;">${escapeHtml(l.endpoint_key)}</code></td>
+                <td><span style="font-family: monospace; font-size: 0.8rem;">${escapeHtml(l.source_ip || '-')}</span></td>
+                <td>${sigBadge}</td>
+                <td>
+                    <div>${statusBadge}</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">HTTP ${l.http_status_code || 200}</div>
+                </td>
+                <td>
+                    <div style="font-size: 0.8rem; color: var(--text-main); font-weight: 500; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(actionText)}">
+                        ${escapeHtml(actionText)}
+                    </div>
+                </td>
+                <td><span style="font-weight: 600; font-size: 0.8rem;">${l.duration_ms || 0} ms</span></td>
+                <td style="text-align: center;">
+                    <button class="btn btn-sm btn-outline" onclick="openInboundLogDetail(${l.id})">🔍 Detail</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function filterInboundLogs() {
+    const status = document.getElementById('inwhFilterStatus')?.value || '';
+    const search = (document.getElementById('inwhSearchLog')?.value || '').toLowerCase();
+
+    let filtered = currentInboundLogs;
+    if (status) {
+        filtered = filtered.filter(l => l.process_status === status);
+    }
+    if (search) {
+        filtered = filtered.filter(l =>
+            (l.log_code && l.log_code.toLowerCase().includes(search)) ||
+            (l.endpoint_key && l.endpoint_key.toLowerCase().includes(search)) ||
+            (l.source_ip && l.source_ip.toLowerCase().includes(search)) ||
+            (l.action_taken && l.action_taken.toLowerCase().includes(search)) ||
+            (l.error_message && l.error_message.toLowerCase().includes(search))
+        );
+    }
+    renderInboundLogsTable(filtered);
+}
+
+function populateSimEndpointsDropdown(endpoints) {
+    const select = document.getElementById('inwhSimEndpointSelect');
+    if (!select) return;
+
+    if (!endpoints || endpoints.length === 0) {
+        select.innerHTML = '<option value="">Tidak ada endpoint tersedia</option>';
+        return;
+    }
+
+    select.innerHTML = endpoints.map(ep => `
+        <option value="${escapeHtml(ep.endpoint_key)}" data-provider="${escapeHtml(ep.provider_type)}" data-auth="${escapeHtml(ep.auth_type)}">
+            ${escapeHtml(ep.name)} (/gateway/${escapeHtml(ep.endpoint_key)}) - [${ep.provider_type}]
+        </option>
+    `).join('');
+}
+
+function openModalCreateInboundEndpoint() {
+    document.getElementById('formCreateInboundEndpoint')?.reset();
+    generateInboundSecretKey();
+    onInboundProviderChanged();
+    openModal('modalCreateInboundEndpoint');
+}
+
+function generateInboundSecretKey() {
+    const chars = '0123456789abcdef';
+    let rand = '';
+    for (let i = 0; i < 32; i++) {
+        rand += chars[Math.floor(Math.random() * chars.length)];
+    }
+    const input = document.getElementById('inwhFormSecret');
+    if (input) input.value = 'whsec_in_' + rand;
+}
+
+function onInboundProviderChanged() {
+    const provider = document.getElementById('inwhFormProvider')?.value;
+    const authSelect = document.getElementById('inwhFormAuth');
+    const modelSelect = document.getElementById('inwhFormTargetModel');
+    const actionSelect = document.getElementById('inwhFormAutoAction');
+    const keyInput = document.getElementById('inwhFormKey');
+    const nameInput = document.getElementById('inwhFormName');
+
+    if (provider === 'midtrans') {
+        if (authSelect) authSelect.value = 'sha512';
+        if (modelSelect) modelSelect.value = 'account.move';
+        if (actionSelect) actionSelect.value = 'mark_invoice_paid';
+        if (keyInput && !keyInput.value) keyInput.value = 'midtrans_snap_payment';
+        if (nameInput && !nameInput.value) nameInput.value = 'Midtrans Payment Gateway Callback';
+    } else if (provider === 'xendit') {
+        if (authSelect) authSelect.value = 'hmac_sha256';
+        if (modelSelect) modelSelect.value = 'account.move';
+        if (actionSelect) actionSelect.value = 'mark_invoice_paid';
+        if (keyInput && !keyInput.value) keyInput.value = 'xendit_invoice_callback';
+        if (nameInput && !nameInput.value) nameInput.value = 'Xendit Invoice Callback';
+    } else if (provider === 'logistics_3pl') {
+        if (authSelect) authSelect.value = 'hmac_sha256';
+        if (modelSelect) modelSelect.value = 'stock.picking';
+        if (actionSelect) actionSelect.value = 'update_tracking_status';
+        if (keyInput && !keyInput.value) keyInput.value = 'jne_shipment_callback';
+        if (nameInput && !nameInput.value) nameInput.value = 'JNE Logistics Tracking Inbound';
+    } else if (provider === 'crm_leads') {
+        if (authSelect) authSelect.value = 'bearer_token';
+        if (modelSelect) modelSelect.value = 'crm.lead';
+        if (actionSelect) actionSelect.value = 'create_lead';
+        if (keyInput && !keyInput.value) keyInput.value = 'web_leads_capture';
+        if (nameInput && !nameInput.value) nameInput.value = 'Website Form Lead Ingestion';
+    }
+}
+
+async function handleCreateInboundEndpoint(event) {
+    event.preventDefault();
+    try {
+        const payload = {
+            name: document.getElementById('inwhFormName').value,
+            endpoint_key: document.getElementById('inwhFormKey').value,
+            provider_type: document.getElementById('inwhFormProvider').value,
+            auth_type: document.getElementById('inwhFormAuth').value,
+            secret_key: document.getElementById('inwhFormSecret').value,
+            target_model: document.getElementById('inwhFormTargetModel').value,
+            auto_action: document.getElementById('inwhFormAutoAction').value,
+            allowed_ips: document.getElementById('inwhFormAllowedIPs').value,
+            description: document.getElementById('inwhFormDesc').value
+        };
+
+        const res = await api('/inbound-webhooks/endpoints', 'POST', payload);
+        showToast(`Endpoint inbound '${res.name}' berhasil dibuat!`, 'success');
+        closeModal('modalCreateInboundEndpoint');
+        loadInboundWebhookData();
+    } catch (err) {
+        showToast('Gagal membuat endpoint: ' + err.message, 'danger');
+    }
+}
+
+async function deleteInboundEndpoint(id) {
+    if (!confirm('Apakah Anda yakin ingin menghapus endpoint inbound webhook ini? Callback dari pihak eksternal tidak akan diproses lagi.')) return;
+    try {
+        await api(`/inbound-webhooks/endpoints/${id}`, 'DELETE');
+        showToast('Endpoint inbound berhasil dihapus!', 'success');
+        loadInboundWebhookData();
+    } catch (err) {
+        showToast('Gagal menghapus endpoint: ' + err.message, 'danger');
+    }
+}
+
+function copyInboundGatewayURL(key) {
+    const origin = window.location.origin || 'http://localhost:8080';
+    const fullURL = `${origin}/api/v1/inbound-webhooks/gateway/${key}`;
+    navigator.clipboard.writeText(fullURL).then(() => {
+        showToast(`URL Inbound disalin ke clipboard:\n${fullURL}`, 'info');
+    }).catch(() => {
+        prompt('Salin URL Inbound Gateway:', fullURL);
+    });
+}
+
+function openInboundLogDetail(logId) {
+    const log = currentInboundLogs.find(l => l.id === logId);
+    if (!log) return;
+
+    document.getElementById('inlogModalTitle').textContent = `Log Inbound: ${log.log_code}`;
+    document.getElementById('inlogModalSubtitle').textContent = `Endpoint: ${log.endpoint_key} | IP: ${log.source_ip || '-'}`;
+
+    const statusBadgeEl = document.getElementById('inlogModalStatusBadge');
+    if (log.process_status === 'processed') {
+        statusBadgeEl.innerHTML = '<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Processed (OK)</span>';
+    } else if (log.process_status === 'rejected') {
+        statusBadgeEl.innerHTML = '<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">Rejected</span>';
+    } else {
+        statusBadgeEl.innerHTML = '<span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">Error</span>';
+    }
+
+    document.getElementById('inlogModalHttpCode').textContent = log.http_status_code || 200;
+
+    const sigBadgeEl = document.getElementById('inlogModalSigBadge');
+    sigBadgeEl.innerHTML = log.signature_valid
+        ? '<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">✓ Valid</span>'
+        : '<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">✗ Mismatch</span>';
+
+    document.getElementById('inlogModalDuration').textContent = `${log.duration_ms || 0} ms`;
+    document.getElementById('inlogModalActionTaken').textContent = log.action_taken || '-';
+    document.getElementById('inlogModalSigReceived').textContent = log.signature_received || 'none';
+
+    // Format Headers
+    try {
+        const parsedHeaders = JSON.parse(log.request_headers || '{}');
+        document.getElementById('inlogModalHeaders').textContent = JSON.stringify(parsedHeaders, null, 2);
+    } catch {
+        document.getElementById('inlogModalHeaders').textContent = log.request_headers || '{}';
+    }
+
+    // Format Payload
+    try {
+        const parsedPayload = JSON.parse(log.payload_json || '{}');
+        document.getElementById('inlogModalPayload').textContent = JSON.stringify(parsedPayload, null, 2);
+    } catch {
+        document.getElementById('inlogModalPayload').textContent = log.payload_json || '{}';
+    }
+
+    // Error box
+    const errorBox = document.getElementById('inlogModalErrorBox');
+    if (log.error_message) {
+        errorBox.style.display = 'block';
+        document.getElementById('inlogModalErrorText').textContent = log.error_message;
+    } else {
+        errorBox.style.display = 'none';
+    }
+
+    openModal('modalInboundLogDetail');
+}
+
+function openModalInboundSimulator(endpointKey = '') {
+    const select = document.getElementById('inwhSimEndpointSelect');
+    if (select && endpointKey) {
+        select.value = endpointKey;
+    }
+    onSimEndpointSelected();
+    document.getElementById('inwhSimResultBox').style.display = 'none';
+    openModal('modalInboundSimulator');
+}
+
+function onSimEndpointSelected() {
+    const select = document.getElementById('inwhSimEndpointSelect');
+    if (!select || !select.value) return;
+
+    const selectedOption = select.options[select.selectedIndex];
+    const provider = selectedOption?.getAttribute('data-provider') || '';
+
+    if (provider === 'midtrans') {
+        loadSimPreset('midtrans');
+    } else if (provider === 'logistics_3pl') {
+        loadSimPreset('jne');
+    } else if (provider === 'crm_leads') {
+        loadSimPreset('lead');
+    }
+}
+
+function loadSimPreset(type) {
+    const payloadArea = document.getElementById('inwhSimPayload');
+    const headersArea = document.getElementById('inwhSimHeaders');
+
+    if (type === 'midtrans') {
+        if (headersArea) {
+            headersArea.value = JSON.stringify({
+                "Content-Type": "application/json",
+                "User-Agent": "Midtrans-Webhook/2.0",
+                "X-Signature": "sha512=demo_auto_calculated"
+            }, null, 2);
+        }
+        if (payloadArea) {
+            payloadArea.value = JSON.stringify({
+                "order_id": "INV/2026/00001",
+                "status_code": "200",
+                "gross_amount": "5000000.00",
+                "transaction_status": "settlement",
+                "payment_type": "qris",
+                "transaction_time": new Date().toISOString()
+            }, null, 2);
+        }
+    } else if (type === 'jne') {
+        if (headersArea) {
+            headersArea.value = JSON.stringify({
+                "Content-Type": "application/json",
+                "User-Agent": "JNE-Courier-Gateway/1.0",
+                "X-Signature": "sha256=demo_auto_calculated"
+            }, null, 2);
+        }
+        if (payloadArea) {
+            payloadArea.value = JSON.stringify({
+                "picking_name": "WH/OUT/00001",
+                "waybill": "JNE-EXP-992188",
+                "status": "delivered",
+                "recipient": "Pak Budi (Security)",
+                "delivered_at": new Date().toISOString()
+            }, null, 2);
+        }
+    } else if (type === 'lead') {
+        if (headersArea) {
+            headersArea.value = JSON.stringify({
+                "Content-Type": "application/json",
+                "Authorization": "Bearer tok_web_lead_capture_9921"
+            }, null, 2);
+        }
+        if (payloadArea) {
+            payloadArea.value = JSON.stringify({
+                "title": "Permintaan Demo Solusi ERP Manufaktur",
+                "name": "Iwan Setiawan",
+                "company_name": "PT Maju Terus Logistik",
+                "email": "iwan@majuterus.co.id",
+                "phone": "+6281122334455",
+                "notes": "Tertarik integrasi otomatis Midtrans & JNE Courier"
+            }, null, 2);
+        }
+    }
+}
+
+async function executeInboundSimulation() {
+    try {
+        const endpointKey = document.getElementById('inwhSimEndpointSelect').value;
+        if (!endpointKey) {
+            showToast('Pilih target endpoint terlebih dahulu', 'warning');
+            return;
+        }
+
+        let headers = {};
+        try {
+            headers = JSON.parse(document.getElementById('inwhSimHeaders').value || '{}');
+        } catch {
+            showToast('Format JSON Headers tidak valid', 'danger');
+            return;
+        }
+
+        let payload = {};
+        try {
+            payload = JSON.parse(document.getElementById('inwhSimPayload').value || '{}');
+        } catch {
+            showToast('Format JSON Payload tidak valid', 'danger');
+            return;
+        }
+
+        showToast('Menjalankan simulasi inbound ingestion...', 'info');
+
+        const res = await api('/inbound-webhooks/simulate', 'POST', {
+            endpoint_key: endpointKey,
+            headers: headers,
+            payload: payload
+        });
+
+        const resultBox = document.getElementById('inwhSimResultBox');
+        resultBox.style.display = 'block';
+
+        const badgeEl = document.getElementById('inwhSimResultBadge');
+        if (res.process_status === 'processed') {
+            badgeEl.innerHTML = '<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">✓ 200 Berhasil Diproses</span>';
+        } else {
+            badgeEl.innerHTML = `<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">${res.http_status_code} Ditolak / Error</span>`;
+        }
+
+        document.getElementById('inwhSimResultText').textContent = res.action_taken || res.error_message || 'Simulasi selesai.';
+        document.getElementById('inwhSimResultMeta').textContent = `Log Code: ${res.log_code} | Durasi: ${res.duration_ms || 0}ms | Signature Valid: ${res.signature_valid}`;
+
+        showToast('Simulasi inbound webhook selesai!', 'success');
+        loadInboundWebhookData();
+
+    } catch (err) {
+        showToast('Simulasi gagal: ' + err.message, 'danger');
+    }
+}
+
+function openModalAIInboundAnalyzer() {
+    loadAIPreset('midtrans');
+    document.getElementById('aiInboundReportResult').style.display = 'none';
+    document.getElementById('btnApplyAIInboundEndpoint').style.display = 'none';
+    openModal('modalAIInboundAnalyzer');
+}
+
+function loadAIPreset(type) {
+    const area = document.getElementById('aiInboundRawPayload');
+    if (!area) return;
+
+    if (type === 'midtrans') {
+        area.value = JSON.stringify({
+            "order_id": "INV/2026/00001",
+            "status_code": "200",
+            "gross_amount": "5000000.00",
+            "transaction_status": "settlement",
+            "payment_type": "qris",
+            "transaction_time": "2026-10-09 18:30:00"
+        }, null, 2);
+    } else if (type === 'xendit') {
+        area.value = JSON.stringify({
+            "id": "inv_xen_9921882",
+            "external_id": "INV/2026/00002",
+            "status": "PAID",
+            "amount": 12500000,
+            "paid_amount": 12500000,
+            "payment_method": "BANK_TRANSFER"
+        }, null, 2);
+    } else if (type === 'logistics') {
+        area.value = JSON.stringify({
+            "waybill": "JNE-EXP-992188",
+            "picking_name": "WH/OUT/00001",
+            "status": "delivered",
+            "recipient": "Pak Budi",
+            "delivered_at": "2026-10-09 19:15:00"
+        }, null, 2);
+    } else if (type === 'lead') {
+        area.value = JSON.stringify({
+            "title": "Inquiry ERP Cloud Enterprise",
+            "name": "Budi Santoso",
+            "email": "budi@perusahaan.co.id",
+            "phone": "+628123456789",
+            "notes": "Tertarik integrasi otomatis webhook inbound"
+        }, null, 2);
+    }
+}
+
+async function analyzeInboundPayloadAI() {
+    try {
+        const rawPayload = document.getElementById('aiInboundRawPayload').value.trim();
+        if (!rawPayload) {
+            showToast('Masukkan contoh payload JSON terlebih dahulu', 'warning');
+            return;
+        }
+
+        showToast('Menganalisis payload skema dengan Cloudflare Workers AI...', 'info');
+
+        const report = await api('/inbound-webhooks/ai-analyze', 'POST', {
+            payload_json: rawPayload
+        });
+
+        lastAIInboundReport = report;
+
+        // Render AI Report
+        document.getElementById('aiInboundReportResult').style.display = 'block';
+        document.getElementById('aiInboundProvider').textContent = report.detected_provider || 'Generic';
+        document.getElementById('aiInboundEngine').textContent = report.ai_provider || 'Local Heuristic';
+        document.getElementById('aiInboundAction').textContent = report.suggested_action || 'log_only';
+        document.getElementById('aiInboundModel').textContent = `Model Target: ${report.suggested_model || 'generic'}`;
+        document.getElementById('aiInboundSummary').textContent = report.executive_summary || '-';
+        document.getElementById('aiInboundSecurity').textContent = report.security_assessment || '-';
+
+        // Render Field Mappings Table
+        const mappingTbody = document.getElementById('aiInboundMappingTableBody');
+        if (mappingTbody) {
+            const mappings = report.field_mappings || {};
+            const keys = Object.keys(mappings);
+            if (keys.length === 0) {
+                mappingTbody.innerHTML = `<tr><td colspan="2" style="text-align: center; color: var(--text-muted);">Tidak ada mapping terdeteksi</td></tr>`;
+            } else {
+                mappingTbody.innerHTML = keys.map(k => `
+                    <tr>
+                        <td><code style="color: #a78bfa; font-weight: 600;">${escapeHtml(k)}</code></td>
+                        <td><strong style="color: #10b981;">${escapeHtml(mappings[k])}</strong></td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        const applyBtn = document.getElementById('btnApplyAIInboundEndpoint');
+        if (applyBtn) applyBtn.style.display = 'inline-block';
+
+        showToast('Analisis skema payload AI selesai!', 'success');
+
+    } catch (err) {
+        showToast('Gagal menganalisis skema dengan AI: ' + err.message, 'danger');
+    }
+}
+
+function applyAIInboundToEndpoint() {
+    if (!lastAIInboundReport) return;
+
+    closeModal('modalAIInboundAnalyzer');
+    openModalCreateInboundEndpoint();
+
+    const providerMap = {
+        'Midtrans Payment Gateway': 'midtrans',
+        'Xendit Payment Gateway': 'xendit',
+        'Logistics & Courier 3PL': 'logistics_3pl',
+        'Website Form / CRM Leads': 'crm_leads'
+    };
+
+    const prov = providerMap[lastAIInboundReport.detected_provider] || 'generic';
+    const provSelect = document.getElementById('inwhFormProvider');
+    if (provSelect) {
+        provSelect.value = prov;
+        onInboundProviderChanged();
+    }
+
+    if (lastAIInboundReport.suggested_model) {
+        const modelSelect = document.getElementById('inwhFormTargetModel');
+        if (modelSelect) modelSelect.value = lastAIInboundReport.suggested_model;
+    }
+    if (lastAIInboundReport.suggested_action) {
+        const actionSelect = document.getElementById('inwhFormAutoAction');
+        if (actionSelect) actionSelect.value = lastAIInboundReport.suggested_action;
+    }
+
+    showToast('Parameter dari AI berhasil diterapkan pada formulir endpoint baru!', 'info');
+}
+
+// =========================================================================
+// 42. MULTI-COMPANY CONSOLIDATION & INTERCOMPANY TRANSACTIONS (MODUL KE-38)
+// =========================================================================
+
+let currentIntercompanyGroups = [];
+let currentIntercompanyRelations = [];
+let currentIntercompanyTransactions = [];
+let currentConsolidationRuns = [];
+let activeConsolidationRun = null;
+
+async function loadIntercompanyData() {
+    try {
+        // 1. Fetch Stats
+        const stats = await api('/intercompany/stats');
+        if (stats) {
+            const elGroups = document.getElementById('icKpiTotalGroups');
+            const elRels = document.getElementById('icKpiTotalRelations');
+            const elTxs = document.getElementById('icKpiMirroredTxs');
+            const elElim = document.getElementById('icKpiTotalEliminated');
+            const elConsRev = document.getElementById('icKpiConsRevenue');
+            const elConsNet = document.getElementById('icKpiConsNetIncome');
+            const elHoldingName = document.getElementById('icKpiHoldingName');
+            const elNciShare = document.getElementById('icKpiNciShare');
+
+            if (elGroups) elGroups.textContent = stats.total_groups || 0;
+            if (elRels) elRels.textContent = stats.total_relations || 0;
+            if (elTxs) elTxs.textContent = stats.total_mirrored_transactions || 0;
+            if (elElim) elElim.textContent = formatRupiah(stats.total_eliminated_volume || 0);
+            if (elConsRev) elConsRev.textContent = formatRupiah(stats.net_consolidated_revenue || 0);
+            if (elConsNet) elConsNet.textContent = formatRupiah(stats.net_consolidated_net_income || 0);
+            if (elHoldingName) elHoldingName.textContent = stats.holding_company_name || 'Holding Enterprise';
+            if (elNciShare) elNciShare.textContent = `Hak Minoritas: ${formatRupiah(stats.non_controlling_interest || 0)}`;
+        }
+
+        // 2. Fetch Groups, Relations, Transactions & Runs
+        currentIntercompanyGroups = await api('/intercompany/groups') || [];
+        currentIntercompanyRelations = await api('/intercompany/relations') || [];
+        currentIntercompanyTransactions = await api('/intercompany/transactions') || [];
+        currentConsolidationRuns = await api('/intercompany/consolidation/runs') || [];
+
+        // Update counts
+        const cntGroups = document.getElementById('icCountGroups');
+        const cntTxs = document.getElementById('icCountTransactions');
+        const cntCons = document.getElementById('icCountConsolidation');
+        if (cntGroups) cntGroups.textContent = currentIntercompanyGroups.length;
+        if (cntTxs) cntTxs.textContent = currentIntercompanyTransactions.length;
+        if (cntCons) cntCons.textContent = currentConsolidationRuns.length;
+
+        // Render Tables
+        renderIntercompanyGroupsTable();
+        renderIntercompanyTransactionsTable();
+        renderConsolidationRunsTable();
+        populateIntercompanyGroupSelects();
+
+    } catch (err) {
+        console.error('Failed to load intercompany data:', err);
+        showToast('Gagal memuat data konsolidasi multi-company: ' + err.message, 'error');
+    }
+}
+
+function switchIntercompanySubtab(tabName) {
+    const tabs = ['groups', 'transactions', 'consolidation', 'eliminationSheet'];
+    tabs.forEach(t => {
+        const pane = document.getElementById(`icSubtab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        const btn = document.getElementById(`icSubtabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        if (pane) pane.style.display = (t === tabName) ? 'block' : 'none';
+        if (btn) {
+            if (t === tabName) {
+                btn.style.borderBottom = '2px solid #6366f1';
+                btn.style.color = '#6366f1';
+                btn.style.fontWeight = '700';
+            } else {
+                btn.style.borderBottom = 'none';
+                btn.style.color = 'var(--text-muted)';
+                btn.style.fontWeight = '600';
+            }
+        }
+    });
+}
+
+function populateIntercompanyGroupSelects() {
+    const selects = ['icRelGroupID', 'icRunGroupID', 'icAuditRunSelect'];
+    selects.forEach(selId => {
+        const el = document.getElementById(selId);
+        if (!el) return;
+        el.innerHTML = '';
+
+        if (selId === 'icAuditRunSelect') {
+            if (currentConsolidationRuns.length === 0) {
+                el.innerHTML = '<option value="">Belum ada laporan konsolidasi</option>';
+            } else {
+                currentConsolidationRuns.forEach(r => {
+                    const opt = document.createElement('option');
+                    opt.value = r.id;
+                    opt.textContent = `${r.run_code} - ${r.group_name} (Tahun ${r.fiscal_year}) [Laba: ${formatRupiah(r.consolidated_net_income)}]`;
+                    el.appendChild(opt);
+                });
+            }
+        } else {
+            if (currentIntercompanyGroups.length === 0) {
+                el.innerHTML = '<option value="">Belum ada grup holding</option>';
+            } else {
+                currentIntercompanyGroups.forEach(g => {
+                    const opt = document.createElement('option');
+                    opt.value = g.id;
+                    opt.textContent = `${g.group_code} - ${g.name} (${g.currency})`;
+                    el.appendChild(opt);
+                });
+            }
+        }
+    });
+}
+
+function renderIntercompanyGroupsTable() {
+    const tbody = document.getElementById('icGroupsTableBody');
+    if (!tbody) return;
+
+    if (currentIntercompanyGroups.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada grup korporasi. Klik 'Buat Grup Holding' untuk memulai.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = currentIntercompanyGroups.map(g => {
+        const groupRels = currentIntercompanyRelations.filter(r => r.group_id === g.id);
+        const relsHtml = groupRels.length > 0
+            ? groupRels.map(r => `
+                <div style="margin-bottom: 0.35rem; font-size: 0.8rem; background: var(--bg-main); padding: 0.3rem 0.5rem; border-radius: 4px; border: 1px solid var(--border-color);">
+                    <strong>${escapeHtml(r.from_company_name)}</strong> ➔ <strong>${escapeHtml(r.to_company_name)}</strong>
+                    <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; margin-left: 0.4rem;">${r.ownership_pct}% Saham</span>
+                </div>
+            `).join('')
+            : '<span style="color: var(--text-muted); font-size: 0.8rem;">Belum ada relasi bilateral</span>';
+
+        return `
+            <tr>
+                <td>
+                    <div style="font-weight: 700; color: #818cf8;">${escapeHtml(g.group_code)}</div>
+                    <div style="font-weight: 600; font-size: 0.95rem; color: var(--text-main);">${escapeHtml(g.name)}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Induk: ${escapeHtml(g.holding_name)} (ID #${g.holding_company_id})</div>
+                </td>
+                <td><span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">${escapeHtml(g.currency)}</span></td>
+                <td>
+                    <span style="font-weight: 700; color: var(--text-main);">${(g.total_subsidiaries || groupRels.length) + 1} Entitas</span>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">${groupRels.length} Anak Usaha</div>
+                </td>
+                <td style="max-width: 300px;">${relsHtml}</td>
+                <td>
+                    <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">PSAK 65 Konsolidasi Penuh</span>
+                </td>
+                <td>
+                    <span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">SO↔PO &amp; Faktur↔Tagihan</span>
+                </td>
+                <td style="text-align: center;">
+                    <button class="btn btn-sm btn-outline" onclick="openModalCreateIntercompanyRelation(${g.id})" title="Tambah Relasi ke Grup Ini">➕ Relasi</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderIntercompanyTransactionsTable() {
+    const tbody = document.getElementById('icTransactionsTableBody');
+    if (!tbody) return;
+
+    if (currentIntercompanyTransactions.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada transaksi cermin bilateral antar-perusahaan.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = currentIntercompanyTransactions.map(tx => {
+        const typeBadge = tx.transaction_type === 'sale_to_purchase'
+            ? `<span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">SO ➔ PO</span>`
+            : `<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Faktur ➔ Tagihan</span>`;
+
+        const dateStr = tx.synced_at ? new Date(tx.synced_at).toLocaleString('id-ID') : '-';
+
+        return `
+            <tr>
+                <td style="font-weight: 700; font-family: monospace; color: #818cf8;">${escapeHtml(tx.transaction_code)}</td>
+                <td>${typeBadge}</td>
+                <td>
+                    <strong style="color: var(--text-main);">${escapeHtml(tx.source_doc_name)}</strong>
+                    <div style="font-size: 0.72rem; color: var(--text-muted);">${escapeHtml(tx.source_model)}</div>
+                </td>
+                <td>
+                    <span class="badge" style="background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border-color);">Entitas #${tx.source_company_id}</span>
+                </td>
+                <td>
+                    <strong style="color: #34d399;">${escapeHtml(tx.target_doc_name)}</strong>
+                    <div style="font-size: 0.72rem; color: var(--text-muted);">${escapeHtml(tx.target_model)}</div>
+                </td>
+                <td>
+                    <span class="badge" style="background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border-color);">Entitas #${tx.target_company_id}</span>
+                </td>
+                <td style="font-weight: 700; color: #fbbf24;">${formatRupiah(tx.source_amount)}</td>
+                <td>
+                    <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Tersinkronisasi</span>
+                </td>
+                <td style="font-size: 0.75rem; color: var(--text-muted);">${dateStr}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function filterIntercompanyTransactions() {
+    const q = (document.getElementById('icSearchTx')?.value || '').toLowerCase().trim();
+    if (!q) {
+        renderIntercompanyTransactionsTable();
+        return;
+    }
+    const filtered = currentIntercompanyTransactions.filter(tx =>
+        (tx.transaction_code || '').toLowerCase().includes(q) ||
+        (tx.source_doc_name || '').toLowerCase().includes(q) ||
+        (tx.target_doc_name || '').toLowerCase().includes(q)
+    );
+    const tbody = document.getElementById('icTransactionsTableBody');
+    if (!tbody) return;
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2rem;">Tidak ada transaksi cermin yang cocok dengan '${escapeHtml(q)}'.</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = filtered.map(tx => {
+        const typeBadge = tx.transaction_type === 'sale_to_purchase'
+            ? `<span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">SO ➔ PO</span>`
+            : `<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Faktur ➔ Tagihan</span>`;
+        const dateStr = tx.synced_at ? new Date(tx.synced_at).toLocaleString('id-ID') : '-';
+        return `
+            <tr>
+                <td style="font-weight: 700; font-family: monospace; color: #818cf8;">${escapeHtml(tx.transaction_code)}</td>
+                <td>${typeBadge}</td>
+                <td><strong style="color: var(--text-main);">${escapeHtml(tx.source_doc_name)}</strong></td>
+                <td>Entitas #${tx.source_company_id}</td>
+                <td><strong style="color: #34d399;">${escapeHtml(tx.target_doc_name)}</strong></td>
+                <td>Entitas #${tx.target_company_id}</td>
+                <td style="font-weight: 700; color: #fbbf24;">${formatRupiah(tx.source_amount)}</td>
+                <td><span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Tersinkronisasi</span></td>
+                <td style="font-size: 0.75rem; color: var(--text-muted);">${dateStr}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderConsolidationRunsTable() {
+    const tbody = document.getElementById('icConsolidationTableBody');
+    if (!tbody) return;
+
+    if (currentConsolidationRuns.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada proses konsolidasi finansial. Klik 'Proses Konsolidasi Baru' untuk menjalankan.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = currentConsolidationRuns.map(r => `
+        <tr>
+            <td>
+                <strong style="color: #818cf8; font-family: monospace;">${escapeHtml(r.run_code)}</strong>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHtml(r.notes || 'Konsolidasi Tahunan')}</div>
+            </td>
+            <td>
+                <div style="font-weight: 600; color: var(--text-main);">${escapeHtml(r.group_name)}</div>
+                <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">Tahun ${r.fiscal_year}</span>
+            </td>
+            <td style="font-weight: 600; color: var(--text-main);">${formatRupiah(r.total_gross_revenue)}</td>
+            <td style="color: #f87171; font-weight: 700;">- ${formatRupiah(r.eliminated_revenue)}</td>
+            <td style="color: #f87171;">- ${formatRupiah(r.eliminated_receivables)}</td>
+            <td style="font-weight: 700; color: #fbbf24;">${formatRupiah(r.consolidated_revenue)}</td>
+            <td style="font-weight: 700; color: #34d399;">${formatRupiah(r.consolidated_net_income)}</td>
+            <td>
+                <span class="badge" style="background: rgba(168, 85, 247, 0.15); color: #c084fc;">${formatRupiah(r.non_controlling_interest)}</span>
+            </td>
+            <td style="text-align: center;">
+                <div style="display: flex; gap: 0.35rem; justify-content: center;">
+                    <button class="btn btn-sm btn-outline" onclick="openConsolidationDetail(${r.id})" title="Lihat Kertas Kerja Eliminasi">📑 Kertas Kerja</button>
+                    <button class="btn btn-sm btn-ghost" style="color: #c084fc;" onclick="openModalAIConsolidationAuditor(${r.id})" title="Audit AI IFRS 10">🤖 Audit AI</button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// ---------------------------------------------------------------------------
+// Modals & Handlers
+// ---------------------------------------------------------------------------
+
+function openModalCreateIntercompanyGroup() {
+    const elCode = document.getElementById('icGroupCode');
+    if (elCode) elCode.value = `GRP/${new Date().getFullYear()}/001`;
+    openModal('modalCreateIntercompanyGroup');
+}
+
+async function handleCreateIntercompanyGroup(e) {
+    e.preventDefault();
+    try {
+        const payload = {
+            group_code: document.getElementById('icGroupCode')?.value || '',
+            name: document.getElementById('icGroupName')?.value || '',
+            holding_company_id: parseInt(document.getElementById('icHoldingCompanyID')?.value) || 1,
+            currency: document.getElementById('icGroupCurrency')?.value || 'IDR',
+            description: document.getElementById('icGroupDescription')?.value || ''
+        };
+
+        const res = await api('/intercompany/groups', 'POST', payload);
+        if (res) {
+            showToast(`Grup Holding '${res.name}' berhasil dibuat!`, 'success');
+            closeModal('modalCreateIntercompanyGroup');
+            await loadIntercompanyData();
+        }
+    } catch (err) {
+        showToast('Gagal membuat grup holding: ' + err.message, 'error');
+    }
+}
+
+function openModalCreateIntercompanyRelation(preselectedGroupId) {
+    populateIntercompanyGroupSelects();
+    if (preselectedGroupId) {
+        const sel = document.getElementById('icRelGroupID');
+        if (sel) sel.value = preselectedGroupId;
+    }
+    openModal('modalCreateIntercompanyRelation');
+}
+
+async function handleCreateIntercompanyRelation(e) {
+    e.preventDefault();
+    try {
+        const payload = {
+            group_id: parseInt(document.getElementById('icRelGroupID')?.value) || 1,
+            name: document.getElementById('icRelName')?.value || '',
+            from_company_id: parseInt(document.getElementById('icRelFromCompanyID')?.value) || 1,
+            from_partner_id: parseInt(document.getElementById('icRelFromPartnerID')?.value) || 0,
+            to_company_id: parseInt(document.getElementById('icRelToCompanyID')?.value) || 2,
+            to_partner_id: parseInt(document.getElementById('icRelToPartnerID')?.value) || 0,
+            ownership_pct: parseFloat(document.getElementById('icRelOwnershipPct')?.value) || 100.0,
+            consolidation_method: document.getElementById('icRelMethod')?.value || 'full',
+            auto_mirror_sale_purchase: document.getElementById('icRelAutoMirrorSO')?.checked ?? true,
+            auto_mirror_invoice_bill: document.getElementById('icRelAutoMirrorInv')?.checked ?? true,
+            auto_eliminate: document.getElementById('icRelAutoEliminate')?.checked ?? true
+        };
+
+        const res = await api('/intercompany/relations', 'POST', payload);
+        if (res) {
+            showToast(`Relasi bilateral '${res.name}' berhasil disimpan!`, 'success');
+            closeModal('modalCreateIntercompanyRelation');
+            await loadIntercompanyData();
+        }
+    } catch (err) {
+        showToast('Gagal menyimpan relasi bilateral: ' + err.message, 'error');
+    }
+}
+
+function openModalRunConsolidation() {
+    populateIntercompanyGroupSelects();
+    openModal('modalRunConsolidation');
+}
+
+async function handleRunConsolidation(e) {
+    e.preventDefault();
+    try {
+        const payload = {
+            group_id: parseInt(document.getElementById('icRunGroupID')?.value) || 1,
+            fiscal_year: parseInt(document.getElementById('icRunFiscalYear')?.value) || 2026,
+            period_start_date: document.getElementById('icRunStartDate')?.value + 'T00:00:00Z',
+            period_end_date: document.getElementById('icRunEndDate')?.value + 'T23:59:59Z',
+            notes: document.getElementById('icRunNotes')?.value || ''
+        };
+
+        const res = await api('/intercompany/consolidation/execute', 'POST', payload);
+        if (res) {
+            showToast(`Konsolidasi '${res.run_code}' selesai dihitung per PSAK 65!`, 'success');
+            closeModal('modalRunConsolidation');
+            await loadIntercompanyData();
+            openConsolidationDetail(res.id);
+        }
+    } catch (err) {
+        showToast('Gagal menjalankan konsolidasi: ' + err.message, 'error');
+    }
+}
+
+async function openConsolidationDetail(runId) {
+    try {
+        const run = await api(`/intercompany/consolidation/runs/${runId}`);
+        if (!run) return;
+        activeConsolidationRun = run;
+
+        document.getElementById('icDetailRunCode').textContent = run.run_code;
+        document.getElementById('icDetailGroupName').textContent = `${run.group_name} (Tahun Fiskal ${run.fiscal_year})`;
+        document.getElementById('icDetailConsRev').textContent = formatRupiah(run.consolidated_revenue);
+        document.getElementById('icDetailGrossRev').textContent = `Kotor: ${formatRupiah(run.total_gross_revenue)}`;
+        document.getElementById('icDetailElimRev').textContent = formatRupiah(run.eliminated_revenue);
+        document.getElementById('icDetailElimARAP').textContent = `AR/AP: ${formatRupiah(run.eliminated_receivables)}`;
+        document.getElementById('icDetailConsNetIncome').textContent = formatRupiah(run.consolidated_net_income);
+        document.getElementById('icDetailNci').textContent = `Hak Minoritas: ${formatRupiah(run.non_controlling_interest)}`;
+        document.getElementById('icDetailConsAssets').textContent = formatRupiah(run.consolidated_assets);
+        document.getElementById('icDetailConsEquity').textContent = `Ekuitas: ${formatRupiah(run.consolidated_equity)}`;
+
+        // Render lines
+        const tbody = document.getElementById('icDetailLinesTableBody');
+        if (tbody) {
+            const lines = run.lines || [];
+            if (lines.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Tidak ada rincian baris eliminasi.</td></tr>`;
+            } else {
+                tbody.innerHTML = lines.map(l => {
+                    const catBadge = {
+                        'revenue': '<span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">Pendapatan</span>',
+                        'expense': '<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">Beban/COGS</span>',
+                        'asset': '<span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">Piutang/Aset</span>',
+                        'liability': '<span class="badge" style="background: rgba(168, 85, 247, 0.15); color: #c084fc;">Hutang/Kewajiban</span>'
+                    }[l.financial_category] || l.financial_category;
+
+                    return `
+                        <tr>
+                            <td><strong>${escapeHtml(l.company_name)}</strong></td>
+                            <td><span class="badge" style="background: rgba(99, 102, 241, 0.1); color: #818cf8;">${l.ownership_pct}%</span></td>
+                            <td>${catBadge} <span style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">(${l.account_code})</span></td>
+                            <td>${formatRupiah(l.gross_amount)}</td>
+                            <td style="color: #f87171;">${l.elimination_debit > 0 ? formatRupiah(l.elimination_debit) : '-'}</td>
+                            <td style="color: #f87171;">${l.elimination_credit > 0 ? formatRupiah(l.elimination_credit) : '-'}</td>
+                            <td style="font-weight: 700; color: #34d399;">${formatRupiah(l.consolidated_amount)}</td>
+                            <td style="font-size: 0.75rem; color: var(--text-muted);">${escapeHtml(l.elimination_note || '-')}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        openModal('modalConsolidationDetail');
+    } catch (err) {
+        showToast('Gagal memuat detail konsolidasi: ' + err.message, 'error');
+    }
+}
+
+function triggerAIAuditFromDetail() {
+    if (activeConsolidationRun) {
+        closeModal('modalConsolidationDetail');
+        openModalAIConsolidationAuditor(activeConsolidationRun.id);
+    }
+}
+
+async function openModalAIConsolidationAuditor(preselectedRunId) {
+    populateIntercompanyGroupSelects();
+    if (preselectedRunId) {
+        const sel = document.getElementById('icAuditRunSelect');
+        if (sel) sel.value = preselectedRunId;
+    }
+    openModal('modalAIConsolidationAuditor');
+    await loadAIAuditForRun();
+}
+
+async function loadAIAuditForRun() {
+    const runId = document.getElementById('icAuditRunSelect')?.value;
+    if (!runId) return;
+
+    try {
+        const report = await api(`/intercompany/consolidation/runs/${runId}/ai-audit`);
+        if (!report) return;
+
+        const resBox = document.getElementById('icAIAuditResult');
+        if (resBox) resBox.style.display = 'block';
+
+        const elStatus = document.getElementById('icAuditStatus');
+        const elScore = document.getElementById('icAuditScore');
+        const elEngine = document.getElementById('icAuditEngine');
+        const elSummary = document.getElementById('icAuditSummary');
+        const elNci = document.getElementById('icAuditNciRisk');
+        const elVars = document.getElementById('icAuditVariancesList');
+        const elChecklist = document.getElementById('icAuditChecklist');
+
+        if (elStatus) elStatus.textContent = report.compliance_status || 'COMPLIANT';
+        if (elScore) elScore.textContent = `${report.audit_score || 95} / 100`;
+        if (elEngine) elEngine.textContent = report.ai_provider || 'Cloudflare Workers AI';
+        if (elSummary) elSummary.textContent = report.executive_summary || '-';
+        if (elNci) elNci.textContent = report.non_controlling_risk || '-';
+
+        if (elVars) {
+            const vars = report.reciprocal_variances || [];
+            elVars.innerHTML = vars.map(v => `
+                <div style="margin-bottom: 0.4rem; padding: 0.35rem 0.5rem; background: var(--bg-main); border-radius: 4px; border: 1px solid var(--border-color);">
+                    ${escapeHtml(v)}
+                </div>
+            `).join('');
+        }
+
+        if (elChecklist) {
+            const chk = report.ifrs10_checklist || {};
+            elChecklist.innerHTML = Object.entries(chk).map(([item, passed]) => `
+                <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.6rem; background: var(--bg-main); border-radius: 6px; border: 1px solid var(--border-color);">
+                    <span>${passed ? '✅' : '⚠️'}</span>
+                    <span style="font-size: 0.8rem; color: var(--text-main); font-weight: 500;">${escapeHtml(item)}</span>
+                </div>
+            `).join('');
+        }
+    } catch (err) {
+        showToast('Gagal memuat audit konsolidasi AI: ' + err.message, 'error');
+    }
+}
+
+// =========================================================================
+// 43. AI PREDICTIVE CASH FLOW FORECASTING & TREASURY MANAGEMENT (MODUL KE-39)
+// =========================================================================
+let currentTreasuryAccounts = [];
+let currentTreasuryForecasts = [];
+let currentTreasuryTransfers = [];
+
+async function loadTreasuryData() {
+    try {
+        // 1. Load Stats & KPIs
+        const stats = await api('/treasury/stats');
+        if (stats) {
+            const elCash = document.getElementById('trKpiTotalCash');
+            const elInflow = document.getElementById('trKpi30DInflow');
+            const elOutflow = document.getElementById('trKpi30DOutflow');
+            const elNetCash = document.getElementById('trKpi30DNetCash');
+            const elRunway = document.getElementById('trKpiRunwayDays');
+            const elBuffer = document.getElementById('trKpiBufferCoverage');
+            const elAccCount = document.getElementById('trKpiAccountsCount');
+            const elNetBadge = document.getElementById('trKpiNetCashBadge');
+            const elRunwayRisk = document.getElementById('trKpiRunwayRisk');
+
+            if (elCash) elCash.textContent = formatCurrency(stats.total_liquid_cash || 0);
+            if (elInflow) elInflow.textContent = formatCurrency(stats.projected_inflow_30d || 0);
+            if (elOutflow) elOutflow.textContent = formatCurrency(stats.projected_outflow_30d || 0);
+            if (elNetCash) {
+                const net = stats.projected_net_30d || 0;
+                elNetCash.textContent = formatCurrency(net);
+                elNetCash.style.color = net >= 0 ? '#34d399' : '#f87171';
+            }
+            if (elNetBadge) elNetBadge.textContent = (stats.projected_net_30d || 0) >= 0 ? 'Surplus Operasional' : 'Defisit Terdeteksi';
+            if (elRunway) elRunway.textContent = (stats.estimated_runway_days || 0) + ' Hari';
+            if (elRunwayRisk) elRunwayRisk.textContent = 'Status Risiko: ' + (stats.deficit_risk_level || 'Normal').toUpperCase();
+            if (elBuffer) elBuffer.textContent = (stats.safety_buffer_coverage || 0).toFixed(1) + '%';
+            if (elAccCount) elAccCount.textContent = (stats.total_active_accounts || 0) + ' Rekening Aktif';
+        }
+
+        // 2. Fetch Accounts, Forecasts, and Transfers in parallel
+        [currentTreasuryAccounts, currentTreasuryForecasts, currentTreasuryTransfers] = await Promise.all([
+            api('/treasury/accounts') || [],
+            api('/treasury/forecasts') || [],
+            api('/treasury/transfers') || []
+        ]);
+
+        // 3. Update Badges
+        const cntAcc = document.getElementById('trCountAccounts');
+        const cntFc = document.getElementById('trCountForecasts');
+        const cntTrf = document.getElementById('trCountTransfers');
+        if (cntAcc) cntAcc.textContent = (currentTreasuryAccounts || []).length;
+        if (cntFc) cntFc.textContent = (currentTreasuryForecasts || []).length;
+        if (cntTrf) cntTrf.textContent = (currentTreasuryTransfers || []).length;
+
+        // 4. Render Tables
+        renderTreasuryAccountsTable();
+        renderTreasuryForecastsTable();
+        renderTreasuryTransfersTable();
+        populateTreasuryForecastSelect();
+    } catch (err) {
+        console.error('Failed to load treasury data:', err);
+        showToast('Gagal memuat data Treasury: ' + err.message, 'error');
+    }
+}
+
+function switchTreasurySubtab(tabName) {
+    const tabs = ['accounts', 'forecasts', 'transfers', 'aiCopilot'];
+    tabs.forEach(t => {
+        const pane = document.getElementById(`trSubtab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        const btn = document.getElementById(`trSubtabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        if (pane) pane.style.display = (t === tabName) ? 'block' : 'none';
+        if (btn) {
+            if (t === tabName) {
+                btn.style.borderBottom = '2px solid #6366f1';
+                btn.style.color = '#6366f1';
+                btn.style.fontWeight = '700';
+            } else {
+                btn.style.borderBottom = 'none';
+                btn.style.color = 'var(--text-muted)';
+                btn.style.fontWeight = '600';
+            }
+        }
+    });
+
+    if (tabName === 'aiCopilot' && currentTreasuryForecasts.length > 0) {
+        const sel = document.getElementById('trAuditForecastSelect');
+        if (sel && sel.value) {
+            loadAITreasuryForSelectedForecast();
+        } else if (sel && currentTreasuryForecasts[0]) {
+            sel.value = currentTreasuryForecasts[0].id;
+            loadAITreasuryForSelectedForecast();
+        }
+    }
+}
+
+function renderTreasuryAccountsTable() {
+    const tbody = document.getElementById('trAccountsTableBody');
+    if (!tbody) return;
+    if (!currentTreasuryAccounts || currentTreasuryAccounts.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-muted);">Belum ada rekening kas/bank perbendaharaan yang terdaftar. Klik "Tambah Rekening Bank" untuk mendaftarkan.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = currentTreasuryAccounts.map(acc => `
+        <tr>
+            <td>
+                <strong>${escapeHtml(acc.bank_name)}</strong>
+                <div style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">${escapeHtml(acc.account_code || '')}</div>
+            </td>
+            <td style="font-family: monospace; font-weight: 600;">${escapeHtml(acc.account_number)}</td>
+            <td>${escapeHtml(acc.account_holder || '-')}</td>
+            <td>
+                <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; text-transform: uppercase;">
+                    ${escapeHtml(acc.account_type || 'checking')}
+                </span>
+            </td>
+            <td style="font-weight: 700; color: #34d399;">
+                ${formatCurrency(acc.current_balance || 0)}
+            </td>
+            <td style="color: var(--text-muted); font-size: 0.85rem;">
+                ${formatCurrency(acc.minimum_balance || 0)}
+            </td>
+            <td style="font-size: 0.85rem;">
+                ${acc.interest_rate_pct ? acc.interest_rate_pct + '% p.a.' : '0%'}
+            </td>
+            <td>
+                ${acc.is_primary_pool 
+                    ? `<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">⭐ Primary Pool</span>` 
+                    : `<span class="badge" style="background: rgba(107, 114, 128, 0.15); color: #9ca3af;">Operasional</span>`}
+            </td>
+            <td style="text-align: center;">
+                <button class="btn btn-sm btn-outline" onclick="openModalCreateInterBankTransfer(${acc.id})" title="Transfer Dana dari Rekening Ini">
+                    🔄 Sweep
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function renderTreasuryForecastsTable() {
+    const tbody = document.getElementById('trForecastsTableBody');
+    if (!tbody) return;
+    if (!currentTreasuryForecasts || currentTreasuryForecasts.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-muted);">Belum ada simulasi proyeksi arus kas. Klik "Hitung Proyeksi Kas" untuk menjalankan AI forecasting engine.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = currentTreasuryForecasts.map(fc => {
+        let riskColor = '#34d399';
+        let riskLabel = 'AMAN';
+        if (fc.deficit_risk === 'high' || fc.deficit_risk === 'critical') {
+            riskColor = '#f87171';
+            riskLabel = 'KRITIS / DEFISIT';
+        } else if (fc.deficit_risk === 'medium') {
+            riskColor = '#fbbf24';
+            riskLabel = 'PERINGATAN';
+        }
+
+        const net = fc.projected_net_cash || 0;
+
+        return `
+            <tr>
+                <td style="font-family: monospace; font-weight: 700; color: #818cf8;">
+                    ${escapeHtml(fc.forecast_code || '')}
+                </td>
+                <td>
+                    <strong>${escapeHtml(fc.name || '')}</strong>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Horizon: ${fc.horizon_days} Hari (${fc.base_date ? fc.base_date.substring(0, 10) : ''})</div>
+                </td>
+                <td style="font-weight: 600;">${formatCurrency(fc.opening_cash_balance || 0)}</td>
+                <td style="color: #34d399; font-weight: 600;">+${formatCurrency(fc.projected_inflow || 0)}</td>
+                <td style="color: #f87171; font-weight: 600;">-${formatCurrency(fc.projected_outflow || 0)}</td>
+                <td style="font-weight: 700; color: ${net >= 0 ? '#34d399' : '#f87171'};">
+                    ${formatCurrency(net)}
+                </td>
+                <td>
+                    <div style="font-weight: 700; color: #60a5fa;">${formatCurrency(fc.projected_ending_cash || 0)}</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted);">Min: ${formatCurrency(fc.lowest_point_cash || 0)}</div>
+                </td>
+                <td>
+                    <span class="badge" style="background: rgba(255,255,255,0.08); color: ${riskColor}; font-weight: 700;">
+                        ${riskLabel}
+                    </span>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">Runway: ${fc.estimated_runway_days || 0} Hari</div>
+                </td>
+                <td style="text-align: center;">
+                    <div style="display: flex; gap: 0.35rem; justify-content: center;">
+                        <button class="btn btn-sm btn-outline" onclick="openModalForecastDetail(${fc.id})" title="Lihat Rincian Baris Arus Kas">
+                            🔍 Rincian
+                        </button>
+                        <button class="btn btn-sm btn-primary" onclick="analyzeAITreasuryForForecast(${fc.id})" title="Audit AI Likuiditas & Modal Kerja">
+                            🤖 AI CFO
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderTreasuryTransfersTable() {
+    const tbody = document.getElementById('trTransfersTableBody');
+    if (!tbody) return;
+    if (!currentTreasuryTransfers || currentTreasuryTransfers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-muted);">Belum ada riwayat transfer antar-bank atau liquidity sweep. Klik "Transfer Likuiditas Antar-Bank" untuk memindahkan saldo.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = currentTreasuryTransfers.map(trf => `
+        <tr>
+            <td style="font-family: monospace; font-weight: 700; color: #6366f1;">
+                ${escapeHtml(trf.transfer_code || '')}
+            </td>
+            <td>
+                <strong>${escapeHtml(trf.from_account_name || 'Bank Asal')}</strong>
+            </td>
+            <td>
+                <strong>${escapeHtml(trf.to_account_name || 'Bank Tujuan')}</strong>
+            </td>
+            <td style="font-size: 0.85rem; color: var(--text-muted);">
+                ${trf.transfer_date ? trf.transfer_date.substring(0, 10) : '-'}
+            </td>
+            <td style="font-weight: 700; color: #34d399;">
+                ${formatCurrency(trf.amount || 0)}
+            </td>
+            <td style="font-size: 0.85rem; color: var(--text-muted);">
+                ${trf.transfer_fee ? formatCurrency(trf.transfer_fee) : 'Rp 0'}
+            </td>
+            <td style="font-size: 0.85rem;">
+                <div>${escapeHtml(trf.reference || '-')}</div>
+                <div style="font-size: 0.72rem; color: var(--text-muted);">${escapeHtml(trf.memo || '')}</div>
+            </td>
+            <td>
+                ${trf.account_move_id ? `<span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">Posted (Entry #${trf.account_move_id})</span>` : '<span class="badge badge-secondary">Pending</span>'}
+            </td>
+            <td style="text-align: center;">
+                <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; text-transform: uppercase;">
+                    ${escapeHtml(trf.state || 'posted')}
+                </span>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function populateTreasuryForecastSelect() {
+    const sel = document.getElementById('trAuditForecastSelect');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">Pilih Proyeksi Arus Kas...</option>' +
+        (currentTreasuryForecasts || []).map(fc => `
+            <option value="${fc.id}">${escapeHtml(fc.forecast_code)} - ${escapeHtml(fc.name)} (${fc.horizon_days} Hari)</option>
+        `).join('');
+}
+
+function populateTreasuryAccountSelects(preselectedFromId) {
+    const selFrom = document.getElementById('trTrfFromAcc');
+    const selTo = document.getElementById('trTrfToAcc');
+    if (!selFrom || !selTo) return;
+
+    const options = (currentTreasuryAccounts || []).map(a => `
+        <option value="${a.id}">${escapeHtml(a.bank_name)} (${escapeHtml(a.account_number)}) - Saldo: ${formatCurrency(a.current_balance)}</option>
+    `).join('');
+
+    selFrom.innerHTML = '<option value="">Pilih Rekening Asal (Sumber)...</option>' + options;
+    selTo.innerHTML = '<option value="">Pilih Rekening Tujuan (Penerima)...</option>' + options;
+
+    if (preselectedFromId) {
+        selFrom.value = preselectedFromId;
+    }
+}
+
+// MODAL HANDLERS
+function openModalCreateBankAccount() {
+    const form = document.getElementById('formCreateBankAccount');
+    if (form) form.reset();
+    openModal('modalCreateBankAccount');
+}
+
+async function handleCreateBankAccount(e) {
+    e.preventDefault();
+    try {
+        const payload = {
+            bank_name: document.getElementById('trAccBankName').value,
+            account_number: document.getElementById('trAccNumber').value,
+            account_holder: document.getElementById('trAccHolder').value,
+            account_type: document.getElementById('trAccType').value,
+            current_balance: parseFloat(document.getElementById('trAccBalance').value) || 0,
+            minimum_balance: parseFloat(document.getElementById('trAccMinBalance').value) || 0,
+            overdraft_limit: parseFloat(document.getElementById('trAccOverdraft').value) || 0,
+            interest_rate_pct: parseFloat(document.getElementById('trAccInterest').value) || 0,
+            is_primary_pool: document.getElementById('trAccIsPrimary').checked,
+            notes: document.getElementById('trAccNotes').value
+        };
+
+        const res = await api('/treasury/accounts', 'POST', payload);
+        if (res && res.id) {
+            showToast(`Rekening Bank ${res.bank_name} berhasil didaftarkan!`, 'success');
+            closeModal('modalCreateBankAccount');
+            await loadTreasuryData();
+        }
+    } catch (err) {
+        showToast('Gagal mendaftarkan rekening: ' + err.message, 'error');
+    }
+}
+
+function openModalGenerateForecast() {
+    const form = document.getElementById('formGenerateForecast');
+    if (form) form.reset();
+    openModal('modalGenerateForecast');
+}
+
+async function handleGenerateForecast(e) {
+    e.preventDefault();
+    try {
+        const payload = {
+            name: document.getElementById('trFcName').value,
+            horizon_days: parseInt(document.getElementById('trFcHorizon').value) || 30,
+            minimum_safety_buffer: parseFloat(document.getElementById('trFcBuffer').value) || 0,
+            include_pipeline_so: document.getElementById('trFcIncludeSO').checked,
+            include_approved_po: document.getElementById('trFcIncludePO').checked,
+            include_mrr_renewal: document.getElementById('trFcIncludeMRR').checked,
+            notes: document.getElementById('trFcNotes').value
+        };
+
+        showToast('Menjalankan AI predictive cash flow simulation...', 'info');
+        const res = await api('/treasury/forecasts/generate', 'POST', payload);
+        if (res && res.id) {
+            showToast(`Proyeksi Arus Kas ${res.forecast_code} berhasil dihitung! Saldo Akhir: ${formatCurrency(res.projected_ending_cash)}`, 'success');
+            closeModal('modalGenerateForecast');
+            await loadTreasuryData();
+            switchTreasurySubtab('forecasts');
+        }
+    } catch (err) {
+        showToast('Gagal menghitung proyeksi kas: ' + err.message, 'error');
+    }
+}
+
+function openModalCreateInterBankTransfer(preselectedFromId) {
+    const form = document.getElementById('formCreateInterBankTransfer');
+    if (form) form.reset();
+    populateTreasuryAccountSelects(preselectedFromId);
+    const dateInput = document.getElementById('trTrfDate');
+    if (dateInput) dateInput.value = new Date().toISOString().substring(0, 10);
+    openModal('modalCreateInterBankTransfer');
+}
+
+async function handleCreateInterBankTransfer(e) {
+    e.preventDefault();
+    try {
+        const fromId = parseInt(document.getElementById('trTrfFromAcc').value);
+        const toId = parseInt(document.getElementById('trTrfToAcc').value);
+        if (fromId === toId) {
+            showToast('Rekening asal dan tujuan tidak boleh sama!', 'warning');
+            return;
+        }
+
+        const payload = {
+            from_account_id: fromId,
+            to_account_id: toId,
+            amount: parseFloat(document.getElementById('trTrfAmount').value) || 0,
+            transfer_fee: parseFloat(document.getElementById('trTrfFee').value) || 0,
+            transfer_date: document.getElementById('trTrfDate').value || new Date().toISOString(),
+            reference: document.getElementById('trTrfRef').value,
+            memo: document.getElementById('trTrfMemo').value
+        };
+
+        const res = await api('/treasury/transfers', 'POST', payload);
+        if (res && res.id) {
+            showToast(`Transfer antar-bank ${res.transfer_code} berhasil dieksekusi & jurnal GL diposting!`, 'success');
+            closeModal('modalCreateInterBankTransfer');
+            await loadTreasuryData();
+            switchTreasurySubtab('transfers');
+        }
+    } catch (err) {
+        showToast('Gagal transfer antar-bank: ' + err.message, 'error');
+    }
+}
+
+async function openModalForecastDetail(forecastID) {
+    try {
+        const fc = await api(`/treasury/forecasts/${forecastID}`);
+        if (!fc) return;
+
+        const elTitle = document.getElementById('trDetailForecastTitle');
+        const elSub = document.getElementById('trDetailForecastSubtitle');
+        const elOpen = document.getElementById('trDetailOpening');
+        const elIn = document.getElementById('trDetailInflow');
+        const elOut = document.getElementById('trDetailOutflow');
+        const elEnd = document.getElementById('trDetailEnding');
+        const tbody = document.getElementById('trDetailItemsTableBody');
+
+        if (elTitle) elTitle.textContent = `📊 Rincian Proyeksi: ${fc.forecast_code} - ${fc.name}`;
+        if (elSub) elSub.textContent = `Horizon: ${fc.horizon_days} Hari | Runway: ${fc.estimated_runway_days} Hari | Risiko: ${(fc.deficit_risk || 'Normal').toUpperCase()}`;
+        if (elOpen) elOpen.textContent = formatCurrency(fc.opening_cash_balance || 0);
+        if (elIn) elIn.textContent = '+' + formatCurrency(fc.projected_inflow || 0);
+        if (elOut) elOut.textContent = '-' + formatCurrency(fc.projected_outflow || 0);
+        if (elEnd) elEnd.textContent = formatCurrency(fc.projected_ending_cash || 0);
+
+        if (tbody) {
+            const items = fc.items || [];
+            if (items.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Tidak ada baris rincian untuk horizon proyeksi ini.</td></tr>`;
+            } else {
+                tbody.innerHTML = items.map(it => {
+                    const isInflow = it.direction === 'inflow';
+                    return `
+                        <tr>
+                            <td>
+                                <span class="badge" style="background: rgba(99, 102, 241, 0.12); color: #818cf8; text-transform: uppercase;">
+                                    ${escapeHtml(it.category || '')}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge" style="background: ${isInflow ? 'rgba(52, 211, 153, 0.15)' : 'rgba(248, 113, 113, 0.15)'}; color: ${isInflow ? '#34d399' : '#f87171'};">
+                                    ${isInflow ? '⬇ Kas Masuk' : '⬆ Kas Keluar'}
+                                </span>
+                            </td>
+                            <td style="font-size: 0.82rem; color: var(--text-muted);">${it.expected_date ? it.expected_date.substring(0, 10) : '-'}</td>
+                            <td style="font-weight: 600;">${formatCurrency(it.amount || 0)}</td>
+                            <td style="font-size: 0.82rem;">${(it.probability_pct || 100).toFixed(0)}%</td>
+                            <td style="font-weight: 700; color: ${isInflow ? '#34d399' : '#f87171'};">
+                                ${isInflow ? '+' : '-'}${formatCurrency(it.weighted_amount || 0)}
+                            </td>
+                            <td style="font-family: monospace; font-size: 0.82rem;">${escapeHtml(it.source_document || '-')}</td>
+                            <td style="font-size: 0.82rem; color: var(--text-muted);">${escapeHtml(it.description || '')}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        openModal('modalForecastDetail');
+    } catch (err) {
+        showToast('Gagal memuat rincian proyeksi: ' + err.message, 'error');
+    }
+}
+
+async function analyzeAITreasuryForForecast(forecastID) {
+    switchTreasurySubtab('aiCopilot');
+    const sel = document.getElementById('trAuditForecastSelect');
+    if (sel) sel.value = forecastID;
+    await loadAITreasuryForSelectedForecast();
+}
+
+async function loadAITreasuryForSelectedForecast() {
+    const sel = document.getElementById('trAuditForecastSelect');
+    if (!sel || !sel.value) return;
+
+    const forecastID = sel.value;
+    const dashboard = document.getElementById('trAICopilotDashboard');
+    const emptyState = document.getElementById('trAICopilotEmptyState');
+
+    try {
+        showToast('Menghubungkan ke Cloudflare Workers AI Copilot untuk analisis likuiditas & modal kerja...', 'info');
+        const report = await api(`/treasury/forecasts/${forecastID}/ai-advisor`);
+        if (!report) return;
+
+        if (dashboard) dashboard.style.display = 'block';
+        if (emptyState) emptyState.style.display = 'none';
+
+        const elStatus = document.getElementById('trAiHealthStatus');
+        const elScore = document.getElementById('trAiHealthScore');
+        const elRunway = document.getElementById('trAiRunwayMonths');
+        const elLowest = document.getElementById('trAiLowestPoint');
+        const elEngine = document.getElementById('trAiEngineBadge');
+        const elSummary = document.getElementById('trAiExecutiveSummary');
+        const elAdvice = document.getElementById('trAiActionableAdvice');
+        const elMetrics = document.getElementById('trAiMetricsGrid');
+
+        if (elStatus) {
+            elStatus.textContent = (report.liquidity_health || 'HEALTHY').toUpperCase();
+            elStatus.style.color = report.liquidity_health === 'CRITICAL' ? '#f87171' : (report.liquidity_health === 'WARNING' ? '#fbbf24' : '#34d399');
+        }
+        if (elScore) elScore.textContent = `${report.health_score || 0} / 100`;
+        if (elRunway) elRunway.textContent = `${(report.estimated_runway_months || 0).toFixed(1)} Bulan`;
+        if (elLowest) elLowest.textContent = formatCurrency(report.stress_test_lowest_point || 0);
+        if (elEngine) elEngine.textContent = report.ai_provider || 'Cloudflare Workers AI';
+        if (elSummary) elSummary.textContent = report.executive_summary || '-';
+
+        if (elAdvice) {
+            const list = report.actionable_advice || [];
+            elAdvice.innerHTML = list.map((adv, idx) => `
+                <div style="display: flex; align-items: flex-start; gap: 0.5rem; background: var(--bg-card); padding: 0.5rem; border-radius: 6px; border-left: 3px solid #6366f1;">
+                    <span style="font-weight: 700; color: #6366f1;">#${idx + 1}</span>
+                    <span>${escapeHtml(adv)}</span>
+                </div>
+            `).join('');
+        }
+
+        if (elMetrics) {
+            const metrics = report.working_capital_metrics || [];
+            elMetrics.innerHTML = metrics.map(m => `
+                <div style="background: var(--bg-card); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">${escapeHtml(m.metric_name)}</div>
+                    <div style="font-size: 1.25rem; font-weight: 800; color: ${m.status === 'OPTIMAL' ? '#34d399' : '#fbbf24'};">
+                        ${m.current_val.toFixed(1)}
+                    </div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem;">
+                        Target: ${m.benchmark.toFixed(1)} | <span class="badge" style="font-size: 0.65rem;">${escapeHtml(m.status)}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        showToast('Analisis Likuiditas & Modal Kerja selesai!', 'success');
+    } catch (err) {
+        showToast('Gagal memuat analisis AI Treasury: ' + err.message, 'error');
+    }
+}
+
+// ============================================================================
+// 44. ADVANCED MRP II: WORK CENTERS, ROUTINGS, WORK ORDERS & GANTT CAPACITY PLANNING (MODUL KE-40)
+// ============================================================================
+
+let cachedWorkCenters = [];
+let cachedRoutings = [];
+let cachedWorkOrders = [];
+let cachedProductsList = [];
+
+async function loadMRPAdvancedData() {
+    try {
+        await Promise.all([
+            fetchMRPAdvancedStats(),
+            fetchMRPWorkCenters(),
+            fetchMRPRoutings(),
+            fetchMRPWorkOrders(),
+            fetchMRPGanttSchedule()
+        ]);
+    } catch (err) {
+        console.error('Error loading MRP Advanced data:', err);
+        showToast('Gagal memuat data Advanced MRP II: ' + err.message, 'error');
+    }
+}
+
+async function fetchMRPAdvancedStats() {
+    try {
+        const res = await apiGet('/api/v1/mrp-advanced/stats');
+        const s = res.data || {};
+
+        const elWC = document.getElementById('mrpKpiTotalWorkCenters');
+        if (elWC) elWC.textContent = s.total_work_centers || 0;
+
+        const elOEE = document.getElementById('mrpKpiAvgOEE');
+        if (elOEE) elOEE.textContent = (s.overall_avg_oee || 0).toFixed(1) + '%';
+
+        const elProg = document.getElementById('mrpKpiInProgressWOs');
+        if (elProg) elProg.textContent = s.in_progress_work_orders || 0;
+
+        const elPend = document.getElementById('mrpKpiPendingWOs');
+        if (elPend) elPend.textContent = (s.pending_work_orders || 0) + (s.ready_work_orders || 0);
+
+        const elMachHours = document.getElementById('mrpKpiTotalMachineHours');
+        if (elMachHours) elMachHours.textContent = (s.total_machine_hours || 0).toFixed(1) + ' Jam';
+
+        const elMachCost = document.getElementById('mrpKpiTotalMachineCost');
+        if (elMachCost) elMachCost.textContent = 'Biaya: ' + formatCurrency(s.total_machine_cost || 0);
+
+        const elBottlenecks = document.getElementById('mrpKpiCriticalBottlenecks');
+        const elBottleStatus = document.getElementById('mrpKpiBottleneckStatus');
+        if (elBottlenecks) {
+            const b = s.critical_bottlenecks_num || 0;
+            elBottlenecks.textContent = b;
+            if (b > 0) {
+                elBottlenecks.style.color = '#f87171';
+                if (elBottleStatus) {
+                    elBottleStatus.textContent = b + ' Mesin Overloaded (>85%)';
+                    elBottleStatus.style.color = '#f87171';
+                }
+            } else {
+                elBottlenecks.style.color = '#34d399';
+                if (elBottleStatus) {
+                    elBottleStatus.textContent = 'Semua Jalur Seimbang';
+                    elBottleStatus.style.color = '#34d399';
+                }
+            }
+        }
+    } catch (err) {
+        console.warn('Could not fetch MRP stats:', err);
+    }
+}
+
+async function fetchMRPWorkCenters() {
+    try {
+        const res = await apiGet('/api/v1/mrp-advanced/work-centers');
+        cachedWorkCenters = res.data || [];
+
+        const elCount = document.getElementById('mrpCountWorkCenters');
+        if (elCount) elCount.textContent = cachedWorkCenters.length;
+
+        renderWorkCentersTable(cachedWorkCenters);
+    } catch (err) {
+        console.error('Failed to fetch work centers:', err);
+    }
+}
+
+function renderWorkCentersTable(items) {
+    const tbody = document.getElementById('mrpWorkCentersTableBody');
+    if (!tbody) return;
+
+    if (!items || items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);">Belum ada pusat kerja/mesin. Klik "+ Tambah Stasiun" untuk mendaftarkan mesin pabrik baru.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = items.map(wc => {
+        let badgeColor = 'rgba(52, 211, 153, 0.15); color: #34d399';
+        let statusLabel = 'Tersedia';
+        if (wc.status === 'busy') {
+            badgeColor = 'rgba(168, 85, 247, 0.15); color: #a855f7';
+            statusLabel = 'Sedang Beroperasi';
+        } else if (wc.status === 'maintenance') {
+            badgeColor = 'rgba(251, 191, 36, 0.15); color: #fbbf24';
+            statusLabel = 'Maintenance';
+        }
+
+        return `
+            <tr>
+                <td>
+                    <div style="font-weight: 700; color: var(--text-main);">${escapeHtml(wc.name)}</div>
+                    <div style="font-size: 0.75rem; color: #6366f1; font-family: monospace;">${escapeHtml(wc.code)}</div>
+                </td>
+                <td>
+                    <span class="badge" style="background: rgba(99, 102, 241, 0.12); color: #818cf8; text-transform: capitalize;">
+                        ${escapeHtml(wc.work_center_type || 'Machining')}
+                    </span>
+                </td>
+                <td><strong>${(wc.capacity_per_hour || 0).toFixed(1)}</strong> unit/jam</td>
+                <td>${(wc.working_hours_per_day || 8).toFixed(0)} jam/hari</td>
+                <td>
+                    <span style="font-weight: 700; color: ${(wc.total_oee_percentage || 0) >= 80 ? '#34d399' : '#fbbf24'};">
+                        ${(wc.total_oee_percentage || 0).toFixed(1)}%
+                    </span>
+                </td>
+                <td><strong>${formatCurrency(wc.cost_per_hour || 0)}</strong></td>
+                <td>${(wc.machine_power_kw || 0).toFixed(1)} kW</td>
+                <td>
+                    <span class="badge" style="background: ${badgeColor};">
+                        ${statusLabel}
+                    </span>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function fetchMRPRoutings() {
+    try {
+        const res = await apiGet('/api/v1/mrp-advanced/routings');
+        cachedRoutings = res.data || [];
+
+        const elCount = document.getElementById('mrpCountRoutings');
+        if (elCount) elCount.textContent = cachedRoutings.length;
+
+        renderRoutingsTable(cachedRoutings);
+    } catch (err) {
+        console.error('Failed to fetch routings:', err);
+    }
+}
+
+function renderRoutingsTable(items) {
+    const tbody = document.getElementById('mrpRoutingsTableBody');
+    if (!tbody) return;
+
+    if (!items || items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">Belum ada rute operasi produksi. Klik "+ Buat Rute Operasi" untuk menyusun tahapan fabrikasi.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = items.map(rt => {
+        const ops = rt.operations || [];
+        const opBadges = ops.map(op => `
+            <span class="badge" style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); font-size: 0.7rem; margin: 2px;">
+                ${op.sequence}. ${escapeHtml(op.name)}
+            </span>
+        `).join('');
+
+        let totalCycle = 0;
+        ops.forEach(op => {
+            totalCycle += (op.setup_time_minutes || 0) + (op.cycle_time_per_unit_minutes || 0) + (op.teardown_time_minutes || 0);
+        });
+
+        const prodName = rt.product ? rt.product.name : 'Produk #' + (rt.product_id || '-');
+
+        return `
+            <tr>
+                <td style="font-family: monospace; font-weight: 700; color: #6366f1;">${escapeHtml(rt.routing_code)}</td>
+                <td style="font-weight: 600;">${escapeHtml(rt.name)}</td>
+                <td>${escapeHtml(prodName)}</td>
+                <td>
+                    <div style="display: flex; flex-wrap: wrap; gap: 2px; max-width: 320px;">
+                        ${opBadges || '<span class="text-muted">-</span>'}
+                    </div>
+                </td>
+                <td><strong>${totalCycle.toFixed(0)} menit</strong> / batch</td>
+                <td style="font-size: 0.8rem; color: var(--text-muted);">${escapeHtml(rt.notes || '-')}</td>
+                <td style="text-align: center;">
+                    <button class="btn btn-sm btn-outline" onclick="prepareGenerateFromRouting(${rt.id})">⚙️ Jadwalkan</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function fetchMRPWorkOrders(stateFilter) {
+    try {
+        let url = '/api/v1/mrp-advanced/work-orders';
+        if (stateFilter && stateFilter !== 'all') {
+            url += '?state=' + stateFilter;
+        }
+        const res = await apiGet(url);
+        cachedWorkOrders = res.data || [];
+
+        const elCount = document.getElementById('mrpCountWorkOrders');
+        if (elCount) elCount.textContent = cachedWorkOrders.length;
+
+        renderWorkOrdersTable(cachedWorkOrders);
+    } catch (err) {
+        console.error('Failed to fetch work orders:', err);
+    }
+}
+
+function filterWorkOrders() {
+    const sel = document.getElementById('mrpWOStateFilter');
+    const val = sel ? sel.value : 'all';
+    fetchMRPWorkOrders(val);
+}
+
+function renderWorkOrdersTable(items) {
+    const tbody = document.getElementById('mrpWorkOrdersTableBody');
+    if (!tbody) return;
+
+    if (!items || items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-muted);">Tidak ada perintah kerja yang sesuai dengan filter.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = items.map(wo => {
+        let stateBadge = '';
+        let actionBtn = '';
+
+        switch (wo.state) {
+            case 'ready':
+                stateBadge = '<span class="badge" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24;">⚡ Ready</span>';
+                actionBtn = `<button class="btn btn-sm btn-primary" onclick="handleStartWorkOrder(${wo.id})">▶️ Mulai</button>`;
+                break;
+            case 'in_progress':
+                stateBadge = '<span class="badge" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;">⏳ In Progress</span>';
+                actionBtn = `<button class="btn btn-sm btn-success" onclick="openModalFinishWorkOrder(${wo.id})">✅ Selesai</button>`;
+                break;
+            case 'done':
+                stateBadge = '<span class="badge" style="background: rgba(52, 211, 153, 0.15); color: #34d399;">✓ Done</span>';
+                actionBtn = '<span style="color: #34d399; font-size: 0.8rem;">Selesai</span>';
+                break;
+            case 'pending':
+                stateBadge = '<span class="badge" style="background: rgba(255, 255, 255, 0.08); color: var(--text-muted);">Pending</span>';
+                actionBtn = '<span class="text-muted" style="font-size: 0.75rem;">Menunggu Antrean</span>';
+                break;
+            default:
+                stateBadge = `<span class="badge">${escapeHtml(wo.state)}</span>`;
+                actionBtn = '-';
+        }
+
+        const wcName = wo.work_center ? wo.work_center.name : 'Stasiun #' + wo.work_center_id;
+
+        return `
+            <tr>
+                <td style="font-family: monospace; font-weight: 700; color: #6366f1;">${escapeHtml(wo.work_order_code)}</td>
+                <td style="font-weight: 600;">${escapeHtml(wo.production_order_name || '-')}</td>
+                <td>
+                    <div style="font-weight: 600;">${escapeHtml(wo.operation_name)}</div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted);">Urutan ke-${wo.sequence}</div>
+                </td>
+                <td>${escapeHtml(wcName)}</td>
+                <td>${(wo.planned_duration_minutes || 0).toFixed(0)} menit</td>
+                <td>
+                    <div>Target: <strong>${(wo.qty_planned || 0).toFixed(0)}</strong></div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Hasil: ${(wo.qty_produced || 0).toFixed(0)} (Scrap: ${(wo.qty_scrap || 0).toFixed(0)})</div>
+                </td>
+                <td>
+                    <div>${(wo.machine_hours || 0).toFixed(2)} jam</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">${formatCurrency(wo.total_machine_cost || 0)}</div>
+                </td>
+                <td>${stateBadge}</td>
+                <td style="text-align: center;">${actionBtn}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function fetchMRPGanttSchedule() {
+    try {
+        const res = await apiGet('/api/v1/mrp-advanced/gantt-capacity?days=14');
+        const data = res.data || {};
+        renderGanttCapacityView(data);
+    } catch (err) {
+        console.error('Failed to fetch Gantt capacity schedule:', err);
+    }
+}
+
+function renderGanttCapacityView(data) {
+    // 1. Capacity Summaries Grid
+    const summariesContainer = document.getElementById('mrpCapacitySummariesGrid');
+    if (summariesContainer && data.capacity_summaries) {
+        summariesContainer.innerHTML = data.capacity_summaries.map(cs => {
+            const util = cs.utilization_percentage || 0;
+            const isBottle = cs.is_bottleneck || util > 85;
+            const barColor = isBottle ? '#f87171' : (util > 60 ? '#fbbf24' : '#34d399');
+
+            return `
+                <div style="background: var(--bg-card); padding: 1.25rem; border-radius: 8px; border: 1px solid ${isBottle ? 'rgba(248, 113, 113, 0.4)' : 'var(--border-color)'};">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                        <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);">${escapeHtml(cs.work_center_name)}</div>
+                        <span class="badge" style="background: ${isBottle ? 'rgba(248, 113, 113, 0.15); color: #f87171' : 'rgba(52, 211, 153, 0.15); color: #34d399'}; font-size: 0.7rem;">
+                            ${isBottle ? '⚠️ Bottleneck' : 'Optimal'}
+                        </span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.25rem;">
+                        <span class="text-muted">Utilisasi:</span>
+                        <strong style="color: ${barColor};">${util.toFixed(1)}%</strong>
+                    </div>
+                    <div style="background: rgba(255, 255, 255, 0.08); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 0.75rem;">
+                        <div style="background: ${barColor}; width: ${Math.min(util, 100)}%; height: 100%;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted);">
+                        <span>Terjadwal: ${(cs.scheduled_hours_total || 0).toFixed(1)} Jam</span>
+                        <span>Aktif: ${cs.active_work_orders_count || 0} SPK</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // 2. Gantt Timeline Container
+    const ganttContainer = document.getElementById('mrpGanttTimelineContainer');
+    if (ganttContainer && data.slots) {
+        if (data.slots.length === 0) {
+            ganttContainer.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">Tidak ada alokasi work order dalam rentang 14 hari ke depan.</div>';
+            return;
+        }
+
+        // Group slots by Work Center
+        const byWC = {};
+        data.slots.forEach(slot => {
+            if (!byWC[slot.work_center_name]) {
+                byWC[slot.work_center_name] = [];
+            }
+            byWC[slot.work_center_name].push(slot);
+        });
+
+        let html = '<div style="min-width: 650px;">';
+        for (const [wcName, slots] of Object.entries(byWC)) {
+            html += `
+                <div style="margin-bottom: 1rem; background: var(--bg-main); padding: 0.75rem; border-radius: 6px; border: 1px solid var(--border-color);">
+                    <div style="font-weight: 700; font-size: 0.85rem; color: #818cf8; margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
+                        <span>🏢 ${escapeHtml(wcName)}</span>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">${slots.length} alokasi operasi</span>
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+            `;
+
+            slots.forEach(slot => {
+                let bg = 'rgba(56, 189, 248, 0.15)';
+                let border = '#38bdf8';
+                let text = '#38bdf8';
+
+                if (slot.state === 'ready') {
+                    bg = 'rgba(251, 191, 36, 0.15)';
+                    border = '#fbbf24';
+                    text = '#fbbf24';
+                } else if (slot.state === 'in_progress') {
+                    bg = 'rgba(168, 85, 247, 0.2)';
+                    border = '#a855f7';
+                    text = '#c084fc';
+                } else if (slot.state === 'done') {
+                    bg = 'rgba(52, 211, 153, 0.15)';
+                    border = '#34d399';
+                    text = '#34d399';
+                }
+
+                html += `
+                    <div style="background: ${bg}; border-left: 3px solid ${border}; padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.75rem; min-width: 140px;">
+                        <div style="font-weight: 700; color: ${text};">${escapeHtml(slot.operation_name)}</div>
+                        <div style="color: var(--text-muted); font-size: 0.7rem;">${escapeHtml(slot.work_order_code)} (${escapeHtml(slot.mo_name || '-')})</div>
+                        <div style="margin-top: 0.2rem; font-weight: 600;">⏱ ${(slot.duration_minutes || 0).toFixed(0)} min</div>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+            `;
+        }
+        html += '</div>';
+        ganttContainer.innerHTML = html;
+    }
+}
+
+function switchMRPSubtab(tabName) {
+    const tabs = ['workCenters', 'routings', 'workOrders', 'ganttAI'];
+    tabs.forEach(t => {
+        const pane = document.getElementById('mrpSubtab' + t.charAt(0).toUpperCase() + t.slice(1));
+        const btn = document.getElementById('mrpSubtabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (pane) pane.style.display = (t === tabName) ? 'block' : 'none';
+        if (btn) {
+            if (t === tabName) {
+                btn.classList.add('active');
+                btn.style.borderBottom = '2px solid #6366f1';
+                btn.style.fontWeight = '700';
+                btn.style.color = '#6366f1';
+            } else {
+                btn.classList.remove('active');
+                btn.style.borderBottom = 'none';
+                btn.style.fontWeight = '600';
+                btn.style.color = 'var(--text-muted)';
+            }
+        }
+    });
+}
+
+// ----------------------------------------------------------------------------
+// MODAL ACTIONS: WORK CENTER
+// ----------------------------------------------------------------------------
+
+function openModalCreateWorkCenter() {
+    const f = document.getElementById('formCreateWorkCenter');
+    if (f) f.reset();
+    openModal('modalCreateWorkCenter');
+}
+
+async function handleCreateWorkCenter(e) {
+    e.preventDefault();
+    try {
+        const payload = {
+            name: document.getElementById('mrpWcName').value,
+            work_center_type: document.getElementById('mrpWcType').value,
+            capacity_per_hour: parseFloat(document.getElementById('mrpWcCapacity').value) || 10,
+            working_hours_per_day: parseFloat(document.getElementById('mrpWcWorkHours').value) || 8,
+            total_oee_percentage: parseFloat(document.getElementById('mrpWcOEE').value) || 85,
+            cost_per_hour: parseFloat(document.getElementById('mrpWcCostPerHour').value) || 150000,
+            machine_power_kw: parseFloat(document.getElementById('mrpWcPowerKW').value) || 15,
+            notes: document.getElementById('mrpWcNotes').value
+        };
+
+        const res = await apiPost('/api/v1/mrp-advanced/work-centers', payload);
+        showToast('Pusat Kerja ' + res.data.code + ' berhasil didaftarkan!', 'success');
+        closeModal('modalCreateWorkCenter');
+        loadMRPAdvancedData();
+    } catch (err) {
+        showToast('Gagal membuat pusat kerja: ' + err.message, 'error');
+    }
+}
+
+// ----------------------------------------------------------------------------
+// MODAL ACTIONS: ROUTING
+// ----------------------------------------------------------------------------
+
+async function openModalCreateRouting() {
+    const f = document.getElementById('formCreateRouting');
+    if (f) f.reset();
+
+    // Populate Products dropdown
+    try {
+        const prodRes = await apiGet('/api/v1/products');
+        cachedProductsList = prodRes.data || [];
+        const sel = document.getElementById('mrpRtProductSelect');
+        if (sel) {
+            sel.innerHTML = '<option value="">-- Pilih Produk Jadi --</option>' +
+                cachedProductsList.map(p => `<option value="${p.id}">${escapeHtml(p.name)} (${escapeHtml(p.default_code || 'ID:' + p.id)})</option>`).join('');
+        }
+    } catch (err) {
+        console.warn('Could not load products:', err);
+    }
+
+    // Initialize 3 default operation rows
+    const tbody = document.getElementById('mrpRoutingOpsTableBody');
+    if (tbody) {
+        tbody.innerHTML = '';
+        addRoutingOperationRow('Milling Komponen Presisi', 10, 15, 5, 5);
+        addRoutingOperationRow('Pengelasan Rangka Struktural', 20, 10, 4, 5);
+        addRoutingOperationRow('Perakitan Akhir & QC', 30, 15, 6, 10);
+    }
+
+    openModal('modalCreateRouting');
+}
+
+function addRoutingOperationRow(defaultName = '', seq = 0, setup = 15, cycle = 5, teardown = 10) {
+    const tbody = document.getElementById('mrpRoutingOpsTableBody');
+    if (!tbody) return;
+
+    const rowCount = tbody.children.length;
+    const currentSeq = seq || ((rowCount + 1) * 10);
+
+    const wcOptions = cachedWorkCenters.map(wc =>
+        `<option value="${wc.id}">${escapeHtml(wc.name)} (${escapeHtml(wc.code)})</option>`
+    ).join('');
+
+    const tr = document.createElement('tr');
+    tr.className = 'routing-op-row';
+    tr.innerHTML = `
+        <td><input type="number" class="form-control form-control-sm op-seq" value="${currentSeq}" style="padding: 2px 4px;"></td>
+        <td><input type="text" class="form-control form-control-sm op-name" value="${escapeHtml(defaultName)}" placeholder="Nama Operasi" required style="padding: 2px 4px;"></td>
+        <td>
+            <select class="form-control form-control-sm op-wc" required style="padding: 2px 4px;">
+                ${wcOptions || '<option value="1">Stasiun Produksi Utama</option>'}
+            </select>
+        </td>
+        <td><input type="number" class="form-control form-control-sm op-setup" value="${setup}" min="0" style="padding: 2px 4px;"></td>
+        <td><input type="number" class="form-control form-control-sm op-cycle" value="${cycle}" min="0.1" step="any" style="padding: 2px 4px;"></td>
+        <td><input type="number" class="form-control form-control-sm op-teardown" value="${teardown}" min="0" style="padding: 2px 4px;"></td>
+        <td><button type="button" class="btn btn-sm" style="color: #f87171; padding: 0 4px;" onclick="this.closest('tr').remove()">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+}
+
+async function handleCreateRouting(e) {
+    e.preventDefault();
+    try {
+        const rows = document.querySelectorAll('#mrpRoutingOpsTableBody tr.routing-op-row');
+        const operations = [];
+
+        rows.forEach(r => {
+            const seq = parseInt(r.querySelector('.op-seq').value) || 10;
+            const name = r.querySelector('.op-name').value;
+            const wcID = parseInt(r.querySelector('.op-wc').value) || 1;
+            const setup = parseFloat(r.querySelector('.op-setup').value) || 15;
+            const cycle = parseFloat(r.querySelector('.op-cycle').value) || 5;
+            const teardown = parseFloat(r.querySelector('.op-teardown').value) || 10;
+
+            operations.push({
+                sequence: seq,
+                name: name,
+                work_center_id: wcID,
+                setup_time_minutes: setup,
+                cycle_time_per_unit_minutes: cycle,
+                teardown_time_minutes: teardown
+            });
+        });
+
+        if (operations.length === 0) {
+            showToast('Rute harus memiliki minimal 1 tahapan operasi!', 'warning');
+            return;
+        }
+
+        const payload = {
+            name: document.getElementById('mrpRtName').value,
+            product_id: parseInt(document.getElementById('mrpRtProductSelect').value) || 1,
+            notes: document.getElementById('mrpRtNotes').value,
+            operations: operations
+        };
+
+        const res = await apiPost('/api/v1/mrp-advanced/routings', payload);
+        showToast('Rute Operasi ' + res.data.routing_code + ' berhasil dibuat!', 'success');
+        closeModal('modalCreateRouting');
+        loadMRPAdvancedData();
+    } catch (err) {
+        showToast('Gagal membuat rute operasi: ' + err.message, 'error');
+    }
+}
+
+// ----------------------------------------------------------------------------
+// MODAL ACTIONS: WORK ORDERS GENERATION
+// ----------------------------------------------------------------------------
+
+async function openModalGenerateWorkOrders() {
+    const f = document.getElementById('formGenerateWorkOrders');
+    if (f) f.reset();
+
+    // Populate MO and Routing dropdowns
+    try {
+        const [moRes, rtRes] = await Promise.all([
+            apiGet('/api/v1/mrp/productions').catch(() => ({ data: [] })),
+            apiGet('/api/v1/mrp-advanced/routings')
+        ]);
+
+        const mos = moRes.data || [];
+        const rts = rtRes.data || [];
+
+        const selMO = document.getElementById('mrpMoSelect');
+        if (selMO) {
+            selMO.innerHTML = mos.length > 0 ?
+                mos.map(mo => `<option value="${mo.id}">${escapeHtml(mo.name)} - Qty: ${mo.product_qty || 1} unit (${escapeHtml(mo.state)})</option>`).join('') :
+                '<option value="1">MO/2026/00001 - Standar 10 unit</option>';
+        }
+
+        const selRT = document.getElementById('mrpRoutingSelect');
+        if (selRT) {
+            selRT.innerHTML = rts.length > 0 ?
+                rts.map(rt => `<option value="${rt.id}">${escapeHtml(rt.name)} (${escapeHtml(rt.routing_code)})</option>`).join('') :
+                '<option value="1">Rute Standar Fabrikasi</option>';
+        }
+    } catch (err) {
+        console.warn('Could not populate MO/Routing dropdowns:', err);
+    }
+
+    openModal('modalGenerateWorkOrders');
+}
+
+function prepareGenerateFromRouting(routingId) {
+    openModalGenerateWorkOrders().then(() => {
+        const sel = document.getElementById('mrpRoutingSelect');
+        if (sel) sel.value = routingId;
+    });
+}
+
+async function handleGenerateWorkOrders(e) {
+    e.preventDefault();
+    try {
+        const payload = {
+            production_order_id: parseInt(document.getElementById('mrpMoSelect').value) || 1,
+            routing_id: parseInt(document.getElementById('mrpRoutingSelect').value) || 1
+        };
+
+        const res = await apiPost('/api/v1/mrp-advanced/work-orders/generate', payload);
+        showToast('Berhasil menjadwalkan ' + (res.data ? res.data.length : 0) + ' Work Orders!', 'success');
+        closeModal('modalGenerateWorkOrders');
+        loadMRPAdvancedData();
+        switchMRPSubtab('workOrders');
+    } catch (err) {
+        showToast('Gagal menjadwalkan SPK: ' + err.message, 'error');
+    }
+}
+
+async function handleStartWorkOrder(id) {
+    try {
+        await apiPost(`/api/v1/mrp-advanced/work-orders/${id}/start`, {});
+        showToast('Work Order #' + id + ' dimulai! Stasiun mesin dialihkan ke sibuk.', 'success');
+        loadMRPAdvancedData();
+    } catch (err) {
+        showToast('Gagal memulai Work Order: ' + err.message, 'error');
+    }
+}
+
+function openModalFinishWorkOrder(id) {
+    const wo = cachedWorkOrders.find(w => w.id === id);
+    if (!wo) return;
+
+    document.getElementById('mrpFinishWoId').value = wo.id;
+    document.getElementById('mrpFinishWoTitle').textContent = wo.work_order_code + ' (' + (wo.operation_name || '') + ')';
+    document.getElementById('mrpFinishWoSub').textContent = 'MO: ' + (wo.production_order_name || '-') + ' | Target: ' + (wo.qty_planned || 10) + ' unit';
+    document.getElementById('mrpFinishQtyProduced').value = wo.qty_planned || 10;
+    document.getElementById('mrpFinishQtyScrap').value = 0;
+    document.getElementById('mrpFinishActualDuration').value = (wo.planned_duration_minutes || 60).toFixed(0);
+
+    openModal('modalFinishWorkOrder');
+}
+
+async function handleFinishWorkOrder(e) {
+    e.preventDefault();
+    try {
+        const id = document.getElementById('mrpFinishWoId').value;
+        const payload = {
+            qty_produced: parseFloat(document.getElementById('mrpFinishQtyProduced').value) || 0,
+            qty_scrap: parseFloat(document.getElementById('mrpFinishQtyScrap').value) || 0,
+            actual_duration_minutes: parseFloat(document.getElementById('mrpFinishActualDuration').value) || 60,
+            notes: document.getElementById('mrpFinishNotes').value
+        };
+
+        const res = await apiPost(`/api/v1/mrp-advanced/work-orders/${id}/finish`, payload);
+        const data = res.data || {};
+        showToast(`Work Order selesai! Terhitung ${data.machine_hours.toFixed(2)} jam mesin (${formatCurrency(data.total_machine_cost)}).`, 'success');
+        closeModal('modalFinishWorkOrder');
+        loadMRPAdvancedData();
+    } catch (err) {
+        showToast('Gagal menyelesaikan Work Order: ' + err.message, 'error');
+    }
+}
+
+// ----------------------------------------------------------------------------
+// AI INDUSTRIAL ENGINEERING COPILOT ADVISOR
+// ----------------------------------------------------------------------------
+
+async function loadAIMRPCapacityAdvisor() {
+    try {
+        showToast('Menghubungi AI Industrial Engineer untuk audit kapasitas...', 'info');
+        switchMRPSubtab('ganttAI');
+
+        const res = await apiGet('/api/v1/mrp-advanced/ai-capacity-advisor');
+        const report = res.data || {};
+
+        const elStatus = document.getElementById('mrpAiOverallStatus');
+        if (elStatus) {
+            elStatus.textContent = report.overall_status || 'BALANCED';
+            if (report.overall_status === 'OVERLOADED') {
+                elStatus.style.color = '#ef4444';
+            } else if (report.overall_status === 'BOTTLENECK_DETECTED') {
+                elStatus.style.color = '#fbbf24';
+            } else {
+                elStatus.style.color = '#34d399';
+            }
+        }
+
+        const elScore = document.getElementById('mrpAiEfficiencyScore');
+        if (elScore) elScore.textContent = (report.schedule_efficiency_score || 88) + ' / 100';
+
+        const elBottle = document.getElementById('mrpAiBottleneckName');
+        if (elBottle) elBottle.textContent = report.bottleneck_work_center || '-';
+
+        const elBottleBadge = document.getElementById('mrpAiBottleneckUtilBadge');
+        if (elBottleBadge) elBottleBadge.textContent = 'Utilisasi: ' + (report.bottleneck_utilization || 0).toFixed(1) + '%';
+
+        const elLeadTime = document.getElementById('mrpAiLeadTimeDays');
+        if (elLeadTime) elLeadTime.textContent = (report.recommended_lead_time_days || 5) + ' Hari';
+
+        const elBadge = document.getElementById('mrpAiEngineBadge');
+        if (elBadge) elBadge.textContent = report.ai_provider || 'Cloudflare Workers AI (@cf/meta/llama-3.1-8b-instruct)';
+
+        const elSummary = document.getElementById('mrpAiExecutiveSummary');
+        if (elSummary) elSummary.textContent = report.executive_summary || '';
+
+        const elAdvice = document.getElementById('mrpAiLineBalancingAdvice');
+        if (elAdvice) {
+            const list = report.line_balancing_advice || [];
+            elAdvice.innerHTML = list.map((item, idx) => `
+                <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                    <span style="color: #818cf8; font-weight: 700;">#${idx + 1}</span>
+                    <span style="color: var(--text-muted); line-height: 1.5;">${escapeHtml(item)}</span>
+                </div>
+            `).join('');
+        }
+
+        showToast('Audit Kapasitas & Line Balancing AI selesai!', 'success');
+    } catch (err) {
+        showToast('Gagal memuat AI Capacity Advisor: ' + err.message, 'error');
+    }
+}
+
+// =========================================================================
+// MODUL KE-41: E-BUPOT 21/26 & SPT MASA PPH 21 DJP EXPORT (PP 58/2023 & PMK 168/2023)
+// =========================================================================
+
+let ebupotPeriodsList = [];
+
+async function loadTaxEbupotData() {
+    try {
+        await Promise.all([
+            loadEbupotStats(),
+            loadEbupotPeriods()
+        ]);
+    } catch (err) {
+        console.error('Error loading Tax e-Bupot data:', err);
+        showToast('Gagal memuat data e-Bupot 21/26: ' + err.message, 'error');
+    }
+}
+
+async function loadEbupotStats() {
+    try {
+        const res = await apiGet('/api/v1/tax-ebupot/stats');
+        const data = res.data || res;
+
+        document.getElementById('ebupotKpiTotalPeriods').textContent = data.total_periods || 0;
+        document.getElementById('ebupotKpiActivePeriod').textContent = data.active_period_code || '-';
+        document.getElementById('ebupotKpiTotalSlips').textContent = data.total_withholding_slips || 0;
+        document.getElementById('ebupotKpiTotalGross').textContent = formatCurrency(data.total_gross_wages || 0);
+        document.getElementById('ebupotKpiTotalTaxWithheld').textContent = formatCurrency(data.total_tax_withheld || 0);
+        
+        const validPct = data.total_withholding_slips > 0
+            ? Math.round((data.valid_nik_count / data.total_withholding_slips) * 100)
+            : 100;
+        document.getElementById('ebupotKpiValidNIKPct').textContent = validPct + '%';
+        
+        if (document.getElementById('ebupotCountPeriods')) {
+            document.getElementById('ebupotCountPeriods').textContent = data.total_periods || 0;
+        }
+        if (document.getElementById('ebupotCountSlips')) {
+            document.getElementById('ebupotCountSlips').textContent = data.total_withholding_slips || 0;
+        }
+    } catch (err) {
+        console.warn('Could not load e-Bupot stats:', err);
+    }
+}
+
+function switchEbupotSubtab(tab) {
+    const subtabs = ['periods', 'slips', 'copilot'];
+    subtabs.forEach(t => {
+        const el = document.getElementById('ebupotSubtab' + t.charAt(0).toUpperCase() + t.slice(1));
+        const btn = document.getElementById('ebupotSubtabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (el) el.style.display = (t === tab) ? 'block' : 'none';
+        if (btn) {
+            if (t === tab) {
+                btn.classList.add('active');
+                btn.style.borderBottom = '2px solid #6366f1';
+                btn.style.color = '#6366f1';
+                btn.style.fontWeight = '700';
+            } else {
+                btn.classList.remove('active');
+                btn.style.borderBottom = 'none';
+                btn.style.color = 'var(--text-muted)';
+                btn.style.fontWeight = '600';
+            }
+        }
+    });
+
+    if (tab === 'slips') {
+        loadEbupotSlipsForSelectedPeriod();
+    } else if (tab === 'copilot') {
+        loadAIEbupotCompliance();
+    }
+}
+
+async function loadEbupotPeriods() {
+    try {
+        const res = await apiGet('/api/v1/tax-ebupot/periods');
+        const periods = res.data || res || [];
+        ebupotPeriodsList = periods;
+
+        // Populate selects
+        const selects = ['ebupotFilterPeriodSelect', 'ebupotSlipModalPeriodSelect', 'ebupotImportPeriodSelect'];
+        selects.forEach(selectId => {
+            const el = document.getElementById(selectId);
+            if (!el) return;
+            const currentVal = el.value;
+            el.innerHTML = periods.map(p => `
+                <option value="${p.id}" ${p.id == currentVal ? 'selected' : ''}>
+                    ${p.period_code} (Bulan ${p.tax_month}/${p.tax_year}) - ${p.state.toUpperCase()}
+                </option>
+            `).join('');
+            if (periods.length > 0 && !el.value) {
+                el.value = periods[0].id;
+            }
+        });
+
+        renderEbupotPeriodsTable(periods);
+    } catch (err) {
+        console.error('Error loading e-bupot periods:', err);
+    }
+}
+
+function renderEbupotPeriodsTable(periods) {
+    const tbody = document.getElementById('ebupotPeriodsTableBody');
+    if (!tbody) return;
+
+    if (!periods || periods.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-muted);">Belum ada Masa Pajak PPh 21. Klik "+ Buka Masa Baru" untuk memulai.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = periods.map(p => {
+        const isLocked = p.state === 'locked';
+        const statusBadge = isLocked 
+            ? `<span class="badge" style="background: rgba(52, 211, 153, 0.15); color: #34d399; font-weight: 700;">LOCKED / TERLAPOR</span>`
+            : `<span class="badge" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; font-weight: 700;">OPEN (DRAFT)</span>`;
+
+        const ntpnDisplay = p.submission_ntpn 
+            ? `<div style="font-family: monospace; font-size: 0.8rem; color: #38bdf8;">${escapeHtml(p.submission_ntpn)}</div>
+               <div style="font-size: 0.7rem; color: var(--text-muted);">${escapeHtml(p.djp_receipt_number || '')}</div>`
+            : `<span style="color: var(--text-muted); font-size: 0.8rem;">-</span>`;
+
+        return `
+            <tr>
+                <td style="font-weight: 700; font-family: monospace; color: #6366f1;">${escapeHtml(p.period_code)}</td>
+                <td>Bulan ${p.tax_month} / ${p.tax_year}</td>
+                <td><span class="badge" style="background: var(--bg-main);">${p.revision_number === 0 ? 'Normal (0)' : 'Pembetulan-' + p.revision_number}</span></td>
+                <td><strong>${p.total_bupot_count}</strong> bupot</td>
+                <td style="font-weight: 600;">${formatCurrency(p.total_gross_wages)}</td>
+                <td style="font-weight: 700; color: #f87171;">${formatCurrency(p.total_tax_deducted)}</td>
+                <td>${statusBadge}</td>
+                <td>${ntpnDisplay}</td>
+                <td style="text-align: center;">
+                    <div style="display: flex; gap: 0.35rem; justify-content: center; flex-wrap: wrap;">
+                        <button class="btn btn-xs btn-outline" title="Lihat Bukti Potong" onclick="viewSlipsForPeriod(${p.id})">
+                            📋 Bupot
+                        </button>
+                        <button class="btn btn-xs btn-secondary" title="Unduh CSV Resmi DJP" onclick="downloadEbupotCSV(${p.id})">
+                            📥 CSV DJP
+                        </button>
+                        <button class="btn btn-xs btn-secondary" title="Unduh XML DJP" onclick="downloadEbupotXML(${p.id})">
+                            📄 XML
+                        </button>
+                        ${!isLocked ? `
+                            <button class="btn btn-xs btn-warning" title="Kunci & Catat NTPN" onclick="openModalLockEbupotPeriod(${p.id}, '${escapeHtml(p.period_code)}')">
+                                🔒 Kunci
+                            </button>
+                        ` : ''}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function viewSlipsForPeriod(periodId) {
+    const sel = document.getElementById('ebupotFilterPeriodSelect');
+    if (sel) {
+        sel.value = periodId;
+    }
+    switchEbupotSubtab('slips');
+}
+
+async function loadEbupotSlipsForSelectedPeriod() {
+    const periodSel = document.getElementById('ebupotFilterPeriodSelect');
+    const typeSel = document.getElementById('ebupotFilterSlipType');
+    const tbody = document.getElementById('ebupotSlipsTableBody');
+    if (!tbody) return;
+
+    const periodId = periodSel ? periodSel.value : '';
+    const slipType = typeSel ? typeSel.value : 'all';
+
+    if (!periodId) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-muted);">Silakan buat atau pilih masa pajak terlebih dahulu.</td></tr>`;
+        return;
+    }
+
+    try {
+        let url = `/api/v1/tax-ebupot/slips?period_id=${periodId}`;
+        if (slipType && slipType !== 'all') {
+            url += `&slip_type=${slipType}`;
+        }
+        const res = await apiGet(url);
+        const slips = res.data || res || [];
+
+        if (slips.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-muted);">Belum ada bukti potong pada masa pajak ini. Klik "+ Buat Bupot Manual" atau "⚡ Impor Payroll".</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = slips.map(s => {
+            const nikBadge = s.is_nik_matched
+                ? `<span class="badge" style="background: rgba(52, 211, 153, 0.15); color: #34d399; font-size: 0.7rem;">✓ NIK Valid</span>`
+                : `<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; font-size: 0.7rem;">! Periksa NIK</span>`;
+
+            let terDisplay = `<span style="color: var(--text-muted);">-</span>`;
+            if (s.slip_type === 'bp_pegawai_tetap') {
+                terDisplay = `<span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; font-weight: 700;">${s.ptkp_status || '-'} (${s.ter_category || '-'})</span>`;
+            } else {
+                terDisplay = `<span class="badge" style="background: var(--bg-main);">${s.tax_object_code}</span>`;
+            }
+
+            return `
+                <tr>
+                    <td style="font-weight: 700; font-family: monospace; color: #6366f1;">${escapeHtml(s.slip_number)}</td>
+                    <td>
+                        <div style="font-weight: 600;">${escapeHtml(s.recipient_name)}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHtml(s.notes || '')}</div>
+                    </td>
+                    <td>
+                        <div style="font-family: monospace; font-size: 0.85rem;">${escapeHtml(s.nik || s.npwp || '-')}</div>
+                        ${nikBadge}
+                    </td>
+                    <td style="font-size: 0.8rem; color: var(--text-muted); max-width: 180px;">${escapeHtml(s.tax_object_name)}</td>
+                    <td>${terDisplay}</td>
+                    <td style="font-weight: 600;">${formatCurrency(s.gross_income)}</td>
+                    <td><span class="badge" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; font-weight: 700;">${s.effective_rate_pct.toFixed(2)}%</span></td>
+                    <td style="font-weight: 800; color: #f87171;">${formatCurrency(s.tax_withheld)}</td>
+                    <td><span class="badge" style="background: rgba(52, 211, 153, 0.15); color: #34d399;">${s.status.toUpperCase()}</span></td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error('Error loading slips:', err);
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem; color: #ef4444;">Gagal memuat bukti potong: ${escapeHtml(err.message)}</td></tr>`;
+    }
+}
+
+function openModalCreateEbupotPeriod() {
+    openModal('modalCreateEbupotPeriod');
+}
+
+async function handleCreateEbupotPeriod(e) {
+    e.preventDefault();
+    try {
+        const payload = {
+            tax_month: parseInt(document.getElementById('ebupotInputMonth').value),
+            tax_year: parseInt(document.getElementById('ebupotInputYear').value),
+            revision_number: parseInt(document.getElementById('ebupotInputRevision').value),
+            notes: document.getElementById('ebupotInputNotes').value
+        };
+
+        const res = await apiPost('/api/v1/tax-ebupot/periods', payload);
+        showToast('Masa Pajak ' + (res.data ? res.data.period_code : '') + ' berhasil dibuka!', 'success');
+        closeModal('modalCreateEbupotPeriod');
+        await loadTaxEbupotData();
+    } catch (err) {
+        showToast('Gagal membuka masa pajak: ' + err.message, 'error');
+    }
+}
+
+function openModalCreateWithholdingSlip() {
+    const sel = document.getElementById('ebupotSlipModalPeriodSelect');
+    if (sel && ebupotPeriodsList.length > 0) {
+        const filterVal = document.getElementById('ebupotFilterPeriodSelect').value;
+        if (filterVal) sel.value = filterVal;
+    }
+    openModal('modalCreateWithholdingSlip');
+}
+
+async function handleCreateWithholdingSlip(e) {
+    e.preventDefault();
+    try {
+        const periodId = parseInt(document.getElementById('ebupotSlipModalPeriodSelect').value);
+        const slipType = document.getElementById('ebupotSlipType').value;
+        const gross = parseFloat(document.getElementById('ebupotSlipGrossIncome').value);
+        const ptkp = document.getElementById('ebupotSlipPTKP').value;
+
+        let objCode = "21-100-01";
+        let objName = "Pegawai Tetap (Gaji Pokok & Tunjangan Rutin)";
+        if (slipType === 'bp_tidak_final') {
+            objCode = "21-100-07";
+            objName = "Tenaga Ahli Bukan Pegawai (Dokter, Notaris, Konsultan, dsb.)";
+        } else if (slipType === 'bp_final') {
+            objCode = "21-401-01";
+            objName = "Uang Pesangon Dibayar Sekaligus";
+        } else if (slipType === 'bp_pasal_26') {
+            objCode = "26-100-01";
+            objName = "Imbalan Sehubungan dengan Jasa (Wajib Pajak Luar Negeri)";
+        }
+
+        const payload = {
+            period_id: periodId,
+            slip_type: slipType,
+            tax_object_code: objCode,
+            tax_object_name: objName,
+            recipient_type: "individual",
+            nik: document.getElementById('ebupotSlipNIK').value,
+            npwp: document.getElementById('ebupotSlipNPWP').value,
+            recipient_name: document.getElementById('ebupotSlipRecipientName').value,
+            address: document.getElementById('ebupotSlipAddress').value,
+            ptkp_status: ptkp,
+            gross_income: gross,
+            tax_facility_type: document.getElementById('ebupotSlipTaxFacility').value
+        };
+
+        const res = await apiPost('/api/v1/tax-ebupot/slips', payload);
+        showToast('Bukti Potong ' + (res.data ? res.data.slip_number : '') + ' berhasil dibuat!', 'success');
+        closeModal('modalCreateWithholdingSlip');
+        await loadEbupotStats();
+        loadEbupotSlipsForSelectedPeriod();
+    } catch (err) {
+        showToast('Gagal membuat bukti potong: ' + err.message, 'error');
+    }
+}
+
+function openModalImportPayrollEbupot() {
+    const sel = document.getElementById('ebupotImportPeriodSelect');
+    if (sel && ebupotPeriodsList.length > 0) {
+        const filterVal = document.getElementById('ebupotFilterPeriodSelect').value;
+        if (filterVal) sel.value = filterVal;
+    }
+    openModal('modalImportPayrollEbupot');
+}
+
+async function handleImportPayrollEbupot(e) {
+    e.preventDefault();
+    try {
+        const periodId = parseInt(document.getElementById('ebupotImportPeriodSelect').value);
+        showToast('Mengimpor slip gaji dan menghitung skema TER PP 58/2023...', 'info');
+
+        const res = await apiPost('/api/v1/tax-ebupot/import-payroll', { period_id: periodId });
+        const slips = res.data || [];
+        showToast(`Berhasil mengimpor ${slips.length} bukti potong dari Payroll!`, 'success');
+        closeModal('modalImportPayrollEbupot');
+        await loadTaxEbupotData();
+        switchEbupotSubtab('slips');
+    } catch (err) {
+        showToast('Gagal mengimpor dari payroll: ' + err.message, 'error');
+    }
+}
+
+function openModalLockEbupotPeriod(periodId, periodCode) {
+    document.getElementById('ebupotLockPeriodId').value = periodId;
+    document.getElementById('ebupotLockPeriodCode').value = periodCode;
+    document.getElementById('ebupotLockNTPN').value = 'NTPN-2026-PPH21-' + Math.floor(100000 + Math.random() * 900000);
+    openModal('modalLockEbupotPeriod');
+}
+
+async function handleLockEbupotPeriod(e) {
+    e.preventDefault();
+    try {
+        const periodId = document.getElementById('ebupotLockPeriodId').value;
+        const ntpn = document.getElementById('ebupotLockNTPN').value;
+
+        await apiPost(`/api/v1/tax-ebupot/periods/${periodId}/lock`, { ntpn: ntpn });
+        showToast('Masa Pajak berhasil dikunci dan dicatat di BPE DJP!', 'success');
+        closeModal('modalLockEbupotPeriod');
+        await loadTaxEbupotData();
+    } catch (err) {
+        showToast('Gagal mengunci masa pajak: ' + err.message, 'error');
+    }
+}
+
+function downloadEbupotCSV(periodId) {
+    window.open(`/api/v1/tax-ebupot/periods/${periodId}/export-csv`, '_blank');
+}
+
+function downloadEbupotXML(periodId) {
+    window.open(`/api/v1/tax-ebupot/periods/${periodId}/export-xml`, '_blank');
+}
+
+async function openModalEbupotReconciliation() {
+    const periodSel = document.getElementById('ebupotFilterPeriodSelect');
+    const periodId = periodSel ? periodSel.value : (ebupotPeriodsList.length > 0 ? ebupotPeriodsList[0].id : null);
+
+    if (!periodId) {
+        showToast('Silakan pilih atau buka Masa Pajak terlebih dahulu.', 'warning');
+        return;
+    }
+
+    try {
+        const res = await apiGet(`/api/v1/tax-ebupot/periods/${periodId}/reconciliation`);
+        const rec = res.data || res;
+
+        document.getElementById('ebupotRecPeriodTitle').textContent = `Masa Pajak: ${rec.period_code || '-'}`;
+        document.getElementById('ebupotRecPayrollGross').textContent = formatCurrency(rec.payroll_gross_wages || 0);
+        document.getElementById('ebupotRecEbupotGross').textContent = formatCurrency(rec.ebupot_gross_income || 0);
+        document.getElementById('ebupotRecGrossVariance').textContent = formatCurrency(rec.gross_variance || 0);
+
+        document.getElementById('ebupotRecPayrollTax').textContent = formatCurrency(rec.payroll_tax_deducted || 0);
+        document.getElementById('ebupotRecEbupotTax').textContent = formatCurrency(rec.ebupot_tax_withheld || 0);
+        document.getElementById('ebupotRecGLBalance').textContent = formatCurrency(rec.gl_pph21_balance || 0);
+
+        const badge = document.getElementById('ebupotRecBadge');
+        if (badge) {
+            if (rec.status === 'reconciled') {
+                badge.style.background = 'rgba(52, 211, 153, 0.15)';
+                badge.style.color = '#34d399';
+                badge.textContent = 'SEIMBANG (RECONCILED)';
+            } else {
+                badge.style.background = 'rgba(239, 68, 68, 0.15)';
+                badge.style.color = '#ef4444';
+                badge.textContent = 'SELISIH (DISCREPANCY)';
+            }
+        }
+
+        openModal('modalEbupotReconciliation');
+    } catch (err) {
+        showToast('Gagal memuat rekonsiliasi: ' + err.message, 'error');
+    }
+}
+
+async function loadAIEbupotCompliance() {
+    const periodSel = document.getElementById('ebupotFilterPeriodSelect');
+    const periodId = periodSel ? periodSel.value : '';
+
+    let url = '/api/v1/tax-ebupot/ai-copilot';
+    if (periodId) {
+        url += `?period_id=${periodId}`;
+    }
+
+    showToast('Menganalisis kepatuhan e-Bupot & skema TER PP 58/2023 dengan AI...', 'info');
+
+    try {
+        const res = await apiGet(url);
+        const report = res.data || res;
+
+        const scoreEl = document.getElementById('ebupotAiScore');
+        if (scoreEl) {
+            scoreEl.textContent = report.compliance_score;
+            scoreEl.style.color = report.compliance_score >= 80 ? '#34d399' : '#f87171';
+        }
+
+        const statusEl = document.getElementById('ebupotAiStatus');
+        const compStatus = report.compliance_status || report.status || 'COMPLIANT';
+        if (statusEl) {
+            statusEl.textContent = compStatus;
+            statusEl.style.color = compStatus === 'COMPLIANT' ? '#34d399' : (compStatus === 'WARNING' ? '#fbbf24' : '#f87171');
+        }
+
+        if (document.getElementById('ebupotAiPenaltyRisk')) {
+            document.getElementById('ebupotAiPenaltyRisk').textContent = 'Estimasi Risiko Denda: ' + (report.estimated_penalty_risk || report.potential_penalty_risk || '-');
+        }
+
+        if (document.getElementById('ebupotAiEngineBadge')) {
+            document.getElementById('ebupotAiEngineBadge').textContent = report.ai_provider || 'PP 58/2023 Baseline';
+        }
+
+        if (document.getElementById('ebupotAiExecutiveSummary')) {
+            document.getElementById('ebupotAiExecutiveSummary').textContent = report.executive_summary || '';
+        }
+
+        const checklistContainer = document.getElementById('ebupotAiChecklist');
+        if (checklistContainer && report.compliance_checklist) {
+            checklistContainer.innerHTML = report.compliance_checklist.map((item, idx) => `
+                <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                    <span style="color: #34d399; font-weight: 700;">✓</span>
+                    <span style="color: var(--text-main); line-height: 1.4;">${escapeHtml(item)}</span>
+                </div>
+            `).join('');
+        }
+
+        const adviceContainer = document.getElementById('ebupotAiAdvice');
+        if (adviceContainer && report.actionable_advice) {
+            adviceContainer.innerHTML = report.actionable_advice.map((item, idx) => `
+                <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                    <span style="color: #818cf8; font-weight: 700;">#${idx + 1}</span>
+                    <span style="color: var(--text-muted); line-height: 1.4;">${escapeHtml(item)}</span>
+                </div>
+            `).join('');
+        }
+
+        showToast('Audit Kepatuhan Pajak AI selesai!', 'success');
+    } catch (err) {
+        showToast('Gagal memuat AI Tax Copilot: ' + err.message, 'error');
+    }
+}
+
+// ==========================================
+// 42. DIGITAL SIGNATURE & DOCUMENT WATERMARKING
+// ==========================================
+
+let esignRequestsList = [];
+let currentActiveSignToken = '';
+let currentSignSimRequest = null;
+let signaturePadCanvas = null;
+let signaturePadCtx = null;
+let isDrawingSig = false;
+let currentSignMethod = 'draw';
+
+async function loadEsignData() {
+    try {
+        const docType = document.getElementById('esignFilterDocType')?.value || 'all';
+        const status = document.getElementById('esignFilterStatus')?.value || 'all';
+
+        // 1. Fetch Stats
+        const statsRes = await apiGet('/api/v1/esignature/stats');
+        if (statsRes) {
+            renderEsignKPIs(statsRes);
+        }
+
+        // 2. Fetch Requests
+        let queryParams = [];
+        if (docType !== 'all') queryParams.push(`doc_type=${encodeURIComponent(docType)}`);
+        if (status !== 'all') queryParams.push(`status=${encodeURIComponent(status)}`);
+        const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
+
+        const requestsRes = await apiGet(`/api/v1/esignature/requests${queryString}`);
+        esignRequestsList = Array.isArray(requestsRes) ? requestsRes : [];
+
+        renderEsignTable(esignRequestsList);
+
+        const countBadge = document.getElementById('esignTableCountBadge');
+        if (countBadge) {
+            countBadge.textContent = `${esignRequestsList.length} dokumen ditemukan`;
+        }
+    } catch (err) {
+        console.error('Error loading esignature data:', err);
+        showToast('Gagal memuat data tanda tangan elektronik: ' + err.message, 'error');
+    }
+}
+
+function renderEsignKPIs(stats) {
+    const totalEl = document.getElementById('esignStatTotal');
+    const pendingEl = document.getElementById('esignStatPending');
+    const signedEl = document.getElementById('esignStatSigned');
+    const rejectedEl = document.getElementById('esignStatRejected');
+    const turnaroundEl = document.getElementById('esignStatTurnaround');
+    const complianceEl = document.getElementById('esignStatCompliance');
+
+    if (totalEl) totalEl.textContent = stats.total_requests || 0;
+    if (pendingEl) pendingEl.textContent = stats.pending_requests || 0;
+    if (signedEl) signedEl.textContent = stats.signed_requests || 0;
+    if (rejectedEl) rejectedEl.textContent = (stats.rejected_requests || 0) + (stats.expired_requests || 0);
+    if (turnaroundEl) turnaroundEl.textContent = (stats.avg_turnaround_hrs || 0).toFixed(1) + ' Jam';
+    if (complianceEl) complianceEl.textContent = (stats.compliance_rate || 100).toFixed(1) + '%';
+}
+
+function renderEsignTable(requests) {
+    const tbody = document.getElementById('esignTableBody');
+    if (!tbody) return;
+
+    if (!requests || requests.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" style="padding: 2.5rem; text-align: center; color: var(--text-muted);">
+                    Tidak ada permohonan tanda tangan elektronik yang sesuai kriteria filter.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = requests.map(req => {
+        let statusBadgeClass = 'badge-warning';
+        let statusLabel = 'Pending';
+        if (req.status === 'signed') {
+            statusBadgeClass = 'badge-success';
+            statusLabel = 'Signed';
+        } else if (req.status === 'rejected') {
+            statusBadgeClass = 'badge-danger';
+            statusLabel = 'Rejected';
+        } else if (req.status === 'cancelled') {
+            statusBadgeClass = 'badge-secondary';
+            statusLabel = 'Cancelled';
+        } else if (req.status === 'expired') {
+            statusBadgeClass = 'badge-secondary';
+            statusLabel = 'Expired';
+        }
+
+        const expiresDate = req.expires_at ? new Date(req.expires_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+
+        const hashPreview = req.document_hash 
+            ? `<div style="font-family: monospace; font-size: 0.72rem; color: #a855f7; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${req.document_hash}">${escapeHtml(req.document_hash.substring(0, 16))}...</div>`
+            : `<span style="font-size: 0.75rem; color: var(--text-muted);">-</span>`;
+
+        const certPreview = req.cert_serial_number 
+            ? `<div style="font-family: monospace; font-size: 0.7rem; color: #10b981; margin-top: 0.15rem;">${escapeHtml(req.cert_serial_number)}</div>`
+            : '';
+
+        const actionButtons = `
+            <div style="display: flex; gap: 0.35rem; justify-content: flex-end;">
+                <button class="btn btn-sm btn-secondary" title="Lihat Detail & Audit Trail" onclick="openEsignDetailModal(${req.id})">
+                    👁️ Detail
+                </button>
+                ${req.status === 'pending' ? `
+                    <button class="btn btn-sm btn-primary" title="Portal Tanda Tangan Publik (Simulator)" onclick="openPublicSignSimulatorModal('${req.security_token}')">
+                        ✍️ TTD
+                    </button>
+                    <button class="btn btn-sm btn-danger" title="Batalkan Permohonan" onclick="cancelEsignRequest(${req.id})">
+                        ✕
+                    </button>
+                ` : ''}
+            </div>
+        `;
+
+        return `
+            <tr style="border-bottom: 1px solid var(--border-color);">
+                <td style="padding: 0.75rem 1rem; font-weight: 700; font-family: monospace; color: var(--text-main);">
+                    ${escapeHtml(req.request_number)}
+                </td>
+                <td style="padding: 0.75rem 1rem;">
+                    <div style="font-weight: 600; color: #38bdf8; font-size: 0.85rem;">${escapeHtml(req.document_number)}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">${escapeHtml(req.document_type.replace('_', ' '))}</div>
+                </td>
+                <td style="padding: 0.75rem 1rem;">
+                    <div style="font-weight: 600; color: var(--text-main); font-size: 0.85rem;">${escapeHtml(req.title)}</div>
+                    ${req.watermark_text ? `<div style="font-size: 0.7rem; color: #f59e0b; margin-top: 0.15rem;">🛡️ ${escapeHtml(req.watermark_text)}</div>` : ''}
+                </td>
+                <td style="padding: 0.75rem 1rem;">
+                    <div style="font-weight: 600; color: var(--text-main); font-size: 0.85rem;">${escapeHtml(req.signer_name)}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHtml(req.signer_role)} &bull; ${escapeHtml(req.signer_email)}</div>
+                </td>
+                <td style="padding: 0.75rem 1rem;">
+                    <span class="badge ${statusBadgeClass}">${statusLabel}</span>
+                </td>
+                <td style="padding: 0.75rem 1rem;">
+                    ${hashPreview}
+                    ${certPreview}
+                </td>
+                <td style="padding: 0.75rem 1rem; font-size: 0.8rem; color: var(--text-muted);">
+                    ${expiresDate}
+                </td>
+                <td style="padding: 0.75rem 1rem; text-align: right;">
+                    ${actionButtons}
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function openModalCreateEsign() {
+    const form = document.getElementById('formCreateEsign');
+    if (form) form.reset();
+
+    const expiryInput = document.getElementById('createEsignExpiryDays');
+    if (expiryInput) expiryInput.value = '7';
+
+    const wmInput = document.getElementById('createEsignWatermarkText');
+    if (wmInput) wmInput.value = 'CONFIDENTIAL - PT MULTI PERUSAHAAN HOLDING';
+
+    handleEsignDocTypeChange();
+    openModal('modalCreateEsign');
+}
+
+function handleEsignDocTypeChange() {
+    const docType = document.getElementById('createEsignDocType')?.value || 'sale_order';
+    const numInput = document.getElementById('createEsignDocNumber');
+    const titleInput = document.getElementById('createEsignTitle');
+
+    if (!numInput || !titleInput) return;
+
+    switch (docType) {
+        case 'sale_order':
+            numInput.placeholder = 'SO/2026/00001';
+            titleInput.placeholder = 'Kontrak Penjualan Produk & Jasa Garansi';
+            break;
+        case 'purchase_order':
+            numInput.placeholder = 'PO/2026/00001';
+            titleInput.placeholder = 'Surat Pemesanan Barang Baku Industri';
+            break;
+        case 'invoice':
+            numInput.placeholder = 'INV/2026/00001';
+            titleInput.placeholder = 'Faktur Tagihan Penjualan Resmi';
+            break;
+        case 'delivery_order':
+            numInput.placeholder = 'DO/2026/00001';
+            titleInput.placeholder = 'Berita Acara Serah Terima & Surat Jalan';
+            break;
+        case 'payslip':
+            numInput.placeholder = 'PAY/2026/10/00001';
+            titleInput.placeholder = 'Bukti Penerimaan Gaji & Slip Remunerasi Karyawan';
+            break;
+        default:
+            numInput.placeholder = 'DOC/2026/00001';
+            titleInput.placeholder = 'Perjanjian Kerjasama Non-Disclosure Agreement (NDA)';
+    }
+}
+
+async function handleCreateEsignRequest(event) {
+    event.preventDefault();
+    try {
+        const payload = {
+            document_type: document.getElementById('createEsignDocType').value,
+            document_id: parseInt(document.getElementById('createEsignDocID').value, 10) || 1,
+            document_number: document.getElementById('createEsignDocNumber').value.trim(),
+            title: document.getElementById('createEsignTitle').value.trim(),
+            description: document.getElementById('createEsignDesc').value.trim(),
+            signer_name: document.getElementById('createEsignSignerName').value.trim(),
+            signer_email: document.getElementById('createEsignSignerEmail').value.trim(),
+            signer_role: document.getElementById('createEsignSignerRole').value.trim(),
+            expiry_days: parseInt(document.getElementById('createEsignExpiryDays').value, 10) || 7,
+            watermark_text: document.getElementById('createEsignWatermarkText').value.trim()
+        };
+
+        const res = await apiPost('/api/v1/esignature/requests', payload);
+        showToast(`Permohonan tanda tangan ${res.request_number || ''} berhasil diterbitkan!`, 'success');
+        closeModal('modalCreateEsign');
+        await loadEsignData();
+    } catch (err) {
+        console.error('Error creating esign request:', err);
+        showToast('Gagal menerbitkan permohonan: ' + err.message, 'error');
+    }
+}
+
+async function openEsignDetailModal(reqId) {
+    try {
+        const req = await apiGet(`/api/v1/esignature/requests/${reqId}`);
+        if (!req) return;
+
+        // Populate fields
+        document.getElementById('esignDetailReqNumber').textContent = req.request_number;
+        document.getElementById('esignDetailDocRef').textContent = `${req.document_type.toUpperCase()}: ${req.document_number} &bull; ${req.title}`;
+
+        const statusBadge = document.getElementById('esignDetailStatusBadge');
+        if (statusBadge) {
+            statusBadge.className = 'badge ' + (
+                req.status === 'signed' ? 'badge-success' : 
+                req.status === 'rejected' ? 'badge-danger' : 
+                req.status === 'pending' ? 'badge-warning' : 'badge-secondary'
+            );
+            statusBadge.textContent = req.status.toUpperCase();
+        }
+
+        document.getElementById('esignDetailWatermarkText').textContent = req.watermark_text || 'CONFIDENTIAL';
+        document.getElementById('esignDetailSignerName').textContent = req.signer_name;
+        document.getElementById('esignDetailSignerRole').textContent = req.signer_role;
+        document.getElementById('esignDetailSignerEmail').textContent = req.signer_email;
+        document.getElementById('esignDetailSignMeta').textContent = `IP: ${req.signer_ip || '-'} | Browser: ${req.signer_user_agent || '-'}`;
+
+        document.getElementById('esignDetailCertSerial').textContent = req.cert_serial_number || 'Belum diterbitkan';
+        document.getElementById('esignDetailHash').textContent = req.document_hash || 'Belum dihitung (dokumen menunggu penandatanganan)';
+
+        const qrInput = document.getElementById('esignDetailQRUrl');
+        if (qrInput) qrInput.value = req.qr_verification_url || `${window.location.origin}/api/v1/public/esign/${req.security_token}`;
+
+        const portalLink = document.getElementById('esignDetailPortalLink');
+        if (portalLink) {
+            portalLink.href = `/api/v1/public/esign/${req.security_token}`;
+            portalLink.onclick = (e) => {
+                e.preventDefault();
+                closeModal('modalEsignDetail');
+                openPublicSignSimulatorModal(req.security_token);
+            };
+        }
+
+        // Signature image visual
+        const sigContainer = document.getElementById('esignDetailSigImageContainer');
+        if (sigContainer) {
+            if (req.signature_image) {
+                sigContainer.innerHTML = `<img src="${req.signature_image}" style="max-height: 80px; max-width: 260px; object-fit: contain;" alt="Digital Signature">`;
+            } else {
+                sigContainer.innerHTML = `<span style="color: #64748b; font-size: 0.8rem;">Menunggu penandatanganan</span>`;
+            }
+        }
+
+        // Chronological Audit Trail
+        const timeline = document.getElementById('esignDetailAuditTimeline');
+        if (timeline) {
+            if (!req.audit_trail || req.audit_trail.length === 0) {
+                timeline.innerHTML = `<div style="color: var(--text-muted); font-size: 0.85rem;">Belum ada catatan jejak audit.</div>`;
+            } else {
+                timeline.innerHTML = req.audit_trail.map(item => {
+                    const dt = new Date(item.timestamp).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+                    return `
+                        <div style="border-left: 3px solid #38bdf8; padding-left: 0.75rem; margin-left: 0.25rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                                <span style="font-weight: 700; font-size: 0.85rem; color: #38bdf8; text-transform: uppercase;">${escapeHtml(item.action)}</span>
+                                <span style="font-size: 0.75rem; color: var(--text-muted);">${dt}</span>
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-main); margin-top: 0.15rem;">${escapeHtml(item.details)}</div>
+                            <div style="font-size: 0.72rem; color: #64748b; margin-top: 0.15rem;">Pelaku: ${escapeHtml(item.actor)} &bull; IP: ${escapeHtml(item.ip_address)}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        openModal('modalEsignDetail');
+    } catch (err) {
+        console.error('Error opening esign detail:', err);
+        showToast('Gagal memuat detail tanda tangan: ' + err.message, 'error');
+    }
+}
+
+function openAIEsignAuditModal() {
+    const select = document.getElementById('aiEsignSelectRequest');
+    if (!select) return;
+
+    if (!esignRequestsList || esignRequestsList.length === 0) {
+        select.innerHTML = `<option value="">Tidak ada permohonan tersedia</option>`;
+    } else {
+        select.innerHTML = esignRequestsList.map(r => `
+            <option value="${r.id}">${escapeHtml(r.request_number)} - ${escapeHtml(r.document_number)} (${escapeHtml(r.signer_name)}) [${r.status}]</option>
+        `).join('');
+    }
+
+    document.getElementById('aiEsignAuditResults').style.display = 'none';
+    openModal('modalAIEsignAudit');
+}
+
+async function runAIEsignAudit() {
+    const select = document.getElementById('aiEsignSelectRequest');
+    const reqId = select?.value;
+    if (!reqId) {
+        showToast('Pilih dokumen yang ingin diaudit', 'warning');
+        return;
+    }
+
+    try {
+        const report = await apiGet(`/api/v1/esignature/requests/${reqId}/ai-audit`);
+        if (!report) return;
+
+        document.getElementById('aiEsignStatus').textContent = report.validity_status;
+        document.getElementById('aiEsignStatus').style.color = report.validity_status === 'VERIFIED_LEGAL' ? '#10b981' : (report.validity_status === 'PENDING_SIGNATURE' ? '#f59e0b' : '#ef4444');
+        document.getElementById('aiEsignScore').textContent = `${report.integrity_score} / 100`;
+        document.getElementById('aiEsignLegalBasis').textContent = report.legal_basis;
+        document.getElementById('aiEsignSummary').textContent = report.executive_summary;
+        document.getElementById('aiEsignProvider').textContent = report.ai_provider || 'Cloudflare Workers AI';
+
+        // Evidence checklist
+        const evidenceEl = document.getElementById('aiEsignEvidenceList');
+        if (evidenceEl && report.evidence_checklist) {
+            evidenceEl.innerHTML = report.evidence_checklist.map(item => `
+                <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                    <span style="color: #10b981;">✔</span>
+                    <span style="color: var(--text-main);">${escapeHtml(item)}</span>
+                </div>
+            `).join('');
+        }
+
+        // Risk recommendations
+        const riskEl = document.getElementById('aiEsignRiskList');
+        if (riskEl && report.risk_mitigation) {
+            riskEl.innerHTML = report.risk_mitigation.map((item, idx) => `
+                <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                    <span style="color: #818cf8; font-weight: 700;">#${idx + 1}</span>
+                    <span style="color: var(--text-muted);">${escapeHtml(item)}</span>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('aiEsignAuditResults').style.display = 'block';
+        showToast('Audit keabsahan tanda tangan elektronik selesai!', 'success');
+    } catch (err) {
+        console.error('Error running AI esign audit:', err);
+        showToast('Gagal menjalankan audit AI: ' + err.message, 'error');
+    }
+}
+
+// -------------------------------------------------------------
+// Interactive Signature Pad & Public Signing Portal Simulator
+// -------------------------------------------------------------
+
+function openPublicSignSimulatorModal(token) {
+    currentActiveSignToken = token;
+    const req = esignRequestsList.find(r => r.security_token === token);
+    currentSignSimRequest = req;
+
+    if (req) {
+        document.getElementById('simDocTitle').textContent = `${req.document_type.toUpperCase()}: ${req.document_number} - ${req.title}`;
+        document.getElementById('simDocSignerInfo').textContent = `Penandatangan Resmi: ${req.signer_name} (${req.signer_role}) &bull; ${req.signer_email}`;
+        const inputTyped = document.getElementById('inputTypedSignature');
+        if (inputTyped) inputTyped.value = req.signer_name;
+    }
+
+    setSignMethod('draw');
+    initSignatureCanvas();
+
+    openModal('modalPublicSignSimulator');
+}
+
+function setSignMethod(method) {
+    currentSignMethod = method;
+    const btnDraw = document.getElementById('btnMethodDraw');
+    const btnTyped = document.getElementById('btnMethodTyped');
+    const containerDraw = document.getElementById('containerSignDraw');
+    const containerTyped = document.getElementById('containerSignTyped');
+
+    if (method === 'draw') {
+        btnDraw.className = 'btn btn-sm btn-primary';
+        btnTyped.className = 'btn btn-sm btn-secondary';
+        containerDraw.style.display = 'block';
+        containerTyped.style.display = 'none';
+    } else {
+        btnDraw.className = 'btn btn-sm btn-secondary';
+        btnTyped.className = 'btn btn-sm btn-primary';
+        containerDraw.style.display = 'none';
+        containerTyped.style.display = 'block';
+    }
+}
+
+function initSignatureCanvas() {
+    signaturePadCanvas = document.getElementById('canvasSignature');
+    if (!signaturePadCanvas) return;
+
+    signaturePadCtx = signaturePadCanvas.getContext('2d');
+    clearSignatureCanvas();
+
+    // Reset old listeners if any by cloning
+    const newCanvas = signaturePadCanvas.cloneNode(true);
+    signaturePadCanvas.parentNode.replaceChild(newCanvas, signaturePadCanvas);
+    signaturePadCanvas = newCanvas;
+    signaturePadCtx = signaturePadCanvas.getContext('2d');
+    clearSignatureCanvas();
+
+    const getPos = (e) => {
+        const rect = signaturePadCanvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+            x: (clientX - rect.left) * (signaturePadCanvas.width / rect.width),
+            y: (clientY - rect.top) * (signaturePadCanvas.height / rect.height)
+        };
+    };
+
+    const startDraw = (e) => {
+        e.preventDefault();
+        isDrawingSig = true;
+        const pos = getPos(e);
+        signaturePadCtx.beginPath();
+        signaturePadCtx.moveTo(pos.x, pos.y);
+    };
+
+    const draw = (e) => {
+        if (!isDrawingSig) return;
+        e.preventDefault();
+        const pos = getPos(e);
+        signaturePadCtx.lineWidth = 2.5;
+        signaturePadCtx.lineCap = 'round';
+        signaturePadCtx.lineJoin = 'round';
+        signaturePadCtx.strokeStyle = '#0f172a';
+        signaturePadCtx.lineTo(pos.x, pos.y);
+        signaturePadCtx.stroke();
+    };
+
+    const stopDraw = (e) => {
+        if (isDrawingSig) {
+            signaturePadCtx.closePath();
+            isDrawingSig = false;
+        }
+    };
+
+    signaturePadCanvas.addEventListener('mousedown', startDraw);
+    signaturePadCanvas.addEventListener('mousemove', draw);
+    signaturePadCanvas.addEventListener('mouseup', stopDraw);
+    signaturePadCanvas.addEventListener('mouseleave', stopDraw);
+
+    signaturePadCanvas.addEventListener('touchstart', startDraw, { passive: false });
+    signaturePadCanvas.addEventListener('touchmove', draw, { passive: false });
+    signaturePadCanvas.addEventListener('touchend', stopDraw, { passive: false });
+}
+
+function clearSignatureCanvas() {
+    if (!signaturePadCanvas || !signaturePadCtx) return;
+    signaturePadCtx.fillStyle = '#ffffff';
+    signaturePadCtx.fillRect(0, 0, signaturePadCanvas.width, signaturePadCanvas.height);
+}
+
+async function submitSignatureSimulation() {
+    if (!currentActiveSignToken) return;
+
+    const consentCheck = document.getElementById('checkConsentEsign');
+    if (consentCheck && !consentCheck.checked) {
+        showToast('Anda harus menyetujui pernyataan kekuatan hukum tanda tangan elektronik', 'warning');
+        return;
+    }
+
+    let signatureDataUrl = '';
+    if (currentSignMethod === 'draw') {
+        if (signaturePadCanvas) {
+            signatureDataUrl = signaturePadCanvas.toDataURL('image/png');
+        }
+    } else {
+        // Draw typed name onto a canvas to create signature PNG
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = 400;
+        tempCanvas.height = 120;
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.fillStyle = '#ffffff';
+        tempCtx.fillRect(0, 0, 400, 120);
+        tempCtx.font = "italic 36px 'Brush Script MT', 'Great Vibes', cursive, sans-serif";
+        tempCtx.fillStyle = '#0f172a';
+        tempCtx.textAlign = 'center';
+        tempCtx.textBaseline = 'middle';
+        const typedName = document.getElementById('inputTypedSignature')?.value || 'Penandatangan Sah';
+        tempCtx.fillText(typedName, 200, 60);
+        signatureDataUrl = tempCanvas.toDataURL('image/png');
+    }
+
+    try {
+        const payload = {
+            signature_image: signatureDataUrl,
+            consent_agreed: true
+        };
+
+        const res = await apiPost(`/api/v1/public/esign/${currentActiveSignToken}/sign`, payload);
+        showToast('Dokumen berhasil ditandatangani secara elektronik!', 'success');
+        closeModal('modalPublicSignSimulator');
+        await loadEsignData();
+    } catch (err) {
+        console.error('Error submitting signature:', err);
+        showToast('Gagal menandatangani: ' + err.message, 'error');
+    }
+}
+
+async function cancelEsignRequest(reqId) {
+    if (!confirm('Apakah Anda yakin ingin membatalkan permohonan tanda tangan elektronik ini?')) {
+        return;
+    }
+
+    try {
+        await apiPost(`/api/v1/esignature/requests/${reqId}/cancel`, {});
+        showToast('Permohonan tanda tangan berhasil dibatalkan', 'info');
+        await loadEsignData();
+    } catch (err) {
+        console.error('Error cancelling request:', err);
+        showToast('Gagal membatalkan permohonan: ' + err.message, 'error');
+    }
+}
+
+// ==========================================
+// 43. ENTERPRISE WMS & 3D BIN LOCATIONS
+// ==========================================
+
+let currentWMSActiveWaveId = null;
+
+function switchWMSSubtab(tabName) {
+    const tabs = ['bins', 'zones', 'waves', 'putaway'];
+    tabs.forEach(t => {
+        const pane = document.getElementById(`wmsSubtab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        const btn = document.getElementById(`wmsSubtabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        if (pane) pane.style.display = (t === tabName) ? 'block' : 'none';
+        if (btn) {
+            if (t === tabName) {
+                btn.classList.remove('btn-secondary');
+                btn.classList.add('btn-primary');
+            } else {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-secondary');
+            }
+        }
+    });
+
+    if (tabName === 'bins') loadWMSBins();
+    else if (tabName === 'zones') loadWMSZones();
+    else if (tabName === 'waves') loadWMSWaves();
+    else if (tabName === 'putaway') loadWMSPutawayRules();
+}
+
+async function loadWMSData() {
+    try {
+        await Promise.all([
+            loadWMSStats(),
+            loadWMSBins(),
+            loadWMSZones(),
+            loadWMSWaves(),
+            loadWMSPutawayRules()
+        ]);
+    } catch (err) {
+        console.error('Error loading WMS data:', err);
+    }
+}
+
+async function loadWMSStats() {
+    try {
+        const stats = await apiGet('/api/v1/wms/stats');
+        if (stats) {
+            document.getElementById('wmsStatZones').textContent = stats.total_zones || 0;
+            document.getElementById('wmsStatBins').textContent = stats.total_bins || 0;
+            document.getElementById('wmsStatOccupied').textContent = stats.occupied_bins || 0;
+            document.getElementById('wmsStatUtilPct').textContent = (stats.capacity_utilization_pct || 0).toFixed(1) + '%';
+            document.getElementById('wmsStatActiveWaves').textContent = stats.active_waves || 0;
+            document.getElementById('wmsStatPutawayRules').textContent = stats.total_putaway_rules || 0;
+        }
+    } catch (err) {
+        console.error('Failed to load WMS stats:', err);
+    }
+}
+
+async function loadWMSBins() {
+    const tbody = document.getElementById('wmsBinsTableBody');
+    if (!tbody) return;
+    try {
+        const statusFilter = document.getElementById('wmsFilterBinStatus')?.value || 'all';
+        const url = statusFilter !== 'all' ? `/api/v1/wms/bins?status=${statusFilter}` : '/api/v1/wms/bins';
+        const bins = await apiGet(url);
+
+        if (!bins || bins.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" style="padding: 2rem; text-align: center; color: var(--text-muted);">Belum ada bin location terdaftar.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = bins.map(b => {
+            const util = b.max_weight_kg > 0 ? ((b.current_weight_kg / b.max_weight_kg) * 100).toFixed(0) : 0;
+            const statusBadge = b.status === 'available'
+                ? `<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Tersedia</span>`
+                : b.status === 'occupied'
+                ? `<span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">Terisi (${util}%)</span>`
+                : `<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">Perawatan</span>`;
+
+            const velColor = b.velocity_category === 'A' ? '#10b981' : b.velocity_category === 'B' ? '#38bdf8' : '#a855f7';
+
+            return `
+                <tr style="border-bottom: 1px solid var(--border-color); font-size: 0.85rem;">
+                    <td style="padding: 0.75rem 1rem; font-weight: 700; color: #38bdf8;">${escapeHtml(b.code)}</td>
+                    <td style="padding: 0.75rem 1rem;">${escapeHtml(b.zone ? b.zone.name : '-')}</td>
+                    <td style="padding: 0.75rem 1rem; font-family: monospace; font-size: 0.8rem;">
+                        <span style="background: var(--bg-main); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border-color);">
+                            A:${escapeHtml(b.aisle)} R:${escapeHtml(b.rack)} S:${escapeHtml(b.shelf)} B:${escapeHtml(b.bin)}
+                        </span>
+                    </td>
+                    <td style="padding: 0.75rem 1rem;">${(b.current_weight_kg || 0).toFixed(1)} / ${(b.max_weight_kg || 0).toFixed(0)} Kg</td>
+                    <td style="padding: 0.75rem 1rem;">${(b.current_volume_cbm || 0).toFixed(2)} / ${(b.max_volume_cbm || 0).toFixed(2)} CBM</td>
+                    <td style="padding: 0.75rem 1rem;">
+                        <span class="badge" style="background: rgba(255,255,255,0.05); color: ${velColor}; font-weight: 800;">
+                            Kelas ${escapeHtml(b.velocity_category)}
+                        </span>
+                    </td>
+                    <td style="padding: 0.75rem 1rem;">${statusBadge}</td>
+                    <td style="padding: 0.75rem 1rem; text-align: right;">
+                        <button class="btn btn-sm btn-secondary" onclick="openModalPutawaySimulator()">Saran Putaway</button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error('Failed to load WMS bins:', err);
+        tbody.innerHTML = `<tr><td colspan="8" style="padding: 2rem; text-align: center; color: #ef4444;">Gagal memuat bin: ${escapeHtml(err.message)}</td></tr>`;
+    }
+}
+
+async function loadWMSZones() {
+    const tbody = document.getElementById('wmsZonesTableBody');
+    if (!tbody) return;
+    try {
+        const zones = await apiGet('/api/v1/wms/zones');
+        if (!zones || zones.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="padding: 2rem; text-align: center; color: var(--text-muted);">Belum ada zona gudang.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = zones.map(z => {
+            const typeBadge = z.zone_type === 'cold'
+                ? `<span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">❄️ Cold Storage</span>`
+                : z.zone_type === 'hazardous'
+                ? `<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">⚠️ Hazardous / B3</span>`
+                : z.zone_type === 'bulk'
+                ? `<span class="badge" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;">📦 Bulk Pallet</span>`
+                : `<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">☀️ Dry Standard</span>`;
+
+            return `
+                <tr style="border-bottom: 1px solid var(--border-color); font-size: 0.85rem;">
+                    <td style="padding: 0.75rem 1rem; font-weight: 700; color: #38bdf8;">${escapeHtml(z.code)}</td>
+                    <td style="padding: 0.75rem 1rem; font-weight: 600;">${escapeHtml(z.name)}</td>
+                    <td style="padding: 0.75rem 1rem;">${typeBadge}</td>
+                    <td style="padding: 0.75rem 1rem;">${z.temperature_min}°C s/d ${z.temperature_max}°C</td>
+                    <td style="padding: 0.75rem 1rem;">${(z.current_weight_load || 0).toLocaleString()} / ${(z.max_weight_capacity || 0).toLocaleString()} Kg</td>
+                    <td style="padding: 0.75rem 1rem;">
+                        <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Aktif</span>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        // Also populate wmsBinZoneSelect
+        const zoneSelect = document.getElementById('wmsBinZoneSelect');
+        if (zoneSelect) {
+            zoneSelect.innerHTML = `<option value="">-- Pilih Zona --</option>` + zones.map(z => `
+                <option value="${z.id}">${escapeHtml(z.code)} - ${escapeHtml(z.name)} (${z.zone_type})</option>
+            `).join('');
+        }
+    } catch (err) {
+        console.error('Failed to load WMS zones:', err);
+        tbody.innerHTML = `<tr><td colspan="6" style="padding: 2rem; text-align: center; color: #ef4444;">Gagal memuat zona: ${escapeHtml(err.message)}</td></tr>`;
+    }
+}
+
+async function loadWMSWaves() {
+    const tbody = document.getElementById('wmsWavesTableBody');
+    if (!tbody) return;
+    try {
+        const waves = await apiGet('/api/v1/wms/waves');
+        if (!waves || waves.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="padding: 2rem; text-align: center; color: var(--text-muted);">Belum ada wave picking aktif.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = waves.map(w => {
+            const statusBadge = w.status === 'draft'
+                ? `<span class="badge" style="background: rgba(148, 163, 184, 0.15); color: #94a3b8;">Draft</span>`
+                : w.status === 'in_progress'
+                ? `<span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">Sedang Picking</span>`
+                : w.status === 'completed'
+                ? `<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Selesai (Completed)</span>`
+                : `<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">Batal</span>`;
+
+            const pct = w.total_lines > 0 ? ((w.picked_lines / w.total_lines) * 100).toFixed(0) : 0;
+
+            let actionBtn = '';
+            if (w.status === 'draft') {
+                actionBtn = `<button class="btn btn-sm btn-primary" onclick="startWMSWave(${w.id})">▶️ Mulai Picking</button>`;
+            } else if (w.status === 'in_progress') {
+                actionBtn = `<button class="btn btn-sm btn-secondary" onclick="viewWMSWaveDetail(${w.id})">📋 Eksekusi Pick</button>
+                             <button class="btn btn-sm btn-primary" onclick="completeWMSWave(${w.id})">✅ Selesaikan</button>`;
+            } else {
+                actionBtn = `<button class="btn btn-sm btn-secondary" onclick="viewWMSWaveDetail(${w.id})">🔍 Lihat Detail</button>`;
+            }
+
+            return `
+                <tr style="border-bottom: 1px solid var(--border-color); font-size: 0.85rem;">
+                    <td style="padding: 0.75rem 1rem; font-weight: 700; color: #ec4899;">${escapeHtml(w.name)}</td>
+                    <td style="padding: 0.75rem 1rem; font-weight: 600;">${escapeHtml(w.batch_name)}</td>
+                    <td style="padding: 0.75rem 1rem;">${escapeHtml(w.assigned_picker_name || '-')}</td>
+                    <td style="padding: 0.75rem 1rem;">${w.total_pickings} Surat Jalan</td>
+                    <td style="padding: 0.75rem 1rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="flex: 1; background: var(--bg-main); height: 6px; border-radius: 3px; overflow: hidden; width: 80px;">
+                                <div style="background: #10b981; height: 100%; width: ${pct}%;"></div>
+                            </div>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">${w.picked_lines}/${w.total_lines} (${pct}%)</span>
+                        </div>
+                    </td>
+                    <td style="padding: 0.75rem 1rem;">${statusBadge}</td>
+                    <td style="padding: 0.75rem 1rem; text-align: right; display: flex; gap: 0.25rem; justify-content: flex-end;">
+                        ${actionBtn}
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error('Failed to load WMS waves:', err);
+        tbody.innerHTML = `<tr><td colspan="7" style="padding: 2rem; text-align: center; color: #ef4444;">Gagal memuat wave: ${escapeHtml(err.message)}</td></tr>`;
+    }
+}
+
+async function loadWMSPutawayRules() {
+    const tbody = document.getElementById('wmsPutawayTableBody');
+    if (!tbody) return;
+    try {
+        const rules = await apiGet('/api/v1/wms/putaway-rules');
+        if (!rules || rules.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="padding: 2rem; text-align: center; color: var(--text-muted);">Belum ada aturan putaway.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = rules.map(r => {
+            const stratLabel = r.strategy === 'fastest_access'
+                ? '⚡ Fastest Access (Bin Dekat & Cepat)'
+                : r.strategy === 'cold_storage'
+                ? '❄️ Cold Chain Priority'
+                : r.strategy === 'hazardous_containment'
+                ? '☣️ Hazardous Containment'
+                : '⚖️ Least Loaded (Beban Terendah)';
+
+            return `
+                <tr style="border-bottom: 1px solid var(--border-color); font-size: 0.85rem;">
+                    <td style="padding: 0.75rem 1rem; font-weight: 700; color: #6366f1;">#${r.priority}</td>
+                    <td style="padding: 0.75rem 1rem; font-weight: 600;">${r.product ? escapeHtml(r.product.name) : 'Semua Produk'}</td>
+                    <td style="padding: 0.75rem 1rem;">${r.target_zone ? escapeHtml(r.target_zone.name) : '-'}</td>
+                    <td style="padding: 0.75rem 1rem; font-size: 0.8rem;">${stratLabel}</td>
+                    <td style="padding: 0.75rem 1rem; color: var(--text-muted); font-size: 0.8rem;">${escapeHtml(r.description || '-')}</td>
+                    <td style="padding: 0.75rem 1rem;">
+                        <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Aktif</span>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error('Failed to load putaway rules:', err);
+        tbody.innerHTML = `<tr><td colspan="6" style="padding: 2rem; text-align: center; color: #ef4444;">Gagal memuat aturan: ${escapeHtml(err.message)}</td></tr>`;
+    }
+}
+
+function openModalCreateWMSBin() {
+    loadWMSZones();
+    openModal('modalCreateWMSBin');
+}
+
+async function handleCreateWMSBin(e) {
+    e.preventDefault();
+    try {
+        const zoneId = parseInt(document.getElementById('wmsBinZoneSelect').value);
+        if (!zoneId) {
+            showToast('Silakan pilih zona terlebih dahulu', 'warning');
+            return;
+        }
+
+        const payload = {
+            warehouse_id: 1,
+            zone_id: zoneId,
+            aisle: document.getElementById('wmsBinAisle').value.trim(),
+            rack: document.getElementById('wmsBinRack').value.trim(),
+            shelf: document.getElementById('wmsBinShelf').value.trim(),
+            bin: document.getElementById('wmsBinSlot').value.trim(),
+            max_weight_kg: parseFloat(document.getElementById('wmsBinMaxWeight').value) || 500,
+            max_volume_cbm: parseFloat(document.getElementById('wmsBinMaxVolume').value) || 1.5,
+            velocity_category: document.getElementById('wmsBinVelocity').value,
+            picking_sequence: parseInt(document.getElementById('wmsBinPickingSeq').value) || 10
+        };
+
+        await apiPost('/api/v1/wms/bins', payload);
+        showToast('3D Bin Location berhasil ditambahkan!', 'success');
+        closeModal('modalCreateWMSBin');
+        await loadWMSData();
+    } catch (err) {
+        console.error('Error creating WMS bin:', err);
+        showToast('Gagal menambah bin: ' + err.message, 'error');
+    }
+}
+
+function openModalCreateWMSZone() {
+    openModal('modalCreateWMSZone');
+}
+
+async function handleCreateWMSZone(e) {
+    e.preventDefault();
+    try {
+        const payload = {
+            warehouse_id: 1,
+            code: document.getElementById('wmsZoneCode').value.trim(),
+            name: document.getElementById('wmsZoneName').value.trim(),
+            zone_type: document.getElementById('wmsZoneType').value,
+            temperature_min: parseFloat(document.getElementById('wmsZoneTempMin').value) || 20,
+            temperature_max: parseFloat(document.getElementById('wmsZoneTempMax').value) || 28,
+            max_weight_capacity: parseFloat(document.getElementById('wmsZoneMaxWeight').value) || 50000,
+            description: document.getElementById('wmsZoneDesc').value.trim()
+        };
+
+        await apiPost('/api/v1/wms/zones', payload);
+        showToast('Zona penyimpanan berhasil dibuat!', 'success');
+        closeModal('modalCreateWMSZone');
+        await loadWMSData();
+    } catch (err) {
+        console.error('Error creating WMS zone:', err);
+        showToast('Gagal membuat zona: ' + err.message, 'error');
+    }
+}
+
+async function openModalCreateWavePicking() {
+    openModal('modalCreateWavePicking');
+    const container = document.getElementById('wmsWavePickingSelectContainer');
+    if (!container) return;
+
+    container.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 1rem;">Memuat daftar pengiriman...</div>`;
+    try {
+        const pickings = await apiGet('/stock/pickings?type=outgoing');
+        if (!pickings || pickings.length === 0) {
+            container.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 1rem;">Tidak ada dokumen delivery order saat ini.</div>`;
+            return;
+        }
+
+        container.innerHTML = pickings.map(p => `
+            <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem; font-size: 0.8rem; cursor: pointer; border-bottom: 1px solid var(--border-color);">
+                <input type="checkbox" name="wmsWavePickingCheck" value="${p.id}">
+                <span style="font-weight: 700; color: #38bdf8;">${escapeHtml(p.name)}</span>
+                <span style="color: var(--text-muted);">${escapeHtml(p.origin || '-')}</span>
+                <span class="badge" style="background: rgba(255,255,255,0.05); font-size: 0.7rem;">${p.state || 'ready'}</span>
+            </label>
+        `).join('');
+    } catch (err) {
+        console.error('Error loading pickings for wave:', err);
+        container.innerHTML = `<div style="font-size: 0.8rem; color: #ef4444; padding: 1rem;">Gagal memuat pengiriman: ${escapeHtml(err.message)}</div>`;
+    }
+}
+
+async function handleCreateWavePicking(e) {
+    e.preventDefault();
+    try {
+        const checkboxes = document.querySelectorAll('input[name="wmsWavePickingCheck"]:checked');
+        const pickingIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+        if (pickingIds.length === 0) {
+            showToast('Silakan pilih minimal 1 delivery order untuk wave picking', 'warning');
+            return;
+        }
+
+        const payload = {
+            warehouse_id: 1,
+            batch_name: document.getElementById('wmsWaveName').value.trim(),
+            picking_ids: pickingIds,
+            assigned_picker_name: document.getElementById('wmsWavePicker').value.trim(),
+            notes: document.getElementById('wmsWaveNotes').value.trim()
+        };
+
+        const wave = await apiPost('/api/v1/wms/waves', payload);
+        showToast(`Wave picking ${wave.name} berhasil dibuat!`, 'success');
+        closeModal('modalCreateWavePicking');
+        await loadWMSData();
+    } catch (err) {
+        console.error('Error creating wave:', err);
+        showToast('Gagal membuat wave picking: ' + err.message, 'error');
+    }
+}
+
+async function startWMSWave(waveId) {
+    try {
+        await apiPost(`/api/v1/wms/waves/${waveId}/start`, {});
+        showToast('Wave picking dimulai! Staf dapat mulai mengambil barang sesuai urutan rute.', 'success');
+        await loadWMSData();
+    } catch (err) {
+        console.error('Error starting wave:', err);
+        showToast('Gagal memulai wave: ' + err.message, 'error');
+    }
+}
+
+async function completeWMSWave(waveId) {
+    try {
+        await apiPost(`/api/v1/wms/waves/${waveId}/complete`, {});
+        showToast('Wave picking telah diselesaikan!', 'success');
+        await loadWMSData();
+    } catch (err) {
+        console.error('Error completing wave:', err);
+        showToast('Gagal menyelesaikan wave: ' + err.message, 'error');
+    }
+}
+
+async function viewWMSWaveDetail(waveId) {
+    currentWMSActiveWaveId = waveId;
+    openModal('modalWMSWaveDetail');
+    try {
+        const wave = await apiGet(`/api/v1/wms/waves/${waveId}`);
+        if (!wave) return;
+
+        document.getElementById('wmsWaveDetailTitle').textContent = `${wave.name} - ${wave.batch_name}`;
+        document.getElementById('wmsWaveDetailPicker').textContent = `Picker: ${wave.assigned_picker_name || 'Belum ditugaskan'} | Status: ${wave.status.toUpperCase()}`;
+
+        const actionsDiv = document.getElementById('wmsWaveDetailActions');
+        if (wave.status === 'draft') {
+            actionsDiv.innerHTML = `<button class="btn btn-sm btn-primary" onclick="startWMSWave(${wave.id}); viewWMSWaveDetail(${wave.id});">▶️ Mulai Picking</button>`;
+        } else if (wave.status === 'in_progress') {
+            actionsDiv.innerHTML = `<button class="btn btn-sm btn-primary" onclick="completeWMSWave(${wave.id}); closeModal('modalWMSWaveDetail');">✅ Selesaikan Wave</button>`;
+        } else {
+            actionsDiv.innerHTML = `<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">SELESAI</span>`;
+        }
+
+        const tbody = document.getElementById('wmsWaveLinesTableBody');
+        if (!wave.lines || wave.lines.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" style="padding: 1.5rem; text-align: center; color: var(--text-muted);">Tidak ada baris item pada wave ini.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = wave.lines.map(l => {
+            const isPicked = l.status === 'picked';
+            const statusBadge = isPicked
+                ? `<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Picked</span>`
+                : `<span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">Pending</span>`;
+
+            let pickBtn = '';
+            if (!isPicked && wave.status === 'in_progress') {
+                pickBtn = `<button class="btn btn-sm btn-primary" onclick="confirmPickLine(${wave.id}, ${l.id})">Konfirmasi Pick</button>`;
+            }
+
+            return `
+                <tr style="border-bottom: 1px solid var(--border-color); font-size: 0.85rem; ${isPicked ? 'opacity: 0.7;' : ''}">
+                    <td style="padding: 0.5rem 0.75rem; font-weight: 700; color: #a855f7;">#${l.sequence}</td>
+                    <td style="padding: 0.5rem 0.75rem; font-family: monospace; font-weight: 700; color: #38bdf8;">${escapeHtml(l.bin_code || '-')}</td>
+                    <td style="padding: 0.5rem 0.75rem; font-weight: 600;">${escapeHtml(l.product ? l.product.name : 'Produk')}</td>
+                    <td style="padding: 0.5rem 0.75rem; font-size: 0.75rem; color: var(--text-muted);">${escapeHtml(l.product ? l.product.default_code : '-')}</td>
+                    <td style="padding: 0.5rem 0.75rem; font-weight: 700;">${l.quantity_requested}</td>
+                    <td style="padding: 0.5rem 0.75rem; color: #10b981; font-weight: 700;">${l.quantity_picked}</td>
+                    <td style="padding: 0.5rem 0.75rem;">${statusBadge}</td>
+                    <td style="padding: 0.5rem 0.75rem; text-align: right;">${pickBtn}</td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error('Error viewing wave detail:', err);
+    }
+}
+
+async function confirmPickLine(waveId, lineId) {
+    try {
+        await apiPost(`/api/v1/wms/waves/${waveId}/pick/${lineId}`, {});
+        showToast('Item berhasil dikonfirmasi pick!', 'success');
+        await viewWMSWaveDetail(waveId);
+        await loadWMSStats();
+    } catch (err) {
+        console.error('Error confirming pick line:', err);
+        showToast('Gagal konfirmasi pick: ' + err.message, 'error');
+    }
+}
+
+async function openModalPutawaySimulator() {
+    openModal('modalWMSPutawaySimulator');
+    const select = document.getElementById('wmsSimProductSelect');
+    if (!select) return;
+
+    try {
+        const products = await apiGet('/products');
+        if (products && products.length > 0) {
+            select.innerHTML = `<option value="">-- Pilih Produk --</option>` + products.map(p => `
+                <option value="${p.id}">${escapeHtml(p.default_code || '')} - ${escapeHtml(p.name)}</option>
+            `).join('');
+        }
+    } catch (err) {
+        console.error('Error loading products for putaway sim:', err);
+    }
+}
+
+async function handlePutawaySimulation(e) {
+    e.preventDefault();
+    try {
+        const prodId = parseInt(document.getElementById('wmsSimProductSelect').value);
+        if (!prodId) {
+            showToast('Silakan pilih produk terlebih dahulu', 'warning');
+            return;
+        }
+
+        const payload = {
+            warehouse_id: 1,
+            product_id: prodId,
+            quantity: parseFloat(document.getElementById('wmsSimQty').value) || 1,
+            weight_kg: parseFloat(document.getElementById('wmsSimWeight').value) || 25,
+            volume_cbm: parseFloat(document.getElementById('wmsSimVolume').value) || 0.2
+        };
+
+        const res = await apiPost('/api/v1/wms/putaway/suggest', payload);
+        const container = document.getElementById('wmsSimResultContainer');
+        container.style.display = 'block';
+
+        if (res.suggested_bin) {
+            document.getElementById('wmsSimBinCode').textContent = res.suggested_bin.code;
+            document.getElementById('wmsSimZoneBadge').textContent = res.suggested_zone ? res.suggested_zone.name : 'Zona Ditugaskan';
+            document.getElementById('wmsSimConfidenceBadge').textContent = `${((res.confidence_score || 0.9) * 100).toFixed(0)}% MATCH`;
+            document.getElementById('wmsSimReason').textContent = res.reason || 'Kapasitas dan lokasi optimal untuk produk ini';
+            document.getElementById('wmsSimStrategy').textContent = res.strategy || 'fastest_access';
+            document.getElementById('wmsSimPriority').textContent = res.matched_rule_id ? `Rule #${res.matched_rule_id}` : 'General Available Bin';
+        }
+        showToast('Saran putaway berhasil dihitung!', 'success');
+    } catch (err) {
+        console.error('Error suggesting putaway:', err);
+        showToast('Gagal menghitung saran putaway: ' + err.message, 'error');
+    }
+}
+
+async function openAIWMSSlottingModal() {
+    openModal('modalAIWMSSlottingReport');
+    document.getElementById('wmsAIExecSummary').textContent = 'Sedang menjalankan AI Warehouse Slotting Copilot...';
+    try {
+        const report = await apiGet('/api/v1/wms/ai/slotting-advisor');
+        if (report) {
+            document.getElementById('wmsAIStatusBadge').textContent = (report.overall_status || 'OPTIMIZED').toUpperCase();
+            document.getElementById('wmsAIProviderBadge').textContent = `AI Provider: ${report.ai_provider || 'Local Heuristic'}`;
+            document.getElementById('wmsAIEfficiencyScore').textContent = `${(report.layout_efficiency_score || 85)}/100`;
+            document.getElementById('wmsAITravelDistance').textContent = `${(report.estimated_travel_savings_pct || 25)}% hemat rute`;
+            document.getElementById('wmsAIExecSummary').textContent = report.executive_summary || '-';
+
+            const relocUl = document.getElementById('wmsAIRelocationsList');
+            if (report.recommended_relocations && report.recommended_relocations.length > 0) {
+                relocUl.innerHTML = report.recommended_relocations.map(r => `<li>${escapeHtml(r)}</li>`).join('');
+            } else {
+                relocUl.innerHTML = `<li>Tata letak rak sudah optimal, tidak perlu relokasi mendesak.</li>`;
+            }
+
+            const advUl = document.getElementById('wmsAIAdviceList');
+            if (report.actionable_advice && report.actionable_advice.length > 0) {
+                advUl.innerHTML = report.actionable_advice.map(a => `<li>${escapeHtml(a)}</li>`).join('');
+            } else {
+                advUl.innerHTML = `<li>Pertahankan alur wave picking berkelompok.</li>`;
+            }
+        }
+    } catch (err) {
+        console.error('Error loading AI slotting advisor:', err);
+        document.getElementById('wmsAIExecSummary').textContent = 'Gagal memuat saran AI: ' + err.message;
+    }
+}
+
+// ==========================================
+// MODUL 44: VENDOR PORTAL & SUPPLIER SELF-SERVICE
+// ==========================================
+
+let vpCurrentAccounts = [];
+let vpPartnersList = [];
+
+async function loadVendorPortalData() {
+    try {
+        await Promise.all([
+            loadVendorPortalStats(),
+            loadVendorPortalAccounts(),
+            loadVendorPortalBids(),
+            loadVendorPortalASNs(),
+            loadVendorPortalInvoices(),
+            loadVendorPortalPartners()
+        ]);
+    } catch (err) {
+        console.error('Error loading vendor portal data:', err);
+        showToast('Gagal memuat data Portal Vendor: ' + err.message, 'error');
+    }
+}
+
+async function loadVendorPortalStats() {
+    try {
+        const stats = await api('/vendor-portal/stats');
+        document.getElementById('vpKpiTotalAccounts').textContent = stats.total_accounts || 0;
+        document.getElementById('vpKpiActiveAccounts').textContent = stats.active_accounts || 0;
+        document.getElementById('vpKpiTotalBids').textContent = stats.total_bids || 0;
+        document.getElementById('vpKpiAcceptedBids').textContent = stats.accepted_bids || 0;
+        document.getElementById('vpKpiAsnInTransit').textContent = stats.asn_in_transit || 0;
+        document.getElementById('vpKpiAsnReceived').textContent = stats.asn_received || 0;
+        document.getElementById('vpKpiMatchedInvoices').textContent = stats.matched_invoices || 0;
+        document.getElementById('vpKpiDiscrepancyInvoices').textContent = stats.discrepancy_invoices || 0;
+        document.getElementById('vpKpiTotalBilledAmount').textContent = formatCurrency(stats.total_billed_amount || 0);
+        document.getElementById('vpKpiAvgLeadTime').textContent = `${(stats.avg_lead_time_days || 0).toFixed(1)} Hari`;
+    } catch (e) {
+        console.error('Error loading vendor portal stats:', e);
+    }
+}
+
+async function loadVendorPortalAccounts() {
+    try {
+        const accounts = await api('/vendor-portal/accounts');
+        vpCurrentAccounts = accounts || [];
+        renderVpAccountsTable(vpCurrentAccounts);
+    } catch (e) {
+        console.error('Error loading vendor portal accounts:', e);
+    }
+}
+
+function renderVpAccountsTable(accounts) {
+    const tbody = document.getElementById('vpAccountsTableBody');
+    if (!tbody) return;
+    if (!accounts || accounts.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">Belum ada akun portal vendor terdaftar. Klik "Undang Vendor" di atas.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = accounts.map(acc => {
+        const statusBadge = acc.status === 'active' 
+            ? '<span class="badge badge-success">Aktif</span>' 
+            : '<span class="badge badge-secondary">Nonaktif</span>';
+        
+        const lastLogin = acc.last_login_at 
+            ? new Date(acc.last_login_at).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' }) 
+            : '<span class="text-muted">Belum pernah</span>';
+
+        return `
+            <tr>
+                <td style="font-weight: 600;">${escapeHtml(acc.vendor_name)}</td>
+                <td>
+                    <div>${escapeHtml(acc.contact_name)}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHtml(acc.phone || '-')}</div>
+                </td>
+                <td><a href="mailto:${escapeHtml(acc.email)}" style="color: var(--primary);">${escapeHtml(acc.email)}</a></td>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 0.25rem;">
+                        <code style="font-size: 0.75rem; background: var(--bg-hover); padding: 2px 4px; border-radius: 4px; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(acc.portal_token)}</code>
+                        <button class="btn btn-sm btn-icon" title="Salin Token" onclick="copyVpToken('${acc.portal_token}')">📋</button>
+                    </div>
+                </td>
+                <td>${statusBadge}</td>
+                <td style="font-size: 0.8rem;">${lastLogin}</td>
+                <td style="text-align: right;">
+                    <button class="btn btn-sm btn-outline-primary" onclick="openSimForAccount('${acc.id}')" title="Simulasi Sebagai Vendor Ini">
+                        🌐 Buka Portal
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function loadVendorPortalBids() {
+    try {
+        const bids = await api('/vendor-portal/bids');
+        renderVpBidsTable(bids || []);
+    } catch (e) {
+        console.error('Error loading vendor portal bids:', e);
+    }
+}
+
+function renderVpBidsTable(bids) {
+    const tbody = document.getElementById('vpBidsTableBody');
+    if (!tbody) return;
+    if (!bids || bids.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">Belum ada penawaran bidding dari vendor.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = bids.map(bid => {
+        let statusBadge = '<span class="badge badge-info">Diajukan</span>';
+        if (bid.status === 'accepted') statusBadge = '<span class="badge badge-success">Diterima (PO Update)</span>';
+        else if (bid.status === 'rejected') statusBadge = '<span class="badge badge-danger">Ditolak</span>';
+
+        const poName = (bid.purchase_order && bid.purchase_order.name) ? bid.purchase_order.name : `PO #${bid.purchase_order_id}`;
+        const canAccept = bid.status === 'submitted';
+
+        return `
+            <tr>
+                <td style="font-weight: 600;">${escapeHtml(bid.bid_number)}</td>
+                <td>${escapeHtml(bid.vendor_name)}</td>
+                <td><span class="badge badge-secondary">${escapeHtml(poName)}</span></td>
+                <td style="font-weight: 600; color: var(--primary);">${formatCurrency(bid.bid_amount)}</td>
+                <td>${bid.lead_time_days} Hari</td>
+                <td>${escapeHtml(bid.payment_terms || '-')}</td>
+                <td>${statusBadge}</td>
+                <td style="text-align: right;">
+                    ${canAccept ? `
+                        <button class="btn btn-sm btn-success" onclick="handleAcceptBid(${bid.id})" title="Setujui Bidding Ini & Update PO">
+                            ✓ Terima Tawaran
+                        </button>
+                    ` : '<span class="text-muted" style="font-size: 0.75rem;">Selesai</span>'}
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function loadVendorPortalASNs() {
+    try {
+        const asns = await api('/vendor-portal/asns');
+        renderVpASNsTable(asns || []);
+    } catch (e) {
+        console.error('Error loading vendor portal ASNs:', e);
+    }
+}
+
+function renderVpASNsTable(asns) {
+    const tbody = document.getElementById('vpASNsTableBody');
+    if (!tbody) return;
+    if (!asns || asns.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">Belum ada Surat Jalan (ASN) dari vendor.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = asns.map(asn => {
+        let statusBadge = '<span class="badge badge-warning">Dalam Pengiriman</span>';
+        if (asn.status === 'received') statusBadge = '<span class="badge badge-success">Diterima di Gudang</span>';
+        else if (asn.status === 'cancelled') statusBadge = '<span class="badge badge-danger">Dibatalkan</span>';
+
+        const poName = (asn.purchase_order && asn.purchase_order.name) ? asn.purchase_order.name : `PO #${asn.purchase_order_id}`;
+        const etaDate = asn.estimated_arrival ? new Date(asn.estimated_arrival).toLocaleDateString('id-ID') : '-';
+        const canReceive = asn.status === 'in_transit' || asn.status === 'dispatched';
+
+        return `
+            <tr>
+                <td style="font-weight: 600;">${escapeHtml(asn.asn_number)}</td>
+                <td>${escapeHtml(asn.vendor_name)}</td>
+                <td><span class="badge badge-secondary">${escapeHtml(poName)}</span></td>
+                <td>
+                    <div style="font-weight: 500;">${escapeHtml(asn.carrier_name)}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHtml(asn.vehicle_plate || '')}</div>
+                </td>
+                <td><code>${escapeHtml(asn.tracking_number || '-')}</code></td>
+                <td>${etaDate}</td>
+                <td>${statusBadge}</td>
+                <td style="text-align: right;">
+                    ${canReceive ? `
+                        <button class="btn btn-sm btn-primary" onclick="handleReceiveASN(${asn.id})" title="Terima Barang di Gudang">
+                            📥 Terima di Gudang
+                        </button>
+                    ` : '<span class="text-muted" style="font-size: 0.75rem;">Sudah Masuk</span>'}
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function loadVendorPortalInvoices() {
+    try {
+        const invoices = await api('/vendor-portal/invoices');
+        renderVpInvoicesTable(invoices || []);
+    } catch (e) {
+        console.error('Error loading vendor portal invoices:', e);
+    }
+}
+
+function renderVpInvoicesTable(invoices) {
+    const tbody = document.getElementById('vpInvoicesTableBody');
+    if (!tbody) return;
+    if (!invoices || invoices.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">Belum ada e-Invoice yang diunggah vendor.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = invoices.map(inv => {
+        let matchBadge = '<span class="badge badge-secondary">Pending</span>';
+        if (inv.matching_status === 'matched') {
+            matchBadge = '<span class="badge badge-success">✓ 3-Way Matched</span>';
+        } else if (inv.matching_status === 'discrepancy') {
+            matchBadge = `<span class="badge badge-danger" title="${escapeHtml(inv.discrepancy_reason || '')}">⚠️ Selisih Harga</span>`;
+        }
+
+        const poName = (inv.purchase_order && inv.purchase_order.name) ? inv.purchase_order.name : `PO #${inv.purchase_order_id}`;
+        const billBadge = inv.account_move_id 
+            ? `<span class="badge badge-info" title="Draft Bill ID #${inv.account_move_id}">Vendor Bill #${inv.account_move_id}</span>` 
+            : '<span class="text-muted">-</span>';
+
+        return `
+            <tr>
+                <td style="font-weight: 600;">${escapeHtml(inv.portal_invoice_number)}</td>
+                <td>
+                    <div>${escapeHtml(inv.vendor_name)}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHtml(inv.vendor_invoice_number)}</div>
+                </td>
+                <td><span class="badge badge-secondary">${escapeHtml(poName)}</span></td>
+                <td style="font-weight: 600; color: var(--primary);">${formatCurrency(inv.total_amount)}</td>
+                <td style="font-size: 0.8rem;"><code>${escapeHtml(inv.tax_invoice_number || '-')}</code></td>
+                <td>${matchBadge}</td>
+                <td>${billBadge}</td>
+                <td style="text-align: right;">
+                    <span class="badge badge-light" style="font-size: 0.75rem;">${inv.status}</span>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function loadVendorPortalPartners() {
+    try {
+        const partners = await api('/partners');
+        vpPartnersList = (partners || []).filter(p => p.is_vendor);
+        
+        // Populate select in create account modal
+        const accSelect = document.getElementById('vpAccountPartnerSelect');
+        if (accSelect) {
+            accSelect.innerHTML = '<option value="">-- Pilih Vendor Terdaftar --</option>' +
+                vpPartnersList.map(p => `<option value="${p.id}">${escapeHtml(p.name)} (${p.email || 'No email'})</option>`).join('');
+        }
+
+        // Populate select in AI vendor rating modal
+        const ratingSelect = document.getElementById('aiVendorRatingSelect');
+        if (ratingSelect) {
+            ratingSelect.innerHTML = '<option value="">-- Pilih Vendor --</option>' +
+                vpPartnersList.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+        }
+    } catch (e) {
+        console.error('Error loading partners for vendor portal:', e);
+    }
+}
+
+function switchVendorPortalSubtab(tabName) {
+    const tabs = ['accounts', 'bids', 'asns', 'invoices'];
+    tabs.forEach(t => {
+        const btn = document.getElementById('btnVpSubtab' + t.charAt(0).toUpperCase() + t.slice(1));
+        const pane = document.getElementById('vpSubtab' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (btn) btn.classList.remove('active');
+        if (pane) pane.style.display = 'none';
+    });
+
+    const activeBtn = document.getElementById('btnVpSubtab' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
+    const activePane = document.getElementById('vpSubtab' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
+    if (activeBtn) activeBtn.classList.add('active');
+    if (activePane) activePane.style.display = 'block';
+}
+
+function handleVpPartnerSelectChange() {
+    const partnerId = parseInt(document.getElementById('vpAccountPartnerSelect').value);
+    const partner = vpPartnersList.find(p => p.id === partnerId);
+    if (partner) {
+        document.getElementById('vpAccountVendorName').value = partner.name || '';
+        document.getElementById('vpAccountContactName').value = partner.contact_name || partner.name || '';
+        document.getElementById('vpAccountEmail').value = partner.email || '';
+        document.getElementById('vpAccountPhone').value = partner.phone || '';
+    }
+}
+
+function openCreateVendorAccountModal() {
+    document.getElementById('formCreateVendorAccount').reset();
+    openModal('modalCreateVendorAccount');
+}
+
+async function handleCreateVendorAccount(event) {
+    event.preventDefault();
+    try {
+        const partnerId = parseInt(document.getElementById('vpAccountPartnerSelect').value);
+        const payload = {
+            partner_id: partnerId,
+            vendor_name: document.getElementById('vpAccountVendorName').value,
+            contact_name: document.getElementById('vpAccountContactName').value,
+            email: document.getElementById('vpAccountEmail').value,
+            phone: document.getElementById('vpAccountPhone').value
+        };
+
+        const res = await api('/vendor-portal/accounts', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+
+        closeModal('modalCreateVendorAccount');
+        await loadVendorPortalData();
+        showToast(`Akun vendor berhasil dibuat! Token Portal: ${res.portal_token}`, 'success');
+    } catch (err) {
+        showToast('Gagal membuat akun vendor: ' + err.message, 'error');
+    }
+}
+
+function copyVpToken(token) {
+    navigator.clipboard.writeText(token).then(() => {
+        showToast('Token portal berhasil disalin ke clipboard!', 'success');
+    }).catch(() => {
+        prompt('Salin Token Portal:', token);
+    });
+}
+
+// -------------------------------------------------------------
+// VENDOR PORTAL SIMULATOR
+// -------------------------------------------------------------
+function openVendorPortalSimulatorModal() {
+    populateSimAccountSelect();
+    openModal('modalVendorPortalSimulator');
+}
+
+function openSimForAccount(accId) {
+    populateSimAccountSelect();
+    const select = document.getElementById('vpSimAccountSelect');
+    if (select) {
+        select.value = accId;
+        handleVpSimAccountChange();
+    }
+    openModal('modalVendorPortalSimulator');
+}
+
+function populateSimAccountSelect() {
+    const select = document.getElementById('vpSimAccountSelect');
+    if (!select) return;
+    select.innerHTML = '<option value="">-- Pilih Akun Vendor --</option>' +
+        vpCurrentAccounts.map(acc => `<option value="${acc.id}">${escapeHtml(acc.vendor_name)} (${acc.contact_name})</option>`).join('');
+}
+
+let currentSimRfqs = [];
+
+async function handleVpSimAccountChange() {
+    const accId = document.getElementById('vpSimAccountSelect').value;
+    const account = vpCurrentAccounts.find(a => a.id == accId);
+    const info = document.getElementById('vpSimAccountInfo');
+    const rfqsContent = document.getElementById('simRfqsContent');
+
+    if (!account) {
+        info.innerHTML = 'Pilih akun untuk memulai simulasi pengiriman penawaran, ASN, atau e-invoicing.';
+        rfqsContent.innerHTML = '<p class="text-muted">Pilih vendor di atas untuk melihat RFQ yang siap diajukan penawaran.</p>';
+        return;
+    }
+
+    info.innerHTML = `Login Aktif: <strong>${escapeHtml(account.vendor_name)}</strong> | Token: <code>${account.portal_token.substring(0, 16)}...</code>`;
+
+    try {
+        // Fetch public RFQs using vendor token
+        currentSimRfqs = await api(`/vendor-portal/public/rfqs?token=${account.portal_token}`);
+        
+        // Render RFQs list
+        if (!currentSimRfqs || currentSimRfqs.length === 0) {
+            rfqsContent.innerHTML = `<div class="alert alert-info">Saat ini tidak ada PO / RFQ terbuka untuk vendor ini. Silakan buat RFQ baru di modul Pembelian.</div>`;
+        } else {
+            rfqsContent.innerHTML = `
+                <div class="table-responsive">
+                    <table class="table" style="width: 100%; font-size: 0.85rem;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--border-color); background: var(--bg-main);">
+                                <th style="padding: 0.5rem;">Nomor PO</th>
+                                <th style="padding: 0.5rem;">Tanggal</th>
+                                <th style="padding: 0.5rem;">Status PO</th>
+                                <th style="padding: 0.5rem;">Nilai Order</th>
+                                <th style="padding: 0.5rem;">Jumlah Item</th>
+                                <th style="padding: 0.5rem; text-align: right;">Aksi Cepat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${currentSimRfqs.map(po => `
+                                <tr>
+                                    <td style="font-weight: 600;">${escapeHtml(po.name)}</td>
+                                    <td>${new Date(po.date_order).toLocaleDateString('id-ID')}</td>
+                                    <td><span class="badge badge-info">${po.state}</span></td>
+                                    <td style="font-weight: 600; color: var(--primary);">${formatCurrency(po.amount_total)}</td>
+                                    <td>${(po.lines || []).length} Baris</td>
+                                    <td style="text-align: right;">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="selectPoForBid(${po.id}, ${po.amount_total})">
+                                            Tawar PO Ini
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        // Populate dropdowns in other simulation tabs
+        const bidPoSelect = document.getElementById('simBidPoSelect');
+        const asnPoSelect = document.getElementById('simAsnPoSelect');
+        const invPoSelect = document.getElementById('simInvPoSelect');
+
+        const poOptions = currentSimRfqs.map(po => `<option value="${po.id}">${escapeHtml(po.name)} - ${formatCurrency(po.amount_total)} (${po.state})</option>`).join('');
+
+        if (bidPoSelect) bidPoSelect.innerHTML = poOptions || '<option value="">Tidak ada PO</option>';
+        if (asnPoSelect) asnPoSelect.innerHTML = poOptions || '<option value="">Tidak ada PO</option>';
+        if (invPoSelect) {
+            invPoSelect.innerHTML = poOptions || '<option value="">Tidak ada PO</option>';
+            handleSimInvPoChange();
+        }
+
+    } catch (err) {
+        rfqsContent.innerHTML = `<div class="alert alert-danger">Gagal memuat RFQ: ${err.message}</div>`;
+    }
+}
+
+function switchSimPane(paneName) {
+    const panes = ['rfqs', 'bid', 'asn', 'invoice'];
+    panes.forEach(p => {
+        const btn = document.getElementById('btnSimTab' + p.charAt(0).toUpperCase() + p.slice(1));
+        const pane = document.getElementById('simPane' + p.charAt(0).toUpperCase() + p.slice(1));
+        if (btn) btn.classList.remove('active');
+        if (pane) pane.style.display = 'none';
+    });
+
+    const activeBtn = document.getElementById('btnSimTab' + paneName.charAt(0).toUpperCase() + paneName.slice(1));
+    const activePane = document.getElementById('simPane' + paneName.charAt(0).toUpperCase() + paneName.slice(1));
+    if (activeBtn) activeBtn.classList.add('active');
+    if (activePane) activePane.style.display = 'block';
+}
+
+function selectPoForBid(poId, amountTotal) {
+    switchSimPane('bid');
+    const select = document.getElementById('simBidPoSelect');
+    if (select) select.value = poId;
+    document.getElementById('simBidAmount').value = Math.round(amountTotal * 0.95); // default slightly lower bid
+}
+
+async function handleSimSubmitBid(event) {
+    event.preventDefault();
+    const accId = document.getElementById('vpSimAccountSelect').value;
+    const account = vpCurrentAccounts.find(a => a.id == accId);
+    if (!account) {
+        showToast('Pilih akun vendor terlebih dahulu!', 'warning');
+        return;
+    }
+
+    try {
+        const payload = {
+            purchase_order_id: parseInt(document.getElementById('simBidPoSelect').value),
+            bid_amount: parseFloat(document.getElementById('simBidAmount').value),
+            lead_time_days: parseInt(document.getElementById('simBidLeadTime').value),
+            payment_terms: document.getElementById('simBidPaymentTerms').value,
+            notes: document.getElementById('simBidNotes').value
+        };
+
+        const res = await api(`/vendor-portal/public/bids?token=${account.portal_token}`, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+
+        showToast(`Penawaran Bidding #${res.bid_number} berhasil dikirim ke ERP!`, 'success');
+        await loadVendorPortalData();
+        switchSimPane('rfqs');
+    } catch (err) {
+        showToast('Gagal mengajukan penawaran: ' + err.message, 'error');
+    }
+}
+
+async function handleSimSubmitASN(event) {
+    event.preventDefault();
+    const accId = document.getElementById('vpSimAccountSelect').value;
+    const account = vpCurrentAccounts.find(a => a.id == accId);
+    if (!account) {
+        showToast('Pilih akun vendor terlebih dahulu!', 'warning');
+        return;
+    }
+
+    try {
+        const payload = {
+            purchase_order_id: parseInt(document.getElementById('simAsnPoSelect').value),
+            carrier_name: document.getElementById('simAsnCarrier').value,
+            tracking_number: document.getElementById('simAsnTracking').value,
+            driver_name: document.getElementById('simAsnDriver').value,
+            vehicle_plate: document.getElementById('simAsnVehicle').value,
+            estimated_arrival: document.getElementById('simAsnEta').value,
+            notes: document.getElementById('simAsnNotes').value
+        };
+
+        const res = await api(`/vendor-portal/public/asn?token=${account.portal_token}`, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+
+        showToast(`Surat Jalan ASN #${res.asn_number} berhasil diterbitkan ke ERP!`, 'success');
+        await loadVendorPortalData();
+        switchSimPane('rfqs');
+    } catch (err) {
+        showToast('Gagal mengirim ASN: ' + err.message, 'error');
+    }
+}
+
+function handleSimInvPoChange() {
+    const poId = parseInt(document.getElementById('simInvPoSelect').value);
+    const po = currentSimRfqs.find(p => p.id === poId);
+    if (po) {
+        const untaxed = po.amount_untaxed || (po.amount_total / 1.11);
+        const tax = po.amount_tax || (po.amount_total - untaxed);
+        document.getElementById('simInvSubtotal').value = Math.round(untaxed);
+        document.getElementById('simInvTax').value = Math.round(tax);
+        calculateSimInvTotal();
+    }
+}
+
+function calculateSimInvTotal() {
+    const subtotal = parseFloat(document.getElementById('simInvSubtotal').value) || 0;
+    const tax = parseFloat(document.getElementById('simInvTax').value) || 0;
+    document.getElementById('simInvTotal').value = Math.round(subtotal + tax);
+}
+
+async function handleSimSubmitInvoice(event) {
+    event.preventDefault();
+    const accId = document.getElementById('vpSimAccountSelect').value;
+    const account = vpCurrentAccounts.find(a => a.id == accId);
+    if (!account) {
+        showToast('Pilih akun vendor terlebih dahulu!', 'warning');
+        return;
+    }
+
+    try {
+        const payload = {
+            purchase_order_id: parseInt(document.getElementById('simInvPoSelect').value),
+            vendor_invoice_number: document.getElementById('simInvNumber').value,
+            tax_invoice_number: document.getElementById('simInvTaxNo').value,
+            subtotal_amount: parseFloat(document.getElementById('simInvSubtotal').value),
+            tax_amount: parseFloat(document.getElementById('simInvTax').value),
+            total_amount: parseFloat(document.getElementById('simInvTotal').value),
+            notes: document.getElementById('simInvNotes').value
+        };
+
+        const res = await api(`/vendor-portal/public/invoices?token=${account.portal_token}`, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+
+        const matchMsg = res.matching_status === 'matched' 
+            ? '✓ 3-Way Match Sempurna! Draft Vendor Bill otomatis dibuat.' 
+            : `⚠️ Ditemukan Selisih: ${res.discrepancy_reason}`;
+
+        showToast(`e-Invoice #${res.portal_invoice_number} berhasil diproses. ${matchMsg}`, 'success');
+        await loadVendorPortalData();
+        switchSimPane('rfqs');
+    } catch (err) {
+        showToast('Gagal mengirim invoice: ' + err.message, 'error');
+    }
+}
+
+async function handleAcceptBid(bidId) {
+    if (!confirm('Apakah Anda yakin ingin menerima penawaran harga ini? Harga PO akan diperbarui sesuai penawaran.')) return;
+    try {
+        await api(`/vendor-portal/bids/${bidId}/accept`, { method: 'POST' });
+        showToast('Penawaran berhasil diterima dan PO telah diperbarui!', 'success');
+        await loadVendorPortalData();
+    } catch (err) {
+        showToast('Gagal menyetujui penawaran: ' + err.message, 'error');
+    }
+}
+
+async function handleReceiveASN(asnId) {
+    if (!confirm('Konfirmasi penerimaan barang untuk Surat Jalan (ASN) ini di gudang?')) return;
+    try {
+        await api(`/vendor-portal/asns/${asnId}/receive`, { method: 'POST' });
+        showToast('Surat Jalan (ASN) berhasil dicatat diterima di gudang!', 'success');
+        await loadVendorPortalData();
+    } catch (err) {
+        showToast('Gagal memproses penerimaan ASN: ' + err.message, 'error');
+    }
+}
+
+// -------------------------------------------------------------
+// AI VENDOR PERFORMANCE & RELIABILITY RATING
+// -------------------------------------------------------------
+function openAIVendorRatingModal() {
+    document.getElementById('aiVendorRatingResults').style.display = 'none';
+    openModal('modalAIVendorRating');
+}
+
+async function runAIVendorEvaluation() {
+    const partnerId = document.getElementById('aiVendorRatingSelect').value;
+    if (!partnerId) {
+        showToast('Silakan pilih mitra vendor terlebih dahulu!', 'warning');
+        return;
+    }
+
+    try {
+        showToast('Sedang menjalankan evaluasi AI untuk vendor...', 'info');
+        const report = await api(`/vendor-portal/ai-vendor-rating?partner_id=${partnerId}`, { method: 'POST' });
+
+        document.getElementById('aiVendorScorecardName').textContent = report.vendor_name || 'Vendor Evaluasi';
+        document.getElementById('aiVendorScorecardProvider').textContent = `AI Provider: ${report.ai_provider || 'Local Heuristic'}`;
+        document.getElementById('aiVendorScorecardScore').textContent = `${(report.overall_score || 0).toFixed(0)}/100`;
+
+        const badge = document.getElementById('aiVendorScorecardBadge');
+        badge.textContent = `Tier: ${report.reliability_tier || 'BRONZE'}`;
+        badge.className = 'badge';
+        if (report.reliability_tier === 'PLATINUM') badge.classList.add('badge-primary');
+        else if (report.reliability_tier === 'GOLD') badge.classList.add('badge-warning');
+        else if (report.reliability_tier === 'SILVER') badge.classList.add('badge-secondary');
+        else badge.classList.add('badge-danger');
+
+        document.getElementById('aiVendorMetricOnTime').textContent = `${(report.on_time_delivery_rate || 0).toFixed(0)}%`;
+        document.getElementById('aiVendorMetricPrice').textContent = `${(report.price_competitiveness || 0).toFixed(0)}%`;
+        document.getElementById('aiVendorMetricQuality').textContent = `${(report.quality_rating || 0).toFixed(0)}%`;
+
+        document.getElementById('aiVendorScorecardSummary').textContent = report.executive_summary || '-';
+
+        const recsUl = document.getElementById('aiVendorScorecardRecs');
+        if (report.recommended_actions && report.recommended_actions.length > 0) {
+            recsUl.innerHTML = report.recommended_actions.map(r => `<li>${escapeHtml(r)}</li>`).join('');
+        } else {
+            recsUl.innerHTML = '<li>Pertahankan kontrak kerjasama jangka panjang.</li>';
+        }
+
+        document.getElementById('aiVendorRatingResults').style.display = 'block';
+    } catch (err) {
+        showToast('Gagal menjalankan analisis AI: ' + err.message, 'error');
+    }
+}
+
+// ==========================================
+// 44. CUSTOMER PORTAL & B2B SELF-SERVICE JS
+// ==========================================
+let currentCustomerAccounts = [];
+let currentCustomerPortalSubTab = 'accounts';
+let currentSimCustomerAccount = null;
+
+async function loadCustomerPortalData() {
+    try {
+        const res = await api('/customer-portal/stats');
+        const stats = (res && res.data) ? res.data : (res || {});
+        document.getElementById('cpStatActiveAccounts').textContent = stats.active_accounts || stats.total_customer_accounts || 0;
+        document.getElementById('cpStatDraftOrders').textContent = stats.total_b2b_orders || 0;
+        document.getElementById('cpStatPendingRMAs').textContent = stats.pending_rmas || 0;
+        document.getElementById('cpStatApprovedRMAs').textContent = (stats.total_rmas || 0) - (stats.pending_rmas || 0);
+        document.getElementById('cpStatTotalDueAR').textContent = formatCurrency(stats.outstanding_ar_balance || stats.total_due_ar || 0);
+        document.getElementById('cpStatAIHealthAvg').textContent = (stats.ai_health_avg || 85).toFixed(1) + ' / 100';
+
+        switch (currentCustomerPortalSubTab) {
+            case 'accounts': loadCustomerAccounts(); break;
+            case 'orders': loadCustomerPortalOrders(); break;
+            case 'rma': loadCustomerPortalRMAs(); break;
+            case 'statements': loadCustomerPortalStatements(); break;
+        }
+    } catch (err) {
+        console.error('Failed to load Customer Portal data:', err);
+    }
+}
+
+function switchCustomerPortalSubTab(tabName) {
+    currentCustomerPortalSubTab = tabName;
+    const subtabs = ['accounts', 'orders', 'rma', 'statements'];
+    subtabs.forEach(t => {
+        const pane = document.getElementById(`cpSubTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        const btn = document.getElementById(`cpSubNav${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        if (pane) pane.style.display = (t === tabName) ? 'block' : 'none';
+        if (btn) {
+            if (t === tabName) {
+                btn.className = 'btn btn-primary';
+            } else {
+                btn.className = 'btn btn-secondary';
+            }
+        }
+    });
+
+    switch (tabName) {
+        case 'accounts': loadCustomerAccounts(); break;
+        case 'orders': loadCustomerPortalOrders(); break;
+        case 'rma': loadCustomerPortalRMAs(); break;
+        case 'statements': loadCustomerPortalStatements(); break;
+    }
+}
+
+async function loadCustomerAccounts() {
+    try {
+        const res = await api('/customer-portal/accounts');
+        currentCustomerAccounts = (res && res.data) ? res.data : (res || []);
+        const tbody = document.getElementById('customerAccountsTableBody');
+        if (!tbody) return;
+
+        if (currentCustomerAccounts.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Belum ada akun portal pelanggan terdaftar. Klik "+ Undang Pelanggan" untuk membuat akses.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = currentCustomerAccounts.map(acc => {
+            const partnerName = acc.customer_name || (acc.partner ? acc.partner.name : `Partner #${acc.partner_id}`);
+            const token = acc.access_token || acc.portal_token || '';
+            const tokenShort = token ? token.substring(0, 14) + '...' : '-';
+            const healthScore = acc.ai_health_score || 85;
+            const healthBadge = healthScore >= 80 ? 'badge-success' : (healthScore >= 60 ? 'badge-warning' : 'badge-danger');
+            const churnRisk = acc.churn_risk || 'low';
+            const churnBadge = churnRisk === 'low' ? 'badge-success' : (churnRisk === 'medium' ? 'badge-warning' : 'badge-danger');
+
+            return `<tr>
+                <td><strong>${escapeHtml(partnerName)}</strong><br><small class="text-muted">${escapeHtml(acc.contact_name)}</small></td>
+                <td>${escapeHtml(acc.email)}<br><small class="text-muted">${escapeHtml(acc.phone || '-')}</small></td>
+                <td>
+                    <span class="badge ${acc.is_active ? 'badge-success' : 'badge-secondary'}">${acc.is_active ? 'Aktif' : 'Non-Aktif'}</span>
+                    <br><code style="font-size: 0.7rem; cursor: pointer;" title="Klik untuk salin token" onclick="copyCustomerPortalLink('${token}')">🔑 ${tokenShort}</code>
+                </td>
+                <td>${formatCurrency(acc.credit_limit)}</td>
+                <td>
+                    <span class="badge ${healthBadge}">${healthScore.toFixed(0)} / 100</span>
+                    <br><small class="badge ${churnBadge}">Churn: ${escapeHtml(churnRisk)}</small>
+                </td>
+                <td>
+                    <small>Reorder: ${acc.allowed_reorder !== false ? '✅' : '❌'}</small><br>
+                    <small>RMA: ✅</small>
+                </td>
+                <td>
+                    <div style="display: flex; gap: 0.25rem;">
+                        <button class="btn btn-sm btn-primary" onclick="openCustomerPortalSimulator(${acc.id})" title="Buka Tampilan Pelanggan Mandiri">🌐 Simulasi</button>
+                        <button class="btn btn-sm btn-info" onclick="openModalAICustomerHealthWithPartner(${acc.partner_id})" title="Evaluasi Skor AI">🤖 AI Health</button>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+    } catch (err) {
+        showToast('Gagal memuat akun portal pelanggan: ' + err.message, 'error');
+    }
+}
+
+async function loadCustomerPortalOrders() {
+    try {
+        const res = await api('/customer-portal/orders');
+        const orders = (res && res.data) ? res.data : (res || []);
+        const tbody = document.getElementById('customerPortalOrdersTableBody');
+        if (!tbody) return;
+
+        if (!orders || orders.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Belum ada pesanan mandiri (Draft SO) dari portal pelanggan.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = orders.map(ord => {
+            const partnerName = ord.portal_account ? ord.portal_account.customer_name : (ord.partner ? ord.partner.name : `Partner #${ord.partner_id}`);
+            const stateBadge = ord.status === 'converted_to_so' || ord.status === 'approved' ? 'badge-success' : (ord.status === 'submitted' ? 'badge-warning' : 'badge-secondary');
+            const dateStr = ord.created_at ? new Date(ord.created_at).toLocaleDateString('id-ID') : '-';
+            const orderNo = ord.request_number || ord.name || `ORD#${ord.id}`;
+
+            return `<tr>
+                <td><strong>${escapeHtml(orderNo)}</strong></td>
+                <td>${dateStr}</td>
+                <td>${escapeHtml(partnerName)}</td>
+                <td><span class="badge badge-info">${escapeHtml(ord.payment_method || 'credit_terms')}</span></td>
+                <td><strong>${formatCurrency(ord.total_amount || ord.amount_total || 0)}</strong></td>
+                <td><span class="badge ${stateBadge}">${escapeHtml(ord.status || ord.state || 'submitted')}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-secondary" onclick="switchTab('sales')">Lihat di Sales</button>
+                </td>
+            </tr>`;
+        }).join('');
+    } catch (err) {
+        showToast('Gagal memuat pesanan portal: ' + err.message, 'error');
+    }
+}
+
+async function loadCustomerPortalRMAs() {
+    try {
+        const res = await api('/customer-portal/rmas');
+        const rmas = (res && res.data) ? res.data : (res || []);
+        const tbody = document.getElementById('customerPortalRMATableBody');
+        if (!tbody) return;
+
+        if (!rmas || rmas.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Belum ada permohonan klaim retur (RMA) aktif.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = rmas.map(r => {
+            const partnerName = r.portal_account ? r.portal_account.customer_name : (r.partner ? r.partner.name : `Partner #${r.partner_id}`);
+            const prodName = r.product ? r.product.name : `Produk #${r.product_id}`;
+            const state = r.status || r.state || 'submitted';
+            const stateBadge = state === 'submitted' || state === 'draft' ? 'badge-warning' : (state === 'approved' ? 'badge-success' : (state === 'rejected' ? 'badge-danger' : 'badge-info'));
+
+            return `<tr>
+                <td><strong>${escapeHtml(r.rma_number)}</strong><br><small class="text-muted">${escapeHtml(partnerName)}</small></td>
+                <td>${escapeHtml(prodName)}</td>
+                <td><strong>${r.quantity || r.qty || 1}</strong> unit</td>
+                <td><small>${escapeHtml(r.reason_code || r.reason || '-')}<br><em>"${escapeHtml(r.description || r.issue_description || '-')}"</em></small></td>
+                <td><span class="badge badge-secondary">${escapeHtml(r.resolution_requested || r.requested_resolution || 'replace_item')}</span></td>
+                <td><span class="badge ${stateBadge}">${escapeHtml(state)}</span></td>
+                <td>
+                    ${(state === 'submitted' || state === 'draft') ? `
+                    <button class="btn btn-sm btn-primary" onclick="openModalApproveRMA(${r.id}, '${r.rma_number}', '${escapeHtml(partnerName)}', '${escapeHtml(prodName)}', ${r.quantity || r.qty || 1})">Proses</button>
+                    ` : `<small class="text-muted">${escapeHtml(r.resolution_action || 'Selesai')}</small>`}
+                </td>
+            </tr>`;
+        }).join('');
+    } catch (err) {
+        showToast('Gagal memuat data RMA: ' + err.message, 'error');
+    }
+}
+
+async function loadCustomerPortalStatements() {
+    try {
+        const res = await api('/customer-portal/statements');
+        const statements = (res && res.data) ? res.data : (res || []);
+        const tbody = document.getElementById('customerPortalStatementsTableBody');
+        if (!tbody) return;
+
+        if (!statements || statements.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Belum ada rekap piutang pelanggan.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = statements.map(st => {
+            const overdue = (st.aging_1_to_30 || 0) + (st.aging_31_60 || 0) + (st.aging_over_60 || 0) || (st.overdue_ar || 0);
+            const hasDue = overdue > 0;
+            return `<tr>
+                <td><strong>${escapeHtml(st.customer_name || st.partner_name || `Partner #${st.partner_id}`)}</strong><br><small class="text-muted">Kredit Limit: ${formatCurrency(st.credit_limit)}</small></td>
+                <td><strong>${formatCurrency(st.total_outstanding)}</strong></td>
+                <td><span class="${hasDue ? 'text-danger font-weight-bold' : 'text-muted'}">${formatCurrency(overdue)}</span></td>
+                <td>${formatCurrency(st.credit_remaining || (st.credit_limit - st.total_outstanding))}</td>
+                <td>
+                    <small>Lancar (Current): ${formatCurrency(st.aging_current || 0)}</small><br>
+                    <small>Menunggak (>30 Hari): <span class="text-danger">${formatCurrency((st.aging_31_60 || 0) + (st.aging_over_60 || 0))}</span></small>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-secondary" onclick="openCustomerPortalSimulatorByPartner(${st.partner_id})">Lihat Portal</button>
+                </td>
+            </tr>`;
+        }).join('');
+    } catch (err) {
+        showToast('Gagal memuat rekap piutang: ' + err.message, 'error');
+    }
+}
+
+async function openModalCreateCustomerAccount() {
+    try {
+        const partners = await api('/partners');
+        const sel = document.getElementById('cpNewPartnerId');
+        if (sel) {
+            sel.innerHTML = '<option value="">-- Pilih Pelanggan --</option>' +
+                (partners || []).map(p => `<option value="${p.id}">${escapeHtml(p.name)} (${escapeHtml(p.email || 'No email')})</option>`).join('');
+        }
+        openModal('modalCreateCustomerAccount');
+    } catch (err) {
+        showToast('Gagal memuat daftar mitra pelanggan: ' + err.message, 'error');
+    }
+}
+
+async function handleCreateCustomerAccount(e) {
+    e.preventDefault();
+    try {
+        const payload = {
+            partner_id: parseInt(document.getElementById('cpNewPartnerId').value, 10),
+            contact_name: document.getElementById('cpNewContactName').value,
+            email: document.getElementById('cpNewEmail').value,
+            phone: document.getElementById('cpNewPhone').value,
+            credit_limit: parseFloat(document.getElementById('cpNewCreditLimit').value) || 0,
+            allowed_reorder: document.getElementById('cpNewAllowReorder').checked
+        };
+
+        const res = await api('/customer-portal/accounts', 'POST', payload);
+        const acc = (res && res.data) ? res.data : res;
+
+        showToast(`Akun portal berhasil dibuat! Token: ${acc.access_token || acc.portal_token}`, 'success');
+        closeModal('modalCreateCustomerAccount');
+        loadCustomerAccounts();
+    } catch (err) {
+        showToast('Gagal membuat akun portal: ' + err.message, 'error');
+    }
+}
+
+function copyCustomerPortalLink(token) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(token);
+        showToast('Token akses portal disalin ke clipboard!', 'info');
+    } else {
+        prompt('Salin token portal:', token);
+    }
+}
+
+function openModalApproveRMA(rmaId, rmaNo, customerName, productName, qty) {
+    document.getElementById('rmaModalId').value = rmaId;
+    document.getElementById('rmaModalSummaryText').innerHTML = `<strong>${escapeHtml(rmaNo)}</strong> - Pelanggan: <strong>${escapeHtml(customerName)}</strong><br>Retur <strong>${qty} unit</strong> ${escapeHtml(productName)}`;
+    openModal('modalApproveRMA');
+}
+
+async function handleApproveRMA(e) {
+    e.preventDefault();
+    const rmaId = document.getElementById('rmaModalId').value;
+    const action = document.getElementById('rmaResolutionAction').value;
+    const notes = document.getElementById('rmaAdminNotes').value;
+
+    try {
+        await api(`/customer-portal/rmas/${rmaId}/approve`, 'POST', {
+            resolution_action: action,
+            admin_notes: notes
+        });
+        showToast('Klaim RMA berhasil disetujui & tindakan dicatat!', 'success');
+        closeModal('modalApproveRMA');
+        loadCustomerPortalRMAs();
+        loadCustomerPortalData();
+    } catch (err) {
+        showToast('Gagal menyetujui RMA: ' + err.message, 'error');
+    }
+}
+
+async function submitRMADecision(isApproved) {
+    if (isApproved) return;
+    const rmaId = document.getElementById('rmaModalId').value;
+    const notes = document.getElementById('rmaAdminNotes').value || 'Ditolak oleh admin/QC';
+
+    try {
+        await api(`/customer-portal/rmas/${rmaId}/reject`, 'POST', {
+            reason: notes
+        });
+        showToast('Klaim RMA telah ditolak.', 'info');
+        closeModal('modalApproveRMA');
+        loadCustomerPortalRMAs();
+        loadCustomerPortalData();
+    } catch (err) {
+        showToast('Gagal menolak RMA: ' + err.message, 'error');
+    }
+}
+
+async function openModalAICustomerHealth() {
+    try {
+        const partners = await api('/partners');
+        const sel = document.getElementById('aiCustomerPartnerSelect');
+        if (sel) {
+            sel.innerHTML = '<option value="">-- Pilih Pelanggan --</option>' +
+                (partners || []).map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+        }
+        document.getElementById('aiCustomerResultContainer').style.display = 'none';
+        openModal('modalAICustomerHealth');
+    } catch (err) {
+        showToast('Gagal memuat pelanggan: ' + err.message, 'error');
+    }
+}
+
+function openModalAICustomerHealthWithPartner(partnerId) {
+    openModalAICustomerHealth().then(() => {
+        const sel = document.getElementById('aiCustomerPartnerSelect');
+        if (sel) {
+            sel.value = partnerId;
+            loadAICustomerHealthScorecard();
+        }
+    });
+}
+
+async function loadAICustomerHealthScorecard() {
+    const partnerId = document.getElementById('aiCustomerPartnerSelect').value;
+    if (!partnerId) {
+        showToast('Pilih pelanggan terlebih dahulu!', 'warning');
+        return;
+    }
+
+    try {
+        const res = await api(`/customer-portal/ai-customer-health?partner_id=${partnerId}`, 'POST');
+        const report = (res && res.data) ? res.data : res;
+
+        document.getElementById('aiCustomerPartnerName').textContent = report.customer_name || report.partner_name || `Pelanggan #${partnerId}`;
+        document.getElementById('aiCustomerModelBadge').textContent = `Model AI: ${report.ai_provider || report.ai_model || 'Local Rule-Engine'}`;
+        document.getElementById('aiCustomerScoreText').textContent = `${(report.overall_health_score || report.health_score || 0).toFixed(0)} / 100`;
+
+        const tier = (report.tier_badge || report.customer_tier || 'standard').toLowerCase();
+        const tierEl = document.getElementById('aiCustomerTierBadge');
+        tierEl.textContent = tier.toUpperCase();
+        if (tier === 'platinum' || tier === 'gold') {
+            tierEl.style.background = '#d97706';
+            tierEl.style.color = '#fff';
+        } else {
+            tierEl.style.background = 'var(--bg-card)';
+            tierEl.style.color = 'var(--text-primary)';
+        }
+
+        document.getElementById('aiCustomerMetricChurn').textContent = (report.churn_risk_level || report.churn_risk || 'low').toUpperCase();
+        document.getElementById('aiCustomerMetricLTV').textContent = formatCurrency(report.total_order_lifetime_value || report.estimated_ltv || 0);
+        document.getElementById('aiCustomerMetricPunctuality').textContent = `${(report.payment_punctuality_score || report.payment_punctuality_rate || 0).toFixed(0)}%`;
+        document.getElementById('aiCustomerMetricRMARate').textContent = `${(report.return_rate_percentage || report.return_rate || 0).toFixed(1)}%`;
+
+        document.getElementById('aiCustomerScorecardSummary').textContent = report.executive_summary || '-';
+
+        const recs = report.recommended_actions || report.actionable_recommendations || [];
+        const recsUl = document.getElementById('aiCustomerScorecardRecs');
+        if (recs && recs.length > 0) {
+            recsUl.innerHTML = recs.map(r => `<li>${escapeHtml(r)}</li>`).join('');
+        } else {
+            recsUl.innerHTML = '<li>Pertahankan hubungan kemitraan B2B yang sudah solid.</li>';
+        }
+
+        document.getElementById('aiCustomerResultContainer').style.display = 'block';
+    } catch (err) {
+        showToast('Gagal menjalankan evaluasi kesehatan AI: ' + err.message, 'error');
+    }
+}
+
+async function openCustomerPortalSimulator(accountId) {
+    try {
+        const res = await api('/customer-portal/accounts');
+        const accounts = (res && res.data) ? res.data : (res || []);
+        const sel = document.getElementById('cpSimAccountSelect');
+        if (sel) {
+            sel.innerHTML = '<option value="">-- Pilih Akun Pelanggan --</option>' +
+                accounts.map(a => {
+                    const pName = a.customer_name || (a.partner ? a.partner.name : `Partner #${a.partner_id}`);
+                    return `<option value="${a.id}">${escapeHtml(pName)} (${escapeHtml(a.contact_name)})</option>`;
+                }).join('');
+            if (accountId) sel.value = accountId;
+        }
+
+        openModal('modalCustomerPortalSimulator');
+        if (accountId) {
+            runCustomerSimulatorLoad();
+        }
+    } catch (err) {
+        showToast('Gagal memuat simulator: ' + err.message, 'error');
+    }
+}
+
+function openCustomerPortalSimulatorByPartner(partnerId) {
+    const acc = currentCustomerAccounts.find(a => a.partner_id === partnerId);
+    if (acc) {
+        openCustomerPortalSimulator(acc.id);
+    } else {
+        openCustomerPortalSimulator(null);
+    }
+}
+
+async function runCustomerSimulatorLoad() {
+    const accId = document.getElementById('cpSimAccountSelect').value;
+    if (!accId) {
+        document.getElementById('cpSimDashboardContainer').style.display = 'none';
+        return;
+    }
+
+    try {
+        const acc = currentCustomerAccounts.find(a => a.id == accId) || await api(`/customer-portal/accounts/${accId}`);
+        currentSimCustomerAccount = acc;
+        const token = acc.access_token || acc.portal_token;
+
+        // Fetch public account info
+        const resPub = await api(`/customer-portal/public/account?token=${token}`);
+        const pubAcc = (resPub && resPub.data) ? resPub.data : resPub;
+
+        const pName = pubAcc.customer_name || (pubAcc.partner ? pubAcc.partner.name : acc.contact_name);
+        document.getElementById('cpSimPartnerName').textContent = `${pName} (PIC: ${acc.contact_name})`;
+        document.getElementById('cpSimPartnerEmail').textContent = `${acc.email} | Tel: ${acc.phone || '-'}`;
+        document.getElementById('cpSimCreditRemaining').textContent = formatCurrency(pubAcc.credit_limit || acc.credit_limit);
+        document.getElementById('cpSimOutstandingDue').textContent = formatCurrency(pubAcc.outstanding_due || 0);
+
+        // Load Products into selects
+        const products = await api('/products');
+        const pSel1 = document.getElementById('cpSimProductId');
+        const pSel2 = document.getElementById('cpSimRMAProductId');
+        const pOpts = (products || []).map(p => `<option value="${p.id}">${escapeHtml(p.name)} - ${formatCurrency(p.list_price)}</option>`).join('');
+
+        if (pSel1) pSel1.innerHTML = '<option value="">-- Pilih Produk --</option>' + pOpts;
+        if (pSel2) pSel2.innerHTML = '<option value="">-- Pilih Produk --</option>' + pOpts;
+
+        // Load Statement
+        loadSimStatement(token);
+
+        document.getElementById('cpSimDashboardContainer').style.display = 'block';
+    } catch (err) {
+        showToast('Gagal memuat portal publik pelanggan: ' + err.message, 'error');
+    }
+}
+
+async function loadSimStatement(token) {
+    try {
+        const res = await api(`/customer-portal/public/statement?token=${token}`);
+        const st = (res && res.data) ? res.data : (res || {});
+        const cont = document.getElementById('cpSimStatementContent');
+        if (!cont) return;
+
+        const overdue = (st.aging_1_to_30 || 0) + (st.aging_31_60 || 0) + (st.aging_over_60 || 0);
+        cont.innerHTML = `
+            <div style="background: var(--bg-card); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); margin-bottom: 1rem;">
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; text-align: center;">
+                    <div><small class="text-muted">Total Tagihan Piutang</small><div style="font-weight: bold; font-size: 1.1rem;">${formatCurrency(st.total_outstanding || 0)}</div></div>
+                    <div><small class="text-muted">Jatuh Tempo (Overdue)</small><div style="font-weight: bold; font-size: 1.1rem; color: #ef4444;">${formatCurrency(overdue)}</div></div>
+                    <div><small class="text-muted">Lancar (Current)</small><div style="font-weight: bold; font-size: 1.1rem; color: #10b981;">${formatCurrency(st.aging_current || 0)}</div></div>
+                    <div><small class="text-muted">Plafon Disetujui</small><div style="font-weight: bold; font-size: 1.1rem;">${formatCurrency(st.credit_limit || 0)}</div></div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead><tr><th>No. Invoice</th><th>Tgl Terbit</th><th>Jatuh Tempo</th><th>Total Tagihan</th><th>Sisa Saldo</th><th>Status</th></tr></thead>
+                    <tbody>
+                        ${(!st.invoices || st.invoices.length === 0) ? '<tr><td colspan="6" class="text-center text-muted">Tidak ada faktur piutang terbuka.</td></tr>' :
+                        st.invoices.map(inv => `<tr>
+                            <td><strong>${escapeHtml(inv.name)}</strong></td>
+                            <td>${inv.invoice_date ? new Date(inv.invoice_date).toLocaleDateString('id-ID') : '-'}</td>
+                            <td>${inv.invoice_date_due ? new Date(inv.invoice_date_due).toLocaleDateString('id-ID') : '-'}</td>
+                            <td>${formatCurrency(inv.amount_total)}</td>
+                            <td><strong>${formatCurrency(inv.amount_residual)}</strong></td>
+                            <td><span class="badge ${inv.payment_state === 'paid' ? 'badge-success' : 'badge-warning'}">${escapeHtml(inv.payment_state)}</span></td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    } catch (err) {
+        console.error('Failed to load sim statement:', err);
+    }
+}
+
+function switchCustomerSimTab(tabId) {
+    const tabs = ['simTabOrder', 'simTabStatement', 'simTabRMA', 'simTabPayment'];
+    tabs.forEach(t => {
+        const el = document.getElementById(t);
+        if (el) el.style.display = (t === tabId) ? 'block' : 'none';
+    });
+}
+
+async function handleSimSubmitOrder(e) {
+    e.preventDefault();
+    if (!currentSimCustomerAccount) {
+        showToast('Pilih akun pelanggan terlebih dahulu!', 'warning');
+        return;
+    }
+
+    try {
+        const token = currentSimCustomerAccount.access_token || currentSimCustomerAccount.portal_token;
+        const payload = {
+            delivery_address: document.getElementById('cpSimShippingNotes').value || 'Alamat Kantor Utama',
+            payment_method: document.getElementById('cpSimPaymentMethod').value,
+            customer_notes: document.getElementById('cpSimShippingNotes').value,
+            lines: [{
+                product_id: parseInt(document.getElementById('cpSimProductId').value, 10),
+                quantity: parseFloat(document.getElementById('cpSimQty').value) || 1,
+                unit_price: 1000000,
+                notes: 'Order dari simulator portal'
+            }]
+        };
+
+        const res = await api(`/customer-portal/public/orders?token=${token}`, 'POST', payload);
+        const ord = (res && res.data) ? res.data : res;
+
+        showToast(`Pesanan mandiri berhasil dikirim! No: ${ord.request_number || ord.name}`, 'success');
+        runCustomerSimulatorLoad();
+        loadCustomerPortalOrders();
+        loadCustomerPortalData();
+    } catch (err) {
+        showToast('Gagal mengirim pesanan: ' + err.message, 'error');
+    }
+}
+
+async function handleSimSubmitRMA(e) {
+    e.preventDefault();
+    if (!currentSimCustomerAccount) {
+        showToast('Pilih akun pelanggan terlebih dahulu!', 'warning');
+        return;
+    }
+
+    try {
+        const token = currentSimCustomerAccount.access_token || currentSimCustomerAccount.portal_token;
+        const payload = {
+            product_id: parseInt(document.getElementById('cpSimRMAProductId').value, 10),
+            quantity: parseFloat(document.getElementById('cpSimRMAQty').value) || 1,
+            reason_code: document.getElementById('cpSimRMAReason').value,
+            description: document.getElementById('cpSimRMADesc').value,
+            resolution_requested: document.getElementById('cpSimRMAResolution').value
+        };
+
+        const res = await api(`/customer-portal/public/rma?token=${token}`, 'POST', payload);
+        const rma = (res && res.data) ? res.data : res;
+
+        showToast(`Permohonan RMA berhasil dibuat! No: ${rma.rma_number}`, 'success');
+        runCustomerSimulatorLoad();
+        loadCustomerPortalRMAs();
+        loadCustomerPortalData();
+    } catch (err) {
+        showToast('Gagal mengajukan RMA: ' + err.message, 'error');
+    }
+}
+
+async function handleSimSubmitPayment(e) {
+    e.preventDefault();
+    if (!currentSimCustomerAccount) {
+        showToast('Pilih akun pelanggan terlebih dahulu!', 'warning');
+        return;
+    }
+
+    try {
+        const token = currentSimCustomerAccount.access_token || currentSimCustomerAccount.portal_token;
+        const payload = {
+            invoice_id: 1,
+            amount_paid: parseFloat(document.getElementById('cpSimPayAmount').value) || 0,
+            sender_bank: document.getElementById('cpSimPayBank').value,
+            sender_account_no: document.getElementById('cpSimPayAccountNo').value,
+            reference_number: document.getElementById('cpSimPayRef').value,
+            payment_date: new Date().toISOString().split('T')[0]
+        };
+
+        await api(`/customer-portal/public/payment-notification?token=${token}`, 'POST', payload);
+        showToast('Slip pembayaran berhasil diunggah! Finance ERP telah dinotifikasi.', 'success');
+    } catch (err) {
+        showToast('Gagal mengirim slip pembayaran: ' + err.message, 'error');
+    }
+}
+
+// ==========================================
+// 46. KAWASAN BERIKAT & IT INVENTORY DJBC (MODUL 46)
+// ==========================================
+
+let currentCustomsDocuments = [];
+let currentCustomsLedgers = [];
+let currentCustomsSubcontracts = [];
+let selectedCustomsDocId = null;
+let selectedCustomsSubconId = null;
+
+function switchCustomsTab(tabName) {
+    const tabs = ['docs', 'inventory', 'subcontract', 'audit'];
+    tabs.forEach(t => {
+        const pane = document.getElementById(`cb-pane-${t}`);
+        const btn = document.getElementById(`cb-nav-${t}`);
+        if (pane) pane.style.display = (t === tabName) ? 'block' : 'none';
+        if (btn) {
+            if (t === tabName) {
+                btn.className = 'px-4 py-2 font-medium text-blue-600 border-b-2 border-blue-600 flex items-center space-x-2';
+            } else {
+                btn.className = 'px-4 py-2 font-medium text-gray-500 hover:text-gray-700 flex items-center space-x-2';
+            }
+        }
+    });
+
+    if (tabName === 'docs') loadCustomsDocuments();
+    else if (tabName === 'inventory') loadCustomsITInventory();
+    else if (tabName === 'subcontract') loadCustomsSubcontracts();
+    else if (tabName === 'audit') runAICustomsAudit();
+}
+
+async function loadCustomsBondedData() {
+    try {
+        const stats = await api('/customs-bonded/stats');
+        if (stats) {
+            const elTotal = document.getElementById('statCBTotalDocs');
+            const elSppb = document.getElementById('statCBSPPBApproved');
+            const elDuty = document.getElementById('statCBDutySuspended');
+            const elSubcon = document.getElementById('statCBSubcontractActive');
+            const elMutations = document.getElementById('statCBITMutations');
+            const elScore = document.getElementById('statCBAICompliance');
+
+            if (elTotal) elTotal.textContent = stats.total_documents || 0;
+            if (elSppb) elSppb.textContent = stats.sppb_approved_docs || 0;
+            if (elDuty) elDuty.textContent = formatCurrency(stats.total_duty_suspended || 0);
+            if (elSubcon) elSubcon.textContent = stats.active_subcontracts || 0;
+            if (elMutations) elMutations.textContent = stats.total_inventory_mutations || 0;
+            if (elScore) elScore.textContent = (stats.compliance_score || 95) + '%';
+        }
+
+        await loadCustomsDocuments();
+    } catch (err) {
+        console.error('Failed loading Customs Bonded data:', err);
+        showToast('Gagal memuat data Kawasan Berikat: ' + err.message, 'error');
+    }
+}
+
+async function loadCustomsDocuments() {
+    try {
+        const filterType = document.getElementById('filterCustomsDocType')?.value || '';
+        let url = '/customs-bonded/documents';
+        if (filterType) url += `?doc_type=${encodeURIComponent(filterType)}`;
+
+        const docs = await api(url);
+        currentCustomsDocuments = docs || [];
+        renderCustomsDocsTable(currentCustomsDocuments);
+    } catch (err) {
+        console.error('Failed loading customs documents:', err);
+    }
+}
+
+function renderCustomsDocsTable(docs) {
+    const tbody = document.getElementById('tableCustomsDocsBody');
+    if (!tbody) return;
+
+    if (!docs || docs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-gray-400">Belum ada dokumen pabean BC yang terdaftar.</td></tr>`;
+        return;
+    }
+
+    const docTypeBadges = {
+        'BC_23': '<span class="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 font-semibold">BC 2.3 (Impor/Bahan Baku)</span>',
+        'BC_25': '<span class="px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-800 font-semibold">BC 2.5 (Jual Lokal/DPP)</span>',
+        'BC_27': '<span class="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-800 font-semibold">BC 2.7 (Antar KB/TPB)</span>',
+        'BC_30': '<span class="px-2 py-0.5 text-xs rounded-full bg-indigo-100 text-indigo-800 font-semibold">BC 3.0 (Ekspor Devisa)</span>',
+        'BC_261': '<span class="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-800 font-semibold">BC 2.61 (Kirim Subkon)</span>',
+        'BC_262': '<span class="px-2 py-0.5 text-xs rounded-full bg-teal-100 text-teal-800 font-semibold">BC 2.62 (Kembali Subkon)</span>',
+        'BC_40': '<span class="px-2 py-0.5 text-xs rounded-full bg-slate-100 text-slate-800 font-semibold">BC 4.0 (Lokal Masuk KB)</span>',
+        'BC_41': '<span class="px-2 py-0.5 text-xs rounded-full bg-rose-100 text-rose-800 font-semibold">BC 4.1 (Kirim Antar KB)</span>'
+    };
+
+    const statusBadges = {
+        'draft': '<span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">Draft</span>',
+        'registered': '<span class="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-800">Tergelar di Bea Cukai</span>',
+        'sppb_approved': '<span class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-800 font-semibold">SPPB Approved ✅</span>',
+        'inspection': '<span class="px-2 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-800">Jalur Merah (Pemeriksaan)</span>',
+        'cancelled': '<span class="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-800">Dibatalkan</span>'
+    };
+
+    tbody.innerHTML = docs.map(d => {
+        const typeBadge = docTypeBadges[d.document_type] || `<span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-800 font-medium">${d.document_type}</span>`;
+        const stBadge = statusBadges[d.status] || `<span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">${d.status}</span>`;
+        const sppbInfo = d.sppb_number ? `<div class="text-xs text-emerald-600 font-semibold">SPPB: ${d.sppb_number}</div><div class="text-[10px] text-gray-400">${d.sppb_date ? d.sppb_date.substring(0,10) : ''}</div>` : `<span class="text-xs text-gray-400">Belum Terbit</span>`;
+        
+        let actionBtn = '';
+        if (d.status === 'registered' || d.status === 'draft') {
+            actionBtn = `<button onclick="openModalApproveSPPB(${d.id}, '${d.document_number}')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded shadow-sm">Setujui SPPB</button>
+                         <button onclick="handleCancelCustomsDoc(${d.id})" class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 text-xs rounded ml-1">Batal</button>`;
+        } else if (d.status === 'sppb_approved') {
+            actionBtn = `<span class="text-xs text-emerald-600 font-semibold flex items-center"><i class="fas fa-check-circle mr-1"></i>Selesai</span>`;
+        } else {
+            actionBtn = `<span class="text-xs text-gray-400">-</span>`;
+        }
+
+        return `
+            <tr class="hover:bg-gray-50 border-b border-gray-100 transition-colors">
+                <td class="px-4 py-3 font-mono font-medium text-blue-600 text-xs">${d.document_number}</td>
+                <td class="px-4 py-3">${typeBadge}</td>
+                <td class="px-4 py-3 text-xs text-gray-700 font-mono">${d.registration_number || '-'}</td>
+                <td class="px-4 py-3 text-xs text-gray-600">${d.registration_date ? d.registration_date.substring(0, 10) : '-'}</td>
+                <td class="px-4 py-3 text-xs text-gray-800 font-medium">${d.partner_name || 'PT Mitra Pabean'}</td>
+                <td class="px-4 py-3 text-xs text-right font-mono font-semibold text-gray-700">${formatCurrency(d.duty_suspended_amount || 0)}</td>
+                <td class="px-4 py-3">${sppbInfo}</td>
+                <td class="px-4 py-3">${stBadge}</td>
+                <td class="px-4 py-3 text-center whitespace-nowrap">${actionBtn}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function loadCustomsITInventory() {
+    try {
+        const filterCat = document.getElementById('filterCustomsBookCat')?.value || '';
+        let url = '/customs-bonded/it-inventory';
+        if (filterCat) url += `?book_category=${encodeURIComponent(filterCat)}`;
+
+        const ledgers = await api(url);
+        currentCustomsLedgers = ledgers || [];
+        renderCustomsITInventoryTable(currentCustomsLedgers);
+    } catch (err) {
+        console.error('Failed loading Customs IT Inventory:', err);
+    }
+}
+
+function renderCustomsITInventoryTable(ledgers) {
+    const tbody = document.getElementById('tableCustomsITInventoryBody');
+    if (!tbody) return;
+
+    if (!ledgers || ledgers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-8 text-gray-400">Belum ada mutasi buku IT Inventory DJBC yang tercatat.</td></tr>`;
+        return;
+    }
+
+    const catLabels = {
+        'raw_material': '<span class="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 font-semibold">Buku Bahan Baku</span>',
+        'finished_goods': '<span class="px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-800 font-semibold">Buku Barang Jadi</span>',
+        'wip': '<span class="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-800 font-semibold">Buku Barang Dalam Proses</span>',
+        'machinery': '<span class="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-800 font-semibold">Buku Mesin & Peralatan</span>',
+        'scrap': '<span class="px-2 py-0.5 text-xs rounded-full bg-rose-100 text-rose-800 font-semibold">Buku Scrap / Sisa Produksi</span>'
+    };
+
+    tbody.innerHTML = ledgers.map(l => {
+        const catBadge = catLabels[l.book_category] || `<span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-800">${l.book_category}</span>`;
+        const diffColor = (l.stock_difference !== 0) ? 'text-rose-600 font-bold' : 'text-gray-400';
+        const docRef = l.customs_doc_number ? `<span class="font-mono text-xs text-blue-600 font-semibold">${l.customs_doc_number}</span>` : '<span class="text-gray-400 text-xs">-</span>';
+
+        return `
+            <tr class="hover:bg-gray-50 border-b border-gray-100 transition-colors">
+                <td class="px-4 py-3">${catBadge}</td>
+                <td class="px-4 py-3 font-mono text-xs font-semibold text-gray-800">${l.product_code || '-'}</td>
+                <td class="px-4 py-3 text-xs text-gray-800 font-medium">${l.product_name || '-'}</td>
+                <td class="px-4 py-3 text-center text-xs text-gray-600 font-mono">${l.uom || 'PCS'}</td>
+                <td class="px-4 py-3 text-right text-xs font-mono text-gray-600">${(l.beginning_balance || 0).toLocaleString()}</td>
+                <td class="px-4 py-3 text-right text-xs font-mono font-semibold text-emerald-600">+${(l.in_quantity || 0).toLocaleString()}</td>
+                <td class="px-4 py-3 text-right text-xs font-mono font-semibold text-rose-600">-${(l.out_quantity || 0).toLocaleString()}</td>
+                <td class="px-4 py-3 text-right text-xs font-mono font-bold text-gray-800 bg-gray-50/50">${(l.ending_balance || 0).toLocaleString()}</td>
+                <td class="px-4 py-3 text-center">${docRef}</td>
+                <td class="px-4 py-3 text-right text-xs font-mono ${diffColor}">${(l.stock_difference || 0).toLocaleString()}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function loadCustomsSubcontracts() {
+    try {
+        const subs = await api('/customs-bonded/subcontracts');
+        currentCustomsSubcontracts = subs || [];
+        renderCustomsSubcontractsTable(currentCustomsSubcontracts);
+    } catch (err) {
+        console.error('Failed loading customs subcontracts:', err);
+    }
+}
+
+function renderCustomsSubcontractsTable(subs) {
+    const tbody = document.getElementById('tableCustomsSubcontractsBody');
+    if (!tbody) return;
+
+    if (!subs || subs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-8 text-gray-400">Belum ada kontrak pekerjaan subkontrak pabean.</td></tr>`;
+        return;
+    }
+
+    const stBadges = {
+        'open': '<span class="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 font-semibold">Sedang Dikerjakan</span>',
+        'partially_returned': '<span class="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-800 font-semibold">Sebagian Kembali</span>',
+        'closed': '<span class="px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-800 font-semibold">Selesai Penuh ✅</span>',
+        'overdue': '<span class="px-2 py-0.5 text-xs rounded-full bg-rose-100 text-rose-800 font-semibold">Jatuh Tempo (Kena Sanksi)</span>'
+    };
+
+    tbody.innerHTML = subs.map(s => {
+        const badge = stBadges[s.status] || `<span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-800">${s.status}</span>`;
+        const remaining = (s.quantity_sent || 0) - (s.quantity_returned || 0);
+        
+        let actionBtn = '';
+        if (s.status !== 'closed') {
+            actionBtn = `<button onclick="openModalReturnSubcontract(${s.id}, '${s.contract_number}', ${remaining})" class="px-2.5 py-1 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded shadow-sm">Catat Pengembalian BC 2.62</button>`;
+        } else {
+            actionBtn = `<span class="text-xs text-emerald-600 font-semibold flex items-center"><i class="fas fa-check-circle mr-1"></i>Lengkap</span>`;
+        }
+
+        return `
+            <tr class="hover:bg-gray-50 border-b border-gray-100 transition-colors">
+                <td class="px-4 py-3 font-mono font-medium text-blue-600 text-xs">${s.contract_number}</td>
+                <td class="px-4 py-3 text-xs text-gray-800 font-medium">${s.subcontractor_name || '-'}</td>
+                <td class="px-4 py-3 text-xs text-gray-800 font-semibold">${s.product_name || '-'}</td>
+                <td class="px-4 py-3 text-xs text-gray-600">${s.process_type || '-'}</td>
+                <td class="px-4 py-3 text-right text-xs font-mono font-semibold text-gray-700">${(s.quantity_sent || 0).toLocaleString()}</td>
+                <td class="px-4 py-3 text-right text-xs font-mono font-semibold text-emerald-600">${(s.quantity_returned || 0).toLocaleString()}</td>
+                <td class="px-4 py-3 text-right text-xs font-mono font-bold text-amber-700 bg-amber-50/40">${remaining.toLocaleString()}</td>
+                <td class="px-4 py-3 text-xs text-rose-600 font-mono font-medium">${s.due_date ? s.due_date.substring(0, 10) : '-'}</td>
+                <td class="px-4 py-3">${badge}</td>
+                <td class="px-4 py-3 text-center whitespace-nowrap">${actionBtn}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function runAICustomsAudit() {
+    try {
+        const btn = document.getElementById('btnTriggerAICustomsAudit');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>Menganalisis Kepatuhan DJBC...`;
+        }
+
+        const res = await api('/customs-bonded/ai-customs-audit', 'POST');
+        if (res) {
+            const elScore = document.getElementById('cbAuditScoreBadge');
+            const elSummary = document.getElementById('cbAuditSummaryText');
+            const elFindings = document.getElementById('cbAuditFindingsList');
+            const elRecs = document.getElementById('cbAuditRecsList');
+
+            if (elScore) {
+                let badgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+                if (res.compliance_score < 70) badgeClass = 'bg-rose-100 text-rose-800 border-rose-300';
+                else if (res.compliance_score < 85) badgeClass = 'bg-amber-100 text-amber-800 border-amber-300';
+
+                elScore.className = `px-3 py-1 rounded-full text-xs font-bold border ${badgeClass}`;
+                elScore.textContent = `Skor Kepatuhan: ${res.compliance_score}% (${res.status || 'COMPLIANT'})`;
+            }
+
+            if (elSummary) {
+                elSummary.textContent = res.summary || 'Audit kepatuhan pabean berhasil dijalankan.';
+            }
+
+            if (elFindings) {
+                if (res.findings && res.findings.length > 0) {
+                    elFindings.innerHTML = res.findings.map(f => `
+                        <li class="flex items-start text-xs text-gray-700 space-x-2">
+                            <span class="text-amber-500 font-bold text-sm leading-none">•</span>
+                            <span>${f}</span>
+                        </li>
+                    `).join('');
+                } else {
+                    elFindings.innerHTML = `<li class="text-xs text-gray-400 italic">Tidak ditemukan anomali atau deviasi stok signifikan.</li>`;
+                }
+            }
+
+            if (elRecs) {
+                if (res.recommendations && res.recommendations.length > 0) {
+                    elRecs.innerHTML = res.recommendations.map(r => `
+                        <li class="flex items-start text-xs text-gray-700 space-x-2">
+                            <span class="text-blue-500 font-bold text-sm leading-none">✓</span>
+                            <span>${r}</span>
+                        </li>
+                    `).join('');
+                } else {
+                    elRecs.innerHTML = `<li class="text-xs text-gray-400 italic">Pertahankan praktik rekonsiliasi IT Inventory DJBC secara harian.</li>`;
+                }
+            }
+
+            showToast('Audit Kepatuhan Pabean Bea Cukai berhasil diperbarui!', 'success');
+        }
+    } catch (err) {
+        console.error('Failed to run AI Customs Audit:', err);
+        showToast('Gagal menjalankan AI Customs Audit: ' + err.message, 'error');
+    } finally {
+        const btn = document.getElementById('btnTriggerAICustomsAudit');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fas fa-play mr-2"></i>Jalankan Ulang Audit Kepatuhan DJBC`;
+        }
+    }
+}
+
+// Modal Helpers
+async function openModalCreateCustomsDoc() {
+    try {
+        const partners = await api('/partners') || [];
+        const partnerSelect = document.getElementById('cbDocPartnerId');
+        if (partnerSelect) {
+            partnerSelect.innerHTML = `<option value="">Pilih Partner / Pemasok / Pembeli...</option>` +
+                partners.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        }
+        document.getElementById('modalCreateCustomsDoc').classList.remove('hidden');
+    } catch (err) {
+        showToast('Gagal memuat data partner: ' + err.message, 'error');
+    }
+}
+
+function closeModalCreateCustomsDoc() {
+    document.getElementById('modalCreateCustomsDoc').classList.add('hidden');
+}
+
+async function handleCreateCustomsDoc(e) {
+    e.preventDefault();
+    try {
+        const payload = {
+            document_type: document.getElementById('cbDocType').value,
+            customs_office_code: document.getElementById('cbDocOfficeCode').value,
+            registration_number: document.getElementById('cbDocRegNo').value,
+            partner_id: parseInt(document.getElementById('cbDocPartnerId').value) || 0,
+            origin_country: document.getElementById('cbDocOriginCountry').value,
+            destination_country: document.getElementById('cbDocDestCountry').value,
+            gross_weight: parseFloat(document.getElementById('cbDocGrossWeight').value) || 0,
+            net_weight: parseFloat(document.getElementById('cbDocNetWeight').value) || 0,
+            package_count: parseInt(document.getElementById('cbDocPackageCount').value) || 0,
+            total_cif_amount: parseFloat(document.getElementById('cbDocCifAmount').value) || 0,
+            duty_suspended_amount: parseFloat(document.getElementById('cbDocDutySuspended').value) || 0,
+            vat_suspended_amount: parseFloat(document.getElementById('cbDocVatSuspended').value) || 0
+        };
+
+        await api('/customs-bonded/documents', 'POST', payload);
+        showToast('Dokumen Pabean Bea Cukai berhasil diterbitkan!', 'success');
+        closeModalCreateCustomsDoc();
+        loadCustomsBondedData();
+    } catch (err) {
+        showToast('Gagal menerbitkan dokumen pabean: ' + err.message, 'error');
+    }
+}
+
+function openModalApproveSPPB(docId, docNo) {
+    selectedCustomsDocId = docId;
+    document.getElementById('sppbDocNumberText').textContent = docNo;
+    document.getElementById('sppbInputNo').value = `SPPB-${Math.floor(100000 + Math.random() * 900000)}/KPU.01/2026`;
+    document.getElementById('modalApproveSPPB').classList.remove('hidden');
+}
+
+function closeModalApproveSPPB() {
+    selectedCustomsDocId = null;
+    document.getElementById('modalApproveSPPB').classList.add('hidden');
+}
+
+async function handleApproveSPPB(e) {
+    e.preventDefault();
+    if (!selectedCustomsDocId) return;
+
+    try {
+        const payload = {
+            sppb_number: document.getElementById('sppbInputNo').value,
+            notes: document.getElementById('sppbInputNotes').value
+        };
+
+        await api(`/customs-bonded/documents/${selectedCustomsDocId}/approve-sppb`, 'POST', payload);
+        showToast('SPPB resmi disetujui! Barang dilepaskan dari Kawasan Berikat.', 'success');
+        closeModalApproveSPPB();
+        loadCustomsBondedData();
+    } catch (err) {
+        showToast('Gagal menyetujui SPPB: ' + err.message, 'error');
+    }
+}
+
+async function handleCancelCustomsDoc(docId) {
+    if (!confirm('Apakah Anda yakin ingin membatalkan dokumen pabean ini?')) return;
+    try {
+        await api(`/customs-bonded/documents/${docId}/cancel`, 'POST', {});
+        showToast('Dokumen pabean berhasil dibatalkan.', 'info');
+        loadCustomsBondedData();
+    } catch (err) {
+        showToast('Gagal membatalkan dokumen pabean: ' + err.message, 'error');
+    }
+}
+
+async function openModalCreateSubcontract() {
+    try {
+        const partners = await api('/partners') || [];
+        const subconSelect = document.getElementById('cbSubPartnerId');
+        if (subconSelect) {
+            subconSelect.innerHTML = `<option value="">Pilih Subkontraktor...</option>` +
+                partners.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        }
+
+        const products = await api('/products') || [];
+        const prodSelect = document.getElementById('cbSubProductId');
+        if (prodSelect) {
+            prodSelect.innerHTML = `<option value="">Pilih Produk / Komponen...</option>` +
+                products.map(pr => `<option value="${pr.id}">${pr.name} (${pr.default_code || 'PROD'})</option>`).join('');
+        }
+
+        document.getElementById('modalCreateSubcontract').classList.remove('hidden');
+    } catch (err) {
+        showToast('Gagal memuat partner/produk: ' + err.message, 'error');
+    }
+}
+
+function closeModalCreateSubcontract() {
+    document.getElementById('modalCreateSubcontract').classList.add('hidden');
+}
+
+async function handleCreateSubcontract(e) {
+    e.preventDefault();
+    try {
+        const payload = {
+            subcontractor_id: parseInt(document.getElementById('cbSubPartnerId').value) || 0,
+            product_id: parseInt(document.getElementById('cbSubProductId').value) || 0,
+            process_type: document.getElementById('cbSubProcessType').value,
+            quantity_sent: parseFloat(document.getElementById('cbSubQtySent').value) || 0,
+            uom: document.getElementById('cbSubUom').value || 'PCS',
+            due_date: document.getElementById('cbSubDueDate').value
+        };
+
+        await api('/customs-bonded/subcontracts', 'POST', payload);
+        showToast('Kontrak subkontrak BC 2.61 berhasil diterbitkan!', 'success');
+        closeModalCreateSubcontract();
+        loadCustomsBondedData();
+        switchCustomsTab('subcontract');
+    } catch (err) {
+        showToast('Gagal menerbitkan subkontrak: ' + err.message, 'error');
+    }
+}
+
+function openModalReturnSubcontract(subId, contractNo, remainingQty) {
+    selectedCustomsSubconId = subId;
+    document.getElementById('cbReturnContractText').textContent = contractNo;
+    document.getElementById('cbReturnRemainingQtyText').textContent = remainingQty.toLocaleString();
+    document.getElementById('cbReturnQty').value = remainingQty;
+    document.getElementById('cbReturnBcDoc').value = `BC262-${Math.floor(100000 + Math.random() * 900000)}`;
+    document.getElementById('modalReturnSubcontract').classList.remove('hidden');
+}
+
+function closeModalReturnSubcontract() {
+    selectedCustomsSubconId = null;
+    document.getElementById('modalReturnSubcontract').classList.add('hidden');
+}
+
+async function handleReturnSubcontract(e) {
+    e.preventDefault();
+    if (!selectedCustomsSubconId) return;
+
+    try {
+        const payload = {
+            quantity_returned: parseFloat(document.getElementById('cbReturnQty').value) || 0,
+            bc262_doc_number: document.getElementById('cbReturnBcDoc').value,
+            notes: document.getElementById('cbReturnNotes').value
+        };
+
+        await api(`/customs-bonded/subcontracts/${selectedCustomsSubconId}/return`, 'POST', payload);
+        showToast('Pengembalian subkontrak (BC 2.62) berhasil dicatat ke IT Inventory!', 'success');
+        closeModalReturnSubcontract();
+        loadCustomsBondedData();
+        switchCustomsTab('subcontract');
+    } catch (err) {
+        showToast('Gagal mencatat pengembalian subkontrak: ' + err.message, 'error');
+    }
+}
+
+// ============================================================================
+// MODUL KE-44: LOW-CODE / NO-CODE STUDIO (DYNAMIC MODELS & DATA ENGINE)
+// ============================================================================
+let currentSelectedLowCodeModel = null;
+let currentSelectedModelFields = [];
+let proposedAISchema = null;
+let cachedLowCodeModels = [];
+
+async function loadLowCodeStudioData() {
+    try {
+        const stats = await api('/lowcode/stats');
+        if (stats) {
+            const elModels = document.getElementById('lcStatTotalModels');
+            const elFields = document.getElementById('lcStatCustomFields');
+            const elRecords = document.getElementById('lcStatTotalRecords');
+            const elWorkflows = document.getElementById('lcStatActiveWorkflows');
+            const elStorage = document.getElementById('lcStatStorageKB');
+            const elHealth = document.getElementById('lcStatSchemaHealth');
+
+            if (elModels) elModels.textContent = stats.total_models || 0;
+            if (elFields) elFields.textContent = stats.total_fields || 0;
+            if (elRecords) elRecords.textContent = stats.total_records || 0;
+            if (elWorkflows) elWorkflows.textContent = stats.active_workflows || 0;
+            if (elStorage) elStorage.textContent = (stats.storage_kb || 0).toLocaleString() + ' KB';
+            if (elHealth) elHealth.textContent = stats.schema_health || '100% OK';
+        }
+        await loadLowCodeModelsList();
+    } catch (err) {
+        console.error('Failed to load Low-Code stats:', err);
+    }
+}
+
+function switchLowCodeTab(tab) {
+    const tabs = ['models', 'records', 'ai-copilot'];
+    tabs.forEach(t => {
+        const btn = document.getElementById(`lcNavTab-${t}`);
+        const content = document.getElementById(`lcTabContent-${t}`);
+        if (btn && content) {
+            if (t === tab) {
+                btn.className = 'px-4 py-2 font-medium text-sm rounded-lg bg-indigo-600 text-white shadow-sm transition-all';
+                content.classList.remove('hidden');
+            } else {
+                btn.className = 'px-4 py-2 font-medium text-sm rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all';
+                content.classList.add('hidden');
+            }
+        }
+    });
+
+    if (tab === 'records') {
+        loadLowCodeRecordsList();
+    }
+}
+
+async function loadLowCodeModelsList() {
+    try {
+        const models = await api('/lowcode/models') || [];
+        cachedLowCodeModels = models;
+        const tbody = document.getElementById('lcModelsTableBody');
+        const filterSelect = document.getElementById('lcRecordModelFilter');
+
+        if (filterSelect) {
+            const currentVal = filterSelect.value;
+            filterSelect.innerHTML = models.map(m => `
+                <option value="${m.technical_name}">${m.icon || '📦'} ${m.name} (${m.technical_name})</option>
+            `).join('');
+            if (currentVal && models.some(m => m.technical_name === currentVal)) {
+                filterSelect.value = currentVal;
+            }
+        }
+
+        if (!tbody) return;
+        if (models.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-slate-400">Belum ada custom data model. Klik "Buat Model Baru" atau gunakan AI Schema Architect!</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = models.map(m => {
+            const isSystem = m.is_system;
+            const fieldsCount = m.fields ? m.fields.length : 0;
+            return `
+                <tr class="hover:bg-slate-50/80 transition-colors border-b border-slate-100">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl p-2 bg-indigo-50 rounded-lg">${m.icon || '📦'}</span>
+                            <div>
+                                <div class="font-semibold text-slate-900">${m.name}</div>
+                                <div class="text-xs text-slate-400 max-w-xs truncate">${m.description || 'Tanpa deskripsi'}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="font-mono text-xs px-2.5 py-1 bg-slate-100 text-slate-700 rounded-md border border-slate-200 font-semibold">${m.technical_name}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2.5 py-1 text-xs rounded-full font-medium ${m.category === 'manufacturing' ? 'bg-amber-100 text-amber-700' : m.category === 'hr' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'} capitalize">
+                            ${m.category || 'general'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2.5 py-1 bg-slate-100 text-slate-700 font-semibold text-xs rounded-full border border-slate-200">${fieldsCount} Fields</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 font-semibold text-xs rounded-full border border-emerald-200">Live Data</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2.5 py-1 text-xs rounded-full font-medium ${m.active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}">
+                            ${m.active ? '● Aktif' : '○ Non-Aktif'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex items-center justify-end gap-1.5">
+                            <button onclick="openModalManageFields(${m.id})" class="px-2.5 py-1 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-md transition-colors" title="Kelola Kolom & Field">
+                                🛠️ Fields
+                            </button>
+                            <button onclick="switchModelRecordView('${m.technical_name}')" class="px-2.5 py-1 text-xs font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-md transition-colors" title="Lihat Data Record">
+                                📋 Data
+                            </button>
+                            ${!isSystem ? `
+                            <button onclick="handleDeleteCustomModel(${m.id}, '${m.name}')" class="px-2.5 py-1 text-xs font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-md transition-colors" title="Hapus Model">
+                                🗑️
+                            </button>` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error('Failed to load Low-Code models:', err);
+    }
+}
+
+function openModalCreateCustomModel() {
+    document.getElementById('lcNewModelName').value = '';
+    document.getElementById('lcNewModelTechName').value = 'x_';
+    document.getElementById('lcNewModelCategory').value = 'custom';
+    document.getElementById('lcNewModelIcon').value = '📦';
+    document.getElementById('lcNewModelDescription').value = '';
+    document.getElementById('modalCreateCustomModel').classList.remove('hidden');
+    document.getElementById('modalCreateCustomModel').classList.add('active');
+}
+
+function closeModalCreateCustomModel() {
+    document.getElementById('modalCreateCustomModel').classList.add('hidden');
+    document.getElementById('modalCreateCustomModel').classList.remove('active');
+}
+
+function autoGenerateModelTechnicalName() {
+    const nameVal = document.getElementById('lcNewModelName').value;
+    const slug = nameVal.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+    document.getElementById('lcNewModelTechName').value = 'x_' + slug;
+}
+
+async function handleCreateCustomModel(e) {
+    e.preventDefault();
+    try {
+        const payload = {
+            name: document.getElementById('lcNewModelName').value.trim(),
+            technical_name: document.getElementById('lcNewModelTechName').value.trim(),
+            category: document.getElementById('lcNewModelCategory').value,
+            icon: document.getElementById('lcNewModelIcon').value.trim() || '📦',
+            description: document.getElementById('lcNewModelDescription').value.trim(),
+            active: true
+        };
+
+        await api('/lowcode/models', 'POST', payload);
+        showToast(`Model baru "${payload.name}" berhasil dibuat!`, 'success');
+        closeModalCreateCustomModel();
+        loadLowCodeStudioData();
+    } catch (err) {
+        showToast('Gagal membuat model: ' + err.message, 'error');
+    }
+}
+
+async function handleDeleteCustomModel(modelId, modelName) {
+    if (!confirm(`Apakah Anda yakin ingin menghapus model "${modelName}" beserta seluruh data record-nya?`)) return;
+    try {
+        await api(`/lowcode/models/${modelId}`, 'DELETE');
+        showToast(`Model "${modelName}" berhasil dihapus.`, 'info');
+        loadLowCodeStudioData();
+    } catch (err) {
+        showToast('Gagal menghapus model: ' + err.message, 'error');
+    }
+}
+
+async function openModalManageFields(modelId) {
+    try {
+        const model = await api(`/lowcode/models/${modelId}`);
+        if (!model) return;
+        currentSelectedLowCodeModel = model;
+
+        document.getElementById('lcManageFieldsModelTitle').textContent = `${model.icon || '📦'} ${model.name} (${model.technical_name})`;
+        document.getElementById('lcNewFieldModelId').value = model.id;
+        document.getElementById('lcNewFieldLabel').value = '';
+        document.getElementById('lcNewFieldName').value = 'x_';
+        document.getElementById('lcNewFieldType').value = 'char';
+        document.getElementById('lcNewFieldRequired').checked = false;
+        document.getElementById('lcNewFieldDefault').value = '';
+        document.getElementById('lcNewFieldOptions').value = '';
+        toggleFieldOptionsVisibility();
+
+        renderModelFieldsList(model.fields || []);
+        document.getElementById('modalManageCustomFields').classList.remove('hidden');
+        document.getElementById('modalManageCustomFields').classList.add('active');
+    } catch (err) {
+        showToast('Gagal membuka kelola field: ' + err.message, 'error');
+    }
+}
+
+function closeModalManageFields() {
+    document.getElementById('modalManageCustomFields').classList.add('hidden');
+    document.getElementById('modalManageCustomFields').classList.remove('active');
+    currentSelectedLowCodeModel = null;
+}
+
+function renderModelFieldsList(fields) {
+    const tbody = document.getElementById('lcModelFieldsTableBody');
+    if (!tbody) return;
+
+    if (!fields || fields.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-400">Belum ada field tambahan. Tambahkan kolom pertama di form atas!</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = fields.map(f => `
+        <tr class="hover:bg-slate-50 border-b border-slate-100">
+            <td class="px-4 py-3 font-medium text-slate-900">${f.label}</td>
+            <td class="px-4 py-3 font-mono text-xs text-indigo-700 bg-indigo-50/50 rounded">${f.field_name}</td>
+            <td class="px-4 py-3">
+                <span class="px-2 py-0.5 text-xs font-semibold rounded bg-slate-100 text-slate-700 uppercase">${f.field_type}</span>
+            </td>
+            <td class="px-4 py-3">
+                <span class="text-xs ${f.required ? 'text-rose-600 font-semibold' : 'text-slate-400'}">${f.required ? '★ Wajib' : 'Opsional'}</span>
+            </td>
+            <td class="px-4 py-3 text-xs text-slate-500 font-mono">${f.default_value || '-'}</td>
+            <td class="px-4 py-3 text-right">
+                <button onclick="handleDeleteCustomField(${f.id}, '${f.label}')" class="px-2 py-1 text-xs text-rose-600 hover:bg-rose-50 rounded" title="Hapus Kolom">
+                    🗑️
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function autoGenerateFieldName() {
+    const labelVal = document.getElementById('lcNewFieldLabel').value;
+    const slug = labelVal.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+    document.getElementById('lcNewFieldName').value = 'x_' + slug;
+}
+
+function toggleFieldOptionsVisibility() {
+    const fType = document.getElementById('lcNewFieldType').value;
+    const row = document.getElementById('lcFieldOptionsRow');
+    if (row) {
+        if (fType === 'selection') {
+            row.classList.remove('hidden');
+        } else {
+            row.classList.add('hidden');
+        }
+    }
+}
+
+async function handleAddCustomField(e) {
+    e.preventDefault();
+    if (!currentSelectedLowCodeModel) return;
+
+    try {
+        const fType = document.getElementById('lcNewFieldType').value;
+        const optionsStr = document.getElementById('lcNewFieldOptions').value.trim();
+        let optionsJson = '[]';
+        if (fType === 'selection' && optionsStr) {
+            const arr = optionsStr.split(',').map(s => s.trim()).filter(Boolean);
+            optionsJson = JSON.stringify(arr);
+        }
+
+        const payload = {
+            field_name: document.getElementById('lcNewFieldName').value.trim(),
+            field_type: fType,
+            label: document.getElementById('lcNewFieldLabel').value.trim(),
+            required: document.getElementById('lcNewFieldRequired').checked,
+            options_json: optionsJson,
+            default_value: document.getElementById('lcNewFieldDefault').value.trim()
+        };
+
+        const res = await api(`/lowcode/models/${currentSelectedLowCodeModel.id}/fields`, 'POST', payload);
+        showToast(`Kolom "${payload.label}" berhasil ditambahkan!`, 'success');
+        
+        // Refresh fields list
+        const updated = await api(`/lowcode/models/${currentSelectedLowCodeModel.id}`);
+        if (updated) {
+            currentSelectedLowCodeModel = updated;
+            renderModelFieldsList(updated.fields || []);
+        }
+
+        // Reset form inputs
+        document.getElementById('lcNewFieldLabel').value = '';
+        document.getElementById('lcNewFieldName').value = 'x_';
+        document.getElementById('lcNewFieldDefault').value = '';
+        document.getElementById('lcNewFieldOptions').value = '';
+
+        // Refresh stats
+        loadLowCodeStudioData();
+    } catch (err) {
+        showToast('Gagal menambah field: ' + err.message, 'error');
+    }
+}
+
+async function handleDeleteCustomField(fieldId, fieldLabel) {
+    if (!currentSelectedLowCodeModel) return;
+    if (!confirm(`Hapus kolom "${fieldLabel}" dari model ini?`)) return;
+
+    try {
+        await api(`/lowcode/models/${currentSelectedLowCodeModel.id}/fields/${fieldId}`, 'DELETE');
+        showToast(`Kolom "${fieldLabel}" berhasil dihapus.`, 'info');
+        const updated = await api(`/lowcode/models/${currentSelectedLowCodeModel.id}`);
+        if (updated) {
+            currentSelectedLowCodeModel = updated;
+            renderModelFieldsList(updated.fields || []);
+        }
+        loadLowCodeStudioData();
+    } catch (err) {
+        showToast('Gagal menghapus kolom: ' + err.message, 'error');
+    }
+}
+
+function switchModelRecordView(techName) {
+    const select = document.getElementById('lcRecordModelFilter');
+    if (select) {
+        select.value = techName;
+    }
+    switchLowCodeTab('records');
+}
+
+async function loadLowCodeRecordsList() {
+    const select = document.getElementById('lcRecordModelFilter');
+    const techName = select ? select.value : '';
+    if (!techName) return;
+
+    const thead = document.getElementById('lcRecordsTableHead');
+    const tbody = document.getElementById('lcRecordsTableBody');
+    const titleEl = document.getElementById('lcRecordModelTitle');
+
+    try {
+        const model = await api(`/lowcode/models/by-name/${techName}`);
+        if (!model) return;
+        currentSelectedModelFields = model.fields || [];
+
+        if (titleEl) {
+            titleEl.textContent = `${model.icon || '📦'} ${model.name} (${model.technical_name})`;
+        }
+
+        // Render dynamic table headers
+        let headersHtml = `
+            <th class="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">ID</th>
+            <th class="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Display Name</th>
+        `;
+
+        currentSelectedModelFields.forEach(f => {
+            headersHtml += `<th class="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">${f.label}</th>`;
+        });
+
+        headersHtml += `
+            <th class="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Dibuat Pada</th>
+            <th class="px-6 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Aksi</th>
+        `;
+        if (thead) thead.innerHTML = `<tr>${headersHtml}</tr>`;
+
+        // Fetch records
+        const records = await api(`/lowcode/records/${techName}`) || [];
+        if (!tbody) return;
+
+        if (records.length === 0) {
+            const colSpan = currentSelectedModelFields.length + 4;
+            tbody.innerHTML = `<tr><td colspan="${colSpan}" class="px-6 py-10 text-center text-slate-400">Belum ada record data untuk model ini. Klik "Tambah Record Data" di kanan atas!</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = records.map(r => {
+            let rowHtml = `
+                <td class="px-6 py-4 font-mono text-xs font-semibold text-slate-600">#${r.id}</td>
+                <td class="px-6 py-4 font-semibold text-slate-900">${r.name || ('Record #' + r.id)}</td>
+            `;
+
+            const rData = r.data || {};
+            currentSelectedModelFields.forEach(f => {
+                const val = rData[f.field_name];
+                let displayVal = val !== undefined && val !== null ? val : '-';
+
+                if (f.field_type === 'boolean') {
+                    displayVal = val ? '<span class="text-emerald-600 font-bold">✓ Ya</span>' : '<span class="text-slate-400">✗ Tidak</span>';
+                } else if (f.field_type === 'float' && typeof val === 'number') {
+                    displayVal = val.toLocaleString();
+                } else if (f.field_type === 'selection' && val) {
+                    displayVal = `<span class="px-2 py-0.5 text-xs rounded bg-indigo-50 text-indigo-700 font-medium">${val}</span>`;
+                }
+
+                rowHtml += `<td class="px-6 py-4 text-sm text-slate-700">${displayVal}</td>`;
+            });
+
+            const createdDate = r.created_at ? new Date(r.created_at).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' }) : '-';
+
+            rowHtml += `
+                <td class="px-6 py-4 text-xs text-slate-500">${createdDate}</td>
+                <td class="px-6 py-4 text-right">
+                    <button onclick="handleDeleteCustomRecord('${techName}', ${r.id})" class="px-2.5 py-1 text-xs text-rose-600 hover:bg-rose-50 rounded font-medium transition-colors" title="Hapus Record">
+                        🗑️ Hapus
+                    </button>
+                </td>
+            `;
+
+            return `<tr class="hover:bg-slate-50/80 transition-colors border-b border-slate-100">${rowHtml}</tr>`;
+        }).join('');
+    } catch (err) {
+        console.error('Failed to load Low-Code records:', err);
+    }
+}
+
+function openModalCreateCustomRecord() {
+    const select = document.getElementById('lcRecordModelFilter');
+    const techName = select ? select.value : '';
+    if (!techName) {
+        showToast('Pilih data model terlebih dahulu!', 'warning');
+        return;
+    }
+
+    const container = document.getElementById('lcDynamicFormInputsContainer');
+    document.getElementById('lcRecordDisplayName').value = '';
+
+    if (container) {
+        if (currentSelectedModelFields.length === 0) {
+            container.innerHTML = `<div class="p-4 bg-amber-50 rounded-lg text-amber-700 text-sm">Model ini belum memiliki custom fields tambahan. Anda dapat menyimpan nama record, atau menambahkan fields di tab Kelola Model.</div>`;
+        } else {
+            container.innerHTML = currentSelectedModelFields.map(f => {
+                let inputMarkup = '';
+                const reqAttr = f.required ? 'required' : '';
+                const reqStar = f.required ? '<span class="text-rose-500">*</span>' : '';
+
+                if (f.field_type === 'text') {
+                    inputMarkup = `<textarea name="${f.field_name}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500" rows="3" ${reqAttr}>${f.default_value || ''}</textarea>`;
+                } else if (f.field_type === 'integer') {
+                    inputMarkup = `<input type="number" step="1" name="${f.field_name}" value="${f.default_value || ''}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500" ${reqAttr}>`;
+                } else if (f.field_type === 'float') {
+                    inputMarkup = `<input type="number" step="0.01" name="${f.field_name}" value="${f.default_value || ''}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500" ${reqAttr}>`;
+                } else if (f.field_type === 'date') {
+                    inputMarkup = `<input type="date" name="${f.field_name}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500" ${reqAttr}>`;
+                } else if (f.field_type === 'datetime') {
+                    inputMarkup = `<input type="datetime-local" name="${f.field_name}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500" ${reqAttr}>`;
+                } else if (f.field_type === 'boolean') {
+                    inputMarkup = `
+                        <label class="flex items-center gap-2 cursor-pointer mt-1">
+                            <input type="checkbox" name="${f.field_name}" class="w-4 h-4 text-indigo-600 rounded">
+                            <span class="text-sm text-slate-700">Aktifkan opsi ini</span>
+                        </label>
+                    `;
+                } else if (f.field_type === 'selection') {
+                    let options = [];
+                    try {
+                        options = JSON.parse(f.options_json || '[]');
+                    } catch (e) {
+                        options = [];
+                    }
+                    const optHtml = options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+                    inputMarkup = `
+                        <select name="${f.field_name}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500" ${reqAttr}>
+                            <option value="">-- Pilih Opsi --</option>
+                            ${optHtml}
+                        </select>
+                    `;
+                } else {
+                    inputMarkup = `<input type="text" name="${f.field_name}" value="${f.default_value || ''}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500" ${reqAttr}>`;
+                }
+
+                return `
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">${f.label} ${reqStar}</label>
+                        ${inputMarkup}
+                    </div>
+                `;
+            }).join('');
+        }
+    }
+
+    document.getElementById('modalCreateCustomRecord').classList.remove('hidden');
+    document.getElementById('modalCreateCustomRecord').classList.add('active');
+}
+
+function closeModalCreateCustomRecord() {
+    document.getElementById('modalCreateCustomRecord').classList.add('hidden');
+    document.getElementById('modalCreateCustomRecord').classList.remove('active');
+}
+
+async function handleSaveCustomRecord(e) {
+    e.preventDefault();
+    const select = document.getElementById('lcRecordModelFilter');
+    const techName = select ? select.value : '';
+    if (!techName) return;
+
+    try {
+        const nameVal = document.getElementById('lcRecordDisplayName').value.trim();
+        const dataObj = {};
+
+        currentSelectedModelFields.forEach(f => {
+            const inputEl = document.querySelector(`[name="${f.field_name}"]`);
+            if (inputEl) {
+                if (f.field_type === 'boolean') {
+                    dataObj[f.field_name] = inputEl.checked;
+                } else if (f.field_type === 'integer') {
+                    dataObj[f.field_name] = inputEl.value ? parseInt(inputEl.value) : 0;
+                } else if (f.field_type === 'float') {
+                    dataObj[f.field_name] = inputEl.value ? parseFloat(inputEl.value) : 0.0;
+                } else {
+                    dataObj[f.field_name] = inputEl.value;
+                }
+            }
+        });
+
+        const payload = {
+            name: nameVal || `Record ${Date.now()}`,
+            data: dataObj
+        };
+
+        await api(`/lowcode/records/${techName}`, 'POST', payload);
+        showToast('Record data berhasil disimpan!', 'success');
+        closeModalCreateCustomRecord();
+        loadLowCodeRecordsList();
+        loadLowCodeStudioData();
+    } catch (err) {
+        showToast('Gagal menyimpan data record: ' + err.message, 'error');
+    }
+}
+
+async function handleDeleteCustomRecord(techName, recordId) {
+    if (!confirm('Hapus record data ini?')) return;
+    try {
+        await api(`/lowcode/records/${techName}/${recordId}`, 'DELETE');
+        showToast('Record berhasil dihapus.', 'info');
+        loadLowCodeRecordsList();
+        loadLowCodeStudioData();
+    } catch (err) {
+        showToast('Gagal menghapus record: ' + err.message, 'error');
+    }
+}
+
+function openModalAISchemaArchitect() {
+    proposedAISchema = null;
+    document.getElementById('lcAiPromptInput').value = '';
+    document.getElementById('lcAiSchemaResultContainer').innerHTML = `
+        <div class="p-8 text-center text-slate-400">
+            Ketik kebutuhan modul bisnis Anda di atas dan klik <b>"Rancang Skema Model dengan AI"</b>.
+        </div>
+    `;
+    const btnApply = document.getElementById('btnApplyAISchema');
+    if (btnApply) btnApply.disabled = true;
+
+    document.getElementById('modalAISchemaArchitect').classList.remove('hidden');
+    document.getElementById('modalAISchemaArchitect').classList.add('active');
+}
+
+function closeModalAISchemaArchitect() {
+    document.getElementById('modalAISchemaArchitect').classList.add('hidden');
+    document.getElementById('modalAISchemaArchitect').classList.remove('active');
+    proposedAISchema = null;
+}
+
+function setAISchemaPromptPreset(preset) {
+    const input = document.getElementById('lcAiPromptInput');
+    if (input) {
+        input.value = preset;
+    }
+}
+
+async function generateAISchemaProposal() {
+    const promptInput = document.getElementById('lcAiPromptInput');
+    const promptVal = promptInput ? promptInput.value.trim() : '';
+    if (!promptVal) {
+        showToast('Silakan masukkan deskripsi modul bisnis terlebih dahulu!', 'warning');
+        return;
+    }
+
+    const container = document.getElementById('lcAiSchemaResultContainer');
+    const btnApply = document.getElementById('btnApplyAISchema');
+    if (container) {
+        container.innerHTML = `
+            <div class="p-8 text-center text-indigo-600 flex flex-col items-center justify-center gap-2">
+                <span class="animate-spin text-3xl">✨</span>
+                <span class="font-medium text-sm">AI sedang menganalisis arsitektur skema & tipe data ERP...</span>
+            </div>
+        `;
+    }
+
+    try {
+        const res = await api('/lowcode/ai/schema-copilot', 'POST', { prompt: promptVal });
+        if (!res || !res.proposed_model) {
+            throw new Error('Gagal menerima proposal skema AI');
+        }
+
+        proposedAISchema = res.proposed_model;
+        if (btnApply) btnApply.disabled = false;
+
+        const m = proposedAISchema;
+        const fields = m.fields || [];
+
+        container.innerHTML = `
+            <div class="space-y-4">
+                <div class="p-4 bg-indigo-50/70 border border-indigo-100 rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl">${m.icon || '📦'}</span>
+                        <div>
+                            <div class="text-lg font-bold text-indigo-950">${m.name}</div>
+                            <div class="text-xs font-mono text-indigo-700">${m.technical_name} • Kategori: ${m.category}</div>
+                            <div class="text-sm text-slate-600 mt-1">${m.description}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="font-bold text-xs uppercase tracking-wider text-slate-700 mb-2">Kolom & Fields yang Dirancang (${fields.length} Field):</div>
+                    <div class="border border-slate-200 rounded-lg overflow-hidden">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-600 border-b border-slate-200">
+                                <tr>
+                                    <th class="px-3 py-2 font-semibold">Label</th>
+                                    <th class="px-3 py-2 font-semibold">Technical Name</th>
+                                    <th class="px-3 py-2 font-semibold">Tipe Data</th>
+                                    <th class="px-3 py-2 font-semibold">Wajib?</th>
+                                    <th class="px-3 py-2 font-semibold">Options / Default</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 bg-white">
+                                ${fields.map(f => `
+                                    <tr>
+                                        <td class="px-3 py-2 font-medium text-slate-900">${f.label}</td>
+                                        <td class="px-3 py-2 font-mono text-indigo-700">${f.field_name}</td>
+                                        <td class="px-3 py-2"><span class="px-1.5 py-0.5 bg-slate-100 rounded uppercase font-semibold text-[10px]">${f.field_type}</span></td>
+                                        <td class="px-3 py-2">${f.required ? '<span class="text-rose-600 font-bold">Wajib</span>' : '<span class="text-slate-400">Opsional</span>'}</td>
+                                        <td class="px-3 py-2 text-slate-500 font-mono">${f.options_json && f.options_json !== '[]' ? f.options_json : (f.default_value || '-')}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-xs">
+                    💡 Klik tombol <b>"Terapkan Skema ke Database"</b> di bawah untuk langsung membuat model dan kolom-kolom ini ke sistem live.
+                </div>
+            </div>
+        `;
+    } catch (err) {
+        if (container) {
+            container.innerHTML = `<div class="p-6 text-center text-rose-600 text-sm">Gagal merancang skema AI: ${err.message}</div>`;
+        }
+        if (btnApply) btnApply.disabled = true;
+    }
+}
+
+async function applyAISchemaProposal() {
+    if (!proposedAISchema) return;
+
+    try {
+        // 1. Create model
+        const modelPayload = {
+            name: proposedAISchema.name,
+            technical_name: proposedAISchema.technical_name,
+            category: proposedAISchema.category || 'custom',
+            icon: proposedAISchema.icon || '📦',
+            description: proposedAISchema.description || '',
+            active: true
+        };
+
+        const createdModel = await api('/lowcode/models', 'POST', modelPayload);
+        if (!createdModel || !createdModel.id) {
+            throw new Error('Gagal menginisialisasi model baru');
+        }
+
+        // 2. Add each field
+        const fields = proposedAISchema.fields || [];
+        for (const f of fields) {
+            await api(`/lowcode/models/${createdModel.id}/fields`, 'POST', {
+                field_name: f.field_name,
+                field_type: f.field_type,
+                label: f.label,
+                required: f.required,
+                options_json: f.options_json || '[]',
+                default_value: f.default_value || ''
+            });
+        }
+
+        showToast(`Model "${proposedAISchema.name}" beserta ${fields.length} field berhasil dibuat ke database!`, 'success');
+        closeModalAISchemaArchitect();
+        await loadLowCodeStudioData();
+        switchLowCodeTab('models');
+    } catch (err) {
+        showToast('Gagal menerapkan skema AI: ' + err.message, 'error');
+    }
+}

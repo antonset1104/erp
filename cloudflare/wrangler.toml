@@ -1,0 +1,16 @@
+name = "odoo-erp-workers-ai"
+main = "worker.js"
+compatibility_date = "2024-09-23"
+
+# Cloudflare Workers AI Binding
+[ai]
+binding = "AI"
+
+# Optional Cloudflare KV Cache for repetitive AI queries
+# [[kv_namespaces]]
+# binding = "AI_CACHE"
+# id = "your_kv_namespace_id"
+
+[vars]
+ENVIRONMENT = "production"
+DEFAULT_MODEL = "@cf/meta/llama-3.1-8b-instruct"

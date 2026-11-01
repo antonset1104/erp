@@ -1,0 +1,22 @@
+# Cloudflare Tunnel Configuration (cloudflared)
+# Exposes Odoo-Go ERP to custom domain safely with zero inbound open firewall ports.
+#
+# Quickstart:
+#   1. cloudflared tunnel login
+#   2. cloudflared tunnel create odoo-erp-tunnel
+#   3. Update tunnel ID and credentials-file below
+#   4. cloudflared tunnel run odoo-erp-tunnel
+
+tunnel: <YOUR-TUNNEL-UUID>
+credentials-file: /etc/cloudflared/<YOUR-TUNNEL-UUID>.json
+
+ingress:
+  # Route traffic for erp.yourdomain.com to local Go server
+  - hostname: erp.yourcompany.com
+    service: http://localhost:8080
+    originRequest:
+      connectTimeout: 30s
+      noTLSVerify: true
+
+  # Default fallback 404
+  - service: http_status:404
