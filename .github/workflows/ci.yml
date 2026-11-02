@@ -1,0 +1,52 @@
+name: CI / Build & Test Suite
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Test (Go ${{ matrix.go-version }} on ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        go-version: ['1.22.x']
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+          cache: true
+
+      - name: Verify Go Modules
+        run: |
+          go mod verify
+
+      - name: Static Analysis & Go Vet
+        run: |
+          go vet ./...
+
+      - name: Build Server Executable
+        run: |
+          go build -v -o bin/server ./cmd/server
+
+      - name: Run Integration & Unit Test Suite
+        env:
+          CGO_ENABLED: '1'
+        run: |
+          go test -v -race -timeout 15m ./tests/...
+
+      - name: Verify Global AdSense & Analytics Compliance
+        shell: bash
+        run: |
+          grep -q "ca-pub-6180580801533680" web/index.html || { echo "Missing Google AdSense in web/index.html"; exit 1; }
+          grep -q "G-79X7K7H4MJ" web/index.html || { echo "Missing Google Analytics in web/index.html"; exit 1; }
+          echo "✓ Global AdSense & Analytics verified successfully!"

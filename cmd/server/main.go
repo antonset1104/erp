@@ -8,6 +8,7 @@ import (
 
 	"erp-golang/internal/config"
 	"erp-golang/internal/core/ai"
+	"erp-golang/internal/core/commandcenter"
 	"erp-golang/internal/core/database"
 	"erp-golang/internal/core/middleware"
 	"erp-golang/internal/core/registry"
@@ -283,6 +284,7 @@ func main() {
 
 		// Register Cloudflare Workers AI endpoints
 		ai.RegisterAIRoutes(apiV1, authMiddleware, aiHandler)
+		commandcenter.RegisterRoutes(apiV1, authMiddleware, db, saleMod.Service(), purchaseMod.Service(), stockMod.Service(), accountMod.Service())
 	}
 
 	// Serve Static Web Frontend
@@ -333,7 +335,7 @@ func getDashboardStats(c *gin.Context, db *gorm.DB) {
 	db.Table("account_moves").Where("company_id = ?", companyID).Count(&invoiceCount)
 
 	var totalSales float64
-	db.Table("sale_orders").Where("company_id = ? AND state = 'sale'", companyID).
+	db.Table("sale_orders").Where("company_id = ? AND state IN ('sale', 'done')", companyID).
 		Select("COALESCE(SUM(amount_total), 0)").Scan(&totalSales)
 
 	var mrpCount int64
@@ -524,7 +526,7 @@ func getDashboardStats(c *gin.Context, db *gorm.DB) {
 	db.Table("integration_connectors").Count(&integrationConnectorCount)
 	db.Table("integration_logs").Count(&integrationLogCount)
 
-	c.JSON(http.StatusOK, gin.H{
+	payload := gin.H{
 		"products":                  productCount,
 		"customers":                 customerCount,
 		"vendors":                   vendorCount,
@@ -607,6 +609,8 @@ func getDashboardStats(c *gin.Context, db *gorm.DB) {
 		"integration_api_keys":      integrationKeyCount,
 		"integration_connectors":    integrationConnectorCount,
 		"integration_logs":          integrationLogCount,
-	})
+	}
+	commandcenter.EnrichDashboardStats(db, companyID, payload)
+	c.JSON(http.StatusOK, payload)
 }
 

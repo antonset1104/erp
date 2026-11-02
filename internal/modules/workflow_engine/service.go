@@ -272,6 +272,11 @@ func (s *Service) StartWorkflow(companyID uint, req StartWorkflowRequest, initia
 		})
 	}
 
+	// Reload instance with workflow details before checking auto transitions
+	if loaded, err := s.repo.GetInstanceByID(inst.ID); err == nil && loaded != nil {
+		inst = loaded
+	}
+
 	// Auto-advance if initial node has automatic transitions
 	inst = s.checkAndAdvanceAutoTransitions(inst)
 
@@ -294,7 +299,7 @@ func (s *Service) ExecuteAction(companyID uint, instanceID uint, action string, 
 
 	// Parse and merge context
 	var ctx map[string]interface{}
-	if err := json.Unmarshal([]byte(inst.ContextJSON), &ctx); err != nil {
+	if err := json.Unmarshal([]byte(inst.ContextJSON), &ctx); err != nil || ctx == nil {
 		ctx = make(map[string]interface{})
 	}
 	for k, v := range additionalData {
@@ -421,6 +426,10 @@ func (s *Service) GetInstanceByID(id uint) (*WorkflowInstance, error) {
 
 func (s *Service) GetInstanceByRecord(companyID uint, targetModel string, recordID uint) (*WorkflowInstance, error) {
 	return s.repo.GetInstanceByRecord(companyID, targetModel, recordID)
+}
+
+func (s *Service) ListInstances(companyID uint, status string) ([]WorkflowInstance, error) {
+	return s.repo.ListInstances(companyID, status)
 }
 
 func (s *Service) ListPendingTasks(companyID uint, role string, userID uint) ([]WorkflowInstance, error) {

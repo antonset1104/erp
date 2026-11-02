@@ -26,7 +26,9 @@ func (h *Handler) RegisterRoutes(api *gin.RouterGroup, authMiddleware gin.Handle
 
 		// Instances & Runtime Execution
 		group.POST("/start", h.StartWorkflow)
+		group.GET("/instances", h.ListInstances)
 		group.GET("/instances/:id", h.GetInstanceByID)
+		group.GET("/instances/:id/logs", h.GetActivityLogs)
 		group.POST("/instances/:id/action", h.ExecuteAction)
 		group.GET("/pending-tasks", h.ListPendingTasks)
 
@@ -98,6 +100,17 @@ func (h *Handler) StartWorkflow(c *gin.Context) {
 	c.JSON(http.StatusCreated, inst)
 }
 
+func (h *Handler) ListInstances(c *gin.Context) {
+	companyID := getCompanyID(c)
+	status := c.Query("status")
+	list, err := h.service.ListInstances(companyID, status)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, list)
+}
+
 func (h *Handler) GetInstanceByID(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -111,6 +124,21 @@ func (h *Handler) GetInstanceByID(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, inst)
+}
+
+func (h *Handler) GetActivityLogs(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID tidak valid"})
+		return
+	}
+
+	logs, err := h.service.GetActivityLogs(uint(id))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, logs)
 }
 
 func (h *Handler) ExecuteAction(c *gin.Context) {
@@ -196,8 +224,13 @@ func getUserID(c *gin.Context) uint {
 }
 
 func getUserName(c *gin.Context) string {
+	if val, ok := c.Get("name"); ok {
+		if name, ok := val.(string); ok && name != "" {
+			return name
+		}
+	}
 	if val, ok := c.Get("user_name"); ok {
-		if name, ok := val.(string); ok {
+		if name, ok := val.(string); ok && name != "" {
 			return name
 		}
 	}

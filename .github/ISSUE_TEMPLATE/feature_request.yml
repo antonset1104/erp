@@ -1,0 +1,49 @@
+name: 💡 Usulan Fitur Baru (Feature Request)
+description: Usulkan peningkatan modul, fitur bisnis baru, atau optimasi untuk Odoo-Go ERP.
+title: "[FEAT]: <judul usulan fitur baru>"
+labels: ["enhancement", "feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Punya ide untuk membuat Odoo-Go ERP semakin hebat? Beritahu kami kebutuhan bisnis atau peningkatan teknis yang ingin Anda lihat!
+  - type: dropdown
+    id: category
+    attributes:
+      label: Kategori Peningkatan
+      options:
+        - "Modul Bisnis Baru (New Business Module)"
+        - "Peningkatan Modul Eksisting (Existing Module Enhancement)"
+        - "Perpajakan & Regulasi Indonesia (Indonesian Localization / Tax)"
+        - "Integrasi API / RPC / Webhook Eksternal"
+        - "Performa, Skalabilitas & Database Engine"
+        - "Antarmuka Pengguna / UX & Visual"
+        - "Dokumentasi & Testing Suite"
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Masalah atau Kebutuhan Bisnis yang Mendasari
+      description: Apakah ada kendala operasional yang saat ini belum bisa ditangani oleh sistem?
+      placeholder: "Contoh: Saat ini alur rekonsiliasi e-Faktur belum mendukung pemindaian batch QR Code Faktur Pajak Masukan dari file PDF..."
+    validations:
+      required: true
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: Usulan Solusi atau Alur Fitur yang Diinginkan
+      description: Jelaskan bagaimana fitur ini sebaiknya bekerja dari sudut pandang pengguna maupun teknis.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatif yang Pernah Dipertimbangkan
+      description: Apakah ada solusi sementara atau cara kerja lain yang sudah pernah Anda coba?
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Kesediaan Berkontribusi
+      options:
+        - label: Saya bersedia membantu mengimplementasikan fitur ini melalui Pull Request jika usulan disetujui.

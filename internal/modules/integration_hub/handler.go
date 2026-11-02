@@ -87,8 +87,10 @@ func (h *Handler) RegisterRoutes(api *gin.RouterGroup, jwtAuth gin.HandlerFunc) 
 		// Pre-Built Connectors
 		dual.GET("/connectors", h.ListConnectors)
 		dual.POST("/connectors/execute", h.ExecuteConnectorAction)
+		dual.POST("/connectors/action", h.ExecuteConnectorAction)
 
 		// Batch Data ETL Jobs
+		dual.GET("/data-jobs", h.ListDataJobs)
 		dual.POST("/data-jobs", h.RunBatchDataJob)
 
 		// Stats & Telemetry
@@ -97,6 +99,7 @@ func (h *Handler) RegisterRoutes(api *gin.RouterGroup, jwtAuth gin.HandlerFunc) 
 
 		// AI Integration Architect
 		dual.POST("/ai-architect", h.AnalyzeIntegrationWithAI)
+		dual.POST("/ai/architect-copilot", h.AnalyzeIntegrationWithAI)
 	}
 
 	// Admin-Only Routes for Key Management (Requires User JWT)
@@ -106,6 +109,7 @@ func (h *Handler) RegisterRoutes(api *gin.RouterGroup, jwtAuth gin.HandlerFunc) 
 		admin.GET("/api-keys", h.ListAPIKeys)
 		admin.POST("/api-keys", h.CreateAPIKey)
 		admin.DELETE("/api-keys/:id", h.RevokeAPIKey)
+		admin.POST("/api-keys/:id/revoke", h.RevokeAPIKey)
 		admin.PUT("/connectors/:code", h.UpdateConnector)
 	}
 }
@@ -344,6 +348,16 @@ func (h *Handler) RunBatchDataJob(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Data Job executed", "data": job})
+}
+
+func (h *Handler) ListDataJobs(c *gin.Context) {
+	companyID := getCompanyID(c)
+	jobs, err := h.service.ListDataJobs(companyID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": jobs})
 }
 
 func (h *Handler) GetStats(c *gin.Context) {

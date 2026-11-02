@@ -2,6 +2,7 @@ package tests
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"math"
@@ -14,6 +15,7 @@ import (
 
 	"erp-golang/internal/config"
 	"erp-golang/internal/core/ai"
+	"erp-golang/internal/core/commandcenter"
 	"erp-golang/internal/core/storage"
 	"erp-golang/internal/modules/account"
 	"erp-golang/internal/modules/approval"
@@ -66,7 +68,8 @@ import (
 	"erp-golang/internal/modules/workflow_engine"
 	"erp-golang/internal/modules/integration_hub"
 
-	"gorm.io/driver/sqlite"
+	"github.com/gin-gonic/gin"
+	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -7903,6 +7906,71 @@ Lead Engineer - Cloud Tech Nusantara (2020 - 2026)
 		t.Fatal("Expected revoked API key to be rejected")
 	}
 	t.Logf("✓ API Key Revocation Verified: Revoked key is inactive and rejected")
+
+	// =========================================================================
+	// 51. EXECUTIVE COMMAND CENTER (OMNI-SEARCH, NOTIFICATIONS, 1-CLICK SIMULATOR)
+	// =========================================================================
+	gin.SetMode(gin.TestMode)
+	ccRouter := gin.New()
+	ccV1 := ccRouter.Group("/api/v1")
+	noopAuth := func(c *gin.Context) {
+		c.Set("user_id", uint(1))
+		c.Set("company_id", uint(1))
+		c.Set("role", "admin")
+		c.Next()
+	}
+	commandcenter.RegisterRoutes(ccV1, noopAuth, db, saleSvc, purchaseSvc, stockSvc, accountSvc)
+
+	// 51.1 Test Universal Omni-Search (/api/v1/search?q=Monitor)
+	reqSearch := httptest.NewRequest(http.MethodGet, "/api/v1/search?q=Monitor", nil)
+	wSearch := httptest.NewRecorder()
+	ccRouter.ServeHTTP(wSearch, reqSearch)
+	if wSearch.Code != http.StatusOK {
+		t.Fatalf("Expected 200 OK from /api/v1/search, got %d: %s", wSearch.Code, wSearch.Body.String())
+	}
+	var searchResp map[string]interface{}
+	if err := json.Unmarshal(wSearch.Body.Bytes(), &searchResp); err != nil {
+		t.Fatalf("Failed to parse search JSON: %v", err)
+	}
+	if totalHits, ok := searchResp["total_hits"].(float64); !ok || totalHits < 1 {
+		t.Fatalf("Expected at least 1 hit in omni-search for 'Monitor', got %v", searchResp["total_hits"])
+	}
+	t.Logf("✓ Universal Omni-Search Verified: query='Monitor' returned %.0f total hits", searchResp["total_hits"])
+
+	// 51.2 Test Actionable Notification Center (/api/v1/dashboard/notifications)
+	reqNotif := httptest.NewRequest(http.MethodGet, "/api/v1/dashboard/notifications", nil)
+	wNotif := httptest.NewRecorder()
+	ccRouter.ServeHTTP(wNotif, reqNotif)
+	if wNotif.Code != http.StatusOK {
+		t.Fatalf("Expected 200 OK from /api/v1/dashboard/notifications, got %d", wNotif.Code)
+	}
+	var notifResp map[string]interface{}
+	_ = json.Unmarshal(wNotif.Body.Bytes(), &notifResp)
+	t.Logf("✓ Actionable Notification Center Verified: %v notifications aggregated", notifResp["total_unread"])
+
+	// 51.3 Test 1-Click End-to-End Business Cycle Simulator (/api/v1/dashboard/simulate-cycle)
+	reqSim := httptest.NewRequest(http.MethodPost, "/api/v1/dashboard/simulate-cycle", nil)
+	wSim := httptest.NewRecorder()
+	ccRouter.ServeHTTP(wSim, reqSim)
+	if wSim.Code != http.StatusOK {
+		t.Fatalf("Expected 200 OK from /api/v1/dashboard/simulate-cycle, got %d: %s", wSim.Code, wSim.Body.String())
+	}
+	var simResp map[string]interface{}
+	_ = json.Unmarshal(wSim.Body.Bytes(), &simResp)
+	if simResp["po_number"] == "" || simResp["so_number"] == "" {
+		t.Fatalf("Expected valid PO and SO numbers from business cycle simulator: %+v", simResp)
+	}
+	t.Logf("✓ 1-Click Business Cycle Simulator Verified: PO=%v, Receipt=%v, SO=%v, Delivery=%v, Invoice=%v",
+		simResp["po_number"], simResp["receipt_number"], simResp["so_number"], simResp["delivery_number"], simResp["invoice_number"])
+
+	// 51.4 Test Executive Summary CSV Export (/api/v1/dashboard/export-summary)
+	reqCSV := httptest.NewRequest(http.MethodGet, "/api/v1/dashboard/export-summary", nil)
+	wCSV := httptest.NewRecorder()
+	ccRouter.ServeHTTP(wCSV, reqCSV)
+	if wCSV.Code != http.StatusOK || !strings.Contains(wCSV.Body.String(), "Total Confirmed Sales") {
+		t.Fatalf("Expected valid CSV from /api/v1/dashboard/export-summary, got code=%d", wCSV.Code)
+	}
+	t.Logf("✓ Executive KPI CSV Export Verified (%d bytes)", wCSV.Body.Len())
 
 	t.Log("🎉 COMPLETE ODOO-GO ERP EXPANDED TEST SUITE (50 MODULES + UNIVERSAL INTEGRATION HUB & OPEN RPC GATEWAY + BPMN 2.0 WORKFLOW ENGINE & VISUAL STATE MACHINE + UNIVERSAL REPORT ENGINE + CLOUDFLARE WORKERS AI COPILOT) PASSED 100%!")
 }

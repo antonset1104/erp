@@ -1,0 +1,83 @@
+name: 🐛 Laporan Bug (Bug Report)
+description: Laporkan adanya perilaku yang salah, kegagalan transaksi, atau error sistem pada Odoo-Go ERP.
+title: "[BUG]: <deskripsi singkat masalah>"
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Terima kasih telah meluangkan waktu untuk melaporkan bug! Laporan yang jelas dan dapat direproduksi membantu tim pengembang menyelesaikan masalah lebih cepat.
+  - type: dropdown
+    id: module
+    attributes:
+      label: Modul yang Terdampak (Affected Module)
+      description: Pilih modul ERP di mana bug ditemukan.
+      options:
+        - "Executive Dashboard & Command Center (Ctrl+K)"
+        - "Base & Otentikasi (base / res.users / res.partner)"
+        - "Stok & Inventaris (stock / stock.picking)"
+        - "Penjualan (sale / sale.order)"
+        - "Pembelian (purchase / purchase.order)"
+        - "Akuntansi & Faktur (account / account.move)"
+        - "Manufaktur & BOM (mrp / mrp.production)"
+        - "Point of Sale / POS (pos / pos.order)"
+        - "HRIS, Presensi & Payroll (hr / hr.payslip)"
+        - "CRM & Sales Pipeline (crm / crm.lead)"
+        - "Kawasan Berikat & DJBC (customs_bonded)"
+        - "Pajak e-Faktur & e-Bupot DJP (tax_efaktur / tax_ebupot)"
+        - "Treasury & Kas Multi-Bank (treasury)"
+        - "Low-Code Studio & Dynamic Schemas (lowcode_studio)"
+        - "BPMN 2.0 Workflow Engine (workflow_engine)"
+        - "Universal Integration Hub & Open RPC (integration_hub)"
+        - "Lainnya (Other)"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Deskripsi Masalah (Description)
+      description: Jelaskan secara singkat apa yang terjadi dan bagaimana masalah ini muncul.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Langkah-Langkah Reproduksi (Steps to Reproduce)
+      description: Tuliskan urutan langkah demi langkah untuk memicu bug ini.
+      placeholder: |
+        1. Buka modul 'Sales & Quotations'
+        2. Klik tombol 'Buat Sales Order' dengan partner '...'
+        3. Konfirmasi Sales Order
+        4. Terjadi pesan error '...'
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Perilaku yang Diharapkan (Expected Behavior)
+      description: Jelaskan apa yang seharusnya terjadi jika sistem berjalan normal.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Lingkungan & Versi (Environment)
+      description: Contoh: Go 1.22.5, Windows 11 / Ubuntu 22.04, Chrome 128, Database SQLite / Postgres.
+      placeholder: "Go 1.22.x, OS Linux/Windows, Browser Chrome/Firefox, SQLite/PostgreSQL"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log Terminal atau Console Error
+      description: Tempelkan cuplikan pesan error dari terminal Go atau Console DevTools browser jika ada.
+      render: shell
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Verifikasi Pelapor
+      options:
+        - label: Saya telah memastikan masalah ini belum dilaporkan pada tab Issues sebelumnya.
+          required: true
+        - label: Saya menyertakan log atau langkah reproduksi yang jelas.
+          required: true

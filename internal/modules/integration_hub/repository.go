@@ -173,37 +173,37 @@ func (r *Repository) GetStats(companyID uint) (*IntegrationHubStats, error) {
 // ----------------- Model Registry & Dynamic Data Access -----------------
 
 var SupportedModelTables = map[string]string{
-	"res.partner":             "partners",
-	"product.product":         "products",
-	"product.template":        "product_templates",
-	"stock.warehouse":         "stock_warehouses",
-	"stock.location":          "stock_locations",
-	"stock.picking":           "stock_pickings",
-	"stock.quant":             "stock_quants",
-	"sale.order":              "sale_orders",
-	"sale.order.line":         "sale_order_lines",
-	"purchase.order":          "purchase_orders",
-	"purchase.order.line":     "purchase_order_lines",
-	"account.move":            "account_moves",
-	"account.move.line":       "account_move_lines",
-	"account.payment":         "account_payments",
-	"mrp.production":          "mrp_productions",
-	"pos.order":               "pos_orders",
-	"hr.employee":             "employees",
-	"crm.lead":                "crm_leads",
-	"project.project":         "projects",
-	"helpdesk.ticket":         "helpdesk_tickets",
-	"maintenance.equipment":   "maintenance_equipments",
-	"fleet.vehicle":           "fleet_vehicles",
-	"hr.leave":                "leave_requests",
-	"hr.expense":              "expenses",
-	"crossovered.budget":      "budgets",
-	"webhook.subscription":    "webhook_subscriptions",
+	"res.partner":              "partners",
+	"product.product":          "products",
+	"product.template":         "product_templates",
+	"stock.warehouse":          "stock_warehouses",
+	"stock.location":           "stock_locations",
+	"stock.picking":            "stock_pickings",
+	"stock.quant":              "stock_quants",
+	"sale.order":               "sale_orders",
+	"sale.order.line":          "sale_order_lines",
+	"purchase.order":           "purchase_orders",
+	"purchase.order.line":      "purchase_order_lines",
+	"account.move":             "account_moves",
+	"account.move.line":        "account_move_lines",
+	"account.payment":          "account_payments",
+	"mrp.production":           "mrp_productions",
+	"pos.order":                "pos_orders",
+	"hr.employee":              "employees",
+	"crm.lead":                 "crm_leads",
+	"project.project":          "projects",
+	"helpdesk.ticket":          "helpdesk_tickets",
+	"maintenance.equipment":    "maintenance_equipments",
+	"fleet.vehicle":            "fleet_vehicles",
+	"hr.leave":                 "leave_requests",
+	"hr.expense":               "expenses",
+	"crossovered.budget":       "account_budgets",
+	"webhook.subscription":     "webhook_subscriptions",
 	"inbound.webhook.endpoint": "inbound_webhook_endpoints",
-	"wms.bin":                 "wms_bins",
-	"portal.vendor.rfq":       "portal_vendor_rfqs",
-	"customs.document":        "customs_documents",
-	"workflow.definition":     "workflow_definitions",
+	"wms.bin":                  "wms_bin_locations",
+	"portal.vendor.rfq":        "vendor_quotation_bids",
+	"customs.document":         "customs_documents",
+	"workflow.definition":      "workflow_definitions",
 }
 
 func (r *Repository) ResolveTableName(model string) (string, error) {
@@ -317,6 +317,12 @@ func (r *Repository) ExecuteCreateRecord(tableName string, values map[string]int
 			id = uint(v)
 		case float64:
 			id = uint(v)
+		}
+	}
+	if id == 0 && r.db.Migrator().HasColumn(tableName, "id") {
+		r.db.Table(tableName).Select("COALESCE(MAX(id), 0)").Scan(&id)
+		if id > 0 {
+			values["id"] = id
 		}
 	}
 

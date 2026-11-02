@@ -39,12 +39,14 @@ func (h *Handler) RegisterRoutes(r *gin.RouterGroup, authMiddleware gin.HandlerF
 			studio.DELETE("/models/:id/fields/:field_id", h.DeleteFieldFromModel)
 			studio.DELETE("/fields/:id", h.DeleteField)
 
-			// Records
+			// Records (supports both numeric record ID and model technical name)
 			studio.GET("/models/:id/records", h.ListRecords)
 			studio.POST("/models/:id/records", h.CreateRecord)
-			studio.GET("/records/:id", h.GetRecord)
+			studio.GET("/records/:id", h.GetOrListRecordsByParam)
+			studio.POST("/records/:id", h.CreateRecordByParam)
 			studio.PUT("/records/:id", h.UpdateRecord)
 			studio.DELETE("/records/:id", h.DeleteRecord)
+			studio.DELETE("/records/:id/:record_id", h.DeleteRecordNested)
 
 			// Records access by model technical name
 			studio.GET("/model-records/:name", h.ListRecordsByModelName)
@@ -76,14 +78,19 @@ func (h *Handler) GetStats(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"total_models":     stats.TotalCustomModels,
-		"total_fields":     stats.TotalCustomFields,
-		"total_records":    stats.TotalCustomRecords,
-		"active_workflows": stats.ActiveBusinessSchemas,
-		"storage_kb":       128 + stats.TotalCustomRecords*2,
-		"schema_health":    "100% OK",
-		"system_readiness": stats.SystemReadinessRate,
-		"data":             stats,
+		"total_models":           stats.TotalCustomModels,
+		"total_custom_models":    stats.TotalCustomModels,
+		"total_fields":           stats.TotalCustomFields,
+		"total_custom_fields":    stats.TotalCustomFields,
+		"total_records":          stats.TotalCustomRecords,
+		"total_custom_records":   stats.TotalCustomRecords,
+		"active_workflows":       stats.ActiveBusinessSchemas,
+		"active_business_schemas": stats.ActiveBusinessSchemas,
+		"storage_kb":             128 + stats.TotalCustomRecords*2,
+		"schema_health":          "100% OK",
+		"system_readiness":       stats.SystemReadinessRate,
+		"system_readiness_rate":  stats.SystemReadinessRate,
+		"data":                   stats,
 	})
 }
 
@@ -128,6 +135,12 @@ func (h *Handler) CreateModel(c *gin.Context) {
 func (h *Handler) GetModel(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
+		// Fallback: try looking up by technical name
+		model, errName := h.service.GetModelByTechnicalName(c.Param("id"))
+		if errName == nil && model != nil {
+			c.JSON(http.StatusOK, model)
+			return
+		}
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID model tidak valid"})
 		return
 	}
@@ -266,6 +279,9 @@ func (h *Handler) ListRecords(c *gin.Context) {
 
 func (h *Handler) ListRecordsByModelName(c *gin.Context) {
 	name := c.Param("name")
+	if name == "" {
+		name = c.Param("id")
+	}
 	model, err := h.service.GetModelByTechnicalName(name)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Model tidak ditemukan: " + name})
@@ -285,6 +301,21 @@ func (h *Handler) ListRecordsByModelName(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, records)
+}
+
+func (h *Handler) GetOrListRecordsByParam(c *gin.Context) {
+	param := c.Param("id")
+	if id, err := strconv.ParseUint(param, 10, 32); err == nil {
+		rec, err := h.service.GetRecordByID(uint(id))
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Data baris tidak ditemukan"})
+			return
+		}
+		c.JSON(http.StatusOK, rec)
+		return
+	}
+	// Non-numeric param is treated as model technical name
+	h.ListRecordsByModelName(c)
 }
 
 func (h *Handler) CreateRecord(c *gin.Context) {
@@ -321,8 +352,20 @@ func (h *Handler) CreateRecord(c *gin.Context) {
 	c.JSON(http.StatusCreated, rec)
 }
 
+func (h *Handler) CreateRecordByParam(c *gin.Context) {
+	param := c.Param("id")
+	if _, err := strconv.ParseUint(param, 10, 32); err == nil {
+		h.CreateRecord(c)
+		return
+	}
+	h.CreateRecordByModelName(c)
+}
+
 func (h *Handler) CreateRecordByModelName(c *gin.Context) {
 	name := c.Param("name")
+	if name == "" {
+		name = c.Param("id")
+	}
 	model, err := h.service.GetModelByTechnicalName(name)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Model tidak ditemukan: " + name})
@@ -413,6 +456,20 @@ func (h *Handler) UpdateRecord(c *gin.Context) {
 
 func (h *Handler) DeleteRecord(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID record tidak valid"})
+		return
+	}
+
+	if err := h.service.DeleteRecord(uint(id)); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Data baris berhasil dihapus"})
+}
+
+func (h *Handler) DeleteRecordNested(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("record_id"), 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID record tidak valid"})
 		return

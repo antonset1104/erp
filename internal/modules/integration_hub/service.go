@@ -504,6 +504,10 @@ func (s *Service) RunBatchDataJob(req *RunBatchDataJobRequest, companyID uint) (
 	return job, nil
 }
 
+func (s *Service) ListDataJobs(companyID uint) ([]IntegrationDataJob, error) {
+	return s.repo.ListDataJobs(companyID)
+}
+
 // ----------------- Telemetry & Logging -----------------
 
 func (s *Service) LogIntegrationCall(companyID uint, apiKey *APIKey, callerIP, authType, method, endpoint, model, action string, statusCode int, durationMs int64, summary, errStr string) {

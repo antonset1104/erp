@@ -3,18 +3,19 @@ package database
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"erp-golang/internal/config"
 
+	"github.com/glebarez/sqlite"
 	"gorm.io/driver/postgres"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
 var DB *gorm.DB
 
-// InitDB initializes GORM with SQLite or PostgreSQL based on config
+// InitDB initializes GORM with SQLite (pure-Go modernc.org/sqlite via glebarez/sqlite) or PostgreSQL based on config
 func InitDB(cfg *config.Config) (*gorm.DB, error) {
 	var dialector gorm.Dialector
 
@@ -32,6 +33,13 @@ func InitDB(cfg *config.Config) (*gorm.DB, error) {
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect database: %w", err)
+	}
+
+	// Ensure in-memory SQLite databases share state across all requests in pure-Go SQLite
+	if cfg.DBType != "postgres" && strings.Contains(cfg.DBDSN, ":memory:") {
+		if sqlDB, err := db.DB(); err == nil {
+			sqlDB.SetMaxOpenConns(1)
+		}
 	}
 
 	DB = db

@@ -112,7 +112,7 @@ func (r *repository) UpdateInstance(inst *WorkflowInstance) error {
 
 func (r *repository) ListInstances(companyID uint, status string) ([]WorkflowInstance, error) {
 	var list []WorkflowInstance
-	q := r.db.Preload("Workflow").Where("company_id = ?", companyID)
+	q := r.db.Preload("Workflow.Nodes").Preload("Workflow.Transitions").Preload("Logs").Where("company_id = ?", companyID)
 	if status != "" {
 		q = q.Where("status = ?", status)
 	}
@@ -123,7 +123,7 @@ func (r *repository) ListInstances(companyID uint, status string) ([]WorkflowIns
 func (r *repository) ListPendingTasks(companyID uint, role string, userID uint) ([]WorkflowInstance, error) {
 	var list []WorkflowInstance
 	// Return running instances that currently require approval
-	err := r.db.Preload("Workflow.Nodes").
+	err := r.db.Preload("Workflow.Nodes").Preload("Workflow.Transitions").Preload("Logs").
 		Where("company_id = ? AND status = ?", companyID, WorkflowStatusRunning).
 		Order("id DESC").Find(&list).Error
 	if err != nil {
@@ -175,20 +175,28 @@ func (r *repository) GetStats(companyID uint) (*WorkflowEngineStats, error) {
 
 	stats.PendingApprovals = stats.RunningInstances
 
-	// Calculate average cycle time in hours
-	var avgSeconds float64
-	row := r.db.Raw(`
-		SELECT COALESCE(AVG((julianday(completed_at) - julianday(started_at)) * 86400), 0)
-		FROM workflow_instances
-		WHERE company_id = ? AND status = 'completed' AND completed_at IS NOT NULL
-	`, companyID).Row()
+	// Calculate average cycle time in hours portably across SQLite and PostgreSQL
+	var completedList []WorkflowInstance
+	r.db.Select("started_at, completed_at").
+		Where("company_id = ? AND status = ? AND completed_at IS NOT NULL", companyID, WorkflowStatusCompleted).
+		Order("id DESC").Limit(200).Find(&completedList)
 
-	if row != nil {
-		_ = row.Scan(&avgSeconds)
-		stats.AvgCycleHours = avgSeconds / 3600.0
-		if stats.AvgCycleHours == 0 {
-			stats.AvgCycleHours = 4.2 // Default reasonable enterprise SLA baseline
+	var totalHours float64
+	var validCount int
+	for _, inst := range completedList {
+		if inst.CompletedAt != nil && !inst.StartedAt.IsZero() {
+			diff := inst.CompletedAt.Sub(inst.StartedAt).Hours()
+			if diff >= 0 {
+				totalHours += diff
+				validCount++
+			}
 		}
+	}
+	if validCount > 0 {
+		stats.AvgCycleHours = totalHours / float64(validCount)
+	}
+	if stats.AvgCycleHours == 0 {
+		stats.AvgCycleHours = 4.2 // Default reasonable enterprise SLA baseline
 	}
 
 	return &stats, nil

@@ -1,6 +1,37 @@
 # Odoo-Go ERP: Enterprise Resource Planning in Golang
 
-Proyek ini adalah implementasi ulang (*recoding*) arsitektur ERP **Odoo** (dari [https://github.com/odoo/odoo](https://github.com/odoo/odoo)) ke bahasa pemrograman **Golang**. Dibangun dengan prinsip *modular monolith*, performa tinggi, konkurensi native Go, memori rendah, serta menjamin integritas data transaksi bisnis.
+[![Go Version](https://img.shields.io/badge/Go-1.22+-00ADD8?style=flat&logo=go)](https://golang.org)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![CI Status](https://img.shields.io/badge/CI-Passing-success?style=flat&logo=githubactions)](https://github.com/antonset1104/erp/actions)
+[![Modules](https://img.shields.io/badge/Modules-50_Enterprise-indigo)](docs/FUNCTIONAL_DOCUMENTATION.md)
+[![Release](https://img.shields.io/badge/Release-v1.41.0-emerald)](https://github.com/antonset1104/erp/releases)
+[![Open Source](https://img.shields.io/badge/Open_Source-Community_Driven-purple)](docs/OPEN_SOURCE_GUIDE.md)
+
+Proyek ini adalah implementasi ulang (*recoding*) arsitektur ERP **Odoo** (dari [https://github.com/odoo/odoo](https://github.com/odoo/odoo)) ke bahasa pemrograman **Golang**. Dibangun dengan prinsip *modular monolith* (50 modul enterprise terintegrasi), performa tinggi, konkurensi native Go, memori rendah, serta menjamin integritas data transaksi bisnis.
+
+---
+
+## 📚 Dokumentasi Resmi Lengkap
+
+Dokumentasi komprehensif tersedia di direktori `docs/`:
+- 🌐 **[Panduan Proyek Open Source (Open Source Guide)](docs/OPEN_SOURCE_GUIDE.md)** — Cetak biru tata kelola open source, konfigurasi repositori GitHub, panduan rilis SemVer, dan kebijakan lisensi.
+- 📘 **[Dokumentasi Teknis (Technical Documentation)](docs/TECHNICAL_DOCUMENTATION.md)** — Arsitektur sistem, struktur direktori 50 modul, skema database ERD, spesifikasi REST API & Open RPC, autentikasi JWT + API Key M2M, dan panduan deployment.
+- 📗 **[Dokumentasi Fungsional (Functional Documentation)](docs/FUNCTIONAL_DOCUMENTATION.md)** — Spesifikasi alur bisnis *end-to-end* (O2C, P2P, MRP II, Akuntansi Buku Besar, HRIS & Payroll, Pajak e-Faktur/e-Bupot DJP, Kawasan Berikat DJBC, Low-Code Studio, BPMN 2.0 Workflow Engine, dan Integration Hub).
+- 📙 **[Panduan Pengguna (User Documentation)](docs/USER_DOCUMENTATION.md)** — Panduan operasional langkah demi langkah (*step-by-step*) untuk Administrator, Sales, Purchasing, Gudang/WMS, Manufaktur, Finance/Accounting, dan HRD.
+- 🤝 **[Panduan Kontribusi (Contributing Guidelines)](CONTRIBUTING.md)** — Alur pengajuan Pull Request, standar konvensi commit, dan pedoman coding Go.
+- 📜 **[Pedoman Perilaku Komunitas (Code of Conduct)](CODE_OF_CONDUCT.md)** — Komitmen lingkungan komunitas inklusif dan profesional (Contributor Covenant v2.1).
+- 🛡️ **[Kebijakan Keamanan (Security Policy)](SECURITY.md)** — Prosedur pengungkapan kerentanan privat (*responsible disclosure*) dan SLA rilis patch.
+
+---
+
+## ⚡ Executive Command Center & Fitur Produktivitas Baru (Continuous Improvement)
+
+- **🔍 Universal Command Palette & Omni-Search (`Ctrl+K`)**: Pencarian terpadu lintas **50 modul ERP**, tindakan cepat (*Quick Actions*), dan rekaman database langsung (*Products*, *Partners*, *Sales Orders*, *Purchase Orders*, *Invoices*) via `GET /api/v1/search?q=...`.
+- **🧭 Filter Instan Sidebar 50 Modul (`/` Shortcut)**: Saring daftar 50 modul di *sidebar* secara *real-time* beserta penghitung modul aktif.
+- **🚀 1-Click End-to-End Business Cycle Simulator (`POST /api/v1/dashboard/simulate-cycle`)**: Eksekusi otomatis siklus *Procure-to-Pay* (`PO` $\rightarrow$ `WH/IN`), *Order-to-Cash* (`SO` $\rightarrow$ `WH/OUT`), hingga *General Ledger Posting* (`INV` berimbang dengan PPN 11%) dalam 1 klik beserta laporan jejak audit 5 langkah.
+- **🔔 Actionable Notification & Approval Center (`GET /api/v1/dashboard/notifications`)**: Lonceng notifikasi pintar yang mengagregasi antrean *Approval Matrix*, *BPMN Workflow* aktif, dokumen *draft*, dan peringatan keamanan ISO 27001.
+- **📊 Executive Financial Pulse Strip & 50-Module Ecosystem Health Matrix**: Pantau Kas & Likuiditas Treasury, Piutang Usaha (*AR*), Hutang Usaha (*AP*), *CRM Pipeline*, *Subscription MRR*, *Live Transaction Feed*, serta ekspor ringkasan KPI ke CSV (`GET /api/v1/dashboard/export-summary`).
+- **🌓 Dark / Light Enterprise Theme Switcher**: Dukungan tema gelap dan terang (*Light Enterprise*) yang disimpan secara persisten di browser.
 
 ---
 
@@ -805,3 +836,27 @@ Untuk mengekspos backend Go yang berjalan di server internal/on-premise ke jarin
 ```bash
 cloudflared tunnel --config cloudflare/cloudflared-config.yml run odoo-go-tunnel
 ```
+
+
+---
+
+## 🌐 Komunitas & Proyek Open Source
+
+Odoo-Go ERP didistribusikan secara bebas dan terbuka di bawah lisensi [Apache License 2.0](LICENSE). Kami percaya bahwa perangkat lunak ERP tingkat perusahaan harus transparan, bebas dari biaya lisensi per-pengguna yang memberatkan, dan dapat dikustomisasi secara leluasa oleh pengembang di seluruh dunia.
+
+### Cara Berpartisipasi:
+- 💬 **Diskusi & Q&A Komunitas**: Bergabunglah dalam [GitHub Discussions](https://github.com/antonset1104/erp/discussions) untuk berbagi pengalaman implementasi, mengajukan pertanyaan teknis, dan berdiskusi dengan sesama pengembang.
+- 🐛 **Pelaporan Masalah**: Temukan bug atau anomali transaksi? Laporkan melalui [GitHub Issues](https://github.com/antonset1104/erp/issues/new/choose) menggunakan form laporan terstruktur kami.
+- 🚀 **Pengajuan Kode**: Baca panduan [CONTRIBUTING.md](CONTRIBUTING.md) untuk mempelajari alur kerja branch, standar penulisan tes, dan pengajuan Pull Request.
+- 🛡️ **Pelaporan Kerentanan**: Laporkan potensi isu keamanan secara privat sesuai prosedur di [SECURITY.md](SECURITY.md).
+
+---
+
+## ⚙️ Konfigurasi Repositori GitHub untuk Maintainer
+
+Bagi maintainer dan pemilik repositori yang melakukan *mirroring* atau *forking*, disarankan memastikan konfigurasi GitHub berikut aktif:
+1. **Branch Protection pada `main`**: Aktifkan *Require a pull request before merging*, *Require status checks to pass* (`Test (Go 1.22.x on ubuntu-latest)` dan `windows-latest`), dan *Require linear history*.
+2. **Issue Forms & Templates**: Repositori telah dilengkapi template deklaratif di `.github/ISSUE_TEMPLATE/` (Bug Report, Feature Request, dan Config redirection ke Discussions).
+3. **Automated CI/CD**: Workflow terkonfigurasi di `.github/workflows/ci.yml` untuk build, vet, dan test matrix otomatis pada setiap commit/PR.
+4. **Dependabot Automated Updates**: File `.github/dependabot.yml` aktif memantau pembaruan modul Go dan GitHub Actions secara berkala.
+5. **Multi-Platform Automated Releases**: Menerbitkan rilis biner multi-arsitektur (`linux/amd64`, `linux/arm64`, `windows/amd64`) dan checksum SHA256 otomatis saat membuat git tag `v*` (`.github/workflows/release.yml`).

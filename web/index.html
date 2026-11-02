@@ -8,6 +8,18 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/web/style.css">
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6180580801533680"
+         crossorigin="anonymous"></script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-79X7K7H4MJ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-79X7K7H4MJ');
+    </script>
 </head>
 <body>
     <!-- App Container -->
@@ -30,6 +42,16 @@
                     <span class="company-name" id="currentCompanyName">PT Odoo Golang Nusantara</span>
                     <span class="company-currency">IDR (Rp)</span>
                 </div>
+            </div>
+
+            <div class="sidebar-search-wrap">
+                <span class="sidebar-search-icon">🔍</span>
+                <input type="text" id="sidebarModuleSearch" class="sidebar-search-input" placeholder="Cari dari 50 modul... ( / )" oninput="filterSidebarModules(this.value)">
+                <button type="button" id="sidebarSearchClearBtn" class="sidebar-search-clear" onclick="clearSidebarModuleFilter()" title="Reset filter">✕</button>
+            </div>
+            <div class="sidebar-module-counter">
+                <span id="sidebarModuleCountText">50 / 50 Modul Aktif</span>
+                <span class="cmd-kbd" style="cursor:pointer;" onclick="openCommandPaletteModal()">Ctrl+K</span>
             </div>
 
             <nav class="nav-menu">
@@ -231,6 +253,10 @@
                     <span class="nav-icon">🔀</span>
                     <span class="nav-label">Workflow Engine</span>
                 </button>
+                <button class="nav-item" data-tab="integration-hub">
+                    <span class="nav-icon">🔌</span>
+                    <span class="nav-label">Integration Hub &amp; API</span>
+                </button>
             </nav>
 
             <div class="user-profile">
@@ -252,6 +278,20 @@
                     <p id="pageSubtitle">Real-time overview of business performance and workflows</p>
                 </div>
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <button id="btnOpenCommandPalette" class="btn btn-sm btn-outline" onclick="openCommandPaletteModal()" style="border-color: #6366f1; color: #818cf8; display: flex; align-items: center; gap: 0.45rem; font-weight: 600;" title="Universal Omni-Search & Command Palette (Ctrl+K)">
+                        <span>🔍</span>
+                        <span>Cari Global</span>
+                        <span class="cmd-kbd">Ctrl+K</span>
+                    </button>
+                    <button id="btnNotificationCenter" class="btn btn-sm btn-outline" onclick="openNotificationCenterModal()" style="border-color: #f59e0b; color: #fbbf24; display: flex; align-items: center; gap: 0.4rem; font-weight: 600;" title="Actionable Notification & Approval Center">
+                        <span>🔔</span>
+                        <span>Notifikasi</span>
+                        <span id="notifBadgeCount" class="notif-badge-dot">0</span>
+                    </button>
+                    <button id="btnThemeToggle" class="btn btn-sm btn-outline" onclick="toggleEnterpriseTheme()" style="border-color: #64748b; color: var(--text-main); display: flex; align-items: center; gap: 0.35rem; font-weight: 600;" title="Switch Dark / Light Enterprise Theme">
+                        <span id="themeToggleIcon">☀️</span>
+                        <span id="themeToggleLabel">Light</span>
+                    </button>
                     <button class="btn btn-sm btn-outline" onclick="openBarcodeScannerModal('general')" style="border-color: #06b6d4; color: #06b6d4; display: flex; align-items: center; gap: 0.4rem; font-weight: 600;">
                         <span>📷</span>
                         <span>Scan Barcode</span>
@@ -270,6 +310,26 @@
             <div class="content-body">
                 <!-- 1. DASHBOARD TAB -->
                 <section id="tab-dashboard" class="tab-view active">
+                    <div class="card" style="margin-bottom: 1.1rem; border: 1px solid rgba(99, 102, 241, 0.35); background: linear-gradient(135deg, rgba(99, 102, 241, 0.14), rgba(16, 185, 129, 0.08));">
+                        <div class="card-body" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; padding: 0.9rem 1.25rem;">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.2rem;">
+                                    <span class="badge badge-primary">ENTERPRISE COMMAND CENTER</span>
+                                    <span class="badge badge-success" id="dashActiveModulesBadge">50 Modul Aktif</span>
+                                </div>
+                                <h3 style="font-size: 1.02rem; margin-bottom: 0.15rem;">⚡ Orkestrasi Siklus Bisnis End-to-End (P2P + WMS + O2C + General Ledger)</h3>
+                                <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Jalankan simulasi transaksi otomatis 1-klik, cari data lintas modul (Ctrl+K), atau ekspor ringkasan KPI eksekutif.</p>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
+                                <button id="btnSimulateBusinessCycle" class="btn btn-primary" onclick="runOneClickBusinessCycleSimulation()" style="font-weight: 700;">
+                                    🚀 Simulasi Siklus Bisnis Otomatis (1-Klik)
+                                </button>
+                                <button id="btnExportExecutiveCSV" class="btn btn-secondary" onclick="exportExecutiveSummaryCSV()">
+                                    📥 Export Executive KPI (CSV)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <div class="metrics-grid">
                         <div class="metric-card">
                             <div class="metric-icon bg-indigo">💰</div>
@@ -302,6 +362,39 @@
                                 <h3 class="metric-value" id="statPickings">0</h3>
                                 <span class="metric-trend text-info">Deliveries & Receipts</span>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="exec-pulse-grid" style="margin-bottom: 1.25rem;">
+                        <div class="exec-pulse-card" onclick="switchTabProgrammatically('treasury')">
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">🏦 Total Kas &amp; Likuiditas Bank</span>
+                            <strong id="statExecLiquidCash" style="font-size: 1.15rem; color: #10b981;">Rp 0</strong>
+                            <span style="font-size: 0.7rem; color: var(--text-muted);">Treasury &amp; Multi-Bank</span>
+                        </div>
+                        <div class="exec-pulse-card" onclick="switchTabProgrammatically('invoicing')">
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">📈 Piutang Usaha (AR)</span>
+                            <strong id="statExecAR" style="font-size: 1.15rem; color: #38bdf8;">Rp 0</strong>
+                            <span style="font-size: 0.7rem; color: var(--text-muted);">Posted Customer Invoices</span>
+                        </div>
+                        <div class="exec-pulse-card" onclick="switchTabProgrammatically('invoicing')">
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">📉 Hutang Usaha (AP)</span>
+                            <strong id="statExecAP" style="font-size: 1.15rem; color: #f59e0b;">Rp 0</strong>
+                            <span style="font-size: 0.7rem; color: var(--text-muted);">Posted Vendor Bills</span>
+                        </div>
+                        <div class="exec-pulse-card" onclick="switchTabProgrammatically('crm')">
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">🎯 CRM Pipeline Revenue</span>
+                            <strong id="statExecCRMPipeline" style="font-size: 1.15rem; color: #a78bfa;">Rp 0</strong>
+                            <span style="font-size: 0.7rem; color: var(--text-muted);">Active Leads &amp; Opportunities</span>
+                        </div>
+                        <div class="exec-pulse-card" onclick="switchTabProgrammatically('subscription')">
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">🔄 Subscription MRR</span>
+                            <strong id="statExecMRR" style="font-size: 1.15rem; color: #34d399;">Rp 0</strong>
+                            <span style="font-size: 0.7rem; color: var(--text-muted);">Recurring SaaS Contracts</span>
+                        </div>
+                        <div class="exec-pulse-card" onclick="switchTabProgrammatically('hr')">
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">👔 SDM &amp; Katalog Produk</span>
+                            <strong id="statExecHRProducts" style="font-size: 1.15rem; color: var(--text-main);">0 Karyawan • 0 SKU</strong>
+                            <span style="font-size: 0.7rem; color: var(--text-muted);">HR Directory &amp; Master Items</span>
                         </div>
                     </div>
 
@@ -344,9 +437,46 @@
                                 <ul class="features-list">
                                     <li><strong>Double-Entry Inventory:</strong> Real-time movements between Virtual and Physical locations without data loss.</li>
                                     <li><strong>Automated Workflows:</strong> Confirming a Sales Order automatically generates a Delivery Order (`WH/OUT`) and draft Customer Invoice.</li>
-                                    <li><strong>Balanced Accounting:</strong> Strict validation ensuring $\sum \text{Debit} == \sum \text{Credit}$ before posting.</li>
+                                    <li><strong>Balanced Accounting:</strong> Strict validation ensuring <code>&Sigma; Debit == &Sigma; Credit</code> before posting.</li>
                                     <li><strong>High Throughput:</strong> Written in Golang with compiled binary efficiency, SQLite/Postgres support, and JWT security.</li>
                                 </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-split" style="margin-top: 1.25rem;">
+                        <div class="card flex-1">
+                            <div class="card-header flex-between">
+                                <div>
+                                    <h3>🕒 Aktivitas Transaksi Terkini (Live Feed)</h3>
+                                    <span class="card-sub">Dokumen Sales Order, Purchase Order &amp; Faktur terbaru</span>
+                                </div>
+                                <button class="btn btn-sm btn-secondary" onclick="loadDashboard()">🔄 Refresh</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>No. Dokumen</th>
+                                            <th>Tipe</th>
+                                            <th>Mitra / Partner</th>
+                                            <th>Nilai</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dashboardRecentTxBody">
+                                        <tr><td colspan="5" class="text-center">Memuat transaksi terkini...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="card flex-1">
+                            <div class="card-header">
+                                <h3>🧭 Peta Ekosistem 50 Modul Enterprise</h3>
+                                <span class="card-sub">Klik departemen untuk navigasi cepat ke modul terkait</span>
+                            </div>
+                            <div class="card-body" id="dashboardDeptHealthGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0.65rem;">
                             </div>
                         </div>
                     </div>
@@ -5513,7 +5643,7 @@
                 </section>
 
                 <!-- 44. ADVANCED MRP II: WORK CENTERS, ROUTINGS, WORK ORDERS & GANTT CAPACITY PLANNING (MODUL KE-40) -->
-                <section id="tab-mrp-advanced" class="tab-view" style="display: none;">
+                <section id="tab-mrp-advanced" class="tab-view">
                     <div class="view-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
                         <div>
                             <h2 style="display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.25rem;">
@@ -5765,7 +5895,7 @@
                 </section>
 
                 <!-- TAB: E-BUPOT 21/26 & SPT MASA PPH 21 DJP EXPORT (MODUL KE-41) -->
-                <section id="tab-tax-ebupot" class="tab-view" style="display: none;">
+                <section id="tab-tax-ebupot" class="tab-view">
                     <div class="view-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
                         <div>
                             <h2 style="margin: 0; font-size: 1.5rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
@@ -5970,7 +6100,7 @@
                 </section>
 
                 <!-- SECTION: DIGITAL SIGNATURE & DOCUMENT WATERMARKING -->
-                <section id="tab-esignature" class="tab-view" style="display: none;">
+                <section id="tab-esignature" class="tab-view">
                     <div class="view-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
                         <div>
                             <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: var(--text-main);">
@@ -6085,7 +6215,7 @@
                 </section>
 
                 <!-- SECTION: ENTERPRISE WMS & 3D BIN LOCATIONS -->
-                <section id="tab-wms" class="tab-view" style="display: none;">
+                <section id="tab-wms" class="tab-view">
                     <div class="view-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
                         <div>
                             <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: var(--text-main);">
@@ -6306,7 +6436,7 @@
                 <!-- ========================================== -->
                 <!-- MODUL 44: VENDOR PORTAL & SUPPLIER SELF-SERVICE -->
                 <!-- ========================================== -->
-                <section id="tab-vendor-portal" class="tab-view" style="display: none;">
+                <section id="tab-vendor-portal" class="tab-view">
                     <div class="content-header">
                         <div class="header-title-group">
                             <h1 class="page-title">🤝 Vendor Portal &amp; Supplier Self-Service</h1>
@@ -6484,7 +6614,7 @@
                 <!-- ========================================== -->
                 <!-- MODUL 45: CUSTOMER PORTAL & B2B SELF-SERVICE COMMERCE -->
                 <!-- ========================================== -->
-                <section id="tab-customer-portal" class="tab-view" style="display: none;">
+                <section id="tab-customer-portal" class="tab-view">
                     <div class="content-header">
                         <div class="header-title-group">
                             <h1 class="page-title">👥 Customer Portal &amp; B2B Self-Service Commerce</h1>
@@ -6699,7 +6829,7 @@
                 <!-- ========================================== -->
                 <!-- MODUL 46: KAWASAN BERIKAT & IT INVENTORY DJBC CEISA 4.0 -->
                 <!-- ========================================== -->
-                <section id="tab-customs-bonded" class="tab-view" style="display: none;">
+                <section id="tab-customs-bonded" class="tab-view">
                     <div class="content-header">
                         <div class="header-title-group">
                             <h1 class="page-title">🛃 Kawasan Berikat &amp; IT Inventory DJBC CEISA 4.0</h1>
@@ -6947,7 +7077,7 @@
                 <!-- ==================================================================================================== -->
                 <!-- SECTION: UNIVERSAL LOW-CODE STUDIO & DYNAMIC SCHEMA ENGINE -->
                 <!-- ==================================================================================================== -->
-                <section id="tab-lowcode-studio" class="tab-view" style="display: none;">
+                <section id="tab-lowcode-studio" class="tab-view">
                     <div class="content-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
                         <div>
                             <h2 style="margin: 0; font-size: 1.6rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
@@ -7122,9 +7252,232 @@
                         </div>
                     </div>
                 <!-- ===================================================== -->
+                </section>
+                <!-- ===================================================== -->
+                <!-- SECTION: UNIVERSAL INTEGRATION HUB & OPEN RPC GATEWAY -->
+                <!-- ===================================================== -->
+                <section id="tab-integration-hub" class="tab-view">
+                    <div class="view-header">
+                        <div>
+                            <h2>🔌 Universal Integration Hub &amp; Open RPC Gateway</h2>
+                            <p class="text-muted">Orkestrasi API Key M2M, Pre-Built Marketplace Connectors (Shopee/Tokopedia/Midtrans/SAP), Open RPC Engine &amp; AI Integration Architect</p>
+                        </div>
+                        <div class="header-actions">
+                            <button class="btn btn-secondary" onclick="openModalAIIntegrationCopilot()">🤖 AI Integration Architect</button>
+                            <button class="btn btn-secondary" onclick="openModalCreateDataJob()">📦 Buat Data ETL Job</button>
+                            <button class="btn btn-primary" onclick="openModalCreateAPIKey()">🔑 Buat API Key M2M</button>
+                        </div>
+                    </div>
+
+                    <!-- KPI Cards Grid -->
+                    <div class="kpi-grid" style="grid-template-columns: repeat(6, 1fr); margin-bottom: 1.5rem;">
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">🔑</div>
+                            <div class="kpi-info">
+                                <span class="kpi-label">API Keys Aktif</span>
+                                <h3 class="kpi-value" id="intgStatActiveKeys">0</h3>
+                                <small class="text-muted">M2M Credentials</small>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">🔌</div>
+                            <div class="kpi-info">
+                                <span class="kpi-label">Konektor Terhubung</span>
+                                <h3 class="kpi-value" id="intgStatConnectors">0</h3>
+                                <small class="text-muted">Pre-Built Ecosystems</small>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9;">📡</div>
+                            <div class="kpi-info">
+                                <span class="kpi-label">Panggilan API (24j)</span>
+                                <h3 class="kpi-value" id="intgStatCalls24h">0</h3>
+                                <small class="text-muted">Inbound &amp; Outbound</small>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">✅</div>
+                            <div class="kpi-info">
+                                <span class="kpi-label">Tingkat Sukses</span>
+                                <h3 class="kpi-value" id="intgStatSuccessRate">100%</h3>
+                                <small class="text-muted">SLA Availability</small>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">⚡</div>
+                            <div class="kpi-info">
+                                <span class="kpi-label">Rata-rata Latensi</span>
+                                <h3 class="kpi-value" id="intgStatLatency">0 ms</h3>
+                                <small class="text-muted">Response Time</small>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background: rgba(168, 85, 247, 0.1); color: #a855f7;">📦</div>
+                            <div class="kpi-info">
+                                <span class="kpi-label">Batch Data Jobs</span>
+                                <h3 class="kpi-value" id="intgStatDataJobs">0</h3>
+                                <small class="text-muted">ETL Sync Pipelines</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subtabs Navigation -->
+                    <div class="card" style="margin-bottom: 1.5rem; padding: 0.5rem 1rem;">
+                        <div class="tab-pills" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <button class="pill-btn active" onclick="switchIntegrationSubtab('connectors', this)">🔌 Katalog Konektor Pihak Ketiga</button>
+                            <button class="pill-btn" onclick="switchIntegrationSubtab('apikeys', this)">🔑 Manajemen API Key M2M</button>
+                            <button class="pill-btn" onclick="switchIntegrationSubtab('rpc', this)">🧪 Universal Open RPC Playground</button>
+                            <button class="pill-btn" onclick="switchIntegrationSubtab('jobs', this)">📦 Batch Data ETL Jobs &amp; Telemetry Logs</button>
+                        </div>
+                    </div>
+
+                    <!-- SUBTAB 1: PRE-BUILT CONNECTORS -->
+                    <div id="subtabIntgConnectors" class="intg-subtab-view">
+                        <div class="card">
+                            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h3>Pre-Built Marketplace, Payment, Logistics &amp; Banking Connectors</h3>
+                                    <p class="text-muted">Uji koneksi langsung, sinkronisasi stok marketplace, atau kirim pesan transaksi WhatsApp</p>
+                                </div>
+                                <button class="btn btn-sm btn-secondary" onclick="loadIntegrationConnectors()">🔄 Refresh Konektor</button>
+                            </div>
+                            <div id="intgConnectorsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; padding: 1rem;">
+                                <div class="text-center text-muted" style="grid-column: 1 / -1; padding: 2rem;">Memuat katalog konektor...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUBTAB 2: M2M API KEYS -->
+                    <div id="subtabIntgAPIKeys" class="intg-subtab-view" style="display: none;">
+                        <div class="card">
+                            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h3>Machine-to-Machine (M2M) API Keys</h3>
+                                    <p class="text-muted">Kredensial SHA-256 dengan Scope Otorisasi, Rate Limit RPM, dan IP Whitelisting</p>
+                                </div>
+                                <button class="btn btn-sm btn-primary" onclick="openModalCreateAPIKey()">+ Buat API Key Baru</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nama Key</th>
+                                            <th>Prefix</th>
+                                            <th>Scopes</th>
+                                            <th>Rate Limit</th>
+                                            <th>Total Request</th>
+                                            <th>Status</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="intgAPIKeysTableBody">
+                                        <tr><td colspan="7" class="text-center">Memuat daftar API Key...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUBTAB 3: OPEN RPC PLAYGROUND -->
+                    <div id="subtabIntgRPC" class="intg-subtab-view" style="display: none;">
+                        <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 1.5rem; align-items: start;">
+                            <div class="card" style="padding: 1.25rem;">
+                                <h3 style="margin-bottom: 0.5rem;">🧪 Universal Open RPC Request Builder</h3>
+                                <p class="text-muted" style="margin-bottom: 1rem;">Eksekusi operasi CRUD &amp; Workflow secara dinamis ke model ERP mana pun layaknya Odoo External XML-RPC / JSON-RPC</p>
+                                <div class="form-group">
+                                    <label>Metode Operasi RPC</label>
+                                    <select id="intgRpcMethod" class="form-control" onchange="onIntgRpcMethodChange()">
+                                        <option value="search_read">search_read (Query &amp; Filter Data)</option>
+                                        <option value="create">create (Tambah Record Baru)</option>
+                                        <option value="write">write (Update Record Berdasarkan ID)</option>
+                                        <option value="execute_action">execute_action (Trigger State Action)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Target Model ERP</label>
+                                    <select id="intgRpcModel" class="form-control">
+                                        <option value="res.partner">res.partner (Pelanggan &amp; Vendor)</option>
+                                        <option value="product.product">product.product (Katalog Produk)</option>
+                                        <option value="sale.order">sale.order (Sales Order)</option>
+                                        <option value="purchase.order">purchase.order (Purchase Order)</option>
+                                        <option value="stock.picking">stock.picking (Transfer Gudang)</option>
+                                        <option value="account.move">account.move (Faktur &amp; Jurnal)</option>
+                                        <option value="hr.employee">hr.employee (Karyawan HR)</option>
+                                        <option value="crm.lead">crm.lead (Prospek CRM)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Payload JSON Parameter</label>
+                                    <textarea id="intgRpcPayload" class="form-control" rows="7" style="font-family: monospace; font-size: 0.85rem;">{
+  "domain": [],
+  "fields": ["id", "name", "email", "phone", "city"],
+  "limit": 10
+}</textarea>
+                                </div>
+                                <button class="btn btn-primary" style="width: 100%;" onclick="executeIntegrationRPCPlayground()">🚀 Kirim Request RPC</button>
+                            </div>
+                            <div class="card" style="padding: 1.25rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                    <h3>Respons JSON Server</h3>
+                                    <span class="badge badge-success" id="intgRpcStatusBadge">READY</span>
+                                </div>
+                                <pre id="intgRpcResponseOutput" style="background: #0f172a; color: #38bdf8; padding: 1rem; border-radius: 8px; border: 1px solid #334155; min-height: 320px; max-height: 460px; overflow: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;">// Klik "Kirim Request RPC" untuk melihat hasil eksekusi langsung dari database ERP</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUBTAB 4: DATA JOBS & TELEMETRY LOGS -->
+                    <div id="subtabIntgJobs" class="intg-subtab-view" style="display: none;">
+                        <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 1.5rem; align-items: start;">
+                            <div class="card">
+                                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <h3>Batch Data ETL Jobs</h3>
+                                    <button class="btn btn-sm btn-primary" onclick="openModalCreateDataJob()">+ Buat Job ETL</button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Kode Job</th>
+                                                <th>Tipe &amp; Target</th>
+                                                <th>Progress</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="intgDataJobsTableBody">
+                                            <tr><td colspan="4" class="text-center">Memuat daftar ETL Job...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <h3>Log Telemetri &amp; Audit Trafik API</h3>
+                                    <button class="btn btn-sm btn-secondary" onclick="loadIntegrationLogs()">🔄 Refresh Log</button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Kode Log</th>
+                                                <th>Arah &amp; Endpoint</th>
+                                                <th>Status</th>
+                                                <th>Durasi</th>
+                                                <th>Waktu</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="intgLogsTableBody">
+                                            <tr><td colspan="5" class="text-center">Memuat telemetri API...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
                 <!-- SECTION: BPMN 2.0 WORKFLOW ENGINE & VISUAL STATE MACHINE -->
                 <!-- ===================================================== -->
-                <section id="tab-workflow-engine" class="tab-view" style="display: none;">
+                <section id="tab-workflow-engine" class="tab-view">
                     <div class="view-header">
                         <div>
                             <h2>🔀 BPMN 2.0 Dynamic Workflow &amp; State Machine Engine</h2>
@@ -7321,11 +7674,294 @@
                         </div>
                     </div>
                 </section>
+                <!-- ===================================================== -->
+                <!-- SECTION: UNIVERSAL INTEGRATION HUB & OPEN RPC GATEWAY -->
+                <!-- ===================================================== -->
+                <section id="tab-integration-hub" class="tab-view">
+                    <div class="view-header">
+                        <div>
+                            <h2>🔌 Universal Integration Hub &amp; Open RPC Gateway</h2>
+                            <p class="text-muted">Orkestrasi API Key M2M, Pre-Built Marketplace Connectors (Shopee/Tokopedia/Midtrans/SAP), Open RPC Engine &amp; AI Integration Architect</p>
+                        </div>
+                        <div class="header-actions">
+                            <button class="btn btn-secondary" onclick="openModalAIIntegrationCopilot()">🤖 AI Integration Architect</button>
+                            <button class="btn btn-secondary" onclick="openModalCreateDataJob()">📦 Buat Data ETL Job</button>
+                            <button class="btn btn-primary" onclick="openModalCreateAPIKey()">🔑 Buat API Key M2M</button>
+                        </div>
+                    </div>
+
+                    <!-- KPI Cards Grid -->
+                    <div class="kpi-grid" style="grid-template-columns: repeat(6, 1fr); margin-bottom: 1.5rem;">
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">🔑</div>
+                            <div class="kpi-info">
+                                <span class="kpi-label">API Keys Aktif</span>
+                                <h3 class="kpi-value" id="intgStatActiveKeys">0</h3>
+                                <small class="text-muted">M2M Credentials</small>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">🔌</div>
+                            <div class="kpi-info">
+                                <span class="kpi-label">Konektor Terhubung</span>
+                                <h3 class="kpi-value" id="intgStatConnectors">0</h3>
+                                <small class="text-muted">Pre-Built Ecosystems</small>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9;">📡</div>
+                            <div class="kpi-info">
+                                <span class="kpi-label">Panggilan API (24j)</span>
+                                <h3 class="kpi-value" id="intgStatCalls24h">0</h3>
+                                <small class="text-muted">Inbound &amp; Outbound</small>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">✅</div>
+                            <div class="kpi-info">
+                                <span class="kpi-label">Tingkat Sukses</span>
+                                <h3 class="kpi-value" id="intgStatSuccessRate">100%</h3>
+                                <small class="text-muted">SLA Availability</small>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">⚡</div>
+                            <div class="kpi-info">
+                                <span class="kpi-label">Rata-rata Latensi</span>
+                                <h3 class="kpi-value" id="intgStatLatency">0 ms</h3>
+                                <small class="text-muted">Response Time</small>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon" style="background: rgba(168, 85, 247, 0.1); color: #a855f7;">📦</div>
+                            <div class="kpi-info">
+                                <span class="kpi-label">Batch Data Jobs</span>
+                                <h3 class="kpi-value" id="intgStatDataJobs">0</h3>
+                                <small class="text-muted">ETL Sync Pipelines</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subtabs Navigation -->
+                    <div class="card" style="margin-bottom: 1.5rem; padding: 0.5rem 1rem;">
+                        <div class="tab-pills" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <button class="pill-btn active" onclick="switchIntegrationSubtab('connectors', this)">🔌 Katalog Konektor Pihak Ketiga</button>
+                            <button class="pill-btn" onclick="switchIntegrationSubtab('apikeys', this)">🔑 Manajemen API Key M2M</button>
+                            <button class="pill-btn" onclick="switchIntegrationSubtab('rpc', this)">🧪 Universal Open RPC Playground</button>
+                            <button class="pill-btn" onclick="switchIntegrationSubtab('jobs', this)">📦 Batch Data ETL Jobs &amp; Telemetry Logs</button>
+                        </div>
+                    </div>
+
+                    <!-- SUBTAB 1: PRE-BUILT CONNECTORS -->
+                    <div id="subtabIntgConnectors" class="intg-subtab-view">
+                        <div class="card">
+                            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h3>Pre-Built Marketplace, Payment, Logistics &amp; Banking Connectors</h3>
+                                    <p class="text-muted">Uji koneksi langsung, sinkronisasi stok marketplace, atau kirim pesan transaksi WhatsApp</p>
+                                </div>
+                                <button class="btn btn-sm btn-secondary" onclick="loadIntegrationConnectors()">🔄 Refresh Konektor</button>
+                            </div>
+                            <div id="intgConnectorsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; padding: 1rem;">
+                                <div class="text-center text-muted" style="grid-column: 1 / -1; padding: 2rem;">Memuat katalog konektor...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUBTAB 2: M2M API KEYS -->
+                    <div id="subtabIntgAPIKeys" class="intg-subtab-view" style="display: none;">
+                        <div class="card">
+                            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h3>Machine-to-Machine (M2M) API Keys</h3>
+                                    <p class="text-muted">Kredensial SHA-256 dengan Scope Otorisasi, Rate Limit RPM, dan IP Whitelisting</p>
+                                </div>
+                                <button class="btn btn-sm btn-primary" onclick="openModalCreateAPIKey()">+ Buat API Key Baru</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nama Key</th>
+                                            <th>Prefix</th>
+                                            <th>Scopes</th>
+                                            <th>Rate Limit</th>
+                                            <th>Total Request</th>
+                                            <th>Status</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="intgAPIKeysTableBody">
+                                        <tr><td colspan="7" class="text-center">Memuat daftar API Key...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUBTAB 3: OPEN RPC PLAYGROUND -->
+                    <div id="subtabIntgRPC" class="intg-subtab-view" style="display: none;">
+                        <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 1.5rem; align-items: start;">
+                            <div class="card" style="padding: 1.25rem;">
+                                <h3 style="margin-bottom: 0.5rem;">🧪 Universal Open RPC Request Builder</h3>
+                                <p class="text-muted" style="margin-bottom: 1rem;">Eksekusi operasi CRUD &amp; Workflow secara dinamis ke model ERP mana pun layaknya Odoo External XML-RPC / JSON-RPC</p>
+                                <div class="form-group">
+                                    <label>Metode Operasi RPC</label>
+                                    <select id="intgRpcMethod" class="form-control" onchange="onIntgRpcMethodChange()">
+                                        <option value="search_read">search_read (Query &amp; Filter Data)</option>
+                                        <option value="create">create (Tambah Record Baru)</option>
+                                        <option value="write">write (Update Record Berdasarkan ID)</option>
+                                        <option value="execute_action">execute_action (Trigger State Action)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Target Model ERP</label>
+                                    <select id="intgRpcModel" class="form-control">
+                                        <option value="res.partner">res.partner (Pelanggan &amp; Vendor)</option>
+                                        <option value="product.product">product.product (Katalog Produk)</option>
+                                        <option value="sale.order">sale.order (Sales Order)</option>
+                                        <option value="purchase.order">purchase.order (Purchase Order)</option>
+                                        <option value="stock.picking">stock.picking (Transfer Gudang)</option>
+                                        <option value="account.move">account.move (Faktur &amp; Jurnal)</option>
+                                        <option value="hr.employee">hr.employee (Karyawan HR)</option>
+                                        <option value="crm.lead">crm.lead (Prospek CRM)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Payload JSON Parameter</label>
+                                    <textarea id="intgRpcPayload" class="form-control" rows="7" style="font-family: monospace; font-size: 0.85rem;">{
+  "domain": [],
+  "fields": ["id", "name", "email", "phone", "city"],
+  "limit": 10
+}</textarea>
+                                </div>
+                                <button class="btn btn-primary" style="width: 100%;" onclick="executeIntegrationRPCPlayground()">🚀 Kirim Request RPC</button>
+                            </div>
+                            <div class="card" style="padding: 1.25rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                    <h3>Respons JSON Server</h3>
+                                    <span class="badge badge-success" id="intgRpcStatusBadge">READY</span>
+                                </div>
+                                <pre id="intgRpcResponseOutput" style="background: #0f172a; color: #38bdf8; padding: 1rem; border-radius: 8px; border: 1px solid #334155; min-height: 320px; max-height: 460px; overflow: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;">// Klik "Kirim Request RPC" untuk melihat hasil eksekusi langsung dari database ERP</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUBTAB 4: DATA JOBS & TELEMETRY LOGS -->
+                    <div id="subtabIntgJobs" class="intg-subtab-view" style="display: none;">
+                        <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 1.5rem; align-items: start;">
+                            <div class="card">
+                                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <h3>Batch Data ETL Jobs</h3>
+                                    <button class="btn btn-sm btn-primary" onclick="openModalCreateDataJob()">+ Buat Job ETL</button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Kode Job</th>
+                                                <th>Tipe &amp; Target</th>
+                                                <th>Progress</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="intgDataJobsTableBody">
+                                            <tr><td colspan="4" class="text-center">Memuat daftar ETL Job...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <h3>Log Telemetri &amp; Audit Trafik API</h3>
+                                    <button class="btn btn-sm btn-secondary" onclick="loadIntegrationLogs()">🔄 Refresh Log</button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Kode Log</th>
+                                                <th>Arah &amp; Endpoint</th>
+                                                <th>Status</th>
+                                                <th>Durasi</th>
+                                                <th>Waktu</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="intgLogsTableBody">
+                                            <tr><td colspan="5" class="text-center">Memuat telemetri API...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
         </main>
     </div>
 
     <!-- MODAL CONTAINERS -->
+
+    <div id="modalCommandPalette" class="modal-overlay" style="z-index: 9999;">
+        <div class="modal-card" style="max-width: 720px;">
+            <div class="modal-header">
+                <h3>🔍 Universal Command Palette &amp; Omni-Search (50 Modul &amp; Database)</h3>
+                <button class="modal-close" onclick="closeModal('modalCommandPalette')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" style="margin-bottom: 0.85rem;">
+                    <input type="text" id="cmdPaletteSearchInput" class="form-control" placeholder="Ketik nama modul, nomor SO/PO/Invoice, nama produk, pelanggan, atau perintah cepat..." oninput="handleCommandPaletteInput(this.value)" autocomplete="off">
+                </div>
+                <div style="display: flex; gap: 0.45rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="closeModal('modalCommandPalette'); runOneClickBusinessCycleSimulation();">🚀 Simulasi Siklus Bisnis 1-Klik</button>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="closeModal('modalCommandPalette'); openModal('modalCreateSaleOrder');">➕ Buat Sales Order</button>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="closeModal('modalCommandPalette'); openModal('modalCreatePurchaseOrder');">➕ Buat Purchase Order</button>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="closeModal('modalCommandPalette'); openModal('modalCreateProduct');">➕ Tambah Produk</button>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="closeModal('modalCommandPalette'); toggleEnterpriseTheme();">🌓 Ganti Tema UI</button>
+                </div>
+                <div id="cmdPaletteResultsContainer" style="max-height: 380px; overflow-y: auto; padding-right: 0.25rem;">
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content: space-between;">
+                <span style="font-size: 0.76rem; color: var(--text-muted);">Tips: Tekan <span class="cmd-kbd">Ctrl+K</span> kapan saja untuk membuka Command Palette, atau <span class="cmd-kbd">Esc</span> untuk menutup.</span>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalCommandPalette')">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalNotificationCenter" class="modal-overlay" style="z-index: 9999;">
+        <div class="modal-card" style="max-width: 680px;">
+            <div class="modal-header">
+                <h3>🔔 Pusat Notifikasi &amp; Antrean Tugas Eksekutif</h3>
+                <button class="modal-close" onclick="closeModal('modalNotificationCenter')">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 0.9rem;">Daftar tugas persetujuan, dokumen draft, alur BPMN aktif, dan peringatan operasional lintas modul. Klik item untuk langsung menuju modul terkait.</p>
+                <div id="notificationCenterList" style="max-height: 400px; overflow-y: auto;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="loadExecutiveNotifications()">🔄 Refresh Antrean</button>
+                <button type="button" class="btn btn-primary" onclick="closeModal('modalNotificationCenter')">Selesai</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalSimulationResult" class="modal-overlay" style="z-index: 9999;">
+        <div class="modal-card" style="max-width: 680px;">
+            <div class="modal-header">
+                <h3>🎉 Laporan Eksekusi Siklus Bisnis Otomatis (P2P + WMS + O2C + GL)</h3>
+                <button class="modal-close" onclick="closeModal('modalSimulationResult')">✕</button>
+            </div>
+            <div class="modal-body" id="simulationResultBody">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalSimulationResult'); switchTabProgrammatically('invoicing');">💳 Lihat Jurnal &amp; Faktur</button>
+                <button type="button" class="btn btn-primary" onclick="closeModal('modalSimulationResult')">Tutup</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Create Partner -->
     <div id="modalCreatePartner" class="modal-overlay">
         <div class="modal-card">
@@ -15397,6 +16033,253 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('modalAISchemaArchitect')">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- MODALS: BPMN 2.0 WORKFLOW ENGINE & INTEGRATION HUB    -->
+    <!-- ===================================================== -->
+    <div id="modalCreateWorkflow" class="modal-overlay">
+        <div class="modal-card" style="max-width: 720px;">
+            <div class="modal-header">
+                <h3>🔀 Buat Definisi Alur Kerja (BPMN 2.0)</h3>
+                <button class="modal-close" onclick="closeModal('modalCreateWorkflow')">✕</button>
+            </div>
+            <form id="formCreateWorkflow" onsubmit="submitCreateWorkflow(event)">
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label>Kode Alur Kerja *</label>
+                            <input type="text" id="wfDefCode" class="form-control" required placeholder="WF-CAPEX-APPROVAL">
+                        </div>
+                        <div class="form-group flex-1">
+                            <label>Nama Alur Kerja *</label>
+                            <input type="text" id="wfDefName" class="form-control" required placeholder="Persetujuan Pengadaan CAPEX">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label>Target Model ERP *</label>
+                            <select id="wfDefTargetModel" class="form-control">
+                                <option value="purchase.order">purchase.order (Purchase Order)</option>
+                                <option value="sale.order">sale.order (Sales Order)</option>
+                                <option value="account.move">account.move (Invoice / Journal)</option>
+                                <option value="hr.leave">hr.leave (Cuti Karyawan)</option>
+                                <option value="hr.expense">hr.expense (Klaim Pengeluaran)</option>
+                            </select>
+                        </div>
+                        <div class="form-group flex-1">
+                            <label>Initial Node Key</label>
+                            <input type="text" id="wfDefInitNode" class="form-control" value="draft">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Deskripsi Proses Bisnis</label>
+                        <input type="text" id="wfDefDesc" class="form-control" placeholder="Otomatisasi persetujuan berjenjang dengan aturan kondisional nilai anggaran">
+                    </div>
+                    <div class="form-group">
+                        <label>Konfigurasi Nodes &amp; Transitions (JSON BPMN) *</label>
+                        <textarea id="wfDefSchemaJSON" class="form-control" rows="9" style="font-family: monospace; font-size: 0.82rem;"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modalCreateWorkflow')">Batal</button>
+                    <button type="submit" class="btn btn-primary">💾 Simpan Alur Kerja</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modalStartWorkflow" class="modal-overlay">
+        <div class="modal-card" style="max-width: 560px;">
+            <div class="modal-header">
+                <h3>🚀 Jalankan Instansi Alur Kerja Baru</h3>
+                <button class="modal-close" onclick="closeModal('modalStartWorkflow')">✕</button>
+            </div>
+            <form id="formStartWorkflow" onsubmit="submitStartWorkflow(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Pilih Definisi Alur Kerja *</label>
+                        <select id="wfStartCodeSelect" class="form-control" required></select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label>Target Model *</label>
+                            <input type="text" id="wfStartTargetModel" class="form-control" value="purchase.order" required>
+                        </div>
+                        <div class="form-group flex-1">
+                            <label>ID Dokumen / Record ID *</label>
+                            <input type="number" id="wfStartRecordID" class="form-control" value="1" min="1" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Parameter Konteks Evaluasi Gateway (JSON) *</label>
+                        <textarea id="wfStartContextJSON" class="form-control" rows="5" style="font-family: monospace; font-size: 0.85rem;">{
+  "amount": 125000000,
+  "department": "Operations",
+  "urgency": "HIGH"
+}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modalStartWorkflow')">Batal</button>
+                    <button type="submit" class="btn btn-primary">🚀 Mulai Eksekusi BPMN</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modalAIWorkflowDesigner" class="modal-overlay">
+        <div class="modal-card" style="max-width: 720px;">
+            <div class="modal-header">
+                <h3>🤖 AI BPMN 2.0 Workflow Architect Copilot</h3>
+                <button class="modal-close" onclick="closeModal('modalAIWorkflowDesigner')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Target Model Dokumen</label>
+                    <select id="wfAITargetModel" class="form-control">
+                        <option value="purchase.order">purchase.order (Pengadaan &amp; PO)</option>
+                        <option value="sale.order">sale.order (Kredit &amp; Diskon Penjualan)</option>
+                        <option value="account.move">account.move (Pencairan &amp; Faktur)</option>
+                        <option value="hr.expense">hr.expense (Reimbursement Karyawan)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Deskripsikan Skenario Persetujuan Bisnis *</label>
+                    <textarea id="wfAIScenarioPrompt" class="form-control" rows="3" placeholder="Contoh: Rancang alur persetujuan pengadaan barang modal (CAPEX) dengan gateway otomatis jika nilai di atas Rp 50 Juta wajib disetujui CFO dan di atas Rp 500 Juta wajib disetujui CEO...">Rancang alur persetujuan pengadaan barang modal (CAPEX) dengan gateway otomatis jika nilai di atas Rp 50 Juta wajib disetujui CFO dan di atas Rp 500 Juta wajib disetujui CEO</textarea>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="generateAIWorkflowProposal()">✨ Rancang Arsitektur BPMN dengan AI</button>
+                <div id="wfAIProposalResult" style="display: none; margin-top: 1.25rem; padding: 1rem; border-radius: 8px; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.3);">
+                    <h4 id="wfAIProposalTitle" style="margin-bottom: 0.4rem;"></h4>
+                    <p id="wfAIProposalCompliance" class="text-muted" style="font-size: 0.85rem; margin-bottom: 0.75rem;"></p>
+                    <div id="wfAIProposalNodesSummary" style="font-size: 0.85rem; margin-bottom: 1rem;"></div>
+                    <button type="button" class="btn btn-success" onclick="applyAIWorkflowProposal()">✅ Terapkan &amp; Simpan ke Katalog Alur Kerja</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalAIWorkflowDesigner')">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalCreateAPIKey" class="modal-overlay">
+        <div class="modal-card" style="max-width: 560px;">
+            <div class="modal-header">
+                <h3>🔑 Buat Kredensial M2M API Key Baru</h3>
+                <button class="modal-close" onclick="closeModal('modalCreateAPIKey')">✕</button>
+            </div>
+            <form id="formCreateAPIKey" onsubmit="submitCreateAPIKey(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Nama Aplikasi / Worker Integrasi *</label>
+                        <input type="text" id="intgKeyName" class="form-control" required placeholder="Contoh: Tokopedia Order Sync Worker">
+                    </div>
+                    <div class="form-group">
+                        <label>Scopes Otorisasi (pisahkan dengan koma) *</label>
+                        <input type="text" id="intgKeyScopes" class="form-control" value="read:product,write:sale,read:stock" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label>Rate Limit (Request / Menit)</label>
+                            <input type="number" id="intgKeyRateLimit" class="form-control" value="120" min="10">
+                        </div>
+                        <div class="form-group flex-1">
+                            <label>IP Whitelist (opsional, gunakan * untuk semua)</label>
+                            <input type="text" id="intgKeyAllowedIPs" class="form-control" value="*">
+                        </div>
+                    </div>
+                    <div id="intgGeneratedSecretBox" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(16, 185, 129, 0.12); border: 1px solid #10b981; border-radius: 8px;">
+                        <strong style="color: #10b981; display: block; margin-bottom: 0.35rem;">✅ API Key Berhasil Dibuat! Salin Secret Key ini sekarang:</strong>
+                        <code id="intgGeneratedSecretValue" style="display: block; padding: 0.6rem; background: #0f172a; color: #f8fafc; border-radius: 4px; word-break: break-all; font-family: monospace;"></code>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modalCreateAPIKey')">Tutup</button>
+                    <button type="submit" class="btn btn-primary">🔑 Generate API Key</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modalCreateDataJob" class="modal-overlay">
+        <div class="modal-card" style="max-width: 560px;">
+            <div class="modal-header">
+                <h3>📦 Buat Batch Data ETL Job</h3>
+                <button class="modal-close" onclick="closeModal('modalCreateDataJob')">✕</button>
+            </div>
+            <form id="formCreateDataJob" onsubmit="submitCreateDataJob(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Nama Job Sinkronisasi / ETL *</label>
+                        <input type="text" id="intgJobName" class="form-control" required placeholder="Contoh: Export Katalog Produk ke Marketplace">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label>Tipe Operasi</label>
+                            <select id="intgJobType" class="form-control">
+                                <option value="export">export (Ekspor Data Master)</option>
+                                <option value="import">import (Impor Batch JSON)</option>
+                                <option value="sync">sync (Sinkronisasi Dua Arah)</option>
+                            </select>
+                        </div>
+                        <div class="form-group flex-1">
+                            <label>Target Model</label>
+                            <select id="intgJobModel" class="form-control">
+                                <option value="product.product">product.product (Produk)</option>
+                                <option value="res.partner">res.partner (Mitra / Pelanggan)</option>
+                                <option value="sale.order">sale.order (Sales Order)</option>
+                                <option value="account.move">account.move (Faktur Akuntansi)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Format File / Payload</label>
+                        <select id="intgJobFormat" class="form-control">
+                            <option value="json">JSON</option>
+                            <option value="csv">CSV</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modalCreateDataJob')">Batal</button>
+                    <button type="submit" class="btn btn-primary">🚀 Eksekusi Batch ETL</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modalAIIntegrationCopilot" class="modal-overlay">
+        <div class="modal-card" style="max-width: 720px;">
+            <div class="modal-header">
+                <h3>🤖 AI Enterprise Integration Architect Copilot</h3>
+                <button class="modal-close" onclick="closeModal('modalAIIntegrationCopilot')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label>Sistem Eksternal Target *</label>
+                        <input type="text" id="intgAISystemName" class="form-control" value="Shopee &amp; Tokopedia Omnichannel" required>
+                    </div>
+                    <div class="form-group flex-1">
+                        <label>Volume Transaksi Harian</label>
+                        <input type="text" id="intgAIVolume" class="form-control" value="15.000 pesanan/hari">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Kebutuhan Integrasi Bisnis *</label>
+                    <textarea id="intgAIUseCase" class="form-control" rows="3">Sinkronisasi pesanan marketplace otomatis ke Sales Order ERP, pemotongan stok gudang real-time, dan pengiriman notifikasi WhatsApp resi pengiriman ke pelanggan.</textarea>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="generateAIIntegrationBlueprint()">✨ Analisis Blueprint Integrasi dengan AI</button>
+                <div id="intgAIBlueprintResult" style="display: none; margin-top: 1.25rem; padding: 1rem; border-radius: 8px; background: rgba(14, 165, 233, 0.08); border: 1px solid rgba(14, 165, 233, 0.3);">
+                    <h4 id="intgAIBlueprintPattern" style="margin-bottom: 0.5rem; color: #38bdf8;"></h4>
+                    <p id="intgAIBlueprintFlow" style="font-size: 0.88rem; margin-bottom: 0.75rem;"></p>
+                    <pre id="intgAIBlueprintPayload" style="background: #0f172a; color: #a5f3fc; padding: 0.75rem; border-radius: 6px; font-size: 0.8rem; overflow-x: auto;"></pre>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalAIIntegrationCopilot')">Tutup</button>
             </div>
         </div>
     </div>

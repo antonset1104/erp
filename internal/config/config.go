@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 )
 
@@ -40,9 +41,39 @@ func LoadConfig() *Config {
 	dbDSN := os.Getenv("DB_DSN")
 	if dbDSN == "" {
 		if dbType == "postgres" {
-			dbDSN = "host=localhost user=odoo password=odoo dbname=odoo_erp port=5432 sslmode=disable"
+			dbHost := os.Getenv("DB_HOST")
+			if dbHost == "" {
+				dbHost = "localhost"
+			}
+			dbPort := os.Getenv("DB_PORT")
+			if dbPort == "" {
+				dbPort = "5432"
+			}
+			dbUser := os.Getenv("DB_USER")
+			if dbUser == "" {
+				dbUser = "odoo"
+			}
+			dbPassword := os.Getenv("DB_PASSWORD")
+			if dbPassword == "" {
+				dbPassword = "odoo"
+			}
+			dbName := os.Getenv("DB_NAME")
+			if dbName == "" {
+				dbName = "odoo_erp"
+			}
+			dbSSLMode := os.Getenv("DB_SSLMODE")
+			if dbSSLMode == "" {
+				dbSSLMode = "disable"
+			}
+			dbDSN = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
+				dbHost, dbUser, dbPassword, dbName, dbPort, dbSSLMode)
 		} else {
-			dbDSN = "odoo_erp.db"
+			dbPath := os.Getenv("DB_PATH")
+			if dbPath != "" {
+				dbDSN = dbPath
+			} else {
+				dbDSN = "odoo_erp.db"
+			}
 		}
 	}
 
@@ -61,13 +92,21 @@ func LoadConfig() *Config {
 		uploadDir = "./uploads/attachments"
 	}
 
+	env := os.Getenv("ENVIRONMENT")
+	if env == "" {
+		env = os.Getenv("APP_ENV")
+	}
+	if env == "" {
+		env = "development"
+	}
+
 	return &Config{
 		Port:                        port,
 		DBType:                      dbType,
 		DBDSN:                       dbDSN,
 		JWTSecret:                   jwtSecret,
 		AppName:                     "Odoo-Go ERP",
-		Environment:                 "development",
+		Environment:                 env,
 		CloudflareAccountID:         os.Getenv("CLOUDFLARE_ACCOUNT_ID"),
 		CloudflareAPIToken:          os.Getenv("CLOUDFLARE_API_TOKEN"),
 		CloudflareAIModel:           cfModel,

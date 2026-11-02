@@ -68,6 +68,7 @@ func (h *Handler) RegisterRoutes(r *gin.RouterGroup, authMiddleware gin.HandlerF
 		admin.POST("/rmas/:id/reject", h.RejectRMA)
 
 		admin.GET("/payment-notifications", h.ListPaymentNotifications)
+		admin.GET("/statements", h.ListPaymentNotifications)
 		admin.POST("/payment-notifications/:id/verify", h.VerifyPaymentNotification)
 
 		admin.GET("/statement/:partner_id", h.GetCustomerStatement)

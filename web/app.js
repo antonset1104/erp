@@ -122,6 +122,41 @@ function formatCurrency(amount) {
     }).format(amount || 0);
 }
 
+function formatRupiah(amount) {
+    return formatCurrency(amount);
+}
+
+function formatDate(dateVal) {
+    if (!dateVal) return '-';
+    const d = new Date(dateVal);
+    if (isNaN(d.getTime())) return String(dateVal);
+    return d.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+}
+
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function formatModelIcon(icon) {
+    if (!icon) return '📦';
+    const s = String(icon);
+    if (s.startsWith('fa')) {
+        if (s.includes('mountain')) return '⛰️';
+        if (s.includes('helmet') || s.includes('hard-hat') || s.includes('shield')) return '⛑️';
+        if (s.includes('truck') || s.includes('car')) return '🚛';
+        if (s.includes('hospital') || s.includes('med')) return '🏥';
+        if (s.includes('building') || s.includes('industry')) return '🏭';
+        return '🧩';
+    }
+    return s;
+}
+
 // Toast Notifications
 function showToast(msg, type = 'primary') {
     const container = document.getElementById('toastContainer');
@@ -232,7 +267,26 @@ function updateHeaderTitles(tab) {
         'purchase-requisitions': { title: 'Purchase Requisitions, Tender & Blanket Orders', sub: 'Permintaan Pembelian Internal, Lelang Multi-Vendor (Call for Bids) & Kontrak Pasokan Jangka Panjang (purchase.requisition)' },
         currency: { title: 'Multi-Valas & Kurs Forex (PSAK 10)', sub: 'Multi-Currency Revaluation, Spot Rates JISDOR/BI, Unrealized & Realized Gain/Loss, dan Treasury AI Copilot (res.currency)' },
         'tax-efaktur': { title: 'Pajak & e-Faktur Elektronik DJP', sub: 'Kepatuhan Pajak UU HPP & PMK 112/2022 - NSFP, Faktur Pajak Keluaran/Masukan, SPT Masa 1111, CSV & AI Compliance (account.tax.invoice)' },
-        'bank-reconcile': { title: 'Rekonsiliasi Bank & Impor Rekening Koran', sub: 'Odoo 17/18 Style Auto-Match Engine, Impor CSV Multi-Format (BCA/Mandiri/BRI), Aturan Write-Off Biaya Bank, dan AI Statement Audit Copilot (account.bank.statement)' }
+        'bank-reconcile': { title: 'Rekonsiliasi Bank & Impor Rekening Koran', sub: 'Odoo 17/18 Style Auto-Match Engine, Impor CSV Multi-Format (BCA/Mandiri/BRI), Aturan Write-Off Biaya Bank, dan AI Statement Audit Copilot (account.bank.statement)' },
+        approvals: { title: 'Approval Matrix & Multi-Tier Authorizations', sub: 'Otorisasi berjenjang untuk pengadaan, pengeluaran kas, cuti & kontrak bisnis' },
+        'landed-cost': { title: 'Landed Cost & Impor Kepabeanan', sub: 'Alokasi biaya bea masuk, pengangkutan laut/udara & asuransi ke HPP inventaris (stock.landed.cost)' },
+        traceability: { title: 'End-to-End Lot Traceability & Product Recall', sub: 'Pelacakan silsilah bahan baku ke barang jadi (hulu-hilir) & penarikan produk darurat (stock.lot.trace)' },
+        subscription: { title: 'Subscription & Recurring Revenue (SaaS / Kontrak)', sub: 'Manajemen langganan berkala, metrik MRR/ARR, churn analysis & penagihan otomatis' },
+        'audit-trail': { title: 'Immutable Audit Trail & Keamanan Sistem', sub: 'Jejak audit perubahan field secara kriptografis, deteksi aktivitas mencurigakan & kepatuhan ISO 27001' },
+        webhook: { title: 'Outbound Webhooks & Event Notification Engine', sub: 'Integrasi event real-time dengan tanda tangan HMAC-SHA256 & mekanisme retry otomatis' },
+        'inbound-webhook': { title: 'Inbound Webhooks & Omnichannel API Receiver', sub: 'Penerima webhook dari e-Commerce, Payment Gateway (Midtrans/Xendit) & Logistik 3PL' },
+        intercompany: { title: 'Multi-Company Holding & Konsolidasi Laporan Keuangan', sub: 'Transaksi antar-entitas otomatis, eliminasi silang & konsolidasi grup perusahaan' },
+        treasury: { title: 'Cash Flow Forecasting & Corporate Treasury', sub: 'Manajemen likuiditas multi-bank, proyeksi arus kas 13-minggu & sweep antar rekening' },
+        'mrp-advanced': { title: 'MRP II: Work Center, Routing & OEE Shop Floor', sub: 'Penjadwalan kapasitas mesin produksi, pelacakan Work Order real-time & analitik OEE' },
+        'tax-ebupot': { title: 'Pajak e-Bupot Unifikasi (PPh 21/23/26/4(2))', sub: 'Pemotongan/pemungutan PPh unifikasi DJP, bukti potong elektronik & SPT Masa Unifikasi' },
+        esignature: { title: 'Digital Signature & Materai Elektronik (e-Meterai)', sub: 'Tanda tangan elektronik tersertifikasi SHA-256, pembubuhan e-Meterai Peruri & verifikasi dokumen' },
+        wms: { title: 'WMS 3D Bin Location, Putaway & Wave Picking', sub: 'Manajemen tata letak rak gudang bertingkat, FEFO/FIFO putaway & optimasi jalur pengambilan' },
+        'vendor-portal': { title: 'Vendor Portal & B2B E-Procurement', sub: 'Portal mandiri pemasok: penawaran tender RFQ, pengiriman ASN & pengajuan tagihan vendor' },
+        'customer-portal': { title: 'Customer Portal & B2B Self-Service', sub: 'Portal mandiri pelanggan B2B: pemesanan katalog grosir, klaim retur RMA & konfirmasi bayar' },
+        'customs-bonded': { title: 'Kawasan Berikat & Kepabeanan DJBC (CEISA 4.0)', sub: 'IT Inventory Kawasan Berikat, dokumen BC 2.3/2.5/2.7/4.0/4.1, subkontrak & laporan mutasi DJBC' },
+        'lowcode-studio': { title: 'Universal Low-Code Studio & Dynamic Schema Engine', sub: 'Rancang model bisnis kustom, kolom dinamis (EAV) & ekstensi entitas tanpa menulis kode Golang' },
+        'workflow-engine': { title: 'BPMN 2.0 Dynamic Workflow & State Machine Engine', sub: 'Orkestrator alur persetujuan bisnis, conditional gateway, SLA tracker & AI Workflow Designer' },
+        'integration-hub': { title: 'Universal Integration Hub & Open RPC Gateway', sub: 'Manajemen M2M API Keys, konektor Shopee/Tokopedia/Midtrans/SAP, Open RPC & Batch ETL' }
     };
     const t = titleMap[tab] || titleMap.dashboard;
     document.getElementById('pageTitle').textContent = t.title;
@@ -287,7 +341,10 @@ function loadCurrentTab() {
         case 'vendor-portal': loadVendorPortalData(); break;
         case 'customer-portal': loadCustomerPortalData(); break;
         case 'customs-bonded': loadCustomsBondedData(); break;
+        case 'attachments': loadAttachments(); break;
         case 'lowcode-studio': loadLowCodeStudioData(); break;
+        case 'workflow-engine': loadWorkflowEngineData(); break;
+        case 'integration-hub': loadIntegrationHubData(); break;
     }
 }
 
@@ -7723,7 +7780,8 @@ async function loadBudgetData() {
 
 async function loadBudgetStats() {
     try {
-        const stats = await api('/budget/stats');
+        const resStats = await api('/budget/stats');
+        const stats = (resStats && resStats.data) ? resStats.data : (resStats || {});
         document.getElementById('budgetStatTotalBudgets').textContent = stats.total_budgets ?? 0;
         document.getElementById('budgetStatValidatedBudgets').textContent = stats.validated_budgets ?? 0;
         document.getElementById('budgetStatTotalPlanned').textContent = formatCurrency(stats.total_planned ?? 0);
@@ -7748,7 +7806,8 @@ async function loadBudgets() {
     if (searchFilter) url += `search=${encodeURIComponent(searchFilter)}&`;
 
     try {
-        const budgets = await api(url);
+        const resBudgets = await api(url);
+        const budgets = Array.isArray(resBudgets) ? resBudgets : (resBudgets && Array.isArray(resBudgets.data) ? resBudgets.data : (resBudgets && Array.isArray(resBudgets.budgets) ? resBudgets.budgets : []));
         if (!budgets || budgets.length === 0) {
             tbody.innerHTML = '<tr><td colspan="11" class="text-center" style="padding: 2rem; color: var(--text-muted);">Belum ada dokumen rencana anggaran belanja (RKAB). Klik <strong>"+ Buat Dokumen Anggaran"</strong> untuk memulai.</td></tr>';
             return;
@@ -14430,13 +14489,13 @@ async function loadInboundWebhookData() {
         }
 
         // 2. Fetch Endpoints
-        currentInboundEndpoints = await api('/inbound-webhooks/endpoints') || [];
+        const resInEp = await api('/inbound-webhooks/endpoints'); currentInboundEndpoints = Array.isArray(resInEp) ? resInEp : (resInEp && Array.isArray(resInEp.data) ? resInEp.data : (resInEp && Array.isArray(resInEp.endpoints) ? resInEp.endpoints : []));
         document.getElementById('inwhCountEndpoints').textContent = currentInboundEndpoints.length;
         renderInboundEndpointsTable(currentInboundEndpoints);
         populateSimEndpointsDropdown(currentInboundEndpoints);
 
         // 3. Fetch Logs
-        currentInboundLogs = await api('/inbound-webhooks/logs') || [];
+        const resInLogs = await api('/inbound-webhooks/logs'); currentInboundLogs = Array.isArray(resInLogs) ? resInLogs : (resInLogs && Array.isArray(resInLogs.data) ? resInLogs.data : (resInLogs && Array.isArray(resInLogs.logs) ? resInLogs.logs : []));
         document.getElementById('inwhCountLogs').textContent = currentInboundLogs.length;
         renderInboundLogsTable(currentInboundLogs);
 
@@ -18351,7 +18410,8 @@ async function loadVendorPortalData() {
 
 async function loadVendorPortalStats() {
     try {
-        const stats = await api('/vendor-portal/stats');
+        const resVpStats = await api('/vendor-portal/stats');
+        const stats = (resVpStats && resVpStats.data) ? resVpStats.data : (resVpStats || {});
         document.getElementById('vpKpiTotalAccounts').textContent = stats.total_accounts || 0;
         document.getElementById('vpKpiActiveAccounts').textContent = stats.active_accounts || 0;
         document.getElementById('vpKpiTotalBids').textContent = stats.total_bids || 0;
@@ -18369,8 +18429,8 @@ async function loadVendorPortalStats() {
 
 async function loadVendorPortalAccounts() {
     try {
-        const accounts = await api('/vendor-portal/accounts');
-        vpCurrentAccounts = accounts || [];
+        const resAcc = await api('/vendor-portal/accounts');
+        vpCurrentAccounts = Array.isArray(resAcc) ? resAcc : (resAcc && Array.isArray(resAcc.data) ? resAcc.data : []);
         renderVpAccountsTable(vpCurrentAccounts);
     } catch (e) {
         console.error('Error loading vendor portal accounts:', e);
@@ -18422,8 +18482,9 @@ function renderVpAccountsTable(accounts) {
 
 async function loadVendorPortalBids() {
     try {
-        const bids = await api('/vendor-portal/bids');
-        renderVpBidsTable(bids || []);
+        const resBids = await api('/vendor-portal/bids');
+        const bids = Array.isArray(resBids) ? resBids : (resBids && Array.isArray(resBids.data) ? resBids.data : []);
+        renderVpBidsTable(bids);
     } catch (e) {
         console.error('Error loading vendor portal bids:', e);
     }
@@ -18468,8 +18529,9 @@ function renderVpBidsTable(bids) {
 
 async function loadVendorPortalASNs() {
     try {
-        const asns = await api('/vendor-portal/asns');
-        renderVpASNsTable(asns || []);
+        const resAsns = await api('/vendor-portal/asns');
+        const asns = Array.isArray(resAsns) ? resAsns : (resAsns && Array.isArray(resAsns.data) ? resAsns.data : []);
+        renderVpASNsTable(asns);
     } catch (e) {
         console.error('Error loading vendor portal ASNs:', e);
     }
@@ -18518,8 +18580,9 @@ function renderVpASNsTable(asns) {
 
 async function loadVendorPortalInvoices() {
     try {
-        const invoices = await api('/vendor-portal/invoices');
-        renderVpInvoicesTable(invoices || []);
+        const resInvs = await api('/vendor-portal/invoices');
+        const invoices = Array.isArray(resInvs) ? resInvs : (resInvs && Array.isArray(resInvs.data) ? resInvs.data : []);
+        renderVpInvoicesTable(invoices);
     } catch (e) {
         console.error('Error loading vendor portal invoices:', e);
     }
@@ -18979,22 +19042,46 @@ async function loadCustomerPortalData() {
     try {
         const res = await api('/customer-portal/stats');
         const stats = (res && res.data) ? res.data : (res || {});
-        document.getElementById('cpStatActiveAccounts').textContent = stats.active_accounts || stats.total_customer_accounts || 0;
-        document.getElementById('cpStatDraftOrders').textContent = stats.total_b2b_orders || 0;
-        document.getElementById('cpStatPendingRMAs').textContent = stats.pending_rmas || 0;
-        document.getElementById('cpStatApprovedRMAs').textContent = (stats.total_rmas || 0) - (stats.pending_rmas || 0);
-        document.getElementById('cpStatTotalDueAR').textContent = formatCurrency(stats.outstanding_ar_balance || stats.total_due_ar || 0);
-        document.getElementById('cpStatAIHealthAvg').textContent = (stats.ai_health_avg || 85).toFixed(1) + ' / 100';
+        const setEl = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = val;
+        };
+        setEl('cpStatActiveAccounts', stats.active_accounts || stats.total_customer_accounts || 0);
+        setEl('cpStatAccounts', stats.total_accounts || stats.total_customer_accounts || stats.active_accounts || 0);
+        setEl('cpStatAccountsActive', (stats.active_accounts || 0) + ' Aktif');
+        setEl('cpStatDraftOrders', stats.total_b2b_orders || 0);
+        setEl('cpStatOrders', stats.total_b2b_orders || stats.total_orders || 0);
+        setEl('cpStatOrdersApproved', (stats.approved_orders || 0) + ' Disetujui');
+        setEl('cpStatOrderValue', formatCurrency(stats.total_order_value || stats.total_b2b_revenue || 0));
+        setEl('cpStatPendingRMAs', stats.pending_rmas || 0);
+        setEl('cpStatRMAs', stats.total_rmas || 0);
+        setEl('cpStatRMAsPending', (stats.pending_rmas || 0) + ' Perlu Review');
+        setEl('cpStatApprovedRMAs', (stats.total_rmas || 0) - (stats.pending_rmas || 0));
+        setEl('cpStatPendingPayments', stats.pending_payment_notifications || stats.pending_payments || 0);
+        setEl('cpStatTotalDueAR', formatCurrency(stats.outstanding_ar_balance || stats.total_due_ar || 0));
+        setEl('cpStatARBalance', formatCurrency(stats.outstanding_ar_balance || stats.total_due_ar || 0));
+        setEl('cpStatAIHealthAvg', (stats.ai_health_avg || 85).toFixed(1) + ' / 100');
 
-        switch (currentCustomerPortalSubTab) {
-            case 'accounts': loadCustomerAccounts(); break;
-            case 'orders': loadCustomerPortalOrders(); break;
-            case 'rma': loadCustomerPortalRMAs(); break;
-            case 'statements': loadCustomerPortalStatements(); break;
-        }
+        await Promise.all([
+            loadCustomerAccounts(),
+            loadCustomerPortalOrders(),
+            loadCustomerPortalRMAs(),
+            loadCustomerPortalStatements()
+        ]);
     } catch (err) {
         console.error('Failed to load Customer Portal data:', err);
     }
+}
+
+function switchCustomerPortalSubtab(targetId) {
+    document.querySelectorAll('.cp-subtab-pane').forEach(el => {
+        el.style.display = (el.id === targetId) ? 'block' : 'none';
+    });
+    document.querySelectorAll('.cp-subtab-btn').forEach(btn => {
+        btn.className = (btn.getAttribute('data-target') === targetId)
+            ? 'btn btn-sm btn-primary cp-subtab-btn'
+            : 'btn btn-sm btn-secondary cp-subtab-btn';
+    });
 }
 
 function switchCustomerPortalSubTab(tabName) {
@@ -19025,7 +19112,7 @@ async function loadCustomerAccounts() {
     try {
         const res = await api('/customer-portal/accounts');
         currentCustomerAccounts = (res && res.data) ? res.data : (res || []);
-        const tbody = document.getElementById('customerAccountsTableBody');
+        const tbody = document.getElementById('customerAccountsTableBody') || document.getElementById('cpAccountsTableBody');
         if (!tbody) return;
 
         if (currentCustomerAccounts.length === 0) {
@@ -19075,7 +19162,7 @@ async function loadCustomerPortalOrders() {
     try {
         const res = await api('/customer-portal/orders');
         const orders = (res && res.data) ? res.data : (res || []);
-        const tbody = document.getElementById('customerPortalOrdersTableBody');
+        const tbody = document.getElementById('customerPortalOrdersTableBody') || document.getElementById('cpOrdersTableBody');
         if (!tbody) return;
 
         if (!orders || orders.length === 0) {
@@ -19110,7 +19197,7 @@ async function loadCustomerPortalRMAs() {
     try {
         const res = await api('/customer-portal/rmas');
         const rmas = (res && res.data) ? res.data : (res || []);
-        const tbody = document.getElementById('customerPortalRMATableBody');
+        const tbody = document.getElementById('customerPortalRMATableBody') || document.getElementById('cpRMAsTableBody');
         if (!tbody) return;
 
         if (!rmas || rmas.length === 0) {
@@ -19147,7 +19234,7 @@ async function loadCustomerPortalStatements() {
     try {
         const res = await api('/customer-portal/statements');
         const statements = (res && res.data) ? res.data : (res || []);
-        const tbody = document.getElementById('customerPortalStatementsTableBody');
+        const tbody = document.getElementById('customerPortalStatementsTableBody') || document.getElementById('cpPaymentsTableBody');
         if (!tbody) return;
 
         if (!statements || statements.length === 0) {
@@ -20716,3 +20803,1703 @@ async function applyAISchemaProposal() {
         showToast('Gagal menerapkan skema AI: ' + err.message, 'error');
     }
 }
+
+
+// ============================================================================
+// UNIFIED OVERRIDES FOR LOW-CODE STUDIO (RECONCILED WITH INDEX.HTML DOM IDs)
+// ============================================================================
+
+async function loadLowCodeStudioData() {
+    try {
+        const stats = await api('/lowcode/stats');
+        if (stats) {
+            const d = stats.data || stats;
+            const setEl = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = val;
+            };
+            setEl('lcStatTotalModels', stats.total_models ?? d.total_custom_models ?? 0);
+            setEl('lcStatTotalFields', stats.total_fields ?? d.total_custom_fields ?? 0);
+            setEl('lcStatCustomFields', stats.total_fields ?? d.total_custom_fields ?? 0);
+            setEl('lcStatTotalRecords', stats.total_records ?? d.total_custom_records ?? 0);
+            setEl('lcStatCoreExtensions', d.extended_core_entities ?? 4);
+            setEl('lcStatActiveSchemas', stats.active_workflows ?? d.active_business_schemas ?? 0);
+            setEl('lcStatActiveWorkflows', stats.active_workflows ?? d.active_business_schemas ?? 0);
+            setEl('lcStatReadiness', stats.system_readiness ?? d.system_readiness_rate ?? '99.8% Ready');
+        }
+        await loadLowCodeModelsList();
+    } catch (err) {
+        console.error('Failed to load Low-Code Studio data:', err);
+    }
+}
+
+function switchLcSubtab(targetId) {
+    document.querySelectorAll('.lc-subtab-pane').forEach(pane => {
+        pane.style.display = (pane.id === targetId) ? 'block' : 'none';
+    });
+    document.querySelectorAll('.lc-subtab-btn').forEach(btn => {
+        if (btn.getAttribute('data-target') === targetId) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    if (targetId === 'lcSubtabDataExplorer') {
+        loadLcModelRecords();
+    } else if (targetId === 'lcSubtabCoreExt') {
+        loadCoreExtensionData();
+    }
+}
+
+function filterLcModels() {
+    const q = (document.getElementById('lcModelSearchInput')?.value || '').toLowerCase().trim();
+    const filtered = !q ? cachedLowCodeModels : cachedLowCodeModels.filter(m =>
+        (m.name || '').toLowerCase().includes(q) ||
+        (m.technical_name || '').toLowerCase().includes(q) ||
+        (m.category || '').toLowerCase().includes(q) ||
+        (m.menu_category || '').toLowerCase().includes(q)
+    );
+    renderLowCodeModelsTable(filtered);
+}
+
+async function loadLowCodeModelsList() {
+    try {
+        const models = await api('/lowcode/models') || [];
+        cachedLowCodeModels = models;
+
+        const explorerSelect = document.getElementById('lcExplorerModelSelect');
+        if (explorerSelect) {
+            const prev = explorerSelect.value;
+            explorerSelect.innerHTML = `<option value="">-- Pilih Model Kustom --</option>` + models.map(m =>
+                `<option value="${m.technical_name}">${formatModelIcon(m.icon)} ${m.display_name || m.name || m.technical_name} (${m.technical_name})</option>`
+            ).join('');
+            if (prev && models.some(m => m.technical_name === prev)) {
+                explorerSelect.value = prev;
+            } else if (models.length > 0) {
+                explorerSelect.value = models[0].technical_name;
+            }
+        }
+
+        renderLowCodeModelsTable(models);
+    } catch (err) {
+        console.error('Failed to load Low-Code models list:', err);
+    }
+}
+
+function renderLowCodeModelsTable(models) {
+    const tbody = document.getElementById('lcModelsTableBody');
+    if (!tbody) return;
+
+    if (!models || models.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">Belum ada model kustom. Klik "+ Buat Model Kustom" atau gunakan AI Schema Copilot.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = models.map(m => {
+        const fieldsCount = m.fields ? m.fields.length : (m.field_count || 0);
+        const category = m.menu_category || m.category || 'Operations';
+        const isActive = m.is_active !== false && m.active !== false;
+        const enableAudit = m.enable_audit !== false;
+        const enableChatter = m.enable_chatter !== false;
+        const dispName = m.display_name || m.name || m.technical_name;
+        const dispIcon = formatModelIcon(m.icon);
+
+        return `
+            <tr>
+                <td style="font-size: 1.4rem; text-align: center;">${dispIcon}</td>
+                <td>
+                    <strong>${dispName}</strong>
+                    <div class="text-muted" style="font-size: 0.78rem;">${m.description || '-'}</div>
+                </td>
+                <td><code>${m.technical_name}</code></td>
+                <td><span class="badge badge-info">${category}</span></td>
+                <td><span class="badge badge-primary">${fieldsCount} Kolom</span></td>
+                <td><span class="badge ${isActive ? 'badge-success' : 'badge-draft'}">${isActive ? 'AKTIF' : 'NONAKTIF'}</span></td>
+                <td>
+                    ${enableAudit ? '<span class="badge badge-warning" style="margin-right:4px;">Audit</span>' : ''}
+                    ${enableChatter ? '<span class="badge badge-info">Chatter</span>' : ''}
+                </td>
+                <td>
+                    <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                        <button class="btn btn-xs btn-secondary" onclick="openModalManageFields(${m.id})">🧩 Kolom (${fieldsCount})</button>
+                        <button class="btn btn-xs btn-primary" onclick="openDataExplorerForModel('${m.technical_name}')">📊 Buka Data</button>
+                        ${!m.is_system ? `<button class="btn btn-xs btn-danger" onclick="handleDeleteCustomModel(${m.id}, '${(dispName || '').replace(/'/g, "\\'")}')">🗑️</button>` : ''}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function openDataExplorerForModel(techName) {
+    const explorerSelect = document.getElementById('lcExplorerModelSelect');
+    if (explorerSelect) {
+        explorerSelect.value = techName;
+    }
+    switchLcSubtab('lcSubtabDataExplorer');
+}
+
+function openModalCreateCustomModel() {
+    const nameEl = document.getElementById('lcNewModelName');
+    const techEl = document.getElementById('lcNewModelTech');
+    const descEl = document.getElementById('lcNewModelDesc');
+    if (nameEl) nameEl.value = '';
+    if (techEl) techEl.value = 'x_';
+    if (descEl) descEl.value = '';
+    openModal('modalCreateCustomModel');
+}
+
+function autoGenerateModelTechnicalName() {
+    const nameVal = document.getElementById('lcNewModelName')?.value || '';
+    const slug = nameVal.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+    const techEl = document.getElementById('lcNewModelTech') || document.getElementById('lcNewModelTechName');
+    if (techEl) techEl.value = 'x_' + slug;
+}
+
+async function handleCreateCustomModel(e) {
+    e.preventDefault();
+    try {
+        const name = (document.getElementById('lcNewModelName')?.value || '').trim();
+        const techName = (document.getElementById('lcNewModelTech')?.value || document.getElementById('lcNewModelTechName')?.value || '').trim();
+        const icon = (document.getElementById('lcNewModelIcon')?.value || '📦').trim();
+        const category = document.getElementById('lcNewModelCategory')?.value || 'Operations';
+        const description = (document.getElementById('lcNewModelDesc')?.value || document.getElementById('lcNewModelDescription')?.value || '').trim();
+        const enableAudit = document.getElementById('lcNewModelAudit') ? document.getElementById('lcNewModelAudit').checked : true;
+        const enableChatter = document.getElementById('lcNewModelChatter') ? document.getElementById('lcNewModelChatter').checked : true;
+
+        await api('/lowcode/models', 'POST', {
+            name,
+            technical_name: techName,
+            icon,
+            category,
+            menu_category: category,
+            description,
+            enable_audit: enableAudit,
+            enable_chatter: enableChatter,
+            active: true
+        });
+        showToast(`Model kustom "${name}" berhasil dibuat!`, 'success');
+        closeModal('modalCreateCustomModel');
+        await loadLowCodeStudioData();
+    } catch (err) {
+        showToast('Gagal membuat model kustom: ' + err.message, 'error');
+    }
+}
+
+async function openModalManageFields(modelId) {
+    try {
+        const model = await api(`/lowcode/models/${modelId}`);
+        if (!model) return;
+        currentSelectedLowCodeModel = model;
+
+        const titleEl = document.getElementById('lcFieldsModalTitle');
+        const summaryEl = document.getElementById('lcFieldsModelSummary');
+        const idEl = document.getElementById('lcCurrentModelId');
+        if (titleEl) titleEl.textContent = `🧩 Kelola Kolom: ${model.icon || '📦'} ${model.name}`;
+        if (summaryEl) summaryEl.textContent = `Model Technical Name: ${model.technical_name} (${(model.fields || []).length} kolom terdaftar)`;
+        if (idEl) idEl.value = model.id;
+
+        const lblEl = document.getElementById('lcNewFieldLabel');
+        const nameEl = document.getElementById('lcNewFieldName');
+        const typeEl = document.getElementById('lcNewFieldType');
+        const reqEl = document.getElementById('lcNewFieldRequired');
+        const defEl = document.getElementById('lcNewFieldDefault');
+        const optEl = document.getElementById('lcNewFieldOptions');
+        if (lblEl) lblEl.value = '';
+        if (nameEl) nameEl.value = 'x_';
+        if (typeEl) typeEl.value = 'char';
+        if (reqEl) reqEl.checked = false;
+        if (defEl) defEl.value = '';
+        if (optEl) optEl.value = '';
+        toggleFieldOptionsVisibility();
+
+        renderModelFieldsList(model.fields || []);
+        openModal('modalManageModelFields');
+    } catch (err) {
+        showToast('Gagal memuat detail kolom model: ' + err.message, 'error');
+    }
+}
+
+function toggleFieldOptionsVisibility() {
+    const fType = document.getElementById('lcNewFieldType')?.value;
+    const grp = document.getElementById('lcFieldOptionsGroup');
+    if (grp) {
+        grp.style.display = (fType === 'selection') ? 'block' : 'none';
+    }
+}
+
+function renderModelFieldsList(fields) {
+    const tbody = document.getElementById('lcModelFieldsTableBody');
+    if (!tbody) return;
+
+    if (!fields || fields.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">Belum ada kolom kustom pada model ini.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = fields.map(f => {
+        const lbl = f.field_label || f.label || f.field_name;
+        const isReq = f.is_required || f.required;
+        return `
+            <tr>
+                <td><strong>${lbl}</strong></td>
+                <td><code>${f.field_name}</code></td>
+                <td><span class="badge badge-info">${f.field_type}</span></td>
+                <td>${isReq ? '<span class="badge badge-warning">Wajib</span>' : '<span class="text-muted">Opsional</span>'}</td>
+                <td><code>${f.default_value || '-'}</code></td>
+                <td>
+                    <button class="btn btn-xs btn-danger" onclick="handleDeleteCustomField(${f.id}, '${lbl.replace(/'/g, "\\'")}')">🗑️</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function loadLcModelRecords() {
+    const select = document.getElementById('lcExplorerModelSelect');
+    const techName = select ? select.value : '';
+    const addBtn = document.getElementById('lcBtnAddRecord');
+    const thead = document.getElementById('lcDynamicTableHead');
+    const tbody = document.getElementById('lcDynamicTableBody');
+
+    if (!techName) {
+        if (addBtn) addBtn.disabled = true;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Silakan pilih model kustom untuk menampilkan data.</td></tr>`;
+        return;
+    }
+
+    if (addBtn) addBtn.disabled = false;
+
+    try {
+        const model = await api(`/lowcode/models/by-name/${techName}`);
+        if (!model) return;
+        currentSelectedLowCodeModel = model;
+        currentSelectedModelFields = model.fields || [];
+
+        let headHtml = `<th>ID</th><th>Kode Baris</th><th>Nama / Display</th>`;
+        currentSelectedModelFields.forEach(f => {
+            headHtml += `<th>${f.field_label || f.label || f.field_name}</th>`;
+        });
+        headHtml += `<th>Dibuat</th><th>Aksi</th>`;
+        if (thead) thead.innerHTML = `<tr>${headHtml}</tr>`;
+
+        const records = await api(`/lowcode/records/${techName}`) || [];
+        if (!tbody) return;
+
+        if (!records || records.length === 0) {
+            const span = currentSelectedModelFields.length + 5;
+            tbody.innerHTML = `<tr><td colspan="${span}" class="text-center text-muted">Belum ada baris data untuk model ${model.name}. Klik "+ Tambah Baris Data".</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = records.map(r => {
+            let parsed = r.data || {};
+            if (typeof parsed === 'string') {
+                try { parsed = JSON.parse(parsed); } catch (e) { parsed = {}; }
+            }
+            if ((!parsed || Object.keys(parsed).length === 0) && r.values_json) {
+                try { parsed = JSON.parse(r.values_json); } catch (e) { parsed = {}; }
+            }
+
+            let cols = `
+                <td>#${r.id}</td>
+                <td><code>${r.record_code || ('REC-' + r.id)}</code></td>
+                <td><strong>${r.display_name || r.name || ('Record #' + r.id)}</strong></td>
+            `;
+            currentSelectedModelFields.forEach(f => {
+                const v = parsed[f.field_name];
+                let disp = (v !== undefined && v !== null && v !== '') ? v : '-';
+                if (f.field_type === 'boolean') {
+                    disp = v ? '<span class="badge badge-success">Ya</span>' : '<span class="badge badge-draft">Tidak</span>';
+                }
+                cols += `<td>${disp}</td>`;
+            });
+            const dt = r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID') : '-';
+            cols += `
+                <td>${dt}</td>
+                <td>
+                    <button class="btn btn-xs btn-danger" onclick="handleDeleteCustomRecord('${techName}', ${r.id})">🗑️ Hapus</button>
+                </td>
+            `;
+            return `<tr>${cols}</tr>`;
+        }).join('');
+    } catch (err) {
+        console.error('Failed to load Low-Code records:', err);
+    }
+}
+
+function openModalCreateCustomRecord() {
+    const techName = document.getElementById('lcExplorerModelSelect')?.value || '';
+    if (!techName) {
+        showToast('Pilih model kustom terlebih dahulu!', 'warning');
+        return;
+    }
+    const techInput = document.getElementById('lcRecordModelTechnical');
+    const nameInput = document.getElementById('lcRecordName');
+    const container = document.getElementById('lcDynamicFormInputsContainer');
+    if (techInput) techInput.value = techName;
+    if (nameInput) nameInput.value = '';
+
+    if (container) {
+        if (!currentSelectedModelFields || currentSelectedModelFields.length === 0) {
+            container.innerHTML = `<p class="text-muted">Model ini belum memiliki kolom kustom tambahan.</p>`;
+        } else {
+            container.innerHTML = currentSelectedModelFields.map(f => {
+                const lbl = f.field_label || f.label || f.field_name;
+                const req = (f.is_required || f.required) ? 'required' : '';
+                if (f.field_type === 'boolean') {
+                    return `
+                        <div class="form-group mb-2">
+                            <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                                <input type="checkbox" name="${f.field_name}">
+                                <span>${lbl}</span>
+                            </label>
+                        </div>
+                    `;
+                } else if (f.field_type === 'integer' || f.field_type === 'float') {
+                    const step = f.field_type === 'float' ? '0.01' : '1';
+                    return `
+                        <div class="form-group mb-2">
+                            <label>${lbl}</label>
+                            <input type="number" step="${step}" name="${f.field_name}" class="form-control" value="${f.default_value || ''}" ${req}>
+                        </div>
+                    `;
+                } else if (f.field_type === 'date') {
+                    return `
+                        <div class="form-group mb-2">
+                            <label>${lbl}</label>
+                            <input type="date" name="${f.field_name}" class="form-control" ${req}>
+                        </div>
+                    `;
+                } else if (f.field_type === 'selection') {
+                    let opts = [];
+                    const rawOpt = f.selection_options || f.options_json || '';
+                    try {
+                        opts = JSON.parse(rawOpt);
+                    } catch (e) {
+                        opts = rawOpt.split(',').map(s => s.trim()).filter(Boolean);
+                    }
+                    return `
+                        <div class="form-group mb-2">
+                            <label>${lbl}</label>
+                            <select name="${f.field_name}" class="form-control" ${req}>
+                                ${opts.map(o => `<option value="${o}">${o}</option>`).join('')}
+                            </select>
+                        </div>
+                    `;
+                }
+                return `
+                    <div class="form-group mb-2">
+                        <label>${lbl}</label>
+                        <input type="text" name="${f.field_name}" class="form-control" value="${f.default_value || ''}" ${req}>
+                    </div>
+                `;
+            }).join('');
+        }
+    }
+    openModal('modalCreateCustomRecord');
+}
+
+async function handleSaveCustomRecord(e) {
+    e.preventDefault();
+    const techName = document.getElementById('lcRecordModelTechnical')?.value || document.getElementById('lcExplorerModelSelect')?.value || '';
+    if (!techName) return;
+
+    try {
+        const displayName = (document.getElementById('lcRecordName')?.value || '').trim();
+        const values = {};
+        (currentSelectedModelFields || []).forEach(f => {
+            const el = document.querySelector(`#lcDynamicFormInputsContainer [name="${f.field_name}"]`);
+            if (el) {
+                if (f.field_type === 'boolean') values[f.field_name] = el.checked;
+                else if (f.field_type === 'integer') values[f.field_name] = parseInt(el.value || '0', 10);
+                else if (f.field_type === 'float') values[f.field_name] = parseFloat(el.value || '0');
+                else values[f.field_name] = el.value;
+            }
+        });
+
+        await api(`/lowcode/records/${techName}`, 'POST', {
+            display_name: displayName || `Record ${Date.now()}`,
+            name: displayName || `Record ${Date.now()}`,
+            values
+        });
+        showToast('Baris data kustom berhasil disimpan!', 'success');
+        closeModal('modalCreateCustomRecord');
+        await loadLcModelRecords();
+        await loadLowCodeStudioData();
+    } catch (err) {
+        showToast('Gagal menyimpan baris data: ' + err.message, 'error');
+    }
+}
+
+async function handleDeleteCustomRecord(techName, recordId) {
+    if (!confirm('Hapus baris data ini?')) return;
+    try {
+        await api(`/lowcode/records/${techName}/${recordId}`, 'DELETE');
+        showToast('Baris data berhasil dihapus.', 'info');
+        await loadLcModelRecords();
+        await loadLowCodeStudioData();
+    } catch (err) {
+        showToast('Gagal menghapus baris data: ' + err.message, 'error');
+    }
+}
+
+async function loadCoreExtensionData() {
+    const coreModel = document.getElementById('lcCoreModelSelect')?.value || 'res.partner';
+    const recId = document.getElementById('lcCoreRecordId')?.value || '1';
+    const txt = document.getElementById('lcCoreExtensionJSON');
+    if (!txt) return;
+
+    try {
+        const res = await api(`/lowcode/core-extensions?core_model=${encodeURIComponent(coreModel)}&record_id=${encodeURIComponent(recId)}`);
+        if (res && res.extension_json) {
+            try {
+                txt.value = JSON.stringify(JSON.parse(res.extension_json), null, 2);
+            } catch (e) {
+                txt.value = res.extension_json;
+            }
+        } else {
+            txt.value = JSON.stringify({
+                x_verified_enterprise: true,
+                x_industry_classification: "Manufacturing & Distribution",
+                x_custom_sla_tier: "PLATINUM_24X7"
+            }, null, 2);
+        }
+    } catch (err) {
+        console.error('Failed to load core extension:', err);
+    }
+}
+
+async function saveCoreExtensionData() {
+    const coreModel = document.getElementById('lcCoreModelSelect')?.value || 'res.partner';
+    const recId = parseInt(document.getElementById('lcCoreRecordId')?.value || '1', 10);
+    const rawJson = document.getElementById('lcCoreExtensionJSON')?.value || '{}';
+
+    try {
+        const parsed = JSON.parse(rawJson);
+        await api('/lowcode/core-extensions', 'POST', {
+            core_model: coreModel,
+            record_id: recId,
+            attributes: parsed
+        });
+        showToast(`Atribut ekstensi ${coreModel} #${recId} berhasil disimpan!`, 'success');
+    } catch (err) {
+        showToast('Pastikan format JSON valid: ' + err.message, 'error');
+    }
+}
+
+function openModalAISchemaArchitect() {
+    proposedAISchema = null;
+    const promptEl = document.getElementById('lcAIPromptInput');
+    const resBox = document.getElementById('lcAIProposalResult');
+    if (promptEl && !promptEl.value) {
+        promptEl.value = 'Saya membutuhkan model untuk melacak inspeksi keselamatan kerja (HSE Inspection) di area pabrik dan tambang, mencakup tanggal inspeksi, area lokasi, tingkat risiko bahaya (Low, Medium, High), skor kepatuhan, dan tindakan korektif.';
+    }
+    if (resBox) resBox.style.display = 'none';
+    openModal('modalAISchemaArchitect');
+}
+
+async function generateAISchemaProposal() {
+    const promptVal = (document.getElementById('lcAIPromptInput')?.value || '').trim();
+    if (!promptVal) {
+        showToast('Masukkan deskripsi kebutuhan bisnis terlebih dahulu!', 'warning');
+        return;
+    }
+    try {
+        const res = await api('/lowcode/ai/schema-copilot', 'POST', { prompt: promptVal });
+        if (!res || !res.proposed_model) throw new Error('Respons AI tidak valid');
+        proposedAISchema = res.proposed_model;
+
+        const nameEl = document.getElementById('lcAIProposedName');
+        const techEl = document.getElementById('lcAIProposedTech');
+        const descEl = document.getElementById('lcAIProposedDesc');
+        const tbody = document.getElementById('lcAIProposedFieldsBody');
+        const resBox = document.getElementById('lcAIProposalResult');
+
+        if (nameEl) nameEl.textContent = `${proposedAISchema.icon || '📦'} ${proposedAISchema.name}`;
+        if (techEl) techEl.textContent = `Technical Name: ${proposedAISchema.technical_name} | Kategori: ${proposedAISchema.category || 'Operations'}`;
+        if (descEl) descEl.textContent = proposedAISchema.description || '';
+        if (tbody) {
+            tbody.innerHTML = (proposedAISchema.fields || []).map(f => `
+                <tr>
+                    <td><code>${f.field_name}</code></td>
+                    <td><strong>${f.label}</strong></td>
+                    <td><span class="badge badge-info">${f.field_type}</span></td>
+                    <td>${f.required ? '<span class="badge badge-warning">Wajib</span>' : 'Opsional'}</td>
+                </tr>
+            `).join('');
+        }
+        if (resBox) resBox.style.display = 'block';
+        showToast('Skema model bisnis berhasil dirancang oleh AI Copilot!', 'success');
+    } catch (err) {
+        showToast('Gagal merancang skema AI: ' + err.message, 'error');
+    }
+}
+
+async function applyAISchemaProposal() {
+    if (!proposedAISchema) return;
+    try {
+        const createdModel = await api('/lowcode/models', 'POST', {
+            name: proposedAISchema.name,
+            technical_name: cachedLowCodeModels.some(m => m.technical_name === proposedAISchema.technical_name) ? (proposedAISchema.technical_name + '_' + Math.floor(100 + Math.random() * 900)) : proposedAISchema.technical_name,
+            category: proposedAISchema.category || 'Operations',
+            menu_category: proposedAISchema.category || 'Operations',
+            icon: proposedAISchema.icon || '📦',
+            description: proposedAISchema.description || '',
+            active: true
+        });
+        for (const f of (proposedAISchema.fields || [])) {
+            await api(`/lowcode/models/${createdModel.id}/fields`, 'POST', {
+                field_name: f.field_name,
+                field_type: f.field_type,
+                label: f.label,
+                field_label: f.label,
+                required: f.required,
+                is_required: f.required,
+                options_json: f.options_json || '',
+                selection_options: f.options_json || '',
+                default_value: f.default_value || ''
+            });
+        }
+        showToast(`Model "${proposedAISchema.name}" berhasil diterapkan ke database ERP!`, 'success');
+        closeModal('modalAISchemaArchitect');
+        await loadLowCodeStudioData();
+    } catch (err) {
+        showToast('Gagal menerapkan skema AI: ' + err.message, 'error');
+    }
+}
+
+// ============================================================================
+// MODUL KE-49: BPMN 2.0 WORKFLOW ENGINE & VISUAL STATE MACHINE
+// ============================================================================
+let cachedWorkflowDefinitions = [];
+let selectedWorkflowDefinition = null;
+let proposedAIWorkflowReport = null;
+
+async function loadWorkflowEngineData() {
+    try {
+        const stats = await api('/workflows/stats');
+        if (stats) {
+            const setEl = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = val;
+            };
+            setEl('wfStatTotalDefs', stats.total_definitions ?? 0);
+            setEl('wfStatRunning', stats.running_instances ?? 0);
+            setEl('wfStatCompleted', stats.completed_instances ?? 0);
+            setEl('wfStatRejected', stats.rejected_instances ?? 0);
+            setEl('wfStatPending', stats.pending_approvals ?? 0);
+            setEl('wfBadgePendingCount', stats.pending_approvals ?? 0);
+            setEl('wfStatAvgCycle', (stats.avg_cycle_hours ?? 4.2).toFixed(1) + 'h');
+        }
+        await Promise.all([
+            loadWorkflowDefinitions(),
+            loadWorkflowPendingTasks(),
+            loadWorkflowInstances()
+        ]);
+    } catch (err) {
+        console.error('Failed to load Workflow Engine data:', err);
+    }
+}
+
+function switchWorkflowSubtab(subtab, btnEl) {
+    const map = {
+        'definitions': 'subtabWorkflowDefinitions',
+        'pending-tasks': 'subtabWorkflowPendingTasks',
+        'instances': 'subtabWorkflowInstances'
+    };
+    Object.values(map).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = (id === map[subtab]) ? 'block' : 'none';
+    });
+    if (btnEl && btnEl.parentElement) {
+        btnEl.parentElement.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+        btnEl.classList.add('active');
+    }
+    if (subtab === 'pending-tasks') loadWorkflowPendingTasks();
+    if (subtab === 'instances') loadWorkflowInstances();
+}
+
+async function loadWorkflowDefinitions() {
+    try {
+        const defs = await api('/workflows/definitions') || [];
+        cachedWorkflowDefinitions = defs;
+        const tbody = document.getElementById('wfDefsTableBody');
+        if (!tbody) return;
+
+        if (defs.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Belum ada definisi alur kerja BPMN.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = defs.map(d => {
+            const nodeCount = d.nodes ? d.nodes.length : 0;
+            const edgeCount = d.transitions ? d.transitions.length : 0;
+            return `
+                <tr>
+                    <td>
+                        <strong>${d.name}</strong>
+                        <div><code>${d.code}</code></div>
+                    </td>
+                    <td><span class="badge badge-info">${d.target_model}</span></td>
+                    <td>
+                        <span class="badge badge-primary">${nodeCount} Nodes</span>
+                        <span class="badge badge-draft">${edgeCount} Edges</span>
+                    </td>
+                    <td>
+                        <button class="btn btn-xs btn-primary" onclick="selectWorkflowForCanvas(${d.id})">👁️ Lihat Diagram</button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        if (!selectedWorkflowDefinition && defs.length > 0) {
+            selectedWorkflowDefinition = defs[0];
+            renderSelectedWorkflowCanvas();
+        }
+    } catch (err) {
+        console.error('Failed to load workflow definitions:', err);
+    }
+}
+
+function selectWorkflowForCanvas(defId) {
+    const found = cachedWorkflowDefinitions.find(d => d.id === defId);
+    if (found) {
+        selectedWorkflowDefinition = found;
+        renderSelectedWorkflowCanvas();
+    }
+}
+
+function renderSelectedWorkflowCanvas() {
+    const container = document.getElementById('wfVisualCanvasContainer');
+    const titleEl = document.getElementById('wfVisualCanvasTitle');
+    const subEl = document.getElementById('wfVisualCanvasSubtitle');
+    if (!container) return;
+
+    const wf = selectedWorkflowDefinition;
+    if (!wf) return;
+
+    if (titleEl) titleEl.textContent = `🔀 ${wf.name} (${wf.code})`;
+    if (subEl) subEl.textContent = `Target Model: ${wf.target_model} • Initial Node: ${wf.initial_node_key}`;
+
+    const nodes = wf.nodes || [];
+    const edges = wf.transitions || [];
+
+    const typeColors = {
+        'start_event': { bg: 'rgba(16, 185, 129, 0.15)', border: '#10b981', icon: '🟢' },
+        'user_task': { bg: 'rgba(99, 102, 241, 0.15)', border: '#6366f1', icon: '👤' },
+        'exclusive_gateway': { bg: 'rgba(245, 158, 11, 0.15)', border: '#f59e0b', icon: '🔶' },
+        'service_task': { bg: 'rgba(14, 165, 233, 0.15)', border: '#0ea5e9', icon: '⚙️' },
+        'end_event': { bg: 'rgba(239, 68, 68, 0.15)', border: '#ef4444', icon: '🏁' }
+    };
+
+    const nodesHtml = nodes.map(n => {
+        const style = typeColors[n.node_type] || typeColors.user_task;
+        return `
+            <div style="background: ${style.bg}; border: 2px solid ${style.border}; border-radius: 10px; padding: 0.75rem 1rem; min-width: 175px; box-shadow: 0 4px 12px rgba(0,0,0,0.25);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.25rem;">
+                    <span style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: #cbd5e1;">${style.icon} ${n.node_type.replace('_', ' ')}</span>
+                    <span style="font-size: 0.7rem; color: #94a3b8;">SLA ${n.timeout_hours || 24}h</span>
+                </div>
+                <div style="font-weight: 700; font-size: 0.92rem; color: #f8fafc;">${n.name}</div>
+                <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.2rem;">Key: <code>${n.node_key}</code> • Role: <strong>${n.approver_role || 'any'}</strong></div>
+            </div>
+        `;
+    }).join('<div style="display:flex; align-items:center; font-size:1.3rem; color:#64748b;">➔</div>');
+
+    const edgesHtml = edges.map(t => `
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.45rem 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; font-size: 0.8rem;">
+            <div>
+                <code>${t.from_node_key}</code> ➔ <code>${t.to_node_key}</code>
+                <span class="badge badge-primary" style="margin-left: 0.5rem;">${t.action_name}</span>
+            </div>
+            <div style="color: #fbbf24; font-family: monospace;">
+                ${t.condition_expression ? `IF (${t.condition_expression})` : 'Unconditional'}
+            </div>
+        </div>
+    `).join('');
+
+    container.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <div>
+                <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 0.65rem; font-weight: 600;">Alur Tahapan State Machine (Nodes):</div>
+                <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+                    ${nodesHtml}
+                </div>
+            </div>
+            <div>
+                <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 0.5rem; font-weight: 600;">Aturan Transisi &amp; Evaluasi Gateway (Transitions):</div>
+                <div style="display: grid; grid-template-columns: 1fr; gap: 0.4rem;">
+                    ${edgesHtml}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+async function loadWorkflowPendingTasks() {
+    try {
+        const tasks = await api('/workflows/pending-tasks') || [];
+        const tbody = document.getElementById('wfPendingTasksTableBody');
+        const badge = document.getElementById('wfBadgePendingCount');
+        if (badge) badge.textContent = tasks.length;
+        if (!tbody) return;
+
+        if (tasks.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">Tidak ada antrean dokumen yang menunggu persetujuan.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = tasks.map(inst => {
+            const wfName = inst.workflow ? inst.workflow.name : `Workflow #${inst.workflow_id}`;
+            const started = inst.started_at ? new Date(inst.started_at).toLocaleString('id-ID') : '-';
+            return `
+                <tr>
+                    <td><strong>#${inst.id}</strong></td>
+                    <td>${wfName}</td>
+                    <td><code>${inst.target_model}</code></td>
+                    <td>#${inst.record_id}</td>
+                    <td><span class="badge badge-warning">${inst.current_node_key}</span></td>
+                    <td>${inst.initiator_name || 'Administrator'}</td>
+                    <td>${started}</td>
+                    <td>
+                        <div style="display: flex; gap: 0.35rem; flex-wrap: wrap;">
+                            <button class="btn btn-xs btn-primary" onclick="executeWorkflowInstanceAction(${inst.id}, 'submit')">📤 Submit</button>
+                            <button class="btn btn-xs btn-success" onclick="executeWorkflowInstanceAction(${inst.id}, 'approve')">✅ Approve</button>
+                            <button class="btn btn-xs btn-danger" onclick="executeWorkflowInstanceAction(${inst.id}, 'reject')">❌ Reject</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error('Failed to load workflow pending tasks:', err);
+    }
+}
+
+async function executeWorkflowInstanceAction(instanceId, action) {
+    try {
+        await api(`/workflows/instances/${instanceId}/action`, 'POST', {
+            action: action,
+            comments: `Dieksekusi melalui Dashboard BPMN (${action.toUpperCase()})`
+        });
+        showToast(`Aksi "${action.toUpperCase()}" berhasil dijalankan pada Instansi #${instanceId}!`, 'success');
+        await loadWorkflowEngineData();
+    } catch (err) {
+        showToast(`Transisi "${action}" ditolak: ` + err.message, 'error');
+    }
+}
+
+async function loadWorkflowInstances() {
+    try {
+        const list = await api('/workflows/instances') || [];
+        const tbody = document.getElementById('wfInstancesTableBody');
+        if (!tbody) return;
+
+        if (list.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">Belum ada instansi workflow yang dijalankan. Klik "🚀 Jalankan Instansi".</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = list.map(inst => {
+            const wfName = inst.workflow ? inst.workflow.name : `WF #${inst.workflow_id}`;
+            const badgeClass = inst.status === 'completed' ? 'badge-success' : (inst.status === 'rejected' ? 'badge-danger' : 'badge-warning');
+            return `
+                <tr>
+                    <td><strong>#${inst.id}</strong></td>
+                    <td>${wfName}</td>
+                    <td><code>${inst.target_model}</code> #${inst.record_id}</td>
+                    <td><code>${inst.current_node_key}</code></td>
+                    <td><span class="badge ${badgeClass}">${inst.status}</span></td>
+                    <td>
+                        <div style="display: flex; gap: 0.35rem;">
+                            <button class="btn btn-xs btn-secondary" onclick="viewWorkflowInstanceLogs(${inst.id})">🔍 Detail Log</button>
+                            ${inst.status === 'running' ? `
+                                <button class="btn btn-xs btn-success" onclick="executeWorkflowInstanceAction(${inst.id}, 'approve')">✅</button>
+                                <button class="btn btn-xs btn-primary" onclick="executeWorkflowInstanceAction(${inst.id}, 'submit')">📤</button>
+                            ` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error('Failed to load workflow instances:', err);
+    }
+}
+
+async function viewWorkflowInstanceLogs(instanceId) {
+    try {
+        const inst = await api(`/workflows/instances/${instanceId}`);
+        const body = document.getElementById('wfInstanceDetailBody');
+        const title = document.getElementById('wfInstanceDetailTitle');
+        const sub = document.getElementById('wfInstanceDetailSubtitle');
+        if (!body || !inst) return;
+
+        if (title) title.textContent = `📜 Jejak Audit Instansi #${inst.id} (${inst.target_model} #${inst.record_id})`;
+        if (sub) sub.textContent = `Status: ${inst.status.toUpperCase()} • Tahap Saat Ini: ${inst.current_node_key}`;
+
+        const logs = inst.logs || [];
+        if (logs.length === 0) {
+            body.innerHTML = `<p class="text-muted text-center">Belum ada log aktivitas.</p>`;
+            return;
+        }
+
+        body.innerHTML = `
+            <div class="chatter-timeline">
+                ${logs.map(l => `
+                    <div class="chatter-item">
+                        <div class="chatter-avatar">⚡</div>
+                        <div class="chatter-content">
+                            <div class="chatter-header">
+                                <span class="chatter-author">${l.actor_name || 'System'} <span class="badge badge-primary">${l.action_taken}</span></span>
+                                <span class="chatter-time">${l.timestamp ? new Date(l.timestamp).toLocaleString('id-ID') : '-'}</span>
+                            </div>
+                            <div class="chatter-body">
+                                Transisi: <code>${l.from_node_key}</code> ➔ <code>${l.to_node_key}</code><br/>
+                                ${l.comments || '-'}
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } catch (err) {
+        showToast('Gagal memuat detail log instansi: ' + err.message, 'error');
+    }
+}
+
+function openModalCreateWorkflow() {
+    const defaultSchema = {
+        nodes: [
+            { node_key: "draft", name: "Draft Dokumen", node_type: "start_event", approver_role: "initiator", timeout_hours: 24, pos_x: 100, pos_y: 150 },
+            { node_key: "manager_review", name: "Review Manager", node_type: "user_task", approver_role: "manager", timeout_hours: 24, pos_x: 320, pos_y: 150 },
+            { node_key: "approved", name: "Disetujui (Approved)", node_type: "end_event", approver_role: "any", timeout_hours: 24, pos_x: 560, pos_y: 150 }
+        ],
+        transitions: [
+            { from_node_key: "draft", to_node_key: "manager_review", action_name: "submit", condition_expression: "", priority: 1 },
+            { from_node_key: "manager_review", to_node_key: "approved", action_name: "approve", condition_expression: "", priority: 1 }
+        ]
+    };
+    const jsonEl = document.getElementById('wfDefSchemaJSON');
+    if (jsonEl) jsonEl.value = JSON.stringify(defaultSchema, null, 2);
+    openModal('modalCreateWorkflow');
+}
+
+async function submitCreateWorkflow(e) {
+    e.preventDefault();
+    try {
+        const schema = JSON.parse(document.getElementById('wfDefSchemaJSON').value || '{}');
+        const payload = {
+            code: document.getElementById('wfDefCode').value.trim(),
+            name: document.getElementById('wfDefName').value.trim(),
+            target_model: document.getElementById('wfDefTargetModel').value,
+            initial_node_key: document.getElementById('wfDefInitNode').value.trim() || 'draft',
+            description: document.getElementById('wfDefDesc').value.trim(),
+            nodes: schema.nodes || [],
+            transitions: schema.transitions || []
+        };
+        await api('/workflows/definitions', 'POST', payload);
+        showToast(`Alur kerja "${payload.name}" berhasil disimpan!`, 'success');
+        closeModal('modalCreateWorkflow');
+        await loadWorkflowEngineData();
+    } catch (err) {
+        showToast('Gagal menyimpan definisi workflow: ' + err.message, 'error');
+    }
+}
+
+function openModalStartWorkflow() {
+    const sel = document.getElementById('wfStartCodeSelect');
+    if (sel) {
+        sel.innerHTML = cachedWorkflowDefinitions.map(d =>
+            `<option value="${d.code}" data-model="${d.target_model}">${d.name} (${d.code})</option>`
+        ).join('');
+        sel.onchange = () => {
+            const opt = sel.options[sel.selectedIndex];
+            if (opt && opt.dataset.model) {
+                document.getElementById('wfStartTargetModel').value = opt.dataset.model;
+            }
+        };
+        if (cachedWorkflowDefinitions.length > 0) {
+            document.getElementById('wfStartTargetModel').value = cachedWorkflowDefinitions[0].target_model;
+        }
+    }
+    openModal('modalStartWorkflow');
+}
+
+async function submitStartWorkflow(e) {
+    e.preventDefault();
+    try {
+        const ctxData = JSON.parse(document.getElementById('wfStartContextJSON').value || '{}');
+        const payload = {
+            workflow_code: document.getElementById('wfStartCodeSelect').value,
+            target_model: document.getElementById('wfStartTargetModel').value.trim(),
+            record_id: parseInt(document.getElementById('wfStartRecordID').value || '1', 10),
+            context_data: ctxData
+        };
+        const inst = await api('/workflows/start', 'POST', payload);
+        showToast(`Instansi Workflow #${inst.id} berhasil dimulai pada tahap "${inst.current_node_key}"!`, 'success');
+        closeModal('modalStartWorkflow');
+        await loadWorkflowEngineData();
+    } catch (err) {
+        showToast('Gagal memulai workflow: ' + err.message, 'error');
+    }
+}
+
+function openModalAIWorkflowDesigner() {
+    proposedAIWorkflowReport = null;
+    const resBox = document.getElementById('wfAIProposalResult');
+    if (resBox) resBox.style.display = 'none';
+    openModal('modalAIWorkflowDesigner');
+}
+
+async function generateAIWorkflowProposal() {
+    try {
+        const scenario = document.getElementById('wfAIScenarioPrompt').value.trim();
+        const targetModel = document.getElementById('wfAITargetModel').value;
+        if (!scenario) {
+            showToast('Masukkan deskripsi skenario terlebih dahulu!', 'warning');
+            return;
+        }
+        const report = await api('/workflows/ai/design-copilot', 'POST', {
+            business_scenario: scenario,
+            target_model: targetModel
+        });
+        proposedAIWorkflowReport = report;
+        document.getElementById('wfAIProposalTitle').textContent = `✨ ${report.efficiency_rating} • ${(report.recommended_nodes || []).length} Nodes & ${(report.recommended_edges || []).length} Transitions`;
+        document.getElementById('wfAIProposalCompliance').textContent = `Kepatuhan: ${report.compliance_guideline}`;
+        document.getElementById('wfAIProposalNodesSummary').innerHTML = (report.recommended_nodes || []).map(n =>
+            `<span class="badge badge-primary" style="margin:2px;">${n.name} (${n.node_key})</span>`
+        ).join(' ➔ ');
+        document.getElementById('wfAIProposalResult').style.display = 'block';
+        showToast('Arsitektur BPMN 2.0 berhasil dirancang oleh AI!', 'success');
+    } catch (err) {
+        showToast('Gagal merancang alur kerja AI: ' + err.message, 'error');
+    }
+}
+
+async function applyAIWorkflowProposal() {
+    if (!proposedAIWorkflowReport) return;
+    try {
+        const code = 'WF-AI-' + Math.floor(1000 + Math.random() * 9000);
+        await api('/workflows/definitions', 'POST', {
+            code: code,
+            name: 'AI BPMN: ' + (proposedAIWorkflowReport.scenario_name || 'Enterprise Approval').slice(0, 45),
+            description: proposedAIWorkflowReport.compliance_guideline,
+            target_model: proposedAIWorkflowReport.target_model || 'purchase.order',
+            initial_node_key: 'draft',
+            nodes: proposedAIWorkflowReport.recommended_nodes || [],
+            transitions: proposedAIWorkflowReport.recommended_edges || []
+        });
+        showToast(`Alur kerja AI (${code}) berhasil disimpan ke katalog!`, 'success');
+        closeModal('modalAIWorkflowDesigner');
+        await loadWorkflowEngineData();
+    } catch (err) {
+        showToast('Gagal menerapkan rancangan AI: ' + err.message, 'error');
+    }
+}
+
+// ============================================================================
+// MODUL KE-50: UNIVERSAL INTEGRATION HUB & OPEN RPC GATEWAY
+// ============================================================================
+
+async function loadIntegrationHubData() {
+    try {
+        const resStats = await api('/integration/stats');
+        const stats = (resStats && resStats.data) ? resStats.data : resStats;
+        if (stats) {
+            const setEl = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = val;
+            };
+            setEl('intgStatActiveKeys', `${stats.active_api_keys ?? 0} / ${stats.total_api_keys ?? 0}`);
+            setEl('intgStatConnectors', `${stats.connected_connectors ?? 0} / ${stats.total_connectors ?? 0}`);
+            setEl('intgStatCalls24h', stats.total_calls_24h ?? 0);
+            setEl('intgStatSuccessRate', (stats.success_rate_percent ?? 100).toFixed(1) + '%');
+            setEl('intgStatLatency', (stats.avg_latency_ms ?? 12).toFixed(1) + ' ms');
+            setEl('intgStatDataJobs', stats.total_data_jobs ?? 0);
+        }
+        await Promise.all([
+            loadIntegrationConnectors(),
+            loadIntegrationAPIKeys(),
+            loadIntegrationDataJobs(),
+            loadIntegrationLogs()
+        ]);
+    } catch (err) {
+        console.error('Failed to load Integration Hub data:', err);
+    }
+}
+
+function switchIntegrationSubtab(subtab, btnEl) {
+    const map = {
+        'connectors': 'subtabIntgConnectors',
+        'apikeys': 'subtabIntgAPIKeys',
+        'rpc': 'subtabIntgRPC',
+        'jobs': 'subtabIntgJobs'
+    };
+    Object.values(map).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = (id === map[subtab]) ? 'block' : 'none';
+    });
+    if (btnEl && btnEl.parentElement) {
+        btnEl.parentElement.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+        btnEl.classList.add('active');
+    }
+}
+
+async function loadIntegrationConnectors() {
+    try {
+        const resConn = await api('/integration/connectors');
+        const list = Array.isArray(resConn) ? resConn : (resConn && Array.isArray(resConn.data) ? resConn.data : []);
+        const grid = document.getElementById('intgConnectorsGrid');
+        if (!grid) return;
+
+        if (list.length === 0) {
+            grid.innerHTML = `<div class="text-center text-muted" style="grid-column: 1 / -1;">Belum ada konektor terdaftar.</div>`;
+            return;
+        }
+
+        grid.innerHTML = list.map(c => {
+            const isConn = c.status === 'connected';
+            return `
+                <div class="card" style="padding: 1.15rem; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between; gap: 0.85rem;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                            <span class="badge badge-info">${c.category}</span>
+                            <span class="badge ${isConn ? 'badge-success' : 'badge-warning'}">${c.status}</span>
+                        </div>
+                        <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem;">${c.name}</h4>
+                        <div style="font-size: 0.78rem; color: var(--text-muted); font-family: monospace; word-break: break-all;">${c.base_url}</div>
+                        <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 0.4rem;">Total Syncs: <strong>${c.total_syncs || 0}</strong> • Provider: ${c.provider}</div>
+                    </div>
+                    <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                        <button class="btn btn-xs btn-secondary" onclick="triggerConnectorAction('${c.code}', 'test_connection')">🔌 Test Koneksi</button>
+                        <button class="btn btn-xs btn-primary" onclick="triggerConnectorAction('${c.code}', 'sync_stock')">🔄 Sync Stok</button>
+                        ${c.category === 'messaging' ? `<button class="btn btn-xs btn-success" onclick="triggerConnectorAction('${c.code}', 'send_whatsapp')">💬 Test WA</button>` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error('Failed to load connectors:', err);
+    }
+}
+
+async function triggerConnectorAction(code, action) {
+    try {
+        const res = await api('/integration/connectors/action', 'POST', {
+            connector_code: code,
+            action: action,
+            payload: { recipient: '+628123456789', message: 'Notifikasi Otomatis ERP Odoo-Go' }
+        });
+        showToast(res.message || `Aksi ${action} berhasil dieksekusi!`, 'success');
+        await loadIntegrationHubData();
+    } catch (err) {
+        showToast('Gagal menjalankan aksi konektor: ' + err.message, 'error');
+    }
+}
+
+async function loadIntegrationAPIKeys() {
+    try {
+        const resKeys = await api('/integration/api-keys');
+        const keys = Array.isArray(resKeys) ? resKeys : (resKeys && Array.isArray(resKeys.data) ? resKeys.data : []);
+        const tbody = document.getElementById('intgAPIKeysTableBody');
+        if (!tbody) return;
+
+        if (keys.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">Belum ada API Key M2M.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = keys.map(k => `
+            <tr>
+                <td><strong>${k.name}</strong></td>
+                <td><code>${k.key_prefix}...</code></td>
+                <td><code style="font-size:0.75rem;">${k.scopes}</code></td>
+                <td>${k.rate_limit_rpm} req/min</td>
+                <td>${k.total_requests || 0}</td>
+                <td><span class="badge ${k.is_active ? 'badge-success' : 'badge-danger'}">${k.is_active ? 'ACTIVE' : 'REVOKED'}</span></td>
+                <td>
+                    ${k.is_active ? `<button class="btn btn-xs btn-danger" onclick="revokeIntegrationAPIKey(${k.id}, '${k.name.replace(/'/g, "\\'")}')">🚫 Revoke</button>` : '-'}
+                </td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        console.error('Failed to load API keys:', err);
+    }
+}
+
+function openModalCreateAPIKey() {
+    const secretBox = document.getElementById('intgGeneratedSecretBox');
+    if (secretBox) secretBox.style.display = 'none';
+    openModal('modalCreateAPIKey');
+}
+
+async function submitCreateAPIKey(e) {
+    e.preventDefault();
+    try {
+        const res = await api('/integration/api-keys', 'POST', {
+            name: document.getElementById('intgKeyName').value.trim(),
+            scopes: document.getElementById('intgKeyScopes').value.trim(),
+            rate_limit_rpm: parseInt(document.getElementById('intgKeyRateLimit').value || '120', 10),
+            allowed_ips: document.getElementById('intgKeyAllowedIPs').value.trim() || '*'
+        });
+        const secretBox = document.getElementById('intgGeneratedSecretBox');
+        const secretVal = document.getElementById('intgGeneratedSecretValue');
+        if (secretBox && secretVal && res.raw_secret_key) {
+            secretVal.textContent = res.raw_secret_key;
+            secretBox.style.display = 'block';
+        }
+        showToast('API Key M2M berhasil dibuat!', 'success');
+        await loadIntegrationHubData();
+    } catch (err) {
+        showToast('Gagal membuat API Key: ' + err.message, 'error');
+    }
+}
+
+async function revokeIntegrationAPIKey(id, name) {
+    if (!confirm(`Cabut (revoke) akses API Key "${name}"?`)) return;
+    try {
+        await api(`/integration/api-keys/${id}/revoke`, 'POST', {});
+        showToast(`API Key "${name}" telah dicabut.`, 'info');
+        await loadIntegrationHubData();
+    } catch (err) {
+        showToast('Gagal mencabut API Key: ' + err.message, 'error');
+    }
+}
+
+function onIntgRpcMethodChange() {
+    const method = document.getElementById('intgRpcMethod')?.value;
+    const payloadEl = document.getElementById('intgRpcPayload');
+    if (!payloadEl) return;
+
+    if (method === 'search_read') {
+        payloadEl.value = JSON.stringify({
+            domain: [],
+            fields: ["id", "name", "email", "phone", "city"],
+            limit: 10
+        }, null, 2);
+    } else if (method === 'create') {
+        payloadEl.value = JSON.stringify({
+            values: {
+                name: "PT Integrasi Omnichannel Nusantara",
+                email: "api@omnichannel.co.id",
+                phone: "+62811998877",
+                city: "Jakarta"
+            }
+        }, null, 2);
+    } else if (method === 'write') {
+        payloadEl.value = JSON.stringify({
+            id: 1,
+            values: {
+                city: "Surabaya"
+            }
+        }, null, 2);
+    } else if (method === 'execute_action') {
+        payloadEl.value = JSON.stringify({
+            id: 1,
+            action: "action_confirm"
+        }, null, 2);
+    }
+}
+
+async function executeIntegrationRPCPlayground() {
+    const method = document.getElementById('intgRpcMethod').value;
+    const model = document.getElementById('intgRpcModel').value;
+    const out = document.getElementById('intgRpcResponseOutput');
+    const badge = document.getElementById('intgRpcStatusBadge');
+
+    try {
+        const parsed = JSON.parse(document.getElementById('intgRpcPayload').value || '{}');
+        parsed.model = model;
+        const res = await api(`/integration/rpc/${method}`, 'POST', parsed);
+        if (out) out.textContent = JSON.stringify(res, null, 2);
+        if (badge) {
+            badge.className = 'badge badge-success';
+            badge.textContent = '200 OK';
+        }
+        showToast(`Operasi RPC ${method} (${model}) berhasil dieksekusi!`, 'success');
+        await loadIntegrationHubData();
+    } catch (err) {
+        if (out) out.textContent = JSON.stringify({ error: err.message }, null, 2);
+        if (badge) {
+            badge.className = 'badge badge-danger';
+            badge.textContent = 'ERROR';
+        }
+        showToast('Gagal mengeksekusi RPC: ' + err.message, 'error');
+    }
+}
+
+async function loadIntegrationDataJobs() {
+    try {
+        const resJobs = await api('/integration/data-jobs');
+        const jobs = Array.isArray(resJobs) ? resJobs : (resJobs && Array.isArray(resJobs.data) ? resJobs.data : []);
+        const tbody = document.getElementById('intgDataJobsTableBody');
+        if (!tbody) return;
+
+        if (jobs.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Belum ada Batch Data ETL Job.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = jobs.map(j => `
+            <tr>
+                <td>
+                    <strong>${j.job_code}</strong>
+                    <div class="text-muted" style="font-size:0.75rem;">${j.name || j.target_model || 'Batch ETL'}</div>
+                </td>
+                <td><span class="badge badge-info">${j.job_type}</span> <code>${j.target_model}</code></td>
+                <td>${j.processed_records ?? j.processed_rows ?? 0}/${j.total_records ?? 0} rows (${(j.file_format || 'json').toUpperCase()})</td>
+                <td><span class="badge badge-success">${j.status}</span></td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        console.error('Failed to load data jobs:', err);
+    }
+}
+
+async function loadIntegrationLogs() {
+    try {
+        const resLogs = await api('/integration/logs?limit=25');
+        const logs = Array.isArray(resLogs) ? resLogs : (resLogs && Array.isArray(resLogs.data) ? resLogs.data : []);
+        const tbody = document.getElementById('intgLogsTableBody');
+        if (!tbody) return;
+
+        if (logs.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">Belum ada log telemetri API.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = logs.map(l => `
+            <tr>
+                <td><code>${l.log_code}</code></td>
+                <td>
+                    <span class="badge ${(l.direction || 'inbound') === 'inbound' ? 'badge-primary' : 'badge-info'}">${l.direction || l.auth_type || 'inbound'}</span>
+                    <code>${l.method} ${l.endpoint}</code>
+                </td>
+                <td><span class="badge ${l.status_code < 400 ? 'badge-success' : 'badge-danger'}">${l.status_code}</span></td>
+                <td>${l.duration_ms} ms</td>
+                <td>${l.created_at ? new Date(l.created_at).toLocaleTimeString('id-ID') : '-'}</td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        console.error('Failed to load integration logs:', err);
+    }
+}
+
+function openModalCreateDataJob() {
+    openModal('modalCreateDataJob');
+}
+
+async function submitCreateDataJob(e) {
+    e.preventDefault();
+    try {
+        const resJob = await api('/integration/data-jobs', 'POST', {
+            name: document.getElementById('intgJobName').value.trim(),
+            job_type: document.getElementById('intgJobType').value,
+            target_model: document.getElementById('intgJobModel').value,
+            file_format: document.getElementById('intgJobFormat').value
+        });
+        const job = (resJob && resJob.data) ? resJob.data : resJob;
+        showToast(`Batch ETL Job ${job.job_code} selesai (${job.processed_records ?? job.processed_rows ?? 0} baris diproses)!`, 'success');
+        closeModal('modalCreateDataJob');
+        await loadIntegrationHubData();
+    } catch (err) {
+        showToast('Gagal menjalankan Batch ETL Job: ' + err.message, 'error');
+    }
+}
+
+function openModalAIIntegrationCopilot() {
+    const box = document.getElementById('intgAIBlueprintResult');
+    if (box) box.style.display = 'none';
+    openModal('modalAIIntegrationCopilot');
+}
+
+async function generateAIIntegrationBlueprint() {
+    try {
+        const rawRes = await api('/integration/ai/architect-copilot', 'POST', {
+            target_app: document.getElementById('intgAISystemName').value.trim(),
+            requirement: document.getElementById('intgAIUseCase').value.trim(),
+            language: 'curl'
+        });
+        const res = (rawRes && rawRes.data) ? rawRes.data : rawRes;
+        document.getElementById('intgAIBlueprintPattern').textContent = `📐 Pola Arsitektur: ${res.integration_pattern || res.recommended_pattern || 'Hybrid RPC & Webhook'}`;
+        document.getElementById('intgAIBlueprintFlow').textContent = res.architecture_flow || res.data_flow_summary || '';
+        document.getElementById('intgAIBlueprintPayload').textContent = res.curl_snippet || res.sample_rpc_payload || '';
+        document.getElementById('intgAIBlueprintResult').style.display = 'block';
+        showToast('Blueprint Arsitektur Integrasi berhasil disusun oleh AI!', 'success');
+    } catch (err) {
+        showToast('Gagal menyusun blueprint AI: ' + err.message, 'error');
+    }
+}
+
+
+// =========================================================================
+// CONTINUOUS IMPROVEMENT: EXECUTIVE COMMAND CENTER, OMNI-SEARCH (Ctrl+K),
+// SIDEBAR MODULE FILTER, NOTIFICATION CENTER, 1-CLICK SIMULATOR & THEME
+// =========================================================================
+
+function switchTabProgrammatically(tab) {
+    const btn = document.querySelector(`.nav-item[data-tab="${tab}"]`);
+    if (btn) {
+        btn.click();
+        btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+
+// Override loadDashboard with rich Executive Command Center telemetry
+loadDashboard = async function() {
+    try {
+        const stats = await api('/dashboard/stats');
+        document.getElementById('statTotalSales').textContent = formatCurrency(stats.total_sales || 0);
+        document.getElementById('statSalesOrders').textContent = stats.sales_orders ?? 0;
+        document.getElementById('statPurchaseOrders').textContent = stats.purchase_orders ?? 0;
+        document.getElementById('statPickings').textContent = stats.pickings ?? 0;
+
+        // Executive Pulse Strip
+        const elLiquid = document.getElementById('statExecLiquidCash');
+        if (elLiquid) elLiquid.textContent = formatCurrency(stats.total_liquid_cash || 0);
+
+        const elAR = document.getElementById('statExecAR');
+        if (elAR) elAR.textContent = formatCurrency(stats.ar_outstanding || 0);
+
+        const elAP = document.getElementById('statExecAP');
+        if (elAP) elAP.textContent = formatCurrency(stats.ap_outstanding || 0);
+
+        const elCRM = document.getElementById('statExecCRMPipeline');
+        if (elCRM) elCRM.textContent = formatCurrency(stats.crm_expected_revenue || 0);
+
+        const elMRR = document.getElementById('statExecMRR');
+        if (elMRR) elMRR.textContent = formatCurrency(stats.subscription_mrr || 0);
+
+        const elHRP = document.getElementById('statExecHRProducts');
+        if (elHRP) elHRP.textContent = `${stats.employees ?? 0} Karyawan • ${stats.products ?? 0} SKU`;
+
+        // Recent Transactions Table
+        const txBody = document.getElementById('dashboardRecentTxBody');
+        if (txBody) {
+            const recent = Array.isArray(stats.recent_transactions) ? stats.recent_transactions : [];
+            if (recent.length === 0) {
+                txBody.innerHTML = `<tr><td colspan="5" class="text-center" style="color: var(--text-muted);">Belum ada transaksi. Klik "🚀 Simulasi Siklus Bisnis Otomatis" di atas!</td></tr>`;
+            } else {
+                txBody.innerHTML = recent.slice(0, 7).map(tx => {
+                    const stateClass = (tx.state === 'sale' || tx.state === 'purchase' || tx.state === 'posted' || tx.state === 'done')
+                        ? 'badge-success'
+                        : (tx.state === 'draft' ? 'badge-warning' : 'badge-info');
+                    return `
+                        <tr style="cursor: pointer;" onclick="switchTabProgrammatically('${escapeHtml(tx.tab || 'dashboard')}')">
+                            <td><strong>${escapeHtml(tx.icon || '📄')} ${escapeHtml(tx.doc_number)}</strong></td>
+                            <td>${escapeHtml(tx.doc_type)}</td>
+                            <td>${escapeHtml(tx.partner_name)}</td>
+                            <td><strong>${formatCurrency(tx.amount || 0)}</strong></td>
+                            <td><span class="badge ${stateClass}">${escapeHtml(String(tx.state || '').toUpperCase())}</span></td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        // 50-Module Department Health Matrix
+        const deptGrid = document.getElementById('dashboardDeptHealthGrid');
+        if (deptGrid) {
+            const depts = [
+                { icon: '💳', name: 'Finance, Tax & Treasury', count: (stats.invoices || 0) + (stats.tax_invoices || 0) + (stats.ebupot_slips || 0) + (stats.treasury_bank_accounts || 0), unit: 'Dokumen', tab: 'invoicing' },
+                { icon: '🏢', name: 'Inventory, WMS & Barcode', count: (stats.pickings || 0) + (stats.wms_bins || 0) + (stats.lots || 0), unit: 'Mutasi/Bin', tab: 'wms' },
+                { icon: '🏭', name: 'MRP II & Quality Control', count: (stats.mrp_orders || 0) + (stats.work_orders || 0) + (stats.quality_checks || 0), unit: 'Order/QC', tab: 'mrp-advanced' },
+                { icon: '👔', name: 'HR, Payroll & Presensi', count: (stats.employees || 0) + (stats.payroll_payslips || 0) + (stats.attendances || 0), unit: 'Record SDM', tab: 'payroll' },
+                { icon: '🤝', name: 'Vendor & Customer B2B', count: (stats.vendor_quotation_bids || 0) + (stats.customer_b2b_orders || 0) + (stats.vendor_portal_accounts || 0), unit: 'Transaksi B2B', tab: 'vendor-portal' },
+                { icon: '🛃', name: 'Kawasan Berikat & DJBC', count: (stats.customs_documents || 0) + (stats.customs_mutations || 0), unit: 'Dokumen BC', tab: 'customs-bonded' },
+                { icon: '🔀', name: 'Low-Code & BPMN Engine', count: (stats.workflow_definitions || 0) + (stats.workflow_instances || 0), unit: 'Workflow', tab: 'workflow-engine' },
+                { icon: '🔌', name: 'Integration Hub & RPC', count: (stats.integration_connectors || 0) + (stats.integration_api_keys || 0) + (stats.webhook_subscriptions || 0), unit: 'Konektor/API', tab: 'integration-hub' }
+            ];
+            deptGrid.innerHTML = depts.map(d => `
+                <div class="dept-health-pill" onclick="switchTabProgrammatically('${d.tab}')">
+                    <div style="display: flex; align-items: center; gap: 0.55rem;">
+                        <span style="font-size: 1.2rem;">${d.icon}</span>
+                        <div>
+                            <div style="font-size: 0.8rem; font-weight: 700;">${escapeHtml(d.name)}</div>
+                            <div style="font-size: 0.7rem; color: var(--text-muted);">Klik untuk buka modul</div>
+                        </div>
+                    </div>
+                    <span class="badge badge-info">${d.count} ${d.unit}</span>
+                </div>
+            `).join('');
+        }
+
+        // Refresh notification badge silently
+        loadExecutiveNotifications(true);
+    } catch (e) {
+        console.error(e);
+    }
+};
+
+// Sidebar Instant Module Filter
+function filterSidebarModules(query) {
+    const q = String(query || '').trim().toLowerCase();
+    const clearBtn = document.getElementById('sidebarSearchClearBtn');
+    if (clearBtn) {
+        clearBtn.style.display = q.length > 0 ? 'block' : 'none';
+    }
+
+    const navItems = document.querySelectorAll('.nav-menu .nav-item');
+    let visibleCount = 0;
+    navItems.forEach(btn => {
+        const label = (btn.textContent || '').toLowerCase();
+        const tab = (btn.dataset.tab || '').toLowerCase();
+        const matched = !q || label.includes(q) || tab.includes(q);
+        btn.style.display = matched ? 'flex' : 'none';
+        if (matched) visibleCount++;
+    });
+
+    const countEl = document.getElementById('sidebarModuleCountText');
+    if (countEl) {
+        countEl.textContent = `${visibleCount} / ${navItems.length} Modul Aktif`;
+    }
+}
+
+function clearSidebarModuleFilter() {
+    const input = document.getElementById('sidebarModuleSearch');
+    if (input) {
+        input.value = '';
+        filterSidebarModules('');
+        input.focus();
+    }
+}
+
+// Universal Command Palette & Omni-Search (Ctrl+K)
+let cmdPaletteDebounceTimer = null;
+
+function openCommandPaletteModal() {
+    openModal('modalCommandPalette');
+    const input = document.getElementById('cmdPaletteSearchInput');
+    if (input) {
+        input.value = '';
+        setTimeout(() => input.focus(), 50);
+    }
+    executeCommandPaletteSearch('');
+}
+
+function handleCommandPaletteInput(val) {
+    if (cmdPaletteDebounceTimer) clearTimeout(cmdPaletteDebounceTimer);
+    cmdPaletteDebounceTimer = setTimeout(() => {
+        executeCommandPaletteSearch(val);
+    }, 120);
+}
+
+async function executeCommandPaletteSearch(query) {
+    const container = document.getElementById('cmdPaletteResultsContainer');
+    if (!container) return;
+    try {
+        const res = await api(`/search?q=${encodeURIComponent(query || '')}`);
+        const modules = Array.isArray(res.modules) ? res.modules : [];
+        const records = Array.isArray(res.records) ? res.records : [];
+
+        let html = '';
+        if (modules.length > 0) {
+            html += `<div style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin: 0.35rem 0 0.45rem;">🧭 Modul ERP (${modules.length})</div>`;
+            html += modules.slice(0, 10).map(m => `
+                <button type="button" class="cmd-palette-item" onclick="closeModal('modalCommandPalette'); switchTabProgrammatically('${escapeHtml(m.tab)}');">
+                    <div style="display: flex; align-items: center; gap: 0.65rem;">
+                        <span style="font-size: 1.15rem;">${escapeHtml(m.icon || '📦')}</span>
+                        <div>
+                            <div style="font-weight: 700; font-size: 0.86rem;">${escapeHtml(m.title)}</div>
+                            <div style="font-size: 0.72rem; color: var(--text-muted);">Tab: ${escapeHtml(m.tab)} • ${escapeHtml(m.category)}</div>
+                        </div>
+                    </div>
+                    <span class="badge badge-primary">Buka Modul →</span>
+                </button>
+            `).join('');
+        }
+
+        if (records.length > 0) {
+            html += `<div style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin: 0.85rem 0 0.45rem;">🗄️ Data Transaksi & Master Database (${records.length})</div>`;
+            html += records.map(r => `
+                <button type="button" class="cmd-palette-item" onclick="closeModal('modalCommandPalette'); switchTabProgrammatically('${escapeHtml(r.tab)}');">
+                    <div style="display: flex; align-items: center; gap: 0.65rem;">
+                        <span style="font-size: 1.15rem;">${escapeHtml(r.icon || '📄')}</span>
+                        <div>
+                            <div style="font-weight: 700; font-size: 0.86rem;">${escapeHtml(r.title)}</div>
+                            <div style="font-size: 0.72rem; color: var(--text-muted);">${escapeHtml(r.subtitle)}</div>
+                        </div>
+                    </div>
+                    <span class="badge badge-info">${escapeHtml(r.badge)}</span>
+                </button>
+            `).join('');
+        }
+
+        if (!html) {
+            html = `<div style="padding: 1.5rem; text-align: center; color: var(--text-muted);">Tidak ditemukan modul atau record untuk kata kunci "<strong>${escapeHtml(query)}</strong>".</div>`;
+        }
+        container.innerHTML = html;
+    } catch (err) {
+        container.innerHTML = `<div style="padding: 1rem; color: #ef4444;">Gagal memuat hasil pencarian: ${escapeHtml(err.message)}</div>`;
+    }
+}
+
+// Actionable Notification Center
+function openNotificationCenterModal() {
+    openModal('modalNotificationCenter');
+    loadExecutiveNotifications(false);
+}
+
+async function loadExecutiveNotifications(silentOnly = false) {
+    try {
+        const res = await api('/dashboard/notifications');
+        const items = Array.isArray(res.items) ? res.items : [];
+        const badge = document.getElementById('notifBadgeCount');
+        if (badge) {
+            badge.textContent = res.total_unread ?? items.length;
+        }
+        if (silentOnly) return;
+
+        const listEl = document.getElementById('notificationCenterList');
+        if (!listEl) return;
+
+        listEl.innerHTML = items.map(item => {
+            const badgeClass = item.severity === 'urgent' ? 'badge-danger'
+                : (item.severity === 'warning' ? 'badge-warning'
+                : (item.severity === 'success' ? 'badge-success' : 'badge-info'));
+            return `
+                <div class="cmd-palette-item" onclick="closeModal('modalNotificationCenter'); switchTabProgrammatically('${escapeHtml(item.tab)}');">
+                    <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                        <span style="font-size: 1.3rem; margin-top: 0.1rem;">${escapeHtml(item.icon || '🔔')}</span>
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.15rem;">
+                                <span class="badge ${badgeClass}">${escapeHtml(item.category)}</span>
+                                <span style="font-size: 0.7rem; color: var(--text-muted);">${escapeHtml(item.created_at || '')}</span>
+                            </div>
+                            <div style="font-weight: 700; font-size: 0.88rem; margin-bottom: 0.15rem;">${escapeHtml(item.title)}</div>
+                            <div style="font-size: 0.78rem; color: var(--text-muted);">${escapeHtml(item.description)}</div>
+                        </div>
+                    </div>
+                    <span class="badge badge-primary">Tindak Lanjuti →</span>
+                </div>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error('Notification load error:', err);
+    }
+}
+
+// 1-Click End-to-End Business Cycle Simulator (P2P + WMS + O2C + GL)
+async function runOneClickBusinessCycleSimulation() {
+    const btn = document.getElementById('btnSimulateBusinessCycle');
+    const origText = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Menjalankan Siklus P2P + WMS + O2C + GL...';
+    }
+    try {
+        const res = await api('/dashboard/simulate-cycle', 'POST', {});
+        showToast(res.message || 'Simulasi Siklus Bisnis berhasil!', 'success');
+
+        const bodyEl = document.getElementById('simulationResultBody');
+        if (bodyEl) {
+            const steps = Array.isArray(res.steps) ? res.steps : [];
+            bodyEl.innerHTML = `
+                <div style="padding: 0.85rem 1rem; border-radius: 8px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); margin-bottom: 1rem;">
+                    <strong style="color: #10b981;">✅ ${escapeHtml(res.message)}</strong>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                        Produk: <strong>${escapeHtml(res.product_name)}</strong> • Nilai Pengadaan: <strong>${formatCurrency(res.total_procurement)}</strong> • Nilai Penjualan: <strong>${formatCurrency(res.total_revenue)}</strong>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.6rem; margin-bottom: 1rem;">
+                    <div class="exec-pulse-card" onclick="closeModal('modalSimulationResult'); switchTabProgrammatically('purchases');">
+                        <span style="font-size: 0.72rem; color: var(--text-muted);">📥 Purchase Order</span>
+                        <strong>${escapeHtml(res.po_number)}</strong>
+                    </div>
+                    <div class="exec-pulse-card" onclick="closeModal('modalSimulationResult'); switchTabProgrammatically('inventory');">
+                        <span style="font-size: 0.72rem; color: var(--text-muted);">🏢 Stock Receipt & Delivery</span>
+                        <strong>${escapeHtml(res.receipt_number)} / ${escapeHtml(res.delivery_number)}</strong>
+                    </div>
+                    <div class="exec-pulse-card" onclick="closeModal('modalSimulationResult'); switchTabProgrammatically('sales');">
+                        <span style="font-size: 0.72rem; color: var(--text-muted);">🛒 Sales Order</span>
+                        <strong>${escapeHtml(res.so_number)}</strong>
+                    </div>
+                    <div class="exec-pulse-card" onclick="closeModal('modalSimulationResult'); switchTabProgrammatically('invoicing');">
+                        <span style="font-size: 0.72rem; color: var(--text-muted);">💳 Posted GL Invoice</span>
+                        <strong>${escapeHtml(res.invoice_number)}</strong>
+                    </div>
+                </div>
+                <h4 style="font-size: 0.85rem; margin-bottom: 0.5rem;">📋 Jejak Audit Eksekusi Otomatis:</h4>
+                <div style="display: flex; flex-direction: column; gap: 0.45rem;">
+                    ${steps.map(s => `<div style="padding: 0.55rem 0.75rem; border-radius: 6px; background: rgba(15, 23, 42, 0.45); border: 1px solid var(--border-color); font-size: 0.82rem;">${escapeHtml(s)}</div>`).join('')}
+                </div>
+            `;
+            openModal('modalSimulationResult');
+        }
+        await loadDashboard();
+    } catch (err) {
+        showToast('Gagal menjalankan simulasi: ' + err.message, 'danger');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = origText;
+        }
+    }
+}
+
+// Export Executive KPI Summary CSV
+async function exportExecutiveSummaryCSV() {
+    try {
+        const headers = {};
+        if (state.token) headers['Authorization'] = `Bearer ${state.token}`;
+        const response = await fetch('/api/v1/dashboard/export-summary', { headers });
+        if (!response.ok) throw new Error('Gagal mengunduh CSV ringkasan eksekutif');
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `executive_kpi_summary_${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        showToast('Laporan Executive KPI (CSV) berhasil diunduh!', 'success');
+    } catch (err) {
+        showToast(err.message, 'danger');
+    }
+}
+
+// Dark / Light Enterprise Theme Switcher
+function applyEnterpriseTheme(theme) {
+    const isLight = theme === 'light';
+    document.body.classList.toggle('light-theme', isLight);
+    const iconEl = document.getElementById('themeToggleIcon');
+    const labelEl = document.getElementById('themeToggleLabel');
+    if (iconEl) iconEl.textContent = isLight ? '🌙' : '☀️';
+    if (labelEl) labelEl.textContent = isLight ? 'Dark' : 'Light';
+}
+
+function toggleEnterpriseTheme() {
+    const isCurrentlyLight = document.body.classList.contains('light-theme');
+    const nextTheme = isCurrentlyLight ? 'dark' : 'light';
+    localStorage.setItem('erp_theme', nextTheme);
+    applyEnterpriseTheme(nextTheme);
+    showToast(`Tema antarmuka diubah ke mode ${nextTheme === 'light' ? 'Light Enterprise' : 'Dark Mode'}`, 'info');
+}
+
+// Global Keyboard Shortcuts (Ctrl+K, /, Escape)
+document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        openCommandPaletteModal();
+        return;
+    }
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.active, .modal.active').forEach(m => m.classList.remove('active'));
+        return;
+    }
+    const tag = (document.activeElement && document.activeElement.tagName) || '';
+    if (e.key === '/' && tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT') {
+        e.preventDefault();
+        const sidebarInput = document.getElementById('sidebarModuleSearch');
+        if (sidebarInput) sidebarInput.focus();
+    }
+});
+
+// Initialize saved theme on load
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('erp_theme') || 'dark';
+    applyEnterpriseTheme(savedTheme);
+});

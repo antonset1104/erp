@@ -54,6 +54,15 @@ func (s *Service) CreatePicking(p *StockPicking) error {
 			prefix = "WH/INT"
 		}
 		p.Name = fmt.Sprintf("%s/%05d", prefix, count+1)
+		for {
+			var exists int64
+			s.db.Model(&StockPicking{}).Where("name = ?", p.Name).Count(&exists)
+			if exists == 0 {
+				break
+			}
+			count++
+			p.Name = fmt.Sprintf("%s/%05d", prefix, count+1)
+		}
 	}
 
 	if p.ScheduledDate == "" {

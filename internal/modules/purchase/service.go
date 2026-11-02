@@ -50,6 +50,15 @@ func (s *Service) CreateOrder(order *PurchaseOrder) error {
 		var count int64
 		s.db.Model(&PurchaseOrder{}).Count(&count)
 		order.Name = fmt.Sprintf("PO%05d", count+1)
+		for {
+			var exists int64
+			s.db.Model(&PurchaseOrder{}).Where("name = ?", order.Name).Count(&exists)
+			if exists == 0 {
+				break
+			}
+			count++
+			order.Name = fmt.Sprintf("PO%05d", count+1)
+		}
 	}
 
 	if order.DateOrder == "" {

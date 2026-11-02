@@ -1,0 +1,74 @@
+name: Release / Multi-Platform Binaries
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build-release:
+    name: Build & Publish Release Binaries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.x'
+          cache: true
+
+      - name: Install Cross-Compilers (gcc-mingw-w64, gcc-aarch64-linux-gnu)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-mingw-w64 gcc-aarch64-linux-gnu
+
+      - name: Extract Release Version
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Build Multi-Platform Binaries
+        env:
+          VER: ${{ steps.get_version.outputs.VERSION }}
+        run: |
+          mkdir -p dist
+
+          # 1. Linux AMD64
+          CGO_ENABLED=1 CC=gcc GOOS=linux GOARCH=amd64 \
+            go build -ldflags="-s -w -X main.AppVersion=${VER}" -o dist/odoo-go-erp-${VER}-linux-amd64 ./cmd/server
+          tar -czvf dist/odoo-go-erp-${VER}-linux-amd64.tar.gz -C dist odoo-go-erp-${VER}-linux-amd64 LICENSE README.md web
+
+          # 2. Linux ARM64
+          CGO_ENABLED=1 CC=aarch64-linux-gnu-gcc GOOS=linux GOARCH=arm64 \
+            go build -ldflags="-s -w -X main.AppVersion=${VER}" -o dist/odoo-go-erp-${VER}-linux-arm64 ./cmd/server
+          tar -czvf dist/odoo-go-erp-${VER}-linux-arm64.tar.gz -C dist odoo-go-erp-${VER}-linux-arm64 LICENSE README.md web
+
+          # 3. Windows AMD64
+          CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc GOOS=windows GOARCH=amd64 \
+            go build -ldflags="-s -w -X main.AppVersion=${VER}" -o dist/odoo-go-erp-${VER}-windows-amd64.exe ./cmd/server
+          zip -j dist/odoo-go-erp-${VER}-windows-amd64.zip dist/odoo-go-erp-${VER}-windows-amd64.exe LICENSE README.md
+
+      - name: Generate SHA256 Checksums
+        run: |
+          cd dist
+          sha256sum *.tar.gz *.zip > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Odoo-Go ERP ${{ steps.get_version.outputs.VERSION }}"
+          files: |
+            dist/*.tar.gz
+            dist/*.zip
+            dist/SHA256SUMS.txt
+          draft: false
+          prerelease: false
+          generate_release_notes: true
