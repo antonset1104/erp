@@ -222,7 +222,7 @@ type RunBatchDataJobRequest struct {
 }
 
 type AIIntegrationArchitectRequest struct {
-	Requirement string `json:"requirement" binding:"required"` // e.g. "Sinkronisasi pesanan dari Tokopedia ke Odoo-Go", "Integrasi POS Kasir Cabang", "Automasi Zapier lead CRM"
+	Requirement string `json:"requirement" binding:"required"` // e.g. "Sinkronisasi pesanan dari Tokopedia ke GoERP", "Integrasi POS Kasir Cabang", "Automasi Zapier lead CRM"
 	TargetApp   string `json:"target_app"`   // e.g. "Shopify", "Tokopedia", "Zapier", "Custom Mobile App"
 	Language    string `json:"language"`     // "curl", "python", "javascript", "go", "all"
 }

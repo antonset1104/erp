@@ -62,7 +62,7 @@ func (m *Module) Seed(db *gorm.DB) error {
 		team1 := HelpdeskTeam{
 			Name:     "Customer Care & Support",
 			Code:     "CARE",
-			Email:    "care@odoo-go.id",
+			Email:    "care@go-erp.id",
 			LeaderID: &userID1,
 			Color:    "#3b82f6",
 			Active:   true,
@@ -75,7 +75,7 @@ func (m *Module) Seed(db *gorm.DB) error {
 		team2 := HelpdeskTeam{
 			Name:     "Technical Support Tier 2",
 			Code:     "TECH",
-			Email:    "tech-support@odoo-go.id",
+			Email:    "tech-support@go-erp.id",
 			LeaderID: &userID1,
 			Color:    "#8b5cf6",
 			Active:   true,
@@ -88,7 +88,7 @@ func (m *Module) Seed(db *gorm.DB) error {
 		team3 := HelpdeskTeam{
 			Name:     "Billing & Invoicing Help",
 			Code:     "BILL",
-			Email:    "billing@odoo-go.id",
+			Email:    "billing@go-erp.id",
 			LeaderID: &userID1,
 			Color:    "#10b981",
 			Active:   true,

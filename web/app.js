@@ -1,6 +1,6 @@
 // State & Global Variables
 let state = {
-    token: localStorage.getItem('odoo_token') || '',
+    token: localStorage.getItem('erp_token') || '',
     user: null,
     currentTab: 'dashboard',
     products: [],
@@ -93,12 +93,12 @@ async function apiPost(endpoint, body = {}) {
 async function autoLogin() {
     try {
         const data = await api('/auth/login', 'POST', {
-            email: 'admin@odoo.local',
+            email: 'admin@erp.local',
             password: 'admin123'
         });
         state.token = data.token;
         state.user = data.user;
-        localStorage.setItem('odoo_token', data.token);
+        localStorage.setItem('erp_token', data.token);
         updateUserUI();
     } catch (e) {
         showToast('Login failed: ' + e.message, 'danger');
@@ -228,7 +228,7 @@ function setupNavigation() {
     });
 
     document.getElementById('logoutBtn').addEventListener('click', () => {
-        localStorage.removeItem('odoo_token');
+        localStorage.removeItem('erp_token');
         state.token = '';
         state.user = null;
         autoLogin().then(() => loadCurrentTab());
@@ -267,7 +267,7 @@ function updateHeaderTitles(tab) {
         'purchase-requisitions': { title: 'Purchase Requisitions, Tender & Blanket Orders', sub: 'Permintaan Pembelian Internal, Lelang Multi-Vendor (Call for Bids) & Kontrak Pasokan Jangka Panjang (purchase.requisition)' },
         currency: { title: 'Multi-Valas & Kurs Forex (PSAK 10)', sub: 'Multi-Currency Revaluation, Spot Rates JISDOR/BI, Unrealized & Realized Gain/Loss, dan Treasury AI Copilot (res.currency)' },
         'tax-efaktur': { title: 'Pajak & e-Faktur Elektronik DJP', sub: 'Kepatuhan Pajak UU HPP & PMK 112/2022 - NSFP, Faktur Pajak Keluaran/Masukan, SPT Masa 1111, CSV & AI Compliance (account.tax.invoice)' },
-        'bank-reconcile': { title: 'Rekonsiliasi Bank & Impor Rekening Koran', sub: 'Odoo 17/18 Style Auto-Match Engine, Impor CSV Multi-Format (BCA/Mandiri/BRI), Aturan Write-Off Biaya Bank, dan AI Statement Audit Copilot (account.bank.statement)' },
+        'bank-reconcile': { title: 'Rekonsiliasi Bank & Impor Rekening Koran', sub: 'Intelligent Auto-Match Engine, Impor CSV Multi-Format (BCA/Mandiri/BRI), Aturan Write-Off Biaya Bank, dan AI Statement Audit Copilot (account.bank.statement)' },
         approvals: { title: 'Approval Matrix & Multi-Tier Authorizations', sub: 'Otorisasi berjenjang untuk pengadaan, pengeluaran kas, cuti & kontrak bisnis' },
         'landed-cost': { title: 'Landed Cost & Impor Kepabeanan', sub: 'Alokasi biaya bea masuk, pengangkutan laut/udara & asuransi ke HPP inventaris (stock.landed.cost)' },
         traceability: { title: 'End-to-End Lot Traceability & Product Recall', sub: 'Pelacakan silsilah bahan baku ke barang jadi (hulu-hilir) & penarikan produk darurat (stock.lot.trace)' },
@@ -9045,7 +9045,7 @@ function triggerPrintBarcodeLabel() {
         <!DOCTYPE html>
         <html>
         <head>
-            <title>Cetak Barcode Label - Odoo-Go ERP</title>
+            <title>Cetak Barcode Label - GoERP</title>
             <style>
                 @page { size: auto; margin: 4mm; }
                 body {
@@ -11476,7 +11476,7 @@ async function runAIBankAuditForCurrent() {
         const recList = document.getElementById('aiBankRecommendationsList');
         const recs = report.action_recommendations || [];
         if (recs.length === 0) {
-            recList.innerHTML = '<li>Semua mutasi telah sesuai dengan tata kelola keuangan Odoo.</li>';
+            recList.innerHTML = '<li>Semua mutasi telah sesuai dengan tata kelola keuangan Enterprise ERP.</li>';
         } else {
             recList.innerHTML = recs.map(r => `<li>${escapeHtml(r)}</li>`).join('');
         }
@@ -14431,7 +14431,7 @@ async function openModalAIWebhookDiagnostic() {
 
         const optText = document.getElementById('aiWhPayloadOptimization');
         if (optText) {
-            optText.textContent = report.payload_optimization || 'Payload format sudah teroptimasi sesuai standar webhook Odoo.';
+            optText.textContent = report.payload_optimization || 'Payload format sudah teroptimasi sesuai standar webhook Enterprise ERP.';
         }
 
         openModal('modalAIWebhookDiagnostic');
@@ -21890,7 +21890,7 @@ async function triggerConnectorAction(code, action) {
         const res = await api('/integration/connectors/action', 'POST', {
             connector_code: code,
             action: action,
-            payload: { recipient: '+628123456789', message: 'Notifikasi Otomatis ERP Odoo-Go' }
+            payload: { recipient: '+628123456789', message: 'Notifikasi Otomatis ERP GoERP' }
         });
         showToast(res.message || `Aksi ${action} berhasil dieksekusi!`, 'success');
         await loadIntegrationHubData();

@@ -6,7 +6,7 @@ import (
 	"erp-golang/internal/modules/stock"
 )
 
-// StockInventory corresponds to Odoo's stock.inventory (Physical Stock Opname / Inventory Adjustment)
+// StockInventory corresponds to standard enterprise stock.inventory (Physical Stock Opname / Inventory Adjustment)
 type StockInventory struct {
 	models.ModelBase
 	Name                string               `gorm:"size:64;not null;uniqueIndex" json:"name"` // e.g. OPNAME/2026/00001
@@ -29,7 +29,7 @@ type StockInventory struct {
 	Lines               []StockInventoryLine `gorm:"foreignKey:InventoryID" json:"lines"`
 }
 
-// StockInventoryLine corresponds to Odoo's stock.inventory.line
+// StockInventoryLine corresponds to standard enterprise stock.inventory.line
 type StockInventoryLine struct {
 	models.ModelBase
 	InventoryID    uint             `gorm:"not null;index" json:"inventory_id"`

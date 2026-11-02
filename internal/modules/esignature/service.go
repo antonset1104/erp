@@ -86,7 +86,7 @@ func (s *service) CreateSignRequest(req *CreateSignRequest, companyID uint) (*Do
 			Action:    "created",
 			Actor:     "System Admin",
 			IP:        "127.0.0.1",
-			UserAgent: "Odoo-Go ERP Server",
+			UserAgent: "GoERP Server",
 			Details:   fmt.Sprintf("Permohonan tanda tangan elektronik diterbitkan untuk %s (%s)", req.SignerName, req.SignerRole),
 		},
 	}
@@ -305,7 +305,7 @@ func (s *service) CancelSignRequest(id uint, companyID uint) error {
 		Action:    "cancelled",
 		Actor:     "System Admin",
 		IP:        "127.0.0.1",
-		UserAgent: "Odoo-Go ERP Server",
+		UserAgent: "GoERP Server",
 		Details:   "Permohonan tanda tangan dibatalkan oleh inisiator internal",
 	})
 	auditJSON, _ := json.Marshal(auditList)

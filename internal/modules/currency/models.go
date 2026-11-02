@@ -6,7 +6,7 @@ import (
 	"erp-golang/internal/modules/base"
 )
 
-// Currency represents Odoo's res.currency
+// Currency represents standard enterprise res.currency
 type Currency struct {
 	models.ModelBase
 	Name          string         `gorm:"size:16;not null;uniqueIndex" json:"name"` // e.g. "USD", "EUR", "IDR"
@@ -25,13 +25,13 @@ func (Currency) TableName() string {
 	return "res_currencies"
 }
 
-// CurrencyRate represents Odoo's res.currency.rate
+// CurrencyRate represents standard enterprise res.currency.rate
 type CurrencyRate struct {
 	models.ModelBase
 	CurrencyID uint      `gorm:"not null;index" json:"currency_id"`
 	Currency   *Currency `gorm:"foreignKey:CurrencyID" json:"currency,omitempty"`
 	Name       string    `gorm:"size:32;not null;index" json:"name"` // Date "YYYY-MM-DD"
-	Rate       float64   `gorm:"not null" json:"rate"`               // Standard Odoo rate (Foreign per 1 Base, e.g. 1/16000)
+	Rate       float64   `gorm:"not null" json:"rate"`               // Standard Enterprise ERP rate (Foreign per 1 Base, e.g. 1/16000)
 	DirectRate float64   `gorm:"not null" json:"direct_rate"`        // Indonesian market rate (Base per 1 Foreign, e.g. 16,000 IDR/USD)
 	Source     string    `gorm:"size:64;default:'Bank Indonesia JISDOR'" json:"source"`
 	CompanyID  uint      `gorm:"default:1;index" json:"company_id"`
@@ -41,7 +41,7 @@ func (CurrencyRate) TableName() string {
 	return "res_currency_rates"
 }
 
-// ForexRevaluation represents Odoo's account.multicurrency.revaluation
+// ForexRevaluation represents standard enterprise account.multicurrency.revaluation
 type ForexRevaluation struct {
 	models.ModelBase
 	Name            string                 `gorm:"size:64;not null;uniqueIndex" json:"name"` // e.g. "REV/2026/10/00001"

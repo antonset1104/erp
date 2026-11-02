@@ -7,7 +7,7 @@ import (
 	"erp-golang/internal/modules/hr"
 )
 
-// Shift corresponds to Odoo's resource.calendar / work shift schedule
+// Shift corresponds to standard enterprise resource.calendar / work shift schedule
 type Shift struct {
 	models.ModelBase
 	Name               string  `gorm:"size:128;not null;index" json:"name"` // e.g. "Shift Reguler (08:30 - 17:30)"
@@ -25,7 +25,7 @@ func (Shift) TableName() string {
 	return "hr_attendance_shifts"
 }
 
-// Attendance corresponds to Odoo's hr.attendance
+// Attendance corresponds to standard enterprise hr.attendance
 type Attendance struct {
 	models.ModelBase
 	EmployeeID        uint         `gorm:"not null;index" json:"employee_id"`

@@ -70,7 +70,7 @@ import (
 
 func main() {
 	log.Println("=====================================================")
-	log.Println("     Starting Odoo-Go ERP Backend & Dashboard        ")
+	log.Println("     Starting GoERP Backend & Dashboard        ")
 	log.Println("=====================================================")
 
 	// 1. Load Configurations
@@ -292,9 +292,9 @@ func main() {
 	r.StaticFile("/", "./web/index.html")
 
 	addr := fmt.Sprintf(":%s", cfg.Port)
-	log.Printf("[Server] Odoo-Go ERP Server is listening on http://localhost%s", addr)
+	log.Printf("[Server] GoERP Server is listening on http://localhost%s", addr)
 	log.Printf("[Server] Web Dashboard available at http://localhost%s/", addr)
-	log.Printf("[Server] Default Admin Login: admin@odoo.local / admin123")
+	log.Printf("[Server] Default Admin Login: admin@erp.local / admin123")
 	log.Printf("[Storage] Storage Backend: %s (Upload directory: %s)", storageProv.Type(), cfg.UploadDir)
 	if storageProv.Type() == "r2" {
 		log.Printf("[Cloudflare R2] Connected to Cloudflare R2 Bucket: %s", cfg.CloudflareR2Bucket)

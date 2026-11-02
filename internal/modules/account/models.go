@@ -5,7 +5,7 @@ import (
 	"erp-golang/internal/modules/base"
 )
 
-// AccountAccount corresponds to Odoo's account.account (Chart of Accounts)
+// AccountAccount corresponds to standard enterprise account.account (Chart of Accounts)
 type AccountAccount struct {
 	models.ModelBase
 	Code    string `gorm:"size:64;not null;uniqueIndex" json:"code"` // e.g. "1200", "2100", "4100"
@@ -13,7 +13,7 @@ type AccountAccount struct {
 	Type    string `gorm:"size:64;not null" json:"type"` // "asset_receivable", "liability_payable", "income", "expense", "asset_cash"
 }
 
-// AccountJournal corresponds to Odoo's account.journal
+// AccountJournal corresponds to standard enterprise account.journal
 type AccountJournal struct {
 	models.ModelBase
 	Name             string `gorm:"size:128;not null" json:"name"`
@@ -22,7 +22,7 @@ type AccountJournal struct {
 	DefaultAccountID uint   `json:"default_account_id"`
 }
 
-// AccountMove corresponds to Odoo's account.move (Customer Invoices, Vendor Bills, Journal Entries)
+// AccountMove corresponds to standard enterprise account.move (Customer Invoices, Vendor Bills, Journal Entries)
 type AccountMove struct {
 	models.ModelBase
 	Name           string            `gorm:"size:64;not null;uniqueIndex" json:"name"` // e.g. INV/2026/00001
@@ -47,7 +47,7 @@ type AccountMove struct {
 	AmountCurrency float64           `gorm:"default:0" json:"amount_currency"` // Amount in foreign currency
 }
 
-// AccountMoveLine corresponds to Odoo's account.move.line (Balanced Debit and Credit entries)
+// AccountMoveLine corresponds to standard enterprise account.move.line (Balanced Debit and Credit entries)
 type AccountMoveLine struct {
 	models.ModelBase
 	MoveID         uint           `gorm:"index" json:"move_id"`
@@ -65,7 +65,7 @@ type AccountMoveLine struct {
 	AmountCurrency float64        `gorm:"default:0" json:"amount_currency"` // Foreign currency balance
 }
 
-// AccountPayment corresponds to Odoo's account.payment (Payment Registration)
+// AccountPayment corresponds to standard enterprise account.payment (Payment Registration)
 type AccountPayment struct {
 	models.ModelBase
 	Name        string       `gorm:"size:64;not null;uniqueIndex" json:"name"` // e.g. PAY/2026/00001

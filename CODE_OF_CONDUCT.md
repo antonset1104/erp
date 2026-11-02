@@ -2,7 +2,7 @@
 
 ## Komitmen Kami
 
-Demi menumbuhkan lingkungan yang terbuka dan ramah bagi semua kalangan, kami sebagai kontributor dan pengelola proyek berkomitmen untuk menjadikan partisipasi dalam proyek **Odoo-Go ERP** dan komunitas kami sebagai pengalaman yang bebas dari pelecehan bagi semua orang, tanpa memandang usia, ukuran tubuh, disabilitas yang tampak maupun tidak tampak, etnisitas, karakteristik seksual, identitas dan ekspresi gender, tingkat pengalaman, pendidikan, status sosio-ekonomi, kebangsaan, penampilan pribadi, ras, kasta, warna kulit, agama, atau identitas dan orientasi seksual.
+Demi menumbuhkan lingkungan yang terbuka dan ramah bagi semua kalangan, kami sebagai kontributor dan pengelola proyek berkomitmen untuk menjadikan partisipasi dalam proyek **GoERP** dan komunitas kami sebagai pengalaman yang bebas dari pelecehan bagi semua orang, tanpa memandang usia, ukuran tubuh, disabilitas yang tampak maupun tidak tampak, etnisitas, karakteristik seksual, identitas dan ekspresi gender, tingkat pengalaman, pendidikan, status sosio-ekonomi, kebangsaan, penampilan pribadi, ras, kasta, warna kulit, agama, atau identitas dan orientasi seksual.
 
 Kami berikrar untuk bertindak dan berinteraksi dengan cara-cara yang berkontribusi pada terciptanya komunitas yang terbuka, ramah, beraneka ragam, inklusif, dan sehat.
 

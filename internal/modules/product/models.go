@@ -4,14 +4,14 @@ import (
 	"erp-golang/internal/core/models"
 )
 
-// ProductCategory corresponds to Odoo's product.category
+// ProductCategory corresponds to standard enterprise product.category
 type ProductCategory struct {
 	models.ModelBase
 	Name     string `gorm:"size:128;not null" json:"name"`
 	ParentID *uint  `json:"parent_id,omitempty"`
 }
 
-// UoM corresponds to Odoo's uom.uom (Unit of Measure)
+// UoM corresponds to standard enterprise uom.uom (Unit of Measure)
 type UoM struct {
 	models.ModelBase
 	Name        string  `gorm:"size:64;not null" json:"name"` // Unit, Pcs, Kg, Liter
@@ -21,7 +21,7 @@ type UoM struct {
 	Active      bool    `gorm:"default:true" json:"active"`
 }
 
-// Product corresponds to Odoo's product.template / product.product
+// Product corresponds to standard enterprise product.template / product.product
 type Product struct {
 	models.ModelBase
 	Name          string          `gorm:"size:255;not null;index" json:"name"`

@@ -7,7 +7,7 @@ import (
 	"erp-golang/internal/modules/hr"
 )
 
-// FleetVehicleModel corresponds to Odoo's fleet.vehicle.model
+// FleetVehicleModel corresponds to standard enterprise fleet.vehicle.model
 type FleetVehicleModel struct {
 	models.ModelBase
 	Brand       string `gorm:"size:64;not null;index" json:"brand"` // e.g. "Toyota", "Mitsubishi", "Isuzu"
@@ -15,7 +15,7 @@ type FleetVehicleModel struct {
 	VehicleType string `gorm:"size:32;default:'van'" json:"vehicle_type"` // "car", "truck", "van", "motorcycle"
 }
 
-// FleetVehicle corresponds to Odoo's fleet.vehicle
+// FleetVehicle corresponds to standard enterprise fleet.vehicle
 type FleetVehicle struct {
 	models.ModelBase
 	LicensePlate      string             `gorm:"size:32;not null;uniqueIndex" json:"license_plate"` // e.g. "B 1234 XYZ"
@@ -38,7 +38,7 @@ type FleetVehicle struct {
 	Note              string             `gorm:"type:text" json:"note,omitempty"`
 }
 
-// FleetOdometerLog corresponds to Odoo's fleet.vehicle.odometer
+// FleetOdometerLog corresponds to standard enterprise fleet.vehicle.odometer
 type FleetOdometerLog struct {
 	models.ModelBase
 	VehicleID        uint          `gorm:"not null;index" json:"vehicle_id"`
@@ -50,7 +50,7 @@ type FleetOdometerLog struct {
 	Note             string        `gorm:"size:255" json:"note,omitempty"`
 }
 
-// FleetServiceLog corresponds to Odoo's fleet.vehicle.log.services
+// FleetServiceLog corresponds to standard enterprise fleet.vehicle.log.services
 type FleetServiceLog struct {
 	models.ModelBase
 	ServiceNumber    string        `gorm:"size:64;not null;uniqueIndex" json:"service_number"` // e.g. SRV/FLEET/2026/00001

@@ -36,4 +36,4 @@ ehthumbs.db
 Thumbs.db
 
 # External upstream reference directory
-/odoo_reference/
+/reference/

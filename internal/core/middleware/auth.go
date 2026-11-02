@@ -29,7 +29,7 @@ func GenerateToken(userID uint, email, name, role string, companyID uint, secret
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			Issuer:    "odoo-golang-erp",
+			Issuer:    "go-erplang-erp",
 		},
 	}
 

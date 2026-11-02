@@ -6,7 +6,7 @@ import (
 	"erp-golang/internal/modules/product"
 )
 
-// SaleOrder corresponds to Odoo's sale.order
+// SaleOrder corresponds to standard enterprise sale.order
 type SaleOrder struct {
 	models.ModelBase
 	Name          string          `gorm:"size:64;not null;uniqueIndex" json:"name"` // e.g. SO0001
@@ -24,7 +24,7 @@ type SaleOrder struct {
 	Note          string          `gorm:"type:text" json:"note"`
 }
 
-// SaleOrderLine corresponds to Odoo's sale.order.line
+// SaleOrderLine corresponds to standard enterprise sale.order.line
 type SaleOrderLine struct {
 	models.ModelBase
 	OrderID       uint            `gorm:"index" json:"order_id"`

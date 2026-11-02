@@ -85,7 +85,7 @@ func (s *Service) CreateOrder(order *SaleOrder) error {
 	return s.db.Create(order).Error
 }
 
-// ActionConfirm executes Odoo's action_confirm: confirm quotation -> Sales Order + auto-generate Delivery Order
+// ActionConfirm executes standard enterprise action_confirm: confirm quotation -> Sales Order + auto-generate Delivery Order
 func (s *Service) ActionConfirm(id uint, companyID uint) (*SaleOrder, *stock.StockPicking, error) {
 	order, err := s.GetOrder(id, companyID)
 	if err != nil {

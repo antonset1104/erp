@@ -119,7 +119,7 @@ func (m *Module) Seed(db *gorm.DB) error {
 				DepartmentID:      itDept.ID,
 				ExpectedEmployees: 2,
 				CurrentHired:      0,
-				Requirements:      "Kualifikasi: Minimal 3 tahun pengalaman backend development dengan Golang, Gin framework, GORM, database PostgreSQL & SQLite. Berpengalaman dengan Cloudflare Workers, Edge caching, Docker, dan arsitektur Modular Monolith/Microservices. Memahami konsep ERP Odoo, clean code, dan high concurrency.",
+				Requirements:      "Kualifikasi: Minimal 3 tahun pengalaman backend development dengan Golang, Gin framework, GORM, database PostgreSQL & SQLite. Berpengalaman dengan Cloudflare Workers, Edge caching, Docker, dan arsitektur Modular Monolith/Microservices. Memahami konsep ERP Enterprise ERP, clean code, dan high concurrency.",
 				Description:       "Bertanggung jawab atas arsitektur backend ERP, integrasi Cloudflare Workers AI edge copilot, optimalisasi latensi database, dan sinkronisasi modul multi-company.",
 				SalaryMin:         16000000,
 				SalaryMax:         25000000,

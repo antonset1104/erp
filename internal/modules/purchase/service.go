@@ -84,7 +84,7 @@ func (s *Service) CreateOrder(order *PurchaseOrder) error {
 	return s.db.Create(order).Error
 }
 
-// ActionConfirm executes Odoo's button_confirm: confirm RFQ -> Purchase Order + auto-generate Stock Receipt
+// ActionConfirm executes standard enterprise button_confirm: confirm RFQ -> Purchase Order + auto-generate Stock Receipt
 func (s *Service) ActionConfirm(id uint, companyID uint) (*PurchaseOrder, *stock.StockPicking, error) {
 	order, err := s.GetOrder(id, companyID)
 	if err != nil {

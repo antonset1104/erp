@@ -519,7 +519,7 @@ func (s *Service) ActionPostSheet(sheetID, companyID uint, userID uint) (*Expens
 	}
 	moveLines = append(moveLines, creditLine)
 
-	partnerID := uint(1) // PT Odoo-Go ERP Solusindo
+	partnerID := uint(1) // PT GoERP Solusindo
 	if sheet.EmployeeID > 0 {
 		// Employee can use default partner
 		partnerID = 1

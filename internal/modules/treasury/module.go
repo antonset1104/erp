@@ -96,7 +96,7 @@ func (m *Module) Seed(db *gorm.DB) error {
 		AccountCode:     "BA/2026/001",
 		BankName:        "Bank Central Asia (BCA)",
 		AccountNumber:   "800-1288-9900",
-		AccountHolder:   "PT Odoo Golang Nusantara",
+		AccountHolder:   "PT Golang ERP Nusantara",
 		AccountType:     BankTypeChecking,
 		Currency:        "IDR",
 		CurrentBalance:  750000000, // Rp 750 Juta
@@ -120,7 +120,7 @@ func (m *Module) Seed(db *gorm.DB) error {
 		AccountCode:     "BA/2026/002",
 		BankName:        "Bank Mandiri",
 		AccountNumber:   "137-00-9821-445",
-		AccountHolder:   "PT Odoo Golang Nusantara",
+		AccountHolder:   "PT Golang ERP Nusantara",
 		AccountType:     BankTypeChecking,
 		Currency:        "IDR",
 		CurrentBalance:  320000000, // Rp 320 Juta
@@ -144,7 +144,7 @@ func (m *Module) Seed(db *gorm.DB) error {
 		AccountCode:     "BA/2026/003",
 		BankName:        "Bank Negara Indonesia (BNI)",
 		AccountNumber:   "089-2234-551",
-		AccountHolder:   "PT Odoo Golang Nusantara",
+		AccountHolder:   "PT Golang ERP Nusantara",
 		AccountType:     BankTypeDeposit,
 		Currency:        "IDR",
 		CurrentBalance:  200000000, // Rp 200 Juta

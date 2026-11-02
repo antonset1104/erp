@@ -1,5 +1,5 @@
 # ==========================================
-# Multi-stage Dockerfile for Odoo-Go ERP
+# Multi-stage Dockerfile for GoERP
 # ==========================================
 
 # Stage 1: Build binary with CGO (for SQLite / PostgreSQL)
@@ -42,7 +42,7 @@ EXPOSE 8080
 # Environment defaults
 ENV PORT=8080
 ENV DB_TYPE=sqlite
-ENV DB_PATH=/app/odoo_erp.db
+ENV DB_PATH=/app/erp.db
 ENV JWT_SECRET=production-secret-replace-me
 
 # Run ERP server

@@ -9,7 +9,7 @@ import (
 	"erp-golang/internal/modules/project"
 )
 
-// ExpenseCategory corresponds to Odoo's hr.expense.category (Expense Products & Types)
+// ExpenseCategory corresponds to standard enterprise hr.expense.category (Expense Products & Types)
 type ExpenseCategory struct {
 	models.ModelBase
 	Name          string                  `gorm:"size:128;not null;index" json:"name"`         // e.g. "Perjalanan Dinas & Akomodasi"
@@ -22,7 +22,7 @@ type ExpenseCategory struct {
 	Description   string                  `gorm:"size:255" json:"description,omitempty"`
 }
 
-// Expense corresponds to Odoo's hr.expense (Individual Expense Item / Claim Line)
+// Expense corresponds to standard enterprise hr.expense (Individual Expense Item / Claim Line)
 type Expense struct {
 	models.ModelBase
 	ExpenseNumber string              `gorm:"size:64;not null;uniqueIndex" json:"expense_number"` // e.g. EXP-ITM/2026/00001
@@ -46,7 +46,7 @@ type Expense struct {
 	Notes         string              `gorm:"type:text" json:"notes,omitempty"`
 }
 
-// ExpenseSheet corresponds to Odoo's hr.expense.sheet (Expense Report / Rekapitulasi Pengajuan)
+// ExpenseSheet corresponds to standard enterprise hr.expense.sheet (Expense Report / Rekapitulasi Pengajuan)
 type ExpenseSheet struct {
 	models.ModelBase
 	SheetNumber    string               `gorm:"size:64;not null;uniqueIndex" json:"sheet_number"` // e.g. EXP/2026/00001

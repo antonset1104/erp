@@ -680,7 +680,7 @@ Hasilkan JSON dengan format tepat:
 				"1. Mohon segera hentikan distribusi, penjualan, atau penggunaan lot tersebut.\n"+
 				"2. Pisahkan dan beri tanda 'KARANTINA - DALAM PROSES PENARIKAN'.\n"+
 				"3. Tim logistik kami akan segera menghubungi Anda untuk proses penjemputan fisik dan penggantian batch/kredit nota penuh.\n\n"+
-				"Hotline Mutu: (021) 555-RECALL / quality-alert@erp-odoo.id\n\n"+
+				"Hotline Mutu: (021) 555-RECALL / quality-alert@golang-erp.id\n\n"+
 				"Hormat kami,\nManajemen Penjaminan Mutu (QA/QC)",
 			customerListStr, recall.ProductName, recall.TargetLotName, lot.ExpirationDate, recall.Reason, strings.ToUpper(recall.Severity),
 		)

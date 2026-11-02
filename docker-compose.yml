@@ -1,12 +1,12 @@
 version: '3.8'
 
 services:
-  # Odoo-Go ERP Backend & Dashboard
+  # GoERP Backend & Dashboard
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: odoo_go_app
+    container_name: erp_app
     restart: unless-stopped
     ports:
       - "8080:8080"
@@ -15,48 +15,48 @@ services:
       - DB_TYPE=postgres
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_USER=odoo
-      - DB_PASSWORD=odoo_secret_password
-      - DB_NAME=odoo_erp
+      - DB_USER=erp
+      - DB_PASSWORD=erp_secret_password
+      - DB_NAME=erp_db
       - JWT_SECRET=super-secure-production-jwt-token-key-2026
     depends_on:
       postgres:
         condition: service_healthy
     networks:
-      - odoo_net
+      - erp_net
 
   # PostgreSQL 16 Enterprise Database
   postgres:
     image: postgres:16-alpine
-    container_name: odoo_go_postgres
+    container_name: erp_postgres
     restart: unless-stopped
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=odoo
-      - POSTGRES_PASSWORD=odoo_secret_password
-      - POSTGRES_DB=odoo_erp
+      - POSTGRES_USER=erp
+      - POSTGRES_PASSWORD=erp_secret_password
+      - POSTGRES_DB=erp_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U odoo -d odoo_erp"]
+      test: ["CMD-SHELL", "pg_isready -U erp -d erp_db"]
       interval: 5s
       timeout: 5s
       retries: 5
     networks:
-      - odoo_net
+      - erp_net
 
   # Redis for In-Memory Caching & Session Storage
   redis:
     image: redis:7-alpine
-    container_name: odoo_go_redis
+    container_name: erp_redis
     restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
     networks:
-      - odoo_net
+      - erp_net
 
 volumes:
   postgres_data:
@@ -65,5 +65,5 @@ volumes:
     driver: local
 
 networks:
-  odoo_net:
+  erp_net:
     driver: bridge

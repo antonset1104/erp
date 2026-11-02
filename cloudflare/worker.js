@@ -25,7 +25,7 @@ export default {
     if (url.pathname === "/health" || url.pathname === "/") {
       return new Response(JSON.stringify({
         status: "ok",
-        service: "Odoo-Go ERP Cloudflare Workers AI Gateway",
+        service: "GoERP Cloudflare Workers AI Gateway",
         models: {
           default_llm: "@cf/meta/llama-3.1-8b-instruct",
           deep_rca: "@cf/meta/llama-3.3-70b-instruct",

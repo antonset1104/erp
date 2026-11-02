@@ -76,8 +76,8 @@ func (m *Module) Seed(db *gorm.DB) error {
 	db.Model(&Company{}).Count(&compCount)
 	if compCount == 0 {
 		company := Company{
-			Name:       "PT Odoo Golang Nusantara",
-			Email:      "info@odoogolang.co.id",
+			Name:       "PT Golang ERP Nusantara",
+			Email:      "info@goerplang.co.id",
 			Phone:      "+62 21 555 1234",
 			Street:     "Jl. Jendral Sudirman Kav. 52",
 			City:       "Jakarta",
@@ -99,7 +99,7 @@ func (m *Module) Seed(db *gorm.DB) error {
 
 		adminPartner := Partner{
 			Name:      "System Administrator",
-			Email:     "admin@odoo.local",
+			Email:     "admin@erp.local",
 			IsCompany: false,
 		}
 		adminPartner.CompanyID = 1
@@ -107,14 +107,14 @@ func (m *Module) Seed(db *gorm.DB) error {
 
 		admin := User{
 			Name:         "Administrator",
-			Email:        "admin@odoo.local",
+			Email:        "admin@erp.local",
 			PasswordHash: string(hash),
 			Role:         "admin",
 			PartnerID:    adminPartner.ID,
 		}
 		admin.CompanyID = 1
 		db.Create(&admin)
-		log.Println("[Base] Seeded admin user: admin@odoo.local / admin123")
+		log.Println("[Base] Seeded admin user: admin@erp.local / admin123")
 
 		// Seed sample Customers and Suppliers
 		samplePartners := []Partner{

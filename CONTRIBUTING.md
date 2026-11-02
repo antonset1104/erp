@@ -1,6 +1,6 @@
 # Panduan Kontribusi (Contributing Guide)
 
-Terima kasih atas minat Anda untuk berkontribusi pada **Odoo-Go ERP**! Kami menyambut segala bentuk kontribusi dari komunitas pengembang open source di seluruh dunia, mulai dari pelaporan bug (*bug reports*), usulan fitur (*feature proposals*), perbaikan dokumentasi (*documentation improvements*), hingga pengiriman kode (*Pull Requests*).
+Terima kasih atas minat Anda untuk berkontribusi pada **GoERP**! Kami menyambut segala bentuk kontribusi dari komunitas pengembang open source di seluruh dunia, mulai dari pelaporan bug (*bug reports*), usulan fitur (*feature proposals*), perbaikan dokumentasi (*documentation improvements*), hingga pengiriman kode (*Pull Requests*).
 
 ---
 
@@ -66,7 +66,7 @@ go fmt ./...
 
 ## 🏗️ Struktur Arsitektur & Panduan Menambah Modul
 
-Odoo-Go ERP dibangun dengan arsitektur **Modular Monolith** berkinerja tinggi:
+GoERP dibangun dengan arsitektur **Modular Monolith** berkinerja tinggi:
 
 ```
 erp/

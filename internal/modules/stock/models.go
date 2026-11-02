@@ -5,7 +5,7 @@ import (
 	"erp-golang/internal/modules/product"
 )
 
-// StockWarehouse corresponds to Odoo's stock.warehouse (Multi-Warehouse Management)
+// StockWarehouse corresponds to standard enterprise stock.warehouse (Multi-Warehouse Management)
 type StockWarehouse struct {
 	models.ModelBase
 	Name       string         `gorm:"size:128;not null" json:"name"`
@@ -17,7 +17,7 @@ type StockWarehouse struct {
 	Active     bool           `gorm:"default:true" json:"active"`
 }
 
-// StockLocation corresponds to Odoo's stock.location
+// StockLocation corresponds to standard enterprise stock.location
 type StockLocation struct {
 	models.ModelBase
 	Name         string          `gorm:"size:128;not null" json:"name"`
@@ -28,7 +28,7 @@ type StockLocation struct {
 	CompleteName string          `gorm:"size:255" json:"complete_name"`
 }
 
-// StockPicking corresponds to Odoo's stock.picking (Receipts, Deliveries, Transfers)
+// StockPicking corresponds to standard enterprise stock.picking (Receipts, Deliveries, Transfers)
 type StockPicking struct {
 	models.ModelBase
 	Name           string      `gorm:"size:64;not null;uniqueIndex" json:"name"` // e.g. WH/IN/0001, WH/OUT/0001
@@ -47,7 +47,7 @@ type StockPicking struct {
 	Note           string      `gorm:"type:text" json:"note"`
 }
 
-// StockMove corresponds to Odoo's stock.move
+// StockMove corresponds to standard enterprise stock.move
 type StockMove struct {
 	models.ModelBase
 	PickingID      uint            `gorm:"index" json:"picking_id"`
@@ -61,7 +61,7 @@ type StockMove struct {
 	State          string          `gorm:"size:32;default:'draft'" json:"state"` // "draft", "confirmed", "done", "cancel"
 }
 
-// StockQuant corresponds to Odoo's stock.quant (On-Hand Balance per Product & Location)
+// StockQuant corresponds to standard enterprise stock.quant (On-Hand Balance per Product & Location)
 type StockQuant struct {
 	models.ModelBase
 	ProductID  uint            `gorm:"not null;index:idx_prod_loc,unique" json:"product_id"`
@@ -72,7 +72,7 @@ type StockQuant struct {
 	Reserved   float64         `gorm:"default:0" json:"reserved"`
 }
 
-// StockOrderpoint corresponds to Odoo's stock.warehouse.orderpoint (Reordering Rules)
+// StockOrderpoint corresponds to standard enterprise stock.warehouse.orderpoint (Reordering Rules)
 type StockOrderpoint struct {
 	models.ModelBase
 	Name          string          `gorm:"size:64;not null;uniqueIndex" json:"name"` // e.g. OP/00001

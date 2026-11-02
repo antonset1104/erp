@@ -5,7 +5,7 @@ import (
 	"erp-golang/internal/modules/base"
 )
 
-// CrmLead corresponds to Odoo's crm.lead (Leads & Opportunities Pipeline)
+// CrmLead corresponds to standard enterprise crm.lead (Leads & Opportunities Pipeline)
 type CrmLead struct {
 	models.ModelBase
 	Name            string        `gorm:"size:255;not null" json:"name"` // Opportunity Title e.g. "Pengadaan Laptop Kantor"

@@ -7,7 +7,7 @@ import (
 	"erp-golang/internal/modules/hr"
 )
 
-// MaintenanceEquipmentCategory corresponds to Odoo's maintenance.equipment.category
+// MaintenanceEquipmentCategory corresponds to standard enterprise maintenance.equipment.category
 type MaintenanceEquipmentCategory struct {
 	models.ModelBase
 	Name             string     `gorm:"size:128;not null;uniqueIndex" json:"name"`
@@ -17,7 +17,7 @@ type MaintenanceEquipmentCategory struct {
 	Note             string     `gorm:"type:text" json:"note,omitempty"`
 }
 
-// MaintenanceEquipment corresponds to Odoo's maintenance.equipment
+// MaintenanceEquipment corresponds to standard enterprise maintenance.equipment
 type MaintenanceEquipment struct {
 	models.ModelBase
 	Name                  string                        `gorm:"size:255;not null" json:"name"`
@@ -45,7 +45,7 @@ type MaintenanceEquipment struct {
 	Note                  string                        `gorm:"type:text" json:"note,omitempty"`
 }
 
-// MaintenanceRequest corresponds to Odoo's maintenance.request
+// MaintenanceRequest corresponds to standard enterprise maintenance.request
 type MaintenanceRequest struct {
 	models.ModelBase
 	RequestNumber   string                `gorm:"size:64;not null;uniqueIndex" json:"request_number"` // e.g. REQ/MAINT/2026/00001

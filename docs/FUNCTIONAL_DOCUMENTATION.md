@@ -1,8 +1,8 @@
-# Dokumentasi Fungsional (Functional Documentation) — Odoo-Go ERP v1.0
+# Dokumentasi Fungsional (Functional Documentation) — GoERP v1.0
 
 ## 1. Gambaran Umum Fungsionalitas Bisnis
 
-**Odoo-Go ERP** mengintegrasikan **50 modul fungsional kelas enterprise** ke dalam satu basis data terpadu. Setiap transaksi operasional di satu modul secara otomatis memicu pembaruan di modul terkait (Inventaris, Buku Besar Akuntansi, Pajak, Kepabeanan, dan Jejak Audit) tanpa duplikasi entri manual.
+**GoERP** mengintegrasikan **50 modul fungsional kelas enterprise** ke dalam satu basis data terpadu. Setiap transaksi operasional di satu modul secara otomatis memicu pembaruan di modul terkait (Inventaris, Buku Besar Akuntansi, Pajak, Kepabeanan, dan Jejak Audit) tanpa duplikasi entri manual.
 
 ```mermaid
 flowchart LR

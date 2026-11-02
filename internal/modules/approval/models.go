@@ -7,7 +7,7 @@ import (
 	"erp-golang/internal/modules/base"
 )
 
-// ApprovalCategory defines approval templates and governance rules (approval.category in Odoo)
+// ApprovalCategory defines approval templates and governance rules (approval.category in Enterprise ERP)
 type ApprovalCategory struct {
 	models.ModelBase
 	Name                 string  `gorm:"size:128;not null" json:"name"`
@@ -26,7 +26,7 @@ func (ApprovalCategory) TableName() string {
 	return "approval_categories"
 }
 
-// ApprovalRequest represents a specific business approval workflow (approval.request in Odoo)
+// ApprovalRequest represents a specific business approval workflow (approval.request in Enterprise ERP)
 type ApprovalRequest struct {
 	models.ModelBase
 	Name           string             `gorm:"size:255;not null" json:"name"`
@@ -50,7 +50,7 @@ func (ApprovalRequest) TableName() string {
 	return "approval_requests"
 }
 
-// ApprovalApprover represents each approval tier in the matrix (approval.approver in Odoo)
+// ApprovalApprover represents each approval tier in the matrix (approval.approver in Enterprise ERP)
 type ApprovalApprover struct {
 	models.ModelBase
 	RequestID    uint       `gorm:"not null;index" json:"request_id"`

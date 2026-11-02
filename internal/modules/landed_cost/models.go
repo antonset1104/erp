@@ -30,7 +30,7 @@ const (
 	StateCancel   LandedCostState = "cancel"   // Dibatalkan
 )
 
-// StockLandedCost represents Odoo's stock.landed.cost (Alokasi Biaya Tambahan Pengadaan & Impor)
+// StockLandedCost represents standard enterprise stock.landed.cost (Alokasi Biaya Tambahan Pengadaan & Impor)
 type StockLandedCost struct {
 	ID               uint            `gorm:"primaryKey" json:"id"`
 	CreatedAt        time.Time       `json:"created_at"`
@@ -53,7 +53,7 @@ type StockLandedCost struct {
 	ValuationLines []StockValuationAdjustmentLine `gorm:"foreignKey:CostID" json:"valuation_lines"`
 }
 
-// StockLandedCostLine represents Odoo's stock.landed.cost.line (Rincian komponen biaya)
+// StockLandedCostLine represents standard enterprise stock.landed.cost.line (Rincian komponen biaya)
 type StockLandedCostLine struct {
 	ID          uint           `gorm:"primaryKey" json:"id"`
 	CreatedAt   time.Time      `json:"created_at"`
@@ -67,7 +67,7 @@ type StockLandedCostLine struct {
 	AccountName string         `gorm:"type:varchar(128)" json:"account_name,omitempty"`
 }
 
-// StockValuationAdjustmentLine represents Odoo's stock.valuation.adjustment.lines (Hasil simulasi alokasi ke tiap item)
+// StockValuationAdjustmentLine represents standard enterprise stock.valuation.adjustment.lines (Hasil simulasi alokasi ke tiap item)
 type StockValuationAdjustmentLine struct {
 	ID                   uint           `gorm:"primaryKey" json:"id"`
 	CreatedAt            time.Time      `json:"created_at"`

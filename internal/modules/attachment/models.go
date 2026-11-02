@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// Attachment represents an uploaded document/file across any ERP model (based on Odoo's ir.attachment)
+// Attachment represents an uploaded document/file across any ERP model (based on standard enterprise ir.attachment)
 type Attachment struct {
 	ID          uint           `gorm:"primaryKey" json:"id"`
 	Name        string         `gorm:"size:255;not null;index" json:"name"`

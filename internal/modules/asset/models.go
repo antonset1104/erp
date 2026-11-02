@@ -6,7 +6,7 @@ import (
 	"erp-golang/internal/modules/base"
 )
 
-// Asset corresponds to Odoo's account.asset (Fixed Asset Management)
+// Asset corresponds to standard enterprise account.asset (Fixed Asset Management)
 type Asset struct {
 	models.ModelBase
 	Name                  string                  `gorm:"size:255;not null" json:"name"`
@@ -36,7 +36,7 @@ type Asset struct {
 	Note                  string                  `gorm:"type:text" json:"note"`
 }
 
-// AssetDepreciationLine corresponds to Odoo's account.asset.depreciation.line
+// AssetDepreciationLine corresponds to standard enterprise account.asset.depreciation.line
 type AssetDepreciationLine struct {
 	models.ModelBase
 	AssetID          uint                 `gorm:"not null;index" json:"asset_id"`

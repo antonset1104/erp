@@ -4,7 +4,7 @@ import (
 	"erp-golang/internal/core/models"
 )
 
-// Department corresponds to Odoo's hr.department
+// Department corresponds to standard enterprise hr.department
 type Department struct {
 	models.ModelBase
 	Name        string `gorm:"size:128;not null;index" json:"name"`
@@ -12,7 +12,7 @@ type Department struct {
 	Description string `gorm:"type:text" json:"description"`
 }
 
-// JobPosition corresponds to Odoo's hr.job
+// JobPosition corresponds to standard enterprise hr.job
 type JobPosition struct {
 	models.ModelBase
 	Name         string     `gorm:"size:128;not null;index" json:"name"` // e.g. "Software Engineer"
@@ -20,7 +20,7 @@ type JobPosition struct {
 	Department   Department `gorm:"foreignKey:DepartmentID" json:"department,omitempty"`
 }
 
-// Employee corresponds to Odoo's hr.employee
+// Employee corresponds to standard enterprise hr.employee
 type Employee struct {
 	models.ModelBase
 	Name         string      `gorm:"size:128;not null;index" json:"name"`
@@ -36,7 +36,7 @@ type Employee struct {
 	Status       string      `gorm:"size:32;default:'active'" json:"status"` // "active", "resigned"
 }
 
-// Payslip corresponds to Odoo's hr.payslip (Employee Payroll)
+// Payslip corresponds to standard enterprise hr.payslip (Employee Payroll)
 type Payslip struct {
 	models.ModelBase
 	Name        string   `gorm:"size:64;not null;uniqueIndex" json:"name"` // e.g. SLIP/2026/10/00001

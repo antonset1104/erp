@@ -92,11 +92,11 @@ func RenderPickingHTML(p *StockPicking) string {
 
 		<div class="header">
 			<div>
-				<div class="company-name">🏢 PT ODOO-GO INDONESIA</div>
+				<div class="company-name">🏢 PT GOLANG ERP INDONESIA</div>
 				<div class="company-info">
 					Logistics & Central Warehouse (WH/Stock)<br>
 					Kawasan Pergudangan Logistik Blok C-4, Jakarta Barat<br>
-					Telp: +62 21 555-9999 | Email: warehouse@odoogolang.co.id
+					Telp: +62 21 555-9999 | Email: warehouse@goerplang.co.id
 				</div>
 			</div>
 			<div class="doc-title">

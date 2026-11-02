@@ -1,8 +1,8 @@
-# Dokumentasi Teknis (Technical Documentation) — Odoo-Go ERP v1.0
+# Dokumentasi Teknis (Technical Documentation) — GoERP v1.0
 
 ## 1. Ikhtisar Arsitektur Sistem (System Architecture Overview)
 
-**Odoo-Go ERP** adalah sistem *Enterprise Resource Planning* (ERP) modular berkinerja tinggi yang dibangun menggunakan bahasa pemrograman **Go (Golang)** dengan pola arsitektur **Modular Monolith** terinspirasi dari *Odoo Framework* (`ir.model`, `res.partner`, `stock.quant`, `account.move`) dan prinsip **Clean Architecture** (*Handler → Service → Repository → GORM Model*).
+**GoERP** adalah sistem *Enterprise Resource Planning* (ERP) modular berkinerja tinggi yang dibangun menggunakan bahasa pemrograman **Go (Golang)** dengan pola arsitektur **Modular Monolith** terinspirasi dari *standard enterprise ERP framework* (`ir.model`, `res.partner`, `stock.quant`, `account.move`) dan prinsip **Clean Architecture** (*Handler → Service → Repository → GORM Model*).
 
 ```mermaid
 flowchart TD
@@ -60,7 +60,7 @@ c:\erp\
 │   │   ├── export/                 # Utilitas ekspor CSV universal untuk seluruh tabel ERP
 │   │   ├── middleware/             # JWT AuthMiddleware & Role-Based Access Control (RBAC)
 │   │   ├── models/                 # BaseModel standar (ID, CreatedAt, UpdatedAt, DeletedAt, CompanyID)
-│   │   ├── registry/               # Registri modul dinamis (Odoo-style module loader)
+│   │   ├── registry/               # Registri modul dinamis (Enterprise-style module loader)
 │   │   └── storage/                # Abstraksi penyimpanan objek Cloudflare R2 & Local File System
 │   └── modules/                    # 50 Modul Bisnis Enterprise (Masing-masing: models, repository, service, handler)
 │       ├── base/                   # 1. Perusahaan (res.company), Mitra (res.partner), Pengguna (res.users), Sequence
@@ -205,16 +205,16 @@ Seluruh endpoint berada di bawah prefix `/api/v1`:
 PORT=8080
 ENVIRONMENT=development
 DB_TYPE=sqlite                  # "sqlite" atau "postgres"
-DB_PATH=odoo_erp.db             # Digunakan jika DB_TYPE=sqlite
+DB_PATH=erp.db             # Digunakan jika DB_TYPE=sqlite
 # Konfigurasi PostgreSQL (Digunakan jika DB_TYPE=postgres)
 DB_HOST=localhost
 DB_PORT=5432
-DB_USER=odoo
-DB_PASSWORD=odoo_secret_password
-DB_NAME=odoo_erp
+DB_USER=erp
+DB_PASSWORD=erp_secret_password
+DB_NAME=erp_db
 DB_SSLMODE=disable
 
-JWT_SECRET=odoo-golang-erp-super-secret-key-2026
+JWT_SECRET=go-erplang-erp-super-secret-key-2026
 UPLOAD_DIR=./uploads/attachments
 
 # Opsional: Cloudflare Workers AI & R2 Object Storage

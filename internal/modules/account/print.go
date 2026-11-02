@@ -97,11 +97,11 @@ func RenderInvoiceHTML(move *AccountMove) string {
 
 		<div class="header">
 			<div>
-				<div class="company-name">🏢 PT ODOO-GO INDONESIA</div>
+				<div class="company-name">🏢 PT GOLANG ERP INDONESIA</div>
 				<div class="company-info">
 					Kawasan Bisnis Sudirman, Tower B Lt. 12, Jakarta Selatan<br>
 					NPWP: 01.234.567.8-012.000 | Telp: +62 21 555-8888<br>
-					Email: billing@odoogolang.co.id | www.odoogolang.co.id
+					Email: billing@goerplang.co.id | www.goerplang.co.id
 				</div>
 			</div>
 			<div class="doc-title">
@@ -124,7 +124,7 @@ func RenderInvoiceHTML(move *AccountMove) string {
 				Tanggal Faktur: <strong>%s</strong><br>
 				Jatuh Tempo: <strong>%s</strong><br>
 				Referensi Order: <strong>%s</strong><br>
-				Metode Pembayaran: Bank Transfer (BCA: 123-456-7890 a/n PT Odoo-Go)
+				Metode Pembayaran: Bank Transfer (BCA: 123-456-7890 a/n PT GoERP)
 			</div>
 		</div>
 
@@ -167,7 +167,7 @@ func RenderInvoiceHTML(move *AccountMove) string {
 		<div class="footer-notes">
 			<strong>Catatan Pembayaran:</strong><br>
 			1. Mohon sertakan nomor invoice pada berita transfer bank.<br>
-			2. Bukti transfer mohon diupload atau dikirimkan ke billing@odoogolang.co.id.<br>
+			2. Bukti transfer mohon diupload atau dikirimkan ke billing@goerplang.co.id.<br>
 			Catatan Dokumen: %s
 		</div>
 
@@ -178,7 +178,7 @@ func RenderInvoiceHTML(move *AccountMove) string {
 			</div>
 			<div class="sign-box">
 				Hormat Kami,<br>
-				<div class="sign-line">PT Odoo-Go Indonesia</div>
+				<div class="sign-line">PT GoERP Indonesia</div>
 			</div>
 		</div>
 	</div>

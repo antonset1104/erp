@@ -4,7 +4,7 @@ import (
 	"erp-golang/internal/core/models"
 )
 
-// MailMessage corresponds to Odoo's mail.message (Audit Trail, Notes, and Notifications)
+// MailMessage corresponds to standard enterprise mail.message (Audit Trail, Notes, and Notifications)
 type MailMessage struct {
 	models.ModelBase
 	ModelName   string `gorm:"size:64;not null;index:idx_model_res" json:"model_name"` // e.g. "sale.order", "account.move"

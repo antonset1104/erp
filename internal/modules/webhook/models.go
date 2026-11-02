@@ -25,7 +25,7 @@ const (
 	EventWildcard          = "*"
 )
 
-// WebhookSubscription represents a configured outbound webhook listener (Odoo webhook / webhook.subscription equivalent)
+// WebhookSubscription represents a configured outbound webhook listener (Enterprise ERP webhook / webhook.subscription equivalent)
 type WebhookSubscription struct {
 	models.ModelBase
 	Name          string    `gorm:"size:128;not null" json:"name"`                 // e.g. "Zapier CRM Sync", "Logistics 3PL Dispatch"

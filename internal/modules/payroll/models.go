@@ -5,7 +5,7 @@ import (
 	"erp-golang/internal/modules/hr"
 )
 
-// SalaryRuleCategory represents Odoo hr.salary.rule.category
+// SalaryRuleCategory represents Enterprise ERP hr.salary.rule.category
 type SalaryRuleCategory struct {
 	models.ModelBase
 	Code        string `gorm:"size:32;not null;index" json:"code"` // BASIC, ALW, DED, TAX, NET
@@ -18,7 +18,7 @@ func (SalaryRuleCategory) TableName() string {
 	return "payroll_salary_rule_categories"
 }
 
-// PayrollStructure represents Odoo hr.payroll.structure
+// PayrollStructure represents Enterprise ERP hr.payroll.structure
 type PayrollStructure struct {
 	models.ModelBase
 	Name        string       `gorm:"size:128;not null;index" json:"name"`
@@ -33,7 +33,7 @@ func (PayrollStructure) TableName() string {
 	return "payroll_structures"
 }
 
-// SalaryRule represents Odoo hr.salary.rule
+// SalaryRule represents Enterprise ERP hr.salary.rule
 type SalaryRule struct {
 	models.ModelBase
 	StructureID       uint    `gorm:"not null;index" json:"structure_id"`
@@ -54,7 +54,7 @@ func (SalaryRule) TableName() string {
 	return "payroll_salary_rules"
 }
 
-// PayslipRun represents Odoo hr.payslip.run (Batch Payroll Processing)
+// PayslipRun represents Enterprise ERP hr.payslip.run (Batch Payroll Processing)
 type PayslipRun struct {
 	models.ModelBase
 	Name            string    `gorm:"size:128;not null;uniqueIndex" json:"name"` // e.g. BATCH/PAY/2026/10
@@ -75,7 +75,7 @@ func (PayslipRun) TableName() string {
 	return "payroll_payslip_runs"
 }
 
-// Payslip represents Odoo hr.payslip
+// Payslip represents Enterprise ERP hr.payslip
 type Payslip struct {
 	models.ModelBase
 	Number               string            `gorm:"size:64;not null;uniqueIndex" json:"number"` // e.g. SLIP/2026/10/00001
@@ -113,7 +113,7 @@ func (Payslip) TableName() string {
 	return "payroll_payslips"
 }
 
-// PayslipLine represents Odoo hr.payslip.line
+// PayslipLine represents Enterprise ERP hr.payslip.line
 type PayslipLine struct {
 	models.ModelBase
 	PayslipID         uint    `gorm:"not null;index" json:"payslip_id"`

@@ -181,7 +181,7 @@ func (s *Service) TestPing(id uint, companyID uint) (*WebhookDelivery, error) {
 	}
 
 	pingData := map[string]interface{}{
-		"message":   "Hello from Odoo-Go ERP Webhook Engine!",
+		"message":   "Hello from GoERP Webhook Engine!",
 		"ping_time": time.Now().Format(time.RFC3339),
 		"endpoint":  sub.Name,
 		"version":   "v1.27.0",
@@ -259,7 +259,7 @@ func (s *Service) deliverToSubscription(sub *WebhookSubscription, eventName stri
 
 	headersSent := map[string]string{
 		"Content-Type":        "application/json",
-		"User-Agent":          "OdooGo-Webhook-Engine/1.27.0",
+		"User-Agent":          "GoERP-Webhook-Engine/1.27.0",
 		"X-Webhook-ID":        eventID,
 		"X-Webhook-Event":     eventName,
 		"X-Webhook-Timestamp": time.Now().UTC().Format(time.RFC3339),

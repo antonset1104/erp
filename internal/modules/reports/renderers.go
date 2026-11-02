@@ -152,7 +152,7 @@ func RenderSaleOrder(db *gorm.DB, id uint) (string, error) {
 		<div class="info-card-title">Rincian Dokumen</div>
 		<div><strong>Tanggal Order:</strong> %s</div>
 		<div><strong>Mata Uang:</strong> IDR (Rupiah)</div>
-		<div><strong>Sales Representative:</strong> Sales Executive Odoo-Go</div>
+		<div><strong>Sales Representative:</strong> Sales Executive GoERP</div>
 	`, FormatDateTime(parseTimeAny(order.DateOrder)))
 
 	var rows strings.Builder
@@ -401,7 +401,7 @@ func RenderAccountMove(db *gorm.DB, id uint) (string, error) {
 		<div class="info-card-title">Data Faktur</div>
 		<div><strong>Tanggal Terbit:</strong> %s</div>
 		<div><strong>Rekening Pembayaran:</strong> Bank Mandiri 123-00-9876543-2</div>
-		<div><strong>Atas Nama:</strong> PT Odoo-Go Indonesia Enterprise</div>
+		<div><strong>Atas Nama:</strong> PT GoERP Indonesia Enterprise</div>
 	`, FormatDateTime(parseTimeAny(move.InvoiceDate)))
 
 	var lines []struct {
@@ -451,7 +451,7 @@ func RenderAccountMove(db *gorm.DB, id uint) (string, error) {
 		</div>
 	`, FormatCurrency(move.AmountTotal))
 
-	notesHTML := `<div class="notes-box"><strong>Keterangan Pelunasan:</strong> Pembayaran dianggap sah apabila dana telah efektif masuk ke rekening koran perusahaan. Bukti transfer mohon diunggah ke Customer Portal atau dikirim ke finance@odoo.local.</div>`
+	notesHTML := `<div class="notes-box"><strong>Keterangan Pelunasan:</strong> Pembayaran dianggap sah apabila dana telah efektif masuk ke rekening koran perusahaan. Bukti transfer mohon diunggah ke Customer Portal atau dikirim ke finance@erp.local.</div>`
 
 	sigsHTML := `
 		<div class="signatures-grid">
@@ -843,7 +843,7 @@ func RenderPayslip(db *gorm.DB, id uint) (string, error) {
 		infoRight,
 		tableHTML,
 		summaryHTML,
-		`<div class="notes-box">Slip gaji ini dihasilkan secara elektronik oleh modul Enterprise Payroll Odoo-Go ERP dan merupakan dokumen rahasia (Strictly Confidential).</div>`,
+		`<div class="notes-box">Slip gaji ini dihasilkan secara elektronik oleh modul Enterprise Payroll GoERP dan merupakan dokumen rahasia (Strictly Confidential).</div>`,
 		"CONFIDENTIAL",
 		sigsHTML,
 		false,
@@ -1357,7 +1357,7 @@ func RenderTaxInvoice(db *gorm.DB, id uint) (string, error) {
 
 	infoRight := fmt.Sprintf(`
 		<div class="info-card-title">Pengusaha Kena Pajak (PKP) Penjual</div>
-		<div class="bold">PT ODOO-GO INDONESIA ENTERPRISE</div>
+		<div class="bold">PT GOLANG ERP INDONESIA ENTERPRISE</div>
 		<div>NPWP: 01.345.678.9-021.000</div>
 		<div>Tanggal Faktur: %s</div>
 	`, FormatDateTime(parseTimeAny(faktur.InvoiceDate)))
@@ -1436,7 +1436,7 @@ func RenderTaxEbupot(db *gorm.DB, id uint) (string, error) {
 	infoRight := fmt.Sprintf(`
 		<div class="info-card-title">Masa & Skema Pemotongan</div>
 		<div><strong>Skema Tarif:</strong> %s (PP 58/2023 & PMK 168/2023)</div>
-		<div><strong>Pemotong:</strong> PT Odoo-Go Indonesia (NPWP: 01.345.678.9-021.000)</div>
+		<div><strong>Pemotong:</strong> PT GoERP Indonesia (NPWP: 01.345.678.9-021.000)</div>
 	`, bp.TERCategory)
 
 	tableHTML := fmt.Sprintf(`
@@ -1579,7 +1579,7 @@ func RenderSubscription(db *gorm.DB, id uint) (string, error) {
 		"#0284c7",
 		fmt.Sprintf(`<div><strong>Pelanggan Berlangganan:</strong> %s</div>`, sub.PartnerName),
 		fmt.Sprintf(`<div><strong>Biaya Berulang (MRR):</strong> Rp %s / Bulan</div>`, FormatCurrency(sub.RecurringPrice)),
-		`<table class="data-table"><tr><th>Paket Layanan Software</th><th class="text-center">Siklus Penagihan</th><th class="text-right">Tarif</th></tr><tr><td>Odoo-Go ERP Enterprise Cloud Tier (Unlimited Users)</td><td class="text-center">Bulanan (Monthly Auto-Bill)</td><td class="text-right bold">Rp 5.500.000</td></tr></table>`,
+		`<table class="data-table"><tr><th>Paket Layanan Software</th><th class="text-center">Siklus Penagihan</th><th class="text-right">Tarif</th></tr><tr><td>GoERP Enterprise Cloud Tier (Unlimited Users)</td><td class="text-center">Bulanan (Monthly Auto-Bill)</td><td class="text-right bold">Rp 5.500.000</td></tr></table>`,
 		"",
 		"",
 		"ACTIVE SUBSCRIPTION",
@@ -1693,7 +1693,7 @@ func RenderConsolidation(db *gorm.DB, id uint) (string, error) {
 		fmt.Sprintf("KONSOL/%d/%02d", rep.PeriodYear, rep.PeriodMonth),
 		"AUDITED",
 		"#16a34a",
-		`<div><strong>Holding Company:</strong> PT Odoo-Go Nusantara Investama (Holding)</div>`,
+		`<div><strong>Holding Company:</strong> PT GoERP Nusantara Investama (Holding)</div>`,
 		fmt.Sprintf(`<div><strong>Periode:</strong> %02d / %d</div><div><strong>Standar:</strong> PSAK 65 / IFRS 10</div>`, rep.PeriodMonth, rep.PeriodYear),
 		fmt.Sprintf(`<table class="data-table"><tr><th>Pos Keuangan Konsolidasian</th><th class="text-right">Nominal Konsolidasi</th></tr><tr><td>Total Pendapatan Konsolidasi (Revenue)</td><td class="text-right bold">Rp %s</td></tr><tr><td>Laba Bersih Konsolidasian (Net Income)</td><td class="text-right bold" style="color:#16a34a;">Rp %s</td></tr></table>`,
 			FormatCurrency(rep.ConsolidatedRevenue), FormatCurrency(rep.ConsolidatedNetIncome)),
@@ -2001,7 +2001,7 @@ func RenderCustomRecord(db *gorm.DB, id uint) (string, error) {
 		fmt.Sprintf(`<div><strong>Model Teknikal:</strong> %s</div>`, model.TechnicalName),
 		tableHTML,
 		"",
-		`<div class="notes-box">Formulir entitas kustom ini dihasilkan secara dinamis oleh Universal Low-Code Studio Odoo-Go ERP.</div>`,
+		`<div class="notes-box">Formulir entitas kustom ini dihasilkan secara dinamis oleh Universal Low-Code Studio GoERP.</div>`,
 		"STUDIO FORM",
 		"",
 		false,

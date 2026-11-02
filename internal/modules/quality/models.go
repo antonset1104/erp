@@ -8,7 +8,7 @@ import (
 	"erp-golang/internal/modules/stock"
 )
 
-// QualityPoint corresponds to Odoo's quality.point (Inspection Rules & Quality Triggers)
+// QualityPoint corresponds to standard enterprise quality.point (Inspection Rules & Quality Triggers)
 type QualityPoint struct {
 	models.ModelBase
 	Title             string           `gorm:"size:128;not null;index" json:"title"`              // e.g. "Inspeksi Visual Segel & Fisik Barang Masuk"
@@ -26,7 +26,7 @@ type QualityPoint struct {
 	Active            bool             `json:"active"`
 }
 
-// QualityCheck corresponds to Odoo's quality.check (Executed Quality Inspection Item)
+// QualityCheck corresponds to standard enterprise quality.check (Executed Quality Inspection Item)
 type QualityCheck struct {
 	models.ModelBase
 	Name          string              `gorm:"size:64;not null;uniqueIndex" json:"name"`         // e.g. "QC/2026/00001"
@@ -54,7 +54,7 @@ type QualityCheck struct {
 	FailureReason string              `gorm:"type:text" json:"failure_reason,omitempty"`
 }
 
-// QualityAlert corresponds to Odoo's quality.alert (Non-Conformance / Root Cause Investigation)
+// QualityAlert corresponds to standard enterprise quality.alert (Non-Conformance / Root Cause Investigation)
 type QualityAlert struct {
 	models.ModelBase
 	Name             string              `gorm:"size:64;not null;uniqueIndex" json:"name"` // e.g. "QA/2026/00001"

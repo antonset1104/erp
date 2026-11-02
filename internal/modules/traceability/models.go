@@ -27,7 +27,7 @@ const (
 )
 
 // LotTraceRecord represents an immutable audit log of a lot's physical movement or transformation.
-// Corresponds to Odoo's stock.move.line & stock.traceability.report.
+// Corresponds to standard enterprise stock.move.line & stock.traceability.report.
 type LotTraceRecord struct {
 	models.ModelBase
 	LotID          uint                       `gorm:"not null;index" json:"lot_id"`
@@ -67,7 +67,7 @@ func (LotTraceRecord) TableName() string {
 	return "stock_lot_traces"
 }
 
-// ProductRecall corresponds to Odoo's stock.lot.recall.
+// ProductRecall corresponds to standard enterprise stock.lot.recall.
 // Captures official recall campaigns for contaminated or defective lots.
 type ProductRecall struct {
 	models.ModelBase

@@ -6,7 +6,7 @@ import (
 	"erp-golang/internal/modules/base"
 )
 
-// AnalyticAccount represents Odoo's account.analytic.account (Cost Center / Project / Department)
+// AnalyticAccount represents standard enterprise account.analytic.account (Cost Center / Project / Department)
 type AnalyticAccount struct {
 	models.ModelBase
 	Code         string        `gorm:"size:64;not null;index" json:"code"` // e.g. "AN/IT", "AN/SALES", "AN/OPS"
@@ -23,7 +23,7 @@ func (AnalyticAccount) TableName() string {
 	return "account_analytic_accounts"
 }
 
-// BudgetaryPosition represents Odoo's account.budget.post (Budgetary Positions / Pos Anggaran)
+// BudgetaryPosition represents standard enterprise account.budget.post (Budgetary Positions / Pos Anggaran)
 type BudgetaryPosition struct {
 	models.ModelBase
 	Name        string                   `gorm:"size:128;not null" json:"name"`
@@ -37,7 +37,7 @@ func (BudgetaryPosition) TableName() string {
 	return "account_budget_posts"
 }
 
-// Budget represents Odoo's crossovered.budget (account.budget)
+// Budget represents standard enterprise crossovered.budget (account.budget)
 type Budget struct {
 	models.ModelBase
 	Name                   string       `gorm:"size:128;not null" json:"name"`
@@ -62,7 +62,7 @@ func (Budget) TableName() string {
 	return "account_budgets"
 }
 
-// BudgetLine represents Odoo's crossovered.budget.lines
+// BudgetLine represents standard enterprise crossovered.budget.lines
 type BudgetLine struct {
 	models.ModelBase
 	BudgetID            uint               `gorm:"not null;index" json:"budget_id"`

@@ -1,5 +1,5 @@
 name: 🐛 Laporan Bug (Bug Report)
-description: Laporkan adanya perilaku yang salah, kegagalan transaksi, atau error sistem pada Odoo-Go ERP.
+description: Laporkan adanya perilaku yang salah, kegagalan transaksi, atau error sistem pada GoERP.
 title: "[BUG]: <deskripsi singkat masalah>"
 labels: ["bug", "triage"]
 body:

@@ -1,18 +1,18 @@
 # Panduan Strategis & Operasional Proyek Open Source (Open Source Project Guide)
 
-Dokumen ini merupakan cetak biru (*blueprint*) komprehensif bagi pemilik repositori, pengelola (*maintainers*), dan komunitas dalam mengelola **Odoo-Go ERP** sebagai proyek perangkat lunak sumber terbuka (*open source software*) berkelas dunia.
+Dokumen ini merupakan cetak biru (*blueprint*) komprehensif bagi pemilik repositori, pengelola (*maintainers*), dan komunitas dalam mengelola **GoERP** sebagai proyek perangkat lunak sumber terbuka (*open source software*) berkelas dunia.
 
 ---
 
 ## 1. Visi & Posisi Pasar (Market Positioning)
 
-### Mengapa Odoo-Go ERP?
-Odoo tradisional (berbasis Python/PostgreSQL) sangat populer namun sering menghadapi tantangan dalam hal:
+### Mengapa GoERP?
+Enterprise ERP tradisional (berbasis Python/PostgreSQL) sangat populer namun sering menghadapi tantangan dalam hal:
 - Konsumsi memori yang tinggi (ratusan megabyte per *worker process*).
 - Ketergantungan *runtime* yang rumit (*pip dependencies*, nodejs untuk asset bundling, pustaka C eksternal).
 - Kecepatan eksekusi dan konkurensi I/O yang terbatas.
 
-**Odoo-Go ERP** hadir untuk memecahkan tantangan tersebut dengan:
+**GoERP** hadir untuk memecahkan tantangan tersebut dengan:
 1. **Single Binary Executable**: Seluruh 50 modul enterprise dan aset antarmuka web dikemas dalam 1 file biner mandiri (tanpa perlu install Python, pip, atau npm di server produksi).
 2. **Kecepatan & Konkurensi Native Go**: Waktu *cold start* di bawah 50 milidetik, konsumsi RAM idle hanya ~25-40 MB, dan mampu menangani ribuan transaksi *concurrent* per detik.
 3. **Penyimpanan Fleksibel**: Dukungan SQLite *embedded* (ideal untuk UKM/edge/on-premise) dan PostgreSQL (untuk korporasi skala besar multi-cabang).
@@ -58,7 +58,7 @@ Untuk perubahan arsitektur besar (seperti penambahan modul inti baru, perubahan 
 ## 3. Strategi Lisensi & Hak Cipta (Licensing & CLA/DCO)
 
 ### Lisensi Utama: Apache License 2.0
-Proyek Odoo-Go ERP didistribusikan di bawah naungan **Apache License 2.0**.
+Proyek GoERP didistribusikan di bawah naungan **Apache License 2.0**.
 - **Kelebihan bagi Pengguna**: Bebas digunakan untuk keperluan komersial, privat, dan edukasi tanpa biaya lisensi.
 - **Perlindungan Paten Eksplisit**: Memberikan jaminan paten timbal balik dari kontributor kepada pengguna dan proyek.
 - **Klausul Pembatasan Tanggung Jawab (*Liability Disclaimer*)**: Melindungi pengelola dari tuntutan hukum kerusakan atau kehilangan data bisnis.
@@ -82,7 +82,7 @@ Agar repositori memenuhi standar baku proyek open source profesional di GitHub, 
 - **Description**: `Enterprise Resource Planning (ERP) platform in Golang — 50 enterprise modules, single-binary, high concurrency, double-entry inventory & accounting, low-code & BPMN engine.`
 - **Website URL**: `https://github.com/antonset1104/erp`
 - **Topics / Tags**:
-  `golang`, `go`, `erp`, `odoo`, `accounting`, `crm`, `wms`, `mrp`, `hris`, `bpm`, `workflow-engine`, `low-code`, `enterprise`, `double-entry`, `rest-api`
+  `golang`, `go`, `erp`, `erp`, `accounting`, `crm`, `wms`, `mrp`, `hris`, `bpm`, `workflow-engine`, `low-code`, `enterprise`, `double-entry`, `rest-api`
 - **Fitur Aktif**:
   - ✅ **Issues** (Diaktifkan)
   - ✅ **Discussions** (Diaktifkan untuk tanya-jawab, ide fitur, dan pengumuman)
@@ -112,7 +112,7 @@ Atur pada menu **Settings $\rightarrow$ Code security and analysis**:
 
 ## 5. Rekayasa Rilis & Semantic Versioning (SemVer)
 
-Odoo-Go ERP mematuhi konvensi **Semantic Versioning 2.0.0** (`vMAJOR.MINOR.PATCH`):
+GoERP mematuhi konvensi **Semantic Versioning 2.0.0** (`vMAJOR.MINOR.PATCH`):
 - **MAJOR (`v2.0.0`)**: Perubahan arsitektur besar yang merusak kompatibilitas backward (*breaking changes* pada API atau skema database).
 - **MINOR (`v1.42.0`)**: Penambahan modul baru, endpoint API baru, atau peningkatan fitur yang kompatibel ke belakang.
 - **PATCH (`v1.41.1`)**: Perbaikan bug, patch keamanan, atau optimasi performa tanpa mengubah kontrak API.
@@ -124,11 +124,11 @@ Odoo-Go ERP mematuhi konvensi **Semantic Versioning 2.0.0** (`vMAJOR.MINOR.PATCH
 ### Alur Rilis Biner Otomatis (GitHub Actions & GoReleaser):
 Ketika maintainer membuat git tag (contoh: `git tag -a v1.41.0 -m "Release v1.41.0" && git push origin v1.41.0`), workflow `.github/workflows/release.yml` otomatis:
 1. Mengompilasi biner untuk berbagai sistem operasi & arsitektur:
-   - `odoo-go-erp_v1.41.0_linux_amd64.tar.gz`
-   - `odoo-go-erp_v1.41.0_linux_arm64.tar.gz`
-   - `odoo-go-erp_v1.41.0_windows_amd64.zip`
-   - `odoo-go-erp_v1.41.0_darwin_amd64.tar.gz`
-   - `odoo-go-erp_v1.41.0_darwin_arm64.tar.gz` (Apple Silicon M1/M2/M3)
+   - `go-erp_v1.41.0_linux_amd64.tar.gz`
+   - `go-erp_v1.41.0_linux_arm64.tar.gz`
+   - `go-erp_v1.41.0_windows_amd64.zip`
+   - `go-erp_v1.41.0_darwin_amd64.tar.gz`
+   - `go-erp_v1.41.0_darwin_arm64.tar.gz` (Apple Silicon M1/M2/M3)
 2. Membuat hash verifikasi `SHA256SUMS.txt`.
 3. Membangun dan mempublikasikan image Docker resmi ke GitHub Container Registry (`ghcr.io/antonset1104/erp:v1.41.0` dan `:latest`).
 4. Menerbitkan rilis baru di halaman *Releases* GitHub beserta *Changelog* otomatis.
@@ -137,7 +137,7 @@ Ketika maintainer membuat git tag (contoh: `git tag -a v1.41.0 -m "Release v1.41
 
 ## 6. Arsitektur Ekstensibilitas untuk Modul Komunitas
 
-Pengembang pihak ketiga dapat memperluas fungsionalitas Odoo-Go ERP melalui 3 mekanisme utama:
+Pengembang pihak ketiga dapat memperluas fungsionalitas GoERP melalui 3 mekanisme utama:
 
 1. **Modul Native Go**: Menambahkan folder baru di `internal/modules/<nama_modul>`, mendaftarkan migrasi model di `internal/core/database/db.go`, dan mendaftarkan rute HTTP di `cmd/server/main.go`.
 2. **Low-Code Studio & Dynamic Data Models**: Membuat entitas database baru dan formulir UI kustom langsung dari antarmuka web tanpa perlu kompilasi ulang kode biner.
@@ -151,7 +151,7 @@ Sebagai proyek open source berskala enterprise, keberlanjutan pemeliharaan dapat
 
 | Komponen | Status Lisensi | Deskripsi |
 | :--- | :---: | :--- |
-| **Odoo-Go ERP Core Engine (50 Modul)** | 🆓 Open Source (Apache 2.0) | Bebas digunakan, dimodifikasi, dan di-hosting mandiri (*self-hosted*) tanpa batasan jumlah pengguna. |
+| **GoERP Core Engine (50 Modul)** | 🆓 Open Source (Apache 2.0) | Bebas digunakan, dimodifikasi, dan di-hosting mandiri (*self-hosted*) tanpa batasan jumlah pengguna. |
 | **Enterprise Cloud Hosting (Managed SaaS)** | 💼 Layanan Komersial | Layanan hosting cloud terkelola (backup harian otomatis, SSL, uptime SLA 99.9%, update versi 1-klik). |
 | **Custom Integration & Implementation Consulting** | 💼 Layanan Profesional | Jasa implementasi ERP untuk perusahaan besar, kustomisasi alur akuntansi/pajak khusus, dan pelatihan tim. |
 | **Enterprise Support & SLA** | 💼 Layanan Berlangganan | Jalur dukungan teknis prioritas (tiket 24/7, hotline respon 1 jam untuk downtime produksi). |

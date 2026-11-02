@@ -24,7 +24,7 @@ const (
 	IntervalYearly    = "yearly"
 )
 
-// SubscriptionTemplate represents contract templates (Odoo sale.subscription.template)
+// SubscriptionTemplate represents contract templates (Enterprise ERP sale.subscription.template)
 type SubscriptionTemplate struct {
 	models.ModelBase
 	Code               string  `gorm:"size:64;not null;uniqueIndex" json:"code"` // e.g. "TMPL-MONTHLY-PRO"
@@ -37,7 +37,7 @@ type SubscriptionTemplate struct {
 	Active             bool    `gorm:"default:true" json:"active"`
 }
 
-// Subscription represents recurring subscription contracts (Odoo sale.subscription)
+// Subscription represents recurring subscription contracts (Enterprise ERP sale.subscription)
 type Subscription struct {
 	models.ModelBase
 	Code                   string                    `gorm:"size:64;not null;uniqueIndex" json:"code"` // e.g. "SUB/2026/00001"

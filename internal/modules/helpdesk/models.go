@@ -5,7 +5,7 @@ import (
 	"erp-golang/internal/modules/base"
 )
 
-// HelpdeskTeam corresponds to Odoo's helpdesk.team
+// HelpdeskTeam corresponds to standard enterprise helpdesk.team
 type HelpdeskTeam struct {
 	models.ModelBase
 	Name     string     `gorm:"size:128;not null" json:"name"`
@@ -17,7 +17,7 @@ type HelpdeskTeam struct {
 	Active   bool       `gorm:"default:true" json:"active"`
 }
 
-// HelpdeskTicket corresponds to Odoo's helpdesk.ticket
+// HelpdeskTicket corresponds to standard enterprise helpdesk.ticket
 type HelpdeskTicket struct {
 	models.ModelBase
 	TicketNumber string        `gorm:"size:64;not null;uniqueIndex" json:"ticket_number"` // e.g. TICKET/2026/00001

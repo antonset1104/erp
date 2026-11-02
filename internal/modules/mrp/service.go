@@ -60,7 +60,7 @@ func (s *Service) CreateProduction(mo *MrpProduction) error {
 	return s.db.Create(mo).Error
 }
 
-// ActionProduce executes Odoo's manufacturing order production: consumes raw components and produces finished goods
+// ActionProduce executes standard enterprise manufacturing order production: consumes raw components and produces finished goods
 func (s *Service) ActionProduce(id uint, companyID uint) (*MrpProduction, error) {
 	var mo MrpProduction
 	if err := s.db.Preload("Bom.Lines").Where("id = ? AND company_id = ?", id, companyID).First(&mo).Error; err != nil {

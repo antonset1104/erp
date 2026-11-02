@@ -1,4 +1,4 @@
-# Odoo-Go ERP: Enterprise Resource Planning in Golang
+# GoERP: Enterprise Resource Planning in Golang
 
 [![Go Version](https://img.shields.io/badge/Go-1.22+-00ADD8?style=flat&logo=go)](https://golang.org)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
@@ -7,7 +7,7 @@
 [![Release](https://img.shields.io/badge/Release-v1.41.0-emerald)](https://github.com/antonset1104/erp/releases)
 [![Open Source](https://img.shields.io/badge/Open_Source-Community_Driven-purple)](docs/OPEN_SOURCE_GUIDE.md)
 
-Proyek ini adalah implementasi ulang (*recoding*) arsitektur ERP **Odoo** (dari [https://github.com/odoo/odoo](https://github.com/odoo/odoo)) ke bahasa pemrograman **Golang**. Dibangun dengan prinsip *modular monolith* (50 modul enterprise terintegrasi), performa tinggi, konkurensi native Go, memori rendah, serta menjamin integritas data transaksi bisnis.
+Proyek ini adalah platform Enterprise Resource Planning (ERP) modern kelas enterprise yang dibangun menggunakan bahasa pemrograman **Golang**. Dibangun dengan prinsip *modular monolith* (50 modul enterprise terintegrasi), performa tinggi, konkurensi native Go, memori rendah, serta menjamin integritas data transaksi bisnis.
 
 ---
 
@@ -49,7 +49,7 @@ Dokumentasi komprehensif tersedia di direktori `docs/`:
 - **Manajemen Harga**: Harga jual (*Sales Price*) dan harga modal (*Cost/Standard Price*).
 
 ### 3. **Modul Stok & Inventaris (`internal/modules/stock`) - Double-Entry & Multi-Warehouse**
-- Mengadopsi prinsip inventaris pembukuan ganda (*double-entry*) seperti Odoo: barang tidak pernah bertambah/berkurang sembarangan, melainkan berpindah antar lokasi (*Source* $\rightarrow$ *Destination*).
+- Mengadopsi prinsip inventaris pembukuan ganda (*double-entry*) seperti Enterprise ERP: barang tidak pernah bertambah/berkurang sembarangan, melainkan berpindah antar lokasi (*Source* $\rightarrow$ *Destination*).
 - **Master Multi-Warehouse (`stock.warehouse`)**: Mendukung banyak cabang/gedung gudang (misal `WH-JKT` Jakarta, `WH-SBY` Surabaya, `WH-BDG` Bandung) dengan lokasi simpan utama masing-masing (`lot_stock_id`).
 - **Transfer Antar-Gudang (*Inter-Warehouse Transfers* / `WH/INT`)**: Perpindahan stok antar-gudang secara atomik yang mengonservasi total stok produk di seluruh perusahaan.
 - **Lokasi Fisik & Virtual**: `WH/Stock`, `WH-SBY/Stock`, `WH-BDG/Stock` (Internal), `Virtual Locations/Inter-Warehouse Transit`, `Virtual/Vendors`, `Virtual/Customers`, `Virtual/Inventory Adjustment`.
@@ -97,7 +97,7 @@ Dokumentasi komprehensif tersedia di direktori `docs/`:
 ### 12. **Modul Project Management & Task Timesheet (`internal/modules/project`)**
 - **Proyek & Pelanggan (`project.project`)**: Manajemen proyek bisnis, warna aksen, integrasi kontak pelanggan (*Partner*), dan status aktif.
 - **Tugas & Tahapan Kanban (`project.task`)**: Pelacakan tugas per proyek dengan tahapan (`todo`, `in_progress`, `review`, `done`), prioritas kerja, estimasi jam (*Planned Hours*), jam terealisasi (*Effective Hours*), dan persentase *progress* atomik.
-- **Pencatatan Jam Kerja / Timesheets (`project.task.timesheet`)**: Analogi `account.analytic.line` pada Odoo untuk mencatat aktivitas harian karyawan dan jam kerja teknis.
+- **Pencatatan Jam Kerja / Timesheets (`project.task.timesheet`)**: Analogi `account.analytic.line` pada Enterprise ERP untuk mencatat aktivitas harian karyawan dan jam kerja teknis.
 
 ### 13. **Modul Manajemen Aset Tetap & Depresiasi Otomatis (`internal/modules/asset`) - `account.asset`**
 - **Registrasi Aset Tetap (`account.asset`)**: Nilai perolehan (*Original Value*), nilai sisa/residu (*Salvage Value*), durasi depresiasi (bulan/tahun), dan kategori aset (Hardware, Machinery, Vehicle, Furniture, Building).
@@ -166,7 +166,7 @@ Dokumentasi komprehensif tersedia di direktori `docs/`:
 - **Integrasi Universal Chatter**: Seluruh siklus pengajuan, persetujuan parsial per level, dan penolakan tercatat pada modul `chatter` (`mail.message`).
 
 ### 21. **Modul Dokumen & Cloudflare R2 Storage Hub (`internal/modules/attachment` & `internal/core/storage`)**
-- **Universal Document Attachment (`ir.attachment`)**: Menghubungkan berkas digital ke record transaksi apapun di ERP (`hr.expense`, `account.move`, `quality.alert`, `approval.request`, `purchase.order`, `project.task`, dll) sesuai arsitektur `ir.attachment` Odoo.
+- **Universal Document Attachment (`ir.attachment`)**: Menghubungkan berkas digital ke record transaksi apapun di ERP (`hr.expense`, `account.move`, `quality.alert`, `approval.request`, `purchase.order`, `project.task`, dll) sesuai arsitektur `ir.attachment` Enterprise ERP.
 - **Cloudflare R2 Zero-Egress Storage Adapter**: Mendukung penyimpanan cloud object storage Cloudflare R2 (S3-compatible) dengan penandatanganan AWS Signature Version 4 (SigV4). Menjamin nol biaya transfer keluar (*zero egress fees*) yang ideal untuk deployment Cloudflare.
 - **Seamless Local Disk Fallback**: Jika kredensial Cloudflare R2 tidak disetel, sistem secara transparan dan tanpa kendala menyimpan file ke penyimpanan lokal (`./uploads/attachments`), sehingga pengujian dan deployment on-premise tetap berjalan 100%.
 - **Validasi Integritas SHA256**: Setiap berkas dihitung nilai hash SHA256 untuk mendeteksi integritas data dan mencegah duplikasi file korporat.
@@ -324,7 +324,7 @@ Dokumentasi komprehensif tersedia di direktori `docs/`:
   - Dukungan multi-mata uang internasional (`res.currency`) dengan Base Currency perusahaan (default: IDR) dan mata uang asing (USD, EUR, SGD, JPY, GBP, AUD, CNY).
   - Integrasi pencatatan multi-currency pada Buku Besar (*General Ledger*), Jurnal Entri, Faktur Penjualan (AR), dan Tagihan Pembelian (AP) melalui `CurrencyID`, `CurrencyRate`, dan `AmountCurrency`.
 - **Manajemen Kurs Harian & Spot Rates JISDOR/BI (`res.currency.rates`)**:
-  - Pencatatan riwayat kurs tanggal efektif (*effective date lookup*) dengan Direct Rate (e.g. 16.300 IDR/USD) dan Inverse Rate Odoo (Unit per 1 Base IDR).
+  - Pencatatan riwayat kurs tanggal efektif (*effective date lookup*) dengan Direct Rate (e.g. 16.300 IDR/USD) dan Inverse Rate Enterprise ERP (Unit per 1 Base IDR).
   - Mesin konversi valas instan lintas mata uang (*cross-currency conversion engine*) dengan interpolasi kurs terdekat.
 - **Revaluasi Kurs Bulanan / Month-End Forex Revaluation (`account.multicurrency.revaluation`)**:
   - Pemindaian otomatis faktur penjualan (AR) dan tagihan pembelian (AP) valas terbuka (*open balance*).
@@ -348,7 +348,7 @@ Dokumentasi komprehensif tersedia di direktori `docs/`:
   - **Universal Chatter Audit Trail**: Pencatatan jejak audit penerbitan, pelaporan, dan pembatalan faktur pada model `account.tax.invoice`.
 
 ### 31. **Modul Rekonsiliasi Bank & Impor Rekening Koran (`internal/modules/bank_reconciliation`) - `account.bank.statement` & Auto-Match Engine**
-- **Arsitektur Rekonsiliasi Modern Bergaya Odoo 17/18**:
+- **Arsitektur Rekonsiliasi Modern Bergaya Modern Enterprise**:
   - **Rekening Koran Bank (`account_bank_statements` / `account.bank.statement`)**: Header rekonsiliasi yang mencatat Jurnal Bank (`BNK`), Tanggal, Saldo Awal (*Balance Start*), Saldo Akhir Buku (*Balance End*), Saldo Fisik Rekening Koran (*Balance End Real*), dan Selisih (*Difference*).
   - **Baris Transaksi Mutasi Bank (`account_bank_statement_lines` / `account.bank.statement.line`)**: Menyimpan riwayat pergerakan kas masuk (inflow/CR bernilai positif) dan kas keluar (outflow/DB bernilai negatif), memo transaksi dari bank, kode referensi, status rekonsiliasi, skor keyakinan pencocokan (*Auto-Match Confidence*), dan tautan faktur/jurnal.
   - **Aturan Rekonsiliasi Otomatis (`account_reconcile_models` / `account.reconcile.model`)**: Pengaturan aturan pencocokan otomatis (*contains*, *regex*, *exact*) untuk pembebanan langsung biaya admin bank, bunga giro, atau potongan transfer antar-bank ke akun GL tujuan.
@@ -377,7 +377,7 @@ Dokumentasi komprehensif tersedia di direktori `docs/`:
   - Pencatatan seluruh riwayat pembuatan, impor CSV, pencocokan otomatis, dan penutupan rekening koran pada audit trail `chatter` (`account.bank.statement`).
 
 ### 32. **Modul Landed Costs Engine & Alokasi Biaya Impor/Logistik (`internal/modules/landed_cost`) - `stock.landed.cost`**
-- **Arsitektur Standard Odoo (`stock.landed.cost`, `stock.landed.cost.line`, `stock.valuation.adjustment.lines`)**:
+- **Arsitektur Standard Enterprise ERP (`stock.landed.cost`, `stock.landed.cost.line`, `stock.valuation.adjustment.lines`)**:
   - Mengalokasikan biaya riil pengadaan internasional dan logistik (seperti *Ocean Freight*, Bea Masuk & Pajak Impor DJBC, *Terminal Handling Charges/THC Pelabuhan*, *Demurrage*, dan Asuransi Kargo) langsung ke nilai perolehan persediaan barang (*Stock Valuation Layer*).
   - Terhubung langsung dengan dokumen Penerimaan Barang Gudang (*Incoming Stock Receipt / Picking* `WH/IN`).
 - **5 Metode Alokasi Biaya (*Split Allocation Methods*)**:
@@ -449,7 +449,7 @@ Dokumentasi komprehensif tersedia di direktori `docs/`:
 
 ```
 erp-golang/
-├── odoo_reference/          # Source code referensi hasil pull dari odoo/odoo
+├── erp_reference/          # Source code referensi hasil pull dari erp/erp
 ├── cloudflare/              # Edge deployment configs (Workers AI & Cloudflare Tunnel)
 │   ├── worker.js            # Cloudflare Worker script dengan binding env.AI
 │   ├── wrangler.toml        # Wrangler CLI config untuk Cloudflare edge deploy
@@ -509,7 +509,7 @@ erp-golang/
 ├── Dockerfile               # Multi-stage production container
 ├── docker-compose.yml       # Stack: Go Backend + PostgreSQL 16 + Redis 7
 ├── .env.example             # Template konfigurasi environment
-├── odoo_erp.db              # Database SQLite otomatis
+├── erp.db              # Database SQLite otomatis
 └── erp-server               # Binary terkompilasi
 ```
 
@@ -530,7 +530,7 @@ go run cmd/server/main.go
 Server akan aktif di:
 - **Web Dashboard**: [http://localhost:8080/](http://localhost:8080/)
 - **API Health**: [http://localhost:8080/health](http://localhost:8080/health)
-- **Default Admin Login**: `admin@odoo.local` / `admin123`
+- **Default Admin Login**: `admin@erp.local` / `admin123`
 
 ### 3. Menjalankan via Docker Compose
 ```bash
@@ -781,7 +781,7 @@ go test -v ./tests/...
 | `POST` | `/api/v1/currencies/convert` | 🔄 Mesin konversi valas instan lintas mata uang pada tanggal efektif tertentu |
 | `GET` | `/api/v1/currencies/stats` | KPI Eksekutif Valas: Total mata uang, total kurs tercatat, revaluasi selesai, YTD gain/loss, spot USD & EUR |
 | `GET` | `/api/v1/currencies/:id/rates` | Riwayat kurs mata uang (res.currency.rates) terurut tanggal terbaru |
-| `POST` | `/api/v1/currencies/:id/rates` | 📈 Catat kurs spot baru (Direct Rate IDR/Unit & auto-compute Inverse Rate Odoo) |
+| `POST` | `/api/v1/currencies/:id/rates` | 📈 Catat kurs spot baru (Direct Rate IDR/Unit & auto-compute Inverse Rate Enterprise ERP) |
 | `POST` | `/api/v1/currencies/realized-gain-loss` | Hitung selisih kurs terealisasi saat pelunasan faktur/tagihan valas |
 | `GET` | `/api/v1/currencies/revaluations` | Riwayat revaluasi kurs bulanan PSAK 10 (account.multicurrency.revaluation) |
 | `POST` | `/api/v1/currencies/revaluations` | ⚡ Hitung draf revaluasi kurs bulanan untuk open AR & AP |
@@ -834,7 +834,7 @@ npx wrangler deploy
 ### 3. Cloudflare Tunnel (Zero-Trust Edge Access)
 Untuk mengekspos backend Go yang berjalan di server internal/on-premise ke jaringan publik Cloudflare tanpa membuka port firewall masuk (*inbound ports*):
 ```bash
-cloudflared tunnel --config cloudflare/cloudflared-config.yml run odoo-go-tunnel
+cloudflared tunnel --config cloudflare/cloudflared-config.yml run go-erp-tunnel
 ```
 
 
@@ -842,7 +842,7 @@ cloudflared tunnel --config cloudflare/cloudflared-config.yml run odoo-go-tunnel
 
 ## 🌐 Komunitas & Proyek Open Source
 
-Odoo-Go ERP didistribusikan secara bebas dan terbuka di bawah lisensi [Apache License 2.0](LICENSE). Kami percaya bahwa perangkat lunak ERP tingkat perusahaan harus transparan, bebas dari biaya lisensi per-pengguna yang memberatkan, dan dapat dikustomisasi secara leluasa oleh pengembang di seluruh dunia.
+GoERP didistribusikan secara bebas dan terbuka di bawah lisensi [Apache License 2.0](LICENSE). Kami percaya bahwa perangkat lunak ERP tingkat perusahaan harus transparan, bebas dari biaya lisensi per-pengguna yang memberatkan, dan dapat dikustomisasi secara leluasa oleh pengembang di seluruh dunia.
 
 ### Cara Berpartisipasi:
 - 💬 **Diskusi & Q&A Komunitas**: Bergabunglah dalam [GitHub Discussions](https://github.com/antonset1104/erp/discussions) untuk berbagi pengalaman implementasi, mengajukan pertanyaan teknis, dan berdiskusi dengan sesama pengembang.

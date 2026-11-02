@@ -85,7 +85,7 @@ func (m *Module) Seed(db *gorm.DB) error {
 		employees := []Employee{
 			{
 				Name:         "Rian Pratama",
-				WorkEmail:    "rian.pratama@odoogolang.co.id",
+				WorkEmail:    "rian.pratama@goerplang.co.id",
 				WorkPhone:    "+62 811 1122 3344",
 				DepartmentID: 1,
 				JobID:        1,
@@ -96,7 +96,7 @@ func (m *Module) Seed(db *gorm.DB) error {
 			},
 			{
 				Name:         "Siti Rahmawati",
-				WorkEmail:    "siti.rahma@odoogolang.co.id",
+				WorkEmail:    "siti.rahma@goerplang.co.id",
 				WorkPhone:    "+62 811 5566 7788",
 				DepartmentID: 3,
 				JobID:        4,

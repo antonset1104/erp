@@ -108,7 +108,7 @@ func (s *Service) CreateRate(req CreateRateRequest, companyID uint) (*CurrencyRa
 		CurrencyID: req.CurrencyID,
 		Name:       dateStr,
 		DirectRate: req.DirectRate,
-		Rate:       1.0 / req.DirectRate, // Standard Odoo format
+		Rate:       1.0 / req.DirectRate, // Standard Enterprise ERP format
 		Source:     req.Source,
 		CompanyID:  companyID,
 	}

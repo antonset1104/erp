@@ -7,7 +7,7 @@ import (
 	"erp-golang/internal/modules/product"
 )
 
-// WorkCenter represents Odoo's mrp.workcenter (Pusat Kerja / Stasiun Mesin Produksi)
+// WorkCenter represents standard enterprise mrp.workcenter (Pusat Kerja / Stasiun Mesin Produksi)
 type WorkCenter struct {
 	models.ModelBase
 	Code               string  `gorm:"size:32;not null;uniqueIndex" json:"code"`       // e.g. WC/2026/001
@@ -22,7 +22,7 @@ type WorkCenter struct {
 	Notes              string  `gorm:"type:text" json:"notes,omitempty"`
 }
 
-// Routing represents Odoo's mrp.routing (Rute Tahapan Proses Produksi)
+// Routing represents standard enterprise mrp.routing (Rute Tahapan Proses Produksi)
 type Routing struct {
 	models.ModelBase
 	RoutingCode string             `gorm:"size:64;not null;uniqueIndex" json:"routing_code"` // e.g. ROUT/2026/00001
@@ -34,7 +34,7 @@ type Routing struct {
 	Notes       string             `gorm:"type:text" json:"notes,omitempty"`
 }
 
-// RoutingOperation represents Odoo's mrp.routing.workcenter (Langkah Operasi dalam Rute)
+// RoutingOperation represents standard enterprise mrp.routing.workcenter (Langkah Operasi dalam Rute)
 type RoutingOperation struct {
 	models.ModelBase
 	RoutingID               uint       `gorm:"index;not null" json:"routing_id"`
@@ -49,7 +49,7 @@ type RoutingOperation struct {
 	Description             string     `gorm:"type:text" json:"description,omitempty"`
 }
 
-// WorkOrder represents Odoo's mrp.workorder (Perintah Kerja Operasi Aktual per SPK)
+// WorkOrder represents standard enterprise mrp.workorder (Perintah Kerja Operasi Aktual per SPK)
 type WorkOrder struct {
 	models.ModelBase
 	WorkOrderCode          string           `gorm:"size:64;not null;uniqueIndex" json:"work_order_code"` // e.g. WO/2026/00001

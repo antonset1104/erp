@@ -13,7 +13,7 @@ const (
 	ActionRollback = "ROLLBACK"
 )
 
-// AuditLogRule defines what models and operations are tracked (Odoo auditlog.rule equivalent)
+// AuditLogRule defines what models and operations are tracked (Enterprise ERP auditlog.rule equivalent)
 type AuditLogRule struct {
 	models.ModelBase
 	Name          string `gorm:"size:128;not null" json:"name"`            // e.g. "Audit Jurnal & Faktur Keuangan"

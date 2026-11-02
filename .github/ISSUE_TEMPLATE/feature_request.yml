@@ -1,12 +1,12 @@
 name: 💡 Usulan Fitur Baru (Feature Request)
-description: Usulkan peningkatan modul, fitur bisnis baru, atau optimasi untuk Odoo-Go ERP.
+description: Usulkan peningkatan modul, fitur bisnis baru, atau optimasi untuk GoERP.
 title: "[FEAT]: <judul usulan fitur baru>"
 labels: ["enhancement", "feature"]
 body:
   - type: markdown
     attributes:
       value: |
-        Punya ide untuk membuat Odoo-Go ERP semakin hebat? Beritahu kami kebutuhan bisnis atau peningkatan teknis yang ingin Anda lihat!
+        Punya ide untuk membuat GoERP semakin hebat? Beritahu kami kebutuhan bisnis atau peningkatan teknis yang ingin Anda lihat!
   - type: dropdown
     id: category
     attributes:

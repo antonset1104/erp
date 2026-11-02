@@ -54,7 +54,7 @@ func FormatDateTime(t time.Time) string {
 // GenerateSecurityHash generates an audit SHA-256 fingerprint for the document
 func GenerateSecurityHash(docNum string, t time.Time) string {
 	h := sha256.New()
-	h.Write([]byte(fmt.Sprintf("%s-%d-PT_ODOO_GO_ENTERPRISE_AUTHENTIC", docNum, t.Unix())))
+	h.Write([]byte(fmt.Sprintf("%s-%d-PT_GO_ERP_ENTERPRISE_AUTHENTIC", docNum, t.Unix())))
 	return fmt.Sprintf("%x", h.Sum(nil))[:24]
 }
 
@@ -113,7 +113,7 @@ func WrapReportHTML(
 		<button class="btn" onclick="window.print()">🖨️ CETAK STRUK KASIR</button>
 	</div>
 	<div class="text-center">
-		<div class="bold" style="font-size: 14px;">PT ODOO-GO INDONESIA</div>
+		<div class="bold" style="font-size: 14px;">PT GOLANG ERP INDONESIA</div>
 		<div>POS Store Outlet #01</div>
 		<div>NPWP: 01.345.678.9-021.000</div>
 		<div class="divider"></div>
@@ -423,10 +423,10 @@ func WrapReportHTML(
 			<div class="company-logo">
 				<div class="company-badge">OG</div>
 				<div>
-					<div class="company-name">PT ODOO-GO INDONESIA ENTERPRISE</div>
+					<div class="company-name">PT GOLANG ERP INDONESIA ENTERPRISE</div>
 					<div class="company-details">
 						Gedung Menara Batavia Lt. 28, Jl. K.H. Mas Mansyur Kav. 126, Jakarta Pusat 10220<br>
-						NPWP: 01.345.678.9-021.000 &bull; Telp: (021) 5790-1234 &bull; Email: finance@odoo.local
+						NPWP: 01.345.678.9-021.000 &bull; Telp: (021) 5790-1234 &bull; Email: finance@erp.local
 					</div>
 				</div>
 			</div>
@@ -455,7 +455,7 @@ func WrapReportHTML(
 		%s
 
 		<div class="footer">
-			<div>Dokumen Resmi Odoo-Go ERP &bull; ID Audit: %s</div>
+			<div>Dokumen Resmi GoERP &bull; ID Audit: %s</div>
 			<div>Dicetak pada: %s</div>
 			<div>Halaman 1 / 1 &bull; Kepatuhan ISO 27001 / SOX Verified</div>
 		</div>

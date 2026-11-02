@@ -1,15 +1,15 @@
-# Panduan Pengguna (User Documentation) — Odoo-Go ERP v1.0
+# Panduan Pengguna (User Documentation) — GoERP v1.0
 
 ## 1. Memulai Penggunaan Aplikasi (Getting Started)
 
 ### 1.1 Mengakses Sistem ERP
 1. Buka peramban web modern (Google Chrome, Microsoft Edge, atau Mozilla Firefox) dan arahkan ke alamat:
    **`http://localhost:8080`**
-2. Sistem dilengkapi fitur **Auto-Login Demo Enterprise** sebagai **Administrator (`admin`)** pada perusahaan **PT Odoo Golang Nusantara** sehingga Anda dapat langsung menjelajahi seluruh 50 modul tanpa hambatan.
+2. Sistem dilengkapi fitur **Auto-Login Demo Enterprise** sebagai **Administrator (`admin`)** pada perusahaan **PT Golang ERP Nusantara** sehingga Anda dapat langsung menjelajahi seluruh 50 modul tanpa hambatan.
 3. Jika Anda keluar (*Logout*) melalui tombol **🚪** di pojok kiri bawah, sistem akan menyegarkan sesi autentikasi JWT secara otomatis.
 
 ### 1.2 Tata Letak Antarmuka (UI Layout)
-Antarmuka Odoo-Go ERP terbagi menjadi 3 area utama:
+Antarmuka GoERP terbagi menjadi 3 area utama:
 - **Bilah Navigasi Kiri (*Sidebar Navigation*)**: Berisi daftar lengkap **50 Modul Enterprise** yang dapat digulir (*scrollable*). Klik nama modul mana pun untuk berpindah tampilan secara instan tanpa memuat ulang halaman (*Single Page Application*).
 - **Bilah Atas (*Top Header*)**:
   - Menampilkan judul dan deskripsi modul yang sedang aktif.
@@ -101,7 +101,7 @@ Mengelola integrasi pihak ketiga dan akses API eksternal:
 - **Bagaimana cara mengekspor data tabel ke Microsoft Excel?**
   Hampir seluruh modul dilengkapi tombol **📥 Export CSV** di bagian atas tabel. File CSV yang diunduh dapat langsung dibuka di Microsoft Excel atau Google Sheets.
 - **Apakah fitur AI tetap berfungsi tanpa koneksi internet atau tanpa akun Cloudflare?**
-  **Ya.** Seluruh 20+ fitur AI Copilot di dalam Odoo-Go ERP dilengkapi mesin *Smart Local Heuristic Fallback* yang memberikan analisis akuntansi, pajak, kepabeanan, OEE, serta perancangan skema Low-Code dan BPMN secara instan meskipun variabel lingkungan Cloudflare AI belum diisi.
+  **Ya.** Seluruh 20+ fitur AI Copilot di dalam GoERP dilengkapi mesin *Smart Local Heuristic Fallback* yang memberikan analisis akuntansi, pajak, kepabeanan, OEE, serta perancangan skema Low-Code dan BPMN secara instan meskipun variabel lingkungan Cloudflare AI belum diisi.
 - **Bagaimana cara mencetak Faktur, PO, atau Slip Gaji ke PDF?**
   Klik tombol **🖨️ Print** pada dokumen terkait, lalu pada jendela pratinjau dokumen cetak yang terbuka, klik tombol **Cetak Dokumen** dan pilih tujuan **Save as PDF** pada dialog cetak browser Anda.
 

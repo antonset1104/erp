@@ -51,15 +51,15 @@ func LoadConfig() *Config {
 			}
 			dbUser := os.Getenv("DB_USER")
 			if dbUser == "" {
-				dbUser = "odoo"
+				dbUser = "erp"
 			}
 			dbPassword := os.Getenv("DB_PASSWORD")
 			if dbPassword == "" {
-				dbPassword = "odoo"
+				dbPassword = "erp"
 			}
 			dbName := os.Getenv("DB_NAME")
 			if dbName == "" {
-				dbName = "odoo_erp"
+				dbName = "erp_db"
 			}
 			dbSSLMode := os.Getenv("DB_SSLMODE")
 			if dbSSLMode == "" {
@@ -72,14 +72,14 @@ func LoadConfig() *Config {
 			if dbPath != "" {
 				dbDSN = dbPath
 			} else {
-				dbDSN = "odoo_erp.db"
+				dbDSN = "erp.db"
 			}
 		}
 	}
 
 	jwtSecret := os.Getenv("JWT_SECRET")
 	if jwtSecret == "" {
-		jwtSecret = "odoo-golang-erp-super-secret-key-2026"
+		jwtSecret = "go-erplang-erp-super-secret-key-2026"
 	}
 
 	cfModel := os.Getenv("CLOUDFLARE_AI_MODEL")
@@ -105,7 +105,7 @@ func LoadConfig() *Config {
 		DBType:                      dbType,
 		DBDSN:                       dbDSN,
 		JWTSecret:                   jwtSecret,
-		AppName:                     "Odoo-Go ERP",
+		AppName:                     "GoERP",
 		Environment:                 env,
 		CloudflareAccountID:         os.Getenv("CLOUDFLARE_ACCOUNT_ID"),
 		CloudflareAPIToken:          os.Getenv("CLOUDFLARE_API_TOKEN"),

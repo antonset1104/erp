@@ -6,7 +6,7 @@ import (
 	"erp-golang/internal/modules/hr"
 )
 
-// LeaveType corresponds to Odoo's hr.leave.type
+// LeaveType corresponds to standard enterprise hr.leave.type
 type LeaveType struct {
 	models.ModelBase
 	Name               string  `gorm:"size:128;not null;index" json:"name"` // e.g. "Cuti Tahunan (Annual Leave)"
@@ -18,7 +18,7 @@ type LeaveType struct {
 	Description        string  `gorm:"size:255" json:"description,omitempty"`
 }
 
-// LeaveAllocation corresponds to Odoo's hr.leave.allocation
+// LeaveAllocation corresponds to standard enterprise hr.leave.allocation
 type LeaveAllocation struct {
 	models.ModelBase
 	Name          string       `gorm:"size:128;not null" json:"name"`
@@ -34,7 +34,7 @@ type LeaveAllocation struct {
 	Notes         string       `gorm:"type:text" json:"notes,omitempty"`
 }
 
-// LeaveRequest corresponds to Odoo's hr.leave (Time Off / Holiday)
+// LeaveRequest corresponds to standard enterprise hr.leave (Time Off / Holiday)
 type LeaveRequest struct {
 	models.ModelBase
 	RequestNumber string       `gorm:"size:64;not null;uniqueIndex" json:"request_number"` // e.g. LV/2026/00001

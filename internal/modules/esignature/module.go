@@ -78,7 +78,7 @@ func (m *Module) Seed(db *gorm.DB) error {
 			Action:    "created",
 			Actor:     "System Admin",
 			IP:        "127.0.0.1",
-			UserAgent: "Odoo-Go ERP Automated Billing",
+			UserAgent: "GoERP Automated Billing",
 			Details:   "Permohonan TTD elektronik resmi diterbitkan untuk Faktur Penjualan INV/2026/00001",
 		},
 		{

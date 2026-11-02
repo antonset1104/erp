@@ -6,7 +6,7 @@ import (
 	"erp-golang/internal/modules/product"
 )
 
-// PosConfig corresponds to Odoo's pos.config (POS Terminal/Register)
+// PosConfig corresponds to standard enterprise pos.config (POS Terminal/Register)
 type PosConfig struct {
 	models.ModelBase
 	Name         string `gorm:"size:128;not null" json:"name"` // e.g. "Cashier Desk 1"
@@ -14,7 +14,7 @@ type PosConfig struct {
 	ReceiptFooter string `gorm:"type:text" json:"receipt_footer"`
 }
 
-// PosSession corresponds to Odoo's pos.session (Cashier Work Shift)
+// PosSession corresponds to standard enterprise pos.session (Cashier Work Shift)
 type PosSession struct {
 	models.ModelBase
 	Name                     string     `gorm:"size:64;not null;uniqueIndex" json:"name"` // e.g. POS/SESSION/0001
@@ -31,7 +31,7 @@ type PosSession struct {
 	TotalRevenue             float64    `gorm:"default:0" json:"total_revenue"`
 }
 
-// PosOrder corresponds to Odoo's pos.order (Point of Sale Transaction)
+// PosOrder corresponds to standard enterprise pos.order (Point of Sale Transaction)
 type PosOrder struct {
 	models.ModelBase
 	Name          string         `gorm:"size:64;not null;uniqueIndex" json:"name"` // e.g. POS/2026/00001
@@ -48,7 +48,7 @@ type PosOrder struct {
 	Note          string         `gorm:"type:text" json:"note"`
 }
 
-// PosOrderLine corresponds to Odoo's pos.order.line
+// PosOrderLine corresponds to standard enterprise pos.order.line
 type PosOrderLine struct {
 	models.ModelBase
 	OrderID       uint            `gorm:"index;not null" json:"order_id"`

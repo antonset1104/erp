@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// ModelBase mimics Odoo's BaseModel fields (id, create_date, write_date, create_uid, write_uid, active, company_id)
+// ModelBase mimics standard enterprise BaseModel fields (id, create_date, write_date, create_uid, write_uid, active, company_id)
 type ModelBase struct {
 	ID        uint           `gorm:"primarykey" json:"id"`
 	CreatedAt time.Time      `json:"created_at"`

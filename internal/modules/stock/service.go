@@ -75,7 +75,7 @@ func (s *Service) CreatePicking(p *StockPicking) error {
 	return s.db.Create(p).Error
 }
 
-// ValidatePicking executes Odoo's double-entry stock movement atomically
+// ValidatePicking executes standard enterprise double-entry stock movement atomically
 func (s *Service) ValidatePicking(id uint, companyID uint) (*StockPicking, error) {
 	var picking StockPicking
 	if err := s.db.Preload("MoveLines").Preload("Location").Preload("LocationDest").

@@ -679,7 +679,7 @@ func TestCompleteERPWorkflow(t *testing.T) {
 	// 13. TEST CHATTER & AUDIT TRAIL LOGS
 	// ==========================================
 	chatterSvc := chatter.NewService(db)
-	err = chatterSvc.LogTracking("sale.order", convertedSO.ID, 1, "admin@odoo.local",
+	err = chatterSvc.LogTracking("sale.order", convertedSO.ID, 1, "admin@erp.local",
 		"Quotation generated from CRM lead conversion", "Stage: proposition -> won", 1)
 	if err != nil {
 		t.Fatalf("Chatter log tracking failed: %v", err)
@@ -689,7 +689,7 @@ func TestCompleteERPWorkflow(t *testing.T) {
 		ModelName:   "sale.order",
 		ResID:       convertedSO.ID,
 		AuthorID:    1,
-		AuthorName:  "admin@odoo.local",
+		AuthorName:  "admin@erp.local",
 		Body:        "Customer requested official quotation PDF via email.",
 		MessageType: "comment",
 	}
@@ -981,7 +981,7 @@ func TestCompleteERPWorkflow(t *testing.T) {
 	teamCare := helpdesk.HelpdeskTeam{
 		Name:     "Customer Care & Support",
 		Code:     "CARE",
-		Email:    "care@odoo-go.id",
+		Email:    "care@go-erp.id",
 		LeaderID: &user.ID,
 		Color:    "#3b82f6",
 		Active:   true,
@@ -1194,7 +1194,7 @@ func TestCompleteERPWorkflow(t *testing.T) {
 	t.Logf("✓ Maintenance Request '%s' (%s) completed: Duration %.1f hrs, Stage '%s', Equipment '%s' status restored to '%s'",
 		completedReq.RequestNumber, completedReq.Name, completedReq.DurationHours, completedReq.Stage, eqRestored.Name, eqRestored.Status)
 
-	// 19. Fleet & Delivery Vehicle Management (Odoo fleet.vehicle, fleet.vehicle.odometer, fleet.vehicle.log.services)
+	// 19. Fleet & Delivery Vehicle Management (Enterprise ERP fleet.vehicle, fleet.vehicle.odometer, fleet.vehicle.log.services)
 	fleetSvc := fleet.NewService(db)
 
 	// 1. Create Vehicle Model
@@ -1300,7 +1300,7 @@ func TestCompleteERPWorkflow(t *testing.T) {
 	t.Logf("✓ Fleet Vehicle '%s' (%s - %s) tested: LastOdometer %.0f KM, Service '%s' (Cost: Rp %.0f), Linked Asset #%d, Driver '%s'",
 		truckVehicle.LicensePlate, truckModel.Brand, truckModel.ModelName, vAfterService.LastOdometer, serviceRecord.ServiceNumber, serviceRecord.Cost, *truckVehicle.AssetID, driver.Name)
 
-	// 20. HR Leave & Time Off Management (Odoo hr.leave, hr.leave.allocation, hr.leave.type)
+	// 20. HR Leave & Time Off Management (Enterprise ERP hr.leave, hr.leave.allocation, hr.leave.type)
 	leaveSvc := leave.NewService(db)
 
 	// 1. Create Leave Types
@@ -5166,7 +5166,7 @@ Lead Engineer - Cloud Tech Nusantara (2020 - 2026)
 		TargetURL:     mockServer.URL + "/logistics",
 		SecretToken:   sharedSecretLogistics,
 		EventTopics:   webhook.EventPickingValidated + "," + webhook.EventWebhookPing,
-		CustomHeaders: `{"X-3PL-Client":"ODOO-GO-ERP"}`,
+		CustomHeaders: `{"X-3PL-Client":"GO-ERP"}`,
 		MaxRetries:    3,
 		RetryDelaySec: 2,
 		TimeoutSec:    5,
@@ -5796,7 +5796,7 @@ Lead Engineer - Cloud Tech Nusantara (2020 - 2026)
 	accBCAReq := treasury.CreateBankAccountRequest{
 		BankName:        "Bank Central Asia (BCA)",
 		AccountNumber:   "800-1122-3344",
-		AccountHolder:   "PT Odoo Golang Nusantara",
+		AccountHolder:   "PT Golang ERP Nusantara",
 		AccountType:     treasury.BankTypeChecking,
 		Currency:        "IDR",
 		CurrentBalance:  500000000, // Rp 500 Juta
@@ -5818,7 +5818,7 @@ Lead Engineer - Cloud Tech Nusantara (2020 - 2026)
 	accMandiriReq := treasury.CreateBankAccountRequest{
 		BankName:        "Bank Mandiri",
 		AccountNumber:   "137-00-1234-567",
-		AccountHolder:   "PT Odoo Golang Nusantara",
+		AccountHolder:   "PT Golang ERP Nusantara",
 		AccountType:     treasury.BankTypeChecking,
 		Currency:        "IDR",
 		CurrentBalance:  200000000, // Rp 200 Juta
@@ -7001,7 +7001,7 @@ Lead Engineer - Cloud Tech Nusantara (2020 - 2026)
 		Quantity:            1,
 		ReasonCode:          "damaged_in_transit",
 		Description:         "Kardus sobek dan bodi produk lecet akibat benturan ekspedisi",
-		EvidenceURL:         "https://storage.odoo.local/rma/indah_damaged_01.jpg",
+		EvidenceURL:         "https://storage.erp.local/rma/indah_damaged_01.jpg",
 		ResolutionRequested: "replace_item",
 	})
 	if err != nil {
@@ -7033,7 +7033,7 @@ Lead Engineer - Cloud Tech Nusantara (2020 - 2026)
 		SenderAccountName: "PT Indah Makmur Retail",
 		SenderAccountNo:   "8820192831",
 		ReferenceNumber:   "TRF-BCA-2026-981245",
-		ProofURL:          "https://storage.odoo.local/payments/slip_transfer_bca_981245.pdf",
+		ProofURL:          "https://storage.erp.local/payments/slip_transfer_bca_981245.pdf",
 		Notes:             "Pelunasan invoice tempo 30 hari via transfer bank",
 	})
 	if err != nil {
@@ -7859,7 +7859,7 @@ Lead Engineer - Cloud Tech Nusantara (2020 - 2026)
 
 	// 7. Test AI Integration Architect & Schema Mapping Copilot
 	aiIntegrationResp, err := integrationSvc.AnalyzeIntegrationWithAI(&integration_hub.AIIntegrationArchitectRequest{
-		Requirement: "Sinkronisasi pesanan dari Tokopedia ke Odoo-Go secara realtime menggunakan webhook dan update stok kembali ke marketplace",
+		Requirement: "Sinkronisasi pesanan dari Tokopedia ke GoERP secara realtime menggunakan webhook dan update stok kembali ke marketplace",
 		TargetApp:   "Tokopedia",
 		Language:    "python",
 	})
@@ -7972,7 +7972,7 @@ Lead Engineer - Cloud Tech Nusantara (2020 - 2026)
 	}
 	t.Logf("✓ Executive KPI CSV Export Verified (%d bytes)", wCSV.Body.Len())
 
-	t.Log("🎉 COMPLETE ODOO-GO ERP EXPANDED TEST SUITE (50 MODULES + UNIVERSAL INTEGRATION HUB & OPEN RPC GATEWAY + BPMN 2.0 WORKFLOW ENGINE & VISUAL STATE MACHINE + UNIVERSAL REPORT ENGINE + CLOUDFLARE WORKERS AI COPILOT) PASSED 100%!")
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (50 MODULES + UNIVERSAL INTEGRATION HUB & OPEN RPC GATEWAY + BPMN 2.0 WORKFLOW ENGINE & VISUAL STATE MACHINE + UNIVERSAL REPORT ENGINE + CLOUDFLARE WORKERS AI COPILOT) PASSED 100%!")
 }
 
 

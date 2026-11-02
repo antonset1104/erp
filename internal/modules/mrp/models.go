@@ -5,7 +5,7 @@ import (
 	"erp-golang/internal/modules/product"
 )
 
-// MrpBom corresponds to Odoo's mrp.bom (Bill of Materials)
+// MrpBom corresponds to standard enterprise mrp.bom (Bill of Materials)
 type MrpBom struct {
 	models.ModelBase
 	Code        string       `gorm:"size:64;not null;uniqueIndex" json:"code"` // e.g. BOM/PC-DESK/01
@@ -16,7 +16,7 @@ type MrpBom struct {
 	Description string       `gorm:"type:text" json:"description"`
 }
 
-// MrpBomLine corresponds to Odoo's mrp.bom.line (BOM Component / Raw Material)
+// MrpBomLine corresponds to standard enterprise mrp.bom.line (BOM Component / Raw Material)
 type MrpBomLine struct {
 	models.ModelBase
 	BomID       uint            `gorm:"index;not null" json:"bom_id"`
@@ -26,7 +26,7 @@ type MrpBomLine struct {
 	ProductQty  float64         `gorm:"not null" json:"product_qty"` // Required quantity
 }
 
-// MrpProduction corresponds to Odoo's mrp.production (Manufacturing Order)
+// MrpProduction corresponds to standard enterprise mrp.production (Manufacturing Order)
 type MrpProduction struct {
 	models.ModelBase
 	Name        string          `gorm:"size:64;not null;uniqueIndex" json:"name"` // e.g. MO/2026/00001

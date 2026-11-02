@@ -5,7 +5,7 @@ import (
 	"erp-golang/internal/modules/hr"
 )
 
-// RecruitmentStage corresponds to Odoo's hr.recruitment.stage
+// RecruitmentStage corresponds to standard enterprise hr.recruitment.stage
 type RecruitmentStage struct {
 	models.ModelBase
 	Name      string `gorm:"size:128;not null" json:"name"`
@@ -19,7 +19,7 @@ func (RecruitmentStage) TableName() string {
 	return "hr_recruitment_stages"
 }
 
-// JobOpening corresponds to Odoo's hr.job (open positions for recruitment)
+// JobOpening corresponds to standard enterprise hr.job (open positions for recruitment)
 type JobOpening struct {
 	models.ModelBase
 	Title             string         `gorm:"size:128;not null" json:"title"`
@@ -40,7 +40,7 @@ func (JobOpening) TableName() string {
 	return "hr_job_openings"
 }
 
-// Applicant corresponds to Odoo's hr.applicant
+// Applicant corresponds to standard enterprise hr.applicant
 type Applicant struct {
 	models.ModelBase
 	Name               string            `gorm:"size:128;not null" json:"name"`

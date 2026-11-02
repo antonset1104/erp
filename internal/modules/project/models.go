@@ -7,7 +7,7 @@ import (
 	"erp-golang/internal/modules/base"
 )
 
-// Project corresponds to Odoo's project.project
+// Project corresponds to standard enterprise project.project
 type Project struct {
 	models.ModelBase
 	Name        string        `gorm:"size:255;not null" json:"name"`
@@ -23,7 +23,7 @@ type Project struct {
 	Tasks       []Task        `gorm:"foreignKey:ProjectID" json:"tasks,omitempty"`
 }
 
-// Task corresponds to Odoo's project.task
+// Task corresponds to standard enterprise project.task
 type Task struct {
 	models.ModelBase
 	ProjectID      uint            `gorm:"not null;index" json:"project_id"`
@@ -43,7 +43,7 @@ type Task struct {
 	Timesheets     []TimesheetLine `gorm:"foreignKey:TaskID" json:"timesheets,omitempty"`
 }
 
-// TimesheetLine corresponds to Odoo's account.analytic.line for project timesheets
+// TimesheetLine corresponds to standard enterprise account.analytic.line for project timesheets
 type TimesheetLine struct {
 	models.ModelBase
 	ProjectID  uint       `gorm:"not null;index" json:"project_id"`

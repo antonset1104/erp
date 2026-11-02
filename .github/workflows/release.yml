@@ -42,18 +42,18 @@ jobs:
 
           # 1. Linux AMD64
           CGO_ENABLED=1 CC=gcc GOOS=linux GOARCH=amd64 \
-            go build -ldflags="-s -w -X main.AppVersion=${VER}" -o dist/odoo-go-erp-${VER}-linux-amd64 ./cmd/server
-          tar -czvf dist/odoo-go-erp-${VER}-linux-amd64.tar.gz -C dist odoo-go-erp-${VER}-linux-amd64 LICENSE README.md web
+            go build -ldflags="-s -w -X main.AppVersion=${VER}" -o dist/go-erp-${VER}-linux-amd64 ./cmd/server
+          tar -czvf dist/go-erp-${VER}-linux-amd64.tar.gz -C dist go-erp-${VER}-linux-amd64 LICENSE README.md web
 
           # 2. Linux ARM64
           CGO_ENABLED=1 CC=aarch64-linux-gnu-gcc GOOS=linux GOARCH=arm64 \
-            go build -ldflags="-s -w -X main.AppVersion=${VER}" -o dist/odoo-go-erp-${VER}-linux-arm64 ./cmd/server
-          tar -czvf dist/odoo-go-erp-${VER}-linux-arm64.tar.gz -C dist odoo-go-erp-${VER}-linux-arm64 LICENSE README.md web
+            go build -ldflags="-s -w -X main.AppVersion=${VER}" -o dist/go-erp-${VER}-linux-arm64 ./cmd/server
+          tar -czvf dist/go-erp-${VER}-linux-arm64.tar.gz -C dist go-erp-${VER}-linux-arm64 LICENSE README.md web
 
           # 3. Windows AMD64
           CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc GOOS=windows GOARCH=amd64 \
-            go build -ldflags="-s -w -X main.AppVersion=${VER}" -o dist/odoo-go-erp-${VER}-windows-amd64.exe ./cmd/server
-          zip -j dist/odoo-go-erp-${VER}-windows-amd64.zip dist/odoo-go-erp-${VER}-windows-amd64.exe LICENSE README.md
+            go build -ldflags="-s -w -X main.AppVersion=${VER}" -o dist/go-erp-${VER}-windows-amd64.exe ./cmd/server
+          zip -j dist/go-erp-${VER}-windows-amd64.zip dist/go-erp-${VER}-windows-amd64.exe LICENSE README.md
 
       - name: Generate SHA256 Checksums
         run: |
@@ -64,7 +64,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: "Odoo-Go ERP ${{ steps.get_version.outputs.VERSION }}"
+          name: "GoERP ${{ steps.get_version.outputs.VERSION }}"
           files: |
             dist/*.tar.gz
             dist/*.zip

@@ -6,7 +6,7 @@ import (
 	"erp-golang/internal/modules/stock"
 )
 
-// StockProductionLot corresponds to Odoo's stock.production.lot (Lot & Serial Number Tracking)
+// StockProductionLot corresponds to standard enterprise stock.production.lot (Lot & Serial Number Tracking)
 type StockProductionLot struct {
 	models.ModelBase
 	Name           string               `gorm:"size:64;not null;index" json:"name"` // e.g. LOT/2026/001, SN-88291039

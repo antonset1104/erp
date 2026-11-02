@@ -6,7 +6,7 @@ import (
 	"erp-golang/internal/modules/product"
 )
 
-// PurchaseOrder corresponds to Odoo's purchase.order
+// PurchaseOrder corresponds to standard enterprise purchase.order
 type PurchaseOrder struct {
 	models.ModelBase
 	Name          string              `gorm:"size:64;not null;uniqueIndex" json:"name"` // e.g. PO0001
@@ -25,7 +25,7 @@ type PurchaseOrder struct {
 	Note          string              `gorm:"type:text" json:"note"`
 }
 
-// PurchaseOrderLine corresponds to Odoo's purchase.order.line
+// PurchaseOrderLine corresponds to standard enterprise purchase.order.line
 type PurchaseOrderLine struct {
 	models.ModelBase
 	OrderID       uint            `gorm:"index" json:"order_id"`

@@ -4,7 +4,7 @@ import (
 	"erp-golang/internal/core/models"
 )
 
-// Company corresponds to Odoo's res.company
+// Company corresponds to standard enterprise res.company
 type Company struct {
 	models.ModelBase
 	Name       string `gorm:"size:255;not null" json:"name"`
@@ -18,7 +18,7 @@ type Company struct {
 	TaxID      string `gorm:"size:64" json:"tax_id"`
 }
 
-// Currency corresponds to Odoo's res.currency
+// Currency corresponds to standard enterprise res.currency
 type Currency struct {
 	models.ModelBase
 	Name   string  `gorm:"size:10;not null;unique" json:"name"`   // IDR, USD, EUR
@@ -27,7 +27,7 @@ type Currency struct {
 	Digits int     `gorm:"default:2" json:"digits"`
 }
 
-// User corresponds to Odoo's res.users
+// User corresponds to standard enterprise res.users
 type User struct {
 	models.ModelBase
 	Name         string `gorm:"size:128;not null" json:"name"`
@@ -37,7 +37,7 @@ type User struct {
 	PartnerID    uint   `json:"partner_id"`
 }
 
-// Partner corresponds to Odoo's res.partner (Customers, Vendors, Contacts)
+// Partner corresponds to standard enterprise res.partner (Customers, Vendors, Contacts)
 type Partner struct {
 	models.ModelBase
 	Name         string `gorm:"size:255;not null;index" json:"name"`

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Odoo-Go ERP | Enterprise Management System</title>
+    <title>GoERP | Enterprise Management System</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -31,7 +31,7 @@
                     <span class="logo-icon">⚡</span>
                 </div>
                 <div class="brand-text">
-                    <h2>Odoo-Go</h2>
+                    <h2>GoERP</h2>
                     <span class="badge badge-primary">ERP v1.0</span>
                 </div>
             </div>
@@ -39,7 +39,7 @@
             <div class="company-badge">
                 <span class="icon">🏢</span>
                 <div class="company-info">
-                    <span class="company-name" id="currentCompanyName">PT Odoo Golang Nusantara</span>
+                    <span class="company-name" id="currentCompanyName">PT Golang ERP Nusantara</span>
                     <span class="company-currency">IDR (Rp)</span>
                 </div>
             </div>
@@ -402,7 +402,7 @@
                         <div class="card flex-1">
                             <div class="card-header">
                                 <h3>⚡ Quick Workflow Actions</h3>
-                                <span class="card-sub">Simulate complete Odoo ERP business cycles in 1-click</span>
+                                <span class="card-sub">Simulate complete Enterprise ERP ERP business cycles in 1-click</span>
                             </div>
                             <div class="card-body quick-actions-grid">
                                 <button class="action-card" onclick="openModal('modalCreateSaleOrder')">
@@ -431,7 +431,7 @@
                         <div class="card flex-1">
                             <div class="card-header">
                                 <h3>🔍 System Architecture Highlights</h3>
-                                <span class="card-sub">Go implementation vs Odoo Python engine</span>
+                                <span class="card-sub">Go implementation vs traditional Python/scripted engine</span>
                             </div>
                             <div class="card-body">
                                 <ul class="features-list">
@@ -614,7 +614,7 @@
                     <div class="view-header">
                         <div>
                             <h2>📦 Inventory & Multi-Warehouse Management</h2>
-                            <p class="subtitle">Pelacakan Stok Pembukuan Ganda (Double-Entry), Multi-Gudang Cabang & Transfer Antar-Gudang (Odoo stock.warehouse & stock.picking)</p>
+                            <p class="subtitle">Pelacakan Stok Pembukuan Ganda (Double-Entry), Multi-Gudang Cabang & Transfer Antar-Gudang (Enterprise ERP stock.warehouse & stock.picking)</p>
                         </div>
                         <div class="header-actions">
                             <button class="btn btn-primary" onclick="openModal('modalCreateTransfer')">🔄 + Inter-Warehouse Transfer</button>
@@ -1164,7 +1164,7 @@
                     <div class="view-header">
                         <div>
                             <h2>🏛️ Fixed Assets & Depreciation Management</h2>
-                            <p class="subtitle">Manajemen Aset Tetap, Jadwal Penyusutan Otomatis, dan Jurnal Akuntansi (Odoo account.asset)</p>
+                            <p class="subtitle">Manajemen Aset Tetap, Jadwal Penyusutan Otomatis, dan Jurnal Akuntansi (Enterprise ERP account.asset)</p>
                         </div>
                         <div class="header-actions">
                             <button class="btn btn-secondary" onclick="handleAutoDepreciate()">⚡ Auto-Post Due Depreciations</button>
@@ -2243,7 +2243,7 @@
                     <div class="view-header mb-4">
                         <div class="view-title">
                             <h2>Pusat Dokumen & Penyimpanan Cloudflare R2 (`ir.attachment`)</h2>
-                            <p class="text-muted">Penyimpanan objek cloud zero-egress R2 terintegrasi Odoo-Go ERP & ekstraksi struk belanja otomatis dengan Cloudflare Workers AI Vision OCR</p>
+                            <p class="text-muted">Penyimpanan objek cloud zero-egress R2 terintegrasi GoERP & ekstraksi struk belanja otomatis dengan Cloudflare Workers AI Vision OCR</p>
                         </div>
                         <div class="view-actions" style="display: flex; gap: 0.5rem;">
                             <button class="btn btn-primary" onclick="openUploadAttachmentModal()">
@@ -2692,7 +2692,7 @@
                     <div class="content-header">
                         <div>
                             <h2>Enterprise Payroll & Aturan Gaji</h2>
-                            <p class="subtitle">Sistem Penggajian Formal Odoo Enterprise dengan Cloudflare Workers AI Tax Auditor (@cf/meta/llama-3.1-8b-instruct), Aturan Gaji Multi-Struktur, Sinkronisasi Lembur & Cuti, serta Entri Jurnal Berimbang GL.</p>
+                            <p class="subtitle">Sistem Penggajian Formal Enterprise ERP dengan Cloudflare Workers AI Tax Auditor (@cf/meta/llama-3.1-8b-instruct), Aturan Gaji Multi-Struktur, Sinkronisasi Lembur & Cuti, serta Entri Jurnal Berimbang GL.</p>
                         </div>
                         <div class="header-actions">
                             <button class="btn btn-secondary" onclick="openPayrollStructuresModal()">
@@ -2809,7 +2809,7 @@
                     <div class="content-header">
                         <div>
                             <h2>Enterprise Budgeting & Akuntansi Analitik</h2>
-                            <p class="subtitle">Manajemen Rencana Anggaran Biaya (RKAB) Odoo Enterprise dengan Sinkronisasi Realisasi GL Otomatis, Dynamic Variance Analysis, Akun Analitik / Cost Center, dan Cloudflare Workers AI Burn-Rate & Overspend Auditor (@cf/meta/llama-3.1-8b-instruct).</p>
+                            <p class="subtitle">Manajemen Rencana Anggaran Biaya (RKAB) Enterprise ERP dengan Sinkronisasi Realisasi GL Otomatis, Dynamic Variance Analysis, Akun Analitik / Cost Center, dan Cloudflare Workers AI Burn-Rate & Overspend Auditor (@cf/meta/llama-3.1-8b-instruct).</p>
                         </div>
                         <div class="header-actions">
                             <button class="btn btn-secondary" onclick="openAnalyticAccountsModal()">
@@ -3946,7 +3946,7 @@
                     <div class="content-header">
                         <div>
                             <h2>Rekonsiliasi Bank & Impor Mutasi Rekening Koran</h2>
-                            <p class="subtitle">Modul ke-31 • Engine Rekonsiliasi Otomatis Odoo 17/18, Impor CSV Multi-Format (BCA/Mandiri/BRI), Aturan Write-Off Biaya Bank, Pencocokan Piutang/Hutang, dan AI Statement Audit Copilot.</p>
+                            <p class="subtitle">Modul ke-31 • Engine Rekonsiliasi Otomatis Modern Enterprise, Impor CSV Multi-Format (BCA/Mandiri/BRI), Aturan Write-Off Biaya Bank, Pencocokan Piutang/Hutang, dan AI Statement Audit Copilot.</p>
                         </div>
                         <div class="header-actions">
                             <button class="btn btn-primary" onclick="openCreateBankStatementModal()" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); border: none;">
@@ -7383,7 +7383,7 @@
                         <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 1.5rem; align-items: start;">
                             <div class="card" style="padding: 1.25rem;">
                                 <h3 style="margin-bottom: 0.5rem;">🧪 Universal Open RPC Request Builder</h3>
-                                <p class="text-muted" style="margin-bottom: 1rem;">Eksekusi operasi CRUD &amp; Workflow secara dinamis ke model ERP mana pun layaknya Odoo External XML-RPC / JSON-RPC</p>
+                                <p class="text-muted" style="margin-bottom: 1rem;">Eksekusi operasi CRUD &amp; Workflow secara dinamis ke model ERP mana pun layaknya Enterprise ERP External XML-RPC / JSON-RPC</p>
                                 <div class="form-group">
                                     <label>Metode Operasi RPC</label>
                                     <select id="intgRpcMethod" class="form-control" onchange="onIntgRpcMethodChange()">
@@ -7804,7 +7804,7 @@
                         <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 1.5rem; align-items: start;">
                             <div class="card" style="padding: 1.25rem;">
                                 <h3 style="margin-bottom: 0.5rem;">🧪 Universal Open RPC Request Builder</h3>
-                                <p class="text-muted" style="margin-bottom: 1rem;">Eksekusi operasi CRUD &amp; Workflow secara dinamis ke model ERP mana pun layaknya Odoo External XML-RPC / JSON-RPC</p>
+                                <p class="text-muted" style="margin-bottom: 1rem;">Eksekusi operasi CRUD &amp; Workflow secara dinamis ke model ERP mana pun layaknya Enterprise ERP External XML-RPC / JSON-RPC</p>
                                 <div class="form-group">
                                     <label>Metode Operasi RPC</label>
                                     <select id="intgRpcMethod" class="form-control" onchange="onIntgRpcMethodChange()">
@@ -10776,7 +10776,7 @@
             </div>
             <div class="modal-body">
                 <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-                    Aturan penggajian formal Odoo Enterprise yang mengatur urutan kalkulasi (Sequence), kategori penghasilan/potongan, serta pemetaan otomatis ke Akun Buku Besar (GL) Akuntansi.
+                    Aturan penggajian formal Enterprise ERP yang mengatur urutan kalkulasi (Sequence), kategori penghasilan/potongan, serta pemetaan otomatis ke Akun Buku Besar (GL) Akuntansi.
                 </p>
                 <div id="payrollStructuresListContainer">
                     <div style="text-align: center; padding: 1rem;">Memuat struktur gaji...</div>
@@ -11501,7 +11501,7 @@
                     <div class="form-group mb-3">
                         <label>Kurs Langsung (IDR per 1 Satuan Valas) *</label>
                         <input type="number" id="rateDirectRate" class="form-control" required step="any" min="0.000001" placeholder="e.g. 16300 untuk USD, 17500 untuk EUR">
-                        <small style="color: var(--text-muted); font-size: 0.72rem;">Sistem otomatis menghitung kurs invers Odoo (Unit per 1 IDR).</small>
+                        <small style="color: var(--text-muted); font-size: 0.72rem;">Sistem otomatis menghitung kurs invers Enterprise ERP (Unit per 1 IDR).</small>
                     </div>
                     <div class="form-group mb-2">
                         <label>Sumber Kurs</label>
@@ -12942,7 +12942,7 @@
                     </div>
                     <div class="form-group" style="margin-bottom: 1rem;">
                         <label style="display: block; font-weight: 600; margin-bottom: 0.35rem;">Target URL (HTTPS Endpoint) *</label>
-                        <input type="url" id="whTargetURL" class="form-control" required placeholder="https://api.partner.com/webhooks/odoo">
+                        <input type="url" id="whTargetURL" class="form-control" required placeholder="https://api.partner.com/webhooks/erp">
                     </div>
                     <div class="form-group" style="margin-bottom: 1rem;">
                         <label style="display: block; font-weight: 600; margin-bottom: 0.35rem;">Secret Token HMAC-SHA256 (Opsional - Dibuat Otomatis)</label>
@@ -13734,7 +13734,7 @@
                     </div>
                     <div class="form-group">
                         <label>Nama Pemilik Rekening *</label>
-                        <input type="text" id="trAccHolder" class="form-control" placeholder="cth. PT Odoo Golang Nusantara" required>
+                        <input type="text" id="trAccHolder" class="form-control" placeholder="cth. PT Golang ERP Nusantara" required>
                     </div>
                     <div class="form-group">
                         <label>Tipe Rekening</label>

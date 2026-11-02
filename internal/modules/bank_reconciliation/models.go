@@ -6,7 +6,7 @@ import (
 	"erp-golang/internal/modules/base"
 )
 
-// AccountBankStatement corresponds to Odoo's account.bank.statement
+// AccountBankStatement corresponds to standard enterprise account.bank.statement
 type AccountBankStatement struct {
 	models.ModelBase
 	Name            string                     `gorm:"size:64;not null;uniqueIndex" json:"name"` // e.g. BNK/STAT/2026/0001
@@ -24,7 +24,7 @@ type AccountBankStatement struct {
 	Note            string                     `gorm:"type:text" json:"note"`
 }
 
-// AccountBankStatementLine corresponds to Odoo's account.bank.statement.line
+// AccountBankStatementLine corresponds to standard enterprise account.bank.statement.line
 type AccountBankStatementLine struct {
 	models.ModelBase
 	StatementID         uint                   `gorm:"not null;index" json:"statement_id"`
@@ -44,7 +44,7 @@ type AccountBankStatementLine struct {
 	AutoMatchReason     string                 `gorm:"size:255" json:"auto_match_reason"`
 }
 
-// AccountReconcileModel corresponds to Odoo's account.reconcile.model (Rules for auto-writeoffs, bank charges)
+// AccountReconcileModel corresponds to standard enterprise account.reconcile.model (Rules for auto-writeoffs, bank charges)
 type AccountReconcileModel struct {
 	models.ModelBase
 	RuleName   string `gorm:"size:128;not null" json:"rule_name"` // e.g. "Biaya Administrasi Bank", "Pajak Bunga"

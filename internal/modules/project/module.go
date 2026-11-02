@@ -67,7 +67,7 @@ func (m *Module) Seed(db *gorm.DB) error {
 		userID1 := uint(1)    // Administrator
 
 		proj1 := Project{
-			Name:        "Implementasi ERP Cloud Odoo-Go",
+			Name:        "Implementasi ERP Cloud GoERP",
 			PartnerID:   &partnerID1,
 			UserID:      &userID1,
 			Status:      "active",

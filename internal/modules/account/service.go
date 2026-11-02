@@ -108,7 +108,7 @@ func (s *Service) ActionPost(id uint, companyID uint) (*AccountMove, error) {
 		return nil, errors.New("cannot post a cancelled move")
 	}
 
-	// Validate Debit == Credit (Odoo core accounting rule)
+	// Validate Debit == Credit (Enterprise ERP core accounting rule)
 	var sumDebit, sumCredit float64
 	for _, line := range move.LineIDs {
 		sumDebit += line.Debit

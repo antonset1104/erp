@@ -55,7 +55,7 @@ func (m *Module) Seed(db *gorm.DB) error {
 	if count == 0 {
 		config := PosConfig{
 			Name:          "Main Cashier Terminal (Shop Front)",
-			ReceiptHeader: "PT Odoo Golang Nusantara\nJl. Sudirman 52, Jakarta",
+			ReceiptHeader: "PT Golang ERP Nusantara\nJl. Sudirman 52, Jakarta",
 			ReceiptFooter: "Terima Kasih Atas Kunjungan Anda!\nBarang yang sudah dibeli tidak dapat ditukar.",
 		}
 		config.CompanyID = 1

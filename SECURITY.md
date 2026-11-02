@@ -1,6 +1,6 @@
 # Kebijakan Keamanan (Security Policy)
 
-Keamanan data finansial, operasional, dan privasi pengguna adalah prioritas tertinggi dalam pengembangan **Odoo-Go ERP**. Kami mengapresiasi upaya komunitas peneliti keamanan dan pengembang yang membantu menjaga integritas sistem kami melalui pengungkapan kerentanan yang bertanggung jawab (*responsible disclosure*).
+Keamanan data finansial, operasional, dan privasi pengguna adalah prioritas tertinggi dalam pengembangan **GoERP**. Kami mengapresiasi upaya komunitas peneliti keamanan dan pengembang yang membantu menjaga integritas sistem kami melalui pengungkapan kerentanan yang bertanggung jawab (*responsible disclosure*).
 
 ---
 
@@ -49,7 +49,7 @@ Sertakan informasi berikut dalam laporan Anda:
 
 ---
 
-## 🔒 Praktik Keamanan Bawaan Odoo-Go ERP
+## 🔒 Praktik Keamanan Bawaan GoERP
 
 Platform ini telah menerapkan standar keamanan enterprise terkemuka:
 - **Autentikasi Aman**: JWT (*JSON Web Tokens*) berdurasi terbatas dengan secret key minimum 32-karakter.

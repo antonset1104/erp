@@ -426,7 +426,7 @@ func (s *service) GenerateSchemaWithAI(prompt string, category string) (*AISchem
 
 	// Cek apakah Cloudflare AI tersedia
 	if s.aiClient != nil && s.aiClient.IsCloudflareConfigured() {
-		systemPrompt := "You are a World-Class Enterprise ERP Data Architect (SAP/Odoo Studio/Salesforce certified). Given a business requirement in any industry, generate an exact JSON schema containing: model_technical_name (prefix x_), model_display_name, description, icon (FontAwesome), menu_category, architecture_notes, and recommended_fields (array of {field_name, field_label, field_type, is_required, selection_options, help_tooltip}). Supported field_types: string, text, integer, float, monetary, date, datetime, boolean, selection, many2one."
+		systemPrompt := "You are a World-Class Enterprise ERP Data Architect (SAP/Enterprise ERP Studio/Salesforce certified). Given a business requirement in any industry, generate an exact JSON schema containing: model_technical_name (prefix x_), model_display_name, description, icon (FontAwesome), menu_category, architecture_notes, and recommended_fields (array of {field_name, field_label, field_type, is_required, selection_options, help_tooltip}). Supported field_types: string, text, integer, float, monetary, date, datetime, boolean, selection, many2one."
 		userPrompt := fmt.Sprintf("Generate ERP Custom Schema for: %s (Category: %s). Return ONLY valid JSON.", prompt, category)
 
 		aiResp, err := s.aiClient.CallRaw(userPrompt, systemPrompt)

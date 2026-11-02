@@ -618,12 +618,12 @@ func (s *Service) GenerateOpenAPISpec(origin string) map[string]interface{} {
 	return map[string]interface{}{
 		"openapi": "3.0.3",
 		"info": map[string]interface{}{
-			"title":       "Odoo-Go Universal Enterprise Integration API",
+			"title":       "GoERP Universal Enterprise Integration API",
 			"version":     "1.40.0",
 			"description": "High-performance Golang Open API engine for machine-to-machine integrations with 3rd-party applications (Shopify, Tokopedia, Zapier, WMS Scanners, Payment Gateways, ERP microservices).",
 			"contact": map[string]interface{}{
 				"name":  "Enterprise ERP Integration Team",
-				"email": "api@odoo.local",
+				"email": "api@erp.local",
 			},
 		},
 		"servers": []map[string]interface{}{
@@ -713,7 +713,7 @@ func (s *Service) AnalyzeIntegrationWithAI(req *AIIntegrationArchitectRequest) (
 	// Try Cloudflare Workers AI if client exists
 	if s.aiClient != nil && s.aiClient.IsCloudflareConfigured() {
 		systemPrompt := `You are an Enterprise ERP Integration Architect. Analyze the 3rd-party integration requirement and output ONLY a valid JSON object matching the requested schema.`
-		userPrompt := fmt.Sprintf(`Analyze the following 3rd-party integration requirement for an Odoo-Go ERP system:
+		userPrompt := fmt.Sprintf(`Analyze the following 3rd-party integration requirement for an GoERP system:
 Requirement: %s
 Target Application: %s
 Programming Language: %s
@@ -794,7 +794,7 @@ async function ingestOrder() {
   });
   console.log('ERP Order ID:', res.data.data.id);
 }`
-		report.GoSnippet = `// Golang SDK client for Odoo-Go ERP
+		report.GoSnippet = `// Golang SDK client for GoERP
 package main
 import (
     "bytes"
