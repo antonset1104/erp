@@ -1,8 +1,8 @@
-# Dokumentasi Fungsional (Functional Documentation) — GoERP v1.0
+# Functional Documentation — GoERP v1.0
 
-## 1. Gambaran Umum Fungsionalitas Bisnis
+## 1. Business Functionality Overview
 
-**GoERP** mengintegrasikan **50 modul fungsional kelas enterprise** ke dalam satu basis data terpadu. Setiap transaksi operasional di satu modul secara otomatis memicu pembaruan di modul terkait (Inventaris, Buku Besar Akuntansi, Pajak, Kepabeanan, dan Jejak Audit) tanpa duplikasi entri manual.
+**GoERP** unifies **50 enterprise-grade functional modules** into a single cohesive data model and transaction engine. Every business transaction in one module automatically cascades updates across corresponding modules (Inventory, General Ledger, Tax Compliance, Customs Bonded Zones, and Audit Trails) eliminating duplicate manual data entry.
 
 ```mermaid
 flowchart LR
@@ -16,126 +16,125 @@ flowchart LR
     WMS -->|Consume Raw Material| MRP["MRP I & II Production"]
     MRP -->|Finished Goods +| WMS
     WMS -->|Stock Quant -| DO
-    INV -->|Post to GL| GL["General Ledger (PSAK)"]
+    INV -->|Post to GL| GL["General Ledger (Balanced)"]
     BILL -->|Post to GL| GL
 ```
 
 ---
 
-## 2. Alur Proses Bisnis End-to-End (Core End-to-End Workflows)
+## 2. Core End-to-End Business Workflows
 
-### 2.1 Siklus *Order-to-Cash* (Penjualan, Pengiriman, Penagihan & Kas)
-1. **Akuisisi Prospek (CRM)**: Tim penjualan mencatat prospek di pipeline CRM (`new` → `qualified` → `proposition` → `won`) dan mengonversinya menjadi *Sales Quotation* dengan 1 klik.
-2. **Konfirmasi Pesanan Penjualan (`sale.order`)**: Saat status diubah dari `draft` menjadi `sale`, sistem secara otomatis:
-   - Memotong/mereservasi stok melalui pembuatan dokumen *Delivery Order* (`WH/OUT/xxxxx`) di modul Inventaris.
-   - Menghitung PPN 11% secara otomatis pada setiap baris pesanan.
-3. **Pengiriman Barang (`stock.picking`)**: Petugas gudang memvalidasi dokumen `WH/OUT`, yang mengurangi saldo `stock.quant` di lokasi `WH/Stock` dan memindahkannya ke `Partners/Customers`.
-4. **Faktur & e-Faktur Pajak (`account.move` & `tax_efaktur`)**: Bagian keuangan menerbitkan *Customer Invoice*, mengambil nomor seri faktur pajak (NSFP) otomatis untuk e-Faktur PPN 11%, dan memposting jurnal berpasangan (*Debit Piutang Usaha / Credit Pendapatan & PPN Keluaran*).
-5. **Penerimaan Pembayaran & Rekonsiliasi Bank**: Pembayaran pelanggan dicatat melalui `account.payment`, mengubah status faktur menjadi `paid`, dan dicocokkan otomatis dengan mutasi rekening koran di modul *Bank Reconciliation*.
+### 2.1 Order-to-Cash Cycle (Sales, Delivery, Invoicing & Cash Collections)
+1. **Lead Acquisition & CRM Pipeline**: Sales representatives qualify prospects across CRM pipeline stages (`new` → `qualified` → `proposition` → `won`) and convert won opportunities into official Sales Quotations with 1 click.
+2. **Sales Order Confirmation (`sale.order`)**: When confirmed (`state` transitions from `draft` to `sale`), the system automatically:
+   - Reserves stock and generates an associated *Delivery Order* (`WH/OUT/xxxxx`) in the Warehouse module.
+   - Computes standard 11% Value Added Tax (VAT) on line items.
+3. **Goods Dispatch & Delivery (`stock.picking`)**: Warehouse personnel validate the `WH/OUT` document, which deducts on-hand quantities from `WH/Stock` and transfers them to `Partners/Customers` via double-entry stock moves.
+4. **Invoicing & e-Faktur Integration (`account.move` & `tax_efaktur`)**: Finance issues a Customer Invoice, allocates official tax serial numbers (NSFP), generates electronic tax invoices (e-Faktur), and posts balanced GL entries (*Debit Accounts Receivable / Credit Sales Revenue & Output VAT*).
+5. **Cash Collections & Bank Reconciliation**: Incoming customer payments are registered via `account.payment`, settling invoice balances and enabling automated algorithmic matching against uploaded bank statements in the *Bank Reconciliation* module.
 
-### 2.2 Siklus *Procure-to-Pay* (Pengadaan, Penerimaan Gudang, Landed Cost & Utang)
-1. **Permintaan Pembelian & Lelang (`purchase.requisition`)**: Departemen mengajukan kebutuhan barang; bagian pengadaan membuka tender multi-vendor (*Call for Bids*) atau menggunakan kontrak *Blanket Order*.
-2. **Persetujuan Berjenjang (`workflow_engine` / `approval`)**: PO bernilai tinggi dievaluasi oleh *BPMN 2.0 Exclusive Gateway* (misal: nilai $\ge \text{Rp } 50\text{ Juta}$ diarahkan ke CFO, $\ge \text{Rp } 500\text{ Juta}$ diarahkan ke CEO).
-3. **Penerimaan Barang & Kontrol Mutu (`WH/IN` & `quality`)**: Saat barang tiba dari pemasok, sistem memicu pemeriksaan *Quality Control Point* (QCP). Setelah lulus inspeksi, validasi `WH/IN` menambah saldo stok fisik.
-4. **Kapitalisasi Biaya Impor (`landed_cost`)**: Bea masuk, biaya pengangkutan (*freight*), dan asuransi dialokasikan secara proporsional (berdasarkan nilai, berat, atau volume) ke Harga Pokok Persediaan.
-5. **Tagihan Vendor & e-Bupot Unifikasi (`tax_ebupot`)**: Atas jasa atau sewa, sistem menerbitkan Bukti Potong PPh 23 / PPh 4(2) secara otomatis dan melunasi utang usaha.
+### 2.2 Procure-to-Pay Cycle (Purchasing, Inbound Receiving, Landed Costs & Accounts Payable)
+1. **Requisitions & Multi-Vendor Tenders (`purchase.requisition`)**: Internal departments raise material requests; procurement issues competitive RFQ tenders (*Call for Bids*) or draws against approved *Blanket Orders*.
+2. **Multi-Level Approval Matrix (`workflow_engine` / `approval`)**: Purchase orders exceeding organizational thresholds trigger conditional BPMN 2.0 evaluation (e.g., $\ge \$5,000$ escalates to Finance Manager, $\ge \$50,000$ escalates to Executive Director).
+3. **Inbound Receiving & Quality Inspection (`WH/IN` & `quality`)**: Upon vendor delivery, the system initiates Quality Control Point (QCP) inspections. Passing items are confirmed via `WH/IN` validation, increasing warehouse inventory.
+4. **Landed Cost Capitalization (`landed_cost`)**: Inbound freight charges, customs import duties, terminal fees, and cargo insurance are proportionally allocated (by value, quantity, weight, or volume) into the inventory valuation layer.
+5. **Vendor Bills & Tax Withholding (`tax_ebupot`)**: Vendor invoices for contracted services automatically generate withholding tax slips (PPh 23 / PPh 4(2)) before final cash disbursement.
 
-### 2.3 Siklus *Plan-to-Produce* (Manufaktur MRP I & MRP II Shop Floor)
-1. **Bill of Materials (`mrp.bom`)**: Mendefinisikan komposisi bahan baku dan komponen untuk setiap produk jadi.
-2. **Work Center & Routing (`mrp_advanced`)**: Menentukan stasiun kerja pabrik (*Work Center*), kapasitas jam mesin, biaya operasional per jam, serta urutan tahapan pengerjaan (*Routing*).
-3. **Eksekusi Produksi (`mrp.production` & `work.order`)**:
-   - Mencatat waktu mulai/selesai aktual di lantai produksi (*Shop Floor*), menghitung metrik **OEE (*Overall Equipment Effectiveness*)** = $\text{Availability} \times \text{Performance} \times \text{Quality}$.
-   - Saat selesai, sistem otomatis mengurangi stok bahan baku dari gudang dan menambah stok produk jadi beserta silsilah *Lot/Serial Number* (`traceability`).
+### 2.3 Plan-to-Produce Cycle (Manufacturing MRP I & MRP II Shop Floor Control)
+1. **Bill of Materials (`mrp.bom`)**: Defines multi-level raw material component structures, scrap percentages, and assembly formulas for finished goods.
+2. **Work Centers & Routing Operations (`mrp_advanced`)**: Configures production work centers, machine hourly capacities, labor operating costs, and sequential operation routings.
+3. **Shop Floor Production Execution (`mrp.production` & `work.order`)**:
+   - Captures real-time work order tracking on the shop floor and tracks **OEE (Overall Equipment Effectiveness)** metrics = $\text{Availability} \times \text{Performance} \times \text{Quality}$.
+   - Upon completion, raw materials are atomically consumed from inventory and finished goods are received into stock accompanied by full lot/serial genealogy (`traceability`).
 
-### 2.4 Siklus *Hire-to-Retire* (SDM, Presensi, Cuti & Payroll PPh 21 TER)
-1. **Rekrutmen Berbasis AI (`recruitment`)**: Pelamar kerja dievaluasi oleh *AI Talent Scorer* berdasarkan kecocokan kualifikasi, dan pelamar terpilih dapat langsung dikonversi menjadi karyawan aktif (*1-Click Hire*).
-2. **Presensi Geofencing & Cuti (`attendance` & `leave`)**: Kehadiran dicatat dengan koordinat GPS, deteksi keterlambatan/lembur otomatis, serta integrasi saldo cuti tahunan dan cuti tidak berbayar (*unpaid leave*).
-3. **Penggajian & Pajak PPh 21 TER (`payroll`)**:
-   - Menghitung gaji pokok, tunjangan tetap/tidak tetap, potongan ketidakhadiran prorata, iuran **BPJS Kesehatan (4% Perusahaan, 1% Karyawan)**, **BPJS Ketenagakerjaan (JHT, JKK, JKM, JP)**, serta **PPh 21 Tarif Efektif Rata-rata (TER Kategori A/B/C sesuai PP 58/2023 & PMK 168/2023)**.
-   - Memposting jurnal gaji secara agregat ke Buku Besar Akuntansi.
+### 2.4 Hire-to-Retire Cycle (HRIS, Attendance, Leave & Enterprise Payroll)
+1. **AI-Assisted Recruitment (`recruitment`)**: Candidates are evaluated by an automated AI Talent Scorer against job descriptions; shortlisted applicants convert to active employees via 1-Click Hire.
+2. **GPS Geofenced Attendance & Leave (`attendance` & `leave`)**: Employee time-tracking enforces GPS geofencing and shift schedules, computing tardiness and overtime while factoring in approved annual leave and unpaid absence.
+3. **Enterprise Payroll Execution (`payroll`)**:
+   - Computes base salaries, position allowances, meal and transport benefits, statutory social security (BPJS Ketenagakerjaan & BPJS Kesehatan), and progressive payroll tax withholding.
+   - Automatically posts aggregated salary expense and withholding liability journals into the General Ledger.
 
-### 2.5 Kepatuhan Kepabeanan Kawasan Berikat (DJBC CEISA 4.0)
-Modul `customs_bonded` memenuhi persyaratan **IT Inventory Kawasan Berikat (PER-09/BC/2014 & PMK 131/PMK.04/2018)**:
-- **Pencatatan Dokumen Pabean**: Mendukung **BC 2.3** (Impor ke KB), **BC 4.0** (Pemasukan Lokal TLDDP), **BC 2.5** (Pengeluaran ke Lokal), **BC 2.7** (Antar KB), **BC 4.1** (Pengeluaran Lokal), **BC 2.6.1 / 2.6.2** (Subkontrak), dan **BC 3.0** (Ekspor).
-- **4 Laporan Resmi DJBC Real-Time**:
-  1. Laporan Pertanggungjawaban Mutasi Bahan Baku & Bahan Penolong.
-  2. Laporan Pertanggungjawaban Mutasi Barang Jadi (Hasil Produksi).
-  3. Laporan Pertanggungjawaban Mutasi Mesin & Peralatan Perkantoran.
-  4. Laporan Pertanggungjawaban Mutasi Barang Reject & Scrap/Limbah.
+### 2.5 Customs Bonded Zone Compliance (DJBC CEISA 4.0 / IT Inventory)
+The `customs_bonded` module adheres to official bonded zone IT inventory reporting requirements:
+- **Customs Declaration Documentation**: Supports Inbound Raw Materials, Domestic Inbound, Domestic Finished Goods Outbound, Inter-Bonded Transfers, Subcontracting Inbound/Outbound, and Export Declarations.
+- **4 Real-Time Official IT Inventory Mutation Ledgers**:
+  1. Accountability Ledger for Raw Materials & Consumables.
+  2. Accountability Ledger for Finished Goods (Production Output).
+  3. Accountability Ledger for Machinery, Capital Equipment & Office Assets.
+  4. Accountability Ledger for Scrap, Waste & Rejected Materials.
 
 ---
 
-## 3. Spesifikasi Fungsional 50 Modul Enterprise
+## 3. Functional Specifications of 50 Enterprise Modules
 
-| No | Nama Modul | Entitas Teknis Utama | Fungsi Bisnis Utama |
+| No | Module Name | Primary Technical Entities | Core Business Responsibilities |
 | :-: | :--- | :--- | :--- |
-| 1 | **Base & Multi-Company** | `res.company`, `res.partner`, `res.users` | Master perusahaan, pelanggan, pemasok, pengguna, dan penomoran dokumen otomatis (`ir.sequence`). |
-| 2 | **Product Catalog** | `product.product`, `product.category` | Katalog barang dagang (*storable*), jasa (*service*), dan barang habis pakai (*consumable*). |
-| 3 | **Inventory & Stock** | `stock.picking`, `stock.move`, `stock.quant` | Mutasi gudang *double-entry*, transfer internal antar gudang, dan aturan pemesanan ulang otomatis (*Reordering Rules*). |
-| 4 | **Sales Management** | `sale.order`, `sale.order.line` | Penawaran harga, konfirmasi pesanan penjualan, integrasi pengiriman dan penagihan. |
-| 5 | **Purchase Management** | `purchase.order`, `purchase.order.line` | Permintaan penawaran (RFQ), pesanan pembelian pemasok, dan penerimaan barang. |
-| 6 | **Accounting & PSAK** | `account.move`, `account.account`, `account.payment` | Buku besar berpasangan, faktur, pembayaran, Laba Rugi, Neraca, dan Neraca Saldo. |
-| 7 | **Manufacturing (MRP I)** | `mrp.bom`, `mrp.production` | Struktur komponen produk (BoM) dan eksekusi perintah kerja produksi. |
-| 8 | **Point of Sale (POS)** | `pos.session`, `pos.order` | Kasir ritel cepat, manajemen kas awal/akhir shift, dan struk thermal 80mm. |
-| 9 | **Human Resources (HR)** | `hr.department`, `hr.employee` | Struktur organisasi departemen, direktori karyawan, dan kontrak kerja. |
-| 10 | **CRM Pipeline** | `crm.lead` | Pelacakan peluang bisnis, probabilitas kemenangan, dan konversi ke Sales Order. |
-| 11 | **Project & Timesheet** | `project.project`, `project.task` | Manajemen proyek pelanggan, tahapan tugas Kanban, dan pencatatan jam kerja. |
-| 12 | **Chatter & Collaboration** | `mail.message` | Diskusi internal pada dokumen transaksi dan pencatatan riwayat perubahan status. |
-| 13 | **Fixed Assets** | `account.asset` | Akuisisi aset tetap, perhitungan penyusutan garis lurus/saldo menurun, dan posting GL. |
-| 14 | **Helpdesk Support** | `helpdesk.ticket` | Tiket layanan pelanggan, prioritas eskalasi, dan pemantauan waktu penyelesaian SLA. |
-| 15 | **Maintenance Management** | `maintenance.equipment`, `maintenance.request` | Jadwal perawatan berkala (*preventive*) dan perbaikan kerusakan mesin (*corrective*). |
-| 16 | **Fleet Management** | `fleet.vehicle`, `fleet.service` | Pemantauan kendaraan operasional, catatan odometer KM, dan biaya servis armada. |
-| 17 | **Leave & Time Off** | `hr.leave`, `hr.leave.allocation` | Pengajuan cuti tahunan/sakit/tidak dibayar dan persetujuan manajer. |
-| 18 | **Employee Expenses** | `hr.expense`, `hr.expense.sheet` | Klaim pengeluaran perjalanan dinas/operasional karyawan dan penggantian biaya. |
-| 19 | **Quality Control (QMS)** | `quality.point`, `quality.check`, `quality.alert` | Pemeriksaan mutu penerimaan/produksi dan tindakan korektif-preventif (CAPA). |
-| 20 | **Approval Matrix** | `approval.rule`, `approval.request` | Aturan otorisasi dokumen berdasarkan ambang nilai transaksi dan jabatan. |
-| 21 | **Attachments & R2 OCR** | `ir.attachment` | Penyimpanan berkas cloud R2 dan ekstraksi data struk belanja otomatis dengan AI Vision. |
-| 22 | **Edge Attendance** | `hr.attendance`, `hr.shift` | Presensi masuk/pulang dengan validasi lokasi GPS dan analisis keterlambatan. |
-| 23 | **AI Recruitment** | `hr.job`, `hr.applicant` | Pembukaan lowongan, penilaian CV otomatis dengan AI, dan konversi pelamar ke karyawan. |
-| 24 | **Stock Opname** | `stock.inventory` | Perhitungan fisik stok gudang, penyesuaian selisih, dan audit penyusutan (*shrinkage*). |
-| 25 | **Enterprise Payroll** | `hr.payslip`, `hr.salary.rule` | Penggajian massal, perhitungan PPh 21 TER & BPJS otomatis, serta slip gaji elektronik. |
-| 26 | **Budget & Analytic** | `account.budget`, `account.analytic.account` | Anggaran tahunan per pusat biaya (*cost center*) dan analisis varians realisasi vs anggaran. |
-| 27 | **Barcode & Lot Engine** | `stock.production.lot` | Pembuatan label barcode SVG Code 128 dan pelacakan nomor seri/lot kedaluwarsa. |
-| 28 | **Purchase Requisition** | `purchase.requisition`, `purchase.bid` | Lelang pengadaan multi-pemasok, matriks perbandingan harga, dan kontrak payung. |
-| 29 | **Multi-Currency (Forex)** | `res.currency.rate`, `account.currency.revaluation` | Pembaruan kurs mata uang asing dan jurnal laba/rugi selisih kurs (PSAK 10). |
-| 30 | **Tax e-Faktur DJP** | `account.tax.nsfp`, `account.tax.invoice` | Pengelolaan jatah NSFP, Faktur Pajak Keluaran/Masukan, dan ekspor CSV SPT Masa PPN 1111. |
-| 31 | **Bank Reconciliation** | `account.bank.statement` | Impor mutasi rekening koran BCA/Mandiri/BRI dan pencocokan otomatis dengan buku besar. |
-| 32 | **Landed Cost** | `stock.landed.cost` | Pembebanan biaya kepabeanan dan logistik impor ke nilai valuasi persediaan barang. |
-| 33 | **Lot Traceability** | `stock.lot.trace`, `stock.lot.recall` | Pelacakan rantai pasok hulu ke hilir dan manajemen penarikan produk cacat (*product recall*). |
-| 34 | **Subscription & SaaS** | `sale.subscription` | Kontrak berlangganan bulanan/tahunan, perhitungan MRR/ARR, dan faktur berulang otomatis. |
-| 35 | **Immutable Audit Trail** | `audit.log.entry` | Rekaman forensik setiap penambahan/perubahan/penghapusan data beserta nilai sebelum & sesudah. |
-| 36 | **Outbound Webhooks** | `webhook.subscription`, `webhook.delivery` | Pengiriman notifikasi event real-time ke sistem luar dengan tanda tangan HMAC-SHA256. |
-| 37 | **Inbound Webhooks** | `inbound.webhook.endpoint`, `inbound.webhook.log` | Penerima callback otomatis dari payment gateway (Midtrans/Xendit) dan marketplace. |
-| 38 | **Intercompany Holding** | `intercompany.group`, `consolidation.run` | Sinkronisasi transaksi antar anak perusahaan dan eliminasi jurnal konsolidasi holding. |
-| 39 | **Corporate Treasury** | `treasury.bank.account`, `cash.flow.forecast` | Pemantauan posisi kas likuid multi-bank, proyeksi arus kas 13 minggu, dan *cash sweeping*. |
-| 40 | **Advanced MRP II** | `mrp.workcenter`, `mrp.routing`, `mrp.workorder` | Penjadwalan mesin pabrik, pelacakan operasi lantai produksi, dan perhitungan skor OEE. |
-| 41 | **Tax e-Bupot Unifikasi** | `tax.ebupot.slip`, `tax.ebupot.period` | Pembuatan bukti potong PPh 21/23/26/4(2) dan pelaporan SPT Masa PPh Unifikasi. |
-| 42 | **Digital Signature** | `esignature.request` | Penandatanganan dokumen kontrak secara kriptografis (SHA-256) dan pembubuhan e-Meterai. |
-| 43 | **3D WMS Gudang** | `wms.zone`, `wms.bin.location`, `wms.wave.picking` | Manajemen koordinat lorong-rak-ambalan-bin 3D, aturan *putaway* FEFO/FIFO, dan *wave picking*. |
-| 44 | **Vendor Portal** | `vendor.portal.account`, `vendor.asn` | Portal mandiri bagi pemasok untuk memasukkan penawaran tender, surat jalan ASN, dan tagihan. |
-| 45 | **Customer Portal B2B** | `customer.portal.account`, `customer.rma` | Portal mandiri bagi pelanggan grosir untuk memesan barang, mengajukan retur RMA, dan konfirmasi bayar. |
-| 46 | **Customs Bonded Zone** | `customs.document`, `customs.it.inventory` | Kepatuhan kawasan berikat DJBC CEISA 4.0, SPPB, subkontrak, dan 4 laporan mutasi IT Inventory. |
-| 47 | **Low-Code Studio** | `lowcode.custom.model`, `lowcode.custom.field` | Pembuatan model data kustom, kolom dinamis EAV, ekstensi entitas standar, dan AI Schema Copilot. |
-| 48 | **Printable Reports** | `reports.engine` | Pencetakan dokumen resmi berformat A4 (SO, PO, Invoice, Surat Jalan, Slip Gaji, P&L) & struk kasir. |
-| 49 | **BPMN Workflow Engine** | `workflow.definition`, `workflow.instance` | Mesin state machine BPMN 2.0 visual dengan *conditional gateway* dan pelacakan SLA persetujuan. |
-| 50 | **Integration Hub** | `integration.api.key`, `integration.connector` | Gateway Open RPC universal, manajemen kunci API M2M, konektor marketplace, dan pekerjaan Batch ETL. |
-
+| 1 | **Base & Multi-Company** | `res.company`, `res.partner`, `res.users` | Master company structures, customer/vendor partners, user authentication, and document sequence auto-numbering (`ir.sequence`). |
+| 2 | **Product Catalog** | `product.product`, `product.category` | Product master data supporting storable goods, services, and consumable items with units of measure (UoM). |
+| 3 | **Inventory & Stock** | `stock.picking`, `stock.move`, `stock.quant` | Double-entry warehouse stock moves, multi-warehouse routing, internal transfers, and automated reordering rules. |
+| 4 | **Sales Management** | `sale.order`, `sale.order.line` | Sales quotations, order confirmation, automated delivery order generation, and customer invoicing hooks. |
+| 5 | **Purchase Management** | `purchase.order`, `purchase.order.line` | Requests for Quotation (RFQ), vendor purchase orders, and automated inbound goods receipt (`WH/IN`). |
+| 6 | **Accounting & General Ledger** | `account.move`, `account.account`, `account.payment` | Double-entry general ledger, customer/vendor invoices, payments, P&L, Balance Sheet, and Trial Balance. |
+| 7 | **Manufacturing (MRP I)** | `mrp.bom`, `mrp.production` | Multi-level Bill of Materials (BoM), manufacturing orders, component consumption, and finished goods creation. |
+| 8 | **Point of Sale (POS)** | `pos.session`, `pos.order` | Cashier shifts, cash in/out reconciliation, instant multi-payment retail checkout, and 80mm thermal receipt printing. |
+| 9 | **Human Resources (HR)** | `hr.department`, `hr.employee` | Department organization hierarchy, employee directories, and job position definitions. |
+| 10 | **CRM Pipeline** | `crm.lead` | Sales lead tracking, opportunity stage qualification, expected revenue calculation, and 1-click quotation conversion. |
+| 11 | **Project & Timesheet** | `project.project`, `project.task` | Client projects, Kanban task stages, planned vs actual hours tracking, and analytical employee timesheets. |
+| 12 | **Chatter & Collaboration** | `mail.message` | Document-level audit trail logging, internal team collaboration, and status history notes. |
+| 13 | **Fixed Assets** | `account.asset` | Asset registry, straight-line and declining depreciation calculation boards, and automated GL posting. |
+| 14 | **Helpdesk Support** | `helpdesk.ticket` | Customer support ticket intake, tiered priority queues, support team routing, and SLA resolution tracking. |
+| 15 | **Maintenance Management** | `maintenance.equipment`, `maintenance.request` | Plant machinery registry, automated preventive maintenance scheduling, and corrective breakdown work orders. |
+| 16 | **Fleet Management** | `fleet.vehicle`, `fleet.service` | Vehicle fleet registry, driver assignments, periodic odometer tracking, and scheduled maintenance history. |
+| 17 | **Leave & Time Off** | `hr.leave`, `hr.leave.allocation` | Annual leave quota allocations, multi-tiered leave requests, and payroll deduction integration. |
+| 18 | **Employee Expenses** | `hr.expense`, `hr.expense.sheet` | Expense receipt claims, multi-item expense report submissions, managerial approvals, and automated GL reimbursement journals. |
+| 19 | **Quality Control (QMS)** | `quality.point`, `quality.check`, `quality.alert` | Quality control points (incoming, production, outgoing), quantitative tolerance checks, and CAPA non-conformance alerts. |
+| 20 | **Approval Matrix** | `approval.rule`, `approval.request` | Multi-tier authorization matrix governed by transaction amount thresholds, departments, and roles. |
+| 21 | **Attachments & R2 OCR** | `ir.attachment` | Universal file attachments backed by Cloudflare R2 / local disk with integrated AI Vision receipt OCR. |
+| 22 | **Edge Attendance** | `hr.attendance`, `hr.shift` | GPS geofenced check-in/out, work shift policies, Cloudflare edge telemetry anti-fraud, and automated payroll sync. |
+| 23 | **AI Recruitment** | `hr.job`, `hr.applicant` | Job openings, recruitment pipeline, AI CV screening and scoring, and 1-click hire to active employee directory. |
+| 24 | **Stock Opname** | `stock.inventory` | Physical stocktaking, automated book quant snapshots, physical count entry, AI shrinkage audit, and GL variance posting. |
+| 25 | **Enterprise Payroll** | `hr.payslip`, `hr.salary.rule` | Multi-tier salary structures, dynamic salary computation rules, statutory deductions, batch payroll runs, and GL posting. |
+| 26 | **Budget & Analytic** | `account.budget`, `account.analytic.account` | Corporate operational budgets (RKAB), cost center tracking, real-time GL practical spend variance, and AI burn-rate alerts. |
+| 27 | **Barcode & Lot Engine** | `stock.production.lot` | Pure-Go SVG Code 128 barcode generator, lot/serial batch tracking, expiration dates, and context-aware mobile scanner. |
+| 28 | **Purchase Requisition** | `purchase.requisition`, `purchase.bid` | Internal purchase requests, competitive multi-vendor tender auctions (*Call for Bids*), and blanket supply contracts. |
+| 29 | **Multi-Currency (Forex)** | `res.currency.rate`, `account.currency.revaluation` | Multi-currency transactions, daily spot rate tables, realized exchange gain/loss, and month-end unrealized FX revaluation. |
+| 30 | **Tax e-Faktur Engine** | `account.tax.nsfp`, `account.tax.invoice` | Tax serial number (NSFP) management, 11% VAT e-Faktur issuance, QR verification codes, and periodic VAT return exports. |
+| 31 | **Bank Reconciliation** | `account.bank.statement` | Multi-bank CSV statement parser, multi-tier algorithmic auto-matching engine, and 1-click ledger reconciliation. |
+| 32 | **Landed Cost** | `stock.landed.cost` | Capitalization of freight, customs, and port handling charges into inventory valuation across 5 allocation methods. |
+| 33 | **Lot Traceability** | `stock.lot.trace`, `stock.lot.recall` | End-to-end upstream and downstream supply chain lot genealogy, batch tracking, and product recall management. |
+| 34 | **Subscription & SaaS** | `sale.subscription` | Recurring customer subscriptions, automated billing cycles, MRR/ARR analytics, and AI churn risk forecasting. |
+| 35 | **Immutable Audit Trail** | `audit.log.entry` | Forensic audit log capturing deep before-and-after JSON diffs, user attribution, and suspicious activity detection. |
+| 36 | **Outbound Webhooks** | `webhook.subscription`, `webhook.delivery` | Real-time event notifications delivered to external endpoints with HMAC-SHA256 signature security and retry policies. |
+| 37 | **Inbound Webhooks** | `inbound.webhook.endpoint`, `inbound.webhook.log` | Omnichannel webhook ingestion for payments (Midtrans, Xendit, Stripe), e-commerce marketplaces, and logistics partners. |
+| 38 | **Intercompany Holding** | `intercompany.group`, `consolidation.run` | Multi-company holding hierarchy, automated sales/purchase order mirroring, and intercompany elimination consolidation. |
+| 39 | **Corporate Treasury** | `treasury.bank.account`, `cash.flow.forecast` | Multi-bank account liquidity monitoring, 13-week rolling cash flow projections, and automated cash sweep transfers. |
+| 40 | **Advanced MRP II** | `mrp.workcenter`, `mrp.routing`, `mrp.workorder` | Industrial work center capacity, sequential routing operations, shop floor tracking, and Overall Equipment Effectiveness (OEE). |
+| 41 | **Tax e-Bupot Unifikasi** | `tax.ebupot.slip`, `tax.ebupot.period` | Unified withholding tax calculation slips, periodic withholding ledgers, and consolidated tax return exports. |
+| 42 | **Digital Signature** | `esignature.request` | Cryptographic document signing workflows (SHA-256), signer verification trails, and digital stamp duty integration. |
+| 43 | **3D Warehouse WMS** | `wms.zone`, `wms.bin.location`, `wms.wave.picking` | 3D bin coordinates (Aisle/Rack/Shelf/Bin), FEFO/FIFO putaway strategies, pick paths, and consolidated wave picking. |
+| 44 | **Vendor Portal** | `vendor.portal.account`, `vendor.asn` | Self-service portal for suppliers: tender bid submissions, advance shipping notices (ASN), and invoice tracking. |
+| 45 | **Customer Portal B2B** | `customer.portal.account`, `customer.rma` | Self-service B2B portal: wholesale catalogs, online ordering, return merchandise authorization (RMA), and payment proofs. |
+| 46 | **Customs Bonded Zone** | `customs.document`, `customs.it.inventory` | Bonded zone compliance (inbound, outbound, subcontracting), customs clearance permits, and 4 real-time IT inventory ledgers. |
+| 47 | **Low-Code Studio** | `lowcode.custom.model`, `lowcode.custom.field` | Dynamic model and field creation (EAV), core entity extensions, and conversational AI Schema Copilot. |
+| 48 | **Printable Reports** | `reports.engine` | Corporate A4 print layouts (SO, PO, Invoices, Delivery Slips, Payslips, Financial Statements) and 80mm POS receipts. |
+| 49 | **BPMN Workflow Engine** | `workflow.definition`, `workflow.instance` | Visual BPMN 2.0 state machine engine, conditional decision gateways, user task approval inboxes, and SLA timers. |
+| 50 | **Universal Integration Hub**| `integration.api.key`, `integration.connector` | M2M API key management, Open RPC gateway, pre-built marketplace/payment connectors, and scheduled batch ETL pipelines. |
 
 ---
 
-## 6. Fitur Continuous Improvement & Produktivitas Eksekutif
+## 4. Continuous Improvement & Executive Productivity Features
 
-Untuk mempercepat alur kerja harian pengguna pada sistem dengan 50 modul enterprise, tersedia fitur produktivitas terpadu:
+To maximize operational throughput across all 50 enterprise modules, GoERP incorporates a comprehensive suite of executive productivity tools:
 
 1. **Universal Command Palette & Omni-Search (`Ctrl+K`)**:
-   - Memungkinkan pengguna mencari dan melompat ke modul mana pun dari 50 modul ERP, mengeksekusi tindakan cepat (*Quick Actions*), serta mencari dokumen transaksi (`SO`, `PO`, `INV`), produk (`SKU`), maupun mitra bisnis secara instan dari satu jendela komando.
-2. **Filter Cepat Sidebar 50 Modul (`/` Shortcut)**:
-   - Kolom pencarian instan di bagian atas menu *sidebar* untuk menyaring daftar 50 modul secara *real-time* beserta indikator jumlah modul aktif.
+   - Enables users to instantly search across all 50 ERP modules, execute quick actions, and look up live database records (`SO`, `PO`, `INV`, `SKU`, and business partners) from a unified dialog with a 120ms debounce.
+2. **Instant 50-Module Sidebar Filter (`/` Shortcut)**:
+   - Real-time search filter situated at the top of the navigation sidebar allowing instant keyword filtering across all 50 modules with a live active module counter.
 3. **1-Click Business Cycle Simulator (O2C & P2P)**:
-   - Tombol simulasi otomatis pada Executive Dashboard yang menjalankan alur *Procure-to-Pay* (PO $\rightarrow$ Penerimaan Gudang `WH/IN`) dan *Order-to-Cash* (SO $\rightarrow$ Pengiriman `WH/OUT` $\rightarrow$ Posting Faktur & Jurnal Buku Besar `INV`) dalam satu klik beserta laporan jejak audit 5 langkah.
+   - Automated workflow simulator on the Executive Dashboard that executes a complete *Procure-to-Pay* (`PO` $\rightarrow$ `WH/IN`) and *Order-to-Cash* (`SO` $\rightarrow$ `WH/OUT` $\rightarrow$ `INV` balanced GL posting) cycle in a single click with an interactive 5-step audit log.
 4. **Actionable Notification & Approval Center (`🔔`)**:
-   - Lonceng notifikasi pintar di *header* atas yang menampilkan jumlah antrean persetujuan (*Approvals*), *workflow* BPMN aktif, dokumen *draft*, dan peringatan audit keamanan dengan navigasi 1-klik ke modul tujuan.
-5. **Executive Financial Pulse Strip & Peta Kesehatan 50 Modul**:
-   - Menampilkan metrik likuiditas kas/bank, Piutang Usaha (*AR*), Hutang Usaha (*AP*), *CRM Pipeline Revenue*, *Subscription MRR*, tabel transaksi terkini (*Live Feed*), serta matriks kesehatan 8 departemen utama.
-6. **Mode Tema Gelap / Terang (*Dark / Light Enterprise Theme*)**:
-   - Sakelar tema tampilan (`☀️ Light` / `🌙 Dark`) di bagian *header* yang disimpan secara persisten di browser pengguna.
+   - Intelligent notification bell in the top navigation bar displaying real-time actionable approval queues, active BPMN workflow tasks, draft documents, and suspicious audit alerts with 1-click navigation to target modules.
+5. **Executive Financial Pulse Strip & 50-Module Ecosystem Health Matrix**:
+   - Live KPI overview displaying Treasury cash and bank balances, Accounts Receivable (AR), Accounts Payable (AP), CRM Pipeline revenue, Subscription MRR, a live transaction activity feed, and a multi-departmental health matrix.
+6. **Dark / Light Enterprise Theme Modes**:
+   - Persistent theme switcher (`☀️ Light` / `🌙 Dark`) in the top navigation bar, remembered across user browser sessions.

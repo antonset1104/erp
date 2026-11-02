@@ -1,19 +1,19 @@
-## 📌 Deskripsi Perubahan (Pull Request Overview)
+## 📌 Pull Request Overview
 
-Jelaskan secara ringkas perubahan yang dilakukan, latar belakang masalah yang diselesaikan, dan modul yang terdampak.
+Please provide a concise summary of the changes made, the problem addressed, and the affected modules.
 
-- **Nomor Issue Terkait (jika ada):** Closes #...
-- **Tipe Perubahan:**
-  - [ ] 🐛 Perbaikan Bug (*Bug fix*)
-  - [ ] ✨ Fitur atau Modul Baru (*New feature*)
-  - [ ] ⚡ Optimasi Performa (*Performance improvement*)
-  - [ ] 📝 Pembaruan Dokumentasi (*Documentation update*)
-  - [ ] 🎨 Restrukturisasi Kode (*Code refactoring*)
-  - [ ] 🧪 Penambahan Test Case (*Testing*)
+- **Related Issue:** Closes #...
+- **Type of Change:**
+  - [ ] 🐛 Bug fix
+  - [ ] ✨ New feature or enterprise module
+  - [ ] ⚡ Performance improvement
+  - [ ] 📝 Documentation update
+  - [ ] 🎨 Code refactoring
+  - [ ] 🧪 Testing & coverage
 
 ---
 
-## 🏢 Modul yang Terdampak (Affected Modules)
+## 🏢 Affected Modules
 
 - [ ] Core Engine / Database / Routing
 - [ ] Sales & Quotations / CRM
@@ -21,35 +21,35 @@ Jelaskan secara ringkas perubahan yang dilakukan, latar belakang masalah yang di
 - [ ] Inventory / Stock / WMS
 - [ ] Invoicing / Accounting / General Ledger
 - [ ] MRP II / Manufacturing / BOM
-- [ ] HRIS / Payroll / Kehadiran
-- [ ] Perpajakan DJP (e-Faktur / e-Bupot)
-- [ ] Kawasan Berikat & DJBC
+- [ ] HRIS / Payroll / Attendance
+- [ ] Tax & Fiscal Localization
+- [ ] Customs & Bonded Zones
 - [ ] Low-Code Studio / Workflow Engine / Integration Hub
-- [ ] Web UI (Frontend HTML/CSS/JS)
+- [ ] Web UI (Frontend SPA)
 
 ---
 
-## 🧪 Bukti Pengujian & Verifikasi (Verification)
+## 🧪 Verification & Evidence
 
-Jelaskan pengujian yang telah Anda jalankan sebelum mengajukan PR:
+Describe the testing performed to verify this change:
 
 ```bash
-# Hasil verifikasi test suite lokal
+# Local test execution
 go test -v ./tests/...
 go test -v -race ./tests/...
 ```
 
-- [ ] Seluruh unit & integration test **lulus 100%** (`PASS`).
-- [ ] Tidak ada regresi pada modul yang beririsan.
-- [ ] *(Jika menyangkut UI)* Telah diuji di browser tanpa adanya JS runtime exception.
+- [ ] All unit and integration tests pass 100% (`PASS`).
+- [ ] No regression introduced to intersecting modules.
+- [ ] *(If UI-related)* Verified in live browser with 0 JavaScript console errors.
 
 ---
 
-## ✅ Daftar Periksa Kontributor (Contributor Checklist)
+## ✅ Contributor Checklist
 
-- [ ] Kode saya telah diformat menggunakan `go fmt ./...`.
-- [ ] Kode saya mematuhi panduan [CONTRIBUTING.md](CONTRIBUTING.md).
-- [ ] Saya telah menambahkan unit test atau integration test yang memverifikasi perubahan ini.
-- [ ] Komit saya menggunakan pesan komit konvensional (*Conventional Commits*).
-- [ ] Setiap halaman web HTML tetap mempertahankan skrip AdSense dan Analytics yang disyaratkan.
-- [ ] Tidak ada kredensial, token privat, atau secret key yang ter-commit ke dalam repositori.
+- [ ] My code follows the [CONTRIBUTING.md](CONTRIBUTING.md) guidelines.
+- [ ] Code is formatted with `go fmt ./...`.
+- [ ] Unit or integration tests covering the changes have been added/updated.
+- [ ] Commit messages follow the Conventional Commits specification.
+- [ ] All user-facing web templates preserve required AdSense and Analytics tags.
+- [ ] No credentials, tokens, or confidential secrets are committed.

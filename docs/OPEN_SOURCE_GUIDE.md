@@ -1,28 +1,28 @@
-# Panduan Strategis & Operasional Proyek Open Source (Open Source Project Guide)
+# Strategic & Operational Open-Source Project Guide
 
-Dokumen ini merupakan cetak biru (*blueprint*) komprehensif bagi pemilik repositori, pengelola (*maintainers*), dan komunitas dalam mengelola **GoERP** sebagai proyek perangkat lunak sumber terbuka (*open source software*) berkelas dunia.
-
----
-
-## 1. Visi & Posisi Pasar (Market Positioning)
-
-### Mengapa GoERP?
-Enterprise ERP tradisional (berbasis Python/PostgreSQL) sangat populer namun sering menghadapi tantangan dalam hal:
-- Konsumsi memori yang tinggi (ratusan megabyte per *worker process*).
-- Ketergantungan *runtime* yang rumit (*pip dependencies*, nodejs untuk asset bundling, pustaka C eksternal).
-- Kecepatan eksekusi dan konkurensi I/O yang terbatas.
-
-**GoERP** hadir untuk memecahkan tantangan tersebut dengan:
-1. **Single Binary Executable**: Seluruh 50 modul enterprise dan aset antarmuka web dikemas dalam 1 file biner mandiri (tanpa perlu install Python, pip, atau npm di server produksi).
-2. **Kecepatan & Konkurensi Native Go**: Waktu *cold start* di bawah 50 milidetik, konsumsi RAM idle hanya ~25-40 MB, dan mampu menangani ribuan transaksi *concurrent* per detik.
-3. **Penyimpanan Fleksibel**: Dukungan SQLite *embedded* (ideal untuk UKM/edge/on-premise) dan PostgreSQL (untuk korporasi skala besar multi-cabang).
-4. **Lengkap & Teruji**: Membawa 50 modul terintegrasi (O2C, P2P, MRP II, WMS, Akuntansi Double-Entry, HRIS, Pajak DJP, Kawasan Berikat, Low-Code, BPMN 2.0, dan Integration Hub).
+This document serves as the comprehensive blueprint for repository owners, core maintainers, and community contributors in governing **GoERP** as a world-class, enterprise-grade open-source software project.
 
 ---
 
-## 2. Model Tata Kelola Proyek (Open Source Governance)
+## 1. Vision & Market Positioning
 
-Proyek ini mengadopsi model tata kelola **Benevolent Maintainer / Core Team Governance**:
+### Why GoERP?
+Traditional enterprise ERP systems (primarily built on Python/PostgreSQL or legacy Java/C++ monoliths) are widespread but face chronic structural drawbacks:
+- High memory consumption (hundreds of megabytes per worker process).
+- Fragile runtime dependencies (Python virtualenvs, pip packages, NodeJS for asset pipelines, external C bindings).
+- Execution bottlenecks and GIL contention under high-concurrency I/O spikes.
+
+**GoERP** resolves these industry pain points by providing:
+1. **Single Standalone Binary**: All 50 enterprise modules and web SPA assets are compiled into a single executable binary (no Python, pip, or npm needed on production servers).
+2. **Native Go Concurrency & Speed**: Sub-50ms cold boot time, ~25–40 MB idle RAM consumption, and native goroutine scheduling capable of sustaining thousands of concurrent transactions per second.
+3. **Flexible Storage Strategy**: Embedded SQLite for edge deployments, branches, and SMEs, or PostgreSQL for large-scale enterprise conglomerates.
+4. **Complete & Battle-Tested**: Comes equipped with 50 integrated modules (O2C, P2P, MRP II, WMS, double-entry accounting, HRIS, taxation, bonded customs, low-code studio, BPMN 2.0 workflow engine, and integration hub).
+
+---
+
+## 2. Open-Source Governance Model
+
+The project operates under a **Benevolent Maintainer / Core Team Governance** model:
 
 ```mermaid
 graph TD
@@ -33,134 +33,127 @@ graph TD
     D --> E
 ```
 
-### Peran & Tanggung Jawab:
+### Roles & Responsibilities:
 1. **Project Lead / Owner (`@antonset1104`)**:
-   - Memegang kendali visi strategis, hak rilis publik, kepemilikan domain, dan hak merge final ke branch `main`.
+   - Oversees strategic project direction, public release signing, domain ownership, and final merge authority on the `main` branch.
 2. **Core Maintainers**:
-   - Meninjau (*review*) dan menyetujui Pull Requests.
-   - Mengelola rilis berkala (*release management*) dan patch keamanan darurat.
-   - Menjaga kebersihan arsitektur sistem (`internal/core`).
+   - Review and approve Pull Requests.
+   - Coordinate release cycles and publish security advisories.
+   - Preserve architectural hygiene within `internal/core`.
 3. **Module Stewards**:
-   - Pengembang spesialis yang fokus memelihara sub-sistem tertentu (misal: Perpajakan Indonesia, Akuntansi Buku Besar, MRP II, atau Frontend UI).
+   - Domain experts who maintain specific sub-systems (e.g., General Ledger Accounting, WMS/Inventory, MRP II, or Frontend SPA).
 4. **Triage Team**:
-   - Mengklasifikasikan issue baru yang masuk, mereproduksi bug, dan memberi label (*labels*).
+   - Triage incoming issues, verify bug reproduction steps, and apply appropriate taxonomy labels.
 5. **Contributors**:
-   - Pengembang komunitas yang mengirimkan perbaikan bug, fitur baru, terjemahan bahasa (*i18n*), atau perbaikan dokumentasi.
+   - Community members who submit bug fixes, new modules, localization plugins, or documentation enhancements.
 
-### Proses Pengambilan Keputusan Arsitektur: RFC (Request for Comments)
-Untuk perubahan arsitektur besar (seperti penambahan modul inti baru, perubahan skema database fundamental, atau pembaruan protokol API), kontributor diwajibkan membuat dokumen usulan:
-1. Buat issue bertipe **RFC: [Judul Usulan]** atau posting di tab GitHub Discussions kategori *Ideas*.
-2. Jelaskan motivasi, alternatif yang dipertimbangkan, dampak performa, dan contoh implementasi.
-3. Diskusi terbuka minimal 7 hari kalender sebelum disetujui oleh Core Maintainers.
+### Architectural Decision Process: RFC (Request for Comments)
+For substantial architectural changes (such as core schema refactoring, new database engines, or protocol alterations), contributors must submit an RFC:
+1. Open an issue titled **RFC: [Proposal Title]** or create a post in GitHub Discussions under the *Ideas* category.
+2. Detail the motivation, alternatives considered, performance benchmarks, and proposed implementation.
+3. Allow a minimum of 7 calendar days for open discussion before a decision by Core Maintainers.
 
 ---
 
-## 3. Strategi Lisensi & Hak Cipta (Licensing & CLA/DCO)
+## 3. Licensing & Copyright Strategy (Apache 2.0 & DCO)
 
-### Lisensi Utama: Apache License 2.0
-Proyek GoERP didistribusikan di bawah naungan **Apache License 2.0**.
-- **Kelebihan bagi Pengguna**: Bebas digunakan untuk keperluan komersial, privat, dan edukasi tanpa biaya lisensi.
-- **Perlindungan Paten Eksplisit**: Memberikan jaminan paten timbal balik dari kontributor kepada pengguna dan proyek.
-- **Klausul Pembatasan Tanggung Jawab (*Liability Disclaimer*)**: Melindungi pengelola dari tuntutan hukum kerusakan atau kehilangan data bisnis.
+### Primary License: Apache License 2.0
+GoERP is distributed under the terms of the **Apache License 2.0**.
+- **Commercial Permissiveness**: Grants individuals and companies the freedom to use, modify, distribute, and self-host the platform commercially without royalty fees.
+- **Explicit Patent Grant**: Provides mutual patent protection from contributors to users and downstream distributors.
+- **Limitation of Liability**: Shields maintainers and contributors from legal liability and operational damages.
 
-### Kebijakan Kontribusi: DCO (Developer Certificate of Origin)
-Untuk menjaga kemurnian hak cipta tanpa membebani kontributor dengan birokrasi CLA yang rumit, proyek ini menggunakan standar **Developer Certificate of Origin (DCO v1.1)** (sama seperti kernel Linux dan Git).
-Setiap kontributor cukup menyertakan tanda tangan baris pada setiap commit:
+### Contribution Policy: Developer Certificate of Origin (DCO)
+To guarantee copyright provenance without imposing bureaucratic paperwork, GoERP adheres to the **Developer Certificate of Origin (DCO v1.1)** standard (used by Linux and Git).
+Contributors sign off on their commits by including the `-s` flag:
 ```bash
 git commit -s -m "feat(wms): implement wave picking algorithm"
 ```
-Yang menghasilkan teks: `Signed-off-by: Nama Lengkap <email@domain.com>`.
+Which appends: `Signed-off-by: Full Name <email@example.com>`.
 
 ---
 
-## 4. Konfigurasi Repositori GitHub yang Diwajibkan (GitHub Settings Checklist)
+## 4. GitHub Repository Configuration Standards
 
-Agar repositori memenuhi standar baku proyek open source profesional di GitHub, pemilik repositori disarankan mengatur konfigurasi berikut pada panel **Settings** di [https://github.com/antonset1104/erp/settings](https://github.com/antonset1104/erp/settings):
+To maintain professional open-source engineering hygiene, the repository is configured with the following settings:
 
 ### A. General Repository Settings
 - **Repository Name**: `erp`
-- **Description**: `Enterprise Resource Planning (ERP) platform in Golang — 50 enterprise modules, single-binary, high concurrency, double-entry inventory & accounting, low-code & BPMN engine.`
-- **Website URL**: `https://github.com/antonset1104/erp`
-- **Topics / Tags**:
-  `golang`, `go`, `erp`, `erp`, `accounting`, `crm`, `wms`, `mrp`, `hris`, `bpm`, `workflow-engine`, `low-code`, `enterprise`, `double-entry`, `rest-api`
-- **Fitur Aktif**:
-  - ✅ **Issues** (Diaktifkan)
-  - ✅ **Discussions** (Diaktifkan untuk tanya-jawab, ide fitur, dan pengumuman)
-  - ✅ **Wikis** (Opsional, dokumentasi utama tetap di folder `docs/`)
-  - ✅ **Sponsorships** (GitHub Sponsors jika membuka donasi publik)
+- **Description**: `High-performance Enterprise Resource Planning (ERP) platform in Golang — 50 enterprise modules, single-binary, high concurrency, double-entry inventory & accounting, low-code & BPMN engine.`
+- **Homepage**: `https://github.com/antonset1104/erp`
+- **Topics**: `golang`, `go`, `erp`, `accounting`, `crm`, `wms`, `mrp`, `hris`, `bpm`, `workflow-engine`, `low-code`, `enterprise`, `double-entry`, `rest-api`, `open-source`
+- **Enabled Features**:
+  - ✅ **Issues** (Enabled with structured YAML issue forms)
+  - ✅ **Discussions** (Enabled for community Q&A and RFCs)
+  - ✅ **Projects & Wiki** (Enabled)
 
-### B. Aturan Perlindungan Branch Utama (`main`)
-Atur pada menu **Settings $\rightarrow$ Branches $\rightarrow$ Branch protection rules**:
-1. **Branch name pattern**: `main`
-2. ✅ **Require a pull request before merging**:
-   - Require approvals: Minimal 1 persetujuan dari Maintainer.
-   - Dismiss stale pull request approvals when new commits are pushed.
-3. ✅ **Require status checks to pass before merging**:
-   - Wajibkan workflow CI lulus (`test (ubuntu-latest)`, `test (windows-latest)`).
-   - Require branches to be up to date before merging.
-4. ✅ **Require linear history** (mencegah *messy merge commits*).
-5. ❌ **Do not allow bypassing the above settings** (berlaku untuk semua orang termasuk admin).
+### B. Main Branch Protection Rules (`main`)
+- **Require pull request before merging**: Enabled.
+- **Require status checks to pass before merging**:
+  - `Test (Go 1.22.x on ubuntu-latest)`
+  - `Test (Go 1.22.x on windows-latest)`
+- **Strict status checks**: Requires branches to be up-to-date with `main` before merging.
+- **Require linear history**: Enabled (enforces clean, rebased git history).
+- **Prevent force pushes & deletions**: Enforced.
 
-### C. Keamanan & Pemindaian Kerentanan (Code Security & Analysis)
-Atur pada menu **Settings $\rightarrow$ Code security and analysis**:
-- ✅ **Dependabot alerts**: Aktif.
-- ✅ **Dependabot security updates**: Aktif (otomatis membuat PR jika dependensi Go memiliki kerentanan CVE).
-- ✅ **Secret scanning**: Aktif (mencegah commit API key atau secret token secara tidak sengaja).
-- ✅ **Private vulnerability reporting**: Aktif (memungkinkan peneliti keamanan melaporkan celah secara privat ke maintainer).
+### C. Security & Dependency Automation
+- ✅ **Dependabot alerts**: Enabled.
+- ✅ **Dependabot automated security fixes**: Enabled.
+- ✅ **Secret scanning**: Enabled.
+- ✅ **Private vulnerability reporting**: Enabled.
 
 ---
 
-## 5. Rekayasa Rilis & Semantic Versioning (SemVer)
+## 5. Release Engineering & Semantic Versioning (SemVer)
 
-GoERP mematuhi konvensi **Semantic Versioning 2.0.0** (`vMAJOR.MINOR.PATCH`):
-- **MAJOR (`v2.0.0`)**: Perubahan arsitektur besar yang merusak kompatibilitas backward (*breaking changes* pada API atau skema database).
-- **MINOR (`v1.42.0`)**: Penambahan modul baru, endpoint API baru, atau peningkatan fitur yang kompatibel ke belakang.
-- **PATCH (`v1.41.1`)**: Perbaikan bug, patch keamanan, atau optimasi performa tanpa mengubah kontrak API.
+GoERP adheres to the **Semantic Versioning 2.0.0** (`vMAJOR.MINOR.PATCH`) standard:
+- **MAJOR (`v2.0.0`)**: Breaking architectural changes, incompatible API modifications, or fundamental schema migrations.
+- **MINOR (`v1.42.0`)**: Backwards-compatible features, new enterprise modules, or significant performance enhancements.
+- **PATCH (`v1.41.1`)**: Backwards-compatible bug fixes and security patches.
 
-### Siklus Rilis (Release Cadence):
-- **Patch Releases**: Dirilis setiap ada perbaikan bug kritis atau celah keamanan (sesegera mungkin / ad-hoc).
-- **Minor Releases**: Dirilis setiap 4-6 minggu sekali dengan menyertakan fitur-fitur baru yang telah teruji di branch `main`.
+### Release Cadence:
+- **Patch Releases**: Published ad-hoc as soon as critical bugs or vulnerabilities are resolved.
+- **Minor Releases**: Published every 4–6 weeks aggregating validated features from `main`.
 
-### Alur Rilis Biner Otomatis (GitHub Actions & GoReleaser):
-Ketika maintainer membuat git tag (contoh: `git tag -a v1.41.0 -m "Release v1.41.0" && git push origin v1.41.0`), workflow `.github/workflows/release.yml` otomatis:
-1. Mengompilasi biner untuk berbagai sistem operasi & arsitektur:
+### Automated Release Pipeline (GitHub Actions & GoReleaser):
+When maintainers push a semver tag (e.g. `git tag -a v1.41.0 -m "Release v1.41.0" && git push origin v1.41.0`), `.github/workflows/release.yml` automatically:
+1. Cross-compiles optimized binaries for supported platforms:
    - `go-erp_v1.41.0_linux_amd64.tar.gz`
    - `go-erp_v1.41.0_linux_arm64.tar.gz`
    - `go-erp_v1.41.0_windows_amd64.zip`
    - `go-erp_v1.41.0_darwin_amd64.tar.gz`
-   - `go-erp_v1.41.0_darwin_arm64.tar.gz` (Apple Silicon M1/M2/M3)
-2. Membuat hash verifikasi `SHA256SUMS.txt`.
-3. Membangun dan mempublikasikan image Docker resmi ke GitHub Container Registry (`ghcr.io/antonset1104/erp:v1.41.0` dan `:latest`).
-4. Menerbitkan rilis baru di halaman *Releases* GitHub beserta *Changelog* otomatis.
+   - `go-erp_v1.41.0_darwin_arm64.tar.gz` (Apple Silicon M-Series)
+2. Generates cryptographic checksums (`SHA256SUMS.txt`).
+3. Publishes official Docker images to GitHub Container Registry (`ghcr.io/antonset1104/erp:latest`).
+4. Generates automated release notes and changelogs on GitHub Releases.
 
 ---
 
-## 6. Arsitektur Ekstensibilitas untuk Modul Komunitas
+## 6. Extensibility Architecture for Community Modules
 
-Pengembang pihak ketiga dapat memperluas fungsionalitas GoERP melalui 3 mekanisme utama:
+Third-party developers can extend GoERP through three primary extension vectors:
 
-1. **Modul Native Go**: Menambahkan folder baru di `internal/modules/<nama_modul>`, mendaftarkan migrasi model di `internal/core/database/db.go`, dan mendaftarkan rute HTTP di `cmd/server/main.go`.
-2. **Low-Code Studio & Dynamic Data Models**: Membuat entitas database baru dan formulir UI kustom langsung dari antarmuka web tanpa perlu kompilasi ulang kode biner.
-3. **Integration Hub, Open RPC & Webhooks**: Menghubungkan sistem eksternal (CRM luar, marketplace Shopee/Tokopedia, payment gateway, WhatsApp API) via protokol JSON-RPC dan event webhook real-time.
+1. **Native Go Modules**: Add a dedicated package under `internal/modules/<module_name>`, register model migrations in `internal/core/database/db.go`, and wire HTTP routes in `cmd/server/main.go`.
+2. **Low-Code Studio & Dynamic Schemas**: Define dynamic database models, relational foreign keys, and UI views directly from the web interface without recompiling Go binaries.
+3. **Integration Hub, Open RPC & Webhooks**: Connect external systems (marketplaces, payment gateways, WhatsApp bots, third-party CRMs) through standardized JSON-RPC and outbound webhook events.
 
 ---
 
-## 7. Model Keberlanjutan & Komersialisasi (Sustainability Model)
+## 7. Sustainability & Commercialization Model
 
-Sebagai proyek open source berskala enterprise, keberlanjutan pemeliharaan dapat dicapai melalui model **Open Core & Value-Added Services**:
+As an enterprise-grade platform, long-term open-source sustainability is supported through an **Open Core & Value-Added Services** model:
 
-| Komponen | Status Lisensi | Deskripsi |
+| Tier | License | Description |
 | :--- | :---: | :--- |
-| **GoERP Core Engine (50 Modul)** | 🆓 Open Source (Apache 2.0) | Bebas digunakan, dimodifikasi, dan di-hosting mandiri (*self-hosted*) tanpa batasan jumlah pengguna. |
-| **Enterprise Cloud Hosting (Managed SaaS)** | 💼 Layanan Komersial | Layanan hosting cloud terkelola (backup harian otomatis, SSL, uptime SLA 99.9%, update versi 1-klik). |
-| **Custom Integration & Implementation Consulting** | 💼 Layanan Profesional | Jasa implementasi ERP untuk perusahaan besar, kustomisasi alur akuntansi/pajak khusus, dan pelatihan tim. |
-| **Enterprise Support & SLA** | 💼 Layanan Berlangganan | Jalur dukungan teknis prioritas (tiket 24/7, hotline respon 1 jam untuk downtime produksi). |
+| **GoERP Core Engine (50 Modules)** | 🆓 Open Source (Apache 2.0) | Completely free for commercial self-hosting without user seats or database row limits. |
+| **Enterprise Cloud Hosting (Managed SaaS)** | 💼 Commercial Service | Managed cloud hosting with automated daily backups, SSL, 99.9% uptime SLA, and 1-click upgrades. |
+| **Custom Integration & Enterprise Consulting** | 💼 Professional Services | Tailored enterprise implementations, custom fiscal compliance adapters, and dedicated technical training. |
+| **Enterprise Support & SLA** | 💼 Subscription | Priority technical support with 24/7 hotline and rapid incident response SLAs. |
 
 ---
 
-## 8. Panduan Komunikasi Komunitas
+## 8. Community Communication Channels
 
-- **GitHub Discussions**: Forum utama tanya-jawab teknis, showcase implementasi, dan ide fitur baru.
-- **GitHub Issues**: Khusus untuk pelaporan bug yang terverifikasi dan tugas kerja resmi.
-- **Discord / Telegram Developer Group**: Saluran komunikasi interaktif untuk pengembang inti dan kontributor aktif.
-- **Dokumentasi Resmi**: Selalu simpan dokumentasi resmi dalam format Markdown di repositori agar versi dokumentasi selalu selaras dengan versi kode biner (*docs as code*).
+- **GitHub Discussions**: The primary venue for architecture discussions, Q&A, and community showcases.
+- **GitHub Issues**: Reserved exclusively for verified bug reports and tracked work items.
+- **Official Documentation**: Kept version-controlled in the repository's `docs/` folder (*documentation as code*).

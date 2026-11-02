@@ -1,49 +1,49 @@
-name: 💡 Usulan Fitur Baru (Feature Request)
-description: Usulkan peningkatan modul, fitur bisnis baru, atau optimasi untuk GoERP.
-title: "[FEAT]: <judul usulan fitur baru>"
+name: 💡 Feature Request
+description: Propose an enterprise module improvement, business workflow addition, or system optimization for GoERP.
+title: "[FEAT]: <feature proposal title>"
 labels: ["enhancement", "feature"]
 body:
   - type: markdown
     attributes:
       value: |
-        Punya ide untuk membuat GoERP semakin hebat? Beritahu kami kebutuhan bisnis atau peningkatan teknis yang ingin Anda lihat!
+        Have an idea to make GoERP even more powerful? Tell us about the business need or technical capability you would like to see!
   - type: dropdown
     id: category
     attributes:
-      label: Kategori Peningkatan
+      label: Enhancement Category
       options:
-        - "Modul Bisnis Baru (New Business Module)"
-        - "Peningkatan Modul Eksisting (Existing Module Enhancement)"
-        - "Perpajakan & Regulasi Indonesia (Indonesian Localization / Tax)"
-        - "Integrasi API / RPC / Webhook Eksternal"
-        - "Performa, Skalabilitas & Database Engine"
-        - "Antarmuka Pengguna / UX & Visual"
-        - "Dokumentasi & Testing Suite"
+        - "New Business Module"
+        - "Existing Module Enhancement"
+        - "Regional Tax & Regulatory Localization"
+        - "API, RPC & Webhook Integration"
+        - "Performance, Scalability & Database Engine"
+        - "User Experience / UI Design"
+        - "Documentation & Testing Suite"
     validations:
       required: true
   - type: textarea
     id: problem
     attributes:
-      label: Masalah atau Kebutuhan Bisnis yang Mendasari
-      description: Apakah ada kendala operasional yang saat ini belum bisa ditangani oleh sistem?
-      placeholder: "Contoh: Saat ini alur rekonsiliasi e-Faktur belum mendukung pemindaian batch QR Code Faktur Pajak Masukan dari file PDF..."
+      label: Underlying Problem or Business Use Case
+      description: Describe the operational pain point or workflow requirement this feature solves.
+      placeholder: "E.g., Currently bank reconciliation requires manual CSV mapping for format X..."
     validations:
       required: true
   - type: textarea
     id: proposed_solution
     attributes:
-      label: Usulan Solusi atau Alur Fitur yang Diinginkan
-      description: Jelaskan bagaimana fitur ini sebaiknya bekerja dari sudut pandang pengguna maupun teknis.
+      label: Proposed Solution & Workflow
+      description: Explain how this feature should work from both a user and technical perspective.
     validations:
       required: true
   - type: textarea
     id: alternatives
     attributes:
-      label: Alternatif yang Pernah Dipertimbangkan
-      description: Apakah ada solusi sementara atau cara kerja lain yang sudah pernah Anda coba?
+      label: Alternatives Considered
+      description: Any alternative solutions or workarounds you have tested or evaluated?
   - type: checkboxes
     id: contribution
     attributes:
-      label: Kesediaan Berkontribusi
+      label: Willingness to Contribute
       options:
-        - label: Saya bersedia membantu mengimplementasikan fitur ini melalui Pull Request jika usulan disetujui.
+        - label: I am interested in helping implement this feature via a Pull Request.

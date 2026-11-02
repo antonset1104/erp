@@ -1,83 +1,83 @@
-name: 🐛 Laporan Bug (Bug Report)
-description: Laporkan adanya perilaku yang salah, kegagalan transaksi, atau error sistem pada GoERP.
-title: "[BUG]: <deskripsi singkat masalah>"
+name: 🐛 Bug Report
+description: Report unexpected behavior, transaction calculation failures, or system errors in GoERP.
+title: "[BUG]: <concise description of the issue>"
 labels: ["bug", "triage"]
 body:
   - type: markdown
     attributes:
       value: |
-        Terima kasih telah meluangkan waktu untuk melaporkan bug! Laporan yang jelas dan dapat direproduksi membantu tim pengembang menyelesaikan masalah lebih cepat.
+        Thank you for taking the time to report an issue! A clear, reproducible bug report helps the community identify and fix issues faster.
   - type: dropdown
     id: module
     attributes:
-      label: Modul yang Terdampak (Affected Module)
-      description: Pilih modul ERP di mana bug ditemukan.
+      label: Affected Module
+      description: Select the ERP module where the bug occurs.
       options:
         - "Executive Dashboard & Command Center (Ctrl+K)"
-        - "Base & Otentikasi (base / res.users / res.partner)"
-        - "Stok & Inventaris (stock / stock.picking)"
-        - "Penjualan (sale / sale.order)"
-        - "Pembelian (purchase / purchase.order)"
-        - "Akuntansi & Faktur (account / account.move)"
-        - "Manufaktur & BOM (mrp / mrp.production)"
+        - "Base & Authentication (base / res.users / res.partner)"
+        - "Inventory & Stock (stock / stock.picking)"
+        - "Sales & Quotations (sale / sale.order)"
+        - "Purchases & RFQ (purchase / purchase.order)"
+        - "Accounting & Invoicing (account / account.move)"
+        - "Manufacturing & BOM (mrp / mrp.production)"
         - "Point of Sale / POS (pos / pos.order)"
-        - "HRIS, Presensi & Payroll (hr / hr.payslip)"
+        - "HRIS, Attendance & Payroll (hr / hr.payslip)"
         - "CRM & Sales Pipeline (crm / crm.lead)"
-        - "Kawasan Berikat & DJBC (customs_bonded)"
-        - "Pajak e-Faktur & e-Bupot DJP (tax_efaktur / tax_ebupot)"
-        - "Treasury & Kas Multi-Bank (treasury)"
+        - "Customs & Bonded Zones (customs_bonded)"
+        - "Tax & Fiscal Localization (tax_efaktur / tax_ebupot)"
+        - "Treasury & Multi-Bank (treasury)"
         - "Low-Code Studio & Dynamic Schemas (lowcode_studio)"
         - "BPMN 2.0 Workflow Engine (workflow_engine)"
         - "Universal Integration Hub & Open RPC (integration_hub)"
-        - "Lainnya (Other)"
+        - "Other"
     validations:
       required: true
   - type: textarea
     id: description
     attributes:
-      label: Deskripsi Masalah (Description)
-      description: Jelaskan secara singkat apa yang terjadi dan bagaimana masalah ini muncul.
+      label: Description
+      description: Explain what happened and how the problem manifested.
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
-      label: Langkah-Langkah Reproduksi (Steps to Reproduce)
-      description: Tuliskan urutan langkah demi langkah untuk memicu bug ini.
+      label: Steps to Reproduce
+      description: Provide clear, sequential steps to reproduce this behavior.
       placeholder: |
-        1. Buka modul 'Sales & Quotations'
-        2. Klik tombol 'Buat Sales Order' dengan partner '...'
-        3. Konfirmasi Sales Order
-        4. Terjadi pesan error '...'
+        1. Navigate to the 'Sales & Quotations' module
+        2. Create a Sales Order for customer '...'
+        3. Click 'Confirm Order'
+        4. Observe error message '...'
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
-      label: Perilaku yang Diharapkan (Expected Behavior)
-      description: Jelaskan apa yang seharusnya terjadi jika sistem berjalan normal.
+      label: Expected Behavior
+      description: What should have happened under normal operational conditions?
     validations:
       required: true
   - type: input
     id: environment
     attributes:
-      label: Lingkungan & Versi (Environment)
-      description: Contoh: Go 1.22.5, Windows 11 / Ubuntu 22.04, Chrome 128, Database SQLite / Postgres.
+      label: Environment Details
+      description: E.g., Go 1.22.5, Windows 11 / Ubuntu 22.04, Chrome 128, SQLite / PostgreSQL.
       placeholder: "Go 1.22.x, OS Linux/Windows, Browser Chrome/Firefox, SQLite/PostgreSQL"
     validations:
       required: true
   - type: textarea
     id: logs
     attributes:
-      label: Log Terminal atau Console Error
-      description: Tempelkan cuplikan pesan error dari terminal Go atau Console DevTools browser jika ada.
+      label: Terminal Logs or Browser Console Output
+      description: Paste any relevant terminal logs, stack traces, or browser console errors.
       render: shell
   - type: checkboxes
     id: checklist
     attributes:
-      label: Verifikasi Pelapor
+      label: Submitter Checklist
       options:
-        - label: Saya telah memastikan masalah ini belum dilaporkan pada tab Issues sebelumnya.
+        - label: I have verified this bug is not already reported in existing issues.
           required: true
-        - label: Saya menyertakan log atau langkah reproduksi yang jelas.
+        - label: I have provided clear reproduction steps and relevant logs.
           required: true

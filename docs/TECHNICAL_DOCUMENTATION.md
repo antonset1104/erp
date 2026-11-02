@@ -1,8 +1,8 @@
-# Dokumentasi Teknis (Technical Documentation) — GoERP v1.0
+# Technical Documentation — GoERP v1.0
 
-## 1. Ikhtisar Arsitektur Sistem (System Architecture Overview)
+## 1. System Architecture Overview
 
-**GoERP** adalah sistem *Enterprise Resource Planning* (ERP) modular berkinerja tinggi yang dibangun menggunakan bahasa pemrograman **Go (Golang)** dengan pola arsitektur **Modular Monolith** terinspirasi dari *standard enterprise ERP framework* (`ir.model`, `res.partner`, `stock.quant`, `account.move`) dan prinsip **Clean Architecture** (*Handler → Service → Repository → GORM Model*).
+**GoERP** is a high-performance modular Enterprise Resource Planning (ERP) system built using the **Go (Golang)** programming language. It leverages a **Modular Monolith** architectural pattern inspired by proven enterprise ERP standard models (`ir.model`, `res.partner`, `stock.quant`, `account.move`) combined with **Clean Architecture** principles (*Handler → Service → Repository → GORM Model*).
 
 ```mermaid
 flowchart TD
@@ -29,184 +29,184 @@ flowchart TD
     Core -->|Attachment Presigned/Put| CF_R2
 ```
 
-### 1.1 Komponen Inti Teknologi (Tech Stack)
-| Lapisan | Teknologi / Library | Peran & Spesifikasi |
+### 1.1 Core Technology Stack
+| Layer | Technology / Library | Role & Specifications |
 | :--- | :--- | :--- |
-| **Bahasa Pemrograman** | Go `1.22+` (Kompatibel penuh hingga Go `1.27`) | Kompilasi statis *single-binary*, konkurensi tinggi (*goroutines*), penggunaan memori sangat rendah (~25 MB RAM idle). |
-| **HTTP Web Framework** | `github.com/gin-gonic/gin` v1.9+ | Routing RESTful API cepat, *middleware chaining*, pengikatan dan validasi payload JSON. |
-| **ORM & Database Layer** | `gorm.io/gorm` v1.25+ | Pemetaan objek-relasional, *Auto-Migration* 120+ tabel otomatis saat *startup*, transaksi ACID (`db.Transaction`). |
-| **Driver SQLite (Zero-CGO)** | `github.com/glebarez/sqlite` (`modernc.org/sqlite`) | Driver SQLite *pure-Go* yang berjalan di Windows, Linux, dan macOS dengan `CGO_ENABLED=0` tanpa ketergantungan kompilator C (`gcc`). |
-| **Driver PostgreSQL** | `gorm.io/driver/postgres` | Driver produksi untuk beban kerja transaksi konkurensi tinggi pada PostgreSQL 15+. |
-| **Keamanan & Autentikasi** | `github.com/golang-jwt/jwt/v5` & `golang.org/x/crypto/bcrypt` | Autentikasi pengguna berbasis *JSON Web Token* (HS256), *hashing* kata sandi Bcrypt, serta autentikasi *Machine-to-Machine* (M2M) berbasis SHA-256 API Key. |
-| **Kecerdasan Buatan (AI)** | Cloudflare Workers AI + Smart Local Heuristic Fallback | Mendukung model LLM `@cf/meta/llama-3.1-8b-instruct` dan Vision `@cf/llava-hf/llava-1.5-7b-hf` dengan *fallback* heuristik lokal deterministik jika kredensial cloud tidak dikonfigurasi. |
-| **Penyimpanan Berkas** | Cloudflare R2 + Local Disk Fallback | Penyimpanan dokumen lampiran (`ir.attachment`) kompatibel S3 API dengan *fallback* otomatis ke direktori lokal `./uploads/attachments`. |
-| **Frontend UI** | Vanilla JavaScript (ES6+), CSS3 Variables, HTML5 | *Single Page Application* (SPA) tanpa langkah *build* Node.js/Webpack, mendukung tema gelap (*Dark Glassmorphism*), pemindai Barcode/QR, dan kanvas visual BPMN 2.0. |
+| **Programming Language** | Go `1.22+` (Fully compatible up to Go `1.27`) | Single-binary static compilation, native high concurrency (*goroutines*), minimal memory footprint (~25 MB idle RAM). |
+| **HTTP Web Framework** | `github.com/gin-gonic/gin` v1.9+ | High-throughput RESTful routing, middleware chaining, strict JSON payload binding and validation. |
+| **ORM & Database Layer** | `gorm.io/gorm` v1.25+ | Object-relational mapping, automatic *Auto-Migration* of 120+ tables at startup, strict ACID transactions (`db.Transaction`). |
+| **SQLite Driver (Zero-CGO)** | `github.com/glebarez/sqlite` (`modernc.org/sqlite`) | Pure-Go SQLite engine running seamlessly across Windows, Linux, and macOS under `CGO_ENABLED=0` without GCC dependencies. |
+| **PostgreSQL Driver** | `gorm.io/driver/postgres` | Enterprise-grade production driver for high-concurrency transactional workloads on PostgreSQL 15+. |
+| **Security & Authentication** | `github.com/golang-jwt/jwt/v5` & `golang.org/x/crypto/bcrypt` | JSON Web Token (HS256) user authentication, Bcrypt password hashing, and SHA-256 scoped Machine-to-Machine (M2M) API keys. |
+| **Artificial Intelligence (AI)** | Cloudflare Workers AI + Smart Local Heuristic Fallback | Integrates LLM `@cf/meta/llama-3.1-8b-instruct` and Vision `@cf/llava-hf/llava-1.5-7b-hf` with deterministic offline local fallback when cloud credentials are omitted. |
+| **Object File Storage** | Cloudflare R2 + Local Disk Fallback | S3-compatible attachment storage (`ir.attachment`) with zero egress fees and automated fallback to local directory `./uploads/attachments`. |
+| **Frontend UI Client** | Vanilla JavaScript (ES6+), CSS3 Variables, HTML5 | Single Page Application (SPA) requiring zero Node.js/Webpack build steps, featuring Dark Glassmorphism, Barcode/QR scanner, and interactive BPMN 2.0 visual canvas. |
 
 ---
 
-## 2. Struktur Direktori Proyek (Repository Structure)
+## 2. Project Directory Structure
 
 ```text
 c:\erp\
 ├── cmd/
 │   └── server/
-│       └── main.go                 # Entrypoint utama server, AutoMigrate, Seeding, Routing & Dashboard Stats
+│       └── main.go                 # Primary server entrypoint, AutoMigrate, Seeding, Routing & Dashboard Stats
 ├── internal/
 │   ├── config/
-│   │   └── config.go               # Konfigurasi environment variables (.env, DB, JWT, Cloudflare AI & R2)
+│   │   └── config.go               # Environment variables configuration (.env, DB, JWT, Cloudflare AI & R2)
 │   ├── core/
-│   │   ├── ai/                     # Klien Cloudflare Workers AI, ERP Copilot & Vision OCR
-│   │   ├── database/               # Inisialisasi koneksi GORM (SQLite pure-Go & PostgreSQL)
-│   │   ├── export/                 # Utilitas ekspor CSV universal untuk seluruh tabel ERP
+│   │   ├── ai/                     # Cloudflare Workers AI client, ERP Copilot & Vision OCR
+│   │   ├── database/               # GORM database connection initialization (Pure-Go SQLite & PostgreSQL)
+│   │   ├── export/                 # Universal CSV export utility across all ERP data tables
 │   │   ├── middleware/             # JWT AuthMiddleware & Role-Based Access Control (RBAC)
-│   │   ├── models/                 # BaseModel standar (ID, CreatedAt, UpdatedAt, DeletedAt, CompanyID)
-│   │   ├── registry/               # Registri modul dinamis (Enterprise-style module loader)
-│   │   └── storage/                # Abstraksi penyimpanan objek Cloudflare R2 & Local File System
-│   └── modules/                    # 50 Modul Bisnis Enterprise (Masing-masing: models, repository, service, handler)
-│       ├── base/                   # 1. Perusahaan (res.company), Mitra (res.partner), Pengguna (res.users), Sequence
-│       ├── product/                # 2. Kategori Produk & Master Produk (product.template / product.product)
-│       ├── stock/                  # 3. Gudang, Lokasi, Double-Entry Stock Move, Picking, Quant & Reordering Rules
-│       ├── sale/                   # 4. Penawaran & Pesanan Penjualan (sale.order & sale.order.line)
-│       ├── purchase/               # 5. RFQ & Pesanan Pembelian (purchase.order & purchase.order.line)
-│       ├── account/                # 6. Bagan Akun (CoA), Jurnal, Faktur, Pembayaran & Laporan Keuangan PSAK
+│   │   ├── models/                 # Standard BaseModel (ID, CreatedAt, UpdatedAt, DeletedAt, CompanyID)
+│   │   ├── registry/               # Dynamic module registry (Enterprise-style module loader)
+│   │   └── storage/                # Cloudflare R2 & Local File System object storage abstraction
+│   └── modules/                    # 50 Enterprise Business Modules (Each: models, repository, service, handler)
+│       ├── base/                   # 1. Company (res.company), Partners (res.partner), Users (res.users), Sequences
+│       ├── product/                # 2. Product Categories & Product Master (product.template / product.product)
+│       ├── stock/                  # 3. Warehouses, Locations, Double-Entry Stock Move, Picking, Quant & Reordering Rules
+│       ├── sale/                   # 4. Quotations & Sales Orders (sale.order & sale.order.line)
+│       ├── purchase/               # 5. RFQs & Purchase Orders (purchase.order & purchase.order.line)
+│       ├── account/                # 6. Chart of Accounts (CoA), Journals, Invoices, Payments & Financial Statements
 │       ├── mrp/                    # 7. Bill of Materials (BoM) & Manufacturing Orders (mrp.production)
-│       ├── pos/                    # 8. Sesi Kasir Point of Sale & Pesanan Ritel Instan (pos.session, pos.order)
-│       ├── hr/                     # 9. Departemen, Karyawan & Slip Gaji Dasar
-│       ├── crm/                    # 10. Pipeline Prospek & Konversi Peluang ke Sales Order (crm.lead)
-│       ├── project/                # 11. Manajemen Proyek, Tahapan Tugas & Timesheet (project.project, project.task)
-│       ├── chatter/                # 12. Kolaborasi Dokumen & Jejak Pesan Audit (mail.message)
-│       ├── asset/                  # 13. Aset Tetap & Jadwal Penyusutan Otomatis ke GL (account.asset)
-│       ├── helpdesk/               # 14. Tiket Dukungan Pelanggan & SLA (helpdesk.ticket)
-│       ├── maintenance/            # 15. Peralatan Pabrik, Preventive & Corrective Maintenance
-│       ├── fleet/                  # 16. Armada Kendaraan, Log Odometer & Servis (fleet.vehicle)
-│       ├── leave/                  # 17. Cuti Karyawan, Kuota Tahunan & Integrasi Payroll (hr.leave)
-│       ├── expense/                # 18. Klaim Reimbursement Karyawan & Posting Jurnal (hr.expense)
-│       ├── quality/                # 19. Titik Kontrol Mutu (QCP), Inspeksi & Peringatan CAPA
-│       ├── approval/               # 20. Matriks Persetujuan Multi-Level (approval.request)
-│       ├── attachment/             # 21. Manajemen Dokumen Lampiran & AI Vision Receipt OCR (ir.attachment)
-│       ├── attendance/             # 22. Presensi Geofencing GPS, Shift Kerja & Deteksi Anomali Edge
-│       ├── recruitment/            # 23. Lowongan Kerja, Pipeline Pelamar, AI CV Scorer & 1-Click Hire
-│       ├── stock_inventory/        # 24. Stock Opname Fisik, Penyesuaian Selisih & AI Shrinkage Auditor
-│       ├── payroll/                # 25. Struktur Gaji, PPh 21 TER (PP 58/2023), BPJS & Batch Payslip Run
-│       ├── budget/                 # 26. Anggaran RKAB, Akuntansi Analitik Cost Center & AI Burn-Rate Auditor
-│       ├── barcode/                # 27. Generator SVG Code 128, Pelacakan Lot/Serial & Pemindai Universal
-│       ├── purchase_requisition/   # 28. Permintaan Pembelian (PR), Tender Multi-Vendor & Blanket Order
-│       ├── currency/               # 29. Multi-Valas, Kurs Tengah BI/JISDOR & Revaluasi Kurs PSAK 10
-│       ├── tax_efaktur/            # 30. Pajak PPN 11%, Jatah NSFP, e-Faktur Keluaran/Masukan & SPT 1111
-│       ├── bank_reconciliation/    # 31. Impor Rekening Koran, Auto-Match Engine & Rekonsiliasi Bank
-│       ├── landed_cost/            # 32. Alokasi Biaya Impor, Bea Masuk & Freight ke HPP Persediaan
-│       ├── traceability/           # 33. Silsilah Hulu-Hilir Lot (Genealogy) & Penarikan Produk (Recall)
-│       ├── subscription/           # 34. Langganan Berulang (MRR/ARR), Penagihan Otomatis & Churn AI
-│       ├── audit_trail/            # 35. Jejak Audit Kriptografis (Old vs New JSON) & Deteksi Anomali
-│       ├── webhook/                # 36. Outbound Event Webhooks dengan Tanda Tangan HMAC-SHA256
-│       ├── inbound_webhook/        # 37. Receiver Webhook Omnichannel (E-Commerce, Payment, Logistik)
-│       ├── intercompany/           # 38. Holding Multi-Perusahaan, Mirroring SO/PO & Eliminasi Konsolidasi
-│       ├── treasury/               # 39. Manajemen Likuiditas Multi-Bank, Proyeksi Kas 13-Minggu & Cash Sweep
-│       ├── mrp_advanced/           # 40. MRP II: Work Center, Routing Operasi, Work Order & Analitik OEE
-│       ├── tax_ebupot/             # 41. Pajak e-Bupot Unifikasi (PPh 21/23/26/4(2)) & SPT Masa Unifikasi
-│       ├── esignature/             # 42. Tanda Tangan Elektronik SHA-256 & Pembubuhan e-Meterai Peruri
-│       ├── wms/                    # 43. WMS 3D Bin Location (Aisle/Rack/Shelf/Bin), Putaway & Wave Picking
-│       ├── vendor_portal/          # 44. Portal Mandiri Pemasok: Penawaran Tender, ASN & Pengajuan Invoice
-│       ├── customer_portal/        # 45. Portal Mandiri Pelanggan B2B: Katalog Grosir, RMA & Bukti Bayar
-│       ├── customs_bonded/         # 46. Kawasan Berikat DJBC CEISA 4.0 (BC 2.3/2.5/2.7/4.0/4.1 & Subkontrak)
-│       ├── lowcode_studio/         # 47. Low-Code Studio: Model Dinamis (EAV), Field Builder & Core Extensions
-│       ├── reports/                # 48. Generator Dokumen Cetak Korporat A4 & Struk Thermal POS 80mm
-│       ├── workflow_engine/        # 49. Mesin BPMN 2.0 State Machine, Conditional Gateway & AI Designer
-│       └── integration_hub/        # 50. Universal Integration Hub, Open RPC Gateway, Connectors & Batch ETL
+│       ├── pos/                    # 8. Point of Sale Cashier Sessions & Instant Retail Orders (pos.session, pos.order)
+│       ├── hr/                     # 9. Departments, Employees & Basic Payslip Management
+│       ├── crm/                    # 10. Lead Pipeline & Opportunity-to-Quotation Conversion (crm.lead)
+│       ├── project/                # 11. Project Management, Task Stages & Timesheets (project.project, project.task)
+│       ├── chatter/                # 12. Document Collaboration & Audit Trail Logging (mail.message)
+│       ├── asset/                  # 13. Fixed Assets & Automated Linear GL Depreciation Scheduling (account.asset)
+│       ├── helpdesk/               # 14. Customer Support Tickets, Escalations & SLA Management (helpdesk.ticket)
+│       ├── maintenance/            # 15. Factory Machinery, Equipment, Preventive & Corrective Maintenance
+│       ├── fleet/                  # 16. Vehicle Fleet, Odometer Logs & Scheduled Servicing (fleet.vehicle)
+│       ├── leave/                  # 17. Employee Leave, Annual Quota Allocations & Payroll Deduction Sync (hr.leave)
+│       ├── expense/                # 18. Employee Expense Reimbursement Claims & GL Journal Posting (hr.expense)
+│       ├── quality/                # 19. Quality Control Points (QCP), Inspections & CAPA Non-Conformance Alerts
+│       ├── approval/               # 20. Multi-Level Corporate Approval Matrix (approval.request)
+│       ├── attachment/             # 21. Document Management & AI Vision Receipt OCR (ir.attachment)
+│       ├── attendance/             # 22. GPS Geofencing Attendance, Work Shifts & Edge Anomaly Detection
+│       ├── recruitment/            # 23. Job Openings, Applicant Pipeline, AI CV Scorer & 1-Click Hire
+│       ├── stock_inventory/        # 24. Physical Stock Opname, Discrepancy Adjustments & AI Shrinkage Auditor
+│       ├── payroll/                # 25. Multi-Tier Salary Structures, BPJS & Batch Payslip Generation
+│       ├── budget/                 # 26. Corporate Budgeting (RKAB), Cost Center Analytic Accounting & AI Burn-Rate Auditor
+│       ├── barcode/                # 27. Pure-Go SVG Code 128 Generator, Lot/Serial Tracking & Universal Scanner
+│       ├── purchase_requisition/   # 28. Purchase Requisitions (PR), Multi-Vendor Tenders & Blanket Supply Agreements
+│       ├── currency/               # 29. Multi-Currency, Historical Spot Exchange Rates & FX Revaluation (PSAK 10 / IAS 21)
+│       ├── tax_efaktur/            # 30. VAT e-Faktur Engine, NSFP Quota Allocation & SPT Tax Filing Export
+│       ├── bank_reconciliation/    # 31. Bank Statement Import (CSV), Algorithmic Auto-Match & One-Click Reconciliation
+│       ├── landed_cost/            # 32. Import Duties, Customs Tariffs & Freight Capitalization to Inventory Valuation
+│       ├── traceability/           # 33. Upstream-Downstream Lot Genealogy Tracking & Product Recall Management
+│       ├── subscription/           # 34. Recurring SaaS Subscriptions (MRR/ARR), Automated Invoicing & AI Churn Prediction
+│       ├── audit_trail/            # 35. Cryptographic Audit Trail (Old vs New JSON) & Suspicious Activity Detection
+│       ├── webhook/                # 36. Outbound Event Webhook Dispatcher with HMAC-SHA256 Signatures
+│       ├── inbound_webhook/        # 37. Omnichannel Inbound Webhook Receiver (E-Commerce, Payments, Logistics)
+│       ├── intercompany/           # 38. Multi-Company Holding, SO/PO Auto-Mirroring & Elimination Consolidation
+│       ├── treasury/               # 39. Multi-Bank Liquidity Management, 13-Week Cash Flow Forecast & Cash Sweep
+│       ├── mrp_advanced/           # 40. Advanced MRP II: Work Centers, Routing Operations, Work Orders & OEE Analytics
+│       ├── tax_ebupot/             # 41. Unified Tax Withholding (e-Bupot) & Periodic Tax Return Filing
+│       ├── esignature/             # 42. Cryptographic Digital Signatures (SHA-256) & Stamp Duty Integration
+│       ├── wms/                    # 43. 3D Warehouse Bin Locations (Aisle/Rack/Shelf/Bin), Putaway & Wave Picking
+│       ├── vendor_portal/          # 44. Self-Service Vendor Portal: Tender Bids, ASN Delivery & Invoice Submissions
+│       ├── customer_portal/        # 45. Self-Service B2B Customer Portal: Wholesale Catalog, RMA & Payment Confirmation
+│       ├── customs_bonded/         # 46. Customs Bonded Zone IT Inventory Compliance (Inbound, Outbound & Subcontracting)
+│       ├── lowcode_studio/         # 47. Low-Code Studio: Dynamic EAV Models, Custom Field Builder & Core Extensions
+│       ├── reports/                # 48. Universal Report Engine: Corporate A4 Documents & 80mm POS Thermal Receipts
+│       ├── workflow_engine/        # 49. Visual BPMN 2.0 State Machine Engine, Conditional Gateways & AI Designer
+│       └── integration_hub/        # 50. Universal Integration Hub: Open RPC Gateway, Pre-built Connectors & Batch ETL
 ├── tests/
-│   └── erp_test.go                 # Suite Pengujian End-to-End 54 Bagian (Mencakup seluruh 50 Modul)
+│   └── erp_test.go                 # 54-Section Comprehensive End-to-End Test Suite (Covering all 50 Modules)
 ├── web/
-│   ├── index.html                  # Antarmuka SPA Utama (50 Tab Modul & 110+ Modal Interaktif)
-│   ├── app.js                      # Logika State, Klien REST API, Render Tabel, Kanban & Kanvas BPMN
-│   └── style.css                   # Sistem Desain CSS Dark Enterprise Glassmorphism
-├── Dockerfile                      # Multi-stage Docker build untuk deployment kontainer ringan
-├── docker-compose.yml              # Orkestrasi layanan aplikasi ERP + PostgreSQL 15
-└── .env.example                    # Template variabel lingkungan konfigurasi sistem
+│   ├── index.html                  # Primary SPA Interface (50 Module Tabs & 110+ Interactive Modals)
+│   ├── app.js                      # Application State, REST Client, Table Renderers, Kanban & BPMN Canvas
+│   └── style.css                   # Enterprise Dark Glassmorphism CSS Design System
+├── Dockerfile                      # Production multi-stage Docker build for lightweight containers
+├── docker-compose.yml              # Service orchestration for ERP Application + PostgreSQL 15
+└── .env.example                    # Environment variable configuration template
 ```
 
 ---
 
-## 3. Desain Database & Prinsip Multi-Tenant / Multi-Company
+## 3. Database Design & Multi-Tenant / Multi-Company Architecture
 
-### 3.1 Standar Model Dasar (`models.BaseModel`)
-Setiap entitas transaksi dan master data mewarisi `models.BaseModel` (`internal/core/models/base.go`):
+### 3.1 Standard Base Model (`models.BaseModel`)
+Every transactional and master entity inherits from `models.BaseModel` (`internal/core/models/base.go`):
 - `ID` (`uint`, Primary Key, Auto-Increment)
 - `CreatedAt` (`time.Time`)
 - `UpdatedAt` (`time.Time`)
-- `DeletedAt` (`gorm.DeletedAt`, Indexed untuk *Soft Delete*)
-- `CompanyID` (`uint`, Indexed, Default: `1` untuk isolasi data multi-entitas perusahaan)
+- `DeletedAt` (`gorm.DeletedAt`, Indexed for soft deletes)
+- `CompanyID` (`uint`, Indexed, Default: `1` for multi-company data isolation)
 
-### 3.2 Mesin Akuntansi Berpasangan (*Double-Entry Bookkeeping*)
-Pada modul `account`, setiap jurnal (`AccountMove`) wajib memenuhi persamaan keseimbangan buku besar sebelum dapat diposting (`state = 'posted'`):
+### 3.2 Double-Entry Bookkeeping Engine
+In the `account` module, every accounting entry (`AccountMove`) must strictly satisfy the General Ledger equilibrium formula before it can be posted (`state = 'posted'`):
 $$\sum \text{Debit} = \sum \text{Credit}$$
-Jika terdapat selisih lebih dari toleransi pembulatan (`0.01`), transaksi dibatalkan secara atomik oleh GORM Transaction.
+If any discrepancy exceeds the allowed rounding tolerance (`0.01`), the transaction is automatically aborted by the GORM database transaction manager.
 
-### 3.3 Mesin Inventaris Berpasangan (*Double-Entry Stock Movement*)
-Serupa dengan prinsip akuntansi, modul `stock` tidak sekadar mengubah angka stok pada tabel produk, melainkan memindahkan kuantitas dari `SourceLocationID` (misal: *Supplier Location* atau *WH/Stock*) ke `DestLocationID` (misal: *WH/Stock* atau *Customer Location*) melalui tabel `stock_moves` dan memperbarui saldo per lokasi di `stock_quants`.
+### 3.3 Double-Entry Stock Movement Engine
+Similar to financial double-entry bookkeeping, the `stock` module does not merely increment or decrement a counter on the product table. Instead, stock moves relocate physical or virtual quantities from a `SourceLocationID` (e.g., *Supplier Location* or *WH/Stock*) to a `DestLocationID` (e.g., *WH/Stock* or *Customer Location*) via the `stock_moves` table, atomicity updating per-location quant balances in `stock_quants`.
 
-### 3.4 Arsitektur *Entity-Attribute-Value* (EAV) pada Low-Code Studio
-Modul `lowcode_studio` memungkinkan pembuatan tabel/model baru saat *runtime* tanpa mengubah skema DDL SQL melalui 4 tabel meta:
-1. `lowcode_custom_models`: Menyimpan definisi model (`technical_name` berawalan `x_`, kategori menu, ikon, pengaturan audit/chatter).
-2. `lowcode_custom_fields`: Menyimpan definisi kolom (`field_name`, `field_type` seperti `char`, `integer`, `float`, `boolean`, `date`, `selection`, `json`).
-3. `lowcode_custom_records`: Menyimpan baris data aktual dengan kolom `values_json` yang divalidasi terhadap skema `lowcode_custom_fields`.
-4. `lowcode_core_extensions`: Menyimpan atribut tambahan (`extension_json`) yang ditempelkan pada model inti ERP (`res.partner`, `product.product`, `sale.order`, `purchase.order`).
+### 3.4 Entity-Attribute-Value (EAV) Architecture in Low-Code Studio
+The `lowcode_studio` module enables real-time creation of custom business models and fields at runtime without requiring SQL DDL schema modifications through 4 core metadata tables:
+1. `lowcode_custom_models`: Stores model definitions (`technical_name` prefixed with `x_`, menu category, icon, audit/chatter toggles).
+2. `lowcode_custom_fields`: Stores column definitions (`field_name`, `field_type` such as `char`, `integer`, `float`, `boolean`, `date`, `selection`, `json`).
+3. `lowcode_custom_records`: Stores raw data rows with a validated `values_json` payload checked against the associated `lowcode_custom_fields` schema.
+4. `lowcode_core_extensions`: Stores supplementary metadata attributes (`extension_json`) dynamically attached to standard core ERP models (`res.partner`, `product.product`, `sale.order`, `purchase.order`).
 
 ---
 
-## 4. Keamanan, Autentikasi & Otorisasi
+## 4. Security, Authentication & Authorization
 
-1. **Autentikasi Pengguna (JWT HS256)**:
-   - Endpoint: `POST /api/v1/auth/login` dan `POST /api/v1/auth/register`.
-   - Token dikirimkan melalui header `Authorization: Bearer <token>`.
-   - Klaim JWT memuat `user_id`, `email`, `name`, `role`, dan `company_id`.
+1. **User Authentication (JWT HS256)**:
+   - Endpoints: `POST /api/v1/auth/login` and `POST /api/v1/auth/register`.
+   - Tokens are transmitted via the standard HTTP header: `Authorization: Bearer <token>`.
+   - JWT claims encapsulate `user_id`, `email`, `name`, `role`, and `company_id`.
 2. **Role-Based Access Control (RBAC)**:
-   - Peran standar meliputi `admin`, `manager`, `finance_manager`, `director`, `dept_head`, dan `staff`.
-   - Middleware `RoleMiddleware` memvalidasi izin akses per rute sensitif.
-3. **Autentikasi Machine-to-Machine (M2M API Key)**:
-   - Digunakan pada modul `integration_hub` (`/api/v1/integration/rpc/...`).
-   - Klien eksternal mengirimkan header `X-API-Key: ak_live_<prefix>_<secret>`.
-   - Sistem hanya menyimpan nilai *hash* SHA-256 dari kunci tersebut di database, memeriksa kecocokan *scope* (`read:product`, `write:sale`, `*`), batas *rate limit* (RPM), serta daftar putih IP (`allowed_ips`).
-4. **Verifikasi Signature Webhook (HMAC-SHA256)**:
-   - Setiap pengiriman *outbound webhook* menyertakan header `X-ERP-Signature-256` yang dihitung menggunakan algoritma HMAC-SHA256 atas *payload* JSON.
+   - Standard roles include `admin`, `manager`, `finance_manager`, `director`, `dept_head`, and `staff`.
+   - The `RoleMiddleware` validates user permissions across protected API routes.
+3. **Machine-to-Machine Authentication (M2M API Keys)**:
+   - Utilized by external microservices and third parties via the `integration_hub` module (`/api/v1/integration/rpc/...`).
+   - Callers supply the HTTP header `X-API-Key: ak_live_<prefix>_<secret>`.
+   - The system stores only the cryptographic SHA-256 hash of the key, validating granted scopes (`read:product`, `write:sale`, `*`), rate limits (RPM), and IP address allowlists (`allowed_ips`).
+4. **Webhook Signature Verification (HMAC-SHA256)**:
+   - All outbound webhook event deliveries carry an `X-ERP-Signature-256` header containing an HMAC-SHA256 signature calculated over the JSON payload using a shared tenant secret.
 
 ---
 
-## 5. Referensi Endpoint API Utama (API Reference)
+## 5. Core API Endpoint Reference
 
-Seluruh endpoint berada di bawah prefix `/api/v1`:
+All RESTful endpoints are exposed under the `/api/v1` namespace:
 
-| Grup Modul | Prefix Endpoint Utama | Metode & Fungsi Utama |
+| Module Group | Primary Endpoint Prefix | HTTP Methods & Core Responsibilities |
 | :--- | :--- | :--- |
-| **Auth & Base** | `/auth/login`, `/partners`, `/companies` | Login JWT, CRUD Mitra (Pelanggan/Vendor), Multi-Perusahaan |
-| **Dashboard & CSV** | `/dashboard/stats`, `/export/:entity` | Statistik KPI 50 modul real-time, Unduh CSV seluruh entitas |
-| **AI Copilot** | `/ai/ask`, `/ai/status` | Asisten Eksekutif Natural Language & Status Cloudflare AI |
-| **Product & Stock** | `/products`, `/stock/pickings`, `/stock/quants`, `/stock/reorder-rules` | Katalog Produk, Transfer Gudang (`WH/IN`, `WH/OUT`, `WH/INT`), Saldo Stok, Auto-Replenishment |
-| **Sales & CRM** | `/sales/orders`, `/crm/leads` | Konfirmasi SO (otomatis buat `WH/OUT` & Faktur), Pipeline Kanban CRM |
-| **Purchase & PR** | `/purchases/orders`, `/purchase-requisitions` | Konfirmasi PO (otomatis buat `WH/IN`), Tender Multi-Vendor & Blanket Order |
-| **Accounting & Financial** | `/accounting/accounts`, `/accounting/moves`, `/accounting/payments`, `/accounting/reports/*` | Buku Besar, Faktur, Pembayaran, Laba Rugi (`profit-loss`), Neraca (`balance-sheet`), Neraca Saldo (`trial-balance`) |
-| **Manufacturing (MRP I & II)** | `/mrp/boms`, `/mrp/orders`, `/mrp-advanced/work-centers`, `/mrp-advanced/work-orders` | Resep BoM, Perintah Produksi, Kapasitas Mesin, Routing & Kalkulasi OEE |
-| **POS & Retail** | `/pos/sessions`, `/pos/orders` | Buka/Tutup Sesi Kasir, Checkout Instan & Pengurangan Stok Otomatis |
-| **HR, Attendance, Leave, Payroll** | `/hr/employees`, `/attendances`, `/leaves`, `/payroll/payslips`, `/recruitment/applicants` | Data Karyawan, Presensi GPS, Cuti Berjenjang, Slip Gaji PPh 21 TER & AI Recruitment |
-| **Tax Compliance (DJP)** | `/tax-efaktur/*`, `/tax-ebupot/*` | Jatah NSFP, Faktur Pajak PPN 11%, Bukti Potong Unifikasi PPh 21/23/26/4(2) & SPT |
-| **Customs & Bonded Zone** | `/customs-bonded/documents`, `/customs-bonded/reports/*`, `/customs-bonded/subcontracts` | Dokumen BC 2.3/2.5/2.7/4.0/4.1, Persetujuan SPPB, 4 Buku Mutasi IT Inventory DJBC |
-| **WMS, Landed Cost, Traceability** | `/wms/bins`, `/wms/waves`, `/landed-costs`, `/traceability/traces` | Rak 3D Gudang, Wave Picking, Kapitalisasi Bea Masuk Impor, Silsilah Lot & Recall |
-| **Portals & e-Signature** | `/vendor-portal/*`, `/customer-portal/*`, `/esignature/requests` | Portal Mandiri Vendor & Pelanggan B2B, Tanda Tangan Digital SHA-256 & e-Meterai |
-| **Low-Code Studio** | `/lowcode/models`, `/lowcode/records/:name`, `/lowcode/core-extensions`, `/lowcode/ai/schema-copilot` | Pembuatan Model & Kolom Kustom saat Runtime, Ekstensi Entitas Inti & AI Schema Designer |
-| **BPMN 2.0 Workflow Engine** | `/workflows/definitions`, `/workflows/start`, `/workflows/instances`, `/workflows/instances/:id/action` | Definisi State Machine BPMN, Evaluasi Gateway Kondisional, Inbox Approval & Audit Log |
-| **Universal Integration Hub** | `/integration/api-keys`, `/integration/connectors`, `/integration/rpc/:method`, `/integration/data-jobs` | Manajemen API Key M2M, Konektor Marketplace/Payment/WA, Open RPC CRUD & Batch ETL |
-| **Universal Report Engine** | `/reports/catalog`, `/reports/sale-order/:id`, `/reports/invoice/:id`, `/reports/payslip/:id` | Render Dokumen Cetak HTML A4 Siap PDF & Struk Thermal POS 80mm dengan Hash Audit SHA-256 |
+| **Auth & Base** | `/auth/login`, `/partners`, `/companies` | JWT Authentication, Partner CRUD (Customers/Vendors), Multi-Company Management |
+| **Dashboard & CSV** | `/dashboard/stats`, `/export/:entity` | Real-time KPI statistics across all 50 modules, universal UTF-8 CSV exporter |
+| **AI Copilot** | `/ai/ask`, `/ai/status` | Executive Natural Language Assistant & Cloudflare Workers AI connectivity health |
+| **Product & Stock** | `/products`, `/stock/pickings`, `/stock/quants`, `/stock/reorder-rules` | Product Catalog, Warehouse Stock Transfers (`WH/IN`, `WH/OUT`, `WH/INT`), On-hand Stock Quants, Auto-Replenishment |
+| **Sales & CRM** | `/sales/orders`, `/crm/leads` | Sales Order Confirmation (auto-generates `WH/OUT` & Customer Invoice), CRM Kanban Pipeline |
+| **Purchase & PR** | `/purchases/orders`, `/purchase-requisitions` | Purchase Order Confirmation (auto-generates `WH/IN`), Multi-Vendor Tenders & Blanket Orders |
+| **Accounting & Financial** | `/accounting/accounts`, `/accounting/moves`, `/accounting/payments`, `/accounting/reports/*` | General Ledger, Invoices, Payments, Profit & Loss (`profit-loss`), Balance Sheet (`balance-sheet`), Trial Balance (`trial-balance`) |
+| **Manufacturing (MRP I & II)** | `/mrp/boms`, `/mrp/orders`, `/mrp-advanced/work-centers`, `/mrp-advanced/work-orders` | Bill of Materials (BoM), Production Orders, Machine Work Centers, Routing Operations & OEE Analytics |
+| **POS & Retail** | `/pos/sessions`, `/pos/orders` | Cashier Session Open/Close, Instant Retail Checkout & Automated Stock Depletion |
+| **HR, Attendance, Leave, Payroll** | `/hr/employees`, `/attendances`, `/leaves`, `/payroll/payslips`, `/recruitment/applicants` | Employee Records, GPS Geofenced Attendance, Tiered Leave Approvals, Payslip Execution & AI Talent Acquisition |
+| **Tax Compliance** | `/tax-efaktur/*`, `/tax-ebupot/*` | Tax Invoice Serial Quotas (NSFP), VAT e-Faktur 11%, Unified Withholding Tax Slips & Periodic Tax Return Exports |
+| **Customs & Bonded Zone** | `/customs-bonded/documents`, `/customs-bonded/reports/*`, `/customs-bonded/subcontracts` | Customs Inbound/Outbound Declarations, Customs Clearance Approvals, 4 Official IT Inventory Mutation Reports |
+| **WMS, Landed Cost, Traceability** | `/wms/bins`, `/wms/waves`, `/landed-costs`, `/traceability/traces` | 3D Warehouse Bin Locations, Wave Picking, Import Duty Capitalization to Inventory Valuation, Lot Genealogy & Recalls |
+| **Portals & e-Signature** | `/vendor-portal/*`, `/customer-portal/*`, `/esignature/requests` | Self-service Vendor & B2B Customer Portals, SHA-256 Digital Signatures & Electronic Stamp Duty |
+| **Low-Code Studio** | `/lowcode/models`, `/lowcode/records/:name`, `/lowcode/core-extensions`, `/lowcode/ai/schema-copilot` | Runtime Dynamic Models & Fields (EAV), Standard Entity Extensions & AI Schema Copilot |
+| **BPMN 2.0 Workflow Engine** | `/workflows/definitions`, `/workflows/start`, `/workflows/instances`, `/workflows/instances/:id/action` | BPMN State Machine Definitions, Conditional Gateway Evaluations, Actionable Inbox & Audit Logging |
+| **Universal Integration Hub** | `/integration/api-keys`, `/integration/connectors`, `/integration/rpc/:method`, `/integration/data-jobs` | M2M API Key Scopes, Marketplace/Payment/Messaging Connectors, Open RPC Gateway & Batch ETL Jobs |
+| **Universal Report Engine** | `/reports/catalog`, `/reports/sale-order/:id`, `/reports/invoice/:id`, `/reports/payslip/:id` | Professional A4 PDF-Ready Corporate Documents & 80mm POS Thermal Receipts with Cryptographic SHA-256 Audit Hashes |
 
 ---
 
-## 6. Konfigurasi Lingkungan & Panduan Deployment
+## 6. Environment Configuration & Deployment Guide
 
-### 6.1 Variabel Lingkungan (`.env`)
+### 6.1 Environment Variables (`.env`)
 ```ini
 PORT=8080
 ENVIRONMENT=development
-DB_TYPE=sqlite                  # "sqlite" atau "postgres"
-DB_PATH=erp.db             # Digunakan jika DB_TYPE=sqlite
-# Konfigurasi PostgreSQL (Digunakan jika DB_TYPE=postgres)
+DB_TYPE=sqlite                  # Options: "sqlite" or "postgres"
+DB_PATH=erp.db                  # Used when DB_TYPE=sqlite
+# PostgreSQL Configuration (Used when DB_TYPE=postgres)
 DB_HOST=localhost
 DB_PORT=5432
 DB_USER=erp
@@ -214,10 +214,10 @@ DB_PASSWORD=erp_secret_password
 DB_NAME=erp_db
 DB_SSLMODE=disable
 
-JWT_SECRET=go-erplang-erp-super-secret-key-2026
+JWT_SECRET=go-erp-production-super-secret-key-2026
 UPLOAD_DIR=./uploads/attachments
 
-# Opsional: Cloudflare Workers AI & R2 Object Storage
+# Optional: Cloudflare Workers AI & R2 Object Storage
 CLOUDFLARE_ACCOUNT_ID=
 CLOUDFLARE_API_TOKEN=
 CLOUDFLARE_AI_MODEL=@cf/meta/llama-3.1-8b-instruct
@@ -227,46 +227,45 @@ CLOUDFLARE_R2_SECRET_ACCESS_KEY=
 CLOUDFLARE_R2_ENDPOINT=
 ```
 
-### 6.2 Menjalankan secara Lokal (Tanpa CGO / Pure Go)
+### 6.2 Running Locally (Zero-CGO / Pure Go)
 ```powershell
-# 1. Jalankan seluruh pengujian integrasi (54 bagian test)
+# 1. Run the comprehensive integration test suite (54 test sections)
 go test -v ./tests/...
 
-# 2. Kompilasi binary server
+# 2. Compile the server binary
 go build -o server.exe ./cmd/server
 
-# 3. Jalankan server ERP (otomatis melakukan AutoMigrate & Seeding data awal)
+# 3. Launch the ERP server (automatically performs AutoMigrate and default seed data)
 ./server.exe
 ```
 
-### 6.3 Menjalankan dengan Docker Compose (PostgreSQL + ERP Server)
+### 6.3 Running with Docker Compose (PostgreSQL + ERP Server)
 ```bash
 docker-compose up --build -d
 ```
 
-
 ---
 
-## 7. Arsitektur Executive Command Center & Continuous Improvements (`internal/core/commandcenter`)
+## 7. Executive Command Center & Continuous Improvement Architecture (`internal/core/commandcenter`)
 
-Sebagai bagian dari peningkatan berkelanjutan (*Continuous Improvement*), paket `internal/core/commandcenter` menyediakan 4 layanan lintas-modul berkecepatan tinggi yang di-mount pada `/api/v1`:
+As part of the platform's continuous improvement initiative, the `internal/core/commandcenter` package provides 4 high-speed cross-module services mounted under `/api/v1`:
 
 1. **Universal Omni-Search Engine (`GET /api/v1/search?q=<keyword>`)**:
-   - Melakukan pencarian terpadu secara simultan terhadap katalog **50 Modul ERP** (berdasarkan judul, kategori, kode tab, serta kata kunci Bahasa Indonesia & Inggris) dan **5 tabel transaksi/master utama** (`products`, `partners`, `sale_orders`, `purchase_orders`, `account_moves`).
-   - Terintegrasi langsung dengan modal **Command Palette (`Ctrl+K`)** di frontend dengan *debouncing* 120ms.
+   - Executes high-speed concurrent search across all **50 ERP Modules** (by title, category, tab code, and bilingual keywords) and **5 core transactional/master tables** (`products`, `partners`, `sale_orders`, `purchase_orders`, `account_moves`).
+   - Directly integrated with the frontend **Command Palette (`Ctrl+K`)** featuring a 120ms debounce.
 2. **Actionable Notification & Pending Approvals Center (`GET /api/v1/dashboard/notifications`)**:
-   - Mengagregasi secara *real-time* seluruh antrean tugas yang membutuhkan tindakan pengguna lintas modul:
-     - Permintaan persetujuan berjenjang (`approval_requests`)
-     - Instance alur kerja BPMN 2.0 yang sedang berjalan (`workflow_instances`)
-     - Penawaran penjualan & pembelian yang masih berstatus `draft` (`sale_orders`, `purchase_orders`)
-     - Dokumen mutasi gudang yang menunggu validasi (`stock_pickings`)
-     - Faktur akuntansi yang belum diposting (`account_moves`)
-     - Peringatan keamanan & perubahan data sensitif (`audit_log_entries` dengan `is_suspicious = true`)
+   - Aggregates real-time pending action items requiring user intervention across business departments:
+     - Tiered approval requests (`approval_requests`)
+     - Active in-flight BPMN 2.0 workflow instances (`workflow_instances`)
+     - Sales and purchase orders pending in `draft` state (`sale_orders`, `purchase_orders`)
+     - Warehouse stock transfer documents awaiting physical validation (`stock_pickings`)
+     - Draft accounting moves pending GL posting (`account_moves`)
+     - Security alerts and high-risk transactional modifications (`audit_log_entries` with `is_suspicious = true`)
 3. **1-Click End-to-End Business Cycle Simulator (`POST /api/v1/dashboard/simulate-cycle`)**:
-   - Mengeksekusi siklus bisnis ERP terintegrasi (*Procure-to-Pay* + *Warehouse Management* + *Order-to-Cash* + *General Ledger*) secara otomatis dalam 1 klik:
-     1. Memastikan ketersediaan data master Pelanggan, Pemasok, dan Produk *Storable*.
-     2. Membuat dan mengonfirmasi **Purchase Order (`PO...`)** -> menghasilkan & memvalidasi **Stock Receipt (`WH/IN/...`)** sehingga stok gudang bertambah secara atomik.
-     3. Membuat dan mengonfirmasi **Sales Order (`SO...`)** -> menghasilkan & memvalidasi **Delivery Order (`WH/OUT/...`)** sehingga stok gudang berkurang secara akurat.
-     4. Membuat dan mem-posting **Customer Invoice (`INV/...`)** berimbang ($\sum \text{Debit} = \sum \text{Credit}$) beserta PPN Keluaran 11% ke **Buku Besar (General Ledger)**.
+   - Executes an automated, atomic end-to-end enterprise business cycle (*Procure-to-Pay* + *Warehouse Management* + *Order-to-Cash* + *General Ledger Posting*) in a single click:
+     1. Validates or provisions Customer, Supplier, and Storable Product master data.
+     2. Generates and confirms a **Purchase Order (`PO...`)** -> generates and validates a **Goods Receipt (`WH/IN/...`)**, atomically incrementing warehouse stock quants.
+     3. Generates and confirms a **Sales Order (`SO...`)** -> generates and validates a **Delivery Order (`WH/OUT/...`)**, atomically decrementing warehouse stock quants.
+     4. Generates and posts a balanced **Customer Invoice (`INV/...`)** ($\sum \text{Debit} = \sum \text{Credit}$) with 11% VAT directly into the **General Ledger**.
 4. **Executive KPI Summary CSV Exporter (`GET /api/v1/dashboard/export-summary`)**:
-   - Menghasilkan file CSV berformat UTF-8 yang merangkum indikator kinerja utama (KPI) finansial dan operasional lintas departemen untuk pelaporan direksi.
+   - Generates a UTF-8 BOM CSV summary aggregating critical financial, operational, and departmental KPIs across all 50 enterprise modules for C-level reporting.

@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: 💬 GitHub Discussions (Tanya Jawab & Komunitas)
+  - name: 💬 GitHub Discussions (Community Q&A & Ideas)
     url: https://github.com/antonset1104/erp/discussions
-    about: Ajukan pertanyaan penggunaan, berdiskusi mengenai arsitektur, atau bagikan ide sebelum mengajukan issue resmi.
+    about: Ask implementation questions, discuss architecture, or brainstorm ideas before submitting a formal issue.
   - name: 🛡️ Security Vulnerability Report
     url: https://github.com/antonset1104/erp/security/advisories/new
-    about: Laporkan celah keamanan secara privat dan bertanggung jawab.
+    about: Report security vulnerabilities privately and responsibly.

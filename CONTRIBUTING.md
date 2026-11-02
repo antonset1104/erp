@@ -1,151 +1,151 @@
-# Panduan Kontribusi (Contributing Guide)
+# Contributing to GoERP
 
-Terima kasih atas minat Anda untuk berkontribusi pada **GoERP**! Kami menyambut segala bentuk kontribusi dari komunitas pengembang open source di seluruh dunia, mulai dari pelaporan bug (*bug reports*), usulan fitur (*feature proposals*), perbaikan dokumentasi (*documentation improvements*), hingga pengiriman kode (*Pull Requests*).
-
----
-
-## 📜 Kode Etik (Code of Conduct)
-
-Sebagai kontributor dan pengelola proyek ini, kita berkomitmen untuk menciptakan komunitas yang ramah, inklusif, dan bebas pelecehan bagi semua orang. Harap membaca dan mematuhi [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) kami sebelum berpartisipasi.
+Thank you for your interest in contributing to **GoERP**! We welcome all forms of contributions from the global open-source community—including bug reports, feature proposals, architectural discussions, documentation improvements, and code contributions via Pull Requests.
 
 ---
 
-## 🛠️ Persiapan Lingkungan Pengembangan (Development Setup)
+## 📜 Code of Conduct
 
-### Prasyarat
-1. **Golang 1.22 atau lebih baru** (disarankan Go 1.22+ untuk dukungan routing native `net/http` dan fitur konkurensi terbaru).
+As contributors and maintainers of this project, we are committed to fostering an open, welcoming, and harassment-free community for everyone. Please read and adhere to our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before participating.
+
+---
+
+## 🛠️ Development Environment Setup
+
+### Prerequisites
+1. **Go 1.22 or higher** (Go 1.22+ is recommended for native HTTP routing enhancements and modern concurrency features).
 2. **Git**.
-3. **C Compiler** (GCC / MinGW pada Windows, GCC/Clang pada Linux/macOS) untuk kompilasi driver CGO `go-sqlite3`.
-4. *(Opsional)* **Docker & Docker Compose** untuk pengujian dengan PostgreSQL.
+3. **C Compiler** (GCC / MinGW on Windows, GCC/Clang on Linux/macOS) for the CGO-based `go-sqlite3` driver.
+4. *(Optional)* **Docker & Docker Compose** for running and testing against PostgreSQL.
 
-### Langkah Instalasi Lokal
-1. **Fork** repositori ini ke akun GitHub Anda: [https://github.com/antonset1104/erp](https://github.com/antonset1104/erp)
-2. **Clone** hasil fork Anda ke komputer lokal:
+### Local Installation Steps
+1. **Fork** this repository to your GitHub account: [https://github.com/antonset1104/erp](https://github.com/antonset1104/erp)
+2. **Clone** your fork locally:
    ```bash
-   git clone https://github.com/<username-anda>/erp.git
+   git clone https://github.com/<your-username>/erp.git
    cd erp
    ```
-3. **Tambahkan upstream remote**:
+3. **Add the upstream remote**:
    ```bash
    git remote add upstream https://github.com/antonset1104/erp.git
    ```
-4. **Unduh dependencies Go**:
+4. **Download and verify Go dependencies**:
    ```bash
    go mod download
    go mod verify
    ```
-5. **Salin konfigurasi environment**:
+5. **Set up the local environment configuration**:
    ```bash
    cp .env.example .env
    ```
-6. **Jalankan server aplikasi**:
+6. **Start the application server**:
    ```bash
    go run ./cmd/server
    ```
-   Aplikasi akan aktif di `http://localhost:8080`.
+   The application dashboard will be live at `http://localhost:8080`.
 
 ---
 
-## 🧪 Menjalankan Pengujian (Running Tests)
+## 🧪 Running the Test Suite
 
-Sebelum mengajukan perubahan, pastikan seluruh pengujian integrasi lulus 100%:
+Before submitting any code changes, ensure that all unit and integration tests pass 100%:
 
 ```bash
-# Menjalankan seluruh test suite
+# Run the complete test suite
 go test -v ./tests/...
 
-# Menjalankan dengan deteksi race conditions
+# Run tests with the race condition detector enabled
 go test -v -race ./tests/...
 
-# Menjalankan verifikasi kompilasi dan linting
+# Verify code formatting and static analysis
 go vet ./...
 go fmt ./...
 ```
 
 ---
 
-## 🏗️ Struktur Arsitektur & Panduan Menambah Modul
+## 🏗️ System Architecture & Adding New Modules
 
-GoERP dibangun dengan arsitektur **Modular Monolith** berkinerja tinggi:
+GoERP is engineered using a high-performance **Modular Monolith** architecture:
 
 ```
 erp/
-├── cmd/server/               # Entrypoint HTTP Server & Registrasi Rute Utama
+├── cmd/server/               # HTTP server entrypoint & main route registration
 ├── internal/
-│   ├── config/               # Konfigurasi Environment & Flags
+│   ├── config/               # Environment configuration & flags
 │   ├── core/
-│   │   ├── database/         # Abstraksi Database (SQLite/PostgreSQL) & Migrasi GORM
-│   │   ├── commandcenter/    # Command Palette (Ctrl+K), Omni-Search, & Simulator
-│   │   └── models/           # ModelBase (ID, CreateDate, WriteDate, Active Promoted)
-│   └── modules/              # 50 Modul ERP Terisolasi (base, stock, sale, account, dll.)
-│       └── <nama_modul>/
-│           ├── model.go      # Struktur Data & Hook GORM
-│           ├── repository.go # Query Data & Akses DB
-│           ├── service.go    # Logika Bisnis & Invarian Transaksional
-│           └── handler.go    # REST API Handlers
-├── web/                      # Frontend SPA Modern (HTML5, Vanilla ES6, CSS Variables)
+│   │   ├── database/         # Database abstraction (SQLite/PostgreSQL) & GORM migrations
+│   │   ├── commandcenter/    # Command Palette (Ctrl+K), Omni-Search, & Business Simulator
+│   │   └── models/           # ModelBase (ID, CreatedAt, UpdatedAt, Active Promoted)
+│   └── modules/              # 50 Isolated Enterprise Modules (base, stock, sale, account, etc.)
+│       └── <module_name>/
+│           ├── model.go      # Data models & GORM hooks
+│           ├── repository.go # Data queries & database access
+│           ├── service.go    # Business logic & transactional invariants
+│           └── handler.go    # REST API request handlers
+├── web/                      # Modern SPA Frontend (HTML5, Vanilla ES6, CSS Variables)
 └── tests/                    # End-to-End & Integration Test Suites
 ```
 
-### Standar Penulisan Modul Baru:
-1. **Warisi `models.ModelBase`**: Setiap entitas master dan dokumen harus menyematkan `models.ModelBase` (`ID`, `CreatedAt`, `UpdatedAt`, `Active`).
-2. **Integritas Transaksi Finansial**:
-   - Jika modul berinteraksi dengan stok barang, gunakan transaksi atomik inventaris pembukuan ganda (*double-entry stock*).
-   - Jika modul berinteraksi dengan jurnal akuntansi, pastikan validasi mutlak: $\sum \text{Debit} == \sum \text{Credit}$.
-3. **Penomoran Dokumen Bebas Tabrakan (*Sequence Collision Resistance*)**:
-   - Gunakan perulangan pengecekan keunikan nomor dokumen (misal `PO%05d`, `SO%05d`, `INV%05d`) agar aman terhadap *race conditions*.
-4. **Kepatuhan Aturan Global Website**:
-   - Setiap halaman/antarmuka HTML **wajib** menyertakan script AdSense (`ca-pub-6180580801533680`) dan Google Analytics (`G-79X7K7H4MJ`).
+### Standards for New Modules:
+1. **Inherit from `models.ModelBase`**: Every master and transactional model must embed `models.ModelBase` (`ID`, `CreatedAt`, `UpdatedAt`, `Active`).
+2. **Financial & Inventory Invariants**:
+   - Inventory movements must use atomic double-entry bookkeeping (*Source Location* $\rightarrow$ *Destination Location*).
+   - General Ledger journal entries must strictly enforce balanced books: $\sum \text{Debit} == \sum \text{Credit}$.
+3. **Collision-Resistant Number Sequences**:
+   - Always implement sequence uniqueness verification loops (e.g., `PO%05d`, `SO%05d`, `INV%05d`) to guarantee safety under high-concurrency race conditions.
+4. **Global Web Rule Compliance**:
+   - Every user-facing HTML template must preserve the mandatory Google AdSense (`ca-pub-6180580801533680`) and Google Analytics (`G-79X7K7H4MJ`) scripts.
 
 ---
 
-## 🌿 Konvensi Branching & Alur Git
+## 🌿 Git Workflow & Branching Conventions
 
-1. Selalu buat branch baru dari branch `main` terbaru:
+1. Always create your feature branch from the latest `main` branch:
    ```bash
    git checkout main
    git pull upstream main
-   git checkout -b feature/nama-fitur-baru
-   # atau untuk perbaikan bug:
-   git checkout -b fix/deskripsi-perbaikan
+   git checkout -b feature/your-feature-name
+   # or for bug fixes:
+   git checkout -b fix/your-fix-description
    ```
-2. Gunakan konvensi **Conventional Commits**:
-   - `feat:` Penambahan fitur atau modul baru
-   - `fix:` Perbaikan bug atau penanganan error
-   - `docs:` Perubahan atau penambahan dokumentasi
-   - `perf:` Optimasi performa dan konkurensi
-   - `refactor:` Restrukturisasi kode tanpa mengubah fungsionalitas
-   - `test:` Penambahan atau perbaikan unit/integration test
-   - `chore:` Pembaruan dependensi, build scripts, atau konfigurasi CI
+2. Adhere to the **Conventional Commits** standard:
+   - `feat:` Introduces a new feature or enterprise module
+   - `fix:` Patches a bug or resolves an edge case
+   - `docs:` Documentation improvements or additions
+   - `perf:` Code improvements that optimize performance/concurrency
+   - `refactor:` Code restructuring without changing external behavior
+   - `test:` Adding or updating unit/integration test coverage
+   - `chore:` Dependency upgrades, build scripts, or CI maintenance
 
-Contoh pesan commit:
+Example commit messages:
 ```bash
-git commit -m "feat(stock): add multi-bin picking wave validation algorithm"
-git commit -m "fix(account): prevent negative debit entries on manual reconciliation"
+git commit -m "feat(stock): add multi-bin wave picking validation algorithm"
+git commit -m "fix(account): prevent negative debit entries during bank reconciliation"
 ```
 
 ---
 
-## 📤 Mengajukan Pull Request (PR)
+## 📤 Submitting a Pull Request (PR)
 
-1. Pastikan kode Anda telah diformat menggunakan `go fmt ./...`.
-2. Pastikan `go test -v ./tests/...` lulus tanpa kegagalan.
-3. Push branch Anda ke repositori fork:
+1. Ensure your code is properly formatted with `go fmt ./...`.
+2. Confirm that `go test -v ./tests/...` passes without any failures.
+3. Push your feature branch to your fork:
    ```bash
-   git push origin feature/nama-fitur-baru
+   git push origin feature/your-feature-name
    ```
-4. Buka repositori utama [https://github.com/antonset1104/erp](https://github.com/antonset1104/erp) dan klik tombol **Compare & pull request**.
-5. Isi template Pull Request secara lengkap:
-   - Jelaskan latar belakang dan masalah yang diselesaikan.
-   - Cantumkan modul yang terdampak.
-   - Cantumkan bukti pengujian (output test atau tangkapan layar jika menyangkut UI).
-6. Tim maintainer akan meninjau kode Anda dan memberikan umpan balik melalui review GitHub.
+4. Navigate to the main repository at [https://github.com/antonset1104/erp](https://github.com/antonset1104/erp) and click **Compare & pull request**.
+5. Fill out the Pull Request template thoroughly:
+   - Summarize the background and the problem solved.
+   - List the affected modules.
+   - Attach verification evidence (test outputs or UI screenshots).
+6. The maintainers will review your PR and provide feedback.
 
 ---
 
-## 🐛 Melaporkan Bug & Mengusulkan Fitur
+## 🐛 Reporting Bugs & Proposing Features
 
-- **Bug Reports**: Sebelum membuat issue, lakukan pencarian pada tab *Issues* apakah masalah serupa sudah pernah dilaporkan. Jika belum, gunakan form issue **Bug Report** dan sertakan langkah reproduksi, versi Go, serta pesan error/log lengkap.
-- **Feature Requests**: Diskusikan ide modul atau peningkatan alur bisnis Anda melalui form issue **Feature Request** atau tab **Discussions**.
+- **Bug Reports**: Before creating a new issue, search the *Issues* tab to verify it hasn't been reported previously. If it's a new issue, use the **Bug Report** form and provide reproduction steps, Go version, and error logs.
+- **Feature Requests**: Discuss your ideas for new business workflows or modules using the **Feature Request** form or in the **Discussions** forum.
 
-Terima kasih atas kontribusi Anda dalam membangun masa depan open-source ERP berbasis Golang!
+Thank you for helping build the future of high-performance, open-source ERP systems in Golang!

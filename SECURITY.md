@@ -1,60 +1,60 @@
-# Kebijakan Keamanan (Security Policy)
+# Security Policy
 
-Keamanan data finansial, operasional, dan privasi pengguna adalah prioritas tertinggi dalam pengembangan **GoERP**. Kami mengapresiasi upaya komunitas peneliti keamanan dan pengembang yang membantu menjaga integritas sistem kami melalui pengungkapan kerentanan yang bertanggung jawab (*responsible disclosure*).
+The security of financial records, business operations, and user privacy is our highest priority in **GoERP**. We deeply appreciate the security research community and developers who help maintain system integrity through responsible vulnerability disclosure.
 
 ---
 
-## 🛡️ Versi yang Didukung (Supported Versions)
+## 🛡️ Supported Versions
 
-Pembaruan keamanan aktif dan patch kerentanan dirilis untuk versi rilis berikut:
+Security updates and vulnerability patches are actively provided for the following releases:
 
-| Versi | Didukung Pembaruan Keamanan | Status Pemeliharaan |
+| Version | Supported | Maintenance Status |
 | :--- | :---: | :--- |
-| `1.41.x` | ✅ Ya | Versi Produksi Aktif (Current Release) |
-| `1.40.x` | ✅ Ya | Dukungan Patch Keamanan Kritis |
-| `< 1.40.0`| ❌ Tidak | End-of-Life (Harap segera upgrade) |
+| `1.41.x` | ✅ Yes | Current Production Release |
+| `1.40.x` | ✅ Yes | Critical Security Patch Support |
+| `< 1.40.0`| ❌ No | End-of-Life (Please upgrade immediately) |
 
 ---
 
-## 🚨 Melaporkan Kerentanan (Reporting a Vulnerability)
+## 🚨 Reporting a Vulnerability
 
-**JANGAN** melaporkan kerentanan keamanan melalui *public GitHub Issue* atau media sosial terbuka.
+**DO NOT** file public GitHub Issues or discuss vulnerabilities on public channels.
 
-Jika Anda menemukan potensi kerentanan keamanan (seperti kebocoran data, bypass autentikasi JWT, SQL Injection, Cross-Site Scripting / XSS, Remote Code Execution, atau eskalasi hak akses RBAC), ikuti langkah-langkah berikut:
+If you discover a potential security vulnerability (such as authentication bypass, privilege escalation, SQL injection, Cross-Site Scripting, or sensitive data exposure), please report it responsibly using one of the following methods:
 
-### Opsi 1: GitHub Private Vulnerability Reporting (Disarankan)
-1. Kunjungi repositori proyek: [https://github.com/antonset1104/erp](https://github.com/antonset1104/erp)
-2. Klik tab **Security** $\rightarrow$ **Advisories** $\rightarrow$ **Report a vulnerability**.
-3. Lampirkan rincian teknis, langkah reproduksi (*Proof-of-Concept* / PoC), dan dampak potensial secara privat.
+### Option 1: GitHub Private Vulnerability Reporting (Recommended)
+1. Go to the project repository: [https://github.com/antonset1104/erp](https://github.com/antonset1104/erp)
+2. Click on the **Security** tab $\rightarrow$ **Advisories** $\rightarrow$ **Report a vulnerability**.
+3. Submit technical details, reproduction steps (*Proof-of-Concept*), and potential impact securely.
 
-### Opsi 2: Email Langsung ke Tim Keamanan
-Kirimkan rincian laporan secara terenkripsi/rahasia ke:
+### Option 2: Direct Confidential Email
+Send an encrypted or confidential report directly to:
 📧 **antonset1104@users.noreply.github.com**
 
-Sertakan informasi berikut dalam laporan Anda:
-- Deskripsi kerentanan dan lokasi modul yang terpengaruh (misal `internal/core/database`, `internal/modules/account`).
-- Langkah-langkah detail untuk mereproduksi masalah (curl command, script PoC, atau tangkapan layar HTTP payload).
-- Analisis dampak dan tingkat keparahan menurut penilaian Anda (Low, Medium, High, Critical).
-- Usulan perbaikan atau mitigasi (jika Anda memilikinya).
+Please include the following information in your advisory:
+- Description of the vulnerability and affected module paths (e.g., `internal/core/database`, `internal/modules/account`).
+- Step-by-step reproduction guide (curl command, PoC payload, or screenshots).
+- Estimated severity rating (Low, Medium, High, Critical).
+- Suggested remediation or patch (if available).
 
 ---
 
-## ⏱️ Komitmen Respons & SLA Penanganan
+## ⏱️ Response Timelines & SLAs
 
-1. **Konfirmasi Awal**: Tim maintainer akan mengonfirmasi penerimaan laporan Anda dalam kurun waktu **maksimal 48 jam**.
-2. **Triase & Verifikasi**: Investigasi dan verifikasi keparahan kerentanan akan diselesaikan dalam kurun waktu **3-5 hari kerja**.
-3. **Perbaikan & Pengujian**: Tim akan menyusun patch perbaikan di repositori privat terpisah dan melakukan regresi pengujian otomatis.
-4. **Rilis Patch Keamanan**: Patch keamanan akan dirilis ke publik dalam versi patch terbaru (misal `v1.41.1`) dalam kurun waktu **maksimal 14 hari** sejak kerentanan diverifikasi.
-5. **Kredit & Pengakuan**: Nama atau persona Anda akan dicantumkan secara terhormat dalam *Security Advisory Notes* dan *Release Notes* publik sebagai bentuk apresiasi kami.
+1. **Acknowledgment**: The maintainers will acknowledge receipt of your report within **48 hours**.
+2. **Triage & Validation**: Investigation and severity assessment will be completed within **3–5 business days**.
+3. **Patch Development & Testing**: Fixes will be prepared in a private fork and thoroughly verified against automated regression suites.
+4. **Public Patch Release**: Security releases (e.g., `v1.41.1`) will be published within **14 calendar days** of vulnerability verification.
+5. **Credit & Recognition**: You will be publicly credited in the release notes and GitHub Security Advisory (unless you request anonymity).
 
 ---
 
-## 🔒 Praktik Keamanan Bawaan GoERP
+## 🔒 Built-in Security Architecture
 
-Platform ini telah menerapkan standar keamanan enterprise terkemuka:
-- **Autentikasi Aman**: JWT (*JSON Web Tokens*) berdurasi terbatas dengan secret key minimum 32-karakter.
-- **Hashing Password**: Bcrypt dengan work factor $\ge 10$.
-- **Database Safety**: Prepared statements / parameter binding otomatis via GORM untuk mencegah SQL Injection.
-- **Proteksi XSS**: Sanitasi HTML bawaan pada web client dan rendering DOM berbasis teks murni.
-- **Isolasi Multi-Tenant**: Filter otomatis `company_id` pada seluruh kueri database.
-- **Jejak Audit ISO 27001**: Modul `audit_trail` mencatat setiap mutasi data sensitif (CDC & user attribution).
+GoERP incorporates enterprise-grade defense-in-depth principles:
+- **Secure Authentication**: Short-lived JWTs (JSON Web Tokens) with a mandatory $\ge 32$-character secret key.
+- **Password Hashing**: Bcrypt with adaptive work factor $\ge 10$.
+- **Database Safety**: Parameterized queries via GORM to eliminate SQL Injection risks.
+- **XSS Protection**: Strict HTML escaping on frontend rendering and text-based DOM bindings.
+- **Multi-Tenant Isolation**: Automated `company_id` tenancy scoping across database operations.
+- **ISO 27001 Audit Trail**: Immutable transaction change logging (CDC & user attribution).

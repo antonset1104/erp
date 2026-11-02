@@ -1,62 +1,62 @@
-# Pedoman Perilaku Komunitas (Contributor Covenant Code of Conduct)
+# Contributor Covenant Code of Conduct
 
-## Komitmen Kami
+## Our Pledge
 
-Demi menumbuhkan lingkungan yang terbuka dan ramah bagi semua kalangan, kami sebagai kontributor dan pengelola proyek berkomitmen untuk menjadikan partisipasi dalam proyek **GoERP** dan komunitas kami sebagai pengalaman yang bebas dari pelecehan bagi semua orang, tanpa memandang usia, ukuran tubuh, disabilitas yang tampak maupun tidak tampak, etnisitas, karakteristik seksual, identitas dan ekspresi gender, tingkat pengalaman, pendidikan, status sosio-ekonomi, kebangsaan, penampilan pribadi, ras, kasta, warna kulit, agama, atau identitas dan orientasi seksual.
+We as members, contributors, and leaders pledge to make participation in **GoERP** and our community a harassment-free experience for everyone, regardless of age, body size, visible or invisible disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, caste, color, religion, or sexual identity and orientation.
 
-Kami berikrar untuk bertindak dan berinteraksi dengan cara-cara yang berkontribusi pada terciptanya komunitas yang terbuka, ramah, beraneka ragam, inklusif, dan sehat.
-
----
-
-## Standar Kami
-
-Contoh perilaku yang berkontribusi pada penciptaan lingkungan yang positif bagi komunitas kami meliputi:
-
-* Menunjukkan empati dan kebaikan terhadap orang lain.
-* Menghargai perbedaan pendapat, sudut pandang, dan pengalaman.
-* Memberikan dan menerima umpan balik yang konstruktif secara anggun.
-* Menerima tanggung jawab dan meminta maaf kepada mereka yang terpengaruh oleh kesalahan kita, serta belajar dari pengalaman tersebut.
-* Berfokus pada hal-hal yang terbaik tidak hanya bagi kita sebagai individu, melainkan bagi komunitas secara keseluruhan.
-
-Contoh perilaku yang tidak dapat diterima meliputi:
-
-* Penggunaan bahasa atau citra bernuansa seksual, serta perhatian atau pendekatan seksual yang tidak diinginkan dalam bentuk apa pun.
-* Melakukan *trolling*, komentar yang meremehkan atau menghina, serta serangan personal atau politis.
-* Pelecehan di ranah publik maupun privat.
-* Menerbitkan informasi privat milik orang lain, seperti alamat fisik atau surel, tanpa izin eksplisit mereka (*doxxing*).
-* Perilaku lain yang secara wajar dapat dianggap tidak pantas dalam lingkungan profesional.
+We pledge to act and interact in ways that contribute to an open, welcoming, diverse, inclusive, and healthy community.
 
 ---
 
-## Tanggung Jawab Penegakan
+## Our Standards
 
-Pengelola proyek bertanggung jawab untuk memperjelas dan menegakkan standar perilaku yang dapat diterima serta akan mengambil tindakan perbaikan yang adil dan sesuai dalam merespons setiap perilaku yang mereka anggap tidak pantas, mengancam, menyinggung, atau berbahaya.
+Examples of behavior that contributes to a positive environment for our community include:
 
-Pengelola proyek memiliki hak dan tanggung jawab untuk menghapus, mengedit, atau menolak komentar, komit, kode, suntingan wiki, *issues*, dan kontribusi lainnya yang tidak selaras dengan Pedoman Perilaku ini, dan akan menyampaikan alasan di balik keputusan moderasi jika dipandang tepat.
+* Demonstrating empathy and kindness toward other people
+* Being respectful of differing opinions, viewpoints, and experiences
+* Giving and gracefully accepting constructive feedback
+* Accepting responsibility and apologizing to those affected by our mistakes, and learning from the experience
+* Focusing on what is best not just for us as individuals, but for the overall community
+
+Examples of unacceptable behavior include:
+
+* The use of sexualized language or imagery, and sexual attention or advances of any kind
+* Trolling, insulting or derogatory comments, and personal or political attacks
+* Public or private harassment
+* Publishing others' private information, such as a physical or email address, without their explicit permission
+* Other conduct which could reasonably be considered inappropriate in a professional setting
 
 ---
 
-## Ruang Lingkup
+## Enforcement Responsibilities
 
-Pedoman Perilaku ini berlaku dalam semua ruang komunitas (ruang obrolan, forum diskusi, *issue tracker*, repositori GitHub), dan juga berlaku ketika seorang individu mewakili komunitas secara resmi di ruang publik. Contoh mewakili komunitas kami mencakup penggunaan alamat surel resmi proyek, memposting melalui akun media sosial resmi, atau bertindak sebagai perwakilan yang ditunjuk pada suatu acara daring maupun luring.
+Community leaders are responsible for clarifying and enforcing our standards of acceptable behavior and will take appropriate and fair corrective action in response to any behavior that they deem inappropriate, threatening, offensive, or harmful.
+
+Community leaders have the right and responsibility to remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions that are not aligned to this Code of Conduct, and will communicate reasons for moderation decisions when appropriate.
 
 ---
 
-## Pelaporan & Penegakan
+## Scope
 
-Insiden perilaku yang menyinggung, melecehkan, atau tidak dapat diterima lainnya dapat dilaporkan kepada pengelola proyek di:
+This Code of Conduct applies within all community spaces (chat rooms, forums, issue trackers, GitHub repositories), and also applies when an individual is officially representing the community in public spaces. Examples of representing our community include using an official e-mail address, posting via an official social media account, or acting as an appointed representative at an online or offline event.
+
+---
+
+## Reporting & Enforcement
+
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the community leaders at:
 **antonset1104@users.noreply.github.com**
 
-Semua keluhan akan ditinjau dan diselidiki secara cepat dan adil. Seluruh pengelola proyek berkewajiban untuk menghormati privasi dan keamanan pihak yang melaporkan insiden apa pun.
+All complaints will be reviewed and investigated promptly and fairly. All community leaders are obligated to respect the privacy and security of the reporter of any incident.
 
-Pedoman penegakan lebih lanjut dapat diterapkan secara bertahap:
-1. **Peringatan / Koreksi**: Percakapan privat dan penjelasan tertulis mengenai pelanggaran.
-2. **Peringatan Keras**: Peringatan resmi dengan konsekuensi jika perilaku berlanjut.
-3. **Penangguhan Sementara**: Pemblokiran sementara dari interaksi publik komunitas proyek.
-4. **Pemblokiran Permanen**: Larangan permanen dari segala bentuk interaksi dengan proyek dan komunitas.
+Enforcement guidelines:
+1. **Correction**: A private, written warning providing clarity around the nature of the violation.
+2. **Warning**: A formal warning with consequences for continued unacceptable behavior.
+3. **Temporary Suspension**: A temporary ban from any interaction with the project or community spaces.
+4. **Permanent Ban**: A permanent ban from any public interaction within the project community.
 
 ---
 
-## Atribusi
+## Attribution
 
-Pedoman Perilaku ini diadaptasi dari [Contributor Covenant](https://www.contributor-covenant.org), versi 2.1, yang tersedia di [https://www.contributor-covenant.org/version/2/1/code_of_conduct.html](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html).
+This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org), version 2.1, available at [https://www.contributor-covenant.org/version/2/1/code_of_conduct.html](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html).
