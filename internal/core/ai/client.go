@@ -22,7 +22,7 @@ type TicketAIAnalysis struct {
 	SuggestedCategory     string   `json:"suggested_category"`     // "technical", "billing", "inquiry", "warranty"
 	DraftResponse         string   `json:"draft_response"`         // AI-composed polite, technical solution draft
 	ActionRecommendations []string `json:"action_recommendations"` // SOP recommended action items
-	Source                string   `json:"source"`                 // "cloudflare_workers_ai" or "local_heuristic_engine"
+	Source                string   `json:"source"`                 // AI provider or "local_heuristic_engine"
 }
 
 // QualityAIAnalysis represents AI Root Cause Analysis (RCA) and CAPA for Quality Control
@@ -32,7 +32,7 @@ type QualityAIAnalysis struct {
 	SuggestedActionType string `json:"suggested_action_type"` // "quarantine", "rework", "return", "scrap"
 	RiskLevel           string `json:"risk_level"`            // "Critical", "High", "Medium", "Low"
 	ComplianceNotes     string `json:"compliance_notes"`      // ISO 9001 / QA compliance notes
-	Source              string `json:"source"`                // "cloudflare_workers_ai" or "local_heuristic_engine"
+	Source              string `json:"source"`                // AI provider or "local_heuristic_engine"
 }
 
 // ExpenseAIAnalysis represents AI categorization for employee expenses
@@ -73,7 +73,7 @@ type ReceiptLineItem struct {
 	Subtotal    float64 `json:"subtotal"`
 }
 
-// ReceiptOCRResult represents structured data extracted from receipts/invoices by Cloudflare Workers AI Vision
+// ReceiptOCRResult represents structured data extracted from receipts/invoices by Vision AI
 type ReceiptOCRResult struct {
 	VendorName         string            `json:"vendor_name"`
 	InvoiceDate        string            `json:"invoice_date"` // YYYY-MM-DD
@@ -84,7 +84,7 @@ type ReceiptOCRResult struct {
 	LineItems          []ReceiptLineItem `json:"line_items"`
 	ConfidenceScore    float64           `json:"confidence_score"`
 	RawExtractedText   string            `json:"raw_extracted_text,omitempty"`
-	Source             string            `json:"source"` // "cloudflare_workers_ai_vision" or "local_heuristic_ocr"
+	Source             string            `json:"source"`
 }
 
 type Client struct {
@@ -96,17 +96,292 @@ func NewClient(cfg *config.Config) *Client {
 	return &Client{
 		cfg: cfg,
 		httpClient: &http.Client{
-			Timeout: 15 * time.Second,
+			Timeout: 20 * time.Second,
 		},
 	}
 }
 
-// IsCloudflareConfigured checks whether Cloudflare Workers AI credentials or Worker URL are set
-func (c *Client) IsCloudflareConfigured() bool {
-	return (c.cfg.CloudflareAccountID != "" && c.cfg.CloudflareAPIToken != "") || c.cfg.CloudflareWorkerURL != ""
+// Provider Availability Checks
+func (c *Client) IsGeminiConfigured() bool {
+	return c.cfg != nil && c.cfg.GeminiAPIKey != ""
 }
 
-// callCloudflareWorkersAI sends prompt to Cloudflare Workers AI edge network
+func (c *Client) IsOpenAIConfigured() bool {
+	return c.cfg != nil && c.cfg.OpenAIAPIKey != ""
+}
+
+func (c *Client) IsAnthropicConfigured() bool {
+	return c.cfg != nil && c.cfg.AnthropicAPIKey != ""
+}
+
+func (c *Client) IsDeepSeekConfigured() bool {
+	return c.cfg != nil && c.cfg.DeepSeekAPIKey != ""
+}
+
+func (c *Client) IsCloudflareConfigured() bool {
+	return c.cfg != nil && ((c.cfg.CloudflareAccountID != "" && c.cfg.CloudflareAPIToken != "") || c.cfg.CloudflareWorkerURL != "")
+}
+
+func (c *Client) IsAnyCloudAIConfigured() bool {
+	return c.IsGeminiConfigured() || c.IsOpenAIConfigured() || c.IsAnthropicConfigured() || c.IsDeepSeekConfigured() || c.IsCloudflareConfigured()
+}
+
+// ActiveProviderName returns the active AI provider identifier
+func (c *Client) ActiveProviderName() string {
+	pref := strings.ToLower(strings.TrimSpace(c.cfg.AIProvider))
+	switch pref {
+	case "gemini", "vertex_ai", "google":
+		if c.IsGeminiConfigured() {
+			return "google_gemini"
+		}
+	case "openai", "gpt":
+		if c.IsOpenAIConfigured() {
+			return "openai_gpt4o"
+		}
+	case "anthropic", "claude":
+		if c.IsAnthropicConfigured() {
+			return "anthropic_claude"
+		}
+	case "deepseek":
+		if c.IsDeepSeekConfigured() {
+			return "deepseek_r1"
+		}
+	case "cloudflare":
+		if c.IsCloudflareConfigured() {
+			return "cloudflare_workers_ai"
+		}
+	}
+
+	if c.IsGeminiConfigured() {
+		return "google_gemini"
+	}
+	if c.IsOpenAIConfigured() {
+		return "openai_gpt4o"
+	}
+	if c.IsAnthropicConfigured() {
+		return "anthropic_claude"
+	}
+	if c.IsDeepSeekConfigured() {
+		return "deepseek_r1"
+	}
+	if c.IsCloudflareConfigured() {
+		return "cloudflare_workers_ai"
+	}
+	return "local_smart_heuristic_engine"
+}
+
+// ---------------------------------------------------------------------------
+// Provider 1: Google Gemini API & Google Cloud Vertex AI
+// ---------------------------------------------------------------------------
+
+func (c *Client) callGeminiAPI(prompt, systemPrompt string) (string, error) {
+	if !c.IsGeminiConfigured() {
+		return "", errors.New("google gemini api key not configured")
+	}
+
+	model := c.cfg.GeminiModel
+	if model == "" {
+		model = "gemini-2.5-flash"
+	}
+
+	endpoint := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s",
+		model, c.cfg.GeminiAPIKey)
+
+	payload := map[string]interface{}{
+		"system_instruction": map[string]interface{}{
+			"parts": []map[string]string{
+				{"text": systemPrompt},
+			},
+		},
+		"contents": []map[string]interface{}{
+			{
+				"role": "user",
+				"parts": []map[string]string{
+					{"text": prompt},
+				},
+			},
+		},
+		"generationConfig": map[string]interface{}{
+			"temperature":     0.2,
+			"maxOutputTokens": 1024,
+		},
+	}
+
+	jsonBytes, err := json.Marshal(payload)
+	if err != nil {
+		return "", err
+	}
+
+	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonBytes))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return "", fmt.Errorf("gemini api returned status %d: %s", resp.StatusCode, string(bodyBytes))
+	}
+
+	var geminiResp struct {
+		Candidates []struct {
+			Content struct {
+				Parts []struct {
+					Text string `json:"text"`
+				} `json:"parts"`
+			} `json:"content"`
+		} `json:"candidates"`
+	}
+
+	if err := json.Unmarshal(bodyBytes, &geminiResp); err == nil && len(geminiResp.Candidates) > 0 && len(geminiResp.Candidates[0].Content.Parts) > 0 {
+		return geminiResp.Candidates[0].Content.Parts[0].Text, nil
+	}
+
+	return string(bodyBytes), nil
+}
+
+// ---------------------------------------------------------------------------
+// Provider 2 & 4: OpenAI API (GPT-4o / Agents SDK) & DeepSeek / OpenRouter
+// ---------------------------------------------------------------------------
+
+func (c *Client) callOpenAICompatible(baseURL, apiKey, model, prompt, systemPrompt string) (string, error) {
+	if apiKey == "" {
+		return "", errors.New("openai-compatible api key not configured")
+	}
+
+	endpoint := strings.TrimRight(baseURL, "/") + "/chat/completions"
+	payload := map[string]interface{}{
+		"model": model,
+		"messages": []map[string]string{
+			{"role": "system", "content": systemPrompt},
+			{"role": "user", "content": prompt},
+		},
+		"temperature": 0.2,
+		"max_tokens":  1024,
+	}
+
+	jsonBytes, err := json.Marshal(payload)
+	if err != nil {
+		return "", err
+	}
+
+	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonBytes))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+apiKey)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return "", fmt.Errorf("openai-compatible api returned status %d: %s", resp.StatusCode, string(bodyBytes))
+	}
+
+	var oaiResp struct {
+		Choices []struct {
+			Message struct {
+				Content string `json:"content"`
+			} `json:"message"`
+		} `json:"choices"`
+	}
+
+	if err := json.Unmarshal(bodyBytes, &oaiResp); err == nil && len(oaiResp.Choices) > 0 {
+		return oaiResp.Choices[0].Message.Content, nil
+	}
+
+	return string(bodyBytes), nil
+}
+
+// ---------------------------------------------------------------------------
+// Provider 3: Anthropic Claude API & MCP
+// ---------------------------------------------------------------------------
+
+func (c *Client) callAnthropicClaude(prompt, systemPrompt string) (string, error) {
+	if !c.IsAnthropicConfigured() {
+		return "", errors.New("anthropic api key not configured")
+	}
+
+	model := c.cfg.AnthropicModel
+	if model == "" {
+		model = "claude-3-7-sonnet-latest"
+	}
+
+	endpoint := "https://api.anthropic.com/v1/messages"
+	payload := map[string]interface{}{
+		"model":      model,
+		"max_tokens": 1024,
+		"system":     systemPrompt,
+		"messages": []map[string]string{
+			{"role": "user", "content": prompt},
+		},
+	}
+
+	jsonBytes, err := json.Marshal(payload)
+	if err != nil {
+		return "", err
+	}
+
+	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonBytes))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("x-api-key", c.cfg.AnthropicAPIKey)
+	req.Header.Set("anthropic-version", "2023-06-01")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return "", fmt.Errorf("anthropic api returned status %d: %s", resp.StatusCode, string(bodyBytes))
+	}
+
+	var claudeResp struct {
+		Content []struct {
+			Type string `json:"type"`
+			Text string `json:"text"`
+		} `json:"content"`
+	}
+
+	if err := json.Unmarshal(bodyBytes, &claudeResp); err == nil && len(claudeResp.Content) > 0 {
+		return claudeResp.Content[0].Text, nil
+	}
+
+	return string(bodyBytes), nil
+}
+
+// ---------------------------------------------------------------------------
+// Provider 5: Cloudflare Workers AI
+// ---------------------------------------------------------------------------
+
 func (c *Client) callCloudflareWorkersAI(prompt, systemPrompt string) (string, error) {
 	if !c.IsCloudflareConfigured() {
 		return "", errors.New("cloudflare workers ai credentials not configured")
@@ -158,7 +433,6 @@ func (c *Client) callCloudflareWorkersAI(prompt, systemPrompt string) (string, e
 		return "", fmt.Errorf("cloudflare workers ai api returned status %d: %s", resp.StatusCode, string(bodyBytes))
 	}
 
-	// Cloudflare Workers AI response format: {"result": {"response": "..."}}
 	var cfResp struct {
 		Result struct {
 			Response string `json:"response"`
@@ -170,7 +444,6 @@ func (c *Client) callCloudflareWorkersAI(prompt, systemPrompt string) (string, e
 		return cfResp.Result.Response, nil
 	}
 
-	// Direct worker response fallback: {"response": "..."}
 	var directResp struct {
 		Response string `json:"response"`
 	}
@@ -181,9 +454,85 @@ func (c *Client) callCloudflareWorkersAI(prompt, systemPrompt string) (string, e
 	return string(bodyBytes), nil
 }
 
-// CallRaw executes a raw prompt using Cloudflare Workers AI
+// CallWithProvider routes the prompt to the requested or prioritized AI provider
+func (c *Client) CallWithProvider(provider, prompt, systemPrompt string) (string, string, error) {
+	p := strings.ToLower(strings.TrimSpace(provider))
+	if p == "" || p == "auto" {
+		p = strings.ToLower(strings.TrimSpace(c.cfg.AIProvider))
+	}
+
+	switch p {
+	case "gemini", "vertex_ai", "google", "google_gemini":
+		if c.IsGeminiConfigured() {
+			out, err := c.callGeminiAPI(prompt, systemPrompt)
+			if err == nil {
+				return out, "google_gemini", nil
+			}
+		}
+	case "openai", "gpt", "gpt-4o", "openai_gpt4o":
+		if c.IsOpenAIConfigured() {
+			out, err := c.callOpenAICompatible(c.cfg.OpenAIBaseURL, c.cfg.OpenAIAPIKey, c.cfg.OpenAIModel, prompt, systemPrompt)
+			if err == nil {
+				return out, "openai_gpt4o", nil
+			}
+		}
+	case "anthropic", "claude", "anthropic_claude":
+		if c.IsAnthropicConfigured() {
+			out, err := c.callAnthropicClaude(prompt, systemPrompt)
+			if err == nil {
+				return out, "anthropic_claude", nil
+			}
+		}
+	case "deepseek", "deepseek_r1":
+		if c.IsDeepSeekConfigured() {
+			out, err := c.callOpenAICompatible(c.cfg.DeepSeekBaseURL, c.cfg.DeepSeekAPIKey, c.cfg.DeepSeekModel, prompt, systemPrompt)
+			if err == nil {
+				return out, "deepseek_r1", nil
+			}
+		}
+	case "cloudflare", "cloudflare_workers_ai":
+		if c.IsCloudflareConfigured() {
+			out, err := c.callCloudflareWorkersAI(prompt, systemPrompt)
+			if err == nil {
+				return out, "cloudflare_workers_ai", nil
+			}
+		}
+	}
+
+	// Automatic Priority Cascade: Gemini -> OpenAI -> Anthropic -> DeepSeek -> Cloudflare
+	if c.IsGeminiConfigured() {
+		if out, err := c.callGeminiAPI(prompt, systemPrompt); err == nil {
+			return out, "google_gemini", nil
+		}
+	}
+	if c.IsOpenAIConfigured() {
+		if out, err := c.callOpenAICompatible(c.cfg.OpenAIBaseURL, c.cfg.OpenAIAPIKey, c.cfg.OpenAIModel, prompt, systemPrompt); err == nil {
+			return out, "openai_gpt4o", nil
+		}
+	}
+	if c.IsAnthropicConfigured() {
+		if out, err := c.callAnthropicClaude(prompt, systemPrompt); err == nil {
+			return out, "anthropic_claude", nil
+		}
+	}
+	if c.IsDeepSeekConfigured() {
+		if out, err := c.callOpenAICompatible(c.cfg.DeepSeekBaseURL, c.cfg.DeepSeekAPIKey, c.cfg.DeepSeekModel, prompt, systemPrompt); err == nil {
+			return out, "deepseek_r1", nil
+		}
+	}
+	if c.IsCloudflareConfigured() {
+		if out, err := c.callCloudflareWorkersAI(prompt, systemPrompt); err == nil {
+			return out, "cloudflare_workers_ai", nil
+		}
+	}
+
+	return "", "local_heuristic_engine", errors.New("no cloud ai provider configured or reachable")
+}
+
+// CallRaw executes a raw prompt using the active multi-provider router
 func (c *Client) CallRaw(prompt, systemPrompt string) (string, error) {
-	return c.callCloudflareWorkersAI(prompt, systemPrompt)
+	out, _, err := c.CallWithProvider("auto", prompt, systemPrompt)
+	return out, err
 }
 
 // ---------------------------------------------------------------------------
@@ -191,8 +540,7 @@ func (c *Client) CallRaw(prompt, systemPrompt string) (string, error) {
 // ---------------------------------------------------------------------------
 
 func (c *Client) AnalyzeTicket(title, desc string) (*TicketAIAnalysis, error) {
-	// Attempt Cloudflare Workers AI inference
-	if c.IsCloudflareConfigured() {
+	if c.IsAnyCloudAIConfigured() {
 		systemPrompt := `You are an expert enterprise ERP Helpdesk Support Assistant. Analyze the customer support ticket title and description. Respond ONLY in valid JSON matching this schema:
 {
   "sentiment": "frustrated"|"neutral"|"positive",
@@ -202,12 +550,12 @@ func (c *Client) AnalyzeTicket(title, desc string) (*TicketAIAnalysis, error) {
   "action_recommendations": ["step 1", "step 2"]
 }`
 		userPrompt := fmt.Sprintf("Ticket Title: %s\nTicket Description: %s", title, desc)
-		respText, err := c.callCloudflareWorkersAI(userPrompt, systemPrompt)
+		respText, source, err := c.CallWithProvider("auto", userPrompt, systemPrompt)
 		if err == nil {
 			var analysis TicketAIAnalysis
 			cleanJSON := extractJSONString(respText)
 			if jsonErr := json.Unmarshal([]byte(cleanJSON), &analysis); jsonErr == nil {
-				analysis.Source = "cloudflare_workers_ai"
+				analysis.Source = source
 				return &analysis, nil
 			}
 		}
@@ -270,7 +618,7 @@ func (c *Client) AnalyzeTicket(title, desc string) (*TicketAIAnalysis, error) {
 // ---------------------------------------------------------------------------
 
 func (c *Client) AnalyzeQualityAlert(title, rootCause, notes string) (*QualityAIAnalysis, error) {
-	if c.IsCloudflareConfigured() {
+	if c.IsAnyCloudAIConfigured() {
 		systemPrompt := `You are an expert ISO 9001 Quality Assurance (QA) and Six Sigma engineer. Analyze this quality non-conformance event and return ONLY valid JSON:
 {
   "root_cause_analysis": "Detailed 5-Whys Root Cause Analysis in Indonesian",
@@ -280,12 +628,12 @@ func (c *Client) AnalyzeQualityAlert(title, rootCause, notes string) (*QualityAI
   "compliance_notes": "ISO 9001 / QA compliance audit note"
 }`
 		userPrompt := fmt.Sprintf("Quality Event: %s\nObserved Failure: %s\nNotes: %s", title, rootCause, notes)
-		respText, err := c.callCloudflareWorkersAI(userPrompt, systemPrompt)
+		respText, source, err := c.CallWithProvider("auto", userPrompt, systemPrompt)
 		if err == nil {
 			var analysis QualityAIAnalysis
 			cleanJSON := extractJSONString(respText)
 			if jsonErr := json.Unmarshal([]byte(cleanJSON), &analysis); jsonErr == nil {
-				analysis.Source = "cloudflare_workers_ai"
+				analysis.Source = source
 				return &analysis, nil
 			}
 		}
@@ -379,7 +727,7 @@ func (c *Client) AnalyzeExpense(desc string, amount float64) (*ExpenseAIAnalysis
 // ---------------------------------------------------------------------------
 
 func (c *Client) AskERP(query string, statsContext map[string]interface{}) (*AskERPResponse, error) {
-	if c.IsCloudflareConfigured() {
+	if c.IsAnyCloudAIConfigured() {
 		systemPrompt := `You are the Executive AI Advisor for an Enterprise ERP system. Answer questions concisely and professionally in Indonesian based on the ERP statistics context provided. Respond in valid JSON:
 {
   "answer": "Clear executive summary and insight in Indonesian",
@@ -387,14 +735,14 @@ func (c *Client) AskERP(query string, statsContext map[string]interface{}) (*Ask
 }`
 		contextJSON, _ := json.Marshal(statsContext)
 		userPrompt := fmt.Sprintf("Question: %s\nERP Context Data: %s", query, string(contextJSON))
-		respText, err := c.callCloudflareWorkersAI(userPrompt, systemPrompt)
+		respText, source, err := c.CallWithProvider("auto", userPrompt, systemPrompt)
 		if err == nil {
 			var resp AskERPResponse
 			cleanJSON := extractJSONString(respText)
 			if jsonErr := json.Unmarshal([]byte(cleanJSON), &resp); jsonErr == nil {
 				resp.Question = query
 				resp.KeyMetrics = statsContext
-				resp.Source = "cloudflare_workers_ai"
+				resp.Source = source
 				return &resp, nil
 			}
 		}
@@ -427,7 +775,7 @@ func (c *Client) AskERP(query string, statsContext map[string]interface{}) (*Ask
 
 // AnalyzeApprovalRisk performs AI risk and compliance evaluation for an approval request
 func (c *Client) AnalyzeApprovalRisk(title, categoryName string, amount float64, reason, reference string) (*ApprovalRiskAnalysis, error) {
-	if c.IsCloudflareConfigured() {
+	if c.IsAnyCloudAIConfigured() {
 		systemPrompt := `You are an executive enterprise risk & compliance auditor for an ERP system.
 Evaluate the approval request and output JSON with keys:
 - risk_level: string ("Low", "Medium", "High", "Critical")
@@ -439,12 +787,12 @@ Evaluate the approval request and output JSON with keys:
 		userPrompt := fmt.Sprintf("Title: %s\nCategory: %s\nAmount: Rp %.2f\nReason: %s\nDocument Reference: %s",
 			title, categoryName, amount, reason, reference)
 
-		respText, err := c.callCloudflareWorkersAI(userPrompt, systemPrompt)
+		respText, source, err := c.CallWithProvider("auto", userPrompt, systemPrompt)
 		if err == nil {
 			var analysis ApprovalRiskAnalysis
 			cleanJSON := extractJSONString(respText)
 			if jsonErr := json.Unmarshal([]byte(cleanJSON), &analysis); jsonErr == nil {
-				analysis.Source = "cloudflare_workers_ai"
+				analysis.Source = source
 				return &analysis, nil
 			}
 		}
@@ -506,7 +854,7 @@ Evaluate the approval request and output JSON with keys:
 
 // AnalyzeReceiptVision extracts vendor, amounts, items, and taxes from receipts/invoices
 func (c *Client) AnalyzeReceiptVision(imageBytes []byte, mimeType string, textHint string) (*ReceiptOCRResult, error) {
-	if c.IsCloudflareConfigured() {
+	if c.IsAnyCloudAIConfigured() {
 		systemPrompt := `You are an enterprise AI document and receipt extraction engine for ERP.
 Analyze the provided receipt or invoice and output valid JSON with the following schema:
 {
@@ -522,12 +870,12 @@ Analyze the provided receipt or invoice and output valid JSON with the following
   "confidence_score": float (0.0 to 1.0)
 }`
 		userPrompt := fmt.Sprintf("Extract receipt details. Content/Hint: %s", textHint)
-		respText, err := c.callCloudflareWorkersAI(userPrompt, systemPrompt)
+		respText, source, err := c.CallWithProvider("auto", userPrompt, systemPrompt)
 		if err == nil {
 			cleanJSON := extractJSONString(respText)
 			var res ReceiptOCRResult
 			if jsonErr := json.Unmarshal([]byte(cleanJSON), &res); jsonErr == nil && res.TotalAmount > 0 {
-				res.Source = "cloudflare_workers_ai_vision"
+				res.Source = source + "_vision"
 				return &res, nil
 			}
 		}
@@ -540,7 +888,6 @@ Analyze the provided receipt or invoice and output valid JSON with the following
 func parseLocalReceiptHeuristics(imageBytes []byte, mimeType string, textHint string) (*ReceiptOCRResult, error) {
 	fullText := textHint
 	if fullText == "" && len(imageBytes) > 0 {
-		// If binary contains printable ASCII text (e.g. receipt text file or metadata header)
 		printable := make([]byte, 0, len(imageBytes))
 		for _, b := range imageBytes {
 			if (b >= 32 && b <= 126) || b == '\n' || b == '\r' || b == '\t' {
@@ -554,7 +901,6 @@ func parseLocalReceiptHeuristics(imageBytes []byte, mimeType string, textHint st
 
 	lowerText := strings.ToLower(fullText)
 
-	// Vendor & Category Detection
 	vendorName := "Merchant Rekanan Bisnis"
 	category := "Operasional & Administrasi Umum"
 	confidence := 0.85
@@ -585,7 +931,6 @@ func parseLocalReceiptHeuristics(imageBytes []byte, mimeType string, textHint st
 		confidence = 0.94
 	}
 
-	// Date Detection
 	dateRegex := regexp.MustCompile(`(20\d{2}[-/.]\d{1,2}[-/.]\d{1,2})|(\d{1,2}[-/.]\d{1,2}[-/.]20\d{2})`)
 	dateMatch := dateRegex.FindString(fullText)
 	invoiceDate := time.Now().Format("2006-01-02")
@@ -594,19 +939,17 @@ func parseLocalReceiptHeuristics(imageBytes []byte, mimeType string, textHint st
 		dateMatch = strings.ReplaceAll(dateMatch, ".", "-")
 		parts := strings.Split(dateMatch, "-")
 		if len(parts) == 3 {
-			if len(parts[0]) == 4 { // YYYY-MM-DD
+			if len(parts[0]) == 4 {
 				invoiceDate = fmt.Sprintf("%04s-%02s-%02s", parts[0], parts[1], parts[2])
-			} else if len(parts[2]) == 4 { // DD-MM-YYYY
+			} else if len(parts[2]) == 4 {
 				invoiceDate = fmt.Sprintf("%04s-%02s-%02s", parts[2], parts[1], parts[0])
 			}
 		}
 	}
 
-	// Amount Detection
 	totalAmount := 0.0
 	taxAmount := 0.0
 
-	// Regex for amounts after words like total, grand total, rp, jumlah
 	amountRegex := regexp.MustCompile(`(?i)(?:total|grand total|jumlah|tagihan|bayar|rp|idr)\s*[:=]?\s*(?:rp\.?\s*)?([0-9]{1,3}(?:[.,][0-9]{3})*(?:[.,][0-9]{2})?|[0-9]+)`)
 	matches := amountRegex.FindAllStringSubmatch(fullText, -1)
 	if len(matches) > 0 {
@@ -622,7 +965,6 @@ func parseLocalReceiptHeuristics(imageBytes []byte, mimeType string, textHint st
 	}
 
 	if totalAmount == 0 {
-		// Generic number regex search
 		numRegex := regexp.MustCompile(`(?:rp\.?\s*)?([0-9]{1,3}(?:\.[0-9]{3})+(?:,[0-9]{2})?|[0-9]{5,9})`)
 		numMatches := numRegex.FindAllStringSubmatch(fullText, -1)
 		for _, nm := range numMatches {
@@ -637,18 +979,16 @@ func parseLocalReceiptHeuristics(imageBytes []byte, mimeType string, textHint st
 	}
 
 	if totalAmount == 0 {
-		totalAmount = 350000.0 // Reasonable fallback sample
+		totalAmount = 350000.0
 	}
 
-	// Tax detection (check if PPN mentioned or compute 11%)
 	if strings.Contains(lowerText, "ppn") || strings.Contains(lowerText, "pajak") || strings.Contains(lowerText, "tax") || strings.Contains(lowerText, "pb1") {
-		taxAmount = totalAmount * 0.11 / 1.11 // Included tax
+		taxAmount = totalAmount * 0.11 / 1.11
 		if taxAmount > 0 {
 			taxAmount = float64(int(taxAmount*100)) / 100
 		}
 	}
 
-	// Items construction
 	subtotalBeforeTax := totalAmount - taxAmount
 	lineItems := []ReceiptLineItem{
 		{
@@ -691,4 +1031,3 @@ func extractJSONString(raw string) string {
 	}
 	return raw
 }
-

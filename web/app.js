@@ -4959,28 +4959,97 @@ function quickAskERP(query) {
     submitAskERPAI();
 }
 
+function quickRunAgent(prompt) {
+    const input = document.getElementById('askERPAIInput');
+    if (input) input.value = prompt;
+    if (prompt.toLowerCase().includes('bigquery') || prompt.toLowerCase().includes('gcp')) {
+        const chk = document.getElementById('askERPAIAutoSyncGCP');
+        if (chk) chk.checked = true;
+    }
+    submitAutonomousAgent();
+}
+
+async function triggerDirectGCPSync(service) {
+    try {
+        const res = await api('/ai/gcp/sync', 'POST', { service });
+        showToast(res.message || `Sinkronisasi GCP (${service}) berhasil!`, 'success');
+    } catch (err) {
+        showToast('Gagal sinkronisasi GCP: ' + err.message, 'danger');
+    }
+}
+
+async function submitAutonomousAgent() {
+    const prompt = document.getElementById('askERPAIInput')?.value.trim();
+    if (!prompt) {
+        showToast('Masukkan perintah atau tujuan untuk AI Agent.', 'warning');
+        return;
+    }
+    const provider = document.getElementById('askERPAIProviderSelect')?.value || 'auto';
+    const autoSyncGCP = document.getElementById('askERPAIAutoSyncGCP')?.checked || false;
+
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'AI Agent sedang mengeksekusi ReAct loop & memanggil database tools...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const resp = await api('/ai/agent/execute', 'POST', {
+            prompt,
+            provider,
+            enable_tools: true,
+            auto_sync_gcp: autoSyncGCP
+        });
+
+        if (badge) {
+            badge.textContent = `🤖 ${resp.provider_used} (${resp.model_used})`;
+            badge.className = 'badge badge-primary';
+        }
+        if (traceEl && resp.tool_calls && resp.tool_calls.length > 0) {
+            traceEl.style.display = 'block';
+            const stepLines = (resp.reasoning_steps || []).map(s => `[${s.timestamp}] (${s.phase.toUpperCase()}) ${s.description}`);
+            const toolLines = resp.tool_calls.map(t => `🔧 Tool Call: ${t.tool_name} (${t.duration_ms}ms) -> Status: ${t.status.toUpperCase()}`);
+            traceEl.textContent = [...stepLines, ...toolLines].join('\n');
+        }
+        if (answerEl) answerEl.textContent = resp.final_answer;
+        if (actionsList && resp.recommended_next) {
+            actionsList.innerHTML = resp.recommended_next.map(act => `<li>${escapeHtml(act)}</li>`).join('');
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal menjalankan Autonomous AI Agent: ' + err.message;
+    }
+}
+
 async function submitAskERPAI() {
     const query = document.getElementById('askERPAIInput')?.value.trim();
     if (!query) {
         showToast('Ketikkan pertanyaan untuk ERP AI.', 'warning');
         return;
     }
+    const provider = document.getElementById('askERPAIProviderSelect')?.value || 'auto';
 
     const resBox = document.getElementById('askERPAIResult');
     const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
     const actionsList = document.getElementById('askERPAIActionsList');
     const badge = document.getElementById('askERPAISourceBadge');
 
-    if (answerEl) answerEl.textContent = 'Sedang menganalisis data bisnis via Cloudflare Workers AI...';
+    if (answerEl) answerEl.textContent = 'Sedang menganalisis data bisnis via Multi-Provider AI Router...';
+    if (traceEl) traceEl.style.display = 'none';
     if (actionsList) actionsList.innerHTML = '';
     if (resBox) resBox.style.display = 'block';
 
     try {
-        const resp = await api('/ai/ask-erp', 'POST', { query });
+        const resp = await api('/ai/ask-erp', 'POST', { query, provider });
         if (answerEl) answerEl.textContent = resp.answer;
         if (badge) {
-            badge.textContent = resp.source === 'cloudflare_workers_ai' ? '⚡ Cloudflare Edge GPU' : '🧠 Smart Local Heuristic';
-            badge.className = resp.source === 'cloudflare_workers_ai' ? 'badge badge-primary' : 'badge badge-info';
+            badge.textContent = `✨ ${resp.source || 'AI Engine'}`;
+            badge.className = 'badge badge-info';
         }
         if (actionsList && resp.suggested_actions) {
             actionsList.innerHTML = resp.suggested_actions.map(act => `<li>${escapeHtml(act)}</li>`).join('');
@@ -21874,8 +21943,12 @@ async function loadIntegrationConnectors() {
                     </div>
                     <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
                         <button class="btn btn-xs btn-secondary" onclick="triggerConnectorAction('${c.code}', 'test_connection')">🔌 Test Koneksi</button>
-                        <button class="btn btn-xs btn-primary" onclick="triggerConnectorAction('${c.code}', 'sync_stock')">🔄 Sync Stok</button>
+                        ${c.category === 'ecommerce' ? `<button class="btn btn-xs btn-primary" onclick="triggerConnectorAction('${c.code}', 'sync_stock')">🔄 Sync Stok</button>` : ''}
                         ${c.category === 'messaging' ? `<button class="btn btn-xs btn-success" onclick="triggerConnectorAction('${c.code}', 'send_whatsapp')">💬 Test WA</button>` : ''}
+                        ${c.code === 'gcp_bigquery' ? `<button class="btn btn-xs btn-primary" onclick="triggerConnectorAction('${c.code}', 'sync_bigquery')">☁️ Stream BigQuery</button>` : ''}
+                        ${c.code === 'gcp_pubsub' ? `<button class="btn btn-xs btn-primary" onclick="triggerConnectorAction('${c.code}', 'publish_pubsub')">📡 Publish Pub/Sub</button>` : ''}
+                        ${c.code === 'gcp_gcs_archive' ? `<button class="btn btn-xs btn-primary" onclick="triggerConnectorAction('${c.code}', 'archive_to_gcs')">🗄️ Archive GCS</button>` : ''}
+                        ${c.category === 'ai_agent' ? `<button class="btn btn-xs btn-primary" onclick="triggerConnectorAction('${c.code}', 'run_ai_agent')">🤖 Run AI Agent</button>` : ''}
                     </div>
                 </div>
             `;

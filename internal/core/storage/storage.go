@@ -112,7 +112,6 @@ func (r *R2Provider) isConfigured() bool {
 
 func (r *R2Provider) Save(ctx context.Context, key string, contentType string, data []byte) (string, error) {
 	if !r.isConfigured() {
-		// Gracefully fall back to local storage if R2 credentials are not configured
 		if r.fallback != nil {
 			return r.fallback.Save(ctx, key, contentType, data)
 		}
@@ -131,13 +130,11 @@ func (r *R2Provider) Save(ctx context.Context, key string, contentType string, d
 	req.Header.Set("Content-Type", contentType)
 	req.Header.Set("Content-Length", fmt.Sprintf("%d", len(data)))
 
-	// Sign request with AWS Signature Version 4
 	now := time.Now().UTC()
 	signAWS4(req, data, r.accessKey, r.secretKey, "auto", "s3", now)
 
 	resp, err := r.client.Do(req)
 	if err != nil {
-		// Fallback to local on network error
 		if r.fallback != nil {
 			return r.fallback.Save(ctx, key, contentType, data)
 		}
@@ -150,7 +147,6 @@ func (r *R2Provider) Save(ctx context.Context, key string, contentType string, d
 	}
 
 	body, _ := io.ReadAll(resp.Body)
-	// If R2 request failed, fallback to local so ERP operation never breaks
 	if r.fallback != nil {
 		return r.fallback.Save(ctx, key, contentType, data)
 	}
@@ -187,7 +183,6 @@ func (r *R2Provider) Get(ctx context.Context, key string) ([]byte, error) {
 		return io.ReadAll(resp.Body)
 	}
 
-	// Try fallback
 	if r.fallback != nil {
 		return r.fallback.Get(ctx, key)
 	}
@@ -233,11 +228,168 @@ func (r *R2Provider) Type() string {
 	return "local"
 }
 
+// GCSProvider implements Google Cloud Storage (GCS) S3-interoperable object storage
+type GCSProvider struct {
+	projectID string
+	bucket    string
+	accessKey string
+	secretKey string
+	endpoint  string
+	region    string
+	client    *http.Client
+	fallback  *LocalProvider
+}
+
+func NewGCSProvider(cfg *config.Config, fallback *LocalProvider) *GCSProvider {
+	endpoint := cfg.GCSEndpoint
+	if endpoint == "" {
+		endpoint = "https://storage.googleapis.com"
+	}
+	region := cfg.GCPLocation
+	if region == "" {
+		region = "asia-southeast2"
+	}
+	return &GCSProvider{
+		projectID: cfg.GCPProjectID,
+		bucket:    cfg.GCSBucket,
+		accessKey: cfg.GCSAccessKeyID,
+		secretKey: cfg.GCSSecretAccessKey,
+		endpoint:  endpoint,
+		region:    region,
+		client: &http.Client{
+			Timeout: 30 * time.Second,
+		},
+		fallback: fallback,
+	}
+}
+
+func (g *GCSProvider) isConfigured() bool {
+	return g.bucket != "" && g.accessKey != "" && g.secretKey != ""
+}
+
+func (g *GCSProvider) Save(ctx context.Context, key string, contentType string, data []byte) (string, error) {
+	if !g.isConfigured() {
+		if g.fallback != nil {
+			return g.fallback.Save(ctx, key, contentType, data)
+		}
+		return "", errors.New("neither Google Cloud Storage nor local storage provider is ready")
+	}
+
+	url := fmt.Sprintf("%s/%s/%s", strings.TrimRight(g.endpoint, "/"), g.bucket, strings.TrimLeft(key, "/"))
+	req, err := http.NewRequestWithContext(ctx, "PUT", url, bytes.NewReader(data))
+	if err != nil {
+		return "", err
+	}
+
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+	req.Header.Set("Content-Type", contentType)
+	req.Header.Set("Content-Length", fmt.Sprintf("%d", len(data)))
+
+	now := time.Now().UTC()
+	signAWS4(req, data, g.accessKey, g.secretKey, g.region, "s3", now)
+
+	resp, err := g.client.Do(req)
+	if err != nil {
+		if g.fallback != nil {
+			return g.fallback.Save(ctx, key, contentType, data)
+		}
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+		return key, nil
+	}
+
+	if g.fallback != nil {
+		return g.fallback.Save(ctx, key, contentType, data)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	return "", fmt.Errorf("GCS upload returned status %d: %s", resp.StatusCode, string(body))
+}
+
+func (g *GCSProvider) Get(ctx context.Context, key string) ([]byte, error) {
+	if !g.isConfigured() {
+		if g.fallback != nil {
+			return g.fallback.Get(ctx, key)
+		}
+		return nil, errors.New("GCS storage provider not configured")
+	}
+
+	url := fmt.Sprintf("%s/%s/%s", strings.TrimRight(g.endpoint, "/"), g.bucket, strings.TrimLeft(key, "/"))
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	now := time.Now().UTC()
+	signAWS4(req, nil, g.accessKey, g.secretKey, g.region, "s3", now)
+
+	resp, err := g.client.Do(req)
+	if err != nil {
+		if g.fallback != nil {
+			return g.fallback.Get(ctx, key)
+		}
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+		return io.ReadAll(resp.Body)
+	}
+
+	if g.fallback != nil {
+		return g.fallback.Get(ctx, key)
+	}
+	return nil, fmt.Errorf("GCS download returned status %d", resp.StatusCode)
+}
+
+func (g *GCSProvider) Delete(ctx context.Context, key string) error {
+	if !g.isConfigured() {
+		if g.fallback != nil {
+			return g.fallback.Delete(ctx, key)
+		}
+		return nil
+	}
+
+	url := fmt.Sprintf("%s/%s/%s", strings.TrimRight(g.endpoint, "/"), g.bucket, strings.TrimLeft(key, "/"))
+	req, err := http.NewRequestWithContext(ctx, "DELETE", url, nil)
+	if err != nil {
+		return err
+	}
+
+	now := time.Now().UTC()
+	signAWS4(req, nil, g.accessKey, g.secretKey, g.region, "s3", now)
+
+	resp, err := g.client.Do(req)
+	if err == nil {
+		defer resp.Body.Close()
+	}
+
+	if g.fallback != nil {
+		_ = g.fallback.Delete(ctx, key)
+	}
+	return nil
+}
+
+func (g *GCSProvider) Type() string {
+	if g.isConfigured() {
+		return "gcs"
+	}
+	return "local"
+}
+
 // InitStorageProvider returns the optimal storage provider based on configuration
 func InitStorageProvider(cfg *config.Config) (Provider, error) {
 	local, err := NewLocalProvider(cfg.UploadDir)
 	if err != nil {
 		return nil, err
+	}
+
+	if cfg.GCSBucket != "" && cfg.GCSAccessKeyID != "" && cfg.GCSSecretAccessKey != "" {
+		return NewGCSProvider(cfg, local), nil
 	}
 
 	if cfg.CloudflareR2Bucket != "" && cfg.CloudflareR2AccessKeyID != "" && cfg.CloudflareR2SecretAccessKey != "" {
@@ -247,7 +399,7 @@ func InitStorageProvider(cfg *config.Config) (Provider, error) {
 	return local, nil
 }
 
-// Helper: Lightweight AWS SigV4 signer for Cloudflare R2
+// Helper: Lightweight AWS SigV4 signer for Cloudflare R2 & Google Cloud Storage S3-Interoperability
 func signAWS4(req *http.Request, payload []byte, accessKey, secretKey, region, service string, t time.Time) {
 	dateStamp := t.Format("20060102")
 	amzDate := t.Format("20060102T150405Z")

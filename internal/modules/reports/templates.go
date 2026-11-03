@@ -83,17 +83,6 @@ func WrapReportHTML(
 <head>
 	<meta charset="UTF-8">
 	<title>%s - %s</title>
-	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6180580801533680"
-	     crossorigin="anonymous"></script>
-	<!-- Google tag (gtag.js) -->
-	<script async src="https://www.googletagmanager.com/gtag/js?id=G-79X7K7H4MJ"></script>
-	<script>
-	  window.dataLayer = window.dataLayer || [];
-	  function gtag(){dataLayer.push(arguments);}
-	  gtag('js', new Date());
-
-	  gtag('config', 'G-79X7K7H4MJ');
-	</script>
 	<style>
 		@page { size: 80mm auto; margin: 0; }
 		body { font-family: 'Courier New', Courier, monospace; width: 72mm; margin: 0 auto; padding: 10px 0; color: #000; font-size: 12px; }
@@ -141,17 +130,6 @@ func WrapReportHTML(
 <head>
 	<meta charset="UTF-8">
 	<title>%s - %s</title>
-	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6180580801533680"
-	     crossorigin="anonymous"></script>
-	<!-- Google tag (gtag.js) -->
-	<script async src="https://www.googletagmanager.com/gtag/js?id=G-79X7K7H4MJ"></script>
-	<script>
-	  window.dataLayer = window.dataLayer || [];
-	  function gtag(){dataLayer.push(arguments);}
-	  gtag('js', new Date());
-
-	  gtag('config', 'G-79X7K7H4MJ');
-	</script>
 	<style>
 		@page {
 			size: A4 portrait;

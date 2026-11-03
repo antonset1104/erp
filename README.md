@@ -283,33 +283,46 @@ All endpoints are hosted under the `/api/v1` namespace:
 | `GET` | `/api/v1/reports/:template/:id` | Render PDF-ready corporate A4 print layout with SHA-256 audit hash |
 | `POST` | `/api/v1/ai/receipt-ocr` | ✨ AI Vision Receipt OCR data extraction |
 | `POST` | `/api/v1/ai/ask` | 🤖 Natural Language Executive Copilot querying live database context |
+| `GET` | `/api/v1/ai/providers` | 🌐 List supported AI Agent & LLM providers (Gemini 2.5, OpenAI GPT-4o, Claude 3.7 MCP, DeepSeek R1, Cloudflare) |
+| `GET` | `/api/v1/ai/tools` | 🔧 Export MCP (Model Context Protocol), OpenAI, Gemini, and Anthropic tool-calling schemas |
+| `POST` | `/api/v1/ai/agent/execute` | 🧠 Execute Autonomous AI Agent ReAct loop with live database tool calling & BigQuery streaming |
+| `GET` | `/api/v1/ai/gcp/status` | ☁️ Inspect Google Cloud Platform (BigQuery, Pub/Sub, GCS, Vertex AI, Cloud Run) integration status |
+| `POST` | `/api/v1/ai/gcp/sync` | ☁️ Trigger real-time synchronization to Google Cloud BigQuery, Pub/Sub, or Cloud Storage (GCS) |
 
 ---
 
-## ☁️ Cloudflare Ecosystem Integration
+## ☁️ Google Cloud Platform (GCP), Popular AI Agents & Cloudflare Integration
 
-GoERP natively integrates with the **Cloudflare** ecosystem for global edge deployment:
+GoERP features a unified **Multi-Provider AI Agent Router** and native **Google Cloud Platform (GCP)** & **Cloudflare** cloud adapters:
 
-### 1. Cloudflare Workers AI (LLM Edge Inference)
-The Go backend connects to Cloudflare Workers AI (`@cf/meta/llama-3.1-8b-instruct`) for executive copilot queries, CV screening, and audit evaluations. Configure the following environment variables:
-```bash
-export CLOUDFLARE_ACCOUNT_ID="your-cf-account-id"
-export CLOUDFLARE_API_TOKEN="your-cf-api-token"
-export CLOUDFLARE_AI_MODEL="@cf/meta/llama-3.1-8b-instruct"
-```
-*Note: If credentials are not supplied, the server automatically defaults to a **Smart Local Heuristic Engine**, ensuring 100% functionality in offline or air-gapped environments without raising errors.*
+### 1. Popular AI Agent APIs & Autonomous Tool-Calling Gateway (`internal/core/ai`)
+GoERP supports automatic priority routing (`AI_PROVIDER=auto`) or explicit selection across the industry's leading AI Agent APIs, complete with **Model Context Protocol (MCP)** and function-calling access to live ERP data (`query_inventory_stock`, `get_financial_summary`, `search_erp_records`, `create_sales_quotation`, `create_purchase_rfq`, `sync_gcp_bigquery`):
+- **Google Gemini 2.5 & Vertex AI Agent Builder**: `GEMINI_API_KEY`, `GEMINI_MODEL=gemini-2.5-flash` (or `gemini-2.5-pro`).
+- **OpenAI GPT-4o & Agents SDK**: `OPENAI_API_KEY`, `OPENAI_MODEL=gpt-4o` (or `o3-mini`).
+- **Anthropic Claude 3.7 Sonnet & MCP**: `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL=claude-3-7-sonnet-latest`.
+- **DeepSeek R1 / V3 Reasoning Agent**: `DEEPSEEK_API_KEY`, `DEEPSEEK_MODEL=deepseek-chat` (or `deepseek-reasoner`).
+- **Cloudflare Workers AI**: `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_AI_MODEL=@cf/meta/llama-3.1-8b-instruct`.
+- **GoERP Built-In Deterministic Agent**: Zero-dependency offline fallback ensuring 100% deterministic reliability in air-gapped or local environments.
 
-### 2. Cloudflare R2 Object Storage (Zero-Egress Storage)
-Attachment storage (`ir.attachment`) supports S3-compatible Cloudflare R2 buckets with zero egress fees:
+### 2. Google Cloud Platform (GCP) Ecosystem
+- **Google Cloud BigQuery Data Warehouse (`gcp_bigquery`)**: Stream real-time General Ledger entries, Sales Orders, Purchase Orders, and Inventory Quants to BigQuery (`GCP_BIGQUERY_DATASET=goerp_analytics`) for Looker Studio and enterprise BI.
+- **Google Cloud Pub/Sub Event Bus (`gcp_pubsub`)**: Publish asynchronous domain events (`erp.invoice.posted`, `erp.order.confirmed`) to `projects/$GCP_PROJECT_ID/topics/$GCP_PUBSUB_TOPIC`.
+- **Google Cloud Storage Archive Vault (`internal/core/storage` & `gcp_gcs_archive`)**: S3-interoperable object storage (`GCS_BUCKET`, `GCS_ACCESS_KEY_ID`, `GCS_SECRET_ACCESS_KEY`) for attachments, e-Faktur CSVs, and immutable audit snapshots.
+- **Google Cloud Build & Cloud Run (`cloudbuild.yaml`)**: Declarative CI/CD pipeline building multi-stage Docker images to Google Artifact Registry and deploying serverless containers to Google Cloud Run with Cloud SQL for PostgreSQL:
+  ```bash
+  gcloud builds submit --config cloudbuild.yaml
+  ```
+
+### 3. Cloudflare Edge & R2 Object Storage
 ```bash
 export CLOUDFLARE_R2_BUCKET="your-r2-bucket"
 export CLOUDFLARE_R2_ACCESS_KEY_ID="your-r2-access-key-id"
 export CLOUDFLARE_R2_SECRET_ACCESS_KEY="your-r2-secret-access-key"
 export CLOUDFLARE_R2_ENDPOINT="https://<account-id>.r2.cloudflarestorage.com"
 ```
-*When omitted, attachments seamlessly fall back to local disk storage (`./uploads/attachments`).*
+*When cloud storage credentials are omitted, attachments seamlessly fall back to local disk storage (`./uploads/attachments`).*
 
-### 3. Cloudflare Tunnel (Zero-Trust Edge Access)
+### 4. Cloudflare Tunnel (Zero-Trust Edge Access)
 Expose an on-premise or private cloud GoERP server to the public Internet without opening any inbound firewall ports:
 ```bash
 cloudflared tunnel --config cloudflare/cloudflared-config.yml run go-erp-tunnel

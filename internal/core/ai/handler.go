@@ -26,14 +26,60 @@ func NewHandler(client *Client, db *gorm.DB) *Handler {
 func (h *Handler) GetStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"cloudflare_configured": h.client.IsCloudflareConfigured(),
-		"model":                 h.client.cfg.CloudflareAIModel,
-		"engine": func() string {
-			if h.client.IsCloudflareConfigured() {
-				return "cloudflare_workers_ai_edge"
-			}
-			return "local_smart_heuristic_engine"
-		}(),
+		"gemini_configured":     h.client.IsGeminiConfigured(),
+		"openai_configured":     h.client.IsOpenAIConfigured(),
+		"anthropic_configured":  h.client.IsAnthropicConfigured(),
+		"deepseek_configured":   h.client.IsDeepSeekConfigured(),
+		"active_provider":       h.client.ActiveProviderName(),
+		"model":                 h.client.modelForProvider(h.client.ActiveProviderName()),
+		"engine":                h.client.ActiveProviderName(),
+		"providers":             h.client.GetSupportedProviders(),
 	})
+}
+
+func (h *Handler) GetProviders(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"active_provider": h.client.ActiveProviderName(),
+		"data":            h.client.GetSupportedProviders(),
+	})
+}
+
+func (h *Handler) GetToolsManifest(c *gin.Context) {
+	c.JSON(http.StatusOK, h.client.GetAgentToolsManifest())
+}
+
+func (h *Handler) ExecuteAgent(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	var req AgentExecuteRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	resp, err := h.client.ExecuteAutonomousAgent(h.db, &req, companyID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
+}
+
+func (h *Handler) GetGCPStatus(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	c.JSON(http.StatusOK, h.client.GetGCPEcosystemStatus(h.db, companyID))
+}
+
+func (h *Handler) SyncGCP(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	var req GCPSyncRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	res := h.client.ExecuteGCPSync(h.db, &req, companyID)
+	c.JSON(http.StatusOK, res)
 }
 
 type TicketTriageRequest struct {
@@ -101,7 +147,8 @@ func (h *Handler) ExpenseCategorize(c *gin.Context) {
 }
 
 type AskERPRequest struct {
-	Query string `json:"query" binding:"required"`
+	Query    string `json:"query" binding:"required"`
+	Provider string `json:"provider"`
 }
 
 func (h *Handler) AskERP(c *gin.Context) {
@@ -181,8 +228,6 @@ func (h *Handler) ReceiptOCR(c *gin.Context) {
 
 	var imgBytes []byte
 	if req.ImageBase64 != "" {
-		// optional decode base64
-		// if format data:image/png;base64,... strip header
 		parts := strings.Split(req.ImageBase64, ",")
 		rawB64 := req.ImageBase64
 		if len(parts) > 1 {
@@ -205,10 +250,17 @@ func RegisterAIRoutes(router *gin.RouterGroup, authMiddleware gin.HandlerFunc, h
 	group.Use(authMiddleware)
 	{
 		group.GET("/status", h.GetStatus)
+		group.GET("/providers", h.GetProviders)
+		group.GET("/tools", h.GetToolsManifest)
+		group.POST("/agent/execute", h.ExecuteAgent)
+		group.GET("/gcp/status", h.GetGCPStatus)
+		group.POST("/gcp/sync", h.SyncGCP)
+
 		group.POST("/ticket-triage", h.TriageTicket)
 		group.POST("/quality-rca", h.QualityRCA)
 		group.POST("/expense-categorize", h.ExpenseCategorize)
 		group.POST("/ask-erp", h.AskERP)
+		group.POST("/ask", h.AskERP)
 		group.POST("/approval-risk", h.ApprovalRisk)
 		group.POST("/receipt-ocr", h.ReceiptOCR)
 	}

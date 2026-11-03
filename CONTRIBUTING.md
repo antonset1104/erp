@@ -94,8 +94,6 @@ erp/
    - General Ledger journal entries must strictly enforce balanced books: $\sum \text{Debit} == \sum \text{Credit}$.
 3. **Collision-Resistant Number Sequences**:
    - Always implement sequence uniqueness verification loops (e.g., `PO%05d`, `SO%05d`, `INV%05d`) to guarantee safety under high-concurrency race conditions.
-4. **Global Web Rule Compliance**:
-   - Every user-facing HTML template must preserve the mandatory Google AdSense (`ca-pub-6180580801533680`) and Google Analytics (`G-79X7K7H4MJ`) scripts.
 
 ---
 

@@ -13,9 +13,9 @@ flowchart TD
     Modules["50 Enterprise Business Modules (Handler -> Service -> Repository)"]
     ORM["GORM ORM Layer (AutoMigrate & Transaction Manager)"]
     SQLite["SQLite (Pure-Go modernc.org/sqlite via glebarez/sqlite)"]
-    Postgres["PostgreSQL 15+ (Production Database)"]
-    CF_AI["Cloudflare Workers AI (Llama-3.1-8b & LLaVA Vision OCR)"]
-    CF_R2["Cloudflare R2 Object Storage (S3-Compatible Zero-Egress)"]
+    Postgres["PostgreSQL 15+ / Google Cloud SQL"]
+    AI_Agents["Multi-Provider AI Agents (Google Gemini 2.5 / Vertex AI, OpenAI GPT-4o, Claude 3.7 MCP, DeepSeek R1, Cloudflare AI)"]
+    GCP_Cloud["Google Cloud Platform (BigQuery OLAP, Pub/Sub Event Bus, GCS Vault) & Cloudflare R2"]
 
     Client -->|REST API JSON / JWT| Router
     ExtSys -->|Open RPC / X-API-Key / HMAC Webhook| Router
@@ -25,8 +25,8 @@ flowchart TD
     Modules --> ORM
     ORM --> SQLite
     ORM --> Postgres
-    Core -->|Inference & Vision| CF_AI
-    Core -->|Attachment Presigned/Put| CF_R2
+    Core -->|Tool-Calling & Inference| AI_Agents
+    Core -->|BigQuery / PubSub / GCS / R2| GCP_Cloud
 ```
 
 ### 1.1 Core Technology Stack
@@ -36,10 +36,10 @@ flowchart TD
 | **HTTP Web Framework** | `github.com/gin-gonic/gin` v1.9+ | High-throughput RESTful routing, middleware chaining, strict JSON payload binding and validation. |
 | **ORM & Database Layer** | `gorm.io/gorm` v1.25+ | Object-relational mapping, automatic *Auto-Migration* of 120+ tables at startup, strict ACID transactions (`db.Transaction`). |
 | **SQLite Driver (Zero-CGO)** | `github.com/glebarez/sqlite` (`modernc.org/sqlite`) | Pure-Go SQLite engine running seamlessly across Windows, Linux, and macOS under `CGO_ENABLED=0` without GCC dependencies. |
-| **PostgreSQL Driver** | `gorm.io/driver/postgres` | Enterprise-grade production driver for high-concurrency transactional workloads on PostgreSQL 15+. |
+| **PostgreSQL / Cloud SQL** | `gorm.io/driver/postgres` | Enterprise-grade production driver for high-concurrency transactional workloads on PostgreSQL 15+ and Google Cloud SQL. |
 | **Security & Authentication** | `github.com/golang-jwt/jwt/v5` & `golang.org/x/crypto/bcrypt` | JSON Web Token (HS256) user authentication, Bcrypt password hashing, and SHA-256 scoped Machine-to-Machine (M2M) API keys. |
-| **Artificial Intelligence (AI)** | Cloudflare Workers AI + Smart Local Heuristic Fallback | Integrates LLM `@cf/meta/llama-3.1-8b-instruct` and Vision `@cf/llava-hf/llava-1.5-7b-hf` with deterministic offline local fallback when cloud credentials are omitted. |
-| **Object File Storage** | Cloudflare R2 + Local Disk Fallback | S3-compatible attachment storage (`ir.attachment`) with zero egress fees and automated fallback to local directory `./uploads/attachments`. |
+| **Multi-Provider AI & Agents** | Google Gemini 2.5 / Vertex AI, OpenAI GPT-4o, Anthropic Claude 3.7 (MCP), DeepSeek R1, Cloudflare Workers AI + Local Agent | Unified AI router with Autonomous ReAct Tool-Calling (`query_inventory_stock`, `get_financial_summary`, `sync_gcp_bigquery`), MCP tool manifests, and deterministic offline fallback. |
+| **Cloud Storage & Analytics** | Google Cloud Storage (GCS), BigQuery, Pub/Sub, Cloudflare R2 + Local Disk Fallback | S3-interoperable object storage (`GCS` & `R2`) for `ir.attachment`, real-time BigQuery OLAP streaming, and Pub/Sub domain event bus. |
 | **Frontend UI Client** | Vanilla JavaScript (ES6+), CSS3 Variables, HTML5 | Single Page Application (SPA) requiring zero Node.js/Webpack build steps, featuring Dark Glassmorphism, Barcode/QR scanner, and interactive BPMN 2.0 visual canvas. |
 
 ---

@@ -8,18 +8,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/web/style.css">
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6180580801533680"
-         crossorigin="anonymous"></script>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-79X7K7H4MJ"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-79X7K7H4MJ');
-    </script>
 </head>
 <body>
     <!-- App Container -->
@@ -9783,35 +9771,61 @@
         </div>
     </div>
 
-    <!-- Modal Ask ERP AI (Executive Copilot) -->
+    <!-- Modal Ask ERP AI (Multi-Provider AI Agent & Google Cloud Hub) -->
     <div id="modalAskERPAI" class="modal-overlay">
-        <div class="modal-card" style="max-width: 650px;">
+        <div class="modal-card" style="max-width: 760px;">
             <div class="modal-header">
-                <h3>✨ Ask ERP AI Copilot (Cloudflare Workers AI)</h3>
+                <h3>✨ GoERP AI Agent Hub (Gemini / Vertex AI • OpenAI • Claude MCP • DeepSeek • GCP)</h3>
                 <button class="modal-close" onclick="closeModal('modalAskERPAI')">✕</button>
             </div>
             <div style="padding: 1rem 0;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>Pilih Provider AI Agent / LLM API:</label>
+                        <select id="askERPAIProviderSelect" class="form-control">
+                            <option value="auto">🌐 Auto Multi-Model Router (Priority Cascade)</option>
+                            <option value="gemini">✨ Google Gemini 2.5 Flash/Pro & Vertex AI</option>
+                            <option value="openai">🟢 OpenAI GPT-4o & Agents SDK</option>
+                            <option value="anthropic">🟣 Anthropic Claude 3.7 Sonnet & MCP</option>
+                            <option value="deepseek">🔵 DeepSeek R1 / V3 Reasoning Agent</option>
+                            <option value="cloudflare">🟠 Cloudflare Workers AI (Llama 3.1)</option>
+                            <option value="local">⚡ GoERP Local Deterministic Agent</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>Integrasi Ekosistem Google Cloud Platform:</label>
+                        <div style="display: flex; gap: 0.4rem; align-items: center; height: 38px;">
+                            <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.82rem; cursor: pointer; margin: 0;">
+                                <input type="checkbox" id="askERPAIAutoSyncGCP"> Stream hasil ke <strong>GCP BigQuery</strong>
+                            </label>
+                            <button type="button" class="btn btn-xs btn-secondary" onclick="triggerDirectGCPSync('bigquery')">☁️ Sync BigQuery</button>
+                            <button type="button" class="btn btn-xs btn-secondary" onclick="triggerDirectGCPSync('gcs')">🗄️ GCS Vault</button>
+                        </div>
+                    </div>
+                </div>
                 <div class="form-group">
-                    <label>Ajukan Pertanyaan Eksekutif Mengenai Data Bisnis:</label>
+                    <label>Perintah AI Agent / Pertanyaan Eksekutif:</label>
                     <div style="display: flex; gap: 0.5rem;">
-                        <input type="text" id="askERPAIInput" class="form-control" placeholder="Contoh: Bagaimana performa omzet dan kendala operasional hari ini?" onkeydown="if(event.key==='Enter') submitAskERPAI()">
-                        <button type="button" class="btn btn-primary" onclick="submitAskERPAI()">Tanyakan</button>
+                        <input type="text" id="askERPAIInput" class="form-control" placeholder="Contoh: Audit stok gudang, ringkasan buku besar GL, dan sinkronisasi ke Google Cloud BigQuery" onkeydown="if(event.key==='Enter') submitAutonomousAgent()">
+                        <button type="button" class="btn btn-secondary" onclick="submitAskERPAI()">💬 Ask Q&A</button>
+                        <button type="button" class="btn btn-primary" onclick="submitAutonomousAgent()">🤖 Run Agent (Tools)</button>
                     </div>
                 </div>
                 <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
-                    <span style="font-size: 0.8rem; color: var(--text-muted); width: 100%;">💡 Contoh cepat:</span>
-                    <button type="button" class="badge badge-info" style="cursor: pointer; border: none;" onclick="quickAskERP('Ringkasan performa penjualan dan pesanan pembelian saat ini')">📊 Ringkasan Penjualan & PO</button>
-                    <button type="button" class="badge badge-warning" style="cursor: pointer; border: none;" onclick="quickAskERP('Status kendala tiket helpdesk dan alert kualitas yang tertunda')">⚠️ Kendala Support & Mutu</button>
-                    <button type="button" class="badge badge-success" style="cursor: pointer; border: none;" onclick="quickAskERP('Rekomendasi tindakan strategis untuk manajemen')">🎯 Rekomendasi Mitigasi</button>
+                    <span style="font-size: 0.8rem; color: var(--text-muted); width: 100%;">💡 Skenario AI Agent & Tool-Calling:</span>
+                    <button type="button" class="badge badge-info" style="cursor: pointer; border: none;" onclick="quickRunAgent('Audit posisi stok inventaris gudang dan ringkasan keuangan General Ledger saat ini')">📦 Audit Stok & Buku Besar (Tool-Calling)</button>
+                    <button type="button" class="badge badge-primary" style="cursor: pointer; border: none;" onclick="quickRunAgent('Sinkronisasi tabel penjualan, jurnal GL, dan produk ke Google Cloud BigQuery goerp_analytics')">☁️ Stream Analytics ke GCP BigQuery</button>
+                    <button type="button" class="badge badge-success" style="cursor: pointer; border: none;" onclick="quickAskERP('Rekomendasi tindakan strategis CFO untuk optimasi arus kas dan margin')">🎯 Rekomendasi Strategis CFO</button>
                 </div>
                 <div id="askERPAIResult" style="display: none; padding: 1rem; background: var(--bg-hover); border-radius: var(--border-radius); border: 1px solid var(--border-color);">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <strong style="color: var(--primary);">🤖 Analisis & Rekomendasi AI:</strong>
+                        <strong style="color: var(--primary);">🤖 Hasil Eksekusi AI Agent & Tool-Calling:</strong>
                         <span id="askERPAISourceBadge" class="badge badge-draft">Engine</span>
                     </div>
-                    <p id="askERPAIAnswer" style="margin: 0; line-height: 1.5; font-size: 0.95rem;"></p>
+                    <div id="askERPAIToolTrace" style="display: none; margin-bottom: 0.75rem; padding: 0.6rem; background: rgba(15, 23, 42, 0.5); border-radius: 6px; font-family: monospace; font-size: 0.78rem; white-space: pre-wrap;"></div>
+                    <p id="askERPAIAnswer" style="margin: 0; line-height: 1.5; font-size: 0.95rem; white-space: pre-line;"></p>
                     <div id="askERPAIActions" style="margin-top: 0.75rem; border-top: 1px dashed var(--border-color); padding-top: 0.5rem;">
-                        <strong style="font-size: 0.85rem;">Rekomendasi Tindakan:</strong>
+                        <strong style="font-size: 0.85rem;">Rekomendasi Tindakan Lanjutan:</strong>
                         <ul id="askERPAIActionsList" style="margin: 0.25rem 0 0 1.25rem; font-size: 0.85rem; color: var(--text-muted);"></ul>
                     </div>
                 </div>

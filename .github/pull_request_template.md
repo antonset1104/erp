@@ -51,5 +51,4 @@ go test -v -race ./tests/...
 - [ ] Code is formatted with `go fmt ./...`.
 - [ ] Unit or integration tests covering the changes have been added/updated.
 - [ ] Commit messages follow the Conventional Commits specification.
-- [ ] All user-facing web templates preserve required AdSense and Analytics tags.
 - [ ] No credentials, tokens, or confidential secrets are committed.
