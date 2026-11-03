@@ -16,6 +16,8 @@ import (
 	"erp-golang/internal/config"
 	"erp-golang/internal/core/ai"
 	"erp-golang/internal/core/commandcenter"
+	"erp-golang/internal/core/events"
+	"erp-golang/internal/core/multitenancy"
 	"erp-golang/internal/core/openapi"
 	"erp-golang/internal/core/storage"
 	"erp-golang/internal/modules/account"
@@ -8158,5 +8160,100 @@ Lead Engineer - Cloud Tech Nusantara (2020 - 2026)
 	}
 	t.Logf("✓ Omnichannel ChatOps Gateway Verified: Channel='%v', Action='%v'", chatopsResp["channel"], chatopsResp["action_executed"])
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (56 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + ENTERPRISE AI INTELLIGENCE + GCP ECOSYSTEM + CHATOPS + WORKFLOW ENGINE) PASSED 100%!")
+	// =========================================================================
+	// >>> SECTION 57: DEMAND SENSING, LIVE PRESENCE SSE, SAAS MULTI-TENANCY, OFFLINE POS & VOICE OPS <<<
+	// =========================================================================
+	t.Log("\n\t\t>>> SECTION 57: AI DEMAND SENSING, REAL-TIME SSE COLLABORATION, SAAS MULTI-TENANCY, OFFLINE POS & VOICE OPS <<<")
+
+	// 57.1 AI Demand Sensing, Dynamic Safety Stock & EOQ
+	demandAnalysis := aiClient.AnalyzeDemandSensing(db, &ai.DemandSensingRequest{HorizonDays: 90, ServiceLevel: 0.95}, 1)
+	if demandAnalysis["success"] != true || demandAnalysis["product_recommendations"] == nil {
+		t.Fatalf("Demand Sensing analysis failed: %+v", demandAnalysis)
+	}
+	metricsList := demandAnalysis["product_recommendations"].([]ai.ProductDemandMetric)
+	if len(metricsList) == 0 {
+		t.Fatalf("Expected at least 1 product demand metric, got 0")
+	}
+	firstMetric := metricsList[0]
+	t.Logf("✓ AI Demand Sensing Verified: Product='%s', DailyVelocity=%.2f, SafetyStock=%.0f, ROP=%.0f, EOQ=%.0f, Risk='%s'",
+		firstMetric.ProductName, firstMetric.DailyDemandVelocity, firstMetric.DynamicSafetyStock, firstMetric.ReorderPoint, firstMetric.EconomicOrderQuantity, firstMetric.StockoutRiskLevel)
+
+	// 57.2 Automated Replenishment Draft Purchase Order Execution
+	replenishRes := aiClient.ExecuteAutoReplenishmentPO(db, &ai.AutoReplenishRequest{Notes: "Unit Test Automated Replenishment Batch"}, 1)
+	if replenishRes["success"] != true || replenishRes["purchase_order_name"] == nil {
+		t.Fatalf("Auto Replenishment PO failed: %+v", replenishRes)
+	}
+	t.Logf("✓ Automated Replenishment PO Verified: PO Number='%v', Lines=%v, Grand Total=IDR %.2f",
+		replenishRes["purchase_order_name"], replenishRes["lines_created"], replenishRes["amount_total"])
+
+	// 57.3 Real-Time SSE Event Broker & Live Presence Tracking
+	broker := events.GetBroker()
+	testChan := broker.Subscribe()
+	broker.UpdatePresence("sale_order", "SO00001", 1, "John Admin", "john@example.com", "editing")
+	activePresences := broker.GetDocumentPresences("sale_order", "SO00001")
+	if len(activePresences) == 0 || activePresences[0].Action != "editing" {
+		t.Fatalf("Live Presence tracking failed: %+v", activePresences)
+	}
+	broker.Broadcast("test_domain_event", map[string]interface{}{"status": "broadcast_ok"})
+	broker.Unsubscribe(testChan)
+	t.Logf("✓ Real-Time Event Broker & Live Presence Verified: Active Document Presences=%d (User: %s)", len(activePresences), activePresences[0].UserName)
+
+	// 57.4 SaaS Multi-Tenancy Provisioning & Isolation Engine
+	tenantMgr := multitenancy.InitManager(db)
+	newTenant, err := tenantMgr.RegisterTenant(&multitenancy.TenantRegisterRequest{
+		TenantID:   fmt.Sprintf("tenant-unit-test-%d", time.Now().UnixNano()%10000),
+		Name:       "PT Solusi Awan Mandiri",
+		Domain:     "solusi-awan.goerp.io",
+		Plan:       "enterprise",
+		AdminEmail: "admin@solusiawan.co.id",
+	})
+	if err != nil || newTenant == nil || newTenant.TenantID == "" {
+		t.Fatalf("Tenant provisioning failed: %v", err)
+	}
+	tenantsList, err := tenantMgr.ListTenants()
+	if err != nil || len(tenantsList) < 2 {
+		t.Fatalf("ListTenants failed: %v, count=%d", err, len(tenantsList))
+	}
+	t.Logf("✓ SaaS Multi-Tenancy Engine Verified: Provisioned Tenant='%s' (%s, Plan: %s), Total Tenants=%d",
+		newTenant.TenantID, newTenant.Name, newTenant.Plan, len(tenantsList))
+
+	// 57.5 Offline-First PWA Barcode POS Synchronization
+	offlineBatchResp, err := posSvc.SyncOfflineBatch([]pos.OfflineOrderPayload{
+		{
+			OfflineID:       fmt.Sprintf("OFF-TX-%d-1", time.Now().Unix()),
+			ClientTimestamp: time.Now().UTC().Format(time.RFC3339),
+			PartnerID:       1,
+			AmountPaid:      2000000,
+			PaymentMethod:   "cash",
+			Lines: []pos.PosOrderLine{
+				{ProductID: 1, Qty: 1, PriceUnit: 1500000},
+			},
+		},
+	}, 1, 1)
+	if err != nil || len(offlineBatchResp) == 0 || offlineBatchResp[0].Status != "synced" {
+		t.Fatalf("Offline POS Batch sync failed: err=%v, res=%+v", err, offlineBatchResp)
+	}
+	t.Logf("✓ Offline-First PWA POS Sync Verified: Reconciled OfflineID='%s' -> Server POS='%s' (Total: IDR %.2f)",
+		offlineBatchResp[0].OfflineID, offlineBatchResp[0].ServerNumber, offlineBatchResp[0].AmountTotal)
+
+	// 57.6 Hands-Free Voice Ops Assistant
+	voiceRespStock := aiClient.ExecuteVoiceCommand(db, &ai.VoiceCommandRequest{
+		Transcript: "GoERP, tolong cek posisi stok gudang",
+		Language:   "id-ID",
+	}, 1)
+	if voiceRespStock == nil || !voiceRespStock.Success || voiceRespStock.IntentDetected != "warehouse_inventory_check" || voiceRespStock.SpokenResponse == "" {
+		t.Fatalf("Voice command stock check failed: %+v", voiceRespStock)
+	}
+
+	voiceRespOmzet := aiClient.ExecuteVoiceCommand(db, &ai.VoiceCommandRequest{
+		Transcript: "Berapa omzet penjualan hari ini?",
+		Language:   "id-ID",
+	}, 1)
+	if voiceRespOmzet == nil || !voiceRespOmzet.Success || voiceRespOmzet.IntentDetected != "executive_finance_inquiry" || voiceRespOmzet.SpokenResponse == "" {
+		t.Fatalf("Voice command omzet check failed: %+v", voiceRespOmzet)
+	}
+	t.Logf("✓ Hands-Free Voice Ops Assistant Verified: Intent='%s' & '%s', Audio Spoken Text=\"%s\"",
+		voiceRespStock.IntentDetected, voiceRespOmzet.IntentDetected, voiceRespOmzet.SpokenResponse)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (57 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT) PASSED 100%!")
 }

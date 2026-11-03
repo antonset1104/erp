@@ -342,6 +342,36 @@ func (h *Handler) ReceiptOCR(c *gin.Context) {
 	c.JSON(http.StatusOK, analysis)
 }
 
+
+// Demand Sensing & Smart Inventory Replenishment
+func (h *Handler) DemandSensing(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	var req DemandSensingRequest
+	_ = c.ShouldBindJSON(&req)
+	c.JSON(http.StatusOK, h.client.AnalyzeDemandSensing(h.db, &req, companyID))
+}
+
+func (h *Handler) AutoReplenish(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	var req AutoReplenishRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, h.client.ExecuteAutoReplenishmentPO(h.db, &req, companyID))
+}
+
+// Hands-Free Voice Ops Assistant
+func (h *Handler) VoiceCommand(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	var req VoiceCommandRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, h.client.ExecuteVoiceCommand(h.db, &req, companyID))
+}
+
 // RegisterRootProtocolRoutes registers public protocol discovery endpoints like /.well-known/agent.json and /mcp
 func RegisterRootProtocolRoutes(r *gin.Engine, h *Handler) {
 	r.GET("/.well-known/agent.json", h.GetA2AAgentCard)
@@ -382,6 +412,10 @@ func RegisterAIRoutes(router *gin.RouterGroup, authMiddleware gin.HandlerFunc, h
 			authed.POST("/cashflow-forecast", h.CashflowForecast)
 			authed.GET("/esg-report", h.ESGReport)
 			authed.POST("/esg-report", h.ESGReport)
+			authed.GET("/demand-sensing", h.DemandSensing)
+			authed.POST("/demand-sensing", h.DemandSensing)
+			authed.POST("/replenish/auto-po", h.AutoReplenish)
+			authed.POST("/voice/command", h.VoiceCommand)
 
 			// Domain AI Endpoints
 			authed.POST("/ticket-triage", h.TriageTicket)

@@ -46,6 +46,7 @@ func (m *Module) RegisterRoutes(api *gin.RouterGroup, authMiddleware gin.Handler
 		group.POST("/sessions/:id/close", m.handler.CloseSession)
 		group.GET("/orders", m.handler.ListOrders)
 		group.POST("/orders", m.handler.CreateOrder)
+		group.POST("/sync-offline-batch", m.handler.SyncOfflineBatch)
 	}
 }
 

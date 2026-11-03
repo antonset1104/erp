@@ -158,3 +158,76 @@ func (s *Service) CreateOrder(order *PosOrder, companyID uint) (*PosOrder, error
 
 	return order, nil
 }
+
+
+type OfflineOrderPayload struct {
+	OfflineID       string         `json:"offline_id"`
+	ClientTimestamp string         `json:"client_timestamp"`
+	PartnerID       uint           `json:"partner_id"`
+	AmountPaid      float64        `json:"amount_paid"`
+	PaymentMethod   string         `json:"payment_method"`
+	Lines           []PosOrderLine `json:"lines"`
+}
+
+type OfflineSyncResult struct {
+	OfflineID    string  `json:"offline_id"`
+	ServerID     uint    `json:"server_id"`
+	ServerNumber string  `json:"server_number"`
+	AmountTotal  float64 `json:"amount_total"`
+	Status       string  `json:"status"`
+}
+
+func (s *Service) SyncOfflineBatch(orders []OfflineOrderPayload, userID, companyID uint) ([]OfflineSyncResult, error) {
+	var session PosSession
+	if err := s.db.Where("company_id = ? AND state = 'opened'", companyID).First(&session).Error; err != nil {
+		var cfg PosConfig
+		if errCfg := s.db.Where("company_id = ?", companyID).First(&cfg).Error; errCfg != nil {
+			cfg = PosConfig{Name: "Offline Sync POS Terminal"}
+			cfg.CompanyID = companyID
+			s.db.Create(&cfg)
+		}
+		newSess, errOpen := s.OpenSession(cfg.ID, userID, 0, companyID)
+		if errOpen != nil {
+			return nil, errOpen
+		}
+		session = *newSess
+	}
+
+	results := make([]OfflineSyncResult, 0, len(orders))
+	for _, off := range orders {
+		var calcTotal float64
+		for _, l := range off.Lines {
+			calcTotal += (l.Qty * l.PriceUnit)
+		}
+		paid := off.AmountPaid
+		if paid < calcTotal {
+			paid = calcTotal
+		}
+
+		var partnerPtr *uint
+		if off.PartnerID > 0 {
+			partnerPtr = &off.PartnerID
+		}
+
+		posOrder := PosOrder{
+			SessionID:     session.ID,
+			PartnerID:     partnerPtr,
+			AmountPaid:    paid,
+			Lines:         off.Lines,
+		}
+		posOrder.CreateUID = userID
+		posOrder.WriteUID = userID
+
+		saved, err := s.CreateOrder(&posOrder, companyID)
+		if err == nil {
+			results = append(results, OfflineSyncResult{
+				OfflineID:    off.OfflineID,
+				ServerID:     saved.ID,
+				ServerNumber: saved.Name,
+				AmountTotal:  saved.AmountTotal,
+				Status:       "synced",
+			})
+		}
+	}
+	return results, nil
+}

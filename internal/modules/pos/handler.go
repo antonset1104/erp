@@ -107,3 +107,26 @@ func (h *Handler) CreateOrder(c *gin.Context) {
 	}
 	c.JSON(http.StatusCreated, res)
 }
+
+type SyncOfflineBatchRequest struct {
+	Orders []OfflineOrderPayload `json:"orders" binding:"required"`
+}
+
+func (h *Handler) SyncOfflineBatch(c *gin.Context) {
+	userID, companyID, _ := middleware.GetUserContext(c)
+	var req SyncOfflineBatchRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	results, err := h.svc.SyncOfflineBatch(req.Orders, userID, companyID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"success":       true,
+		"synced_count":  len(results),
+		"synced_orders": results,
+	})
+}

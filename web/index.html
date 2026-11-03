@@ -8,6 +8,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/web/style.css">
+    <link rel="manifest" href="/web/manifest.json">
+    <meta name="theme-color" content="#0284c7">
+    <meta name="apple-mobile-web-app-capable" content="yes">
 </head>
 <body>
     <!-- App Container -->
@@ -9824,6 +9827,10 @@
                     <button type="button" class="badge" style="background:#059669;color:#fff;cursor:pointer;border:none;" onclick="triggerAICashflowForecast()">📈 30/60/90d Cashflow</button>
                     <button type="button" class="badge" style="background:#16a34a;color:#fff;cursor:pointer;border:none;" onclick="triggerAIESGReport()">🌱 ESG Carbon Ledger</button>
                     <button type="button" class="badge" style="background:#7c3aed;color:#fff;cursor:pointer;border:none;" onclick="triggerAIChatOpsSimulator()">💬 ChatOps WhatsApp/Slack</button>
+                    <button type="button" class="badge" style="background:#d97706;color:#fff;cursor:pointer;border:none;" onclick="triggerAIDemandSensing()">📊 Demand Sensing & EOQ</button>
+                    <button type="button" class="badge" style="background:#0d9488;color:#fff;cursor:pointer;border:none;" onclick="triggerSaaSTenants()">🏢 SaaS Multi-Tenancy</button>
+                    <button type="button" class="badge" style="background:#4f46e5;color:#fff;cursor:pointer;border:none;" onclick="syncOfflinePOSQueue()">📴 Sync Offline POS</button>
+                    <button type="button" class="badge" style="background:#db2777;color:#fff;cursor:pointer;border:none;" onclick="toggleVoiceAssistant()">🎙️ Voice Ops Assistant</button>
                     <a href="/api/docs" target="_blank" class="badge" style="background:#334155;color:#38bdf8;text-decoration:none;cursor:pointer;">📑 OpenAPI 3.1 & MCP Explorer ↗</a>
                 </div>
                 <div id="askERPAIResult" style="display: none; padding: 1rem; background: var(--bg-hover); border-radius: var(--border-radius); border: 1px solid var(--border-color);">
@@ -16311,5 +16318,16 @@
     <div id="toastContainer" class="toast-container"></div>
 
     <script src="/web/app.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/web/sw.js').then(function(reg) {
+      console.log('[GoERP] PWA ServiceWorker registered with scope:', reg.scope);
+    }).catch(function(err) {
+      console.log('[GoERP] ServiceWorker registration failed:', err);
+    });
+  });
+}
+</script>
 </body>
 </html>

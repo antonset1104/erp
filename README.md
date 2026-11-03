@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![CI Status](https://img.shields.io/badge/CI-Passing-success?style=flat&logo=githubactions)](https://github.com/antonset1104/erp/actions)
 [![Modules](https://img.shields.io/badge/Modules-50_Enterprise-indigo)](docs/FUNCTIONAL_DOCUMENTATION.md)
-[![Release](https://img.shields.io/badge/Release-v1.42.0-emerald)](https://github.com/antonset1104/erp/releases)
+[![Release](https://img.shields.io/badge/Release-v1.43.0-emerald)](https://github.com/antonset1104/erp/releases)
 [![Open Source](https://img.shields.io/badge/Open_Source-Community_Driven-purple)](docs/OPEN_SOURCE_GUIDE.md)
 
 **GoERP** is a modern, high-performance, enterprise-grade Enterprise Resource Planning (ERP) platform built natively with **Golang**. Engineered with a clean **Modular Monolith** architecture comprising **50 integrated business modules**, GoERP delivers single-binary static compilation, native Go concurrency, ultra-low memory overhead (~25 MB idle RAM), and strict transactional integrity for mission-critical enterprise workloads.
@@ -41,6 +41,11 @@ GoERP includes built-in executive productivity tools to accelerate day-to-day op
 - **🛡️ AI Fraud Radar & Predictive Cashflow (30/60/90 Days)**: Real-time anomaly detection (Split POs, high-value postings) and CFO liquidity runway projections.
 - **🌱 ESG & Carbon Footprint Ledger**: Automated GHG Scope 1 (Fleet), Scope 2 (MRP Energy), and Scope 3 (Logistics) accounting with tree offset equivalents.
 - **💬 Omnichannel ChatOps Gateway**: WhatsApp Business, Telegram, and Slack bot processing executive commands (`/omzet`, `/stok`, `/approve`, `/fraud`, `/esg`).
+- **📊 AI Demand Sensing & Smart Replenishment**: Daily velocity forecasting, Dynamic Gaussian Safety Stock (95% service level), Reorder Point (ROP), and Economic Order Quantity (EOQ) with 1-click auto-PO creation.
+- **⚡ Real-Time SSE Collaboration & Live Presence**: Server-Sent Events stream (`/api/v1/events/stream`) and document editing lock indicators to prevent concurrent overwrite collisions.
+- **🏢 Enterprise SaaS Multi-Tenancy Engine**: Database-per-tenant and schema isolation with automatic routing by subdomain or `X-Tenant-ID` header, and self-service registration.
+- **📴 Offline-First PWA & Barcode POS Sync**: Service worker app shell caching (`/web/sw.js`), web app manifest (`/web/manifest.json`), and batch background synchronization for offline transactions.
+- **🎙️ Hands-Free Voice Ops Assistant**: Speech recognition & synthesis voice assistant executing warehouse inventory checks, financial summaries, and approvals via voice commands.
 - **🌓 Dark / Light Enterprise Theme Modes**: Seamless visual theme switcher (`☀️ Light` / `🌙 Dark`) with state persisted across browser sessions.
 
 ---
@@ -303,6 +308,14 @@ All endpoints are hosted under the `/api/v1` namespace:
 | `GET` | `/api/v1/ai/cashflow-forecast` | 📈 Predictive 30/60/90-Day Cashflow Forecasting & CFO Runway |
 | `GET` | `/api/v1/ai/esg-report` | 🌱 ESG & Carbon Footprint Ledger (Scope 1, 2, 3 GHG Accounting) |
 | `POST` | `/api/v1/ai/chatops/webhook` | 💬 Omnichannel ChatOps Gateway (WhatsApp, Telegram & Slack Webhook) |
+| `GET` | `/api/v1/ai/demand-sensing` | 📊 AI Demand Sensing, Dynamic Safety Stock & EOQ Replenishment |
+| `POST` | `/api/v1/ai/replenish/auto-po` | 🚀 1-Click Automated Draft Purchase Order Replenishment |
+| `GET` | `/api/v1/events/stream` | ⚡ Real-Time Server-Sent Events (SSE) Stream |
+| `POST` | `/api/v1/events/presence` | 👥 Document Viewing & Editing Live Presence |
+| `POST` | `/api/v1/saas/tenants/register` | 🏢 Self-Service SaaS Multi-Tenant Provisioning |
+| `GET` | `/api/v1/saas/tenants` | 🏢 List Registered SaaS Tenants & Isolation Metadata |
+| `POST` | `/api/v1/pos/sync-offline-batch` | 📴 Reconcile & Synchronize Offline PWA POS Transactions |
+| `POST` | `/api/v1/ai/voice/command` | 🎙️ Hands-Free Voice Ops Assistant & Audio Synthesis |
 
 ---
 

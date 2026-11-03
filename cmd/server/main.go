@@ -10,7 +10,9 @@ import (
 	"erp-golang/internal/core/ai"
 	"erp-golang/internal/core/commandcenter"
 	"erp-golang/internal/core/database"
+	"erp-golang/internal/core/events"
 	"erp-golang/internal/core/middleware"
+	"erp-golang/internal/core/multitenancy"
 	"erp-golang/internal/core/openapi"
 	"erp-golang/internal/core/registry"
 	"erp-golang/internal/core/storage"
@@ -250,8 +252,10 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
-	// Enable CORS
+	// Enable CORS & Multi-Tenancy Resolution
 	r.Use(middleware.CORSMiddleware())
+	tenantMgr := multitenancy.InitManager(db)
+	r.Use(multitenancy.TenantMiddleware(tenantMgr))
 
 	// Health Check
 	r.GET("/health", func(c *gin.Context) {
@@ -292,6 +296,8 @@ func main() {
 		// Register Cloudflare Workers AI endpoints
 		ai.RegisterAIRoutes(apiV1, authMiddleware, aiHandler)
 		commandcenter.RegisterRoutes(apiV1, authMiddleware, db, saleMod.Service(), purchaseMod.Service(), stockMod.Service(), accountMod.Service())
+		events.RegisterEventRoutes(apiV1, authMiddleware)
+		multitenancy.RegisterSaaSRoutes(apiV1, authMiddleware, tenantMgr)
 	}
 
 	// Serve Static Web Frontend

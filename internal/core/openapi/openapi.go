@@ -12,7 +12,7 @@ func GetSpec(appName, version string) map[string]interface{} {
 		appName = "GoERP Enterprise Cloud"
 	}
 	if version == "" {
-		version = "1.42.0"
+		version = "1.43.0"
 	}
 
 	return map[string]interface{}{
@@ -214,6 +214,76 @@ func GetSpec(appName, version string) map[string]interface{} {
 					"description": "Processes natural language and slash commands (/omzet, /stok, /approve, /fraud, /esg) from WhatsApp, Telegram, or Slack and returns interactive executive cards.",
 					"responses": map[string]interface{}{
 						"200": map[string]interface{}{"description": "Formatted ChatOps response and executed ERP action"},
+					},
+				},
+			},
+			"/api/v1/ai/demand-sensing": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"AI Enterprise Intelligence"},
+					"summary":     "AI Demand Sensing, Dynamic Safety Stock & EOQ Replenishment",
+					"description": "Calculates daily demand velocity, dynamic Gaussian safety stock (95% service level), Reorder Point (ROP), and Economic Order Quantity (EOQ).",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Demand metrics and replenishment recommendations"},
+					},
+				},
+			},
+			"/api/v1/ai/replenish/auto-po": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"AI Enterprise Intelligence"},
+					"summary":     "Execute 1-Click Automated Draft PO Replenishment",
+					"description": "Generates draft Purchase Orders with EOQ batch sizes for critical or reorder-needed products.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Created Purchase Order details"},
+					},
+				},
+			},
+			"/api/v1/events/stream": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"System & Protocols"},
+					"summary":     "Real-Time Server-Sent Events (SSE) Stream",
+					"description": "Opens persistent SSE connection receiving live domain events, document changes, and presence updates.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "SSE text/event-stream"},
+					},
+				},
+			},
+			"/api/v1/events/presence": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"System & Protocols"},
+					"summary":     "Broadcast Document Viewing/Editing Presence",
+					"description": "Records user active presence on a specific document to prevent collaborative overwrites.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Active users list"},
+					},
+				},
+			},
+			"/api/v1/saas/tenants/register": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"System & Protocols"},
+					"summary":     "Self-Service SaaS Multi-Tenant Provisioning",
+					"description": "Provisions a new isolated corporate tenant with custom domain, storage quota, and dedicated database schema.",
+					"responses": map[string]interface{}{
+						"201": map[string]interface{}{"description": "Provisioned tenant profile"},
+					},
+				},
+			},
+			"/api/v1/pos/sync-offline-batch": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Reconcile Offline PWA POS Transactions",
+					"description": "Atomically processes batched offline transactions, deduces warehouse inventory, and posts GL moves.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Reconciled server POS orders"},
+					},
+				},
+			},
+			"/api/v1/ai/voice/command": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"AI Enterprise Intelligence"},
+					"summary":     "Hands-Free Voice Ops Assistant",
+					"description": "Processes voice commands from shop floor or warehouse, executes ERP tools, and returns spoken synthesized audio text.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Voice intent and spoken audio response"},
 					},
 				},
 			},

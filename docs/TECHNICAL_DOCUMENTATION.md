@@ -344,3 +344,35 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Raw JSON Spec**: `GET /openapi.json` and `GET /api/v1/openapi.json`
 - **Interactive Explorer UI**: `GET /api/docs`
 - Features live token authentication, pre-populated sample payloads for MCP, A2A, and ChatOps, and real-time response inspection.
+
+
+---
+
+## 9. Next-Gen Enterprise Capabilities (v1.43.0)
+
+### 9.1 AI Demand Sensing & Smart Inventory Replenishment (`internal/core/ai/demand_sensing.go`)
+- **Daily Demand Velocity**: Calculates 30, 60, and 90-day moving sales velocity across historical order lines.
+- **Dynamic Gaussian Safety Stock**: Computes dynamic buffer $SS = Z \times \sqrt{L} \times \sigma_D$ at a 95% cycle service level ($Z = 1.65$) to absorb supplier lead-time variance.
+- **Reorder Point (ROP)**: $ROP = (L \times D) + SS$.
+- **Economic Order Quantity (EOQ)**: $EOQ = \sqrt{\frac{2DS}{H}}$, optimizing total annual procurement and inventory holding costs.
+- **1-Click Auto-Draft PO**: Endpoints `GET /api/v1/ai/demand-sensing` and `POST /api/v1/ai/replenish/auto-po` automatically draft Purchase Orders with EOQ batch sizes and 11% VAT.
+
+### 9.2 Real-Time SSE Event Broker & Live Presence Engine (`internal/core/events`)
+- **Persistent Server-Sent Events**: `GET /api/v1/events/stream` provides live push notifications for sales orders, payment reconciliations, and inventory alerts with periodic 15s keep-alive heartbeats.
+- **Document Presence & Collision Avoidance**: `POST & GET /api/v1/events/presence` tracks active users viewing or editing specific documents (`sale_order`, `purchase_order`, `account_move`, `mrp_production`) to avoid concurrent edit collisions.
+
+### 9.3 SaaS Multi-Tenancy & Database-per-Tenant Isolation (`internal/core/multitenancy`)
+- **Tenant Context Middleware**: Resolves tenant identity from:
+  1. Subdomain parsing from Host header (e.g. `tenant1.goerp.io`).
+  2. Header `X-Tenant-ID` or `X-Tenant-Domain`.
+  3. URL query parameter `?tenant=...`.
+- **Database Isolation Modes**: Dedicated SQLite file path (`./data/tenants/<tenant_id>/erp.db`) or PostgreSQL schema search path (`SET search_path TO tenant_<tenant_id>`).
+- **Self-Service Tenant Provisioning**: `POST /api/v1/saas/tenants/register` provisions new tenants with configurable plan limits (Starter, Professional, Enterprise) and storage quotas.
+
+### 9.4 Offline-First PWA & Barcode POS Sync (`web/manifest.json` & `web/sw.js`)
+- **Progressive Web App Shell**: Standalone mobile display mode, theme colors, and offline shell pre-caching via Service Worker.
+- **Offline Batch Reconciliation**: `POST /api/v1/pos/sync-offline-batch` atomically processes orders queued locally during network outages, decrements warehouse stock quants, and posts balanced GL entries upon reconnection.
+
+### 9.5 Hands-Free Voice Ops Assistant (`internal/core/ai/voice.go`)
+- **Voice Intent Parser**: Endpoint `POST /api/v1/ai/voice/command` accepts voice transcripts and routes to autonomous tools (`warehouse_inventory_check`, `executive_finance_inquiry`, `executive_order_approval`, `continuous_fraud_scan`, `esg_carbon_lookup`, `cashflow_runway_forecast`).
+- **Conversational Speech Synthesis**: Returns synthesized text in Indonesian (`id-ID`) or English (`en-US`) for browser SpeechSynthesis and mobile audio playback.
