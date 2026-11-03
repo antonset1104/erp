@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![CI Status](https://img.shields.io/badge/CI-Passing-success?style=flat&logo=githubactions)](https://github.com/antonset1104/erp/actions)
 [![Modules](https://img.shields.io/badge/Modules-50_Enterprise-indigo)](docs/FUNCTIONAL_DOCUMENTATION.md)
-[![Release](https://img.shields.io/badge/Release-v1.44.0-emerald)](https://github.com/antonset1104/erp/releases)
+[![Release](https://img.shields.io/badge/Release-v1.45.0-emerald)](https://github.com/antonset1104/erp/releases)
 [![Open Source](https://img.shields.io/badge/Open_Source-Community_Driven-purple)](docs/OPEN_SOURCE_GUIDE.md)
 
 **GoERP** is a modern, high-performance, enterprise-grade Enterprise Resource Planning (ERP) platform built natively with **Golang**. Engineered with a clean **Modular Monolith** architecture comprising **50 integrated business modules**, GoERP delivers single-binary static compilation, native Go concurrency, ultra-low memory overhead (~25 MB idle RAM), and strict transactional integrity for mission-critical enterprise workloads.
@@ -51,6 +51,11 @@ GoERP includes built-in executive productivity tools to accelerate day-to-day op
 - **🌐 Supply Chain Digital Twin & "What-If" Scenario Simulator (`POST /api/v1/ai/digital-twin/simulate`)**: Monte Carlo stress test engine simulating supplier lead-time shocks, freight rate spikes (+18.5%), and USD/IDR FX volatility on BOM unit costs, gross margins, and customer delivery orders with actionable AI playbooks.
 - **🛡️ Enterprise Single Sign-On (SAML 2.0 / OIDC) & Field-Level RBAC Matrix (`GET /api/v1/security/rbac-matrix`, `GET /api/v1/security/sso/config`)**: Federated corporate identity (Okta, Azure AD, Google Workspace) and dynamic field-level masking (e.g. `standard_price`/`cost_price` masked for warehouse operators).
 - **📊 Visual Drag-and-Drop BI Dashboard & Custom Report Builder (`GET /api/v1/bi/dashboards`, `POST /api/v1/bi/reports/export`)**: Dynamic KPI cards, gauges, charts (Bar/Line/Pie) backed by live DB metrics, and user-configurable custom PDF/Excel executive reports.
+- **🏷️ AI Autonomous Dynamic Pricing & Elasticity Optimizer (`POST /api/v1/ai/pricing/recommend`)**: Profit-maximizing price recommendations using Price Elasticity of Demand (PED), margin floors (20%+), inventory velocity, and multi-tier volume discounts.
+- **💱 Cross-Border FX Exposure & Automated Treasury Hedging (`GET /api/v1/treasury/fx-exposure`, `POST /api/v1/treasury/hedge-contracts`)**: Multi-currency Net Open Position (NOP) tracking (USD/EUR/SGD vs IDR), unhedged Value-at-Risk (VaR), sensitivity stress-testing (+/- 10%), and automated forward contracts.
+- **🏭 Predictive Equipment Maintenance & IoT Telemetry Gateway (`POST /api/v1/iot/telemetry/ingest`, `GET /api/v1/iot/predictive-health`)**: Industrial sensor ingestion (vibration ISO 10816, temperature, motor current), Remaining Useful Life (RUL) estimation, and auto-creation of maintenance work orders.
+- **🌍 Supplier Sustainability Passport & Scope 3 Vendor Scoring (`GET /api/v1/esg/vendor-scorecards`, `POST /api/v1/esg/vendor-assessments`)**: Green credentials passport tracking emission intensity (kg CO2e/unit), ISO 14001/50001 certifications, recycled packaging, and procurement bonus scoring.
+- **🧠 AI Knowledge Base Semantic Search & Customer Support Copilot (RAG) (`POST /api/v1/ai/knowledge/query`, `POST /api/v1/ai/helpdesk/copilot-draft`)**: Semantic vector RAG retrieval across corporate SOPs, warranties, and product specs, generating automated, context-aware Helpdesk responses.
 - **🌓 Dark / Light Enterprise Theme Modes**: Seamless visual theme switcher (`☀️ Light` / `🌙 Dark`) with state persisted across browser sessions.
 
 ---

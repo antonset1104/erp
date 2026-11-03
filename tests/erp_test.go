@@ -21,6 +21,9 @@ import (
 	"erp-golang/internal/core/openapi"
 	"erp-golang/internal/core/audit"
 	"erp-golang/internal/core/bi"
+	coretreasury "erp-golang/internal/core/treasury"
+	"erp-golang/internal/core/esg"
+	"erp-golang/internal/core/iot"
 	"erp-golang/internal/core/security"
 	"erp-golang/internal/core/storage"
 	"erp-golang/internal/modules/account"
@@ -8490,5 +8493,129 @@ Lead Engineer - Cloud Tech Nusantara (2020 - 2026)
 	t.Logf("✓ Visual BI Dashboard & Custom Report Builder Verified: Dashboard='%s', Widgets=%d (Populated Metric: %v), ReportExport='%s' (Status: %s)",
 		fetchedDash.Name, len(fetchedDash.Widgets), fetchedDash.Widgets[0].DataPayload["formatted"], repRes.ReportName, repRes.Status)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (58 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI) PASSED 100%!")
+	// =========================================================================
+	// SECTION 59: AI DYNAMIC PRICING, CROSS-BORDER FX HEDGING, IOT MACHINE HEALTH,
+	//             VENDOR GREEN PASSPORT & SEMANTIC RAG COPILOT
+	// =========================================================================
+	t.Log(`
+		>>> SECTION 59: AI DYNAMIC PRICING, CROSS-BORDER FX, IOT TELEMETRY & RAG COPILOT <<<`)
+
+	// 59.1 AI Autonomous Dynamic Pricing & Elasticity Optimizer
+	pricingResp, err := aiClient.OptimizeProductPricing(db, &ai.PricingRecommendRequest{
+		ProductID:         1,
+		CustomerSegment:   "wholesale",
+		CompetitorPrice:   2450000,
+		MinGrossMarginPct: 20.0,
+		Urgency:           "standard",
+	}, 1)
+	if err != nil || pricingResp == nil || pricingResp.RecommendedOptimalPrice <= 0 {
+		t.Fatalf("Optimize product pricing failed: err=%v, res=%+v", err, pricingResp)
+	}
+	if pricingResp.ElasticityClassification != "ELASTIC" || len(pricingResp.VolumeTiers) != 3 {
+		t.Fatalf("Unexpected elasticity or volume tiers: %+v", pricingResp)
+	}
+
+	appliedProd, err := aiClient.ApplyPricingRule(db, &ai.ApplyPricingRuleRequest{
+		ProductID:    1,
+		NewListPrice: pricingResp.RecommendedOptimalPrice,
+		Reason:       "AI Elasticity Optimization",
+	}, 1)
+	if err != nil || appliedProd == nil || appliedProd.ListPrice != pricingResp.RecommendedOptimalPrice {
+		t.Fatalf("Apply pricing rule failed: err=%v, prod=%+v", err, appliedProd)
+	}
+	t.Logf("✓ AI Dynamic Pricing Optimizer Verified: Product='%s', OptimalPrice=IDR %.2f (Change: %+.1f%%), PED=%.2f (%s), Margin=%.1f%%, VolumeTiers=%d",
+		pricingResp.ProductName, pricingResp.RecommendedOptimalPrice, pricingResp.PriceChangePct,
+		pricingResp.ElasticityScore, pricingResp.ElasticityClassification, pricingResp.ProjectedGrossMarginPct, len(pricingResp.VolumeTiers))
+
+	// 59.2 Cross-Border FX Exposure Matrix & Automated Treasury Hedging
+	fxReport := coretreasury.ComputeFXExposure(db, 1)
+	if fxReport == nil || len(fxReport.Positions) != 3 || len(fxReport.StressTestScenarios) != 3 {
+		t.Fatalf("Compute FX exposure report failed: %+v", fxReport)
+	}
+	if fxReport.Positions[0].NetOpenPosition >= 0 || fxReport.Positions[0].PositionType != "SHORT_DEFICIT" {
+		t.Fatalf("Expected USD short deficit position, got: %+v", fxReport.Positions[0])
+	}
+
+	wHedge := httptest.NewRecorder()
+	cHedge, _ := gin.CreateTestContext(wHedge)
+	hedgeReqBody, _ := json.Marshal(coretreasury.CreateHedgeContractRequest{
+		BankPartner:       "Bank Mandiri Treasury",
+		ContractType:      "FORWARD",
+		BaseCurrency:      "USD",
+		NotionalAmount:    40000,
+		LockedForwardRate: 15900,
+		MaturityDays:      90,
+	})
+	cHedge.Request = httptest.NewRequest("POST", "/api/v1/treasury/hedge-contracts", strings.NewReader(string(hedgeReqBody)))
+	cHedge.Request.Header.Set("Content-Type", "application/json")
+	coretreasury.NewHandler(db).CreateHedgeContract(cHedge)
+	if wHedge.Code != http.StatusCreated {
+		t.Fatalf("Failed to create hedge contract: code=%d, body=%s", wHedge.Code, wHedge.Body.String())
+	}
+	t.Logf("✓ Cross-Border FX Exposure & Treasury Hedging Verified: NetExposureIDR=IDR %.2f, USD Short Deficit=$%.2f, StressScenarios=%d, Policy='%s'",
+		fxReport.TotalNetExposureIDR, math.Abs(fxReport.Positions[0].NetOpenPosition), len(fxReport.StressTestScenarios), fxReport.ExecutiveHedgingPolicy)
+
+	// 59.3 Predictive Equipment Maintenance & IoT Telemetry Sensor Gateway
+	iotEval := iot.EvaluateMachineHealth(db, &iot.TelemetryPacket{
+		MachineID:        "SMT-AUTO-01",
+		MachineName:      "Mesin Solder & Perakitan SMT Otomatis",
+		VibrationRMS:     7.8, // Exceeds ISO critical limit 7.1 mm/s
+		OperatingTempC:   89.0, // Exceeds thermal limit 85 C
+		MotorCurrentAmps: 18.2,
+		SpindleRPM:       12400,
+		CumulativeHours:  2200,
+	}, 1)
+	if iotEval == nil || iotEval.Status != "CRITICAL_ANOMALY" || len(iotEval.AnomalyIndicators) < 2 {
+		t.Fatalf("IoT machine health evaluation failed: %+v", iotEval)
+	}
+	if iotEval.RemainingUsefulLifeHours <= 0 || iotEval.TriggeredMaintenanceReq == "" {
+		t.Fatalf("Expected auto-generated maintenance ticket and RUL estimation, got: %+v", iotEval)
+	}
+	t.Logf("✓ Predictive IoT Machine Health Verified: Machine='%s', Status='%s', HealthScore=%.1f/100, RUL=%.0f hrs, AutoTicket='%s', Action='%s'",
+		iotEval.MachineName, iotEval.Status, iotEval.HealthScore, iotEval.RemainingUsefulLifeHours, iotEval.TriggeredMaintenanceReq, iotEval.SuggestedAction)
+
+	// 59.4 Supplier Sustainability Passport & Scope 3 Vendor Scoring
+	vendorCard := esg.AssessVendorSustainability(db, &esg.VendorAssessmentRequest{
+		VendorID:                1,
+		VendorName:              "PT Pelanggan Sejahtera (Vendor Divisi Display)",
+		Country:                 "Indonesia",
+		CarbonEmissionIntensity: 12.8,
+		BenchmarkIntensity:      28.5,
+		ISO14001Certified:       true,
+		ISO50001Certified:       true,
+		RecycledPackagingPct:    90.0,
+		RenewableEnergySharePct: 70.0,
+		LogisticsGreenMode:      "ELECTRIC_EV",
+	})
+	if vendorCard == nil || vendorCard.SustainabilityTier != "PLATINUM_LEADER" || vendorCard.CompositeGreenScore < 85.0 {
+		t.Fatalf("Vendor sustainability assessment failed: %+v", vendorCard)
+	}
+	if vendorCard.ProcurementBonusScore <= 0 || vendorCard.Scope3Factor >= 1.0 {
+		t.Fatalf("Expected green bonus points and low Scope 3 factor for platinum leader, got: %+v", vendorCard)
+	}
+	t.Logf("✓ Supplier Sustainability Passport Verified: Vendor='%s', Tier='%s', CompositeGreenScore=%.1f/100, EmissionIntensity=%.1f kg CO2e, BonusPts=+%.1f, Scope3Factor=%.2f",
+		vendorCard.VendorName, vendorCard.SustainabilityTier, vendorCard.CompositeGreenScore, vendorCard.CarbonEmissionIntensity, vendorCard.ProcurementBonusScore, vendorCard.Scope3Factor)
+
+	// 59.5 AI Knowledge Base Semantic Search & Customer Support Copilot (RAG)
+	ragQueryResp := aiClient.QueryKnowledgeRAG(&ai.KnowledgeQueryRequest{
+		Query: "Apakah monitor dilindungi garansi dan bagaimana proses RMA barang rusak?",
+		TopK:  2,
+	})
+	if ragQueryResp == nil || len(ragQueryResp.Chunks) == 0 || ragQueryResp.SynthesizedAnswer == "" {
+		t.Fatalf("Knowledge base RAG query failed: %+v", ragQueryResp)
+	}
+
+	copilotResp := aiClient.DraftSupportCopilotReply(&ai.CopilotDraftRequest{
+		TicketID:         "TCK/2026/00088",
+		CustomerName:     "PT Solusi Retail Nusantara",
+		IssueTitle:       "Monitor display mati total setelah 4 bulan pemakaian",
+		IssueDescription: "Customer ingin tahu masa garansi monitor dan persyaratan klaim unit pengganti.",
+	})
+	if copilotResp == nil || copilotResp.DraftReplyText == "" || len(copilotResp.ReferencedArticles) == 0 || copilotResp.ConfidenceScore < 0.90 {
+		t.Fatalf("Support Copilot draft reply failed: %+v", copilotResp)
+	}
+	t.Logf("✓ AI Knowledge RAG & Support Copilot Verified: Ticket='%s', Confidence=%.0f%%, Referenced=%v, DraftLength=%d chars",
+		copilotResp.TicketID, copilotResp.ConfidenceScore*100, copilotResp.ReferencedArticles, len(copilotResp.DraftReplyText))
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (59 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT) PASSED 100%!")
 }

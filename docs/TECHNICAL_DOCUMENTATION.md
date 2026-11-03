@@ -417,3 +417,32 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Interactive BI Dashboard Cockpit**: Endpoints `GET & POST /api/v1/bi/dashboards` manage departmental layouts (C-Suite Executive, Supply Chain Operations, Treasury & Finance) with flexible GridX/Y/W/H coordinates.
 - **Dynamic Real-Time Widgets**: Automatically aggregates live metrics from the ERP database for KPI Cards, Margin Gauges, Bar Charts (Monthly Revenue), Line Charts (Cashflow Runway), and Pie Charts (Product Category Breakdown).
 - **Custom Executive Report Builder**: Endpoint `POST /api/v1/bi/reports/export` generates custom tabular reports with aggregations and formats for Excel and PDF downloads.
+
+---
+
+## 11. Strategic Enterprise Optimization & IoT Operations (v1.45.0)
+
+### 11.1 AI Autonomous Dynamic Pricing & Elasticity Optimizer (`internal/core/ai/pricing_optimizer.go`)
+- **Price Elasticity of Demand (PED)**: Evaluates volume elasticity $PED = \frac{\% \Delta Q}{\% \Delta P}$ per customer tier (Retail, Wholesale, Key Account, E-Commerce).
+- **Profit-Maximizing Pricing**: Endpoint `POST /api/v1/ai/pricing/recommend` optimizes unit price with protected gross margin floors (e.g. 20%), inventory velocity factors, and Days-of-Inventory (DOI) markdown rules.
+- **Automated Rule Application**: `POST /api/v1/ai/pricing/apply-rule` commits approved price updates to master product records and broadcasts audit notifications.
+
+### 11.2 Cross-Border FX Exposure Matrix & Automated Treasury Hedging (`internal/core/treasury/fx_exposure.go`)
+- **Net Open Currency Position (NOP)**: Endpoint `GET /api/v1/treasury/fx-exposure` aggregates multi-currency cash balances, export AR, import AP, and committed open POs:
+  $$\text{NOP}_{\text{CCY}} = (\text{Cash} + \text{AR}) - (\text{AP} + \text{Committed PO})$$
+- **Sensitivity Stress-Testing**: Models currency depreciation shocks ($\pm 5\%$, $\pm 10\%$) against operating cashflow and computes unhedged Value-at-Risk (VaR).
+- **Automated Forward Contracts**: Endpoint `POST /api/v1/treasury/hedge-contracts` registers FX Forward contracts locking spot rates to insulate international procurement margins.
+
+### 11.3 Predictive Equipment Maintenance & IoT Telemetry Gateway (`internal/core/iot/predictive_maintenance.go`)
+- **Shop-Floor Telemetry Ingestion**: Endpoint `POST /api/v1/iot/telemetry/ingest` ingests mechanical vibration (RMS per ISO 10816 standards), operating temperature, motor current, and acoustic emissions.
+- **Remaining Useful Life (RUL) Modeling**: Weibull-based estimation calculates remaining machine operating hours before bearing or spindle fatigue failure.
+- **Automated Work Orders**: Transitions to `CRITICAL_ANOMALY` automatically trigger priority Maintenance Requests (`maintenance.MaintenanceRequest`) and reserve replacement spare parts before physical breakdown occurs.
+
+### 11.4 Supplier Sustainability Passport & Scope 3 Vendor Scoring (`internal/core/esg/supplier_passport.go`)
+- **Multi-Dimensional Green Auditing**: Endpoint `GET /api/v1/esg/vendor-scorecards` scores vendors across Carbon Intensity (kg CO2e/unit), ISO 14001/50001 certifications, circular recycled packaging percentage, and green logistics modes (Electric EV, Intermodal Rail, Maritime).
+- **Composite Green Score (0-100)**: Classifies vendors into tiers (Platinum Leader, Gold Advanced, Silver Compliant, Bronze Basic).
+- **Procurement Bonus Points**: Platinum and Gold suppliers receive competitive bonus scoring in corporate RFQ bidding wars, lowering the company's indirect Scope 3 emissions.
+
+### 11.5 AI Knowledge Base Semantic Search & Customer Support Copilot (RAG) (`internal/core/ai/knowledge_rag.go`)
+- **Hybrid Semantic Index**: Indexes corporate SOPs, product specifications, warranty policies, and tax guidelines via BM25 and cosine keyword similarity (`POST /api/v1/ai/knowledge/query`).
+- **Support Copilot Agent**: Endpoint `POST /api/v1/ai/helpdesk/copilot-draft` ingests incoming Helpdesk tickets, extracts problem context, retrieves authoritative knowledge chunks, and automatically drafts polite, accurate, step-by-step customer resolutions with high confidence scores.

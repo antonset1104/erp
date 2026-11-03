@@ -347,6 +347,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/ai/pricing/recommend": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"AI Enterprise Intelligence"},
+					"summary":     "AI Autonomous Dynamic Pricing & Elasticity Optimizer",
+					"description": "Calculates profit-maximizing price using Price Elasticity of Demand (PED), margin floors, inventory aging, and customer segmentation.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Optimal price, elasticity classification, and volume discount tiers"},
+					},
+				},
+			},
+			"/api/v1/treasury/fx-exposure": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Cross-Border FX Exposure Matrix & Stress-Test Simulator",
+					"description": "Calculates multi-currency Net Open Positions (USD/EUR/SGD vs IDR), unhedged VaR, and automated forward contract recommendations.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Currency positions, sensitivity shocks, and active hedge contracts"},
+					},
+				},
+			},
+			"/api/v1/iot/telemetry/ingest": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Predictive Equipment Maintenance & IoT Telemetry Ingestion",
+					"description": "Ingests vibration (ISO 10816), operating temperature, and acoustic metrics to compute Remaining Useful Life (RUL) and auto-trigger maintenance requests.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Machine health score, RUL hours, anomaly indicators, and auto-created maintenance orders"},
+					},
+				},
+			},
+			"/api/v1/esg/vendor-scorecards": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"AI Enterprise Intelligence"},
+					"summary":     "Supplier Sustainability Passport & Scope 3 Vendor Scoring",
+					"description": "Audits vendor carbon intensity (kg CO2e/unit), ISO 14001/50001 certifications, recycled packaging, and green logistics scores.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "List of vendor green scorecards and procurement bonus factors"},
+					},
+				},
+			},
+			"/api/v1/ai/knowledge/query": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"AI Enterprise Intelligence"},
+					"summary":     "AI Knowledge Base Semantic Search & Customer Support Copilot (RAG)",
+					"description": "Retrieves semantic knowledge chunks across internal SOPs, warranties, and product manuals to synthesize context-aware answers.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Semantic chunks, confidence score, and synthesized answer"},
+					},
+				},
+			},
 		},
 	}
 }

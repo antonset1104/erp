@@ -11,6 +11,9 @@ import (
 	"erp-golang/internal/core/audit"
 	"erp-golang/internal/core/bi"
 	"erp-golang/internal/core/commandcenter"
+	coretreasury "erp-golang/internal/core/treasury"
+	"erp-golang/internal/core/esg"
+	"erp-golang/internal/core/iot"
 	"erp-golang/internal/core/database"
 	"erp-golang/internal/core/events"
 	"erp-golang/internal/core/middleware"
@@ -265,7 +268,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.44.0",
+			"version":    "1.45.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -283,7 +286,7 @@ func main() {
 	ai.RegisterRootProtocolRoutes(r, aiHandler)
 
 	// Register OpenAPI 3.1 & Interactive API Explorer
-	openapi.RegisterRoutes(r, cfg.AppName, "1.44.0")
+	openapi.RegisterRoutes(r, cfg.AppName, "1.45.0")
 
 	// API v1 Router Group
 	apiV1 := r.Group("/api/v1")
@@ -304,6 +307,9 @@ func main() {
 		audit.RegisterAuditRoutes(apiV1, authMiddleware, db)
 		security.RegisterSecurityRoutes(apiV1, authMiddleware)
 		bi.RegisterBIRoutes(apiV1, authMiddleware, db)
+		coretreasury.RegisterTreasuryFXRoutes(apiV1, authMiddleware, db)
+		iot.RegisterIoTRoutes(apiV1, authMiddleware, db)
+		esg.RegisterESGVendorRoutes(apiV1, authMiddleware, db)
 	}
 
 	// Serve Static Web Frontend

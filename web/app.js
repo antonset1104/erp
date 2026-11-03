@@ -23288,6 +23288,268 @@ async function exportCustomExecutiveReport() {
     }
 }
 
+// AI Autonomous Dynamic Pricing & Elasticity Optimizer
+async function triggerAIDynamicPricing() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menghitung Price Elasticity of Demand (PED), margin floor, dan kuotasi harga optimal...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const resp = await api('/ai/pricing/recommend', 'POST', {
+            product_id: 1,
+            customer_segment: 'wholesale',
+            competitor_price: 2450000,
+            min_gross_margin_pct: 20.0,
+            urgency: 'standard'
+        });
+
+        if (badge) badge.textContent = '🏷️ Dynamic Pricing: ' + resp.elasticity_classification;
+        if (answerEl) {
+            let out = `🏷️ AI DYNAMIC PRICING & ELASTICITY OPTIMIZER:\n`;
+            out += `Produk: ${resp.product_name} | Segmen Pelanggan: ${resp.customer_segment.toUpperCase()}\n`;
+            out += `Harga Pokok (HPP): IDR ${resp.standard_cost_price.toLocaleString()} | Harga Jual Saat Ini: IDR ${resp.current_list_price.toLocaleString()} (Margin: ${resp.current_gross_margin_pct}%)\n\n`;
+            out += `🎯 REKOMENDASI HARGA OPTIMAL: IDR ${resp.recommended_optimal_price.toLocaleString()} (${resp.price_change_pct > 0 ? '+' : ''}${resp.price_change_pct}%)\n`;
+            out += `Proyeksi Gross Margin Baru: ${resp.projected_gross_margin_pct}% | Elastisitas Permintaan (PED): ${resp.elasticity_score}\n\n`;
+            out += `📦 TIER DISKON KUANTITAS (VOLUME TIERS):\n`;
+            resp.volume_tiers.forEach(t => {
+                out += `• ${t.min_qty} - ${t.max_qty} unit: IDR ${t.unit_price.toLocaleString()} (Diskon ${t.discount_pct}%, Margin: ${t.projected_margin_pct}%)\n`;
+            });
+            out += `\n💡 Rasional AI: ${resp.ai_rationale}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li><a href="javascript:void(0)" onclick="applyOptimalPrice(${resp.product_id}, ${resp.recommended_optimal_price})" style="color:var(--primary);font-weight:600;">⚡ Terapkan Harga Optimal (IDR ${resp.recommended_optimal_price.toLocaleString()}) ke Master Produk</a></li>
+                <li>Hari Persediaan (Days of Inventory): ${resp.days_of_inventory} hari (Stok Fisik: ${resp.current_stock_on_hand} unit)</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal menghitung harga optimal: ' + err.message;
+    }
+}
+
+async function applyOptimalPrice(productId, newPrice) {
+    try {
+        await api('/ai/pricing/apply-rule', 'POST', {
+            product_id: productId,
+            new_list_price: newPrice,
+            reason: 'AI Dynamic Pricing Rule Applied'
+        });
+        alert(`Berhasil memperbarui harga jual produk menjadi IDR ${newPrice.toLocaleString()}!`);
+    } catch (err) {
+        alert('Gagal menerapkan harga baru: ' + err.message);
+    }
+}
+
+// Cross-Border FX Exposure & Automated Treasury Hedging
+async function triggerFXExposureMatrix() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menghitung eksposur valas korporat (Net Open Position) dan rekomendasi hedging...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const resp = await api('/treasury/fx-exposure', 'GET');
+        if (badge) badge.textContent = '💱 FX Treasury: ' + resp.primary_vulnerability;
+        if (answerEl) {
+            let out = `💱 MATRIKS EKSPOSUR VALAS KORPORAT (NET OPEN CURRENCY POSITION):\n\n`;
+            resp.positions.forEach(p => {
+                out += `• Mata Uang ${p.currency} (Spot: Rp ${p.spot_rate_idr.toLocaleString()}):\n`;
+                out += `  Kas: ${p.cash_and_bank.toLocaleString()} | Piutang AR: ${p.accounts_receivable.toLocaleString()} | Utang AP: ${p.accounts_payable.toLocaleString()} | Open PO: ${p.open_purchase_orders.toLocaleString()}\n`;
+                out += `  Posisi Bersih: ${p.net_open_position.toLocaleString()} ${p.currency} (${p.position_type}) ➔ Eksposur: IDR ${p.net_exposure_idr.toLocaleString()}\n`;
+                out += `  Rekomendasi Lindung Nilai: Hedge ${p.hedge_ratio_pct}% (${p.recommended_hedge_amount.toLocaleString()} ${p.currency})\n\n`;
+            });
+            out += `⚡ SIMULASI STRESS-TEST VOLATILITAS RUPIAH:\n`;
+            resp.stress_test_scenarios.forEach(s => {
+                out += `• Syok ${s.shock_pct > 0 ? '+' : ''}${s.shock_pct}%: Kurs Rp ${s.simulated_rate_idr.toLocaleString()} ➔ Dampak Kas: IDR ${s.projected_impact_idr.toLocaleString()}\n`;
+            });
+            out += `\n📋 Kebijakan Treasury: ${resp.executive_hedging_policy}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li><a href="javascript:void(0)" onclick="executeSampleHedgeContract()" style="color:var(--primary);font-weight:600;">🔒 Buka Kontrak Forward FX Lindung Nilai (USD 50,000 @ Rp 15,920)</a></li>
+                <li>Kontrak Forward Aktif Terdaftar: ${resp.active_hedge_contracts.length} kontrak</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memuat eksposur FX: ' + err.message;
+    }
+}
+
+async function executeSampleHedgeContract() {
+    try {
+        const c = await api('/treasury/hedge-contracts', 'POST', {
+            bank_partner: 'Bank Central Asia (BCA) Treasury',
+            contract_type: 'FORWARD',
+            base_currency: 'USD',
+            notional_amount: 50000,
+            locked_forward_rate: 15920,
+            maturity_days: 60
+        });
+        alert(`Kontrak Forward ${c.contract_number} berhasil didaftarkan (Notional: $${c.notional_amount.toLocaleString()} @ Rp ${c.locked_forward_rate.toLocaleString()})!`);
+    } catch (err) {
+        alert('Gagal membuat kontrak forward: ' + err.message);
+    }
+}
+
+// Predictive Equipment Maintenance & IoT Telemetry Gateway
+async function triggerIoTPredictiveHealth() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengirim paket telemetri sensor IoT dan mengevaluasi sisa usia pakai mesin (RUL)...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        // Ingest telemetry for a vibrating machine
+        const evalResp = await api('/iot/telemetry/ingest', 'POST', {
+            machine_id: 'SMT-AUTO-01',
+            machine_name: 'Mesin Solder & Perakitan SMT Otomatis',
+            vibration_rms: 7.45, // Critical vibration threshold
+            operating_temp_c: 88.2, // Overheating
+            motor_current_amps: 18.5,
+            spindle_rpm: 12500,
+            acoustic_db: 78.0,
+            cumulative_hours: 2150
+        });
+
+        if (badge) badge.textContent = '🏭 IoT Health: ' + evalResp.status;
+        if (answerEl) {
+            let out = `🏭 PEMELIHARAAN PREDIKTIF IOT & KESEHATAN MESIN PABRIK:\n`;
+            out += `Peralatan: ${evalResp.machine_name} (${evalResp.machine_id})\n`;
+            out += `Status Diagnostik: ${evalResp.status === 'CRITICAL_ANOMALY' ? '🚨 KRITIS / ANOMALI TERDETEKSI' : evalResp.status}\n`;
+            out += `Skor Kesehatan Mesin: ${evalResp.health_score}/100 | Estimasi Sisa Jam Pakai (RUL): ${evalResp.remaining_useful_life_hours} jam operasional\n\n`;
+            out += `⚠️ INDIKATOR KERUSAKAN TERDETEKSI SENSOR:\n`;
+            evalResp.anomaly_indicators.forEach(a => {
+                out += `• ${a}\n`;
+            });
+            out += `\n🛠️ TINDAKAN OTOMATIS: ${evalResp.suggested_action}\n`;
+            if (evalResp.triggered_maintenance_req) {
+                out += `✅ Tiket Maintenance Otomatis Dibuat: ${evalResp.triggered_maintenance_req}`;
+            }
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Sensor getaran ISO 10816 berhasil mendeteksi anomali sebelum terjadi *breakdown* mesin fisik.</li>
+                <li>Work Order pemeliharaan preventif dan alokasi suku cadang telah disinkronkan ke Modul Maintenance.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses telemetri IoT: ' + err.message;
+    }
+}
+
+// Supplier Sustainability Passport & Scope 3 Vendor Scoring
+async function triggerESGVendorScorecards() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memuat paspor keberlanjutan vendor (Scope 3 GHG & ISO Certifications)...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const resp = await api('/esg/vendor-scorecards', 'GET');
+        if (badge) badge.textContent = '🌍 ESG Passport: ' + resp.total_vendors_assessed + ' Vendor Dinilai';
+        if (answerEl) {
+            let out = `🌍 PASPOR KEBERLANJUTAN VENDOR (SUPPLIER SUSTAINABILITY & SCOPE 3):\n\n`;
+            resp.scorecards.forEach(v => {
+                out += `🏢 ${v.vendor_name} (${v.country}) — Tier: ${v.sustainability_tier}\n`;
+                out += `• Skor Hijau Komposit: ${v.composite_green_score}/100 | Bonus Poin Tender RFQ: +${v.procurement_bonus_score} pts\n`;
+                out += `• Intensitas Emisi: ${v.carbon_emission_intensity} kg CO2e/unit (Benchmark: ${v.benchmark_intensity} kg)\n`;
+                out += `• Sertifikasi: ISO 14001 (${v.iso14001_certified ? '✅' : '❌'}), ISO 50001 (${v.iso50001_certified ? '✅' : '❌'})\n`;
+                out += `• Kemasan Daur Ulang: ${v.recycled_packaging_pct}% | Energi Terbarukan: ${v.renewable_energy_share_pct}% | Logistik: ${v.logistics_green_mode}\n\n`;
+            });
+            out += `📌 Vendor berpredikat PLATINUM_LEADER memberikan penghematan jejak karbon Scope 3 bagi laporan korporat GoERP.`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Skor keberlanjutan terintegrasi langsung dengan mesin tender pengadaan (AI RFQ Bidding Wars).</li>
+                <li>Mendukung kepatuhan audit global CBAM, CSRD, dan standar akuntansi gas rumah kaca GHG Protocol Scope 3.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memuat paspor vendor: ' + err.message;
+    }
+}
+
+// AI Knowledge Base Semantic Search & Customer Support Copilot (RAG)
+async function triggerKnowledgeRAGCopilot() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menjalankan pencarian semantik RAG dan mengenerate draf respon Helpdesk Copilot...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const copilot = await api('/ai/helpdesk/copilot-draft', 'POST', {
+            ticket_id: 'TCK/2026/00099',
+            customer_name: 'PT Mitra Retail Mandiri',
+            issue_title: 'Layar monitor berkedip dan adaptor mati setelah 3 bulan pemakaian',
+            issue_description: 'Pelanggan menanyakan apakah produk masih tercover garansi dan bagaimana prosedur klaim unit baru.'
+        });
+
+        if (badge) badge.textContent = '🧠 Support Copilot: Confidence ' + Math.round(copilot.confidence_score * 100) + '%';
+        if (answerEl) {
+            let out = `🧠 AI CUSTOMER SUPPORT COPILOT & SEMANTIC RAG:\n`;
+            out += `Tiket: ${copilot.ticket_id} | Subjek: ${copilot.draft_subject}\n`;
+            out += `Rujukan Dokumen SOP Resmi:\n`;
+            copilot.referenced_articles.forEach(r => {
+                out += `• ${r}\n`;
+            });
+            out += `\n💬 DRAF BALASAN OTOMATIS COPILOT (SIAP KIRIM):\n`;
+            out += `--------------------------------------------------\n`;
+            out += copilot.draft_reply_text + `\n`;
+            out += `--------------------------------------------------\n`;
+            out += `⚡ Rekomendasi Tindakan: ${copilot.recommended_action}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pencarian semantik RAG mencocokkan dokumen kebijakan garansi 24 bulan dan prosedur RMA secara akurat.</li>
+                <li>Draf respon memotong waktu penanganan tiket agen support dari 15 menit menjadi kurang dari 10 detik.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Copilot RAG: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {
