@@ -287,6 +287,66 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/ai/rfq/tenders": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"AI Enterprise Intelligence"},
+					"summary":     "AI Autonomous RFQ Bidding Tender Creation",
+					"description": "Initializes multi-vendor RFQ bidding tender with target quantity, budget, and tokenized vendor intake links.",
+					"responses": map[string]interface{}{
+						"201": map[string]interface{}{"description": "Created RFQ tender profile with vendor portal tokens"},
+					},
+				},
+			},
+			"/api/v1/ai/rfq/evaluate/{tender_id}": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"AI Enterprise Intelligence"},
+					"summary":     "AI Multi-Criteria Vendor Scorecard & Award Recommendation",
+					"description": "Runs Multi-Attribute Utility Theory (MAUT) scoring on price (40%), lead time (25%), payment terms (20%), and warranty (15%).",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Ranked scorecard, savings analysis, and recommended award"},
+					},
+				},
+			},
+			"/api/v1/audit/verify-tamper": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"System & Protocols"},
+					"summary":     "Cryptographic Merkle-Tree Ledger Audit (Zero-Tamper Verification)",
+					"description": "Recomputes sequential SHA-256 block hash chain and binary Merkle tree across GL journal entries, invoices, and payments.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Merkle root hash, tree depth, and cryptographic verification certificate"},
+					},
+				},
+			},
+			"/api/v1/ai/digital-twin/simulate": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"AI Enterprise Intelligence"},
+					"summary":     "Supply Chain Digital Twin & What-If Scenario Simulator",
+					"description": "Runs stress simulations on BOM costs, gross margins, stockout risks, and delivery delays given lead-time, freight, and FX shocks.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Simulated COGS inflation, margin erosion, at-risk SKUs, and strategic mitigation playbooks"},
+					},
+				},
+			},
+			"/api/v1/security/rbac-matrix": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"System & Protocols"},
+					"summary":     "Field-Level RBAC Permission Matrix & Masking Rules",
+					"description": "Returns module permissions and granular field-level masking rules (e.g. standard_price hidden for warehouse operators).",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Enterprise role profiles and field masking configuration"},
+					},
+				},
+			},
+			"/api/v1/bi/dashboards": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Visual Drag-and-Drop BI Dashboards & Live Widgets",
+					"description": "Lists configured departmental and C-suite dashboards with real-time aggregated metrics (KPI cards, bar/line/pie charts).",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Configured dashboards with live populated widget data"},
+					},
+				},
+			},
 		},
 	}
 }

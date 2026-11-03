@@ -376,3 +376,44 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 ### 9.5 Hands-Free Voice Ops Assistant (`internal/core/ai/voice.go`)
 - **Voice Intent Parser**: Endpoint `POST /api/v1/ai/voice/command` accepts voice transcripts and routes to autonomous tools (`warehouse_inventory_check`, `executive_finance_inquiry`, `executive_order_approval`, `continuous_fraud_scan`, `esg_carbon_lookup`, `cashflow_runway_forecast`).
 - **Conversational Speech Synthesis**: Returns synthesized text in Indonesian (`id-ID`) or English (`en-US`) for browser SpeechSynthesis and mobile audio playback.
+
+---
+
+## 10. Advanced Intelligence & Enterprise Security (v1.44.0)
+
+### 10.1 AI Autonomous Supplier Negotiation & RFQ Bidding Wars (`internal/core/ai/bidding_engine.go`)
+- **Tokenized Vendor Bid Intake**: Endpoint `POST /api/v1/ai/rfq/tenders` initializes competitive tenders with secure vendor submission tokens (`POST /api/v1/ai/rfq/submit-bid`).
+- **Multi-Attribute Utility Theory (MAUT) Scorecard**: AI scoring engine dynamically weights multi-criteria parameters:
+  - Unit Price & Volume Discounts (40% weight)
+  - Delivery Lead Time & Speed (25% weight)
+  - Payment Terms Flexibility (Net 30/60/90) (20% weight)
+  - Quality Warranty & Coverage (15% weight)
+- **Automated Award & PO Generation**: `POST /api/v1/ai/rfq/award/:tender_id` locks the lowest effective price, calculates procurement budget savings, and automatically generates a draft Purchase Order (`PO/AWARD/...`) with line items.
+
+### 10.2 Cryptographic Merkle-Tree Ledger Audit (`internal/core/audit/merkle_ledger.go`)
+- **Sequential SHA-256 Hash Chaining**: Every financial record (`account_moves`, `account_payments`, and `purchase_orders`) is deterministically serialized and cryptographically linked to previous entries:
+  $$\text{Block}_{i} = \text{SHA256}(\text{Block}_{i-1} \parallel \text{CanonicalTxData}_i)$$
+- **Binary Merkle Tree Recomputation**: Leaves are computed as $\text{SHA256}(\text{Block}_i)$, recursively paired into branch nodes up to a singular, verifiable Merkle Root.
+- **1-Click Tamper Verification**: Endpoint `GET /api/v1/audit/verify-tamper` recalculates the tree in real time, verifies mathematical sibling proof paths, and generates a zero-tamper cryptographic certificate confirming zero alterations or deletions.
+
+### 10.3 Supply Chain Digital Twin & What-If Scenario Simulator (`internal/core/ai/digital_twin.go`)
+- **Stress-Test Simulation Engine**: Endpoint `POST /api/v1/ai/digital-twin/simulate` accepts parameterized macroeconomic and supply-chain shocks:
+  - Supplier Lead-Time Delay ($\Delta L$ days)
+  - Fuel & Freight Rate Inflation ($\%$)
+  - USD/IDR Spot Rate Depreciation ($\%$)
+  - Raw Material Price Hikes ($\%$)
+  - Demand Spikes ($\%$)
+- **Impact Assessment**: Simulates compound cost increases across active Bills of Materials (`mrp_boms`), projects gross profit margin erosion, identifies at-risk SKUs and projected stockout dates, and computes customer revenue at risk.
+- **Strategic Mitigation Playbooks**: Automatically generates actionable hedging recommendations across Dual-Sourcing, Freight Index Surcharges, Gaussian Safety Stock increases ($Z=2.33$), and FX Forward Contracts.
+
+### 10.4 Enterprise Single Sign-On & Field-Level RBAC Matrix (`internal/core/security/rbac_matrix.go`)
+- **Federated Corporate Identity**: Configured metadata for SAML 2.0 (Okta, Microsoft Entra ID) and OpenID Connect (Google Workspace, Keycloak) with RSA-SHA256 certificate validation (`GET /api/v1/security/sso/config`).
+- **Granular Field-Level Data Masking**: Dynamic masking engine (`POST /api/v1/security/mask-record`) prevents information leakage across personas:
+  - Warehouse operators see physical quantity and bin locations, while `standard_price` and `cost_price` are masked to `***CONFIDENTIAL***`.
+  - Sales reps see customer orders and retail prices, while vendor costs are masked.
+  - Role-permission profiles map modules, CRUD actions, and field masking policies.
+
+### 10.5 Visual Drag-and-Drop BI Dashboard & Custom Report Builder (`internal/core/bi/dashboard_builder.go`)
+- **Interactive BI Dashboard Cockpit**: Endpoints `GET & POST /api/v1/bi/dashboards` manage departmental layouts (C-Suite Executive, Supply Chain Operations, Treasury & Finance) with flexible GridX/Y/W/H coordinates.
+- **Dynamic Real-Time Widgets**: Automatically aggregates live metrics from the ERP database for KPI Cards, Margin Gauges, Bar Charts (Monthly Revenue), Line Charts (Cashflow Runway), and Pie Charts (Product Category Breakdown).
+- **Custom Executive Report Builder**: Endpoint `POST /api/v1/bi/reports/export` generates custom tabular reports with aggregations and formats for Excel and PDF downloads.

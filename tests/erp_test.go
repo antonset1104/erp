@@ -19,6 +19,9 @@ import (
 	"erp-golang/internal/core/events"
 	"erp-golang/internal/core/multitenancy"
 	"erp-golang/internal/core/openapi"
+	"erp-golang/internal/core/audit"
+	"erp-golang/internal/core/bi"
+	"erp-golang/internal/core/security"
 	"erp-golang/internal/core/storage"
 	"erp-golang/internal/modules/account"
 	"erp-golang/internal/modules/approval"
@@ -8255,5 +8258,237 @@ Lead Engineer - Cloud Tech Nusantara (2020 - 2026)
 	t.Logf("✓ Hands-Free Voice Ops Assistant Verified: Intent='%s' & '%s', Audio Spoken Text=\"%s\"",
 		voiceRespStock.IntentDetected, voiceRespOmzet.IntentDetected, voiceRespOmzet.SpokenResponse)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (57 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT) PASSED 100%!")
+	// =========================================================================
+	// SECTION 58: AI AUTONOMOUS RFQ BIDDING, MERKLE-TREE LEDGER AUDIT,
+	//             SUPPLY CHAIN DIGITAL TWIN, FIELD-LEVEL RBAC & VISUAL BI BUILDER
+	// =========================================================================
+	t.Log(`
+		>>> SECTION 58: AI AUTONOMOUS RFQ BIDDING, MERKLE AUDIT, DIGITAL TWIN & BI DASHBOARD <<<`)
+
+	// 58.1 AI Autonomous Supplier Negotiation & RFQ Bidding Wars
+	tenderReq := &ai.CreateTenderRequest{
+		Title:           "Bulk Procurement: High-Definition IPS Panels Q4 2026",
+		ProductID:       1,
+		TargetQuantity:  100,
+		BudgetUnitPrice: 2500000,
+		VendorIDs:       []uint{1, 2},
+	}
+	tender, err := aiClient.CreateBiddingTender(db, tenderReq, 1)
+	if err != nil || tender == nil || tender.TenderID == "" || len(tender.InvitedVendors) != 2 {
+		t.Fatalf("Failed to create RFQ bidding tender: err=%v, tender=%+v", err, tender)
+	}
+
+	// Vendor 1 submits aggressive bid
+	bid1, err := aiClient.SubmitVendorBid(db, &ai.VendorBidSubmission{
+		TenderID:         tender.TenderID,
+		VendorID:         1,
+		OfferedUnitPrice: 2300000,
+		LeadTimeDays:     7,
+		PaymentTermsDays: 30,
+		WarrantyMonths:   24,
+		DiscountPct:      3.0,
+		Notes:            "Fast regional dispatch from Jakarta warehouse",
+	}, 1)
+	if err != nil || bid1 == nil {
+		t.Fatalf("Vendor 1 bid submission failed: %v", err)
+	}
+
+	// Vendor 2 submits bulk discount bid
+	bid2, err := aiClient.SubmitVendorBid(db, &ai.VendorBidSubmission{
+		TenderID:         tender.TenderID,
+		VendorID:         2,
+		OfferedUnitPrice: 2150000,
+		LeadTimeDays:     14,
+		PaymentTermsDays: 60,
+		WarrantyMonths:   18,
+		DiscountPct:      5.0,
+		Notes:            "Direct factory import Net 60 terms",
+	}, 1)
+	if err != nil || bid2 == nil {
+		t.Fatalf("Vendor 2 bid submission failed: %v", err)
+	}
+
+	// Evaluate MAUT Scorecard
+	scorecard, err := aiClient.EvaluateBiddingTender(db, tender.TenderID, 1)
+	if err != nil || scorecard == nil || len(scorecard.Bids) != 2 || scorecard.WinningBid == nil {
+		t.Fatalf("Tender evaluation failed: err=%v, scorecard=%+v", err, scorecard)
+	}
+	if scorecard.TotalEstimatedSavings <= 0 || scorecard.SavingsPct <= 0 {
+		t.Fatalf("Expected positive savings from competitive bidding, got %.2f (%.1f%%)",
+			scorecard.TotalEstimatedSavings, scorecard.SavingsPct)
+	}
+
+	// Award Tender to Winning Vendor
+	awardedPO, err := aiClient.AwardBiddingTender(db, tender.TenderID, scorecard.WinningBid.VendorID, 1)
+	if err != nil || awardedPO == nil || awardedPO.ID == 0 || len(awardedPO.OrderLines) == 0 {
+		t.Fatalf("Award tender failed: err=%v, po=%+v", err, awardedPO)
+	}
+	t.Logf("✓ AI Autonomous Supplier RFQ Bidding Verified: Tender='%s', WinningVendor='%s' (Score: %.1f/100, EffPrice: IDR %.2f), Savings=IDR %.2f (%.1f%%), Auto-Created PO='%s'",
+		tender.TenderID, scorecard.WinningBid.VendorName, scorecard.WinningBid.CompositeScore,
+		scorecard.WinningBid.EffectivePrice, scorecard.TotalEstimatedSavings, scorecard.SavingsPct, awardedPO.Name)
+
+	// 58.2 Cryptographic Merkle-Tree Ledger Audit (Tamper-Proof Financial Chain)
+	auditResult, err := audit.BuildAndVerifyMerkleLedger(db, 1)
+	if err != nil || auditResult == nil || !auditResult.Verified || auditResult.TamperDetected {
+		t.Fatalf("Merkle ledger audit verification failed: err=%v, res=%+v", err, auditResult)
+	}
+	if auditResult.MerkleRoot == "" || auditResult.ChainLength == 0 || auditResult.TreeDepth == 0 {
+		t.Fatalf("Invalid Merkle ledger audit metrics: %+v", auditResult)
+	}
+	t.Logf("✓ Cryptographic Merkle-Tree Ledger Audit Verified: Verified=%t, ChainLength=%d blocks, MerkleRoot='%s', TreeDepth=%d, Certificate='%s'",
+		auditResult.Verified, auditResult.ChainLength, auditResult.MerkleRoot, auditResult.TreeDepth, auditResult.Certificate)
+
+	// 58.3 Supply Chain Digital Twin & Interactive "What-If" Scenario Simulator
+	twinSim := aiClient.ExecuteDigitalTwinSimulation(db, &ai.DigitalTwinSimulateRequest{
+		ScenarioName:               "Simulated Middle-East Freight Spike & Supplier 14-Day Lead-Time Shock",
+		SupplierLeadTimeDelayDays:  14,
+		FuelFreightInflationPct:    18.5,
+		FXRateUSDIDR:               16800,
+		BaselineFXRateUSDIDR:       15800,
+		DemandSpikePct:             25.0,
+		RawMaterialCostIncreasePct: 12.0,
+	}, 1)
+	if twinSim == nil || twinSim.ActiveBOMsEvaluated == 0 || len(twinSim.MitigationStrategies) == 0 {
+		t.Fatalf("Supply chain digital twin simulation failed: %+v", twinSim)
+	}
+	if twinSim.TotalCOGSIncreasePct <= 0 || twinSim.GrossMarginErosionPct <= 0 {
+		t.Fatalf("Expected positive COGS inflation and margin erosion, got COGS=+%.2f%%, MarginErosion=%.2f%%",
+			twinSim.TotalCOGSIncreasePct, twinSim.GrossMarginErosionPct)
+	}
+	t.Logf("✓ Supply Chain Digital Twin Simulator Verified: Scenario='%s', COGS Increase=+%.1f%%, Gross Margin Erosion=-%.1f%%, Stockout At-Risk SKUs=%d, Mitigations=%d",
+		twinSim.ScenarioName, twinSim.TotalCOGSIncreasePct, twinSim.GrossMarginErosionPct, twinSim.StockoutRiskCount, len(twinSim.MitigationStrategies))
+
+	// 58.4 Enterprise Single Sign-On (SAML 2.0 / OIDC) & Field-Level RBAC Matrix
+	ssoConfig := security.GetEnterpriseSSOConfig()
+	if ssoConfig == nil || len(ssoConfig.Providers) < 3 || ssoConfig.EntityID == "" {
+		t.Fatalf("SSO configuration failed: %+v", ssoConfig)
+	}
+
+	rbacMatrix := security.GetRBACMatrix()
+	if rbacMatrix == nil || len(rbacMatrix.RoleProfiles) < 4 || len(rbacMatrix.SystemRoles) == 0 {
+		t.Fatalf("RBAC Matrix retrieval failed: %+v", rbacMatrix)
+	}
+
+	// Test field-level masking: Warehouse role should mask standard_price & cost_price
+	unmaskedWarehouseData := map[string]interface{}{
+		"name":           "Gaming Monitor 27 Inch",
+		"default_code":   "MON-27-001",
+		"standard_price": 2500000.0,
+		"cost_price":     2500000.0,
+		"qty_available":  10.0,
+	}
+	maskedWarehouseData := security.MaskRecordDynamically("warehouse", "product", unmaskedWarehouseData)
+	if maskedWarehouseData["standard_price"] != "***CONFIDENTIAL***" || maskedWarehouseData["cost_price"] != "***CONFIDENTIAL***" {
+		t.Fatalf("Expected masked cost prices for warehouse role, got: %+v", maskedWarehouseData)
+	}
+	if maskedWarehouseData["qty_available"] != 10.0 {
+		t.Fatalf("Expected unmasked physical quantity for warehouse role, got: %v", maskedWarehouseData["qty_available"])
+	}
+
+	// Admin role should NOT mask anything
+	adminData := security.MaskRecordDynamically("admin", "product", unmaskedWarehouseData)
+	if adminData["standard_price"] != 2500000.0 {
+		t.Fatalf("Expected unmasked price for admin role, got: %v", adminData["standard_price"])
+	}
+	t.Logf("✓ Enterprise SSO & Field-Level RBAC Matrix Verified: SSO Providers=%d, Roles=%d, MaskingVerified(warehouse standard_price='%s', admin standard_price=%.2f)",
+		len(ssoConfig.Providers), len(rbacMatrix.RoleProfiles), maskedWarehouseData["standard_price"], adminData["standard_price"])
+
+	// 58.5 Visual Drag-and-Drop BI Dashboard & Custom Executive Report Builder
+	biHandler := bi.NewHandler(db)
+	if biHandler == nil {
+		t.Fatal("BI Handler failed to initialize")
+	}
+
+	// Test saving a custom BI Dashboard
+	customDashID := fmt.Sprintf("DASH-CUSTOM-TEST-%d", time.Now().Unix()%10000)
+	customDashReq := bi.BIDashboard{
+		ID:          customDashID,
+		Name:        "Corporate Strategy & Financial Performance Cockpit",
+		Department:  "executive",
+		Description: "Executive overview of revenue, gross margin, and working capital.",
+		IsDefault:   false,
+		CompanyID:   1,
+		Widgets: []bi.BIWidget{
+			{
+				ID:         "WGT-TEST-01",
+				Title:      "Real-Time Net Revenue",
+				Type:       "kpi_card",
+				GridX:      0,
+				GridY:      0,
+				GridW:      4,
+				GridH:      2,
+				DataSource: "monthly_revenue",
+			},
+			{
+				ID:         "WGT-TEST-02",
+				Title:      "Gross Margin %",
+				Type:       "gauge",
+				GridX:      4,
+				GridY:      0,
+				GridW:      4,
+				GridH:      2,
+				DataSource: "cogs_breakdown",
+			},
+		},
+	}
+
+	// Test via HTTP endpoint simulation
+	wSave := httptest.NewRecorder()
+	cSave, _ := gin.CreateTestContext(wSave)
+	saveBody, _ := json.Marshal(customDashReq)
+	cSave.Request = httptest.NewRequest("POST", "/api/v1/bi/dashboards", strings.NewReader(string(saveBody)))
+	cSave.Request.Header.Set("Content-Type", "application/json")
+	cSave.Set("company_id", uint(1))
+	cSave.Set("user_id", uint(1))
+	biHandler.SaveDashboard(cSave)
+
+	if wSave.Code != http.StatusCreated {
+		t.Fatalf("Failed to save custom BI dashboard: code=%d, body=%s", wSave.Code, wSave.Body.String())
+	}
+
+	// Test fetching the dashboard with live dynamic widget payloads
+	wGet := httptest.NewRecorder()
+	cGet, _ := gin.CreateTestContext(wGet)
+	cGet.Request = httptest.NewRequest("GET", "/api/v1/bi/dashboards/"+customDashID, nil)
+	cGet.Params = []gin.Param{{Key: "id", Value: customDashID}}
+	cGet.Set("company_id", uint(1))
+	biHandler.GetDashboard(cGet)
+
+	if wGet.Code != http.StatusOK {
+		t.Fatalf("Failed to get BI dashboard: code=%d, body=%s", wGet.Code, wGet.Body.String())
+	}
+
+	var fetchedDash bi.BIDashboard
+	if err := json.Unmarshal(wGet.Body.Bytes(), &fetchedDash); err != nil || len(fetchedDash.Widgets) != 2 {
+		t.Fatalf("Failed to unmarshal populated BI dashboard: %v", err)
+	}
+	if fetchedDash.Widgets[0].DataPayload == nil || fetchedDash.Widgets[0].DataPayload["value"] == nil {
+		t.Fatalf("Expected live populated DataPayload for widget, got: %+v", fetchedDash.Widgets[0])
+	}
+
+	// Test Custom Report Export
+	wExp := httptest.NewRecorder()
+	cExp, _ := gin.CreateTestContext(wExp)
+	repReqBody, _ := json.Marshal(bi.CustomReportConfig{
+		ReportName: "Executive_Sales_Performance_Q4",
+		Module:     "sale",
+		Columns:    []string{"id", "name", "amount_total"},
+		Format:     "excel",
+	})
+	cExp.Request = httptest.NewRequest("POST", "/api/v1/bi/reports/export", strings.NewReader(string(repReqBody)))
+	cExp.Request.Header.Set("Content-Type", "application/json")
+	cExp.Set("company_id", uint(1))
+	biHandler.ExportCustomReport(cExp)
+
+	if wExp.Code != http.StatusOK {
+		t.Fatalf("Export custom report failed: code=%d, body=%s", wExp.Code, wExp.Body.String())
+	}
+	var repRes bi.ReportExportResult
+	if err := json.Unmarshal(wExp.Body.Bytes(), &repRes); err != nil || repRes.Status != "SUCCESS_GENERATED" {
+		t.Fatalf("Invalid report export response: %v, body=%s", err, wExp.Body.String())
+	}
+	t.Logf("✓ Visual BI Dashboard & Custom Report Builder Verified: Dashboard='%s', Widgets=%d (Populated Metric: %v), ReportExport='%s' (Status: %s)",
+		fetchedDash.Name, len(fetchedDash.Widgets), fetchedDash.Widgets[0].DataPayload["formatted"], repRes.ReportName, repRes.Status)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (58 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI) PASSED 100%!")
 }

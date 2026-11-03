@@ -372,6 +372,70 @@ func (h *Handler) VoiceCommand(c *gin.Context) {
 	c.JSON(http.StatusOK, h.client.ExecuteVoiceCommand(h.db, &req, companyID))
 }
 
+// AI Autonomous Supplier Negotiation & RFQ Bidding Wars
+func (h *Handler) CreateRFQBidTender(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	var req CreateTenderRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	tender, err := h.client.CreateBiddingTender(h.db, &req, companyID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, tender)
+}
+
+func (h *Handler) SubmitVendorBid(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	var req VendorBidSubmission
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	eval, err := h.client.SubmitVendorBid(h.db, &req, companyID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, eval)
+}
+
+func (h *Handler) EvaluateRFQBidTender(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	tenderID := c.Param("tender_id")
+	card, err := h.client.EvaluateBiddingTender(h.db, tenderID, companyID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, card)
+}
+
+func (h *Handler) AwardRFQBidTender(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	tenderID := c.Param("tender_id")
+	var req AwardTenderRequest
+	_ = c.ShouldBindJSON(&req)
+	po, err := h.client.AwardBiddingTender(h.db, tenderID, req.VendorID, companyID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, po)
+}
+
+// Supply Chain Digital Twin & What-If Scenario Simulator
+func (h *Handler) DigitalTwinSimulate(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	var req DigitalTwinSimulateRequest
+	_ = c.ShouldBindJSON(&req)
+	resp := h.client.ExecuteDigitalTwinSimulation(h.db, &req, companyID)
+	c.JSON(http.StatusOK, resp)
+}
+
 // RegisterRootProtocolRoutes registers public protocol discovery endpoints like /.well-known/agent.json and /mcp
 func RegisterRootProtocolRoutes(r *gin.Engine, h *Handler) {
 	r.GET("/.well-known/agent.json", h.GetA2AAgentCard)
@@ -391,6 +455,7 @@ func RegisterAIRoutes(router *gin.RouterGroup, authMiddleware gin.HandlerFunc, h
 		group.GET("/a2a/agent.json", h.GetA2AAgentCard)
 		group.POST("/mcp", h.HandleMCP)
 		group.POST("/chatops/webhook", h.ChatOpsWebhook) // Webhooks from WhatsApp/Slack can use signature verification or direct POST
+		group.POST("/rfq/submit-bid", h.SubmitVendorBid) // Public tokenized vendor bid intake portal
 
 		// Authenticated AI routes
 		authed := group.Group("")
@@ -416,6 +481,12 @@ func RegisterAIRoutes(router *gin.RouterGroup, authMiddleware gin.HandlerFunc, h
 			authed.POST("/demand-sensing", h.DemandSensing)
 			authed.POST("/replenish/auto-po", h.AutoReplenish)
 			authed.POST("/voice/command", h.VoiceCommand)
+
+			// AI Autonomous RFQ Bidding & Digital Twin
+			authed.POST("/rfq/tenders", h.CreateRFQBidTender)
+			authed.GET("/rfq/evaluate/:tender_id", h.EvaluateRFQBidTender)
+			authed.POST("/rfq/award/:tender_id", h.AwardRFQBidTender)
+			authed.POST("/digital-twin/simulate", h.DigitalTwinSimulate)
 
 			// Domain AI Endpoints
 			authed.POST("/ticket-triage", h.TriageTicket)

@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![CI Status](https://img.shields.io/badge/CI-Passing-success?style=flat&logo=githubactions)](https://github.com/antonset1104/erp/actions)
 [![Modules](https://img.shields.io/badge/Modules-50_Enterprise-indigo)](docs/FUNCTIONAL_DOCUMENTATION.md)
-[![Release](https://img.shields.io/badge/Release-v1.43.0-emerald)](https://github.com/antonset1104/erp/releases)
+[![Release](https://img.shields.io/badge/Release-v1.44.0-emerald)](https://github.com/antonset1104/erp/releases)
 [![Open Source](https://img.shields.io/badge/Open_Source-Community_Driven-purple)](docs/OPEN_SOURCE_GUIDE.md)
 
 **GoERP** is a modern, high-performance, enterprise-grade Enterprise Resource Planning (ERP) platform built natively with **Golang**. Engineered with a clean **Modular Monolith** architecture comprising **50 integrated business modules**, GoERP delivers single-binary static compilation, native Go concurrency, ultra-low memory overhead (~25 MB idle RAM), and strict transactional integrity for mission-critical enterprise workloads.
@@ -46,6 +46,11 @@ GoERP includes built-in executive productivity tools to accelerate day-to-day op
 - **🏢 Enterprise SaaS Multi-Tenancy Engine**: Database-per-tenant and schema isolation with automatic routing by subdomain or `X-Tenant-ID` header, and self-service registration.
 - **📴 Offline-First PWA & Barcode POS Sync**: Service worker app shell caching (`/web/sw.js`), web app manifest (`/web/manifest.json`), and batch background synchronization for offline transactions.
 - **🎙️ Hands-Free Voice Ops Assistant**: Speech recognition & synthesis voice assistant executing warehouse inventory checks, financial summaries, and approvals via voice commands.
+- **⚔️ AI Autonomous Supplier Negotiation & RFQ Bidding Wars (`POST /api/v1/ai/rfq/tenders`, `GET /api/v1/ai/rfq/evaluate/:id`)**: Tokenized vendor bid portal, automated bid intake, and Multi-Attribute Utility Theory (MAUT) scorecard matrix (Price 40%, Lead Time 25%, Payment Terms 20%, Warranty 15%) with 1-click auto-PO tender awarding.
+- **🔒 Cryptographic Merkle-Tree Ledger Audit (Tamper-Proof Financial Chain) (`GET /api/v1/audit/verify-tamper`)**: Sequential SHA-256 linear hash chaining and binary Merkle tree recomputation over General Ledger entries (`account_moves`), payments, and purchase orders, generating mathematical zero-tamper certificates.
+- **🌐 Supply Chain Digital Twin & "What-If" Scenario Simulator (`POST /api/v1/ai/digital-twin/simulate`)**: Monte Carlo stress test engine simulating supplier lead-time shocks, freight rate spikes (+18.5%), and USD/IDR FX volatility on BOM unit costs, gross margins, and customer delivery orders with actionable AI playbooks.
+- **🛡️ Enterprise Single Sign-On (SAML 2.0 / OIDC) & Field-Level RBAC Matrix (`GET /api/v1/security/rbac-matrix`, `GET /api/v1/security/sso/config`)**: Federated corporate identity (Okta, Azure AD, Google Workspace) and dynamic field-level masking (e.g. `standard_price`/`cost_price` masked for warehouse operators).
+- **📊 Visual Drag-and-Drop BI Dashboard & Custom Report Builder (`GET /api/v1/bi/dashboards`, `POST /api/v1/bi/reports/export`)**: Dynamic KPI cards, gauges, charts (Bar/Line/Pie) backed by live DB metrics, and user-configurable custom PDF/Excel executive reports.
 - **🌓 Dark / Light Enterprise Theme Modes**: Seamless visual theme switcher (`☀️ Light` / `🌙 Dark`) with state persisted across browser sessions.
 
 ---

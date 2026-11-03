@@ -23007,6 +23007,287 @@ async function submitVoiceCommandText(transcript) {
     }
 }
 
+// AI Autonomous Supplier Negotiation & RFQ Bidding Wars
+async function triggerAIRFQBidding() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mempersiapkan RFQ Tender, token intake vendor, dan AI MAUT scorecard matrix...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        // 1. Create Tender
+        const tender = await api('/ai/rfq/tenders', 'POST', {
+            title: 'Pengadaan Layar Panel Monitor & Komponen Display Q4 2026',
+            product_id: 1,
+            target_quantity: 50,
+            budget_unit_price: 2500000,
+            vendor_ids: [1, 2]
+        });
+
+        // 2. Simulate Vendor Bid Submissions
+        await api('/ai/rfq/submit-bid', 'POST', {
+            tender_id: tender.tender_id,
+            vendor_id: 1,
+            offered_unit_price: 2350000,
+            lead_time_days: 7,
+            payment_terms_days: 30,
+            warranty_months: 24,
+            discount_pct: 3.5,
+            notes: 'Siap kirim via gudang regional Jakarta'
+        });
+
+        await api('/ai/rfq/submit-bid', 'POST', {
+            tender_id: tender.tender_id,
+            vendor_id: 2,
+            offered_unit_price: 2200000,
+            lead_time_days: 14,
+            payment_terms_days: 60,
+            warranty_months: 18,
+            discount_pct: 5.0,
+            notes: 'Import FOB Shanghai, syarat LC atau Net 60'
+        });
+
+        // 3. Evaluate Scorecard
+        const scorecard = await api('/ai/rfq/evaluate/' + tender.tender_id, 'GET');
+
+        if (badge) badge.textContent = '⚔️ RFQ Bidding: ' + scorecard.total_bids + ' Vendor Bids Evaluated';
+        if (answerEl) {
+            let out = `🏆 REKOMENDASI AI RFQ TENDER (${scorecard.tender_id}):\n`;
+            out += `Produk: ${scorecard.product_name} | Target: ${scorecard.target_quantity} unit | Pagu Anggaran: IDR ${scorecard.budget_unit_price.toLocaleString()}\n\n`;
+            out += `💡 ${scorecard.strategic_recommendation}\n\n`;
+            out += `📋 PERINGKAT BIDDING MATRIX (Price 40%, Lead Time 25%, Terms 20%, Warranty 15%):\n`;
+            scorecard.bids.forEach(b => {
+                out += `• Rank #${b.rank}: ${b.vendor_name} — Skor: ${b.composite_score}/100\n`;
+                out += `  Harga Efektif: IDR ${b.effective_price.toLocaleString()} | Lead Time: ${b.lead_time_days} hari | Termin: Net ${b.payment_terms_days} | Garansi: ${b.warranty_months} bln\n`;
+                out += `  Saran AI: ${b.counter_offer_suggestion}\n`;
+            });
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li><a href="javascript:void(0)" onclick="awardWinningBid('${tender.tender_id}', ${scorecard.winning_bid.vendor_id})" style="color:var(--primary);font-weight:600;">⚡ 1-Click Award ke Pemenang (${scorecard.winning_bid.vendor_name}) & Terbitkan Draft PO</a></li>
+                <li>Penghematan Pengadaan Terkunci: IDR ${scorecard.total_estimated_savings.toLocaleString()} (${scorecard.savings_pct}% di bawah pagu)</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mengevaluasi tender bidding: ' + err.message;
+    }
+}
+
+async function awardWinningBid(tenderId, vendorId) {
+    try {
+        const po = await api('/ai/rfq/award/' + tenderId, 'POST', { vendor_id: vendorId });
+        alert(`Berhasil menerbitkan Draft Purchase Order ${po.name} (Total: IDR ${po.amount_total.toLocaleString()})!`);
+    } catch (err) {
+        alert('Gagal menerbitkan PO: ' + err.message);
+    }
+}
+
+// Cryptographic Merkle-Tree Ledger Audit
+async function triggerMerkleLedgerAudit() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Merekonsiliasi SHA-256 linear hash chain dan Binary Merkle Tree dari seluruh entri buku besar...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const resp = await api('/audit/verify-tamper', 'GET');
+        if (badge) badge.textContent = '🔒 Merkle Audit: ' + resp.integrity_status;
+        if (answerEl) {
+            let out = `🛡️ HASIL AUDIT KRIPTOGRAFIS BUKU BESAR FINANCIAL (TAMPER-PROOF LEDGER):\n`;
+            out += `Status Integritas: ${resp.verified ? '✅ 100% TERVERIFIKASI ASLI (ZERO-TAMPER)' : '⚠️ PERINGATAN INTEGRITAS'}\n`;
+            out += `Panjang Rantai Transaksi (Chain Length): ${resp.chain_length} entri terenkripsi\n`;
+            out += `Merkle Root Hash (SHA-256): ${resp.merkle_root}\n`;
+            out += `Kedalaman Pohon Merkle (Tree Depth): ${resp.tree_depth} level | Daun (Leaves): ${resp.leaf_count}\n`;
+            out += `Blok Terakhir (Latest Block Hash): ${resp.latest_block_hash.substring(0, 32)}...\n`;
+            out += `Sertifikat Audit: ${resp.certificate}\n\n`;
+            out += `📌 Ringkasan: ${resp.summary}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList && resp.sample_merkle_proof) {
+            actionsList.innerHTML = `
+                <li>Validasi Bukti Cabang Merkle (Proof Sibling Nodes): ${resp.sample_merkle_proof.length} level diverifikasi matematis.</li>
+                <li>Tidak ditemukan manipulasi, penghapusan baris, maupun modifikasi tanggal jurnal akuntansi.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal menjalankan audit kriptografis: ' + err.message;
+    }
+}
+
+// Supply Chain Digital Twin Simulator
+async function triggerDigitalTwinSimulator() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menjalankan simulasi Digital Twin & Stress-Test Rantai Pasok (Monte Carlo)...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const resp = await api('/ai/digital-twin/simulate', 'POST', {
+            scenario_name: 'Simulasi Krisis Logistik Global: Lonjakan Freight +18.5% & Delay Vendor 14 Hari',
+            supplier_lead_time_delay_days: 14,
+            fuel_freight_inflation_pct: 18.5,
+            raw_material_cost_increase_pct: 12.0,
+            fx_rate_usd_idr: 16800,
+            baseline_fx_rate_usd_idr: 15800,
+            demand_spike_pct: 20.0
+        });
+
+        if (badge) badge.textContent = '🌐 Digital Twin: ' + resp.active_boms_evaluated + ' BOM Dievaluasi';
+        if (answerEl) {
+            let out = `🌐 SIMULASI DIGITAL TWIN RANTAI PASOK (${resp.scenario_name}):\n\n`;
+            out += `📊 PROYEKSI FINANSIAL:\n`;
+            out += `• Baseline COGS: IDR ${resp.baseline_total_cogs.toLocaleString()} ➔ Proyeksi COGS: IDR ${resp.projected_total_cogs.toLocaleString()} (+${resp.total_cogs_increase_pct}%)\n`;
+            out += `• Erosi Gross Margin: Tergerus sebesar -${resp.gross_margin_erosion_pct}% (Laba Kotor Berkurang IDR ${(resp.baseline_gross_profit - resp.projected_gross_profit).toLocaleString()})\n`;
+            out += `• SKU Berisiko Kehabisan Stok (Stockout): ${resp.stockout_risk_count} produk\n`;
+            out += `• Nilai Penjualan Berisiko Terlambat: IDR ${resp.estimated_revenue_at_risk.toLocaleString()} (${resp.delayed_customer_orders} pesanan pelanggan)\n\n`;
+            out += `🛠️ REKOMENDASI PLAYBOOK MITIGASI AI:\n`;
+            resp.mitigation_strategies.forEach(m => {
+                out += `[${m.priority}] ${m.category}: ${m.action}\n  ↳ Dampak: ${m.projected_impact}\n`;
+            });
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Strategi Hedging Sourcing: Aktifkan supplier alternatif regional untuk memotong lead time 14 hari.</li>
+                <li>Penyesuaian Margin: Terapkan freight index surcharge sementara untuk mengamankan profitabilitas.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal menjalankan simulasi digital twin: ' + err.message;
+    }
+}
+
+// Field-Level RBAC Matrix & SSO
+async function triggerRBACMatrixModal() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengambil matriks RBAC dan menguji dynamic field-level masking...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const matrix = await api('/security/rbac-matrix', 'GET');
+        const sso = await api('/security/sso/config', 'GET');
+
+        // Test field-level masking for warehouse role
+        const masked = await api('/security/mask-record', 'POST', {
+            role: 'warehouse',
+            module: 'product',
+            data: {
+                name: 'Gaming Monitor 27 Inch',
+                default_code: 'MON-27-001',
+                standard_price: 2500000,
+                cost_price: 2500000,
+                qty_available: 12
+            }
+        });
+
+        if (badge) badge.textContent = '🛡️ Enterprise Security & SSO';
+        if (answerEl) {
+            let out = `🛡️ MATRIKS ROLE-BASED ACCESS CONTROL (RBAC) & ENTERPRISE SSO:\n\n`;
+            out += `🏢 Single Sign-On (SSO): ${sso.providers.length} Federasi Aktif (${sso.providers.map(p => p.name).join(', ')})\n`;
+            out += `SP Entity ID: ${sso.entity_id} | Domain Enforce: ${sso.enforce_sso_for_domain}\n\n`;
+            out += `👥 Sistem Roles: ${matrix.system_roles.join(', ')}\n\n`;
+            out += `🔒 CONTOH FIELD-LEVEL DATA MASKING (Role: Warehouse):\n`;
+            out += `Data Mentah: standard_price = Rp 2,500,000 | cost_price = Rp 2,500,000\n`;
+            out += `Data Terfilter: standard_price = "${masked.record.standard_price}" | cost_price = "${masked.record.cost_price}" | qty_available = ${masked.record.qty_available}\n`;
+            out += `Staf gudang hanya melihat kuantitas fisik tanpa mengungkap harga pokok atau rahasia margin perusahaan.`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Matriks izin berbasis field mencegah kebocoran margin dan informasi sensitif per divisi.</li>
+                <li>Integrasi protokol standar SAML 2.0 & OIDC siap dihubungkan ke Okta, Azure AD, atau Google Workspace.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memuat matriks keamanan: ' + err.message;
+    }
+}
+
+// Visual Drag-and-Drop BI Dashboard
+async function triggerBIDashboardBuilder() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memuat dashboard BI, widget KPI kustom, dan grafik real-time...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const dashboards = await api('/bi/dashboards', 'GET');
+        const defaultDash = dashboards[0] || {};
+
+        if (badge) badge.textContent = '📊 BI Cockpit: ' + (defaultDash.widgets ? defaultDash.widgets.length : 0) + ' Live Widgets';
+        if (answerEl) {
+            let out = `📊 VISUAL BI DASHBOARD BUILDER (${defaultDash.name || 'Executive Cockpit'}):\n`;
+            out += `Departemen: ${defaultDash.department || 'C-Suite'} | Deskripsi: ${defaultDash.description || ''}\n\n`;
+            out += `📈 WIDGET AKTIF TERHUBUNG KE DATABASE:\n`;
+            (defaultDash.widgets || []).forEach(w => {
+                const val = w.data_payload && (w.data_payload.formatted || w.data_payload.value || JSON.stringify(w.data_payload));
+                out += `• [${w.type.toUpperCase()}] ${w.title}: ${val}\n`;
+            });
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li><a href="javascript:void(0)" onclick="exportCustomExecutiveReport()" style="color:var(--primary);font-weight:600;">📥 Export Laporan Eksekutif Kustom (PDF/Excel)</a></li>
+                <li>Dashboard mendukung kustomisasi koordinat GridX/Y, jenis grafik (Line, Bar, Pie, Gauge), dan sumber data live.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memuat visual BI dashboard: ' + err.message;
+    }
+}
+
+async function exportCustomExecutiveReport() {
+    try {
+        const rep = await api('/bi/reports/export', 'POST', {
+            report_name: 'Executive_Corporate_PnL_Summary_2026',
+            module: 'sale',
+            columns: ['id', 'name', 'partner_id', 'amount_total', 'state'],
+            group_by: 'month',
+            format: 'excel'
+        });
+        alert(`Laporan ${rep.report_name} berhasil digenerate (${rep.total_records} data transaksi diproses)!`);
+    } catch (err) {
+        alert('Gagal mengekspor laporan: ' + err.message);
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

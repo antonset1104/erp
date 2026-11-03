@@ -8,6 +8,8 @@ import (
 
 	"erp-golang/internal/config"
 	"erp-golang/internal/core/ai"
+	"erp-golang/internal/core/audit"
+	"erp-golang/internal/core/bi"
 	"erp-golang/internal/core/commandcenter"
 	"erp-golang/internal/core/database"
 	"erp-golang/internal/core/events"
@@ -15,6 +17,7 @@ import (
 	"erp-golang/internal/core/multitenancy"
 	"erp-golang/internal/core/openapi"
 	"erp-golang/internal/core/registry"
+	"erp-golang/internal/core/security"
 	"erp-golang/internal/core/storage"
 	"erp-golang/internal/modules/account"
 	"erp-golang/internal/modules/approval"
@@ -262,7 +265,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.41.0",
+			"version":    "1.44.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -280,7 +283,7 @@ func main() {
 	ai.RegisterRootProtocolRoutes(r, aiHandler)
 
 	// Register OpenAPI 3.1 & Interactive API Explorer
-	openapi.RegisterRoutes(r, cfg.AppName, "1.42.0")
+	openapi.RegisterRoutes(r, cfg.AppName, "1.44.0")
 
 	// API v1 Router Group
 	apiV1 := r.Group("/api/v1")
@@ -298,6 +301,9 @@ func main() {
 		commandcenter.RegisterRoutes(apiV1, authMiddleware, db, saleMod.Service(), purchaseMod.Service(), stockMod.Service(), accountMod.Service())
 		events.RegisterEventRoutes(apiV1, authMiddleware)
 		multitenancy.RegisterSaaSRoutes(apiV1, authMiddleware, tenantMgr)
+		audit.RegisterAuditRoutes(apiV1, authMiddleware, db)
+		security.RegisterSecurityRoutes(apiV1, authMiddleware)
+		bi.RegisterBIRoutes(apiV1, authMiddleware, db)
 	}
 
 	// Serve Static Web Frontend
