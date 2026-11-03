@@ -11,6 +11,7 @@ import (
 	"erp-golang/internal/core/commandcenter"
 	"erp-golang/internal/core/database"
 	"erp-golang/internal/core/middleware"
+	"erp-golang/internal/core/openapi"
 	"erp-golang/internal/core/registry"
 	"erp-golang/internal/core/storage"
 	"erp-golang/internal/modules/account"
@@ -270,6 +271,12 @@ func main() {
 
 	// Cloudflare Workers AI Service Handler
 	aiHandler := ai.NewHandler(aiClient, db)
+
+	// Register Root Protocol Routes (MCP JSON-RPC 2.0 & Google A2A Agent Card)
+	ai.RegisterRootProtocolRoutes(r, aiHandler)
+
+	// Register OpenAPI 3.1 & Interactive API Explorer
+	openapi.RegisterRoutes(r, cfg.AppName, "1.42.0")
 
 	// API v1 Router Group
 	apiV1 := r.Group("/api/v1")

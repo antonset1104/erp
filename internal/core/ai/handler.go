@@ -82,6 +82,104 @@ func (h *Handler) SyncGCP(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+// Model Context Protocol (MCP) JSON-RPC 2.0 Handler
+func (h *Handler) HandleMCP(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	var req MCPJSONRPCRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"jsonrpc": "2.0",
+			"id":      nil,
+			"error": gin.H{
+				"code":    -32700,
+				"message": "Parse error: " + err.Error(),
+			},
+		})
+		return
+	}
+
+	resp := h.client.HandleMCPJSONRPC(h.db, &req, companyID)
+	c.JSON(http.StatusOK, resp)
+}
+
+// Google Cloud Agent-to-Agent (A2A) Discovery Card Handler
+func (h *Handler) GetA2AAgentCard(c *gin.Context) {
+	scheme := "http"
+	if c.Request.TLS != nil {
+		scheme = "https"
+	}
+	baseURL := scheme + "://" + c.Request.Host
+	c.JSON(http.StatusOK, h.client.GetA2AAgentCard(baseURL))
+}
+
+// Google Cloud A2A Task Submission Handler
+func (h *Handler) ExecuteA2ATask(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	var req A2ATaskRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, h.client.ExecuteA2ATask(h.db, &req, companyID))
+}
+
+// AI Document Intelligence (OCR & 3-Way Matching)
+func (h *Handler) DocumentIntelligence(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	var req DocumentIntelligenceRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	res := h.client.ExecuteDocumentIntelligence(h.db, &req, companyID)
+	c.JSON(http.StatusOK, res)
+}
+
+// Continuous AI Audit & Fraud Radar
+func (h *Handler) FraudRadar(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	var req FraudRadarRequest
+	_ = c.ShouldBindJSON(&req)
+
+	res := h.client.RunFraudRadar(h.db, &req, companyID)
+	c.JSON(http.StatusOK, res)
+}
+
+// Predictive 30/60/90-Day Cashflow Forecasting
+func (h *Handler) CashflowForecast(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	var req CashflowForecastRequest
+	_ = c.ShouldBindJSON(&req)
+
+	res := h.client.GetCashflowForecast(h.db, &req, companyID)
+	c.JSON(http.StatusOK, res)
+}
+
+// ESG & Carbon Footprint Ledger (Scope 1, 2, 3 GHG Accounting)
+func (h *Handler) ESGReport(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	var req ESGReportRequest
+	_ = c.ShouldBindJSON(&req)
+
+	res := h.client.GetESGCarbonReport(h.db, &req, companyID)
+	c.JSON(http.StatusOK, res)
+}
+
+// Omnichannel ChatOps Webhook (WhatsApp, Telegram, Slack)
+func (h *Handler) ChatOpsWebhook(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	var req ChatOpsWebhookRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	res := h.client.ExecuteChatOpsWebhook(h.db, &req, companyID)
+	c.JSON(http.StatusOK, res)
+}
+
 type TicketTriageRequest struct {
 	Title       string `json:"title" binding:"required"`
 	Description string `json:"description"`
@@ -159,7 +257,6 @@ func (h *Handler) AskERP(c *gin.Context) {
 		return
 	}
 
-	// Gather live business context from DB
 	var saleCount int64
 	var totalSales float64
 	var purchaseCount int64
@@ -245,23 +342,55 @@ func (h *Handler) ReceiptOCR(c *gin.Context) {
 	c.JSON(http.StatusOK, analysis)
 }
 
+// RegisterRootProtocolRoutes registers public protocol discovery endpoints like /.well-known/agent.json and /mcp
+func RegisterRootProtocolRoutes(r *gin.Engine, h *Handler) {
+	r.GET("/.well-known/agent.json", h.GetA2AAgentCard)
+	r.POST("/mcp", h.HandleMCP)
+	r.GET("/mcp", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "GoERP Native Model Context Protocol (MCP) Server. Send POST JSON-RPC 2.0 requests to this endpoint.",
+			"version": "2025-03-26",
+		})
+	})
+}
+
 func RegisterAIRoutes(router *gin.RouterGroup, authMiddleware gin.HandlerFunc, h *Handler) {
 	group := router.Group("/ai")
-	group.Use(authMiddleware)
 	{
-		group.GET("/status", h.GetStatus)
-		group.GET("/providers", h.GetProviders)
-		group.GET("/tools", h.GetToolsManifest)
-		group.POST("/agent/execute", h.ExecuteAgent)
-		group.GET("/gcp/status", h.GetGCPStatus)
-		group.POST("/gcp/sync", h.SyncGCP)
+		// Public protocol & discovery endpoints (optional token)
+		group.GET("/a2a/agent.json", h.GetA2AAgentCard)
+		group.POST("/mcp", h.HandleMCP)
+		group.POST("/chatops/webhook", h.ChatOpsWebhook) // Webhooks from WhatsApp/Slack can use signature verification or direct POST
 
-		group.POST("/ticket-triage", h.TriageTicket)
-		group.POST("/quality-rca", h.QualityRCA)
-		group.POST("/expense-categorize", h.ExpenseCategorize)
-		group.POST("/ask-erp", h.AskERP)
-		group.POST("/ask", h.AskERP)
-		group.POST("/approval-risk", h.ApprovalRisk)
-		group.POST("/receipt-ocr", h.ReceiptOCR)
+		// Authenticated AI routes
+		authed := group.Group("")
+		authed.Use(authMiddleware)
+		{
+			authed.GET("/status", h.GetStatus)
+			authed.GET("/providers", h.GetProviders)
+			authed.GET("/tools", h.GetToolsManifest)
+			authed.POST("/agent/execute", h.ExecuteAgent)
+			authed.GET("/gcp/status", h.GetGCPStatus)
+			authed.POST("/gcp/sync", h.SyncGCP)
+
+			// Enterprise AI Intelligence Endpoints
+			authed.POST("/a2a/tasks/send", h.ExecuteA2ATask)
+			authed.POST("/doc-intelligence", h.DocumentIntelligence)
+			authed.GET("/fraud-radar", h.FraudRadar)
+			authed.POST("/fraud-radar", h.FraudRadar)
+			authed.GET("/cashflow-forecast", h.CashflowForecast)
+			authed.POST("/cashflow-forecast", h.CashflowForecast)
+			authed.GET("/esg-report", h.ESGReport)
+			authed.POST("/esg-report", h.ESGReport)
+
+			// Domain AI Endpoints
+			authed.POST("/ticket-triage", h.TriageTicket)
+			authed.POST("/quality-rca", h.QualityRCA)
+			authed.POST("/expense-categorize", h.ExpenseCategorize)
+			authed.POST("/ask-erp", h.AskERP)
+			authed.POST("/ask", h.AskERP)
+			authed.POST("/approval-risk", h.ApprovalRisk)
+			authed.POST("/receipt-ocr", h.ReceiptOCR)
+		}
 	}
 }

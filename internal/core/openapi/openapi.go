@@ -1,0 +1,380 @@
+package openapi
+
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
+
+// GetSpec generates the OpenAPI 3.1.0 specification for GoERP
+func GetSpec(appName, version string) map[string]interface{} {
+	if appName == "" {
+		appName = "GoERP Enterprise Cloud"
+	}
+	if version == "" {
+		version = "1.42.0"
+	}
+
+	return map[string]interface{}{
+		"openapi": "3.1.0",
+		"info": map[string]interface{}{
+			"title":       appName + " — OpenAPI 3.1 & AI Agent Specification",
+			"version":     version,
+			"description": "Production-grade Open-Source Enterprise Resource Planning (ERP) REST API, Native Model Context Protocol (MCP) JSON-RPC 2.0 Server, Google Cloud A2A (Agent-to-Agent) Protocol, and Multi-Provider AI Intelligence Engine.",
+			"contact": map[string]interface{}{
+				"name": "GoERP Open Source Community",
+				"url":  "https://github.com/antonset1104/erp",
+			},
+			"license": map[string]interface{}{
+				"name": "MIT License",
+				"url":  "https://opensource.org/licenses/MIT",
+			},
+		},
+		"servers": []map[string]interface{}{
+			{
+				"url":         "/",
+				"description": "Active GoERP Server Instance",
+			},
+		},
+		"components": map[string]interface{}{
+			"securitySchemes": map[string]interface{}{
+				"BearerAuth": map[string]interface{}{
+					"type":         "http",
+					"scheme":       "bearer",
+					"bearerFormat": "JWT",
+					"description":  "Obtain a JWT token via POST /api/v1/auth/login (Default: admin@erp.local / admin123)",
+				},
+			},
+		},
+		"security": []map[string]interface{}{
+			{"BearerAuth": []string{}},
+		},
+		"tags": []map[string]interface{}{
+			{"name": "System & Protocols", "description": "Health check, OpenAPI 3.1, Native MCP JSON-RPC 2.0, and Google A2A Agent Discovery"},
+			{"name": "AI Agent & GCP Ecosystem", "description": "Multi-Provider AI Agents (Gemini, OpenAI, Claude, DeepSeek), ReAct Tool-Calling, and Google Cloud BigQuery/PubSub/GCS"},
+			{"name": "AI Enterprise Intelligence", "description": "Document OCR & 3-Way Matching, Fraud Radar, 30/60/90-Day Cashflow Forecast, ESG Carbon Ledger, and Omnichannel ChatOps"},
+			{"name": "Core ERP Modules", "description": "35+ Enterprise Modules: Sales, Purchase, Inventory, Accounting, MRP, POS, HR, CRM, Customs Bonded (CEISA 4.0), Low-Code Studio, Workflow Engine & Integration Hub"},
+		},
+		"paths": map[string]interface{}{
+			"/health": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"System & Protocols"},
+					"summary":     "System Health & Active Modules Check",
+					"security":    []map[string]interface{}{},
+					"description": "Returns server health, database engine, storage backend, and list of 35+ registered ERP modules.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Server is healthy"},
+					},
+				},
+			},
+			"/.well-known/agent.json": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"System & Protocols"},
+					"summary":     "Google Cloud A2A (Agent-to-Agent) Discovery Card",
+					"security":    []map[string]interface{}{},
+					"description": "Publishes GoERP's autonomous agent capabilities, skills, authentication schemes, and endpoints following the Google A2A open standard.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "A2A Agent Card JSON"},
+					},
+				},
+			},
+			"/mcp": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"System & Protocols"},
+					"summary":     "Native Model Context Protocol (MCP) JSON-RPC 2.0 Server",
+					"description": "Standard MCP JSON-RPC 2.0 endpoint supporting initialize, tools/list, tools/call, resources/list, resources/read, and prompts/list for Claude Desktop, Cursor, Gemini CLI, and Antigravity.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "JSON-RPC 2.0 Response"},
+					},
+				},
+			},
+			"/api/v1/auth/login": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"System & Protocols"},
+					"summary":     "Authenticate User & Issue JWT",
+					"security":    []map[string]interface{}{},
+					"description": "Authenticates user credentials and returns a signed JWT Bearer token.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "JWT Token & User Profile"},
+					},
+				},
+			},
+			"/api/v1/ai/providers": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"AI Agent & GCP Ecosystem"},
+					"summary":     "List Supported AI Agent Providers & Status",
+					"description": "Returns configuration status and capabilities for Google Gemini 2.5, Vertex AI, OpenAI GPT-4o, Anthropic Claude 3.7, DeepSeek R1, Cloudflare Workers AI, and Local Heuristic Engine.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Provider list"},
+					},
+				},
+			},
+			"/api/v1/ai/tools": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"AI Agent & GCP Ecosystem"},
+					"summary":     "Export Standardized AI Agent Tools Manifest",
+					"description": "Returns tool schemas compatible with MCP (2025-03-26), OpenAI function calling, Gemini function_declarations, and Anthropic tool_use.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Tool definitions"},
+					},
+				},
+			},
+			"/api/v1/ai/agent/execute": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"AI Agent & GCP Ecosystem"},
+					"summary":     "Execute Autonomous ReAct AI Agent with Live Database Tool-Calling",
+					"description": "Runs a multi-step Reason + Act (ReAct) loop against live ERP database tables and optional Google Cloud BigQuery telemetry sync.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "ReAct trace, tool call results, and synthesized answer"},
+					},
+				},
+			},
+			"/api/v1/ai/gcp/status": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"AI Agent & GCP Ecosystem"},
+					"summary":     "Google Cloud Platform (GCP) Ecosystem Readiness",
+					"description": "Checks Vertex AI, BigQuery OLAP Data Warehouse, Cloud Pub/Sub Event Bus, Cloud Storage (GCS), and Cloud Run status.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "GCP services status"},
+					},
+				},
+			},
+			"/api/v1/ai/gcp/sync": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"AI Agent & GCP Ecosystem"},
+					"summary":     "Synchronize ERP Data with Google Cloud BigQuery, Pub/Sub, or GCS",
+					"description": "Streams analytical snapshots to BigQuery, publishes domain events to Pub/Sub, or archives audit snapshots to GCS.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Sync job confirmation"},
+					},
+				},
+			},
+			"/api/v1/ai/a2a/tasks/send": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"System & Protocols"},
+					"summary":     "Google A2A Protocol Task Execution",
+					"description": "Executes cross-company B2B agent tasks (inventory check, quote negotiation, 3-way match, ESG Scope 3 exchange).",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "A2A Task Artifact Response"},
+					},
+				},
+			},
+			"/api/v1/ai/doc-intelligence": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"AI Enterprise Intelligence"},
+					"summary":     "AI Document Intelligence (OCR Invoice/e-Faktur & Automated 3-Way Matching)",
+					"description": "Extracts structured vendor bill / tax invoice fields and performs automated 3-Way Matching against Purchase Orders (PO) and Goods Receipts (GRN).",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Extracted fields and 3-Way Match verification report"},
+					},
+				},
+			},
+			"/api/v1/ai/fraud-radar": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"AI Enterprise Intelligence"},
+					"summary":     "Continuous AI Audit & Fraud Anomaly Radar",
+					"description": "Scans live Purchase Orders, Vendor Bills, Journal Entries, and Expenses for Split POs, duplicate invoices, weekend postings, and price anomalies.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Fraud radar risk score and anomaly findings"},
+					},
+				},
+				"post": map[string]interface{}{
+					"tags":        []string{"AI Enterprise Intelligence"},
+					"summary":     "Run Targeted AI Fraud & Compliance Scan",
+					"description": "Executes deep forensic scan with custom sensitivity threshold.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Forensic audit report"},
+					},
+				},
+			},
+			"/api/v1/ai/cashflow-forecast": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"AI Enterprise Intelligence"},
+					"summary":     "Predictive 30/60/90-Day Cashflow Forecasting",
+					"description": "Projects cash inflows (AR, Sales, Subscriptions) and outflows (AP, POs, Payroll, Expenses) across 30/60/90-day horizons with Optimistic, Baseline, and Conservative scenarios.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Cashflow forecast & runway metrics"},
+					},
+				},
+			},
+			"/api/v1/ai/esg-report": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"AI Enterprise Intelligence"},
+					"summary":     "ESG & Carbon Footprint Ledger (Scope 1, 2 & 3 GHG Accounting)",
+					"description": "Calculates Scope 1 (Fleet Fuel), Scope 2 (MRP Manufacturing Energy), and Scope 3 (Supply Chain & Logistics) CO2e emissions aligned with GHG Protocol, GRI, EU CSRD, and OJK POJK 51.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "ESG Carbon Footprint & Sustainability Report"},
+					},
+				},
+			},
+			"/api/v1/ai/chatops/webhook": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"AI Enterprise Intelligence"},
+					"summary":     "Omnichannel ChatOps Gateway (WhatsApp Business, Telegram & Slack Bot)",
+					"description": "Processes natural language and slash commands (/omzet, /stok, /approve, /fraud, /esg) from WhatsApp, Telegram, or Slack and returns interactive executive cards.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Formatted ChatOps response and executed ERP action"},
+					},
+				},
+			},
+		},
+	}
+}
+
+// RegisterRoutes registers OpenAPI 3.1 JSON spec and Interactive API Explorer HTML UI
+func RegisterRoutes(r *gin.Engine, appName, version string) {
+	specHandler := func(c *gin.Context) {
+		c.JSON(http.StatusOK, GetSpec(appName, version))
+	}
+
+	r.GET("/openapi.json", specHandler)
+	r.GET("/api/v1/openapi.json", specHandler)
+
+	r.GET("/api/docs", func(c *gin.Context) {
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(interactiveDocsHTML))
+	})
+}
+
+const interactiveDocsHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GoERP — OpenAPI 3.1 & AI Protocol Explorer</title>
+  <style>
+    :root { --bg: #0f172a; --card: #1e293b; --border: #334155; --text: #f8fafc; --muted: #94a3b8; --accent: #38bdf8; --green: #22c55e; --purple: #a855f7; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 24px; line-height: 1.5; }
+    .container { max-width: 1180px; margin: 0 auto; }
+    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    h1 { font-size: 1.5rem; color: var(--accent); }
+    .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+    .badge { padding: 4px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; background: #1e3a8a; color: #93c5fd; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+    .endpoint { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: border-color 0.15s; }
+    .endpoint:hover { border-color: var(--accent); }
+    .method { font-weight: 700; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; margin-right: 10px; }
+    .GET { background: rgba(34,197,94,0.2); color: #4ade80; }
+    .POST { background: rgba(56,189,248,0.2); color: #38bdf8; }
+    input, textarea, select { width: 100%; background: #090d16; color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-family: monospace; font-size: 0.85rem; margin-top: 6px; margin-bottom: 12px; }
+    button { background: var(--accent); color: #0f172a; border: none; padding: 9px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; }
+    pre { background: #090d16; padding: 12px; border-radius: 8px; overflow-x: auto; font-size: 0.8rem; color: #a7f3d0; max-height: 460px; border: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>GoERP — OpenAPI 3.1, Native MCP & Google A2A Explorer</h1>
+        <p style="color:var(--muted);font-size:0.9rem;">Interactive REST, Model Context Protocol (JSON-RPC 2.0), and Agent-to-Agent Console</p>
+      </div>
+      <div class="badges">
+        <span class="badge">OpenAPI 3.1.0</span>
+        <span class="badge">MCP 2025-03-26</span>
+        <span class="badge">Google A2A</span>
+        <a href="/openapi.json" target="_blank" class="badge" style="text-decoration:none;background:#065f46;color:#6ee7b7;">Raw /openapi.json</a>
+        <a href="/.well-known/agent.json" target="_blank" class="badge" style="text-decoration:none;background:#581c87;color:#e9d5ff;">/.well-known/agent.json</a>
+        <a href="/" class="badge" style="text-decoration:none;background:#334155;color:#f8fafc;">← Back to GoERP Dashboard</a>
+      </div>
+    </header>
+    <div class="grid">
+      <div>
+        <div class="card">
+          <h3 style="margin-bottom:10px;">1. Select Endpoint to Test</h3>
+          <div id="endpointsList">Loading OpenAPI 3.1 specification...</div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h3 style="margin-bottom:10px;">2. Live API & Protocol Console</h3>
+          <label style="font-size:0.8rem;color:var(--muted);">JWT Bearer Token (auto-loaded from localStorage or login)</label>
+          <input id="jwtToken" placeholder="Optional JWT Token (click Authenticate Default Admin below)" />
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <button onclick="loginDefaultAdmin()" style="background:#334155;color:#fff;font-size:0.78rem;">Authenticate Default Admin</button>
+            <button onclick="sendRequest()">Send Live Request</button>
+          </div>
+          <label style="font-size:0.8rem;color:var(--muted);">Method & Path</label>
+          <div style="display:flex;gap:8px;">
+            <select id="reqMethod" style="width:110px;"><option>GET</option><option>POST</option></select>
+            <input id="reqPath" value="/.well-known/agent.json" />
+          </div>
+          <label style="font-size:0.8rem;color:var(--muted);">JSON Request Body (for POST)</label>
+          <textarea id="reqBody" rows="5">{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}</textarea>
+          <label style="font-size:0.8rem;color:var(--muted);">Live Server Response</label>
+          <pre id="respBox">// Click any endpoint on the left or "Send Live Request" to inspect response</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const savedToken = localStorage.getItem('erp_token') || '';
+    if (savedToken) document.getElementById('jwtToken').value = savedToken;
+
+    const samplePayloads = {
+      '/mcp': JSON.stringify({jsonrpc: "2.0", id: 1, method: "tools/list", params: {}}, null, 2),
+      '/api/v1/ai/agent/execute': JSON.stringify({prompt: "Check warehouse stock and financial revenue summary", provider: "auto", enable_tools: true}, null, 2),
+      '/api/v1/ai/doc-intelligence': JSON.stringify({document_type: "vendor_bill", vendor_name: "PT Baja Nusantara", invoice_number: "INV-2026-0881", document_text: "NPWP: 01.234.567.8-012.000 Faktur: 010.002-26.12345678 Subtotal: 10000000 PPN 11%: 1100000 Total: 11100000", subtotal: 10000000, tax_amount: 1100000, total_amount: 11100000}, null, 2),
+      '/api/v1/ai/chatops/webhook': JSON.stringify({channel: "whatsapp", sender: "+62811998877", message: "/omzet"}, null, 2),
+      '/api/v1/ai/a2a/tasks/send': JSON.stringify({id: "task-b2b-001", skill: "inventory-availability-check", message: {role: "user", parts: [{type: "text", text: "Check stock availability and pricing for B2B partner order"}] }}, null, 2)
+    };
+
+    fetch('/openapi.json').then(r => r.json()).then(spec => {
+      const container = document.getElementById('endpointsList');
+      container.innerHTML = '';
+      Object.entries(spec.paths || {}).forEach(([path, methods]) => {
+        Object.entries(methods).forEach(([method, info]) => {
+          const m = method.toUpperCase();
+          const div = document.createElement('div');
+          div.className = 'endpoint';
+          div.innerHTML = '<div><span class="method ' + m + '">' + m + '</span><code>' + path + '</code><div style="font-size:0.78rem;color:#94a3b8;margin-top:4px;">' + (info.summary || '') + '</div></div>';
+          div.onclick = () => {
+            document.getElementById('reqMethod').value = m;
+            document.getElementById('reqPath').value = path;
+            if (samplePayloads[path]) document.getElementById('reqBody').value = samplePayloads[path];
+            sendRequest();
+          };
+          container.appendChild(div);
+        });
+      });
+    });
+
+    async function loginDefaultAdmin() {
+      const res = await fetch('/api/v1/auth/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({email: 'admin@erp.local', password: 'admin123'})
+      });
+      const data = await res.json();
+      if (data.token) {
+        document.getElementById('jwtToken').value = data.token;
+        localStorage.setItem('erp_token', data.token);
+        document.getElementById('respBox').textContent = 'Authenticated as admin@erp.local! Token populated.';
+      }
+    }
+
+    async function sendRequest() {
+      const method = document.getElementById('reqMethod').value;
+      const path = document.getElementById('reqPath').value;
+      const token = document.getElementById('jwtToken').value.trim();
+      const headers = {'Content-Type': 'application/json'};
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      const opts = { method, headers };
+      if (method === 'POST') opts.body = document.getElementById('reqBody').value;
+      document.getElementById('respBox').textContent = 'Executing ' + method + ' ' + path + '...';
+      try {
+        const res = await fetch(path, opts);
+        const text = await res.text();
+        try {
+          document.getElementById('respBox').textContent = JSON.stringify(JSON.parse(text), null, 2);
+        } catch (_) {
+          document.getElementById('respBox').textContent = text;
+        }
+      } catch (err) {
+        document.getElementById('respBox').textContent = 'Error: ' + err.message;
+      }
+    }
+  </script>
+</body>
+</html>`

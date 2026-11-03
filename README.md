@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![CI Status](https://img.shields.io/badge/CI-Passing-success?style=flat&logo=githubactions)](https://github.com/antonset1104/erp/actions)
 [![Modules](https://img.shields.io/badge/Modules-50_Enterprise-indigo)](docs/FUNCTIONAL_DOCUMENTATION.md)
-[![Release](https://img.shields.io/badge/Release-v1.41.0-emerald)](https://github.com/antonset1104/erp/releases)
+[![Release](https://img.shields.io/badge/Release-v1.42.0-emerald)](https://github.com/antonset1104/erp/releases)
 [![Open Source](https://img.shields.io/badge/Open_Source-Community_Driven-purple)](docs/OPEN_SOURCE_GUIDE.md)
 
 **GoERP** is a modern, high-performance, enterprise-grade Enterprise Resource Planning (ERP) platform built natively with **Golang**. Engineered with a clean **Modular Monolith** architecture comprising **50 integrated business modules**, GoERP delivers single-binary static compilation, native Go concurrency, ultra-low memory overhead (~25 MB idle RAM), and strict transactional integrity for mission-critical enterprise workloads.
@@ -34,6 +34,13 @@ GoERP includes built-in executive productivity tools to accelerate day-to-day op
 - **🚀 1-Click End-to-End Business Cycle Simulator (`POST /api/v1/dashboard/simulate-cycle`)**: Automated one-click execution of the entire enterprise cycle (*Procure-to-Pay* `PO` $\rightarrow$ `WH/IN`, *Order-to-Cash* `SO` $\rightarrow$ `WH/OUT`, and *Balanced General Ledger Posting* `INV` with 11% VAT) with an interactive 5-step audit log.
 - **🔔 Actionable Notification & Approval Center (`GET /api/v1/dashboard/notifications`)**: Intelligent notification bell aggregating pending approvals, active BPMN workflows, draft documents, and security alerts.
 - **📊 Executive Financial Pulse Strip & 50-Module Health Matrix**: Live liquidity tracking across Treasury bank accounts, Accounts Receivable (AR), Accounts Payable (AP), CRM Pipeline revenue, Subscription MRR, live transaction feeds, and 1-click executive KPI CSV export (`GET /api/v1/dashboard/export-summary`).
+- **📑 OpenAPI 3.1 & Interactive API Explorer (`/api/docs`)**: Native browser console to test all REST endpoints, Model Context Protocol (MCP), and Google A2A tasks.
+- **🔌 Native Model Context Protocol (MCP) JSON-RPC 2.0 Server (`/mcp`)**: Zero-code integration for Claude Desktop, Cursor, Gemini CLI, and Antigravity.
+- **🤖 Google Cloud Agent-to-Agent (A2A) Discovery Card (`/.well-known/agent.json`)**: Autonomous B2B agent negotiation for inventory availability, 3-way matching, and Scope 3 ESG carbon exchange.
+- **🧾 AI Document Intelligence & Automated 3-Way Matching**: Multimodal OCR invoice/e-Faktur extraction with automated PO and Goods Receipt (GRN) verification.
+- **🛡️ AI Fraud Radar & Predictive Cashflow (30/60/90 Days)**: Real-time anomaly detection (Split POs, high-value postings) and CFO liquidity runway projections.
+- **🌱 ESG & Carbon Footprint Ledger**: Automated GHG Scope 1 (Fleet), Scope 2 (MRP Energy), and Scope 3 (Logistics) accounting with tree offset equivalents.
+- **💬 Omnichannel ChatOps Gateway**: WhatsApp Business, Telegram, and Slack bot processing executive commands (`/omzet`, `/stok`, `/approve`, `/fraud`, `/esg`).
 - **🌓 Dark / Light Enterprise Theme Modes**: Seamless visual theme switcher (`☀️ Light` / `🌙 Dark`) with state persisted across browser sessions.
 
 ---
@@ -288,6 +295,14 @@ All endpoints are hosted under the `/api/v1` namespace:
 | `POST` | `/api/v1/ai/agent/execute` | 🧠 Execute Autonomous AI Agent ReAct loop with live database tool calling & BigQuery streaming |
 | `GET` | `/api/v1/ai/gcp/status` | ☁️ Inspect Google Cloud Platform (BigQuery, Pub/Sub, GCS, Vertex AI, Cloud Run) integration status |
 | `POST` | `/api/v1/ai/gcp/sync` | ☁️ Trigger real-time synchronization to Google Cloud BigQuery, Pub/Sub, or Cloud Storage (GCS) |
+| `POST` | `/mcp` | 🔌 Native Model Context Protocol (MCP) JSON-RPC 2.0 Server |
+| `GET` | `/.well-known/agent.json` | 🤖 Google Cloud Agent-to-Agent (A2A) Discovery Card |
+| `GET` | `/api/docs` | 📑 OpenAPI 3.1 Interactive API Explorer & Protocol Console |
+| `POST` | `/api/v1/ai/doc-intelligence` | 🧾 AI Document Intelligence (Auto-OCR & Automated 3-Way PO/GRN Matching) |
+| `GET` | `/api/v1/ai/fraud-radar` | 🛡️ Continuous Forensic AI Audit & Fraud Detection Radar |
+| `GET` | `/api/v1/ai/cashflow-forecast` | 📈 Predictive 30/60/90-Day Cashflow Forecasting & CFO Runway |
+| `GET` | `/api/v1/ai/esg-report` | 🌱 ESG & Carbon Footprint Ledger (Scope 1, 2, 3 GHG Accounting) |
+| `POST` | `/api/v1/ai/chatops/webhook` | 💬 Omnichannel ChatOps Gateway (WhatsApp, Telegram & Slack Webhook) |
 
 ---
 

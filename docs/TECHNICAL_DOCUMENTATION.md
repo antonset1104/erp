@@ -269,3 +269,78 @@ As part of the platform's continuous improvement initiative, the `internal/core/
      4. Generates and posts a balanced **Customer Invoice (`INV/...`)** ($\sum \text{Debit} = \sum \text{Credit}$) with 11% VAT directly into the **General Ledger**.
 4. **Executive KPI Summary CSV Exporter (`GET /api/v1/dashboard/export-summary`)**:
    - Generates a UTF-8 BOM CSV summary aggregating critical financial, operational, and departmental KPIs across all 50 enterprise modules for C-level reporting.
+
+
+---
+
+## 6. Native Model Context Protocol (MCP) & Google Cloud A2A Architecture
+
+GoERP provides first-class support for autonomous agent-to-agent interoperability and external AI tooling integration without custom coding:
+
+### 6.1 Native Model Context Protocol (MCP) JSON-RPC 2.0 Server (`/mcp`)
+Compliant with standard MCP specification (`2025-03-26`), GoERP functions as a native MCP server for **Claude Desktop, Cursor, Gemini CLI, and Antigravity**:
+- **Protocol Endpoint**: `POST /mcp` and `GET /mcp`
+- **Supported Methods**:
+  - `initialize`: Reports server capabilities, protocol version (`2025-03-26`), and server name (`goerp-enterprise-mcp-server`).
+  - `ping`: Returns server heartbeat and UTC timestamp.
+  - `tools/list`: Exposes standardized tool definitions with JSON Schema parameter validation (`query_inventory_stock`, `get_financial_summary`, `search_erp_records`, `create_sales_quotation`, `create_purchase_rfq`, `sync_gcp_bigquery`, `extract_document_3way_match`, `scan_fraud_anomalies`, `forecast_cashflow`, `calculate_esg_carbon_footprint`).
+  - `tools/call`: Invokes any ERP database tool atomically against live GORM tables and returns structured content.
+  - `resources/list` & `resources/read`: Exposes virtual URIs (`erp://finance/gl-summary`, `erp://inventory/stock-levels`, `erp://esg/carbon-ledger`).
+  - `prompts/list`: Exports standard executive prompt templates for forensic audit, supply-chain 3-way match, and ESG compliance.
+
+### 6.2 Google Cloud Agent-to-Agent (A2A) Protocol (`/.well-known/agent.json`)
+GoERP exposes an Agent Discovery Card following Google Cloud's open standard for autonomous B2B agent-to-agent communication:
+- **Discovery Card**: `GET /.well-known/agent.json`
+- **Task Submission Gateway**: `POST /api/v1/ai/a2a/tasks/send`
+- **Supported B2B Skills**:
+  1. `inventory-availability-check`: Real-time warehouse availability and pricing for supplier/buyer agents.
+  2. `b2b-quote-negotiation`: Autonomous sales quotation and purchase RFQ creation.
+  3. `invoice-3way-reconciliation`: Cross-company automated 3-Way Matching of vendor bills against POs and GRNs.
+  4. `financial-audit-verification`: Continuous fraud radar and 90-day cashflow liquidity projection.
+  5. `esg-scope3-exchange`: Scope 1-3 GHG carbon emissions data exchange across supply chain partners.
+
+---
+
+## 7. Enterprise AI Intelligence Engine
+
+### 7.1 AI Document Intelligence & Automated 3-Way Matching (`POST /api/v1/ai/doc-intelligence`)
+- **Multimodal OCR Extraction**: Extracts Vendor Name, NPWP Tax ID, e-Faktur Serial Number (`010.002-26.XXXXXXXX`), Invoice Number, DPP Subtotal, PPN 11%, PPh 23, and Grand Total with 97%+ confidence.
+- **Automated 3-Way Matching**: Cross-matches invoice amounts against corresponding **Purchase Orders (`PO...`)** and warehouse **Goods Receipt Notes (`WH/IN...`)**. Flags price deviations exceeding tolerance (`PRICE_VARIANCE_ALERT`) and auto-generates balanced double-entry GL journal moves (Debit: Inventory Clearing 510100 & VAT Input 110600; Credit: Accounts Payable 210100).
+
+### 7.2 Continuous AI Audit & Fraud Radar (`GET & POST /api/v1/ai/fraud-radar`)
+- **Forensic Anomaly Detection**:
+  - *Split PO Detection*: Identifies potential approval-limit evasion by detecting multiple POs to the same vendor within the same cycle.
+  - *High-Value Postings*: Flags journal moves and invoices exceeding user-defined threshold limits (default: IDR 50M).
+  - *Trial Balance Guard*: Verifies 100% mathematical integrity where `Debit == Credit` across all historical entries.
+- **Compliance Alignment**: PSAK / IFRS, ISO 27001 Audit Immutability, and SOX Segregation of Duties.
+
+### 7.3 Predictive 30/60/90-Day Cashflow Forecasting (`GET & POST /api/v1/ai/cashflow-forecast`)
+- **Liquidity Horizon Modeling**: Projects cash inflows (Confirmed Sales AR, Pipeline Quotations, SaaS Subscription MRR) and outflows (Procurement AP, Operating Expenses, Payroll) across 30, 60, and 90-day horizons.
+- **Scenario Analysis**: Generates Optimistic (+25%), Baseline (100%), and Conservative (-22%) projections.
+- **CFO Health Metrics**: Computes estimated cash runway (months), Days Sales Outstanding (DSO), and Days Payable Outstanding (DPO).
+
+### 7.4 ESG & Carbon Footprint Ledger (`GET & POST /api/v1/ai/esg-report`)
+- **Greenhouse Gas (GHG) Protocol Accounting**:
+  - **Scope 1 (Direct)**: Fleet vehicle fuel consumption (IPCC Mobile Combustion: 2.68 kg CO2e / Liter diesel).
+  - **Scope 2 (Indirect)**: MRP Manufacturing electricity consumption (Grid Electricity Factor: 0.78 kg CO2e / kWh).
+  - **Scope 3 (Value Chain)**: Upstream/downstream logistics shipments and procurement orders (GHG Scope 3 Cat 1 & 4).
+- **Sustainability Metrics**: Total emissions (kg & metric tons CO2e), carbon intensity per million IDR revenue, and tree offset equivalents.
+- **Regulatory Readiness**: OJK POJK No. 51/2017, Global Reporting Initiative (GRI 305), and EU CSRD.
+
+### 7.5 Omnichannel ChatOps Gateway (`POST /api/v1/ai/chatops/webhook`)
+- **Supported Channels**: WhatsApp Business API, Telegram Bot, Slack, and Microsoft Teams.
+- **Executive Slash Commands**:
+  - `/omzet`: Instant revenue, procurement spend, and GL posting summary.
+  - `/stok`: Warehouse inventory stock and quant availability brief.
+  - `/approve`: Executive 1-click Purchase Order approval.
+  - `/fraud`: Immediate forensic audit and fraud risk radar briefing.
+  - `/esg`: Live corporate ESG carbon footprint and sustainability summary.
+
+---
+
+## 8. OpenAPI 3.1 & Interactive API Explorer (`/api/docs`)
+
+GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-based testing console:
+- **Raw JSON Spec**: `GET /openapi.json` and `GET /api/v1/openapi.json`
+- **Interactive Explorer UI**: `GET /api/docs`
+- Features live token authentication, pre-populated sample payloads for MCP, A2A, and ChatOps, and real-time response inspection.

@@ -16,6 +16,7 @@ import (
 	"erp-golang/internal/config"
 	"erp-golang/internal/core/ai"
 	"erp-golang/internal/core/commandcenter"
+	"erp-golang/internal/core/openapi"
 	"erp-golang/internal/core/storage"
 	"erp-golang/internal/modules/account"
 	"erp-golang/internal/modules/approval"
@@ -8045,12 +8046,117 @@ Lead Engineer - Cloud Tech Nusantara (2020 - 2026)
 		t.Logf("✓ AI Agent Connector '%s' Verified: %s", agentConnCode, agConnResp.Message)
 	}
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (50 MODULES + GOOGLE CLOUD PLATFORM ECOSYSTEM + MULTI-PROVIDER AI AGENT GATEWAY + UNIVERSAL INTEGRATION HUB + BPMN 2.0 WORKFLOW ENGINE) PASSED 100%!")
+	// =========================================================================
+	// >>> SECTION 56: OPENAPI 3.1, MCP SERVER, GOOGLE A2A, AI DOC INTELLIGENCE, FRAUD RADAR, CASHFLOW, ESG & CHATOPS <<<
+	// =========================================================================
+	t.Log("\n\t\t>>> SECTION 56: OPENAPI 3.1, NATIVE MCP JSON-RPC 2.0, GOOGLE A2A PROTOCOL, ENTERPRISE AI INTELLIGENCE & CHATOPS <<<")
+
+	// 56.1 OpenAPI 3.1.0 Specification & API Explorer
+	spec := openapi.GetSpec("GoERP Test Suite", "1.42.0")
+	if spec["openapi"] != "3.1.0" {
+		t.Fatalf("Expected OpenAPI 3.1.0, got %v", spec["openapi"])
+	}
+	t.Logf("✓ OpenAPI 3.1.0 Specification Verified (Server: %v, Paths: %d)", spec["info"], len(spec["paths"].(map[string]interface{})))
+
+	// 56.2 Google Cloud Agent-to-Agent (A2A) Discovery Card
+	a2aCard := aiClient.GetA2AAgentCard("http://localhost:8080")
+	if a2aCard["standard"] == "" || len(a2aCard["skills"].([]map[string]interface{})) < 4 {
+		t.Fatalf("Invalid A2A Agent Card: %+v", a2aCard)
+	}
+	t.Logf("✓ Google Cloud A2A Discovery Card Verified: Standard='%v', Skills=%d", a2aCard["standard"], len(a2aCard["skills"].([]map[string]interface{})))
+
+	// 56.3 Native Model Context Protocol (MCP) JSON-RPC 2.0 Server
+	mcpInit := aiClient.HandleMCPJSONRPC(db, &ai.MCPJSONRPCRequest{Method: "initialize"}, 1)
+	if mcpInit.Result == nil || mcpInit.Result["protocolVersion"] != "2025-03-26" {
+		t.Fatalf("MCP initialize failed: %+v", mcpInit)
+	}
+	mcpTools := aiClient.HandleMCPJSONRPC(db, &ai.MCPJSONRPCRequest{Method: "tools/list"}, 1)
+	if mcpTools.Result == nil || len(mcpTools.Result["tools"].([]map[string]interface{})) < 5 {
+		t.Fatalf("MCP tools/list failed: %+v", mcpTools)
+	}
+	mcpCall := aiClient.HandleMCPJSONRPC(db, &ai.MCPJSONRPCRequest{
+		Method: "tools/call",
+		Params: map[string]interface{}{
+			"name": "get_financial_summary",
+		},
+	}, 1)
+	if mcpCall.Result == nil || mcpCall.Result["isError"] == true {
+		t.Fatalf("MCP tools/call failed: %+v", mcpCall)
+	}
+	mcpRes := aiClient.HandleMCPJSONRPC(db, &ai.MCPJSONRPCRequest{
+		Method: "resources/read",
+		Params: map[string]interface{}{"uri": "erp://esg/carbon-ledger"},
+	}, 1)
+	if mcpRes.Result == nil {
+		t.Fatalf("MCP resources/read failed: %+v", mcpRes)
+	}
+	t.Logf("✓ Native MCP JSON-RPC 2.0 Server Verified: Protocol=2025-03-26, Tools=%d, Call & Resource Read Success", len(mcpTools.Result["tools"].([]map[string]interface{})))
+
+	// 56.4 Google A2A Cross-Company Task Execution
+	a2aTaskResp := aiClient.ExecuteA2ATask(db, &ai.A2ATaskRequest{
+		ID:    "b2b-task-001",
+		Skill: "inventory-availability-check",
+		Message: map[string]interface{}{
+			"text": "Check warehouse inventory stock levels for partner B2B order",
+		},
+	}, 1)
+	if a2aTaskResp["protocol"] != "Google A2A v1.0" || len(a2aTaskResp["artifacts"].([]map[string]interface{})) == 0 {
+		t.Fatalf("Google A2A Task execution failed: %+v", a2aTaskResp)
+	}
+	t.Logf("✓ Google A2A Task Execution Verified: Skill='%v', Artifacts=%d", a2aTaskResp["skillUsed"], len(a2aTaskResp["artifacts"].([]map[string]interface{})))
+
+	// 56.5 AI Document Intelligence (Auto-OCR & 3-Way Matching)
+	docIntelResp := aiClient.ExecuteDocumentIntelligence(db, &ai.DocumentIntelligenceRequest{
+		DocumentType:  "vendor_bill",
+		VendorName:    "PT Baja Presisi Indo",
+		InvoiceNumber: "INV-2026-9912",
+		DocumentText:  "NPWP: 01.333.444.5-091.000 Faktur Pajak: 010.002-26.11223344 Subtotal: 10,000,000 PPN 11%: 1,100,000 Total: 11,100,000",
+		SubTotal:      10000000,
+		TaxAmount:     1100000,
+		TotalAmount:   11100000,
+	}, 1)
+	if docIntelResp["success"] != true || docIntelResp["three_way_matching"] == nil {
+		t.Fatalf("AI Document Intelligence failed: %+v", docIntelResp)
+	}
+	t.Logf("✓ AI Document Intelligence & 3-Way Matching Verified: Status='%v', e-Faktur Serial='%v'",
+		docIntelResp["three_way_matching"].(map[string]interface{})["status"],
+		docIntelResp["extracted_fields"].(map[string]interface{})["efaktur_serial"])
+
+	// 56.6 Continuous AI Audit & Fraud Radar
+	fraudResp := aiClient.RunFraudRadar(db, &ai.FraudRadarRequest{Sensitivity: "high"}, 1)
+	if fraudResp["success"] != true || len(fraudResp["anomalies_and_controls"].([]map[string]interface{})) == 0 {
+		t.Fatalf("AI Fraud Radar failed: %+v", fraudResp)
+	}
+	t.Logf("✓ Continuous AI Audit & Fraud Radar Verified: RiskLevel=%v, Transactions Scanned=%v, Controls=%d",
+		fraudResp["risk_level"], fraudResp["total_transactions_scanned"], len(fraudResp["anomalies_and_controls"].([]map[string]interface{})))
+
+	// 56.7 Predictive 30/60/90-Day Cashflow Forecasting
+	cashflowResp := aiClient.GetCashflowForecast(db, &ai.CashflowForecastRequest{HorizonDays: 90}, 1)
+	if cashflowResp["success"] != true || cashflowResp["horizons"] == nil {
+		t.Fatalf("Predictive Cashflow Forecasting failed: %+v", cashflowResp)
+	}
+	t.Logf("✓ Predictive 30/60/90-Day Cashflow Forecast Verified: Liquidity='%v', Estimated Runway=%v Months",
+		cashflowResp["cfo_health_metrics"].(map[string]interface{})["liquidity_status"],
+		cashflowResp["cfo_health_metrics"].(map[string]interface{})["estimated_runway_months"])
+
+	// 56.8 ESG & Carbon Footprint Ledger (Scope 1, 2, 3 GHG Protocol)
+	esgResp := aiClient.GetESGCarbonReport(db, &ai.ESGReportRequest{Period: "2026-YTD"}, 1)
+	if esgResp["success"] != true || esgResp["scopes_breakdown"] == nil {
+		t.Fatalf("ESG Carbon Report failed: %+v", esgResp)
+	}
+	t.Logf("✓ ESG & Carbon Footprint Ledger Verified: Rating='%v', Total Emissions=%.0f kg CO2e, Offset Equivalent=%v Trees",
+		esgResp["esg_rating"], esgResp["total_emissions_kg_co2e"], esgResp["offset_trees_equivalent"])
+
+	// 56.9 Omnichannel ChatOps Gateway (WhatsApp, Telegram & Slack Webhook)
+	chatopsResp := aiClient.ExecuteChatOpsWebhook(db, &ai.ChatOpsWebhookRequest{
+		Channel: "whatsapp",
+		Sender:  "+62811998877",
+		Message: "/omzet",
+	}, 1)
+	if chatopsResp["success"] != true || !strings.Contains(chatopsResp["reply_text"].(string), "GoERP") {
+		t.Fatalf("ChatOps Webhook failed: %+v", chatopsResp)
+	}
+	t.Logf("✓ Omnichannel ChatOps Gateway Verified: Channel='%v', Action='%v'", chatopsResp["channel"], chatopsResp["action_executed"])
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (56 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + ENTERPRISE AI INTELLIGENCE + GCP ECOSYSTEM + CHATOPS + WORKFLOW ENGINE) PASSED 100%!")
 }
-
-
-
-
-
-
-
