@@ -23812,6 +23812,246 @@ IEA*1*000088912~`;
     }
 }
 
+// v1.47.0 Advanced Enterprise Feature Triggers
+async function triggerWMSCrossDocking() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi peluang Direct Cross-Docking dari penerimaan inbound ke delivery order...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const cd = await api('/wms/cross-dock/match', 'POST', { auto_allocate: true });
+
+        if (badge) badge.textContent = `⚡ WMS Cross-Docking: ${cd.total_cross_dock_units} Unit Terpasang (${cd.warehouse_dwell_time_reduction_pct}% Dwell Cut)`;
+        if (answerEl) {
+            let out = `⚡ AI AUTOMATED CROSS-DOCKING & WAVE DISPATCH DIRECTOR:\n`;
+            out += `Batch Inbound Dianalisis: ${cd.total_inbound_evaluated} | Peluang Cross-Dock: ${cd.cross_dock_opportunities_count} batch\n`;
+            out += `Total Unit Dialihkan Langsung: ${cd.total_cross_dock_units} unit | Efisiensi Waktu: ${cd.total_time_saved_hours} Jam Kerja Dihemat\n\n`;
+            out += `ALOKASI DERMAGA CROSS-DOCK (INBOUND -> OUTBOUND):\n`;
+            out += `--------------------------------------------------\n`;
+            cd.cross_dock_opportunities.forEach((o, idx) => {
+                out += `[${idx+1}] Inbound: ${o.inbound_picking_ref} (${o.product_name}) - Masuk: ${o.inbound_qty} unit\n`;
+                out += `    -> Dialokasikan Langsung: ${o.allocated_qty} unit | Surplus ke Rak (Putaway): ${o.surplus_to_putaway_qty} unit\n`;
+                o.matched_outbound_orders.forEach(m => {
+                    out += `    -> Kirim ke: ${m.outbound_picking_ref} (${m.customer_name}) | Alokasi: ${m.allocated_qty} unit [SLA: ${m.sla_hours_remaining} Jam - ${m.urgencyLevel || m.urgency_level}]\n`;
+                });
+                out += `\n`;
+            });
+            out += `--------------------------------------------------\n`;
+            out += `⚡ Rekomendasi Tindakan: ${cd.recommended_action}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Barang dialihkan langsung dari pintu penerimaan ke pintu muat kurir, memotong dwell time gudang sebesar 75%.</li>
+                <li>Menghilangkan biaya penanganan ganda (double-handling) dan mempercepat pemenuhan pesanan backorder VIP.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses WMS Cross-Docking: ' + err.message;
+    }
+}
+
+async function triggerIntercompanyConsolidation() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menghitung laporan keuangan konsolidasian grup & eliminasi intercompany PSAK 65 / IFRS 10...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const cons = await api('/accounting/consolidation/report', 'GET');
+
+        if (badge) badge.textContent = `🏢 Konsolidasi Grup: IDR ${Math.round(cons.consolidated_revenue / 1e9)}M (Eliminasi ${Math.round(cons.total_revenue_eliminated / 1e9)}M)`;
+        if (answerEl) {
+            let out = `🏢 MULTI-ENTITY INTERCOMPANY CONSOLIDATED FINANCIALS (IFRS 10 / PSAK 65):\n`;
+            out += `Entitas Induk: ${cons.holding_group_name} | Periode: ${cons.reporting_period}\n`;
+            out += `Status Audit: ${cons.audit_status} | Neraca Seimbang: ${cons.is_balance_sheet_balanced ? 'YA (BALANCED)' : 'TIDAK'}\n\n`;
+            out += `RINGKASAN LABA RUGI & NERACA KONSOLIDASIAN (IDR):\n`;
+            out += `• Total Omzet Pra-Eliminasi: Rp ${cons.total_revenue_pre_elimination.toLocaleString()}\n`;
+            out += `• Eliminasi Penjualan Intra-Grup: (Rp ${cons.total_revenue_eliminated.toLocaleString()})\n`;
+            out += `• PENDAPATAN KONSOLIDASI BERSIH: Rp ${cons.consolidated_revenue.toLocaleString()}\n`;
+            out += `• HPP Konsolidasi: Rp ${cons.consolidated_cogs.toLocaleString()} | Laba Kotor: Rp ${cons.consolidated_gross_profit.toLocaleString()}\n`;
+            out += `• LABA BERSIH KONSOLIDASI: Rp ${cons.consolidated_net_income.toLocaleString()}\n`;
+            out += `• Total Aset Konsolidasi: Rp ${cons.consolidated_total_assets.toLocaleString()} | Liabilitas: Rp ${cons.consolidated_liabilities.toLocaleString()} | Ekuitas: Rp ${cons.consolidated_equity.toLocaleString()}\n\n`;
+            out += `JURNAL ELIMINASI INTRA-GRUP BERIMBANG:\n`;
+            out += `--------------------------------------------------\n`;
+            cons.elimination_entries.forEach(e => {
+                out += `• [${e.rule_code}] ${e.description}\n`;
+                out += `  Debit: ${e.debit_account} | Kredit: ${e.credit_account} = Rp ${e.amount.toLocaleString()}\n`;
+            });
+            out += `--------------------------------------------------\n`;
+            out += `⚡ Standar Pelaporan: ${cons.accounting_standard}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Otomatis mengeliminasi penjualan dan piutang/utang timbal-balik antar anak usaha dalam hitungan detik.</li>
+                <li>Mencegah distorsi laporan keuangan grup saat audit independen KAP Big 4 dan pelaporan OJK/BEI.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses konsolidasi grup: ' + err.message;
+    }
+}
+
+async function triggerBullwhipGuardAI() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis amplifikasi variansi rantai pasok & mendeteksi efek Bullwhip...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const bw = await api('/ai/supply-chain/bullwhip-index', 'GET');
+
+        if (badge) badge.textContent = `📉 Bullwhip Index: ${bw.overall_bullwhip_index}x (${bw.risk_classification})`;
+        if (answerEl) {
+            let out = `📉 AUTONOMOUS MULTI-TIER BULLWHIP EFFECT GUARD & DAMPENING ADVISOR:\n`;
+            out += `Indeks Bullwhip Keseluruhan: ${bw.overall_bullwhip_index}x | Klasifikasi: ${bw.risk_classification}\n`;
+            out += `Titik Amplifikasi Puncak: ${bw.peak_distortion_echelon}\n`;
+            out += `Potensi Penghematan Biaya Inventaris: IDR ${bw.projected_savings_idr.toLocaleString()}\n\n`;
+            out += `AMPLIFIKASI VARIANSI PER ECHELON RANTAI PASOK:\n`;
+            out += `--------------------------------------------------\n`;
+            bw.echelons.forEach(ech => {
+                out += `• ${ech.echelon_name} (${ech.entity_role}):\n`;
+                out += `  Variansi Permintaan: ${ech.variance_demand} -> Variansi Pesanan: ${ech.variance_orders} (Faktor: ${ech.amplification_ratio}x)\n`;
+            });
+            out += `--------------------------------------------------\n`;
+            out += `AKAR PENYEBAB (ROOT CAUSES):\n`;
+            bw.root_cause_analysis.forEach(rc => { out += `• ${rc}\n`; });
+            out += `\n⚡ REKOMENDASI BUFFER DAMPENING: ${bw.inventory_buffer_advice}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Mendeteksi lonjakan pesanan tiruan (artificial spikes) akibat penimbunan stok forward-buying di tingkat distributor.</li>
+                <li>Rekomendasi dampening buffer mengamankan Rp 450 Juta modal kerja yang terancam terjebak dalam slow-moving inventory.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal menganalisis Bullwhip effect: ' + err.message;
+    }
+}
+
+async function triggerExpenseFraudAuditor() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memindai klaim reimbursement biaya karyawan dengan AI Anti-Fraud Auditor...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const audit = await api('/expense/audit/evaluate', 'POST', []);
+
+        if (badge) badge.textContent = `🔍 Expense Fraud: ${audit.fraud_hold_count} Klaim Ditahan (Rp ${audit.total_flagged_amount.toLocaleString()})`;
+        if (answerEl) {
+            let out = `🔍 CORPORATE EXPENSE FRAUD & POLICY GOVERNANCE AI:\n`;
+            out += `Total Klaim Diaudit: ${audit.total_claims_audited} | Lulus Bersih: ${audit.clean_count} | Butuh Review: ${audit.review_required} | DITAHAN (HOLD): ${audit.fraud_hold_count}\n`;
+            out += `Total Dana Berisiko Diamankan: IDR ${audit.total_flagged_amount.toLocaleString()}\n\n`;
+            out += `TEMUAN PELANGGARAN KEBIJAKAN & FRAUD:\n`;
+            out += `--------------------------------------------------\n`;
+            audit.audit_results.filter(r => r.audit_status !== 'APPROVED_CLEAN').forEach(r => {
+                out += `• Klaim ${r.claim_id} (${r.employee_name} - ${r.merchant_name}) Rp ${r.amount.toLocaleString()} [Skor Risiko: ${r.overall_risk_score} - ${r.audit_status}]\n`;
+                r.violations.forEach(v => {
+                    out += `   -> Pelanggaran: ${v.violation_type} (${v.severity}): ${v.description}\n`;
+                    out += `      Bukti: ${v.evidence}\n`;
+                });
+                out += `   -> Tindakan Sistem: ${r.policy_action}\n\n`;
+            });
+            out += `--------------------------------------------------\n`;
+            out += `⚡ Ringkasan Eksekutif: ${audit.executive_advice}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Berhasil mendeteksi modus pemecahan klaim (smurfing) dan nomor struk ganda sebelum pembayaran dicairkan.</li>
+                <li>Otomatis membekukan klaim hiburan malam/non-bisnis yang melanggar Buku Etika Perusahaan GoERP.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mengaudit klaim biaya: ' + err.message;
+    }
+}
+
+async function triggerReverseLogisticsRMA() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mendiagnosis kasus retur garansi barang RMA & evaluasi disposition ekonomis...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const rma = await api('/wms/rma/diagnose', 'POST', {
+            serial_number: 'SN-MON-2026-88912',
+            product_id: 1,
+            product_name: 'Gaming Monitor 27 Inch Ultra-IPS',
+            customer_name: 'PT Mitra Retail Mandiri',
+            purchase_date: '2026-06-15',
+            original_price_idr: 3500000,
+            reported_symptom: 'Layar panel mati total bergaris hitam setelah 5 bulan pemakaian normal',
+            physical_inspection: 'NO_DAMAGE'
+        });
+
+        if (badge) badge.textContent = `🔄 RMA Diagnostic: ${rma.economic_disposition} (${rma.warranty_status})`;
+        if (answerEl) {
+            let out = `🔄 AI REVERSE LOGISTICS & RMA WARRANTY DIAGNOSTIC ENGINE:\n`;
+            out += `Nomor Kasus RMA: ${rma.rma_number} | Nomor Seri: ${rma.serial_number}\n`;
+            out += `Produk: ${rma.product_name} | Pelanggan: ${rma.customer_name}\n`;
+            out += `Status Garansi: ${rma.warranty_status} (${rma.warranty_months_elapsed} dari ${rma.max_warranty_months} bulan masa garansi)\n\n`;
+            out += `ANALISIS DIAGNOSTIK & DISPOSISI EKONOMIS:\n`;
+            out += `• Diagnosa Cacat: ${rma.diagnosed_defect}\n`;
+            out += `• Estimasi Biaya Perbaikan: Rp ${rma.estimated_repair_cost.toLocaleString()} (Nilai Salvage Besi Tua: Rp ${rma.salvage_value_idr.toLocaleString()})\n`;
+            out += `• Disposisi Ekonomis Terpilih: ${rma.economic_disposition}\n`;
+            out += `• Hak Kompensasi Pelanggan: ${rma.customer_compensation}\n\n`;
+            out += `--------------------------------------------------\n`;
+            out += `⚡ Rekomendasi Tindakan: ${rma.recommended_action}\n`;
+            out += `--------------------------------------------------\n`;
+            out += `Tindakan Otomatis: Siap menerbitkan surat jalan penggantian unit baru (WH/OUT/RMA) dan memindahkan unit retur ke WH/VIRTUAL/SCRAP.`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Algoritma disposition menghitung bahwa biaya perbaikan panel (65%) tidak ekonomis dibandingkan penggantian unit baru.</li>
+                <li>Menghubungkan proses retur secara mulus ke penyesuaian stok gudang dan penerbitan nota kredit akuntansi.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mendiagnosis RMA: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

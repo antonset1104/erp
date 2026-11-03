@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![CI Status](https://img.shields.io/badge/CI-Passing-success?style=flat&logo=githubactions)](https://github.com/antonset1104/erp/actions)
 [![Modules](https://img.shields.io/badge/Modules-50_Enterprise-indigo)](docs/FUNCTIONAL_DOCUMENTATION.md)
-[![Release](https://img.shields.io/badge/Release-v1.46.0-emerald)](https://github.com/antonset1104/erp/releases)
+[![Release](https://img.shields.io/badge/Release-v1.47.0-emerald)](https://github.com/antonset1104/erp/releases)
 [![Open Source](https://img.shields.io/badge/Open_Source-Community_Driven-purple)](docs/OPEN_SOURCE_GUIDE.md)
 
 **GoERP** is a modern, high-performance, enterprise-grade Enterprise Resource Planning (ERP) platform built natively with **Golang**. Engineered with a clean **Modular Monolith** architecture comprising **50 integrated business modules**, GoERP delivers single-binary static compilation, native Go concurrency, ultra-low memory overhead (~25 MB idle RAM), and strict transactional integrity for mission-critical enterprise workloads.
@@ -61,6 +61,11 @@ GoERP includes built-in executive productivity tools to accelerate day-to-day op
 - **👥 Predictive Employee Attrition & AI Talent Retention Radar (`GET /api/v1/hr/attrition-radar`, `POST /api/v1/hr/retention-playbook`)**: Flight risk radar analyzing overtime burnout, unused leaves, promotion stagnation, and compensation benchmarks, with automated 1-click HR retention playbooks.
 - **🏦 Multi-Horizon Bank Reconciler with ML Fuzzy Statement Matching (`POST /api/v1/account/reconciliation/auto-match`, `POST /api/v1/account/reconciliation/batch-post`)**: Fuzzy Levenshtein + BI-FAST fee tolerance band matching (+/- Rp 2,500/Rp 6,500) between bank statement lines and open invoices, with 1-click batch auto-post reconciliation.
 - **🌐 Universal EDI (Electronic Data Interchange) Gateway (`POST /api/v1/edi/ingest`, `POST /api/v1/edi/generate`, `GET /api/v1/edi/supported`)**: ANSI X12 & UN/EDIFACT gateway translating EDI 850 (PO intake to Sales Order), EDI 855 (PO Ack), EDI 856 (ASN shipping notice), and EDI 810 (Commercial Invoice).
+- **⚡ AI Automated Cross-Docking & Wave Dispatch Director (`POST /api/v1/wms/cross-dock/match`, `POST /api/v1/wms/cross-dock/dispatch`)**: Intercepts incoming warehouse receipts, matches waiting customer backorders by SLA priority, and routes directly to dock staging (`STAGING/CROSSDOCK`), slashing warehouse dwell time by 75%.
+- **🏢 Multi-Entity Intercompany Consolidated Financials & Elimination Engine (`GET /api/v1/accounting/consolidation/report`, `POST /api/v1/accounting/consolidation/eliminate`)**: Real-time IFRS 10 / PSAK 65 group consolidation, eliminating intra-group revenue, COGS, and intercompany AR/AP with balanced elimination entries.
+- **📉 Autonomous Multi-Tier Bullwhip Effect Guard & Lead-Time Anomaly Detector (`GET /api/v1/ai/supply-chain/bullwhip-index`, `POST /api/v1/ai/supply-chain/lead-time-anomalies`)**: Computes demand variance amplification across supply chain echelons (Tier 0 to Tier 3), predicts component stockouts 14–30 days in advance, and provides dampening buffer recommendations.
+- **🔍 Corporate Expense Fraud & Policy Governance AI (`POST /api/v1/expense/audit/evaluate`, `GET /api/v1/expense/audit/flagged`)**: Deep claim audit engine detecting smurfing/split claims below approval ceilings, duplicate receipt hashes, weekend/holiday policy violations, and unauthorized entertainment venues.
+- **🔄 AI Reverse Logistics & RMA Warranty Diagnostic Engine (`POST /api/v1/wms/rma/diagnose`, `POST /api/v1/wms/rma/process-resolution`)**: Serial number warranty entitlement validation, economic disposition analysis (Refurbish vs Scrap vs Restock), and 1-click execution of replacement pickings or credit notes.
 - **🌓 Dark / Light Enterprise Theme Modes**: Seamless visual theme switcher (`☀️ Light` / `🌙 Dark`) with state persisted across browser sessions.
 
 ---

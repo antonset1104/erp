@@ -447,6 +447,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/wms/cross-dock/match": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "AI Automated Cross-Docking & Wave Dispatch Director",
+					"description": "Matches incoming warehouse stock receipts directly to waiting customer backorders, cutting warehouse dwell time by 75%.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Cross-dock allocations, time saved, and staging dock routing"},
+					},
+				},
+			},
+			"/api/v1/accounting/consolidation/report": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Multi-Entity Intercompany Consolidated Financials (IFRS 10 / PSAK 65)",
+					"description": "Generates real-time consolidated multi-subsidiary Balance Sheet and P&L with automated intra-group elimination entries.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Consolidated financials, elimination entries, and balanced status"},
+					},
+				},
+			},
+			"/api/v1/ai/supply-chain/bullwhip-index": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"AI Enterprise Intelligence"},
+					"summary":     "Autonomous Multi-Tier Bullwhip Effect Guard & Lead-Time Anomaly Detector",
+					"description": "Computes demand variance amplification across supply chain echelons (Tier 0 to Tier 3) and predicts component stockouts.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Bullwhip ratio, echelon amplifications, and buffer dampening playbooks"},
+					},
+				},
+			},
+			"/api/v1/expense/audit/evaluate": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Corporate Expense Fraud & Policy Governance AI",
+					"description": "Detects smurfing/split claims, duplicate receipt hashes, and non-working day policy violations with automated audit holds.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Audit risk scores, detected violations, and policy actions"},
+					},
+				},
+			},
+			"/api/v1/wms/rma/diagnose": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "AI Reverse Logistics & RMA Warranty Diagnostic Engine",
+					"description": "Validates warranty entitlement, classifies defects, and computes optimal economic disposition (Refurbish vs Scrap vs Restock).",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Warranty status, repair cost vs salvage value, and recommended disposition"},
+					},
+				},
+			},
 		},
 	}
 }

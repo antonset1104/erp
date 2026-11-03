@@ -23,6 +23,7 @@ import (
 	"erp-golang/internal/core/bi"
 	coreaccount "erp-golang/internal/core/account"
 	coreedi "erp-golang/internal/core/edi"
+	coreexpense "erp-golang/internal/core/expense"
 	corehr "erp-golang/internal/core/hr"
 	coretreasury "erp-golang/internal/core/treasury"
 	corewms "erp-golang/internal/core/wms"
@@ -8793,5 +8794,123 @@ IEA*1*000099123~`
 	t.Logf("✓ Universal EDI Gateway Verified: IngestedFormat='%s', DocType='%s', PO='%s', Total=%.2f, StagedSaleOrderID=%d, GeneratedX12Segs=%d, GeneratedEDIFACTSegs=%d",
 		ediIngestRes.Format, ediIngestRes.DocumentType, ediIngestRes.PONumber, ediIngestRes.TotalAmount, *ediIngestRes.CreatedRecordID, ediGenRes.SegmentCount, ediFactGenRes.SegmentCount)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (60 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI) PASSED 100%!")
+	// SECTION 61: AI AUTOMATED CROSS-DOCKING, INTERCOMPANY CONSOLIDATION,
+	// BULLWHIP EFFECT GUARD, EXPENSE FRAUD AUDITOR & REVERSE LOGISTICS RMA
+	t.Log(`
+		>>> SECTION 61: CROSS-DOCKING, CONSOLIDATION, BULLWHIP GUARD, EXPENSE FRAUD & RMA <<<`)
+
+	// 61.1 AI Automated Cross-Docking & Wave Dispatch Director
+	cdMatchRes := corewms.MatchCrossDockOpportunities(db, &corewms.CrossDockMatchRequest{
+		AutoAllocate: true,
+	}, 1)
+	if cdMatchRes == nil || cdMatchRes.CrossDockOpportunitiesCount == 0 || cdMatchRes.TotalCrossDockUnits <= 0 {
+		t.Fatalf("Cross-dock opportunity matching failed: %+v", cdMatchRes)
+	}
+	firstCD := cdMatchRes.CrossDockOpportunities[0]
+	if len(firstCD.MatchedOutboundOrders) == 0 || firstCD.AllocatedQty <= 0 {
+		t.Fatalf("Expected matched outbound orders in cross-dock opportunity: %+v", firstCD)
+	}
+
+	cdDispatchRes := corewms.DispatchCrossDock(db, &corewms.CrossDockDispatchRequest{
+		InboundPickingID: firstCD.InboundPickingID,
+		Allocations: []corewms.CrossDockDispatchAllocation{
+			{
+				OutboundPickingID: firstCD.MatchedOutboundOrders[0].OutboundPickingID,
+				ProductID:         firstCD.ProductID,
+				DispatchQty:       firstCD.MatchedOutboundOrders[0].AllocatedQty,
+				StagingLocation:   "STAGING/CROSSDOCK-BAY-01",
+			},
+		},
+	}, 1)
+	if cdDispatchRes == nil || cdDispatchRes.Status != "SUCCESS_DISPATCHED" || cdDispatchRes.TotalUnitsDispatched <= 0 {
+		t.Fatalf("Cross-dock dispatch failed: %+v", cdDispatchRes)
+	}
+	t.Logf("✓ AI WMS Cross-Docking Director Verified: InboundsEvaluated=%d, Opportunities=%d, TotalUnits=%.0f, TimeSaved=%.1f hrs (Dwell Cut: %.0f%%), DispatchBatch='%s'",
+		cdMatchRes.TotalInboundEvaluated, cdMatchRes.CrossDockOpportunitiesCount, cdMatchRes.TotalCrossDockUnits, cdMatchRes.TotalTimeSavedHours,
+		cdMatchRes.WarehouseDwellTimeReductionPct, cdDispatchRes.DispatchBatchRef)
+
+	// 61.2 Multi-Entity Intercompany Consolidated Financials & Elimination Engine
+	consRep := coreaccount.ComputeConsolidatedFinancials(db, 1, "2026-Q4")
+	if consRep == nil || len(consRep.Subsidiaries) != 3 || len(consRep.EliminationEntries) < 3 {
+		t.Fatalf("Consolidated financials calculation failed: %+v", consRep)
+	}
+	if !consRep.IsBalanceSheetBalanced || consRep.ConsolidatedRevenue <= 0 || consRep.TotalRevenueEliminated <= 0 {
+		t.Fatalf("Consolidated balance sheet should be balanced and elimination applied: %+v", consRep)
+	}
+	t.Logf("✓ Multi-Entity Intercompany Consolidation Verified: Holding='%s', Subsidiaries=%d, PreElimRev=IDR %.0f, Eliminated=IDR %.0f, NetConsRev=IDR %.0f, NetIncome=IDR %.0f, Balanced=%v (%s)",
+		consRep.HoldingGroupName, len(consRep.Subsidiaries), consRep.TotalRevenuePreElimination, consRep.TotalRevenueEliminated,
+		consRep.ConsolidatedRevenue, consRep.ConsolidatedNetIncome, consRep.IsBalanceSheetBalanced, consRep.AuditStatus)
+
+	// 61.3 Autonomous Multi-Tier Bullwhip Effect Guard & Lead-Time Anomaly Detector
+	bwRes := aiClient.ComputeBullwhipIndex(db, 1)
+	if bwRes == nil || bwRes.OverallBullwhipIndex <= 1.0 || len(bwRes.Echelons) < 4 || bwRes.RiskClassification == "" {
+		t.Fatalf("Bullwhip index computation failed: %+v", bwRes)
+	}
+	if len(bwRes.MitigationPlaybook) == 0 || bwRes.ProjectedSavingsIDR <= 0 {
+		t.Fatalf("Expected mitigation playbooks and projected savings: %+v", bwRes)
+	}
+
+	ltAnomalyRes := aiClient.DetectLeadTimeAnomalies(db, &ai.LeadTimeAnomalyRequest{LookbackDays: 90}, 1)
+	if ltAnomalyRes == nil || ltAnomalyRes.AnomaliesDetected == 0 || len(ltAnomalyRes.AtRiskComponents) == 0 {
+		t.Fatalf("Supplier lead-time anomaly detection failed: %+v", ltAnomalyRes)
+	}
+	t.Logf("✓ Multi-Tier Bullwhip Guard & Lead-Time Anomaly Verified: BullwhipIndex=%.2fx (%s), PeakEchelon='%s', ProjectedSavings=IDR %.0f, LTAnomalies=%d (Critical: %d)",
+		bwRes.OverallBullwhipIndex, bwRes.RiskClassification, bwRes.PeakDistortionEchelon, bwRes.ProjectedSavingsIDR,
+		ltAnomalyRes.AnomaliesDetected, ltAnomalyRes.CriticalBottlenecks)
+
+	// 61.4 Corporate Expense Fraud & Policy Governance AI
+	expAuditRes := coreexpense.EvaluateExpenseClaims(nil)
+	if expAuditRes == nil || expAuditRes.TotalClaimsAudited < 4 || expAuditRes.FraudHoldCount == 0 || expAuditRes.TotalFlaggedAmount <= 0 {
+		t.Fatalf("Expense fraud audit failed: %+v", expAuditRes)
+	}
+	hasDuplicate := false
+	hasSmurfing := false
+	for _, r := range expAuditRes.AuditResults {
+		for _, v := range r.Violations {
+			if v.ViolationType == "DUPLICATE_RECEIPT" {
+				hasDuplicate = true
+			}
+			if v.ViolationType == "SPLIT_TRANSACTION_SMURFING" {
+				hasSmurfing = true
+			}
+		}
+	}
+	if !hasDuplicate || !hasSmurfing {
+		t.Fatalf("Expected both duplicate receipt and smurfing violations in audit results: %+v", expAuditRes.AuditResults)
+	}
+	t.Logf("✓ Corporate Expense Fraud & Policy Auditor Verified: ClaimsAudited=%d, Clean=%d, Review=%d, FraudHold=%d, FlaggedAmount=IDR %.0f, ViolationsCaught=(Duplicate+Smurfing)",
+		expAuditRes.TotalClaimsAudited, expAuditRes.CleanCount, expAuditRes.ReviewRequired, expAuditRes.FraudHoldCount, expAuditRes.TotalFlaggedAmount)
+
+	// 61.5 AI Reverse Logistics & RMA Warranty Diagnostic Engine
+	rmaDiagRes := corewms.DiagnoseRMACase(&corewms.RMADiagnosisRequest{
+		SerialNumber:        "SN-MON-2026-88912",
+		ProductID:           1,
+		ProductName:         "Gaming Monitor 27 Inch Ultra-IPS",
+		CustomerName:        "PT Mitra Retail Mandiri",
+		PurchaseDate:        "2026-06-15",
+		OriginalPriceIDR:    3500000,
+		ReportedSymptom:     "Layar panel mati total bergaris hitam setelah 5 bulan pemakaian",
+		PhysicalInspection:  "NO_DAMAGE",
+	})
+	if rmaDiagRes == nil || rmaDiagRes.WarrantyStatus != "ACTIVE_WARRANTY" || rmaDiagRes.EconomicDisposition != "REPLACE_AND_SCRAP" {
+		t.Fatalf("RMA warranty diagnostic failed: %+v", rmaDiagRes)
+	}
+	if rmaDiagRes.EstimatedRepairCost <= 0 || rmaDiagRes.SalvageValueIDR <= 0 {
+		t.Fatalf("Expected estimated repair cost and salvage value: %+v", rmaDiagRes)
+	}
+
+	rmaResExec := corewms.ProcessRMAResolution(db, &corewms.RMAResolutionRequest{
+		RMANumber:          rmaDiagRes.RMANumber,
+		ChosenDisposition:  "REPLACE",
+		CompensationAmount: 3500000,
+		ApprovalNote:       "Authorized unit replacement under 24M manufacturer warranty",
+	}, 1)
+	if rmaResExec == nil || !strings.Contains(rmaResExec.ResolutionStatus, "REPLACE") || rmaResExec.GeneratedDocRef == "" {
+		t.Fatalf("RMA resolution process failed: %+v", rmaResExec)
+	}
+	t.Logf("✓ AI Reverse Logistics & RMA Diagnostic Verified: RMANum='%s', Warranty='%s' (%d/%d mos), Disposition='%s', EstRepair=IDR %.0f, Salvage=IDR %.0f, ExecutedDoc='%s', Loc='%s'",
+		rmaDiagRes.RMANumber, rmaDiagRes.WarrantyStatus, rmaDiagRes.WarrantyMonthsElapsed, rmaDiagRes.MaxWarrantyMonths,
+		rmaDiagRes.EconomicDisposition, rmaDiagRes.EstimatedRepairCost, rmaDiagRes.SalvageValueIDR, rmaResExec.GeneratedDocRef, rmaResExec.InventoryAdjustedLocation)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (61 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA) PASSED 100%!")
 }

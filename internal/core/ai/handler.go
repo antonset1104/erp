@@ -505,6 +505,19 @@ func (h *Handler) RedlineContract(c *gin.Context) {
 	c.JSON(http.StatusOK, h.client.RedlineContractClause(&req))
 }
 
+// Multi-Tier Supply Chain Bullwhip Guard & Lead-Time Anomaly Detector
+func (h *Handler) GetBullwhipIndex(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	c.JSON(http.StatusOK, h.client.ComputeBullwhipIndex(h.db, companyID))
+}
+
+func (h *Handler) DetectLeadTimeAnomalies(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	var req LeadTimeAnomalyRequest
+	_ = c.ShouldBindJSON(&req)
+	c.JSON(http.StatusOK, h.client.DetectLeadTimeAnomalies(h.db, &req, companyID))
+}
+
 // RegisterRootProtocolRoutes registers public protocol discovery endpoints like /.well-known/agent.json and /mcp
 func RegisterRootProtocolRoutes(r *gin.Engine, h *Handler) {
 	r.GET("/.well-known/agent.json", h.GetA2AAgentCard)
@@ -566,6 +579,10 @@ func RegisterAIRoutes(router *gin.RouterGroup, authMiddleware gin.HandlerFunc, h
 			// AI Contract Lifecycle Management (CLM)
 			authed.POST("/contracts/analyze", h.AnalyzeContract)
 			authed.POST("/contracts/redline", h.RedlineContract)
+
+			// Supply Chain Bullwhip Guard & Lead-Time Anomaly Detector
+			authed.GET("/supply-chain/bullwhip-index", h.GetBullwhipIndex)
+			authed.POST("/supply-chain/lead-time-anomalies", h.DetectLeadTimeAnomalies)
 
 			// Domain AI Endpoints
 			authed.POST("/ticket-triage", h.TriageTicket)
