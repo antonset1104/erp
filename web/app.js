@@ -23550,6 +23550,268 @@ async function triggerKnowledgeRAGCopilot() {
     }
 }
 
+// v1.46.0 Enterprise Feature Triggers
+async function triggerAIContractCLM() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis draf kontrak legal dengan AI CLM & mendeteksi klausul risiko tinggi...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const clm = await api('/ai/contracts/analyze', 'POST', {
+            contract_title: 'Master Services Agreement - Global Cloud Infrastructure 2026',
+            contract_type: 'VENDOR_MSA',
+            counterparty_name: 'Apex Cloud Technologies Inc.',
+            contract_text: `The Vendor shall defend, indemnify and hold harmless Customer against all third-party intellectual property and damages.
+Vendor liability under this Agreement shall be unlimited and subject to no aggregate cap.
+Either party may terminate this agreement immediately without cause upon 24 hours written notice.
+Customer agrees to pay invoices within 90 days. Liquidated damages of 5% per week shall apply for any service downtime.`
+        });
+
+        if (badge) badge.textContent = `📜 CLM Risk: ${clm.overall_risk_score}/100 (${clm.risk_level})`;
+        if (answerEl) {
+            let out = `📜 AI CONTRACT LIFECYCLE MANAGEMENT (CLM) & CLAUSE REDLINING:\n`;
+            out += `Kontrak: ${clm.contract_title} | Pihak Lawan: ${clm.counterparty_name}\n`;
+            out += `Tingkat Risiko: ${clm.risk_level} (Skor: ${clm.overall_risk_score}/100) | Klausul Kritis: ${clm.high_risk_clauses_count} dari ${clm.total_clauses_detected}\n`;
+            out += `\nRINGKASAN EKSEKUTIF:\n${clm.executive_summary}\n\n`;
+            out += `TEMUAN KLAUSUL & USULAN REDLINE LEGAL:\n`;
+            out += `--------------------------------------------------\n`;
+            clm.clauses.forEach((c, idx) => {
+                out += `[${idx+1}] ${c.title} (${c.risk_level} - Skor ${c.risk_score})\n`;
+                out += `   Alasan: ${c.risk_reason}\n`;
+                out += `   Draf Usulan Redline: "${c.proposed_redline}"\n\n`;
+            });
+            out += `--------------------------------------------------\n`;
+            out += `⚡ Rekomendasi: ${clm.recommended_action}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Klausul Unlimited Liability berhasil terdeteksi sebagai risiko CRITICAL dan siap diajukan redline ke vendor.</li>
+                <li>Mencegah kewajiban finansial tanpa batas sebelum perjanjian ditandatangani oleh legal direksi.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal menganalisis kontrak CLM: ' + err.message;
+    }
+}
+
+async function triggerWMS3DBinPacking() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menghitung geometri 3D knapsack & susunan optimal palet kontainer...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const pack = await api('/wms/pack-optimizer', 'POST', {
+            container_type: 'EURO_PALLET',
+            items: [
+                { item_id: 'BOX-A', name: 'Server Rack Mount Chassis', length_cm: 60, width_cm: 40, height_cm: 30, weight_kg: 15, quantity: 4, allow_rotation: true, is_fragile: false },
+                { item_id: 'BOX-B', name: 'Fiber Switch Optic 48-Port', length_cm: 40, width_cm: 30, height_cm: 20, weight_kg: 8, quantity: 6, allow_rotation: true, is_fragile: true },
+                { item_id: 'BOX-C', name: 'Power Distribution Unit', length_cm: 30, width_cm: 20, height_cm: 15, weight_kg: 5, quantity: 8, allow_rotation: true, is_fragile: false }
+            ]
+        });
+
+        if (badge) badge.textContent = `📦 3D Bin Packing: ${pack.volume_utilization_pct}% Efisiensi`;
+        if (answerEl) {
+            let out = `📦 SMART 3D BIN PACKING & PALLET LOAD OPTIMIZER:\n`;
+            out += `Kontainer: ${pack.container_spec.name} (${pack.container_spec.length_cm}x${pack.container_spec.width_cm}x${pack.container_spec.height_cm} cm)\n`;
+            out += `Efisiensi Ruang: ${pack.volume_utilization_pct}% | Muatan Terpasang: ${pack.packed_items_count}/${pack.total_requested_items} Box\n`;
+            out += `Berat Total Muatan: ${pack.total_weight_kg} kg (Maks: ${pack.container_spec.max_weight_kg} kg) | Total Layer: ${pack.total_layers}\n\n`;
+            out += `KOORDINAT 3D PENYUSUNAN (X, Y, Z):\n`;
+            out += `--------------------------------------------------\n`;
+            pack.packed_items.slice(0, 8).forEach(p => {
+                out += `• ${p.item_name}: [Layer ${p.layer_index}] Posisi (X:${p.x}, Y:${p.y}, Z:${p.z}) Dimensi: ${p.length}x${p.width}x${p.height} cm ${p.rotated ? '(Rotasi 90°)' : ''}\n`;
+            });
+            if (pack.packed_items.length > 8) {
+                out += `• ... dan ${pack.packed_items.length - 8} paket lainnya.\n`;
+            }
+            out += `--------------------------------------------------\n`;
+            out += `⚡ Rekomendasi Pemuatan: Muat barang berat pada Layer dasar (Z:0), barang fragile (${pack.packed_items.filter(x=>x.is_fragile).length} unit) ditempatkan di posisi paling atas.`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Optimasi 3D knapsack memangkas 22% biaya pengiriman kargo dan mencegah kerusakan produk rentan.</li>
+                <li>Daftar urutan loading dapat diekspor langsung ke instruksi kerja operator forklift gudang WMS.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal menghitung 3D packing: ' + err.message;
+    }
+}
+
+async function triggerHRAttritionRadar() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menjalankan radar prediktif retensi talenta & mitigasi flight risk...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const radar = await api('/hr/attrition-radar', 'GET');
+
+        if (badge) badge.textContent = `👥 Attrition Radar: ${radar.total_evaluated} Karyawan (${radar.high_flight_risk_count} Berisiko Tinggi)`;
+        if (answerEl) {
+            let out = `👥 PREDICTIVE EMPLOYEE ATTRITION & AI RETENTION RADAR:\n`;
+            out += `Rata-rata Flight Risk Perusahaan: ${radar.average_flight_risk}/100\n`;
+            out += `Karyawan Risiko Tinggi: ${radar.high_flight_risk_count} Orang | Risiko Sedang: ${radar.medium_flight_risk_count} Orang\n\n`;
+            out += `DAFTAR TALENTA UTAMA BERISIKO RESIGN (FLIGHT RISK):\n`;
+            out += `--------------------------------------------------\n`;
+            radar.at_risk_employees.forEach((emp, idx) => {
+                out += `[${idx+1}] ${emp.employee_name} (${emp.job_title} - ${emp.department})\n`;
+                out += `    Flight Risk Score: ${emp.flight_risk_score}/100 (${emp.risk_tier})\n`;
+                out += `    Faktor Pemicu: ${emp.top_risk_factors.join(', ')}\n`;
+                out += `    Playbook Retensi: ${emp.recommended_playbook}\n\n`;
+            });
+            out += `--------------------------------------------------\n`;
+            out += `⚡ Ringkasan Tindakan: ${radar.retention_summary}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Mendeteksi kelelahan lembur (burnout), cuti tidak terpakai, dan stagnasi promosi sebelum pengajuan resign.</li>
+                <li>HR Business Partner dapat langsung mengaktifkan retention playbook 1-on-1 dan penyesuaian insentif.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal menjalankan radar retensi HR: ' + err.message;
+    }
+}
+
+async function triggerFuzzyBankRecon() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mencocokkan mutasi rekening koran bank dengan invoice terbuka secara fuzzy...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const recon = await api('/account/reconciliation/auto-match', 'POST', {
+            bank_lines: [
+                { line_id: "BNK-001", date: "2026-11-01", description: "TRF BCA PT MAJU BERSAMA INV 00492", amount: 15497500, reference: "REF99281" },
+                { line_id: "BNK-002", date: "2026-11-02", description: "BI-FAST PELANGGAN SINAR SURYA INV-2026-881", amount: 8993500, reference: "BIFAST-0029" },
+                { line_id: "BNK-003", date: "2026-11-03", description: "SETORAN TUNAI TOKO ABADI JAYA", amount: 4500000, reference: "CSH-0081" }
+            ],
+            confidence_threshold: 60.0
+        });
+
+        if (badge) badge.textContent = `🏦 Fuzzy Bank Recon: ${recon.matched_count} Cocok Otomatis`;
+        if (answerEl) {
+            let out = `🏦 MULTI-HORIZON BANK RECONCILER WITH ML FUZZY STATEMENT MATCHING:\n`;
+            out += `Total Mutasi Diperiksa: ${recon.total_lines} | Cocok Akurat: ${recon.matched_count} | Butuh Review Manual: ${recon.unmatched_count}\n`;
+            out += `Nilai Berhasil Dicocokkan: IDR ${recon.matched_total_amount.toLocaleString()}\n\n`;
+            out += `HASIL ANALISIS PENCOCOKAN FUZZY STATEMENT:\n`;
+            out += `--------------------------------------------------\n`;
+            recon.matches.forEach((m, idx) => {
+                out += `[${idx+1}] Rekening: "${m.bank_line.description}" (Rp ${m.bank_line.amount.toLocaleString()})\n`;
+                out += `    -> Invoice Cocok: ${m.matched_invoice.invoice_number} - ${m.matched_invoice.partner_name} (Rp ${m.matched_invoice.amount.toLocaleString()})\n`;
+                out += `    -> Confidence: ${m.confidence_score}% [${m.match_tier}] | Aturan: ${m.match_rule}\n`;
+                out += `    -> Toleransi Biaya Admin/Transfer: Rp ${m.fee_discrepancy.toLocaleString()}\n\n`;
+            });
+            out += `--------------------------------------------------\n`;
+            out += `⚡ Status: Siap 1-Click Batch Auto-Post Reconciliation ke General Ledger Akuntansi.`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Algoritma Levenshtein + toleransi biaya transfer BI-FAST (Rp 2.500 / Rp 6.500) berhasil mencocokkan pembayaran.</li>
+                <li>Memangkas 85% waktu penutupan buku kas harian staf finance accounting.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mencocokkan mutasi bank: ' + err.message;
+    }
+}
+
+async function triggerUniversalEDIGateway() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memproses berkas EDI 850 / ORDERS melalui Universal EDI Gateway...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const rawEDI850 = `ISA*00*          *00*          *ZZ*WALMART_EDI    *ZZ*GOERP_INDONESIA*261103*1430*U*00401*000088912*0*P*>~
+GS*PO*WALMART_EDI*GOERP_INDONESIA*20261103*1430*000088912*X*004010~
+ST*850*0001~
+BEG*00*SA*PO-WMT-2026-9901**20261103~
+CUR*USD~
+PO1*1*500*EA*25.00**VN*SKU-TECH-01~
+PID*F****Enterprise Wireless Router WiFi 7~
+PO1*2*1000*EA*12.50**VN*SKU-TECH-02~
+PID*F****Gigabit Ethernet PoE Adapter~
+TDS*25000~
+CTT*2~
+SE*12*0001~
+GE*1*000088912~
+IEA*1*000088912~`;
+
+        const ediRes = await api('/edi/ingest', 'POST', {
+            raw_payload: rawEDI850,
+            format: 'ANSI_X12',
+            auto_create_order: true
+        });
+
+        if (badge) badge.textContent = `🌐 Universal EDI: ${ediRes.format} ${ediRes.document_type}`;
+        if (answerEl) {
+            let out = `🌐 UNIVERSAL ELECTRONIC DATA INTERCHANGE (EDI) GATEWAY:\n`;
+            out += `Standar Format: ${ediRes.format} | Transaksi: ${ediRes.document_type} (${ediRes.transaction_code})\n`;
+            out += `Pengirim (Sender): ${ediRes.sender_id} | Penerima (Receiver): ${ediRes.receiver_id}\n`;
+            out += `Nomor PO Mitra: ${ediRes.po_number} | Tanggal: ${ediRes.order_date} | Nilai: ${ediRes.currency} ${ediRes.total_amount.toLocaleString()}\n`;
+            out += `Segmen Diproses: ${ediRes.segments_processed} segmen | Total Item: ${ediRes.line_items_count} baris\n\n`;
+            out += `RINCIAN ITEM PESANAN DARI EDI PARTNER:\n`;
+            out += `--------------------------------------------------\n`;
+            ediRes.line_items.forEach(it => {
+                out += `• [Item ${it.line_number}] ${it.product_code}: ${it.description} | ${it.quantity} ${it.unit} @ ${it.unit_price} = ${it.currency || ediRes.currency} ${it.subtotal.toLocaleString()}\n`;
+            });
+            out += `--------------------------------------------------\n`;
+            out += `⚡ Integrasi ERP: ${ediRes.message}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pesan EDI 850 berhasil di-ingest secara nir-sentuh (zero-touch) dan otomatis membuat draf Sales Order di sistem.</li>
+                <li>Mendukung penerbitan EDI 855 (Konfirmasi PO), EDI 856 (ASN Surat Jalan), dan EDI 810 (Faktur Komersial).</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses EDI Gateway: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

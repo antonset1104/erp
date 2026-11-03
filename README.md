@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![CI Status](https://img.shields.io/badge/CI-Passing-success?style=flat&logo=githubactions)](https://github.com/antonset1104/erp/actions)
 [![Modules](https://img.shields.io/badge/Modules-50_Enterprise-indigo)](docs/FUNCTIONAL_DOCUMENTATION.md)
-[![Release](https://img.shields.io/badge/Release-v1.45.0-emerald)](https://github.com/antonset1104/erp/releases)
+[![Release](https://img.shields.io/badge/Release-v1.46.0-emerald)](https://github.com/antonset1104/erp/releases)
 [![Open Source](https://img.shields.io/badge/Open_Source-Community_Driven-purple)](docs/OPEN_SOURCE_GUIDE.md)
 
 **GoERP** is a modern, high-performance, enterprise-grade Enterprise Resource Planning (ERP) platform built natively with **Golang**. Engineered with a clean **Modular Monolith** architecture comprising **50 integrated business modules**, GoERP delivers single-binary static compilation, native Go concurrency, ultra-low memory overhead (~25 MB idle RAM), and strict transactional integrity for mission-critical enterprise workloads.
@@ -56,6 +56,11 @@ GoERP includes built-in executive productivity tools to accelerate day-to-day op
 - **🏭 Predictive Equipment Maintenance & IoT Telemetry Gateway (`POST /api/v1/iot/telemetry/ingest`, `GET /api/v1/iot/predictive-health`)**: Industrial sensor ingestion (vibration ISO 10816, temperature, motor current), Remaining Useful Life (RUL) estimation, and auto-creation of maintenance work orders.
 - **🌍 Supplier Sustainability Passport & Scope 3 Vendor Scoring (`GET /api/v1/esg/vendor-scorecards`, `POST /api/v1/esg/vendor-assessments`)**: Green credentials passport tracking emission intensity (kg CO2e/unit), ISO 14001/50001 certifications, recycled packaging, and procurement bonus scoring.
 - **🧠 AI Knowledge Base Semantic Search & Customer Support Copilot (RAG) (`POST /api/v1/ai/knowledge/query`, `POST /api/v1/ai/helpdesk/copilot-draft`)**: Semantic vector RAG retrieval across corporate SOPs, warranties, and product specs, generating automated, context-aware Helpdesk responses.
+- **📜 AI Automated Contract Lifecycle Management (CLM) & Clause Risk Redlining (`POST /api/v1/ai/contracts/analyze`, `POST /api/v1/ai/contracts/redline`)**: Legal clause extraction (Liability caps, indemnification, auto-renewal, liquidated damages), 0-100 risk scoring, and automated AI legal redline counter-proposals.
+- **📦 Smart 3D Bin Packing & Pallet Load Optimizer (`POST /api/v1/wms/pack-optimizer`)**: 3D knapsack spatial geometry engine computing item coordinates (x, y, z), rotation, layer stability, and container volume utilization for Euro pallets, standard pallets, and shipping containers.
+- **👥 Predictive Employee Attrition & AI Talent Retention Radar (`GET /api/v1/hr/attrition-radar`, `POST /api/v1/hr/retention-playbook`)**: Flight risk radar analyzing overtime burnout, unused leaves, promotion stagnation, and compensation benchmarks, with automated 1-click HR retention playbooks.
+- **🏦 Multi-Horizon Bank Reconciler with ML Fuzzy Statement Matching (`POST /api/v1/account/reconciliation/auto-match`, `POST /api/v1/account/reconciliation/batch-post`)**: Fuzzy Levenshtein + BI-FAST fee tolerance band matching (+/- Rp 2,500/Rp 6,500) between bank statement lines and open invoices, with 1-click batch auto-post reconciliation.
+- **🌐 Universal EDI (Electronic Data Interchange) Gateway (`POST /api/v1/edi/ingest`, `POST /api/v1/edi/generate`, `GET /api/v1/edi/supported`)**: ANSI X12 & UN/EDIFACT gateway translating EDI 850 (PO intake to Sales Order), EDI 855 (PO Ack), EDI 856 (ASN shipping notice), and EDI 810 (Commercial Invoice).
 - **🌓 Dark / Light Enterprise Theme Modes**: Seamless visual theme switcher (`☀️ Light` / `🌙 Dark`) with state persisted across browser sessions.
 
 ---

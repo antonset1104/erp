@@ -446,3 +446,36 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 ### 11.5 AI Knowledge Base Semantic Search & Customer Support Copilot (RAG) (`internal/core/ai/knowledge_rag.go`)
 - **Hybrid Semantic Index**: Indexes corporate SOPs, product specifications, warranty policies, and tax guidelines via BM25 and cosine keyword similarity (`POST /api/v1/ai/knowledge/query`).
 - **Support Copilot Agent**: Endpoint `POST /api/v1/ai/helpdesk/copilot-draft` ingests incoming Helpdesk tickets, extracts problem context, retrieves authoritative knowledge chunks, and automatically drafts polite, accurate, step-by-step customer resolutions with high confidence scores.
+
+---
+
+## 12. Advanced Legal Intelligence, Spatial Optimization & Global Supply Chain EDI (v1.46.0)
+
+### 12.1 AI Automated Contract Lifecycle Management (CLM) & Clause Risk Redlining (`internal/core/ai/clm_analyzer.go`)
+- **Automated Legal Risk Scoring**: Endpoint `POST /api/v1/ai/contracts/analyze` ingests Vendor MSAs, NDAs, and Customer Agreements, extracting high-liability clauses (Unlimited Liability, one-sided Indemnification, aggressive Liquidated Damages, lock-in Auto-Renewal, and unbalanced Termination for Convenience).
+- **Composite Contract Exposure Score (0-100)**: Evaluates overall legal risk tiers (`LOW_RISK`, `MEDIUM_RISK`, `HIGH_RISK`, `CRITICAL_EXPOSURE`) with actionable executive summaries.
+- **AI Counter-Clause Redliner**: Endpoint `POST /api/v1/ai/contracts/redline` automatically synthesizes balanced counter-proposals (e.g. capping liability to 100% of trailing 12-month contract value) with legal rationales and negotiation tactics.
+
+### 12.2 Smart 3D Bin Packing & Pallet Load Optimizer (`internal/core/wms/bin_packing.go`)
+- **Spatial 3D Knapsack Heuristic**: Endpoint `POST /api/v1/wms/pack-optimizer` computes optimal cuboid packing coordinates $(x, y, z)$, 90-degree rotations, and layer indices across Euro Pallets ($1200 \times 800 \times 1500$ mm), Standard Pallets ($1200 \times 1000 \times 1600$ mm), 20ft Containers, and Delivery Vans.
+- **Fragile & Gravitational Stability**: Automatically sorts non-fragile heavy cartons to bottom support layers ($Z = 0$) and places fragile items on top layers to prevent cargo crush damage.
+- **Volume & Weight Utilization**: Computes precise volumetric efficiency percentages, gross payload weight, center-of-gravity ratios, and generates step-by-step 3D forklift loading instructions.
+
+### 12.3 Predictive Employee Attrition & AI Talent Retention Radar (`internal/core/hr/attrition_radar.go`)
+- **Multi-Factor Flight Risk Scoring**: Endpoint `GET /api/v1/hr/attrition-radar` computes employee flight risk (0-100) using continuous evaluation of overtime burnout ratios, untaken annual leave accumulation, months since last promotion, and compensation market review latencies.
+- **Departmental Risk Benchmarking**: Aggregates enterprise flight risk heatmaps across Supply Chain, Manufacturing, Sales, Engineering, and Finance.
+- **Automated Retention Playbooks**: Endpoint `POST /api/v1/hr/retention-playbook` executes targeted HR interventions (stay interviews, salary adjustments, promotion fast-tracking, and shift workload rebalancing) with projected post-intervention risk reductions.
+
+### 12.4 Multi-Horizon Bank Reconciler with ML Fuzzy Statement Matching (`internal/core/account/fuzzy_reconciliation.go`)
+- **ML Fuzzy Statement Matching**: Endpoint `POST /api/v1/account/reconciliation/auto-match` compares raw bank statement lines against open invoices using normalized Levenshtein string distance, invoice reference extraction, and partner memo heuristics.
+- **Banking Fee Tolerance Bands**: Automatically accommodates transfer fee discrepancies (e.g. Indonesian BI-FAST Rp 2,500 and RTGS Rp 6,500 fees), eliminating manual journal variance adjustments.
+- **1-Click Batch Reconciliation**: Endpoint `POST /api/v1/account/reconciliation/batch-post` posts matched statement lines to General Ledger journal entries, registers customer payments (`account.payment`), and updates invoice status to `paid` in bulk.
+
+### 12.5 Universal EDI (Electronic Data Interchange) Gateway (`internal/core/edi/gateway.go`)
+- **Multi-Standard Ingestion Engine**: Endpoint `POST /api/v1/edi/ingest` automatically detects and parses North American ANSI X12 and international UN/EDIFACT streams.
+- **Core Document Support**:
+  - **EDI 850 / ORDERS**: Ingests retail and B2B Purchase Orders and stages draft Sales Orders (`sale.order`) in GoERP with parsed line items, quantities, and pricing.
+  - **EDI 855 / ORDRSP**: Generates automated PO acknowledgments confirming order acceptance and delivery commitments.
+  - **EDI 856 / DESADV**: Generates Advance Shipping Notices (ASN) with carrier codes, tracking numbers, and package hierarchies upon stock shipment.
+  - **EDI 810 / INVOIC**: Generates and ingests Commercial Invoices directly synchronized with posted General Ledger customer invoices (`account.move`).
+- **Standard Discovery**: Endpoint `GET /api/v1/edi/supported` exposes transaction set catalogs and validation specs for partner B2B integrations.

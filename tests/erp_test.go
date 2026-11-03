@@ -21,7 +21,11 @@ import (
 	"erp-golang/internal/core/openapi"
 	"erp-golang/internal/core/audit"
 	"erp-golang/internal/core/bi"
+	coreaccount "erp-golang/internal/core/account"
+	coreedi "erp-golang/internal/core/edi"
+	corehr "erp-golang/internal/core/hr"
 	coretreasury "erp-golang/internal/core/treasury"
+	corewms "erp-golang/internal/core/wms"
 	"erp-golang/internal/core/esg"
 	"erp-golang/internal/core/iot"
 	"erp-golang/internal/core/security"
@@ -8617,5 +8621,177 @@ Lead Engineer - Cloud Tech Nusantara (2020 - 2026)
 	t.Logf("✓ AI Knowledge RAG & Support Copilot Verified: Ticket='%s', Confidence=%.0f%%, Referenced=%v, DraftLength=%d chars",
 		copilotResp.TicketID, copilotResp.ConfidenceScore*100, copilotResp.ReferencedArticles, len(copilotResp.DraftReplyText))
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (59 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT) PASSED 100%!")
+	// SECTION 60: AI CLM CONTRACT RISK & REDLINING, SMART 3D BIN PACKING,
+	// HR ATTRITION RADAR, FUZZY BANK RECONCILIATION & UNIVERSAL EDI GATEWAY
+	t.Log(`
+		>>> SECTION 60: AI CLM, 3D BIN PACKING, HR ATTRITION, FUZZY RECON & UNIVERSAL EDI <<<`)
+
+	// 60.1 AI Automated Contract Lifecycle Management (CLM) & Clause Risk Redlining
+	clmRes := aiClient.AnalyzeContractCLM(&ai.ContractAnalysisRequest{
+		ContractTitle:    "Enterprise Cloud Master Services Agreement 2026",
+		ContractType:     "VENDOR_MSA",
+		CounterpartyName: "Global Infrastructure Cloud Inc.",
+		ContractText: `The Vendor shall indemnify, defend and hold harmless the Customer from all claims.
+The liability of the Vendor under this agreement shall be unlimited without limitation of liability cap.
+Customer may terminate this agreement for convenience upon 24 hours written notice.
+Customer agrees to pay all invoices within 90 days of receipt.
+Liquidated damages of 10% per day shall be assessed for any service delay.
+This agreement shall automatically renew for additional 2-year periods unless terminated 120 days in advance.`,
+	})
+	if clmRes == nil || clmRes.TotalClausesDetected < 4 || clmRes.OverallRiskScore < 70.0 || clmRes.RiskLevel != "CRITICAL_EXPOSURE" {
+		t.Fatalf("CLM contract analysis failed: %+v", clmRes)
+	}
+	if clmRes.HighRiskClausesCount < 2 {
+		t.Fatalf("Expected at least 2 high/critical risk clauses, got %d: %+v", clmRes.HighRiskClausesCount, clmRes)
+	}
+
+	redlineRes := aiClient.RedlineContractClause(&ai.ContractRedlineRequest{
+		ContractTitle: "Enterprise Cloud MSA 2026",
+		ClauseType:    "LIABILITY_CAP",
+		CurrentText:   "The liability of the Vendor under this agreement shall be unlimited.",
+	})
+	if redlineRes == nil || redlineRes.RedlinedText == "" || redlineRes.LegalRationale == "" {
+		t.Fatalf("CLM contract redline failed: %+v", redlineRes)
+	}
+	t.Logf("✓ AI Contract CLM & Clause Redlining Verified: Title='%s', RiskLevel='%s', RiskScore=%.1f/100, ClausesDetected=%d, HighRisk=%d, RedlineSample='%s'",
+		clmRes.ContractTitle, clmRes.RiskLevel, clmRes.OverallRiskScore, clmRes.TotalClausesDetected, clmRes.HighRiskClausesCount, redlineRes.RedlinedText)
+
+	// 60.2 Smart 3D Bin Packing & Pallet Load Optimizer
+	packRes := corewms.Optimize3DPacking(&corewms.PackOptimizationRequest{
+		ContainerType: "EURO_PALLET",
+		Items: []corewms.PackItemInput{
+			{ItemCode: "BOX-SRV", ItemName: "Server Chassis 2U", LengthMM: 600, WidthMM: 400, HeightMM: 300, WeightKG: 15, Quantity: 4, AllowRotation: true, IsFragile: false},
+			{ItemCode: "BOX-SW", ItemName: "Fiber Switch 48P", LengthMM: 400, WidthMM: 300, HeightMM: 200, WeightKG: 8, Quantity: 6, AllowRotation: true, IsFragile: true},
+			{ItemCode: "BOX-PDU", ItemName: "Rack PDU Strip", LengthMM: 300, WidthMM: 200, HeightMM: 150, WeightKG: 5, Quantity: 8, AllowRotation: true, IsFragile: false},
+		},
+	})
+	if packRes == nil || packRes.TotalItemsPacked != packRes.TotalItemsRequested || packRes.VolumeUtilizationPct <= 0 {
+		t.Fatalf("3D bin packing optimizer failed: %+v", packRes)
+	}
+	if packRes.ContainerSpec.ContainerType != "EURO_PALLET" || len(packRes.LoadingSequence) != 18 {
+		t.Fatalf("Unexpected packed items count or container spec: %+v", packRes)
+	}
+	// Verify that fragile items are placed safely
+	fragileAtTop := false
+	for _, it := range packRes.LoadingSequence {
+		if it.IsFragile && it.LayerIndex > 0 {
+			fragileAtTop = true
+			break
+		}
+	}
+	if !fragileAtTop {
+		t.Fatalf("Fragile items should be placed in higher layers for pallet stability: %+v", packRes)
+	}
+	t.Logf("✓ Smart 3D Bin Packing Optimizer Verified: Container='%s' (Dims: %.0fx%.0fx%.0f mm), Packed=%d/%d, VolEfficiency=%.1f%%, Weight=%.1f kg, Layers=%d",
+		packRes.ContainerSpec.ContainerType, packRes.ContainerSpec.LengthMM, packRes.ContainerSpec.WidthMM, packRes.ContainerSpec.HeightMM,
+		packRes.TotalItemsPacked, packRes.TotalItemsRequested, packRes.VolumeUtilizationPct, packRes.TotalGrossWeightKG, packRes.LayersCount)
+
+	// 60.3 Predictive Employee Attrition & AI Talent Retention Radar
+	radarRes := corehr.ComputeAttritionRadar(db, 1)
+	if radarRes == nil || radarRes.TotalEmployeesMonitored < 3 || radarRes.HighRiskCount == 0 {
+		t.Fatalf("HR attrition radar evaluation failed: %+v", radarRes)
+	}
+	topRiskEmp := radarRes.Employees[0]
+	if topRiskEmp.FlightRiskScore < 70.0 || topRiskEmp.FlightRiskLevel != "HIGH_FLIGHT_RISK" || len(topRiskEmp.KeyDrivers) == 0 {
+		t.Fatalf("Expected top at-risk employee to have high flight risk: %+v", topRiskEmp)
+	}
+
+	wPlaybook := httptest.NewRecorder()
+	cPlaybook, _ := gin.CreateTestContext(wPlaybook)
+	playbookBody, _ := json.Marshal(corehr.RetentionPlaybookRequest{
+		EmployeeID:      topRiskEmp.EmployeeID,
+		ProposedAction:  "salary_adjustment",
+		BudgetImpactIDR: 2500000,
+		Notes:           "Approval of retention salary adjustment and bonus retention grant",
+	})
+	cPlaybook.Request = httptest.NewRequest("POST", "/api/v1/hr/retention-playbook", strings.NewReader(string(playbookBody)))
+	cPlaybook.Request.Header.Set("Content-Type", "application/json")
+	corehr.NewHandler(db).ApplyRetentionPlaybook(cPlaybook)
+	if wPlaybook.Code != http.StatusOK {
+		t.Fatalf("Failed to trigger retention playbook: code=%d, body=%s", wPlaybook.Code, wPlaybook.Body.String())
+	}
+	t.Logf("✓ Predictive Employee Attrition Radar Verified: Monitored=%d, HighRiskCount=%d, Depts=%d, TopRiskEmp='%s' (Score=%.1f, Drivers=%v), PlaybookTriggered=OK",
+		radarRes.TotalEmployeesMonitored, radarRes.HighRiskCount, len(radarRes.DepartmentRiskRankings), topRiskEmp.EmployeeName, topRiskEmp.FlightRiskScore, topRiskEmp.KeyDrivers)
+
+	// 60.4 Multi-Horizon Bank Reconciler with ML Fuzzy Statement Matching
+	fuzzyMatchRes := coreaccount.RunFuzzyReconciliation(db, []coreaccount.RawBankStatementLine{
+		{LineID: "BNK-001", Date: "2026-11-01", Description: "TRF BCA PT MAJU BERSAMA INV 00492", Amount: 15497500, BankRef: "REF99281"},
+		{LineID: "BNK-002", Date: "2026-11-02", Description: "BI-FAST PELANGGAN SINAR SURYA INV-2026-881", Amount: 8993500, BankRef: "BIFAST-0029"},
+		{LineID: "BNK-003", Date: "2026-11-03", Description: "SETORAN TUNAI TOKO ABADI JAYA", Amount: 4500000, BankRef: "CSH-0081"},
+	}, 1)
+	if fuzzyMatchRes == nil || len(fuzzyMatchRes.Matches) == 0 {
+		t.Fatalf("Fuzzy bank reconciliation failed: %+v", fuzzyMatchRes)
+	}
+
+	wBatchPost := httptest.NewRecorder()
+	cBatchPost, _ := gin.CreateTestContext(wBatchPost)
+	batchPostReq, _ := json.Marshal(coreaccount.BatchReconcileRequest{
+		Matches:    fuzzyMatchRes.Matches,
+		AutoPostGL: true,
+	})
+	cBatchPost.Request = httptest.NewRequest("POST", "/api/v1/account/reconciliation/batch-post", strings.NewReader(string(batchPostReq)))
+	cBatchPost.Request.Header.Set("Content-Type", "application/json")
+	coreaccount.NewHandler(db).BatchPost(cBatchPost)
+	if wBatchPost.Code != http.StatusOK {
+		t.Fatalf("Failed to batch post reconciliation: code=%d, body=%s", wBatchPost.Code, wBatchPost.Body.String())
+	}
+	t.Logf("✓ Multi-Horizon Fuzzy Bank Reconciliation Verified: Lines=%d, Matched=%d, Unmatched=%d, MatchedAmount=IDR %.2f, 1-ClickBatchPost=OK",
+		fuzzyMatchRes.TotalStatementLines, fuzzyMatchRes.MatchedLinesCount, fuzzyMatchRes.UnmatchedLinesCount, fuzzyMatchRes.TotalMatchedVolumeIDR)
+
+	// 60.5 Universal EDI Gateway (ANSI X12 & UN/EDIFACT Parser and Generator)
+	rawEDI850 := `ISA*00*          *00*          *ZZ*WALMART_HQ     *ZZ*GOERP_GLOBAL   *261103*1430*U*00401*000099123*0*P*>~
+GS*PO*WALMART_HQ*GOERP_GLOBAL*20261103*1430*000099123*X*004010~
+ST*850*0001~
+BEG*00*SA*PO-WMT-2026-9901**20261103~
+CUR*USD~
+PO1*1*500*EA*25.00**VN*SKU-ROUTER-WIFI7~
+PID*F****Enterprise Wireless Router WiFi 7~
+PO1*2*1000*EA*12.50**VN*SKU-POE-ADAPTER~
+PID*F****Gigabit Ethernet PoE Adapter~
+TDS*25000~
+CTT*2~
+SE*12*0001~
+GE*1*000099123~
+IEA*1*000099123~`
+
+	ediIngestRes := coreedi.IngestEDI(rawEDI850, "ANSI_X12", true, db, 1)
+	if ediIngestRes == nil || ediIngestRes.Format != "ANSI_X12" || ediIngestRes.DocumentType != "PURCHASE_ORDER_850" || ediIngestRes.LineItemsCount != 2 {
+		t.Fatalf("EDI 850 ingest failed: %+v", ediIngestRes)
+	}
+	if ediIngestRes.PONumber != "PO-WMT-2026-9901" || ediIngestRes.TotalAmount != 25000 {
+		t.Fatalf("Unexpected EDI 850 PO details: %+v", ediIngestRes)
+	}
+	if ediIngestRes.CreatedRecordID == nil {
+		t.Fatalf("Expected auto-created Sales Order from EDI 850, got nil")
+	}
+
+	ediGenRes := coreedi.GenerateEDI(&coreedi.EDIGenerateRequest{
+		DocumentType:   "810",
+		Format:         "ANSI_X12",
+		SenderID:       "GOERP_GLOBAL",
+		ReceiverID:     "WALMART_HQ",
+		DocumentNumber: "INV-2026-00991",
+		TotalAmount:    25000,
+		LineItems:      ediIngestRes.LineItems,
+	})
+	if ediGenRes == nil || !strings.Contains(ediGenRes.RawPayload, "ST*810*") || !strings.Contains(ediGenRes.RawPayload, "BIG*") {
+		t.Fatalf("EDI 810 invoice generation failed: %+v", ediGenRes)
+	}
+
+	ediFactGenRes := coreedi.GenerateEDI(&coreedi.EDIGenerateRequest{
+		DocumentType:   "INVOIC",
+		Format:         "EDIFACT",
+		SenderID:       "GOERP_GLOBAL",
+		ReceiverID:     "CARREFOUR_EU",
+		DocumentNumber: "INV-2026-00992",
+		TotalAmount:    25000,
+		LineItems:      ediIngestRes.LineItems,
+	})
+	if ediFactGenRes == nil || !strings.Contains(ediFactGenRes.RawPayload, "UNB+UNOC") || !strings.Contains(ediFactGenRes.RawPayload, "BGM+380+") {
+		t.Fatalf("EDIFACT INVOIC generation failed: %+v", ediFactGenRes)
+	}
+	t.Logf("✓ Universal EDI Gateway Verified: IngestedFormat='%s', DocType='%s', PO='%s', Total=%.2f, StagedSaleOrderID=%d, GeneratedX12Segs=%d, GeneratedEDIFACTSegs=%d",
+		ediIngestRes.Format, ediIngestRes.DocumentType, ediIngestRes.PONumber, ediIngestRes.TotalAmount, *ediIngestRes.CreatedRecordID, ediGenRes.SegmentCount, ediFactGenRes.SegmentCount)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (60 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI) PASSED 100%!")
 }

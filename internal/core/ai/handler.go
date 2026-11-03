@@ -486,6 +486,25 @@ func (h *Handler) SupportCopilotDraft(c *gin.Context) {
 	c.JSON(http.StatusOK, h.client.DraftSupportCopilotReply(&req))
 }
 
+// AI Contract Lifecycle Management (CLM) & Clause Risk Analysis
+func (h *Handler) AnalyzeContract(c *gin.Context) {
+	var req ContractAnalysisRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, h.client.AnalyzeContractCLM(&req))
+}
+
+func (h *Handler) RedlineContract(c *gin.Context) {
+	var req ContractRedlineRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, h.client.RedlineContractClause(&req))
+}
+
 // RegisterRootProtocolRoutes registers public protocol discovery endpoints like /.well-known/agent.json and /mcp
 func RegisterRootProtocolRoutes(r *gin.Engine, h *Handler) {
 	r.GET("/.well-known/agent.json", h.GetA2AAgentCard)
@@ -543,6 +562,10 @@ func RegisterAIRoutes(router *gin.RouterGroup, authMiddleware gin.HandlerFunc, h
 			authed.POST("/pricing/apply-rule", h.ApplyPricingRule)
 			authed.POST("/knowledge/query", h.QueryKnowledge)
 			authed.POST("/helpdesk/copilot-draft", h.SupportCopilotDraft)
+
+			// AI Contract Lifecycle Management (CLM)
+			authed.POST("/contracts/analyze", h.AnalyzeContract)
+			authed.POST("/contracts/redline", h.RedlineContract)
 
 			// Domain AI Endpoints
 			authed.POST("/ticket-triage", h.TriageTicket)

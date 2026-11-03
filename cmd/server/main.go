@@ -11,7 +11,11 @@ import (
 	"erp-golang/internal/core/audit"
 	"erp-golang/internal/core/bi"
 	"erp-golang/internal/core/commandcenter"
+	coreaccount "erp-golang/internal/core/account"
+	coreedi "erp-golang/internal/core/edi"
+	corehr "erp-golang/internal/core/hr"
 	coretreasury "erp-golang/internal/core/treasury"
+	corewms "erp-golang/internal/core/wms"
 	"erp-golang/internal/core/esg"
 	"erp-golang/internal/core/iot"
 	"erp-golang/internal/core/database"
@@ -268,7 +272,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.45.0",
+			"version":    "1.46.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -286,7 +290,7 @@ func main() {
 	ai.RegisterRootProtocolRoutes(r, aiHandler)
 
 	// Register OpenAPI 3.1 & Interactive API Explorer
-	openapi.RegisterRoutes(r, cfg.AppName, "1.45.0")
+	openapi.RegisterRoutes(r, cfg.AppName, "1.46.0")
 
 	// API v1 Router Group
 	apiV1 := r.Group("/api/v1")
@@ -310,6 +314,10 @@ func main() {
 		coretreasury.RegisterTreasuryFXRoutes(apiV1, authMiddleware, db)
 		iot.RegisterIoTRoutes(apiV1, authMiddleware, db)
 		esg.RegisterESGVendorRoutes(apiV1, authMiddleware, db)
+		corewms.RegisterWMSPackRoutes(apiV1, authMiddleware)
+		corehr.RegisterHRRadarRoutes(apiV1, authMiddleware, db)
+		coreaccount.RegisterFuzzyReconcileRoutes(apiV1, authMiddleware, db)
+		coreedi.RegisterEDIRoutes(apiV1, authMiddleware, db)
 	}
 
 	// Serve Static Web Frontend

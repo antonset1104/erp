@@ -397,6 +397,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/ai/contracts/analyze": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"AI Enterprise Intelligence"},
+					"summary":     "AI Contract Lifecycle Management (CLM) & Clause Risk Redlining",
+					"description": "Extracts liability caps, indemnification, liquidated damages, and auto-renewal terms with 0-100 risk scoring and redlines.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Risk score, detected high-risk clauses, and recommended counter-terms"},
+					},
+				},
+			},
+			"/api/v1/wms/pack-optimizer": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Smart 3D Bin Packing & Pallet Load Optimizer",
+					"description": "Computes 3D cuboid packing coordinates (x, y, z), rotation, layer stability, and container volume utilization for pallets and containers.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Container volume efficiency, placed item coordinates, and 3D visual preview"},
+					},
+				},
+			},
+			"/api/v1/hr/attrition-radar": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Predictive Employee Attrition & AI Talent Retention Radar",
+					"description": "Calculates employee flight risk (0-100) based on overtime burnout, leave deficit, promotion stagnation, and compensation benchmarks.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Ranked at-risk employees and automated retention playbooks"},
+					},
+				},
+			},
+			"/api/v1/account/reconciliation/auto-match": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Multi-Horizon Bank Reconciler with ML Fuzzy Statement Matching",
+					"description": "Fuzzy string matching with BI-FAST fee tolerance (+/- Rp 2,500/Rp 6,500) and 1-click batch payment reconciliation.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Matched bank lines, invoice candidates, and confidence score"},
+					},
+				},
+			},
+			"/api/v1/edi/ingest": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"System & Protocols"},
+					"summary":     "Universal EDI Gateway (ANSI X12 & UN/EDIFACT)",
+					"description": "Ingests EDI 850 / ORDERS (Purchase Orders), EDI 810 (Invoices), EDI 856 (ASNs) with automated draft Sales Order creation.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Parsed segments, document type, line items, and staged ERP record ID"},
+					},
+				},
+			},
 		},
 	}
 }
