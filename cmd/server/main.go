@@ -18,6 +18,8 @@ import (
 	coreautomotive "erp-golang/internal/core/automotive"
 	coreaviation "erp-golang/internal/core/aviation"
 	corebess "erp-golang/internal/core/bess"
+	corebiopharma "erp-golang/internal/core/biopharma"
+	coreccus "erp-golang/internal/core/ccus"
 	corecosting "erp-golang/internal/core/costing"
 	corecpq "erp-golang/internal/core/cpq"
 	corecrm "erp-golang/internal/core/crm"
@@ -29,6 +31,7 @@ import (
 	corefieldservice "erp-golang/internal/core/fieldservice"
 	corefinance "erp-golang/internal/core/finance"
 	corefleet "erp-golang/internal/core/fleet"
+	coregeotech "erp-golang/internal/core/geotech"
 	coregraphql "erp-golang/internal/core/graphql"
 	coregrc "erp-golang/internal/core/grc"
 	corehr "erp-golang/internal/core/hr"
@@ -41,11 +44,13 @@ import (
 	coremrp "erp-golang/internal/core/mrp"
 	corenuclear "erp-golang/internal/core/nuclear"
 	corepharma "erp-golang/internal/core/pharma"
+	corepowergrid "erp-golang/internal/core/powergrid"
 	corepricing "erp-golang/internal/core/pricing"
 	coreprocurement "erp-golang/internal/core/procurement"
 	coreproject "erp-golang/internal/core/project"
 	corequality "erp-golang/internal/core/quality"
 	corerailway "erp-golang/internal/core/railway"
+	corerenewables "erp-golang/internal/core/renewables"
 	corescm "erp-golang/internal/core/scm"
 	coresemiconductor "erp-golang/internal/core/semiconductor"
 	coreservice "erp-golang/internal/core/service"
@@ -314,7 +319,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.68.0",
+			"version":    "1.69.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -469,6 +474,11 @@ func main() {
 		coreaerospace.RegisterAerospaceRoutes(apiV1)
 		coresubsea.RegisterSubseaRoutes(apiV1)
 		coreautomotive.RegisterAutomotiveRoutes(apiV1)
+		corebiopharma.RegisterBiopharmaRoutes(apiV1)
+		corerenewables.RegisterRenewablesRoutes(apiV1)
+		corepowergrid.RegisterPowerGridRoutes(apiV1)
+		coreccus.RegisterCCUSRoutes(apiV1)
+		coregeotech.RegisterGeotechRoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend

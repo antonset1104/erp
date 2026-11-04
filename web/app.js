@@ -30794,6 +30794,392 @@ async function triggerAutomotiveOTA() {
     }
 }
 
+async function triggerBiopharmaBioreactor() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis kinetika pertumbuhan Monod sel mamalia CHO, spektroskopi Raman VCD & koreksi pakan glukosa...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const batchID = "BATCH-CHO-MAB-2026-901";
+
+        // 1. Ingest Raman PAT telemetry
+        await api('/biopharma/bioreactor/ingest-culture-telemetry', 'POST', {
+            batch_id: batchID,
+            bioreactor_id: "BIOREACT-SUB-2000L-01",
+            culture_duration_hours: 168.0,
+            viable_cell_density_10e6_ml: 28.5,
+            cell_viability_pct: 96.5,
+            glucose_concentration_gl: 1.75,
+            lactate_concentration_gl: 3.35,
+            ammonia_concentration_mm: 4.25,
+            dissolved_oxygen_do_pct: 40.0,
+            culture_ph: 7.02
+        });
+
+        // 2. Evaluate Monod metabolic growth
+        const evalRes = await api('/biopharma/bioreactor/evaluate-metabolic-growth', 'POST', {
+            batch_id: batchID
+        });
+
+        // 3. Execute feed correction
+        const corrRes = await api('/biopharma/bioreactor/execute-nutrient-feed-correction', 'POST', {
+            batch_id: batchID
+        });
+
+        // 4. cGMP Dossier
+        const dossierRes = await api(`/biopharma/bioreactor/batch-cgmp-dossier/${batchID}`, 'GET');
+
+        if (badge) badge.textContent = `🧬 BIOPHARMA: VCD ${dossierRes.data.vcd_10e6_ml}M/mL | Viability ${dossierRes.data.cell_viability_pct}% | Feed ${corrRes.data.adjusted_feed_rate_ml_hr} mL/h`;
+        if (answerEl) {
+            let out = `🧬 BIOPHARMACEUTICAL BIOREACTOR CELL CULTURE FED-BATCH & VCD METABOLIC SENTINEL (FDA cGMP 21 CFR 211 & PAT):\n`;
+            out += `Batch Kultur Sel: ${batchID} | Bioreaktor: BIOREACT-SUB-2000L-01 (Kultur Sel CHO Antibodi Monoklonal)\n`;
+            out += `Durasi Fermentasi: 168.0 jam (Hari ke-7) | Standar Regulasi: FDA 21 CFR Part 211 & ICH Q8/Q11 PAT\n\n`;
+            out += `SPEKTROSKOPI RAMAN IN-LINE & INDIKATOR METABOLIK SEL:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Kerapatan Sel Hidup (Viable Cell Density - VCD): 28.5 × 10^6 sel/mL (Fase Eksponensial Lanjut)\n`;
+            out += `• Viabilitas Sel Hidup: 96.5% (Ambang Batas Kritis Panen > 85.0%)\n`;
+            out += `• Konsentrasi Glukosa Substrat: 1.75 g/L (Peringatan Deplesi Substrat < 2.0 g/L)\n`;
+            out += `• Konsentrasi Asam Laktat Produk Samping: 3.35 g/L (Inhibisi Sedang > 3.0 g/L)\n`;
+            out += `• Konsentrasi Amonia Toksik: 4.25 mM (Batas Toleransi Apoptosis < 5.0 mM)\n`;
+            out += `• Laju Pertumbuhan Spesifik Monod (µ): ${evalRes.data.specific_growth_rate_mu_per_hr} /jam\n`;
+            out += `• Laju Kematian Sel Spesifik (kd): ${evalRes.data.cell_death_rate_kd_per_hr} /jam\n`;
+            out += `• Status Kesehatan Metabolik: ${evalRes.data.metabolic_health_status}\n\n`;
+            out += `KONTROL MIKRO-DOSIS PAKAN NUTRISI LOOP TERTUTUP (AUTOMATED FEED):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Otorisasi Penyesuaian Dosis: ${corrRes.data.correction_id}\n`;
+            out += `• Laju Pompa Pakan Glukosa Terkoreksi: ${corrRes.data.adjusted_feed_rate_ml_hr} mL/jam (Larutan Sirup Glukosa 50% w/v)\n`;
+            out += `• Target Konsentrasi Glukosa Kalibrasi: ${corrRes.data.target_glucose_level_gl} g/L\n`;
+            out += `• Rekomendasi Titrasi Basa Penyeimbang pH: ${evalRes.data.recommended_base_titration_ml_hr} mL/jam\n`;
+            out += `• Kerugian Gagal Panen Batch Terhindar: $${corrRes.data.avoided_batch_discard_loss_usd.toLocaleString()} USD (Menyelamatkan 2,000L Produk Protein Terapeutik)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Sensor Raman non-invasif mendeteksi dinamika nutrien tanpa risiko kontaminasi mikroba pada bejana bioreaktor steril.</li>
+                <li>Pemberian pakan adaptif otomatis mencegah sel mamalia beralih ke metabolisme pembentukan laktat berlebih (*Warburg effect*).</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses biopharma bioreactor: ' + err.message;
+    }
+}
+
+async function triggerRenewablesMooring() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis tegangan katenari tali tambat turbin terapung 15MW, fatigue siklik T-N & proteksi badai...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const turbineID = "FOWT-15MW-NORTHSEA-04";
+
+        // 1. Ingest mooring line telemetry
+        await api('/renewables/mooring/ingest-line-telemetry', 'POST', {
+            turbine_id: turbineID,
+            mooring_line_id: "LINE-CATENARY-01-SE",
+            wind_speed_mps: 29.2,
+            significant_wave_height_hs_m: 8.8,
+            peak_wave_period_tp_sec: 12.6,
+            tension_kn: 3950.0,
+            maximum_breaking_load_kn: 6200.0,
+            anchor_pullout_capacity_kn: 7500.0,
+            fairlead_angle_deg: 41.2
+        });
+
+        // 2. Evaluate fatigue & tension
+        const evalRes = await api('/renewables/mooring/evaluate-fatigue-and-tension', 'POST', {
+            turbine_id: turbineID
+        });
+
+        // 3. Trigger storm derating
+        const actRes = await api('/renewables/mooring/trigger-storm-derating-action', 'POST', {
+            turbine_id: turbineID
+        });
+
+        // 4. Dossier
+        const dossierRes = await api(`/renewables/mooring/turbine-integrity-dossier/${turbineID}`, 'GET');
+
+        if (badge) badge.textContent = `💨 FOWT: Line Util ${evalRes.data.line_tension_utilization_pct}% | Anchor SF ${evalRes.data.anchor_safety_factor} | Storm Pitch Feathered`;
+        if (answerEl) {
+            let out = `💨 FLOATING OFFSHORE WIND TURBINE MOORING LINE TENSION & HYDRODYNAMIC FATIGUE GUARDIAN (DNV-ST-0119 & IEC 61400-3-2):\n`;
+            out += `Unit Turbin Angin Terapung: ${turbineID} (Kapasitas 15MW Laut Utara) | Tali Tambat: LINE-CATENARY-01-SE\n`;
+            out += `Kecepatan Angin Badai: 29.2 m/detik (Gale Force) | Tinggi Gelombang Signifikan (Hs): 8.8 meter | Periode Gelombang: 12.6 detik\n`;
+            out += `Standar Sertifikasi: DNV-ST-0119 Floating Wind Mooring & IEC 61400-3-2 Offshore Standards\n\n`;
+            out += `INTEGRITAS TEGANGAN KATENARI & AKUMULASI FATIGUE SIKLIK:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Tegangan Tarik Fairlead Aktif: 3,950.0 kN (Beban Patah Maksimum MBL: 6,200.0 kN)\n`;
+            out += `• Rasio Utilitas Tegangan Tali Tambat: ${evalRes.data.line_tension_utilization_pct}% (Batas Desain Dinamis < 60.0%)\n`;
+            out += `• Kerusakan Kelelahan Kumulatif Palmgren-Miner (D): ${evalRes.data.cumulative_fatigue_damage_d} (Model Siklus Rainflow & T-N Curve)\n`;
+            out += `• Faktor Keamanan Penahan Jangkar Hisap (Anchor Safety Factor): ${evalRes.data.anchor_safety_factor} (Mandatori DNV >= 1.60)\n`;
+            out += `• Tingkat Keparahan Integritas Tambat: ${evalRes.data.integrity_status}\n`;
+            out += `• Mandat De-Rating Darurat Badai: ${evalRes.data.storm_derating_mandate ? 'WAJIB DILAKSANAKAN (MANDATORY)' : 'NORMAL'}\n\n`;
+            out += `AKSI MITIGASI PITCH FEATHERING & DE-RATING AERODINAMIS:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Perintah Mitigasi Badai: ${actRes.data.action_id}\n`;
+            out += `• Sudut Pitch Bilah Rotor Terputar (Feathered Angle): ${actRes.data.rotor_pitch_feathered_deg}° (Mengeliminasi Gaya Angkat Aerodinamis)\n`;
+            out += `• Reduksi Beban Dorong Horisontal (Thrust Reduction): ${actRes.data.thrust_load_reduction_pct}%\n`;
+            out += `• Estimasi Kerugian Terhindar: $${actRes.data.avoided_mooring_failure_usd.toLocaleString()} USD (Mencegah Turbin Hanyut & Putusnya Kabel Bawah Laut)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Sensor beban fairlead memprediksi kelelahan kumulatif sebelum rantai baja tempa mengalami perambatan retak fatik.</li>
+                <li>Perputaran sudut bilah (*feathering*) seketika mereduksi gaya dorong badai sehingga tali tambat tidak putus akibat beban lonjakan.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses floating wind mooring: ' + err.message;
+    }
+}
+
+async function triggerHVDCCable() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memeriksa profil suhu serat optik DTS, kapasitas Neher-McGrath & deteksi partial discharge kabel HVDC 500kV...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const cableID = "HVDC-500KV-JAVA-SUMATRA-01";
+
+        // 1. Ingest telemetry
+        await api('/powergrid/hvdc/ingest-cable-telemetry', 'POST', {
+            cable_circuit_id: cableID,
+            segment_km_position: 48.5,
+            rated_voltage_kv: 500.0,
+            current_load_amps: 2180.0,
+            conductor_temp_c: 85.8,
+            seabed_sediment_temp_c: 18.5,
+            sediment_thermal_resistivity: 1.42,
+            partial_discharge_pc: 165.0,
+            insulation_type: "XLPE_CROSSLINKED_POLYETHYLENE"
+        });
+
+        // 2. Evaluate thermal ampacity
+        const evalRes = await api('/powergrid/hvdc/evaluate-thermal-ampacity', 'POST', {
+            cable_circuit_id: cableID
+        });
+
+        // 3. Dispatch curtailment
+        const curtRes = await api('/powergrid/hvdc/dispatch-load-curtailment', 'POST', {
+            cable_circuit_id: cableID
+        });
+
+        // 4. Reliability Dossier
+        const dossierRes = await api(`/powergrid/hvdc/cable-reliability-dossier/${cableID}`, 'GET');
+
+        if (badge) badge.textContent = `⚡ HVDC: Temp ${dossierRes.data.conductor_temp_c}°C | PD ${dossierRes.data.partial_discharge_pc}pC | Curtail ${curtRes.data.curtailed_load_amps}A`;
+        if (answerEl) {
+            let out = `⚡ HIGH-VOLTAGE DIRECT CURRENT (HVDC) SUBSEA INTERCONNECTOR CABLE THERMAL RATING & PARTIAL DISCHARGE SENTINEL (CIGRE TB 622 & IEC 62067):\n`;
+            out += `Sirkuit Transmisi Interkoneksi: ${cableID} (Tegangan Pengenal: 500 kV DC XLPE)\n`;
+            out += `Lokasi Segmen Bawah Laut: KM 48.5 (Selat Sunda) | Suhu Sedimen Dasar Laut: 18.5°C | Resistivitas Termal: 1.42 K·m/W\n`;
+            out += `Standar Sertifikasi: CIGRE TB 622 Subsea Cable Guidelines & IEC 62067 Extra High Voltage Standards\n\n`;
+            out += `RATING TERMAL NEHER-McGRATH & LEPASAN MUATAN PARSIAL (PARTIAL DISCHARGE - PD):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Beban Arus Listrik Berjalan: 2,180.0 A\n`;
+            out += `• Suhu Inti Konduktor (Serat Optik DTS Raman): 85.8°C (Ambang Batas Maksimal Isolasi XLPE: 90.0°C)\n`;
+            out += `• Margin Keamanan Termal (Thermal Margin): ${evalRes.data.thermal_margin_celsius}°C (Suhu Terlalu Panas Dekat Batas Kritis)\n`;
+            out += `• Kapasitas Arus Kontinu Mantap Neher-McGrath: ${evalRes.data.neher_mcgrath_continuous_ampacity_amps} A\n`;
+            out += `• Deteksi Pelepasan Parsial (Sensor HFCT): 165.0 pC (Ambang Batas Degradasi Rongga Dielektrik > 100 pC)\n`;
+            out += `• Tingkat Risiko Kerusakan Dielektrik: ${evalRes.data.partial_discharge_risk_level}\n`;
+            out += `• Persentase De-Rating Dinamis: ${evalRes.data.dynamic_ampacity_derate_pct}%\n\n`;
+            out += `AKSI PENGURANGAN BEBAN TRANSMISI & PENGALIHAN DAYA (LOAD CURTAILMENT):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Pengurangan Beban: ${curtRes.data.action_id}\n`;
+            out += `• Arus Beban Yang Dipangkas: ${curtRes.data.curtailed_load_amps} A\n`;
+            out += `• Daya Listrik Dialihkan ke Koridor Alternatif: ${curtRes.data.rerouted_grid_power_mw} MW\n`;
+            out += `• Estimasi Biaya Pemulihan Kapal Kabel Terhindar: $${curtRes.data.avoided_subsea_vessel_mobilization_usd.toLocaleString()} USD (Biaya Mobilisasi Kapal Pemasang Kabel Laut & Penyambungan Ekstra Tinggi)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Serat optik DTS Raman mendeteksi pembentukan titik panas di zona penumpukan sedimen lumpur dasar laut.</li>
+                <li>Sensor lecutan parsial frekuensi tinggi memberikan peringatan dini berminggu-minggu sebelum tembus listrik (*flashover*) fatal terjadi.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses HVDC cable sentinel: ' + err.message;
+    }
+}
+
+async function triggerCCUSPipeline() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menghitung amplop fase termodinamika Peng-Robinson CO2 superkritis & pendinginan Joule-Thomson...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const segmentID = "CCS-PIPE-SUKOWATI-DENSE-01";
+
+        // 1. Ingest telemetry
+        await api('/ccus/pipeline/ingest-telemetry', 'POST', {
+            pipeline_segment_id: segmentID,
+            operating_pressure_bar: 78.2,
+            operating_temp_c: 32.5,
+            co2_purity_mol_pct: 96.8,
+            n2_impurity_mol_pct: 2.1,
+            ch4_impurity_mol_pct: 1.1,
+            mass_flow_rate_tons_hr: 420.0,
+            depressurization_rate_bar_min: 5.2
+        });
+
+        // 2. Evaluate phase envelope
+        const evalRes = await api('/ccus/pipeline/evaluate-phase-envelope', 'POST', {
+            pipeline_segment_id: segmentID
+        });
+
+        // 3. Trigger repressurization control
+        const ctrlRes = await api('/ccus/pipeline/trigger-repressurization-control', 'POST', {
+            pipeline_segment_id: segmentID
+        });
+
+        // 4. Dossier
+        const dossierRes = await api(`/ccus/pipeline/integrity-dossier/${segmentID}`, 'GET');
+
+        if (badge) badge.textContent = `🌫️ CCS CO2: Phase ${evalRes.data.fluid_phase_state} | Saturation ${evalRes.data.saturation_bubble_pressure_bar}bar | Heater ${ctrlRes.data.in_line_heater_duty_kw}kW`;
+        if (answerEl) {
+            let out = `🌫️ CARBON CAPTURE & STORAGE (CCS) SUPERCRITICAL CO2 PIPELINE PHASE ENVELOPE & JOULE-THOMSON CHILLING SENTINEL (ISO 27913 & DNV-RP-F104):\n`;
+            out += `Jalur Pipa Transmisi Karbon: ${segmentID} (Blok Sukowati CCUS Hub) | Laju Alir: 420.0 Ton/jam\n`;
+            out += `Komposisi Gas: CO2 96.8 mol% | N2 2.1 mol% | CH4 1.1 mol% (Impuritas Menaikkan Cricondenbar)\n`;
+            out += `Standar Sertifikasi: ISO 27913 Carbon Dioxide Transportation Pipelines & DNV-RP-F104 Dense Phase CO2\n\n`;
+            out += `TERMODINAMIKA AMPLOP FASE PENG-ROBINSON (EOS) & PENDINGINAN JOULE-THOMSON:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Tekanan Operasi Pipa: 78.2 Bar | Suhu Operasi: 32.5°C\n`;
+            out += `• Tekanan Titik Gelembung Campuran (Saturation Bubble Pressure): ${evalRes.data.saturation_bubble_pressure_bar} Bar\n`;
+            out += `• Margin Tekanan Menuju Dua Fase (Pressure Margin): ${evalRes.data.pressure_margin_to_two_phase_bar} Bar (Mendekati Zona Transisi Dua Fase)\n`;
+            out += `• Status Fase Fluida Aliran: ${evalRes.data.fluid_phase_state}\n`;
+            out += `• Koefisien Ekspansi Pendinginan Joule-Thomson (µJT): ${evalRes.data.joule_thomson_chilling_coeff_c_bar} °C/Bar\n`;
+            out += `• Proyeksi Suhu Ekstrem Saat Blowdown Dekompresi: ${evalRes.data.projected_choked_orifice_temp_c}°C\n`;
+            out += `• Tingkat Risiko Patah Getas Baja Karbon (Brittle Fracture): ${evalRes.data.brittle_ductile_fracture_risk} (Bahaya Di Bawah Suhu DBTT -40°C)\n\n`;
+            out += `SISTEM KONTROL PEMANAS SEJAJAR & PENCEGAHAN ES KERING:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Perintah Regulasi Termal: ${ctrlRes.data.control_id}\n`;
+            out += `• Daya Pemanas Sejajar (In-Line Heater Duty): ${ctrlRes.data.in_line_heater_duty_kw} kW (Mencegah Pembentukan Kristal Es Kering Padat)\n`;
+            out += `• Pembatasan Bukaan Katup Choke: ${ctrlRes.data.choke_valve_throttled_pct}%\n`;
+            out += `• Estimasi Kerugian Terhindar: $${ctrlRes.data.avoided_pipe_rupture_loss_usd.toLocaleString()} USD (Mencegah Pecah Pipa Getas & Pelepasan Gas Beracun Skala Besar)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pemodelan termodinamika Peng-Robinson memperhitungkan impuritas N2/CH4 yang memperlebar kubah dua fase (*two-phase envelope*).</li>
+                <li>Kontrol pemanas gas in-line otomatis mempertahankan integritas ulet baja pipa saat terjadi penurunan tekanan pipa tak terduga.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses CCUS CO2 pipeline: ' + err.message;
+    }
+}
+
+async function triggerGeotechSeismic() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis tensor momen seismik tambang dalam, nilai b-value Gutenberg-Richter & evakuasi rockburst...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const mineLevelID = "LEVEL-DEEP-ORE-1650M";
+
+        // 1. Ingest event telemetry
+        await api('/geotech/seismic/ingest-event-telemetry', 'POST', {
+            event_id: "EVT-SEISMIC-2026-9901",
+            mine_level_id: mineLevelID,
+            extraction_drift_id: "DRIFT-PANEL-XC-08",
+            local_magnitude_ml: 1.92,
+            radiated_seismic_energy_joules: 5.6e6,
+            seismic_moment_nm: 1.4e11,
+            hypocenter_x: 4520.5,
+            hypocenter_y: 8110.2,
+            hypocenter_z: -1650.0,
+            geophone_trigger_count: 18
+        });
+
+        // 2. Evaluate hazard
+        const evalRes = await api('/geotech/seismic/evaluate-rockburst-hazard', 'POST', {
+            mine_level_id: mineLevelID
+        });
+
+        // 3. Order evacuation
+        const evacRes = await api('/geotech/seismic/order-exclusion-zone-evacuation', 'POST', {
+            mine_level_id: mineLevelID
+        });
+
+        // 4. Dossier
+        const dossierRes = await api(`/geotech/seismic/mine-seismic-safety-dossier/${mineLevelID}`, 'GET');
+
+        if (badge) badge.textContent = `⛏️ GEOTECH: b-val ${evalRes.data.gutenberg_richter_b_value} | Stress ${evalRes.data.apparent_stress_kpa}kPa | Evac ${evacRes.data.personnel_count_evacuated} Miners`;
+        if (answerEl) {
+            let out = `⛏️ PRECISION DEEP UNDERGROUND MINING BLOCK CAVING MICROSEISMIC HAZARD & ROCKBURST SENTINEL (ISO 22477 & ISRM):\n`;
+            out += `Tingkat Penambangan Bawah Tanah: ${mineLevelID} (Kedalaman -1,650 Meter) | Terowongan Ekstraksi: DRIFT-PANEL-XC-08\n`;
+            out += `Sistem Deteksi: Array Geofon Triaksial Bawah Tanah (18 Sensor Terpicu) | Standar Sertifikasi: ISRM Suggested Methods & ISO 22477\n\n`;
+            out += `ANALISIS MIKROSEISMIK & INDIKATOR TEGANGAN KRITIS BATUAN:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Magnitudo Gempa Lokal (Richter): 1.92 ML\n`;
+            out += `• Energi Seismik Terpancar (Radiated Energy Es): 5,600,000 Joule\n`;
+            out += `• Momen Seismik Inversi (M0): 1.4 × 10^11 N·m\n`;
+            out += `• Nilai Kemiringan Seismik Gutenberg-Richter (b-value): ${evalRes.data.gutenberg_richter_b_value} (Penurunan Kritis Di Bawah 0.80 Menandakan Konsentrasi Tegangan Pra-Runtuh)\n`;
+            out += `• Tegangan Semu Batuan (Apparent Stress): ${evalRes.data.apparent_stress_kpa} kPa (Lonjakan Tekanan Dinamis Pilar Penopang)\n`;
+            out += `• Tingkat Bahaya Gempa Batuan (Rockburst Hazard): ${evalRes.data.rockburst_hazard_level}\n`;
+            out += `• Radius Zona Bahaya Terowongan (Exclusion Radius): ${evalRes.data.exclusion_radius_meters} meter\n`;
+            out += `• Perintah Mandatori Evakuasi Darurat: ${evalRes.data.mandatory_evacuation_command ? 'WAJIB EVAKUASI SEKETIKA (RED-TAG)' : 'NORMAL'}\n\n`;
+            out += `AKSI EVAKUASI RED-TAG EXCLUSION ZONE & PENGHENTIAN ALAT BERAT:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Otorisasi Penguncian Terowongan: ${evacRes.data.action_id}\n`;
+            out += `• Jumlah Personel Tambang Berhasil Dievakuasi: ${evacRes.data.personnel_count_evacuated} Pekerja Tambang Bawah Tanah\n`;
+            out += `• Unit Loader Otonom (LHD) Otomatis Dihentikan: ${evacRes.data.autonomous_lhd_halted_count} Unit LHD Sandvik/Cat\n`;
+            out += `• Estimasi Kerugian Korban Jiwa & Runtuhan Terhindar: $${evacRes.data.avoided_cave_in_fatality_loss_usd.toLocaleString()} USD\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penurunan Gutenberg-Richter b-value memberikan jendela peringatan dini sebelum batuan keras melepaskan energi regangan tinggi (*strainburst*).</li>
+                <li>Perintah isolasi terowongan otomatis mematikan loader otonom dan membunyikan alarm klakson bawah tanah untuk evakuasi cepat ke *refuge chamber*.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses geotech rockburst sentinel: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

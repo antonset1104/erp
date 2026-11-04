@@ -1547,6 +1547,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/biopharma/bioreactor/evaluate-metabolic-growth": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Biopharmaceutical Bioreactor Cell Culture Fed-Batch & Viable Cell Density (VCD) Metabolic Sentinel (FDA cGMP 21 CFR 211 & PAT)",
+					"description": "Monitors in-line Raman spectroscopy viable cell density, substrate Monod kinetics, lactate/ammonia inhibition, and micro-dosing pump control.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Specific growth rate mu, death rate kd, metabolic health status, and glucose feed rate recommendations"},
+					},
+				},
+			},
+			"/api/v1/renewables/mooring/evaluate-fatigue-and-tension": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Floating Offshore Wind Turbine Mooring Line Tension & Hydrodynamic Fatigue Guardian (DNV-ST-0119 & IEC 61400-3-2)",
+					"description": "Calculates Rainflow cycle counting, catenary line tension utilization, suction anchor pullout safety factors, and storm de-rating commands.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Cumulative fatigue damage D, tension utilization percentage, anchor safety factor, and storm pitch feathering mandate"},
+					},
+				},
+			},
+			"/api/v1/powergrid/hvdc/evaluate-thermal-ampacity": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "HVDC Subsea Interconnector Cable Thermal Rating & Partial Discharge Sentinel (CIGRE TB 622 & IEC 62067)",
+					"description": "Monitors optical fiber distributed temperature sensing (DTS), Neher-McGrath ampacity limits, seabed sediment thermal resistance, and partial discharge risks.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Neher-McGrath ampacity, thermal margin to 90C XLPE limit, partial discharge classification, and grid load curtailment"},
+					},
+				},
+			},
+			"/api/v1/ccus/pipeline/evaluate-phase-envelope": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Carbon Capture & Storage (CCS) Supercritical CO2 Pipeline Phase Envelope & Joule-Thomson Chilling Sentinel (ISO 27913 & DNV-RP-F104)",
+					"description": "Tracks Peng-Robinson EOS dense-phase envelope, impurity saturation pressures, Joule-Thomson chilling cooling, and pipeline ductile-to-brittle fracture risks.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Dense phase state, bubble point pressure, pressure margin, projected choked orifice temperature, and fracture risk"},
+					},
+				},
+			},
+			"/api/v1/geotech/seismic/evaluate-rockburst-hazard": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Precision Deep Underground Mining Block Caving Microseismic Hazard & Rockburst Sentinel (ISO 22477 & ISRM Suggested Methods)",
+					"description": "Calculates acoustic geophone Gutenberg-Richter b-values, apparent stress tensor inversions, and triggers automated drift red-tag exclusion zone evacuations.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Gutenberg-Richter b-value, apparent stress kPa, rockburst hazard level, exclusion radius, and mandatory evacuation order"},
+					},
+				},
+			},
 		},
 	}
 }
