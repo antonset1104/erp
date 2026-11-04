@@ -23,6 +23,7 @@ import (
 	corecosting "erp-golang/internal/core/costing"
 	corecpq "erp-golang/internal/core/cpq"
 	corecrm "erp-golang/internal/core/crm"
+	corecryo "erp-golang/internal/core/cryo"
 	corecustoms "erp-golang/internal/core/customs"
 	coreedi "erp-golang/internal/core/edi"
 	coreehs "erp-golang/internal/core/ehs"
@@ -31,10 +32,13 @@ import (
 	corefieldservice "erp-golang/internal/core/fieldservice"
 	corefinance "erp-golang/internal/core/finance"
 	corefleet "erp-golang/internal/core/fleet"
+	corefusion "erp-golang/internal/core/fusion"
 	coregeotech "erp-golang/internal/core/geotech"
+	coregeothermal "erp-golang/internal/core/geothermal"
 	coregraphql "erp-golang/internal/core/graphql"
 	coregrc "erp-golang/internal/core/grc"
 	corehr "erp-golang/internal/core/hr"
+	corehypersonic "erp-golang/internal/core/hypersonic"
 	coreitops "erp-golang/internal/core/itops"
 	corelegal "erp-golang/internal/core/legal"
 	corelogistics "erp-golang/internal/core/logistics"
@@ -43,6 +47,7 @@ import (
 	coremining "erp-golang/internal/core/mining"
 	coremrp "erp-golang/internal/core/mrp"
 	corenuclear "erp-golang/internal/core/nuclear"
+	corepackaging "erp-golang/internal/core/packaging"
 	corepharma "erp-golang/internal/core/pharma"
 	corepowergrid "erp-golang/internal/core/powergrid"
 	corepricing "erp-golang/internal/core/pricing"
@@ -319,7 +324,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.69.0",
+			"version":    "1.70.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -479,6 +484,11 @@ func main() {
 		corepowergrid.RegisterPowerGridRoutes(apiV1)
 		coreccus.RegisterCCUSRoutes(apiV1)
 		coregeotech.RegisterGeotechRoutes(apiV1)
+		corefusion.RegisterFusionRoutes(apiV1)
+		corecryo.RegisterCryoRoutes(apiV1)
+		corehypersonic.RegisterHypersonicRoutes(apiV1)
+		corepackaging.RegisterPackagingRoutes(apiV1)
+		coregeothermal.RegisterGeothermalRoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend

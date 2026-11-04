@@ -31180,6 +31180,388 @@ async function triggerGeotechSeismic() {
     }
 }
 
+async function triggerTokamakFusion() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis batas kerapatan Greenwald plasma fusi, ketidakstabilan mode tearing MHD & injeksi pelet SPI...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const shotID = "SHOT-FUSION-ITER-2026-8801";
+
+        // 1. Ingest telemetry
+        await api('/fusion/plasma/ingest-tokamak-telemetry', 'POST', {
+            shot_number_id: shotID,
+            reactor_id: "TOKAMAK-DEMO-1000MW",
+            plasma_current_ma: 15.0,
+            minor_radius_meters: 2.0,
+            toroidal_field_tesla: 5.3,
+            electron_density_10e19_m3: 11.4,
+            safety_factor_q95: 2.82,
+            mhd_tearing_mode_amplitude: 0.046,
+            core_electron_temp_kev: 18.5,
+            radiated_power_fraction: 0.91
+        });
+
+        // 2. Evaluate disruption
+        const evalRes = await api('/fusion/plasma/evaluate-disruption-risk', 'POST', {
+            shot_number_id: shotID
+        });
+
+        // 3. Trigger SPI
+        const spiRes = await api('/fusion/plasma/trigger-pellet-injection-mitigation', 'POST', {
+            shot_number_id: shotID
+        });
+
+        // 4. Dossier
+        const dossierRes = await api(`/fusion/plasma/tokamak-safety-dossier/${shotID}`, 'GET');
+
+        if (badge) badge.textContent = `⚛️ FUSION: n/nG ${evalRes.data.greenwald_density_fraction} | q95 ${dossierRes.data.safety_factor_q95} | SPI Mitigated ${spiRes.data.thermal_quench_mitigated_pct}%`;
+        if (answerEl) {
+            let out = `⚛️ COMMERCIAL NUCLEAR FUSION TOKAMAK PLASMA CONFINEMENT & DISRUPTION SENTINEL (IAEA & ITER):\n`;
+            out += `Nomor Pulsa Fusi: ${shotID} | Reaktor: TOKAMAK-DEMO-1000MW (D-T Tokamak Daya Magnetik 5.3 Tesla)\n`;
+            out += `Arus Plasma: 15.0 MA | Suhu Inti Elektron: 18.5 keV (~215 Juta °C) | Standar Sertifikasi: IAEA Fusion Safety\n\n`;
+            out += `ANALISIS DIAGNOSTIK PLASMA & BATAS KESTABILAN OPERASI (GREENWALD LIMIT):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Kerapatan Elektron Plasma: 11.4 × 10^19 m^-3\n`;
+            out += `• Batas Kerapatan Greenwald (n_G): ${evalRes.data.greenwald_density_limit_10e19} × 10^19 m^-3\n`;
+            out += `• Fraksi Kerapatan Greenwald (n/nG): ${evalRes.data.greenwald_density_fraction} (Ambang Batas Kritis > 0.90)\n`;
+            out += `• Profil Faktor Keamanan Tepi (Safety Factor q95): 2.82 (Batas Minimal Kestabilan q95 >= 3.00)\n`;
+            out += `• Amplitudo Osilasi Mode Tearing MHD (Mirnov Coils): 0.046 (Prekursor Gangguan Magnetik Kritis)\n`;
+            out += `• Tingkat Bahaya Disrupsi Plasma: ${evalRes.data.disruption_hazard_level}\n`;
+            out += `• Jendela Waktu Tanggap Darurat: ${evalRes.data.response_window_millisec} milidetik (Mencegah Pelepasan Arus Halo)\n`;
+            out += `• Mandat Injeksi Pelet Gas Pecah (SPI): ${evalRes.data.mgi_spi_pellet_injection_mandate ? 'WAJIB DITEMBAKKAN (MANDATORY)' : 'NORMAL'}\n\n`;
+            out += `MITIGASI INJEKSI PELET KRISTAL BEKU (SHATTERED PELLET INJECTION - SPI):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Otorisasi Mitigasi SPI: ${spiRes.data.action_id}\n`;
+            out += `• Spesies Pelet Kriogenik: ${spiRes.data.pellet_species}\n`;
+            out += `• Jumlah Atom Diinjeksikan: ${(spiRes.data.injected_atoms_count || 4.5e22).toExponential(2)} Atom Gas Neon/Deuterium\n`;
+            out += `• Persentase Pemadaman Energi Termal Quench Terkendali: ${spiRes.data.thermal_quench_mitigated_pct}%\n`;
+            out += `• Estimasi Kerusakan Komponen Terhindar: $${spiRes.data.avoided_divertor_melt_loss_usd.toLocaleString()} USD (Mencegah Pelelehan Tungsten Divertor & Deformasi Bejana Vakum)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Sensor koil Mirnov mendeteksi pertumbuhan osilasi tearing mode belasan milidetik sebelum keruntuhan termal terjadi.</li>
+                <li>Injeksi shattered pellet menyebarkan energi radiasi secara seragam ke seluruh dinding first-wall tanpa titik leleh terkonsentrasi.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses tokamak fusion disruption: ' + err.message;
+    }
+}
+
+async function triggerCryoHydrogen() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menghitung konversi spin ortho-ke-para hidrogen cair, panas eksotermik & supresi boil-off...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const tankID = "TANK-CRYO-LH2-50000L-01";
+
+        // 1. Ingest telemetry
+        await api('/cryo/lh2/ingest-storage-telemetry', 'POST', {
+            storage_tank_id: tankID,
+            liquid_level_pct: 84.5,
+            tank_storage_temp_kelvin: 20.4,
+            tank_vapor_pressure_bar: 1.92,
+            para_hydrogen_fraction: 0.91,
+            catalyst_bed_iron_oxide_health_pct: 78.5,
+            vacuum_jacket_pressure_mbar: 3.8e-5,
+            reliquefaction_compressor_active: true
+        });
+
+        // 2. Evaluate spin isomerization
+        const evalRes = await api('/cryo/lh2/evaluate-spin-isomerization', 'POST', {
+            storage_tank_id: tankID
+        });
+
+        // 3. Trigger suppression
+        const actRes = await api('/cryo/lh2/trigger-boil-off-suppression', 'POST', {
+            storage_tank_id: tankID
+        });
+
+        // 4. Dossier
+        const dossierRes = await api(`/cryo/lh2/cryogenic-safety-dossier/${tankID}`, 'GET');
+
+        if (badge) badge.textContent = `❄️ LH2 CRYO: Para ${dossierRes.data.para_fraction * 100}% | Heat ${evalRes.data.exothermic_heat_release_rate_kw}kW | Recondense ${actRes.data.cold_helium_loop_recondense_rate_kg_hr} kg/h`;
+        if (answerEl) {
+            let out = `❄️ CRYOGENIC LIQUID HYDROGEN (LH2) ORTHO-TO-PARA SPIN ISOMERIZATION & BOIL-OFF GUARDIAN (ISO 19880-1 & ASME B31.12):\n`;
+            out += `Tangki Kriogenik: ${tankID} (Kapasitas 50,000 Liter LH2) | Level Cairan: 84.5% (~2,990 kg Hidrogen Cair)\n`;
+            out += `Suhu Kriogenik: 20.4 Kelvin (-252.75°C) | Tekanan Uap: 1.92 Bar | Standar Regulasi: ISO 19880-1 & ASME B31.12\n\n`;
+            out += `ANALISIS KINETIKA SPIN ISOMERIK & LAJU PENGUAPAN (BOIL-OFF RATE):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Fraksi Para-Hydrogen Terukur: 91.0% (Kondisi Keseimbangan Termodinamika pada 20K: 99.8% Para)\n`;
+            out += `• Fraksi Ortho-Hydrogen Sisa: 9.0% (Ortho Melepaskan Panas Eksotermik 527 kJ/kg Saat Terkonversi)\n`;
+            out += `• Efisiensi Bed Katalis Oksida Besi (Fe2O3): 78.5% (Peringatan Degradasi Lapisan Katalis)\n`;
+            out += `• Pelepasan Panas Eksotermik Spin: ${evalRes.data.exothermic_heat_release_rate_kw} kW (Pemicu Utama Self-Boil-Off Mandiri)\n`;
+            out += `• Proyeksi Kehilangan Penguapan Harian: ${evalRes.data.projected_daily_boil_off_loss_kg} kg/hari (${evalRes.data.boil_off_rate_pct_per_day}% per hari)\n`;
+            out += `• Tingkat Risiko Kenaikan Tekanan Tangki: ${evalRes.data.tank_pressurization_risk_level}\n`;
+            out += `• Mandat Regenerasi Bed Katalis: ${evalRes.data.catalyst_bed_regeneration_needed ? 'DIREKOMENDASIKAN (SERVICE NEEDED)' : 'OPTIMAL'}\n\n`;
+            out += `SUPRESI PENGUAPAN DENGAN SIKLUS PENDINGIN HELIUM BRAYTON (ZERO-VENTING):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Rekondensasi: ${actRes.data.action_id}\n`;
+            out += `• Laju Rekondensasi Loop Helium Dingin: ${actRes.data.cold_helium_loop_recondense_rate_kg_hr} kg/jam (Menjaga Emisi Ventilasi 0.0 kg)\n`;
+            out += `• Volume Hidrogen Terbakar Melalui Flare Venting: 0.0 kg (Nol Kerugian Gas Bersih)\n`;
+            out += `• Estimasi Kerugian Finansial Terhindar: $${actRes.data.avoided_hydrogen_vent_loss_usd.toLocaleString()} USD (Mencegah Kehilangan Bahan Bakar & Penalti Bahaya Ledakan)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Katalis oksida besi mempercepat konversi ortho-ke-para saat pencairan sebelum bahan bakar disimpan dalam tangki vakum.</li>
+                <li>Rekondensasi loop helium tertutup mengeliminasi keharusan pembuangan gas hidrogen ke udara bebas (*zero boil-off loss*).</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses cryogenic hydrogen: ' + err.message;
+    }
+}
+
+async function triggerHypersonicFlight() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menghitung fluks panas Fay-Riddell Mach 6.4, frekuensi plasma RF blackout & modulasi trajektori...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const tailID = "HSV-MACH6-PHOENIX-01";
+
+        // 1. Ingest telemetry
+        await api('/hypersonic/tps/ingest-flight-telemetry', 'POST', {
+            vehicle_tail_id: tailID,
+            mach_number: 6.4,
+            altitude_km: 28.5,
+            stagnation_point_temp_c: 2140.0,
+            initial_tps_thickness_mm: 45.0,
+            current_recession_depth_mm: 9.5,
+            electron_density_per_m3: 4.8e18,
+            angle_of_attack_deg: 14.5,
+            telemetry_signal_attenuation_db: 44.0
+        });
+
+        // 2. Evaluate ablation and plasma
+        const evalRes = await api('/hypersonic/tps/evaluate-tps-ablation-and-plasma', 'POST', {
+            vehicle_tail_id: tailID
+        });
+
+        // 3. Trigger trajectory modulation
+        const modRes = await api('/hypersonic/tps/trigger-trajectory-modulation', 'POST', {
+            vehicle_tail_id: tailID
+        });
+
+        // 4. Dossier
+        const dossierRes = await api(`/hypersonic/tps/flight-safety-dossier/${tailID}`, 'GET');
+
+        if (badge) badge.textContent = `🚀 HYPERSONIC: Mach ${dossierRes.data.mach_number} | Flux ${evalRes.data.fay_riddell_heat_flux_mw_m2}MW/m² | Blackout ${evalRes.data.rf_communication_state}`;
+        if (answerEl) {
+            let out = `🚀 AUTONOMOUS HYPERSONIC FLIGHT VEHICLE TPS ABLATION & PLASMA BLACKOUT SENTINEL (AIAA & NASA SP-8000):\n`;
+            out += `Wahana Hipersonik: ${tailID} | Kecepatan: Mach 6.4 (Hipersonik) | Ketinggian: 28.5 km\n`;
+            out += `Suhu Stagnasi Hidung Wahana: 2,140.0°C | Sudut Serang Awal: 14.5° | Standar Sertifikasi: AIAA & NASA SP-8000\n\n`;
+            out += `TERMODINAMIKA AEROTERMAL FAY-RIDDELL & INTEGRITAS LAPISAN ABLATIF TPS:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Fluks Panas Titik Stagnasi Konvektif (Fay-Riddell): ${evalRes.data.fay_riddell_heat_flux_mw_m2} MW/m²\n`;
+            out += `• Ketebalan Awal Insulasi Karbon-Fenolik: 45.0 mm | Kedalaman Resesi Terkikis: 9.5 mm\n`;
+            out += `• Sisa Ketebalan Pelindung Termal Efektif: ${evalRes.data.remaining_tps_thickness_mm} mm (Ambang Batas Struktural > 20.0 mm)\n`;
+            out += `• Kerapatan Elektron Selubung Plasma: 4.8 × 10^18 e/m³\n`;
+            out += `• Frekuensi Cutoff Plasma Gelombang Radio: ${evalRes.data.plasma_cutoff_frequency_ghz} GHz (Pelemahan Sinyal: 44.0 dB)\n`;
+            out += `• Status Komunikasi Telemetri Radio RF: ${evalRes.data.rf_communication_state}\n`;
+            out += `• Mandat Relai Tautan Optik Laser Antariksa: ${evalRes.data.optical_laser_relay_mandate ? 'DIAKTIFKAN (LASER LINK ENGAGED)' : 'OFF'}\n`;
+            out += `• Tingkat Risiko Tembus Bakar Termal (Burnthrough): ${evalRes.data.thermal_structural_burnthrough_risk}\n\n`;
+            out += `MODULASI SUDUT SERANG & TRAJEKTORI SKIP-GLIDE PELEPAS PANAS:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Manuver Aerodinamis: ${modRes.data.action_id}\n`;
+            out += `• Sudut Serang Terkoreksi (Lofted Skip-Glide AoA): ${modRes.data.modulated_angle_of_attack_deg}°\n`;
+            out += `• Reduksi Beban Fluks Panas Aerodinamis: ${modRes.data.heat_flux_reduction_pct}%\n`;
+            out += `• Estimasi Kerusakan Wahana Terhindar: $${modRes.data.avoided_airframe_loss_usd.toLocaleString()} USD (Mencegah Hancurnya Rangka Wahana Akibat Burnthrough)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Persamaan Fay-Riddell secara dinamis memodelkan disosiasi molekul udara menjadi plasma terionisasi pada kecepatan hipersonik.</li>
+                <li>Modulasi trajektori skip-glide mengangkat wahana ke lapisan atmosfer lebih tipis guna mendinginkan lapisan ablatif karbon.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses hypersonic flight sentinel: ' + err.message;
+    }
+}
+
+async function triggerPackagingWarpage() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis defleksi warpage Suhir kemasan 3D chiplet AI, tegangan geser TSV & profil reflow...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const pkgID = "PKG-2.5D-COWOS-72X72";
+
+        // 1. Ingest telemetry
+        await api('/packaging/tsv/ingest-warpage-telemetry', 'POST', {
+            wafer_lot_id: "LOT-HBM4-AI-CHIPLET-9901",
+            package_id: pkgID,
+            peak_reflow_temp_c: 260.0,
+            substrate_dimension_x_mm: 72.0,
+            substrate_dimension_y_mm: 72.0,
+            silicon_die_thickness_micron: 50.0,
+            tsv_copper_protrusion_nanometer: 185.0,
+            measured_shadow_moire_warpage_micron: 168.0,
+            micro_bump_pitch_micron: 25.0
+        });
+
+        // 2. Evaluate warpage
+        const evalRes = await api('/packaging/tsv/evaluate-warpage-stress', 'POST', {
+            package_id: pkgID
+        });
+
+        // 3. Optimize reflow
+        const optRes = await api('/packaging/tsv/optimize-reflow-profile', 'POST', {
+            package_id: pkgID
+        });
+
+        // 4. Dossier
+        const dossierRes = await api(`/packaging/tsv/package-reliability-dossier/${pkgID}`, 'GET');
+
+        if (badge) badge.textContent = `💽 CHIPLET: Warp ${dossierRes.data.measured_warpage_um}µm | TSV Stress ${evalRes.data.tsv_shear_stress_mpa}MPa | Post-Warp ${optRes.data.target_post_reflow_warpage_micron}µm`;
+        if (answerEl) {
+            let out = `💽 SEMICONDUCTOR 3D HETEROGENEOUS PACKAGING & TSV WARPAGE SENTINEL (JEDEC J-STD-020 & IEEE 1581):\n`;
+            out += `Modul Kemasan Chiplet: ${pkgID} (2.5D CoWoS AI Accelerator 72x72 mm) | Lot Wafer: LOT-HBM4-AI-CHIPLET-9901\n`;
+            out += `Ketebalan Die Silikon: 50.0 µm | Pitch Micro-Bump: 25.0 µm | Standar Kepatuhan: JEDEC J-STD-020 & IEEE 1581\n\n`;
+            out += `METROLOGI LASER SHADOW MOIRÉ & TEGANGAN TERMO-MEKANIKAL SUHIR:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Suhu Puncak Reflow Solder SAC305: 260.0°C\n`;
+            out += `• Kelengkungan Warpage Terukur (Shadow Moiré): 168.0 µm (Ambang Batas Maksimal JEDEC < 150.0 µm)\n`;
+            out += `• Defleksi Bimetalik Teoretis Model Suhir: ${evalRes.data.suhir_max_deflection_micron} µm\n`;
+            out += `• Tonjolan Tembaga TSV (Copper Protrusion): 185.0 nm (Memicu Delaminasi Dielektrik Low-k)\n`;
+            out += `• Tegangan Geser Antarmuka Cu/Si TSV: ${evalRes.data.tsv_shear_stress_mpa} MPa\n`;
+            out += `• Status Kepatuhan Kelengkungan Kemasan: ${evalRes.data.warpage_compliance_status}\n`;
+            out += `• Rekomendasi Laju Pendinginan Oven Reflow: ${evalRes.data.recommended_cooling_rate_c_per_sec} °C/detik\n\n`;
+            out += `OPTIMASI KURVA PEMANASAN REFLOW LOOP TERTUTUP (THERMAL PROFILE TUNING):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Profil Suhu: ${optRes.data.action_id}\n`;
+            out += `• Laju Ramp Pendinginan Terkoreksi: ${optRes.data.optimized_cooling_ramp_c_per_sec} °C/detik (Relaksasi Tegangan Epoxy Mold Compound)\n`;
+            out += `• Target Kelengkungan Pasca-Pendinginan: ${optRes.data.target_post_reflow_warpage_micron} µm (Kembali Dalam Batas Aman JEDEC)\n`;
+            out += `• Kerugian Scrap Wafer AI Terhindar: $${optRes.data.avoided_chiplet_packaging_scrap_usd.toLocaleString()} USD (Menyelamatkan Seluruh Lot Wafer HBM & Interposer)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Model bimetalik Suhir mengorelasikan perbedaan CTE antara silikon dan substrat organik untuk mencegah hubung singkat solder micro-bump.</li>
+                <li>Modulasi laju pendinginan oven reflow menghilangkan tegangan sisa tanpa memperpanjang waktu siklus manufaktur chiplet.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses packaging warpage sentinel: ' + err.message;
+    }
+}
+
+async function triggerGeothermalEGS() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memeriksa telemetri hidraulik sumur EGS 5,200m, protokol TLP seismisitas & mitigasi bleed-off...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const wellID = "WELL-EGS-SUPERHOT-5500M-01";
+
+        // 1. Ingest telemetry
+        await api('/geothermal/egs/ingest-hydraulic-telemetry', 'POST', {
+            wellbore_id: wellID,
+            geothermal_field_id: "FIELD-NEWBERRY-VOLCANO-EGS",
+            well_depth_meters: 5200.0,
+            bottomhole_temp_c: 365.0,
+            injection_flow_rate_lpm: 3800.0,
+            wellhead_pressure_bar: 325.0,
+            cumulative_injected_volume_m3: 18500.0,
+            max_induced_magnitude_ml: 2.18,
+            distance_to_known_fault_meters: 410.0
+        });
+
+        // 2. Evaluate seismicity
+        const evalRes = await api('/geothermal/egs/evaluate-induced-seismicity', 'POST', {
+            wellbore_id: wellID
+        });
+
+        // 3. Trigger bleed-off
+        const bleedRes = await api('/geothermal/egs/trigger-emergency-bleed-off', 'POST', {
+            wellbore_id: wellID
+        });
+
+        // 4. Dossier
+        const dossierRes = await api(`/geothermal/egs/egs-safety-dossier/${wellID}`, 'GET');
+
+        if (badge) badge.textContent = `🌋 EGS: TLP ${evalRes.data.traffic_light_protocol_color} | Mag ${dossierRes.data.max_magnitude_ml}ML | Bleed ${bleedRes.data.flowback_rate_lpm} LPM`;
+        if (answerEl) {
+            let out = `🌋 SUPERHOT ROCK EGS GEOTHERMAL HYDRAULIC STIMULATION & INDUCED SEISMICITY TRAFFIC LIGHT PROTOCOL (DOE & ISO 13628):\n`;
+            out += `Sumur Panas Bumi Batuan Super-Panas: ${wellID} | Kedalaman: 5,200 Meter | Suhu Dasar Sumur: 365.0°C\n`;
+            out += `Laju Injeksi Fluida: 3,800.0 L/menit | Tekanan Kepala Sumur: 325.0 Bar | Standar Regulasi: US DOE EGS Protocol & ISO 13628\n\n`;
+            out += `PROTOKOL LAMPU LALU LINTAS SEISMISITAS (TLP) & TEGANGAN KEGAGALAN COULOMB:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Magnitudo Gempa Induksi Terbesar: 2.18 ML (Ambang Batas Merah TLP Mandatori >= 2.0 ML)\n`;
+            out += `• Status Protokol Lampu Lalu Lintas Seismik (TLP): ${evalRes.data.traffic_light_protocol_color}\n`;
+            out += `• Perubahan Tegangan Kegagalan Coulomb (ΔCFS): ${evalRes.data.coulomb_failure_stress_change_kpa} kPa (Risiko Reaktivasi Sesar Aktif)\n`;
+            out += `• Radius Difusi Tekanan Pori Fluida Shapiro: ${evalRes.data.shapiro_diffusion_radius_meters} meter (Jarak ke Patahan Terdekat: 410.0 meter)\n`;
+            out += `• Tingkat Bahaya Reaktivasi Sesar Geologi: ${evalRes.data.fault_reactivation_hazard_level}\n`;
+            out += `• Mandat Penghentian Injeksi & Pembuangan Tekanan Balik: ${evalRes.data.mandatory_bleed_off_active ? 'WAJIB DIEKSEKUSI SEKETIKA (RED SHUT-IN)' : 'NORMAL'}\n\n`;
+            out += `AKSI PEMBUANGAN TEKANAN KEPALA SUMUR (WELLHEAD EMERGENCY BLEED-OFF):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Operasi Bleed-Off: ${bleedRes.data.action_id}\n`;
+            out += `• Laju Alir Balik Fluida Tekanan Tinggi (Flowback Rate): ${bleedRes.data.flowback_rate_lpm} L/menit\n`;
+            out += `• Penurunan Tekanan Formasi Batuan: ${bleedRes.data.pressure_drop_bar} Bar (Meredakan Tekanan Pori Bidang Sesar)\n`;
+            out += `• Estimasi Kerugian Struktur Permukaan Terhindar: $${bleedRes.data.avoided_surface_infrastructure_damage_usd.toLocaleString()} USD (Mencegah Kerusakan Bangunan Warga & Pencabutan Izin Proyek)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Kriteria TLP Merah otomatis memutus pompa stimulasi sebelum energi geser elastis memicu gempa terasa berkekuatan lebih tinggi.</li>
+                <li>Operasi bleed-off segera mendekompresi fluida rekahan batuan granit superhot sehingga tegangan efektif Coulomb kembali stabil.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses geothermal EGS: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

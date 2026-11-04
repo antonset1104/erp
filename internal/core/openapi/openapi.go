@@ -1597,6 +1597,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/fusion/plasma/evaluate-disruption-risk": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Commercial Nuclear Fusion Tokamak Plasma Magnetic Confinement & Disruption Sentinel (IAEA Fusion Safety & ITER Guidelines)",
+					"description": "Evaluates Greenwald density limits, Mirnov coil tearing mode amplitudes, and commands shattered pellet injection (SPI) thermal quench mitigation.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Greenwald fraction, disruption hazard level, response window, and SPI mitigation mandate"},
+					},
+				},
+			},
+			"/api/v1/cryo/lh2/evaluate-spin-isomerization": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Cryogenic Liquid Hydrogen (LH2) Ortho-to-Para Spin Isomerization & Boil-Off Guardian (ISO 19880-1 & ASME B31.12)",
+					"description": "Calculates catalytic ortho-para conversion heat, daily boil-off rates, vacuum jacket health, and cold helium loop recondensation.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Exothermic spin heat release, projected daily boil-off kg, boil-off percentage, and catalyst bed regeneration flag"},
+					},
+				},
+			},
+			"/api/v1/hypersonic/tps/evaluate-tps-ablation-and-plasma": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Autonomous Hypersonic Flight Vehicle TPS Ablation & Plasma Blackout Sentinel (AIAA Standards & NASA SP-8000)",
+					"description": "Computes Fay-Riddell stagnation heat flux, remaining carbon-phenolic thickness, plasma cutoff frequency, and automated skip trajectory modulation.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Heat flux MW/m2, remaining TPS mm, plasma cutoff GHz, RF blackout state, and optical laser relay mandate"},
+					},
+				},
+			},
+			"/api/v1/packaging/tsv/evaluate-warpage-stress": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Semiconductor 3D Heterogeneous Packaging & Through-Silicon Via (TSV) Warpage Sentinel (JEDEC J-STD-020 & IEEE 1581)",
+					"description": "Monitors Shadow Moire warpage metrology, Suhir bimetallic thermal deflection, TSV copper shear stress, and optimizes reflow cooling ramp rates.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Suhir deflection, TSV shear stress MPa, warpage compliance status, and recommended cooling rate"},
+					},
+				},
+			},
+			"/api/v1/geothermal/egs/evaluate-induced-seismicity": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Superhot Rock EGS Geothermal Hydraulic Stimulation & Induced Seismicity Traffic Light Protocol (DOE EGS Standards & ISO 13628)",
+					"description": "Enforces Traffic Light Protocol (TLP Green/Amber/Red), Coulomb failure stress changes, Shapiro diffusion radius, and wellhead emergency bleed-off.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Traffic light protocol color, Coulomb stress change kPa, Shapiro diffusion radius, and bleed-off status"},
+					},
+				},
+			},
 		},
 	}
 }
