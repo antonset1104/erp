@@ -1347,6 +1347,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/agriculture/silo/evaluate-aeration-trigger": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Grain & Bulk Agricultural Silo Aeration & Mycotoxin Spoilage Sentinel (ISO 6322)",
+					"description": "Evaluates vertical silo multi-depth temperature, moisture, and headspace CO2 to calculate Henderson EMC, safe storage days, and psychrometric aeration fan triggers.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Aeration fan control command, psychrometric EMC %, Safe Storage Life (SSL) days, and mycotoxin hazard index"},
+					},
+				},
+			},
+			"/api/v1/project/epc/generate-interim-payment-certificate": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Autonomous Multi-Tier Escrow & Dynamic Progress Billing for EPC Infrastructure Mega-Projects (FIDIC & IFRS 15)",
+					"description": "Generates FIDIC Clause 14 Interim Payment Certificates (IPC) with progressive retention deduction, mobilization advance amortization, and direct escrow waterfall disbursements.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Certified IPC document, gross valuation, retention deducted, advance recovered, and net payable amount"},
+					},
+				},
+			},
+			"/api/v1/logistics/berth/optimize-berth-allocation": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Autonomous Dynamic Port Berth Allocation & Demurrage Minimization Engine (BIMCO Charterparties)",
+					"description": "Optimizes spatial-temporal quay allocation, water depth draft, and crane intensity to minimize vessel turnaround time and avoid demurrage liabilities.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Assigned berth ID, quay meter coordinates, allocated quay crane count, and estimated discharge hours"},
+					},
+				},
+			},
+			"/api/v1/maintenance/transformer/diagnose-duval-fault": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Substation High-Voltage Transformer Dissolved Gas Analysis (DGA) & Arc Fault Guardian (IEEE C57.104 & IEC 60599)",
+					"description": "Analyzes dissolved combustible gases (H2, CH4, C2H4, C2H2, CO) using Duval Triangle 1 to classify high-energy electrical arcing, thermal faults, and cellulose degradation.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Duval fault classification, gas percentage coordinates, severity level, and safety de-rating mandate"},
+					},
+				},
+			},
+			"/api/v1/treasury/repatriation/simulate-optimal-pathways": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Corporate Global Cross-Border Cash Repatriation & Trapped Liquidity Optimizer (BEPS Pillar 2)",
+					"description": "Simulates comparative after-tax net cash yields across intercompany loan repayments, management cost-sharing, and statutory DTAA dividends to repatriate offshore trapped cash.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Ranked repatriation pathways, effective withholding tax rates, net cash yields, and estimated regulatory lead time"},
+					},
+				},
+			},
 		},
 	}
 }

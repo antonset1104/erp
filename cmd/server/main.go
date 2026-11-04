@@ -12,6 +12,7 @@ import (
 	"erp-golang/internal/core/bi"
 	"erp-golang/internal/core/commandcenter"
 	coreaccount "erp-golang/internal/core/account"
+	coreagriculture "erp-golang/internal/core/agriculture"
 	coreasset "erp-golang/internal/core/asset"
 	corecosting "erp-golang/internal/core/costing"
 	corecpq "erp-golang/internal/core/cpq"
@@ -33,6 +34,7 @@ import (
 	coremrp "erp-golang/internal/core/mrp"
 	corepricing "erp-golang/internal/core/pricing"
 	coreprocurement "erp-golang/internal/core/procurement"
+	coreproject "erp-golang/internal/core/project"
 	corequality "erp-golang/internal/core/quality"
 	corescm "erp-golang/internal/core/scm"
 	coreservice "erp-golang/internal/core/service"
@@ -299,7 +301,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.64.0",
+			"version":    "1.65.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -434,6 +436,11 @@ func main() {
 		coremaintenance.RegisterBoilerRoutes(apiV1)
 		coresubscription.RegisterDunningRoutes(apiV1)
 		coremrp.RegisterTollManufacturingRoutes(apiV1)
+		coreagriculture.RegisterAgricultureRoutes(apiV1)
+		coreproject.RegisterEPCRoutes(apiV1)
+		corelogistics.RegisterBerthRoutes(apiV1)
+		coremaintenance.RegisterTransformerRoutes(apiV1)
+		coretreasury.RegisterRepatriationRoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend

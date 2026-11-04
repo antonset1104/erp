@@ -1022,6 +1022,40 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Yield Audit & Excess Scrap Contra Recovery**: Endpoint `POST /api/v1/mrp/subcontracting/reconcile-inward-scrap` audits returned finished goods and scrap against BOM standards, automatically deducting excess material wastage from subcontractor processing fees via contra debit notes.
 - **Subcontracting Reconciliation Dossier**: Endpoint `GET /api/v1/mrp/subcontracting/reconciliation-summary/:jobwork_id` produces complete yield variance reports, scrap audit trails, debit note references, and Customs Bonded compliance verification.
 
+---
+
+## 31. Silo Aeration Sentinel, EPC Progress Billing Escrow, Dynamic Port Berth Demurrage, Transformer DGA & Cross-Border Cash Repatriation (v1.65.0)
+
+### 31.1 Grain & Bulk Agricultural Silo Aeration & Mycotoxin Spoilage Sentinel (`internal/core/agriculture/silo_aeration.go`)
+- **Multi-Depth In-Line Silo Telemetry**: Endpoint `POST /api/v1/agriculture/silo/ingest-telemetry` monitors real-time vertical bulk grain sensors including multi-depth temperature cables, interstitial relative humidity, grain moisture content (MC %), and headspace $CO_2$ ppm (early metabolic respiration indicator).
+- **Henderson Psychrometric Aeration Controller**: Endpoint `POST /api/v1/agriculture/silo/evaluate-aeration-trigger` calculates Equilibrium Moisture Content (EMC %) and psychrometric cooling windows to command automated aeration fans, detecting hot spots and predicting Safe Storage Life (SSL days) and mycotoxin fungal risks (Aflatoxin/Ochratoxin A).
+- **HACCP Critical Control Point Quarantine Guard**: Endpoint `POST /api/v1/agriculture/silo/quarantine-spoilage-risk` locks downstream silo discharge slide gates upon mold threshold breaches and dispatches lab ELISA work orders with SHA-256 regulatory audit certificates.
+- **Grain Preservation Health Dossier**: Endpoint `GET /api/v1/agriculture/silo/grain-health-dossier/:silo_id` provides complete grain quality histories, aeration cycles, and compliance under ISO 6322 and FAO Good Storage Practices.
+
+### 31.2 Autonomous Multi-Tier Escrow & Dynamic Progress Billing for EPC Infrastructure Mega-Projects (`internal/core/project/epc_progress_billing.go`)
+- **FIDIC Clause 14 Contract Price & Milestone Management**: Endpoint `POST /api/v1/project/epc/generate-interim-payment-certificate` automates monthly Interim Payment Certificates (IPC) incorporating certified physical progress %, materials-on-site valuation, contractual retention deductions (e.g. 5%), and mobilization advance recovery amortization.
+- **Direct Multi-Tier Subcontractor Escrow Waterfall**: Endpoint `POST /api/v1/project/epc/disburse-escrow-waterfall` ring-fences employer disbursements into project escrow accounts and directly disburses certified funds to Tier-1 and Tier-2 subcontractors, preventing contractor fund diversion and mechanic liens.
+- **Earned Value Management (EVM) Performance Radar**: Endpoint `POST /api/v1/project/epc/record-earned-value-milestone` computes Cost Performance Index (CPI) and Schedule Performance Index (SPI) to detect project budget or schedule overruns in real time.
+- **EPC Financial Progress Dossier**: Endpoint `GET /api/v1/project/epc/financial-progress-dossier/:project_id` provides 360-degree contract progress, certified billings, escrow disbursement logs, and IFRS 15 percentage-of-completion compliance.
+
+### 31.3 Autonomous Dynamic Port Berth Allocation & Demurrage Minimization Engine (`internal/core/logistics/berth_allocation.go`)
+- **Vessel Notice of Readiness (NOR) & Charterparty Ingestion**: Endpoint `POST /api/v1/logistics/berth/ingest-vessel-nor` ingests vessel arrival data, Length Overall (LOA), arrival draft, cargo tonnages, allowed laytime hours, and contractual demurrage/despatch rates under BIMCO charterparties.
+- **Spatial-Temporal Quay & Crane Optimization**: Endpoint `POST /api/v1/logistics/berth/optimize-berth-allocation` optimizes continuous quay coordinates, tidal window drafts, and quay crane intensity to minimize port turnaround time and anchorage congestion.
+- **BIMCO Laytime, Demurrage & Despatch Financial Settler**: Endpoint `POST /api/v1/logistics/berth/settle-laytime-demurrage` reconciles actual discharge hours against allowed laytime, calculating net demurrage payable to shipowners or despatch money earned by terminal operators.
+- **Terminal Efficiency Dossier**: Endpoint `GET /api/v1/logistics/berth/terminal-efficiency-dossier/:terminal_id` compiles terminal occupancy rates, average vessel waiting times, and avoided demurrage metrics.
+
+### 31.4 Substation High-Voltage Transformer Dissolved Gas Analysis (DGA) & Arc Fault Guardian (`internal/core/maintenance/transformer_dga.go`)
+- **Multi-Gas Chromatography In-Line Telemetry**: Endpoint `POST /api/v1/maintenance/transformer/ingest-dga-telemetry` monitors real-time dissolved gas concentrations ($H_2$, $CH_4$, $C_2H_6$, $C_2H_4$, $C_2H_2$, $CO$, $CO_2$) in transformer dielectric insulating oil.
+- **Duval Triangle 1 & IEC 60599 Fault Classification**: Endpoint `POST /api/v1/maintenance/transformer/diagnose-duval-fault` plots methane, ethylene, and acetylene percentages on Duval Triangle 1 coordinates to classify incipient faults: high-energy arcing (D2), thermal faults ($T1/T2/T3 > 700^\circ\text{C}$), partial discharge (PD), and cellulose paper degradation ($CO_2/CO$ ratio).
+- **Autonomous Safety Load De-Rating & Work Order**: Endpoint `POST /api/v1/maintenance/transformer/trigger-safety-derating` commands electrical load reduction (e.g. capped at 60%) and schedules emergency oil degasification work orders, mitigating catastrophic tank rupture and multimillion-dollar blackout losses.
+- **Transformer Insulation Health Dossier**: Endpoint `GET /api/v1/maintenance/transformer/insulation-health-dossier/:asset_id` provides complete diagnostic histories, Duval coordinates, and IEEE C57.104 compliance verification.
+
+### 31.5 Corporate Global Cross-Border Cash Repatriation & Trapped Liquidity Optimizer (`internal/core/treasury/cash_repatriation.go`)
+- **Trapped Liquidity & Currency Risk Mapping**: Endpoint `POST /api/v1/treasury/repatriation/analyze-trapped-liquidity` evaluates offshore subsidiary cash reserves in restricted currency jurisdictions, identifying statutory reserves, inflation risks, and central bank foreign exchange approval constraints.
+- **Multi-Route Tax & Yield Simulation**: Endpoint `POST /api/v1/treasury/repatriation/simulate-optimal-pathways` compares after-tax net yields and regulatory lead times across statutory DTAA dividends, management cost-sharing allocations, IP royalties, and intercompany loan repayments under OECD BEPS Action 8-10.
+- **International Remittance Dispatcher**: Endpoint `POST /api/v1/treasury/repatriation/dispatch-remittance-order` executes authorized cross-border SWIFT gpi payment instructions backed by central bank permit references and transfer pricing documentation.
+- **Group Treasury Liquidity Dossier**: Endpoint `GET /api/v1/treasury/repatriation/group-liquidity-dossier/:holding_id` provides holding-level consolidated visibility into trapped versus mobilized capital and effective tax withholding minimization.
+
 
 
 

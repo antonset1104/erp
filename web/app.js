@@ -29201,6 +29201,432 @@ async function triggerTollManufacturing() {
     }
 }
 
+async function triggerSiloAeration() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi sensor silo biji-bijian, risiko mikotoksin & pemicu kipas aerasi ISO 6322...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const siloID = "SILO-WHEAT-PORT-01";
+        // 1. Ingest telemetry
+        await api('/agriculture/silo/ingest-telemetry', 'POST', {
+            silo_id: siloID,
+            grain_commodity: "HARD_RED_WINTER_WHEAT",
+            grain_total_tons: 15000.0,
+            average_grain_temp_c: 29.5,
+            top_headspace_temp_c: 35.0,
+            interstitial_relative_humidity_pct: 79.0,
+            grain_moisture_content_pct: 15.4,
+            headspace_co2_ppm: 1480.0,
+            ambient_air_temp_c: 21.0,
+            ambient_air_rh_pct: 54.0
+        });
+
+        // 2. Evaluate Aeration Trigger
+        const evalRes = await api('/agriculture/silo/evaluate-aeration-trigger', 'POST', {
+            silo_id: siloID
+        });
+
+        // 3. Quarantine Spoilage
+        const quarRes = await api('/agriculture/silo/quarantine-spoilage-risk', 'POST', {
+            silo_id: siloID,
+            batch_lot_number: "LOT-WHEAT-2026-B88",
+            reason: "Excessive headspace CO2 and high grain moisture indicating incipient Aspergillus flavus hotspot."
+        });
+
+        // 4. Retrieve dossier
+        const dossierRes = await api(`/agriculture/silo/grain-health-dossier/${siloID}`, 'GET');
+
+        if (badge) badge.textContent = `🌾 SILO: ${evalRes.data.fan_operating_command}`;
+        if (answerEl) {
+            let out = `🌾 GRAIN & BULK AGRICULTURAL SILO AERATION & MYCOTOXIN SPOILAGE SENTINEL (ISO 6322 & FAO):\n`;
+            out += `Silo Komoditas: ${siloID} (Gandum Curah Impor - 15,000 Ton)\n`;
+            out += `Kondisi Fisik Biji: Suhu Rata-rata: 29.5 °C | Kadar Air (MC): 15.4% (Batas Aman: <= 13.5%)\n`;
+            out += `Konsentrasi CO2 Headspace: 1,480 PPM (Indikasi Dini Hotspot Respirasi Fungi/Serangga)\n\n`;
+            out += `HASIL PERHITUNGAN PSIKROMETRIK HENDERSON & KONTROL AERASI:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Status Hot-spot: ${evalRes.data.hotspot_detected ? 'TERDETEKSI TITIK PANAS (HOTSPOT)' : 'NORMAL'}\n`;
+            out += `Equilibrium Moisture Content (EMC): ${evalRes.data.equilibrium_moisture_content_emc}%\n`;
+            out += `Jendela Psikrometrik Aerasi: ${evalRes.data.aeration_psychrometric_window_ok ? 'TERBUKA (Udara Ambien Dingin & Kering)' : 'TERTUTUP'}\n`;
+            out += `Perintah Kipas Aerasi: ${evalRes.data.fan_operating_command}\n`;
+            out += `Sisa Umur Simpan Aman (Safe Storage Life): ${evalRes.data.calculated_safe_storage_days} Hari\n`;
+            out += `Indeks Risiko Mikotoksin (Aflatoksin/Okratoksin): ${evalRes.data.mycotoxin_risk_index}/100 (${evalRes.data.risk_classification})\n`;
+            out += `Rekomendasi Preservasi: ${evalRes.data.recommendation}\n\n`;
+            out += `PENGUNCIAN PINTU KELUAR & KARANTINA KEAMANAN PANGAN (HACCP CCP #3):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Nomor Karantina: ${quarRes.data.quarantine_id} (Lot: ${quarRes.data.batch_lot_number})\n`;
+            out += `Kunci Pintu Pengeluaran Silo (Slide Gate): ${quarRes.data.downstream_discharge_gate_locked ? 'TERKUNCI AMAN (Mencegah Kontaminasi Tepung)' : 'TERBUKA'}\n`;
+            out += `Perintah Kerja Uji Lab (ELISA Testing): ${quarRes.data.lab_sampling_work_order_id}\n`;
+            out += `Hash Kepatuhan Audit Regulasi: ${quarRes.data.audit_regulatory_digest.substring(0, 32)}...\n`;
+            out += `Standar Preservasi Pangan: ${dossierRes.data.statutory_standards}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Aerasi pintar berdasarkan jendela psikrometrik mencegah kondensasi dan kerusakan ribuan ton gandum bernilai jutaan dolar.</li>
+                <li>Penguncian gerbang pelepasan otomatis memastikan gandum yang terkontaminasi jamur tidak masuk ke rantai pasok pangan.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mengevaluasi silo aeration sentinel: ' + err.message;
+    }
+}
+
+async function triggerEPCProgressBilling() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menerbitkan sertifikat IPC FIDIC, memotong retensi & menyalurkan dana escrow subkon...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const projectID = "PRJ-EPC-REFINERY-09";
+
+        // 1. Generate Interim Payment Certificate
+        const ipcRes = await api('/project/epc/generate-interim-payment-certificate', 'POST', {
+            project_id: projectID,
+            progress_pct: 7.5,
+            materials_on_site_usd: 450000.0
+        });
+
+        // 2. Disburse Escrow Waterfall
+        const disbRes = await api('/project/epc/disburse-escrow-waterfall', 'POST', {
+            certificate_number: ipcRes.data.certificate_number,
+            subcontractors: [
+                {
+                    subcontractor_id: "SUB-CIVIL-PILING-01",
+                    subcontractor_name: "PT Wijaya Karya Fondasi Presisi",
+                    tier_level: 1,
+                    allocated_amount_usd: 1250000.0
+                },
+                {
+                    subcontractor_id: "SUB-PIPING-VALVE-02",
+                    subcontractor_name: "PT Rekayasa Pipa Nusantara",
+                    tier_level: 2,
+                    allocated_amount_usd: 680000.0
+                }
+            ]
+        });
+
+        // 3. Record EVM Milestone
+        const evmRes = await api('/project/epc/record-earned-value-milestone', 'POST', {
+            project_id: projectID,
+            planned_value_usd: 16000000.0,
+            earned_value_usd: 15975000.0,
+            actual_cost_usd: 15450000.0
+        });
+
+        // 4. Retrieve dossier
+        const dossierRes = await api(`/project/epc/financial-progress-dossier/${projectID}`, 'GET');
+
+        if (badge) badge.textContent = `🏗️ EPC: Net IPC $${(ipcRes.data.net_certified_amount_usd/1000000).toFixed(2)}M`;
+        if (answerEl) {
+            let out = `🏗️ AUTONOMOUS MULTI-TIER ESCROW & PROGRESS BILLING FOR EPC MEGA-PROJECTS (FIDIC & IFRS 15):\n`;
+            out += `Nama Mega Proyek: ${dossierRes.data.contract.project_name} (${projectID})\n`;
+            out += `Pemilik Proyek (Employer): ${dossierRes.data.contract.client_employer_name}\n`;
+            out += `Kontraktor Utama (Lead Contractor): ${dossierRes.data.contract.lead_contractor_name}\n`;
+            out += `Nilai Kontrak Total: $${dossierRes.data.contract.total_contract_value_usd.toLocaleString()} USD\n\n`;
+            out += `INTERIM PAYMENT CERTIFICATE (IPC) SESUAI FIDIC KLAUSUL 14:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Nomor Sertifikat IPC: ${ipcRes.data.certificate_number} (Bulan: ${ipcRes.data.billing_period_month})\n`;
+            out += `Kemajuan Fisik Periode Ini: ${ipcRes.data.current_period_progress_pct}%\n`;
+            out += `Nilai Bruto Pekerjaan (Gross Work Valuation): $${ipcRes.data.gross_valuation_usd.toLocaleString()} USD\n`;
+            out += `Tunjangan Material On-Site: +$${ipcRes.data.materials_on_site_allowance_usd.toLocaleString()} USD\n`;
+            out += `Potongan Retensi Jaminan (5.0%): -$${ipcRes.data.retention_deducted_usd.toLocaleString()} USD\n`;
+            out += `Potongan Pengembalian Uang Muka (Advance Recovery): -$${ipcRes.data.advance_recovery_deducted_usd.toLocaleString()} USD\n`;
+            out += `NILAI BERSIH SERTIFIKAT DISAHKAN (NET PAYABLE): $${ipcRes.data.net_certified_amount_usd.toLocaleString()} USD\n`;
+            out += `Status Sertifikasi Konsultan Pengawas: ${ipcRes.data.engineer_certification_status}\n\n`;
+            out += `DISTRIBUSI WATERFALL ESCROW KEPADA SUBKONTRAKTOR TIER 1 & TIER 2:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            disbRes.data.forEach(sub => {
+                out += `• Tier-${sub.tier_level} Subkon: ${sub.subcontractor_name} -> $${sub.allocated_amount_usd.toLocaleString()} USD (${sub.disbursement_status})\n`;
+            });
+            out += `\nMETRIK PENGENDALIAN BIAYA & JADWAL (EARNED VALUE MANAGEMENT - EVM):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Cost Performance Index (CPI): ${evmRes.data.cost_performance_index} (Efisiensi Anggaran: Positif Hemat Biaya)\n`;
+            out += `Schedule Performance Index (SPI): ${evmRes.data.sched_performance_idx} (Ketepatan Jadwal: On-Track Sesuai Rencana)\n`;
+            out += `Standar Pengakuan Pendapatan: ${dossierRes.data.accounting_standard}\n`;
+            out += `Perlindungan Hukum: ${dossierRes.data.lien_prevention_status}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penerbitan IPC otomatis dengan kalkulasi retensi dan pengembalian uang muka memangkas sengketa penagihan hingga nol.</li>
+                <li>Penyaluran dana escrow langsung ke subkontraktor mencegah pengalihan dana sepihak dan klaim sita jaminan (mechanic liens).</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses EPC progress billing: ' + err.message;
+    }
+}
+
+async function triggerBerthAllocation() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengoptimalkan alokasi dermaga kapal, jangkauan crane & rekonsiliasi laytime BIMCO...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const vesselIMO = "IMO-9812401";
+        const terminalID = "TERM-TANJUNG-PRIOK-02";
+
+        // 1. Ingest NOR
+        await api('/logistics/berth/ingest-vessel-nor', 'POST', {
+            vessel_imo: vesselIMO,
+            vessel_name: "MV Nusantara Samudera Perkasa",
+            vessel_type: "BULK_CARRIER_PANAMAX",
+            loa_meters: 225.0,
+            beam_meters: 32.2,
+            arrival_draft_meters: 13.5,
+            cargo_tons: 55000.0,
+            allowed_laytime_hours: 72.0,
+            contractual_demurrage_rate_per_day_usd: 36000.0,
+            contractual_despatch_rate_per_day_usd: 18000.0
+        });
+
+        // 2. Optimize Berth Allocation
+        const allocRes = await api('/logistics/berth/optimize-berth-allocation', 'POST', {
+            vessel_imo: vesselIMO,
+            terminal_id: terminalID
+        });
+
+        // 3. Settle Laytime & Demurrage (Completed in 48.0 hours vs 72.0 hours allowed -> 24 hours saved -> Despatch!)
+        const settleRes = await api('/logistics/berth/settle-laytime-demurrage', 'POST', {
+            vessel_imo: vesselIMO,
+            actual_hours: 48.0
+        });
+
+        // 4. Retrieve dossier
+        const dossierRes = await api(`/logistics/berth/terminal-efficiency-dossier/${terminalID}`, 'GET');
+
+        if (badge) badge.textContent = `🚢 PORT: Despatch $${settleRes.data.despatch_earned_usd.toLocaleString()}`;
+        if (answerEl) {
+            let out = `🚢 AUTONOMOUS DYNAMIC PORT BERTH ALLOCATION & DEMURRAGE MINIMIZATION (BIMCO LAYTIME):\n`;
+            out += `Kapal Kargo: MV Nusantara Samudera Perkasa (IMO: ${vesselIMO})\n`;
+            out += `Tipe Armada: Bulk Carrier Panamax (Panjang LOA: 225m, Draft Kedalaman: 13.5m)\n`;
+            out += `Muatan Curah yang Dibongkar: 55,000 Metrik Ton\n\n`;
+            out += `ALOKASI DERMAGA & PENUGASAN QUAY CRANE DINAMIS:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Dermaga Ditugaskan: ${allocRes.data.assigned_berth_id}\n`;
+            out += `Koordinat Quay: Meter ${allocRes.data.quay_meter_start} s/d Meter ${allocRes.data.quay_meter_end}\n`;
+            out += `Kedalaman Alur Air Dermaga: ${allocRes.data.water_depth_meters}m (Aman untuk Draft 13.5m)\n`;
+            out += `Jumlah Derek Ditugaskan (Quay Cranes): ${allocRes.data.allocated_cranes_count} Unit Derek Berkecepatan Tinggi\n`;
+            out += `Estimasi Waktu Bongkar: ${allocRes.data.estimated_discharge_hours} Jam Operasional\n`;
+            out += `Status Sandar: ${allocRes.data.berth_status}\n\n`;
+            out += `REKONSILIASI KEUANGAN LAYTIME, DEMURRAGE & DESPATCH (BIMCO):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Waktu Laytime Kontraktual yang Diizinkan: ${settleRes.data.allowed_laytime_hours} Jam (3 Hari Penuh)\n`;
+            out += `Waktu Aktual Bongkar Selesai: ${settleRes.data.actual_laytime_consumed_hours} Jam\n`;
+            out += `Selisih Efisiensi Waktu: Menghemat ${Math.abs(settleRes.data.time_variance_hours)} Jam (Lebih Cepat 1 Hari Penuh!)\n`;
+            out += `Putusan Komersial: ${settleRes.data.settlement_verdict}\n`;
+            out += `PENDAPATAN BONUS PERCEPATAN (DESPATCH EARNED): +$${settleRes.data.despatch_earned_usd.toLocaleString()} USD\n`;
+            out += `Nomor Referensi Penyelesaian BIMCO: ${settleRes.data.commercial_settlement_reference}\n`;
+            out += `Kinerja Efisiensi Terminal: ${dossierRes.data.demurrage_reduction_rate} (Rata-rata Waktu Tunggu: ${dossierRes.data.average_waiting_time_hrs} Jam)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Alokasi dermaga berbasis draft dan produktivitas crane memangkas denda demurrage puluhan ribu dolar per kapal.</li>
+                <li>Bongkar muat lebih cepat 24 jam menghasilkan bonus Despatch Money dari pemilik kapal kepada operator terminal.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mengoptimalkan berth allocation: ' + err.message;
+    }
+}
+
+async function triggerTransformerDGA() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis kromatografi gas terlarut trafo daya, Duval Triangle & de-rating beban...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const assetID = "TRF-MAIN-150KV-02";
+
+        // 1. Ingest DGA Telemetry
+        await api('/maintenance/transformer/ingest-dga-telemetry', 'POST', {
+            asset_id: assetID,
+            substation_id: "SUBSTATION-CILEGON-WEST",
+            hydrogen_ppm_h2: 240.0,
+            methane_ppm_ch4: 180.0,
+            ethane_ppm_c2h6: 75.0,
+            ethylene_ppm_c2h4: 310.0,
+            acetylene_ppm_c2h2: 98.0, // High-energy arcing
+            carbon_monoxide_ppm_co: 520.0,
+            carbon_dioxide_ppm_co2: 4200.0,
+            oil_temperature_c: 78.5,
+            load_current_amperes: 1150.0
+        });
+
+        // 2. Diagnose Duval Triangle
+        const diagRes = await api('/maintenance/transformer/diagnose-duval-fault', 'POST', {
+            asset_id: assetID
+        });
+
+        // 3. Trigger Safety De-rating
+        const derateRes = await api('/maintenance/transformer/trigger-safety-derating', 'POST', {
+            asset_id: assetID,
+            derate_pct: 60.0
+        });
+
+        // 4. Retrieve dossier
+        const dossierRes = await api(`/maintenance/transformer/insulation-health-dossier/${assetID}`, 'GET');
+
+        if (badge) badge.textContent = `⚡ TRF: ${diagRes.data.identified_fault_type.substring(0, 15)}`;
+        if (answerEl) {
+            let out = `⚡ SUBSTATION TRANSFORMER DISSOLVED GAS ANALYSIS (DGA) & DUVAL TRIANGLE GUARDIAN (IEEE C57.104):\n`;
+            out += `Aset Trafo Daya: ${assetID} (Gardu Induk Tegangan Tinggi 150 kV Cilegon West)\n`;
+            out += `Suhu Minyak Trafo: 78.5 °C | Arus Beban: 1,150 Ampere\n\n`;
+            out += `HASIL KROMATOGRAFI GAS TERLARUT & KOORDINAT DUVAL TRIANGLE 1:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Konsentrasi Asetilena (C2H2): 68.0 PPM (Batas Bahaya Kritis: > 35.0 PPM) -> SEVERE ANOMALY\n`;
+            out += `Koordinat Metana (%CH4): ${diagRes.data.ch4_ratio_pct}%\n`;
+            out += `Koordinat Etilena (%C2H4): ${diagRes.data.c2h4_ratio_pct}%\n`;
+            out += `Koordinat Asetilena (%C2H2): ${diagRes.data.c2h2_ratio_pct}%\n`;
+            out += `DIAGNOSIS KERUSAKAN SISTEM: ${diagRes.data.identified_fault_type}\n`;
+            out += `Tingkat Keparahan Bahaya: ${diagRes.data.action_severity}\n`;
+            out += `Rasio Degradasi Kertas Selulosa (CO2/CO): ${diagRes.data.cellulose_paper_co2_to_co_ratio}\n`;
+            out += `Tindakan Kritis Disarankan: ${diagRes.data.recommended_action}\n\n`;
+            out += `PERINTAH PENURUNAN BEBAN (SAFETY DE-RATING) & PENCEGAHAN LEDAKAN:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Nomor Perintah Kerja: ${derateRes.data.work_order_id}\n`;
+            out += `Pembatasan Beban Maksimal (De-rating): Dibatasi ke ${derateRes.data.max_allowed_load_capacity_pct}% Kapasitas Nominal\n`;
+            out += `Tindakan Darurat: Pemurnian & Degasifikasi Minyak Dielektrik (Oil Degasification)\n`;
+            out += `Nilai Kerusakan Total Dihindari: $${derateRes.data.avoided_transformer_loss_usd.toLocaleString()} USD (Mencegah Ledakan & Blackout Total)\n`;
+            out += `Standar Diagnostik: ${dossierRes.data.diagnostic_standards}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Deteksi dini busur api listrik (Arcing D2) via Duval Triangle mencegah ledakan fatal trafo berbobot ratusan ton.</li>
+                <li>Penurunan beban otomatis (de-rating) melindungi integritas kertas isolasi hingga pemadaman perbaikan terjadwal dilakukan.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal menganalisis transformer DGA: ' + err.message;
+    }
+}
+
+async function triggerCashRepatriation() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis likuiditas terjebak luar negeri, simulasi pajak DTAA & instruksi repatriasi...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const subID = "SUB-VIETNAM-OPERATING-01";
+        const holdingID = "HOLDING-GOERP-SG-01";
+
+        // 1. Analyze trapped liquidity
+        await api('/treasury/repatriation/analyze-trapped-liquidity', 'POST', {
+            subsidiary_id: subID,
+            jurisdiction_country_code: "VN",
+            holding_company_id: holdingID,
+            local_currency_code: "VND",
+            trapped_cash_amount_local: 500000000000.0,
+            trapped_cash_amount_usd: 20000000.0,
+            central_bank_approval_required: true,
+            annual_inflation_rate_pct: 4.2,
+            currency_depreciation_risk_pct: 3.5,
+            statutory_reserve_locked_usd: 2000000.0
+        });
+
+        // 2. Simulate optimal pathways
+        const simRes = await api('/treasury/repatriation/simulate-optimal-pathways', 'POST', {
+            subsidiary_id: subID
+        });
+
+        // 3. Dispatch Remittance Order (Best Pathway: Intercompany Loan Repayment with Zero WHT!)
+        const remRes = await api('/treasury/repatriation/dispatch-remittance-order', 'POST', {
+            subsidiary_id: subID,
+            pathway: "INTERCOMPANY_LOAN_REPAYMENT",
+            central_bank_permit_reference: "SBV-FX-REPAT-2026-99012",
+            target_holding_account_iban: "SG77-DBS-HOLDING-998811",
+            amount_usd: 10000000.0
+        });
+
+        // 4. Retrieve dossier
+        const dossierRes = await api(`/treasury/repatriation/group-liquidity-dossier/${holdingID}`, 'GET');
+
+        if (badge) badge.textContent = `🌐 TREASURY: $${(remRes.data.dispatched_remittance_usd/1000000).toFixed(1)}M Remitted`;
+        if (answerEl) {
+            let out = `🌐 CORPORATE GLOBAL CROSS-BORDER CASH REPATRIATION & TRAPPED LIQUIDITY OPTIMIZER (BEPS):\n`;
+            out += `Entitas Anak Terjebak: ${subID} (Vietnam Manufacturing Ops)\n`;
+            out += `Total Saldo Kas Terjebak: 500,000,000,000 VND (~$20,000,000.00 USD)\n`;
+            out += `Cadangan Statutori Terkunci: -$2,000,000.00 USD | Dana Siap Direpatriasi: $18,000,000.00 USD\n\n`;
+            out += `HASIL SIMULASI MULTI-JALUR REPATRIASI & EFISIENSI PAJAK INTERNASIONAL:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            simRes.data.forEach(sim => {
+                out += `• Ranking #${sim.recommended_ranking}: ${sim.pathway_type}\n`;
+                out += `  - Tarif Pajak Pemotongan (WHT): ${sim.applicable_withholding_tax_pct}%\n`;
+                out += `  - Potongan Pajak WHT: -$${sim.withholding_tax_deduction_usd.toLocaleString()} USD\n`;
+                out += `  - HASIL BERSIH (NET YIELD): $${sim.net_effective_yield_usd.toLocaleString()} USD (${sim.net_yield_percentage}% Efektivitas Kas)\n`;
+                out += `  - Estimasi Waktu Izin Bank Sentral: ${sim.estimated_regulatory_lead_time_days} Hari Kerja\n`;
+                out += `  - Sertifikasi Kepatuhan: ${sim.oecd_compliance_rating}\n\n`;
+            });
+            out += `EKSEKUSI PENGIRIMAN DANA LINTAS NEGARA (INTERNATIONAL REMITTANCE ORDER):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Nomor Instruksi Remitansi: ${remRes.data.remittance_order_id}\n`;
+            out += `Jalur Dipilih: ${remRes.data.selected_pathway} (Pengembalian Pokok Pinjaman Intra-Grup Bebas Pajak WHT)\n`;
+            out += `Nominal Kas Berhasil Dipulangkan: $${remRes.data.dispatched_remittance_usd.toLocaleString()} USD\n`;
+            out += `Izin Devisa Bank Sentral: ${remRes.data.central_bank_permit_reference}\n`;
+            out += `Rekening Tujuan Holding: ${remRes.data.target_holding_account_iban}\n`;
+            out += `Status Pengiriman Dana: ${remRes.data.remittance_status}\n`;
+            out += `Efisiensi Repatriasi Grup: ${dossierRes.data.repatriation_efficiency}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Optimalisasi jalur pengembalian pinjaman intra-grup menghemat ratusan ribu dolar pajak pemotongan (WHT).</li>
+                <li>Pemulangan kas tepat waktu melindungi kas perusahaan dari depresiasi mata uang lokal dan inflasi negara berkembang.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses cash repatriation: ' + err.message;
+    }
+}
+
 
 
 // Auto-initialize Real-Time SSE Event Stream
