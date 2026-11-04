@@ -1647,6 +1647,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/quantum/qkd/evaluate-qber-and-phase-drift": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Quantum Key Distribution (QKD) Optical Fiber Link & Entangled Photon Phase Drift Guardian (ETSI GS QKD 014 & ITU-T Y.3800)",
+					"description": "Evaluates Shor-Preskill key distillation rates, Mach-Zehnder interferometer acoustic phase drift, and triggers Crystals-Kyber PQC fallback upon eavesdropping QBER breach.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Secret key rate bps, phase drift severity, electro-optic tuning flag, and emergency PQC fallback status"},
+					},
+				},
+			},
+			"/api/v1/seabed/mining/evaluate-benthic-plume-turbidity": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Subsea Seabed Polymetallic Nodule Harvesting & Hydrocyclone Plume Turbidity Sentinel (ISA Guidelines & UNCLOS Part XI)",
+					"description": "Models benthic sediment plume advection-diffusion transport, hydrocyclone solids separation efficiency, suction dredge throttling, and midwater flocculant dosing.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Dispersion radius meters, separation efficiency percentage, benthic compliance status, and suction throttling mandate"},
+					},
+				},
+			},
+			"/api/v1/moltensalt/storage/evaluate-freeze-plugging-risk": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Concentrated Solar Power (CSP) Molten Salt Storage & Freeze-Plugging Sentinel (ASME Section VIII Div 2 & ASTM D6800)",
+					"description": "Models binary nitrate solar salt Arrhenius viscosity spikes near 221°C eutectic freezing point, commanding 450 kW trace heating and emergency gravity drainback.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Temperature margin to solidus, Arrhenius viscosity cP, freeze-plugging risk level, and emergency drainback active"},
+					},
+				},
+			},
+			"/api/v1/solidstate/battery/evaluate-dendrite-and-cracking": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Solid-State Battery (SSB) Sulfide Electrolyte Lithium Dendrite & Acoustic Crack Sentinel (IEC 62660-3 & ISO 12405-4)",
+					"description": "Evaluates Monroe-Newman shear modulus stability, critical current density margins, acoustic emission microcracking, and commands 5 MPa stack pressure with pulsed rejuvenation.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Monroe-Newman shear ratio, CCD margin, interfacial cracking hazard, and reverse pulse rejuvenation mandate"},
+					},
+				},
+			},
+			"/api/v1/dac/capture/evaluate-sorption-competition": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Industrial Direct Air Capture (DAC) Sorbent Moisture Competition & Steam Desorption Optimizer (ISO 14064-2 & GHG Protocol)",
+					"description": "Models Langmuir-Freundlich competitive adsorption between 420 ppm CO2 and moisture vapor, optimizing Temperature-Vacuum Swing Desorption (TVSD) steam duty.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Competitive moisture ratio, Langmuir selectivity index, specific thermal energy GJ/ton, and pre-drying cycle requirement"},
+					},
+				},
+			},
 		},
 	}
 }

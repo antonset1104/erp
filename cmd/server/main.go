@@ -25,6 +25,7 @@ import (
 	corecrm "erp-golang/internal/core/crm"
 	corecryo "erp-golang/internal/core/cryo"
 	corecustoms "erp-golang/internal/core/customs"
+	coredac "erp-golang/internal/core/dac"
 	coreedi "erp-golang/internal/core/edi"
 	coreehs "erp-golang/internal/core/ehs"
 	coreenergy "erp-golang/internal/core/energy"
@@ -45,6 +46,7 @@ import (
 	coremaintenance "erp-golang/internal/core/maintenance"
 	coremarine "erp-golang/internal/core/marine"
 	coremining "erp-golang/internal/core/mining"
+	coremoltensalt "erp-golang/internal/core/moltensalt"
 	coremrp "erp-golang/internal/core/mrp"
 	corenuclear "erp-golang/internal/core/nuclear"
 	corepackaging "erp-golang/internal/core/packaging"
@@ -54,10 +56,13 @@ import (
 	coreprocurement "erp-golang/internal/core/procurement"
 	coreproject "erp-golang/internal/core/project"
 	corequality "erp-golang/internal/core/quality"
+	corequantum "erp-golang/internal/core/quantum"
 	corerailway "erp-golang/internal/core/railway"
 	corerenewables "erp-golang/internal/core/renewables"
 	corescm "erp-golang/internal/core/scm"
+	coreseabed "erp-golang/internal/core/seabed"
 	coresemiconductor "erp-golang/internal/core/semiconductor"
+	coresolidstate "erp-golang/internal/core/solidstate"
 	coreservice "erp-golang/internal/core/service"
 	coresubsea "erp-golang/internal/core/subsea"
 	coresubscription "erp-golang/internal/core/subscription"
@@ -324,7 +329,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.70.0",
+			"version":    "1.71.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -489,6 +494,11 @@ func main() {
 		corehypersonic.RegisterHypersonicRoutes(apiV1)
 		corepackaging.RegisterPackagingRoutes(apiV1)
 		coregeothermal.RegisterGeothermalRoutes(apiV1)
+		corequantum.RegisterQuantumRoutes(apiV1)
+		coreseabed.RegisterSeabedRoutes(apiV1)
+		coremoltensalt.RegisterMoltenSaltRoutes(apiV1)
+		coresolidstate.RegisterSolidStateRoutes(apiV1)
+		coredac.RegisterDACRoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend

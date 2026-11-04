@@ -31562,6 +31562,326 @@ async function triggerGeothermalEGS() {
     }
 }
 
+async function triggerQuantumQKD() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memeriksa telemetri QKD serat optik 78.5 km, laju QBER & failover Crystals-Kyber...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const linkID = "QKD-LINK-BANK-NY-DC-01";
+        await api('/quantum/qkd/ingest-link-telemetry', 'POST', {
+            link_id: linkID,
+            source_datacenter_id: "DC-FEDERAL-RESERVE-NY",
+            target_datacenter_id: "DC-TREASURY-DC",
+            fiber_distance_km: 78.5,
+            quantum_bit_error_rate_qber: 0.118,
+            interferometer_phase_drift_rad: 0.92,
+            single_photon_count_per_sec: 110000.0,
+            dark_count_rate_hz: 28.0,
+            fiber_attenuation_db: 16.2,
+            pq_crystals_kyber_fallback_armed: true
+        });
+
+        const evalRes = await api('/quantum/qkd/evaluate-qber-and-phase-drift', 'POST', { link_id: linkID });
+        const actRes = await api('/quantum/qkd/trigger-phase-tuning-and-pqc-fallback', 'POST', { link_id: linkID });
+        const dossierRes = await api(`/quantum/qkd/qkd-security-dossier/${linkID}`, 'GET');
+
+        if (badge) badge.textContent = `🔒 QKD: QBER ${(evalRes.data.quantum_bit_error_rate_qber*100 || 11.8).toFixed(1)}% | Distil ${evalRes.data.secret_key_distillation_rate_bps} bps | PQC Kyber Active`;
+        if (answerEl) {
+            let out = `🔒 QUANTUM KEY DISTRIBUTION (QKD) LINK & ENTANGLED PHOTON PHASE DRIFT GUARDIAN (ETSI & ITU-T):\n`;
+            out += `Tautan Kuantum: ${linkID} (${dossierRes.data.source_dc} -> ${dossierRes.data.target_dc}) | Jarak: 78.5 km Serat Optik Bawah Tanah\n`;
+            out += `Standar Regulasi: ETSI GS QKD 014, ITU-T Y.3800, & NIST SP 800-208 Post-Quantum Transition\n\n`;
+            out += `ANALISIS TINGKAT KESALAHAN BIT KUANTUM (QBER) & DISTILASI KUNCI SHOR-PRESKILL:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Quantum Bit Error Rate (QBER): 11.8% (Melampaui Ambang Batas Teoretis Penyadap Kuantum 11.0%)\n`;
+            out += `• Pergeseran Fasa Interferometer (Acoustic/Thermal Phase Drift): 0.92 Radian (Penyimpangan Signifikan)\n`;
+            out += `• Laju Cacah Foton Tunggal (SPAD): 110,000 cps | Redaman Total Serat: 16.2 dB\n`;
+            out += `• Laju Distilasi Kunci Rahasia Aman: ${evalRes.data.secret_key_distillation_rate_bps} bps\n`;
+            out += `• Klasifikasi Tingkat Bahaya Keamanan Kuantum: ${evalRes.data.phase_drift_severity_level}\n`;
+            out += `• Pemicu Darurat Post-Quantum Cryptography (PQC): ${evalRes.data.emergency_pqc_fallback_trigger ? 'AKTIF SEKETIKA (CRYSTALS-KYBER)' : 'STANDBY'}\n\n`;
+            out += `KOMPENSASI FASA ELEKTRO-OPTIK & FAILOVER PQC PROTOKOL:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Tindakan: ${actRes.data.action_id}\n`;
+            out += `• Koreksi Fasa Modulator Elektro-Optik (Piezo Shifter): ${actRes.data.phase_modulator_correction_rad} Radian\n`;
+            out += `• Status Enkripsi PQC Crystals-Kyber: ${actRes.data.pqc_fallback_engaged ? 'TERKUNCI & MENGAMBIL ALIH ENKRIPSI KEUANGAN' : 'STANDBY'}\n`;
+            out += `• Estimasi Kerugian Transaksi Terhindar: $${actRes.data.avoided_settlement_loss_usd.toLocaleString()} USD (Mencegah Penyadapan Kliring Interbank Kuantum)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Kompensasi fasa piezoelektrik otomatis meredam gangguan vibrasi akustik kabel serat optik bawah tanah.</li>
+                <li>Ambang batas QBER > 11% secara instan mengalihkan kliring interbank ke algoritma PQC Crystals-Kyber NIST Level 5.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses QKD guardian: ' + err.message;
+    }
+}
+
+async function triggerSeabedMining() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memeriksa crawler nodul laut dalam 4,350m, pemodelan adveksi turbiditas & injeksi flokulan...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const crawlerID = "CRAWLER-PACIFIC-CCZ-01";
+        await api('/seabed/mining/ingest-crawler-telemetry', 'POST', {
+            crawler_id: crawlerID,
+            mining_concession_id: "NORI-D-CLARION-CLIPPERTON",
+            water_depth_meters: 4350.0,
+            seabed_crawler_speed_m_per_sec: 0.45,
+            nodule_collection_rate_tons_hr: 195.0,
+            vertical_riser_velocity_m_per_sec: 3.8,
+            benthic_plume_turbidity_ntu: 82.5,
+            suspended_particulate_mg_l: 52.0,
+            midwater_discharge_depth_m: 1200.0
+        });
+
+        const evalRes = await api('/seabed/mining/evaluate-benthic-plume-turbidity', 'POST', { crawler_id: crawlerID });
+        const actRes = await api('/seabed/mining/trigger-suction-and-flocculant-control', 'POST', { crawler_id: crawlerID });
+        const dossierRes = await api(`/seabed/mining/seabed-environmental-dossier/${crawlerID}`, 'GET');
+
+        if (badge) badge.textContent = `🌊 SEABED: Turbidity 82.5 NTU | Particulate 52.0 mg/L | Suction Throttled 35%`;
+        if (answerEl) {
+            let out = `🌊 SUBSEA POLYMETALLIC NODULE HARVESTING & PLUME TURBIDITY SENTINEL (ISA & UNCLOS PART XI):\n`;
+            out += `Robot Penambang Dasar Laut: ${crawlerID} | Konsesi: ${dossierRes.data.concession_id} | Kedalaman: 4,350 Meter\n`;
+            out += `Laju Panen Nodul Mangan/Nikel/Kobalt: 195.0 Ton/Jam | Standar Lingkungan: ISA Guidelines & UNCLOS Part XI\n\n`;
+            out += `PEMODELAN DISPERSI PLUME ADVEKSI-DIFUSI & KEPATUHAN LINGKUNGAN BENTIK:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Turbiditas Sedimen Plume Terukur: 82.5 NTU (Ambang Batas ISA < 40.0 NTU)\n`;
+            out += `• Partikulat Padat Tersuspensi: 52.0 mg/L (Ambang Batas Kelestarian Hayati Bentik < 25.0 mg/L)\n`;
+            out += `• Radius Dispersi Plume Adveksi-Difusi: ${evalRes.data.advection_diffusion_dispersion_radius_m} meter\n`;
+            out += `• Efisiensi Separasi Hidrosiklon Vertikal Riser: ${evalRes.data.hydrocyclone_separation_efficiency_pct}%\n`;
+            out += `• Status Kepatuhan Lingkungan Bentik: ${evalRes.data.benthic_environmental_compliance_status}\n`;
+            out += `• Mandat Throttling Pompa Hisap: ${evalRes.data.suction_throttling_mandate ? 'WAJIB (THROTTLED 35%)' : 'NORMAL'}\n\n`;
+            out += `KONTROL HISAPAN DASAR LAUT & INJEKSI FLOKULAN RAMAH LINGKUNGAN:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Mitigasi: ${actRes.data.action_id}\n`;
+            out += `• Daya Pompa Dredge Dithrottle: ${actRes.data.throttled_suction_power_pct}%\n`;
+            out += `• Laju Injeksi Flokulan Biodegradabel Midwater: ${actRes.data.flocculant_injection_rate_lpm} L/menit (Mempercepat Pengendapan Sedimen)\n`;
+            out += `• Denda Lingkungan PBB/ISA Terhindar: $${actRes.data.avoided_environmental_fine_usd.toLocaleString()} USD (Mencegah Moratorium & Penyitaan Kapal Tambang)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Throttling dinamis pompa dasar laut mereduksi turbiditas suspensi lumpur sebelum melewati batas ambang ISA.</li>
+                <li>Injeksi flokulan biodegradabel pada midwater separator mempercepat sedimentasi partikel lempung dasar samudra.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses seabed mining: ' + err.message;
+    }
+}
+
+async function triggerMoltenSaltCSP() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis viskositas Arrhenius garam cair CSP, batas eutektik 221°C & pemanas induksi...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const tankID = "TANK-CSP-SALT-HOT-50KT-01";
+        await api('/moltensalt/storage/ingest-salt-telemetry', 'POST', {
+            storage_tank_id: tankID,
+            plant_id: "CSP-NOOR-ATACAMA-350MW",
+            salt_mass_tons: 28500.0,
+            salt_bulk_temperature_c: 236.0,
+            boundary_layer_pipe_wall_temp_c: 223.5,
+            nano3_fraction: 0.60,
+            kno3_fraction: 0.40,
+            viscosity_centipoise: 9.8,
+            pipe_flow_velocity_m_per_sec: 0.22,
+            impedance_heating_active: false
+        });
+
+        const evalRes = await api('/moltensalt/storage/evaluate-freeze-plugging-risk', 'POST', { storage_tank_id: tankID });
+        const actRes = await api('/moltensalt/storage/trigger-trace-heating-and-drainback', 'POST', { storage_tank_id: tankID });
+        const dossierRes = await api(`/moltensalt/storage/molten-salt-safety-dossier/${tankID}`, 'GET');
+
+        if (badge) badge.textContent = `☀️ CSP SALT: Margin ${evalRes.data.temperature_margin_to_solidus_c}°C | Visc ${evalRes.data.arrhenius_dynamic_viscosity_cp}cP | Trace Heat 450kW`;
+        if (answerEl) {
+            let out = `☀️ CONCENTRATED SOLAR POWER (CSP) MOLTEN SALT STORAGE & FREEZE-PLUGGING SENTINEL (ASME & ASTM):\n`;
+            out += `Tangki Penyimpanan Termal: ${tankID} (${dossierRes.data.plant_id}) | Massa Garam Biner: 28,500 Ton Solar Salt\n`;
+            out += `Komposisi Garam: 60% NaNO3 + 40% KNO3 | Standar Desain: ASME Section VIII Div 2 & ASTM D6800\n\n`;
+            out += `ANALISIS VISKOSITAS ARRHENIUS & MARGIN PEMBEKUAN EUTEKTIK (SOLIDUS CURVE):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Suhu Curah Garam Cair (Bulk Temperature): 236.0°C\n`;
+            out += `• Suhu Dinding Batas Pipa (Boundary Layer): 223.5°C\n`;
+            out += `• Titik Beku Eutektik Garam (Eutectic Freezing Point): 221.0°C\n`;
+            out += `• Margin Suhu Terhadap Titik Beku: ${evalRes.data.temperature_margin_to_solidus_c}°C (Sangat Kritis, Risiko Pembekuan Kristal)\n`;
+            out += `• Viskositas Dinamis Model Arrhenius: ${evalRes.data.arrhenius_dynamic_viscosity_cp} cP (Lonjakan Viskositas Non-Newtonian)\n`;
+            out += `• Laju Alir Fluida Dalam Pipa: 0.22 m/detik (Stagnasi Aliran Berbahaya)\n`;
+            out += `• Tingkat Bahaya Penyumbatan Pembekuan: ${evalRes.data.freeze_plugging_risk_level}\n\n`;
+            out += `AKTIVASI PEMANAS INDUKSI DARURAT & PEMBUANGAN GRAVITASI (DRAINBACK):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Tindakan Proteksi: ${actRes.data.action_id}\n`;
+            out += `• Daya Pemanas Impedansi Otomatis (Trace Heating): ${actRes.data.impedance_heating_duty_kw} kW\n`;
+            out += `• Pembukaan Katup Kuras Gravitasi Darurat (Drainback Valve): ${actRes.data.drainback_valve_opened_pct}% (Mengosongkan Pipa ke Hot Sump)\n`;
+            out += `• Estimasi Kerugian Pipa & Solidifikasi Terhindar: $${actRes.data.avoided_solidification_damage_loss_usd.toLocaleString()} USD (Mencegah Pipa Retak & Outage Berbulan-bulan)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pemanas impedansi parasitik 450 kW seketika menaikkan suhu lapisan batas pipa sebelum kristalisasi garam menutup aliran.</li>
+                <li>Katup drainback gravitasi otomatis menguras garam cair ke tangki berinsulasi panas saat aliran terdeteksi stagnan.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses CSP molten salt: ' + err.message;
+    }
+}
+
+async function triggerSolidStateBattery() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi kriteria Monroe-Newman, emisi akustik retak & modulasi tekanan kompresi 5 MPa...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const cellID = "CELL-SSB-SULFIDE-LITHIUM-01";
+        await api('/solidstate/battery/ingest-cell-telemetry', 'POST', {
+            cell_id: cellID,
+            pack_id: "PACK-EV-800V-100KWH",
+            current_density_ma_cm2: 5.8,
+            solid_electrolyte_shear_modulus_gpa: 6.2,
+            acoustic_emission_hit_count: 156,
+            acoustic_emission_peak_db: 62.0,
+            applied_stack_pressure_mpa: 3.0,
+            internal_impedance_milli_ohm: 16.2,
+            cell_temperature_c: 39.5
+        });
+
+        const evalRes = await api('/solidstate/battery/evaluate-dendrite-and-cracking', 'POST', { cell_id: cellID });
+        const actRes = await api('/solidstate/battery/trigger-pressure-and-pulse-rejuvenation', 'POST', { cell_id: cellID });
+        const dossierRes = await api(`/solidstate/battery/battery-reliability-dossier/${cellID}`, 'GET');
+
+        if (badge) badge.textContent = `🔋 SSB: Ratio ${evalRes.data.monroe_newman_shear_ratio} | AE ${dossierRes.data.acoustic_hits} hits | Stack 5.2 MPa`;
+        if (answerEl) {
+            let out = `🔋 SOLID-STATE BATTERY (SSB) SULFIDE ELECTROLYTE LITHIUM DENDRITE & CRACK SENTINEL (IEC & ISO):\n`;
+            out += `Sel Baterai Solid-State: ${cellID} (Pack EV 800V 100kWh) | Anoda: Lithium Metal Murni | Elektrolit: Sulfida Li10GeP2S12\n`;
+            out += `Standar Pengujian Mutu: IEC 62660-3 (Reliability for EV) & ISO 12405-4 Electrically Propelled Vehicles\n\n`;
+            out += `KRITERIA MEKANIS MONROE-NEWMAN & ANALISIS GELOMBANG EMISI AKUSTIK (AE):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Kerapatan Arus Pengisian Terukur: 5.8 mA/cm² (Melampaui Critical Current Density CCD 5.0 mA/cm²)\n`;
+            out += `• Modulus Geser Elektrolit Sulfida: 6.2 GPa (Modulus Geser Lithium Metal: 3.4 GPa)\n`;
+            out += `• Rasio Monroe-Newman (G_se / G_li): ${evalRes.data.monroe_newman_shear_ratio} (Di Bawah Batas Aman Minimal 2.0; Rawan Penetrasi Dendrit)\n`;
+            out += `• Cacah Gelombang Emisi Akustik (AE Hit Count): 156 hit/menit (Peak 62.0 dB; Inisiasi Retak Mikro Intergranular)\n`;
+            out += `• Tekanan Kompresi Tumpukan Aktual: 3.0 MPa (Target Optimal: 5.0 MPa)\n`;
+            out += `• Tingkat Bahaya Hubung Singkat Dendrit: ${evalRes.data.interfacial_cracking_hazard_level}\n\n`;
+            out += `MODULASI TEKANAN MEKANIKAL TUMPUKAN & PEREMAJAAN ARUS PULSA (REVERSE PULSE):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Proteksi Sel: ${actRes.data.action_id}\n`;
+            out += `• Penyesuaian Tekanan Tumpukan Silinder/Pneumatik: ${actRes.data.adjusted_stack_pressure_mpa} MPa (Menahan Laju Perambatan Dendrit)\n`;
+            out += `• Frekuensi Gelombang Pulsa Peremajaan (Reverse Pulse): ${actRes.data.reverse_pulse_frequency_khz} kHz (Melarutkan Tonjolan Kristal Lithium)\n`;
+            out += `• Estimasi Kerugian Recall & Kebakaran Terhindar: $${actRes.data.avoided_battery_recall_loss_usd.toLocaleString()} USD (Mencegah Thermal Runaway & Penarikan Armada EV)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penyesuaian tekanan kompresi tumpukan ke 5.2 MPa menutup retak mikro antarmuka padat-padat sebelum dendrit menembus separator.</li>
+                <li>Arus pulsa bolak-balik frekuensi tinggi meratakan morfologi deposisi lithium pada permukaan anoda logam murni.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses solid-state battery: ' + err.message;
+    }
+}
+
+async function triggerDACDirectAir() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memodelkan kompetisi uap air Langmuir-Freundlich pada sorben DAC & optimasi uap desorpsi TVSD...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const unitID = "DAC-MAMMOTH-MODULE-01";
+        await api('/dac/capture/ingest-contactor-telemetry', 'POST', {
+            contactor_unit_id: unitID,
+            facility_id: "FAC-ICELAND-HELLISHEIDI-DAC",
+            ambient_co2_ppm: 422.0,
+            ambient_relative_humidity_pct: 82.5,
+            ambient_temperature_c: 7.8,
+            air_flow_rate_m3_sec: 450.0,
+            solid_sorbent_bed_mass_kg: 12500.0,
+            adsorbed_co2_kg_hr: 320.0,
+            adsorbed_moisture_kg_hr: 890.0,
+            desorption_steam_pressure_bar: 0.25,
+            desorption_temperature_c: 98.0
+        });
+
+        const evalRes = await api('/dac/capture/evaluate-sorption-competition', 'POST', { contactor_unit_id: unitID });
+        const actRes = await api('/dac/capture/optimize-tvsd-desorption-cycle', 'POST', { contactor_unit_id: unitID });
+        const dossierRes = await api(`/dac/capture/dac-carbon-removal-dossier/${unitID}`, 'GET');
+
+        if (badge) badge.textContent = `🍃 DAC: Moisture Ratio ${evalRes.data.competitive_moisture_ratio} | Energy ${evalRes.data.specific_desorption_thermal_energy_gj_per_ton} GJ/t | Steam -32.5%`;
+        if (answerEl) {
+            let out = `🍃 INDUSTRIAL DIRECT AIR CAPTURE (DAC) SORBENT MOISTURE COMPETITION & STEAM DESORPTION OPTIMIZER (ISO 14064 & GHG):\n`;
+            out += `Modul Kontaktor Penangkapan Udara: ${unitID} (${dossierRes.data.facility_id}) | Massa Sorben Padat Amina: 12,500 kg\n`;
+            out += `Kondisi Udara Sekitar: 422.0 ppm CO2, Kelembapan 82.5% RH, Suhu 7.8°C | Debit Aliran Udara: 450.0 m³/detik\n\n`;
+            out += `KOMPETISI ADSORPSI ISOTERM LANGMUIR-FREUNDLICH & BEBAN ENERGI DESORPSI:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Laju Adsorpsi CO2: 320.0 kg/jam | Laju Ko-Adsorpsi Uap Air (Moisture): 890.0 kg/jam\n`;
+            out += `• Rasio Kompetisi Uap Air Terhadap CO2: ${evalRes.data.competitive_moisture_ratio} (Beban Penguapan Air Parasitik Sangat Tinggi)\n`;
+            out += `• Indeks Selektivitas Sorben Langmuir: ${evalRes.data.langmuir_sorbent_selectivity}\n`;
+            out += `• Konsumsi Energi Termal Spesifik: ${evalRes.data.specific_desorption_thermal_energy_gj_per_ton} GJ/Ton CO2 (Standar Target Efisien < 5.5 GJ/Ton)\n`;
+            out += `• Status Efisiensi Sorpsi Kontaktor: ${evalRes.data.sorption_efficiency_status}\n`;
+            out += `• Mandat Siklus Pra-Pengeringan Udara (Pre-Drying): ${evalRes.data.pre_drying_cycle_required ? 'DIPERLUKAN (AKTIFKAN REKUASI UDARA)' : 'NORMAL'}\n\n`;
+            out += `OPTIMASI SIKLUS DESORPSI SUHU-VAKUM (TVSD STEAM RECOVERY CYCLE):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Efisiensi Energi: ${actRes.data.action_id}\n`;
+            out += `• Reduksi Beban Uap Termal Pemanas (Steam Duty Reduction): ${actRes.data.steam_duty_reduction_pct}%\n`;
+            out += `• Kemurnian Gas CO2 Hasil Desorpsi: ${actRes.data.produced_co2_purity_pct}% (Memenuhi Syarat Sekuestrasi Mineral Basalt Carbfix)\n`;
+            out += `• Penghematan Biaya Energi Parasitik Terhindar: $${actRes.data.avoided_parasitic_energy_loss_usd.toLocaleString()} USD (Mengamankan Sertifikasi Kredit Karbon CDR)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Siklus pra-pengeringan udara mengurangi ko-adsorpsi molekul air sehingga energi laten penguapan desorpsi turun drastis.</li>
+                <li>Rekuperasi uap vakum pada desorber 98°C memulihkan panas sisa dan menjamin kemurnian CO2 melampaui 99%.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses DAC optimizer: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

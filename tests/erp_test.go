@@ -35,6 +35,7 @@ import (
 	corecrm "erp-golang/internal/core/crm"
 	corecryo "erp-golang/internal/core/cryo"
 	corecustoms "erp-golang/internal/core/customs"
+	coredac "erp-golang/internal/core/dac"
 	coreedi "erp-golang/internal/core/edi"
 	coreehs "erp-golang/internal/core/ehs"
 	coreenergy "erp-golang/internal/core/energy"
@@ -55,6 +56,7 @@ import (
 	coremaintenance "erp-golang/internal/core/maintenance"
 	coremarine "erp-golang/internal/core/marine"
 	coremining "erp-golang/internal/core/mining"
+	coremoltensalt "erp-golang/internal/core/moltensalt"
 	coremrp "erp-golang/internal/core/mrp"
 	corenuclear "erp-golang/internal/core/nuclear"
 	corepackaging "erp-golang/internal/core/packaging"
@@ -64,10 +66,13 @@ import (
 	coreprocurement "erp-golang/internal/core/procurement"
 	coreproject "erp-golang/internal/core/project"
 	corequality "erp-golang/internal/core/quality"
+	corequantum "erp-golang/internal/core/quantum"
 	corerailway "erp-golang/internal/core/railway"
 	corerenewables "erp-golang/internal/core/renewables"
 	corescm "erp-golang/internal/core/scm"
+	coreseabed "erp-golang/internal/core/seabed"
 	coresemiconductor "erp-golang/internal/core/semiconductor"
+	coresolidstate "erp-golang/internal/core/solidstate"
 	coreservice "erp-golang/internal/core/service"
 	coresubsea "erp-golang/internal/core/subsea"
 	coresubscription "erp-golang/internal/core/subscription"
@@ -12757,5 +12762,183 @@ IEA*1*000099123~`
 	t.Logf("✓ Superhot Rock EGS Geothermal Induced Seismicity TLP Verified: Wellbore='%s' (Field='%s', Depth=%.0fm, BHT=%.1f°C), Flow=%.0f LPM, Pwellhead=%.1f bar, Vinj=%.0f m^3, Max Mag=%.2f ML, FaultDist=%.0fm, Shapiro Radius=%.1fm, Delta CFS=%.1f kPa, TLP='%s', FaultState='%s', BleedMandate=%t, FlowbackRate=%.0f LPM, DeltaP=%.1f bar, AvoidedSurfaceDamageLoss=$%.2fM USD",
 		geoTel.WellboreID, geoTel.GeothermalFieldID, geoTel.WellDepthMeters, geoTel.BottomholeTempC, geoTel.InjectionFlowRateLPM, geoTel.WellheadPressureBar, geoTel.CumulativeInjectedVolumeM3, geoTel.MaxInducedMagnitudeML, geoTel.DistanceToKnownFaultMeters, geoAssess.ShapiroDiffusionRadiusMeters, geoAssess.CoulombFailureStressChange, geoAssess.TrafficLightProtocolColor, geoAssess.FaultReactivationHazardLevel, geoAssess.MandatoryBleedOffActive, geoBleed.FlowbackRateLPM, geoBleed.PressureDropBar, geoBleed.AvoidedSurfaceInfrastructureDamageUSD/1e6)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (84 SECTIONS: 90+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD + CONTRACT LEAKAGE SENTINEL + MICROGRID ISLANDING + CARGO GEOFENCE + SHIFT BIDDING FATIGUE + CIRCULAR PACKAGING RTI + INDUSTRIAL WATER ZLD + VENDOR SANCTIONS GRAPH + BOILER TUBE DESCALING + SAAS DUNNING WATERFALL + TOLL MANUFACTURING RECON + SILO AERATION SENTINEL + EPC PROGRESS BILLING ESCROW + DYNAMIC PORT BERTH DEMURRAGE + TRANSFORMER DGA GUARDIAN + CROSS BORDER CASH REPATRIATION + ORE BLENDING OPTIMIZER + PHARMA CRYOGENIC SENTINEL + KILN REFRACTORY GUARDIAN + IP PATENT ANNUITY + TURBINE EOH CREEP + AVIATION MRO FATIGUE + MARINE LNG RELIQUEFACTION + SEMICONDUCTOR FAB YIELD + WASTEWATER BIOMETHANE + RAILWAY WHEEL RCF + NUCLEAR RADIOPHARM DECAY + UTILITY BESS THERMAL SOH + SATELLITE ORBITAL CONJUNCTION + SUBSEA FLOW ASSURANCE + CONNECTED VEHICLE OTA SUMS + BIOPHARMA BIOREACTOR PAT + FLOATING WIND MOORING + HVDC SUBSEA DTS + CCS CO2 ENVELOPE + MINE ROCKBURST SENTINEL + TOKAMAK FUSION DISRUPTION + CRYO LH2 ORTHO-PARA + HYPERSONIC TPS ABLATION + 3D CHIPLET TSV WARPAGE + SUPERHOT EGS GEOTHERMAL SEISMICITY) PASSED 100%!")
+	// ==========================================
+	// 85. GOERP v1.71.0 ENTERPRISE DEEP-TECH INNOVATIONS: QUANTUM QKD PHASE GUARDIAN, SEABED NODULE PLUME TURBIDITY, CSP MOLTEN SALT FREEZE SENTINEL, SOLID-STATE BATTERY DENDRITE ACOUSTIC CRACK SENTINEL, & DIRECT AIR CAPTURE (DAC) MOISTURE COMPETITION OPTIMIZER
+	// ==========================================
+
+	// 85.1 Quantum Key Distribution (QKD) Optical Fiber Link & Entangled Photon Phase Drift Guardian (ETSI GS QKD 014 & ITU-T Y.3800)
+	qkdTel := corequantum.GlobalQuantumVault.IngestLinkTelemetry(corequantum.QKDLinkTelemetry{
+		TelemetryID:                  "TEL-QKD-9901",
+		LinkID:                       "QKD-LINK-BANK-NY-DC-99",
+		SourceDataCenterID:           "DC-FEDERAL-RESERVE-NY",
+		TargetDataCenterID:           "DC-TREASURY-DC",
+		FiberDistanceKM:              78.5,
+		QuantumBitErrorRateQBER:      0.116,
+		InterferometerPhaseDriftRad:  0.88,
+		SinglePhotonCountPerSec:      1.15e5,
+		DarkCountRateHz:              26.0,
+		FiberAttenuationDB:           15.9,
+		PQCrystalsKyberFallbackArmed: true,
+	})
+	if qkdTel.LinkID == "" || qkdTel.QuantumBitErrorRateQBER != 0.116 {
+		t.Fatalf("Failed to ingest QKD link telemetry: %+v", qkdTel)
+	}
+
+	qkdAssess, err := corequantum.GlobalQuantumVault.EvaluateQBERAndPhaseDrift("QKD-LINK-BANK-NY-DC-99")
+	if err != nil || !qkdAssess.EmergencyPQCFallbackTrigger || qkdAssess.PhaseDriftSeverityLevel != "CRITICAL_EAVESDROPPING_QBER_BREACH" {
+		t.Fatalf("Failed to evaluate QKD security & phase drift: %+v, err: %v", qkdAssess, err)
+	}
+
+	qkdAct, err := corequantum.GlobalQuantumVault.TriggerPhaseTuningAndPQCFallback("QKD-LINK-BANK-NY-DC-99")
+	if err != nil || !qkdAct.PQCFallbackEngaged || qkdAct.AvoidedSettlementLossUSD <= 0 {
+		t.Fatalf("Failed to trigger phase tuning & PQC fallback: %+v, err: %v", qkdAct, err)
+	}
+
+	qkdDossier, err := corequantum.GlobalQuantumVault.GetQKDSecurityDossier("QKD-LINK-BANK-NY-DC-99")
+	if err != nil || !qkdDossier["etsi_qkd_014_compliant"].(bool) || !qkdDossier["itu_t_y3800_certified"].(bool) {
+		t.Fatalf("Failed to compile QKD security dossier: %+v, err: %v", qkdDossier, err)
+	}
+	t.Logf("✓ Quantum Key Distribution (QKD) Link & Phase Drift Guardian Verified: Link='%s' (Dist=%.1f km, Attenuation=%.1f dB), QBER=%.1f%%, PhaseDrift=%.2f rad, SinglePhoton=%.1e cps, DarkCount=%.1f Hz, SecretKeyRate=%.1f bps, Severity='%s', PQC Fallback=%t (Crystals-Kyber), PhaseCorrection=%.2f rad, AvoidedInterbankLoss=$%.2fM USD",
+		qkdTel.LinkID, qkdTel.FiberDistanceKM, qkdTel.FiberAttenuationDB, qkdTel.QuantumBitErrorRateQBER*100, qkdTel.InterferometerPhaseDriftRad, qkdTel.SinglePhotonCountPerSec, qkdTel.DarkCountRateHz, qkdAssess.SecretKeyDistillationRateBPS, qkdAssess.PhaseDriftSeverityLevel, qkdAct.PQCFallbackEngaged, qkdAct.PhaseModulatorCorrectionRad, qkdAct.AvoidedSettlementLossUSD/1e6)
+
+	// 85.2 Subsea Seabed Polymetallic Nodule Harvesting & Hydrocyclone Plume Turbidity Sentinel (ISA Guidelines & UNCLOS Part XI)
+	seabedTel := coreseabed.GlobalSeabedVault.IngestCrawlerTelemetry(coreseabed.SeabedMiningTelemetry{
+		TelemetryID:                  "TEL-SEABED-9901",
+		CrawlerID:                    "CRAWLER-PACIFIC-CCZ-99",
+		MiningConcessionID:           "NORI-D-CLARION-CLIPPERTON",
+		WaterDepthMeters:             4350.0,
+		SeabedCrawlerSpeedMPerSec:    0.45,
+		NoduleCollectionRateTonsHr:   198.0,
+		VerticalRiserVelocityMPerSec: 3.8,
+		BenthicPlumeTurbidityNTU:     84.0,
+		SuspendedParticulateMgL:      54.0,
+		MidwaterDischargeDepthM:      1200.0,
+	})
+	if seabedTel.CrawlerID == "" || seabedTel.WaterDepthMeters != 4350.0 {
+		t.Fatalf("Failed to ingest seabed crawler telemetry: %+v", seabedTel)
+	}
+
+	seabedAssess, err := coreseabed.GlobalSeabedVault.EvaluateBenthicPlumeTurbidity("CRAWLER-PACIFIC-CCZ-99")
+	if err != nil || seabedAssess.AdvectionDiffusionDispersionRadiusM <= 0 || !seabedAssess.SuctionThrottlingMandate || seabedAssess.BenthicEnvironmentalComplianceStatus != "CRITICAL_BENTHIC_ECOSYSTEM_HAZARD" {
+		t.Fatalf("Failed to evaluate benthic plume turbidity: %+v, err: %v", seabedAssess, err)
+	}
+
+	seabedAct, err := coreseabed.GlobalSeabedVault.TriggerSuctionAndFlocculantControl("CRAWLER-PACIFIC-CCZ-99")
+	if err != nil || seabedAct.ThrottledSuctionPowerPct <= 0 || seabedAct.FlocculantInjectionRateLPM <= 0 || seabedAct.AvoidedEnvironmentalFineUSD <= 0 {
+		t.Fatalf("Failed to trigger seabed suction & flocculant control: %+v, err: %v", seabedAct, err)
+	}
+
+	seabedDossier, err := coreseabed.GlobalSeabedVault.GetSeabedEnvironmentalDossier("CRAWLER-PACIFIC-CCZ-99")
+	if err != nil || !seabedDossier["isa_guidelines_compliant"].(bool) || !seabedDossier["unclos_part_xi_approved"].(bool) {
+		t.Fatalf("Failed to compile seabed environmental dossier: %+v, err: %v", seabedDossier, err)
+	}
+	t.Logf("✓ Subsea Seabed Nodule Harvesting & Plume Turbidity Sentinel Verified: Crawler='%s' (Concession='%s', Depth=%.0fm), Harvest=%.0f t/h, RiserVel=%.1f m/s, Turbidity=%.1f NTU, Particulate=%.1f mg/L, DispersionRadius=%.1fm, HydrocycloneSep=%.1f%%, Status='%s', ThrottledSuction=%.1f%%, Flocculant=%.1f LPM, AvoidedMoratoriumFines=$%.2fM USD",
+		seabedTel.CrawlerID, seabedTel.MiningConcessionID, seabedTel.WaterDepthMeters, seabedTel.NoduleCollectionRateTonsHr, seabedTel.VerticalRiserVelocityMPerSec, seabedTel.BenthicPlumeTurbidityNTU, seabedTel.SuspendedParticulateMgL, seabedAssess.AdvectionDiffusionDispersionRadiusM, seabedAssess.HydrocycloneSeparationEfficiencyPct, seabedAssess.BenthicEnvironmentalComplianceStatus, seabedAct.ThrottledSuctionPowerPct, seabedAct.FlocculantInjectionRateLPM, seabedAct.AvoidedEnvironmentalFineUSD/1e6)
+
+	// 85.3 Concentrated Solar Power (CSP) Molten Salt Storage & Freeze-Plugging Sentinel (ASME Section VIII Div 2 & ASTM D6800)
+	saltTel := coremoltensalt.GlobalMoltenSaltVault.IngestSaltTelemetry(coremoltensalt.MoltenSaltStorageTelemetry{
+		TelemetryID:                "TEL-SALT-9901",
+		StorageTankID:              "TANK-CSP-SALT-HOT-50KT-99",
+		PlantID:                    "CSP-NOOR-ATACAMA-350MW",
+		SaltMassTons:               28500.0,
+		SaltBulkTemperatureC:      235.0,
+		BoundaryLayerPipeWallTempC: 223.0,
+		NaNO3Fraction:              0.60,
+		KNO3Fraction:               0.40,
+		ViscosityCentipoise:        10.2,
+		PipeFlowVelocityMPerSec:    0.20,
+		ImpedanceHeatingActive:     false,
+	})
+	if saltTel.StorageTankID == "" || saltTel.SaltBulkTemperatureC != 235.0 {
+		t.Fatalf("Failed to ingest molten salt storage telemetry: %+v", saltTel)
+	}
+
+	saltAssess, err := coremoltensalt.GlobalMoltenSaltVault.EvaluateFreezePluggingRisk("TANK-CSP-SALT-HOT-50KT-99")
+	if err != nil || saltAssess.TemperatureMarginToSolidusC > 5.0 || !saltAssess.ImpedanceHeatingMandate || !saltAssess.EmergencyGravityDrainbackActive || saltAssess.FreezePluggingRiskLevel != "CRITICAL_SOLIDIFICATION_FREEZE_PLUG_IMMINENT" {
+		t.Fatalf("Failed to evaluate molten salt freeze-plugging risk: %+v, err: %v", saltAssess, err)
+	}
+
+	saltAct, err := coremoltensalt.GlobalMoltenSaltVault.TriggerTraceHeatingAndDrainback("TANK-CSP-SALT-HOT-50KT-99")
+	if err != nil || saltAct.ImpedanceHeatingDutyKW <= 0 || saltAct.DrainbackValveOpenedPct <= 0 || saltAct.AvoidedSolidificationDamageLossUSD <= 0 {
+		t.Fatalf("Failed to trigger molten salt trace heating & drainback: %+v, err: %v", saltAct, err)
+	}
+
+	saltDossier, err := coremoltensalt.GlobalMoltenSaltVault.GetMoltenSaltSafetyDossier("TANK-CSP-SALT-HOT-50KT-99")
+	if err != nil || !saltDossier["asme_section_viii_div2"].(bool) || !saltDossier["astm_d6800_certified"].(bool) {
+		t.Fatalf("Failed to compile molten salt safety dossier: %+v, err: %v", saltDossier, err)
+	}
+	t.Logf("✓ Concentrated Solar Power (CSP) Molten Salt Freeze-Plugging Sentinel Verified: Tank='%s' (Plant='%s', SaltMass=%.0f tons), Tbulk=%.1f°C, Tboundary=%.1f°C, Tsolidus=%.1f°C, SolidusMargin=%.1f°C, ArrheniusViscosity=%.2f cP, Velocity=%.2f m/s, Risk='%s', TraceHeating=%.0f kW, DrainbackValve=%.0f%%, AvoidedSolidificationLoss=$%.2fM USD",
+		saltTel.StorageTankID, saltTel.PlantID, saltTel.SaltMassTons, saltTel.SaltBulkTemperatureC, saltTel.BoundaryLayerPipeWallTempC, saltAssess.EutecticFreezingPointC, saltAssess.TemperatureMarginToSolidusC, saltAssess.ArrheniusDynamicViscosityCP, saltTel.PipeFlowVelocityMPerSec, saltAssess.FreezePluggingRiskLevel, saltAct.ImpedanceHeatingDutyKW, saltAct.DrainbackValveOpenedPct, saltAct.AvoidedSolidificationDamageLossUSD/1e6)
+
+	// 85.4 Solid-State Battery (SSB) Sulfide Electrolyte Lithium Dendrite & Acoustic Crack Sentinel (IEC 62660-3 & ISO 12405-4)
+	ssbTel := coresolidstate.GlobalSolidStateVault.IngestCellTelemetry(coresolidstate.SSBCellTelemetry{
+		TelemetryID:                     "TEL-SSB-9901",
+		CellID:                          "CELL-SSB-SULFIDE-LITHIUM-99",
+		PackID:                          "PACK-EV-800V-100KWH",
+		CurrentDensityMA_CM2:            5.9,
+		SolidElectrolyteShearModulusGPA: 6.3,
+		AcousticEmissionHitCount:        160,
+		AcousticEmissionPeakDB:          63.0,
+		AppliedStackPressureMPA:         3.0,
+		InternalImpedanceMilliOhm:       16.5,
+		CellTemperatureC:                39.8,
+	})
+	if ssbTel.CellID == "" || ssbTel.CurrentDensityMA_CM2 != 5.9 {
+		t.Fatalf("Failed to ingest SSB cell telemetry: %+v", ssbTel)
+	}
+
+	ssbAssess, err := coresolidstate.GlobalSolidStateVault.EvaluateDendriteAndCracking("CELL-SSB-SULFIDE-LITHIUM-99")
+	if err != nil || ssbAssess.MonroeNewmanShearRatio >= 2.0 || !ssbAssess.StackPressureAdjustmentRequired || !ssbAssess.ReversePulseRejuvenationMandate || ssbAssess.InterfacialCrackingHazardLevel != "CRITICAL_LITHIUM_DENDRITE_SHORT_HAZARD" {
+		t.Fatalf("Failed to evaluate SSB dendrite & acoustic cracking: %+v, err: %v", ssbAssess, err)
+	}
+
+	ssbAct, err := coresolidstate.GlobalSolidStateVault.TriggerPressureAndPulseRejuvenation("CELL-SSB-SULFIDE-LITHIUM-99")
+	if err != nil || ssbAct.AdjustedStackPressureMPA <= 0 || ssbAct.ReversePulseFrequencyKhz <= 0 || ssbAct.AvoidedBatteryRecallLossUSD <= 0 {
+		t.Fatalf("Failed to trigger SSB pressure & pulse rejuvenation: %+v, err: %v", ssbAct, err)
+	}
+
+	ssbDossier, err := coresolidstate.GlobalSolidStateVault.GetBatteryReliabilityDossier("CELL-SSB-SULFIDE-LITHIUM-99")
+	if err != nil || !ssbDossier["iec_62660_3_compliant"].(bool) || !ssbDossier["iso_12405_4_certified"].(bool) {
+		t.Fatalf("Failed to compile SSB battery reliability dossier: %+v, err: %v", ssbDossier, err)
+	}
+	t.Logf("✓ Solid-State Battery (SSB) Dendrite & Acoustic Crack Sentinel Verified: Cell='%s' (Pack='%s'), CurrentDensity=%.1f mA/cm^2 (CCD Margin=%.2f), G_se=%.1f GPa, Monroe-Newman Ratio=%.2f (<2.0 Critical), AE Hits=%d/min (Peak=%.1f dB), Hazard='%s', AdjustedStackPressure=%.1f MPa, ReversePulseFreq=%.1f kHz, AvoidedFleetRecallLoss=$%.2fM USD",
+		ssbTel.CellID, ssbTel.PackID, ssbTel.CurrentDensityMA_CM2, ssbAssess.CriticalCurrentDensityMargin, ssbTel.SolidElectrolyteShearModulusGPA, ssbAssess.MonroeNewmanShearRatio, ssbTel.AcousticEmissionHitCount, ssbTel.AcousticEmissionPeakDB, ssbAssess.InterfacialCrackingHazardLevel, ssbAct.AdjustedStackPressureMPA, ssbAct.ReversePulseFrequencyKhz, ssbAct.AvoidedBatteryRecallLossUSD/1e6)
+
+	// 85.5 Industrial Direct Air Capture (DAC) Sorbent Moisture Competition & Steam Desorption Optimizer (ISO 14064-2 & GHG Protocol)
+	dacTel := coredac.GlobalDACVault.IngestContactorTelemetry(coredac.DACContactorTelemetry{
+		TelemetryID:                "TEL-DAC-9901",
+		ContactorUnitID:            "DAC-MAMMOTH-MODULE-99",
+		FacilityID:                 "FAC-ICELAND-HELLISHEIDI-DAC",
+		AmbientCO2PPM:              422.0,
+		AmbientRelativeHumidityPct: 83.0,
+		AmbientTemperatureC:        7.5,
+		AirFlowRateM3Sec:           450.0,
+		SolidSorbentBedMassKg:      12500.0,
+		AdsorbedCO2KgHr:            315.0,
+		AdsorbedMoistureKgHr:       910.0,
+		DesorptionSteamPressureBar: 0.25,
+		DesorptionTemperatureC:     98.0,
+	})
+	if dacTel.ContactorUnitID == "" || dacTel.AmbientCO2PPM != 422.0 {
+		t.Fatalf("Failed to ingest DAC contactor telemetry: %+v", dacTel)
+	}
+
+	dacAssess, err := coredac.GlobalDACVault.EvaluateSorptionCompetition("DAC-MAMMOTH-MODULE-99")
+	if err != nil || dacAssess.CompetitiveMoistureRatio <= 2.0 || dacAssess.SpecificDesorptionThermalEnergyGJPerTon <= 0 || !dacAssess.PreDryingCycleRequired || dacAssess.SorptionEfficiencyStatus != "CRITICAL_SORBENT_FLOODING_THERMAL_PENALTY" {
+		t.Fatalf("Failed to evaluate DAC sorption competition: %+v, err: %v", dacAssess, err)
+	}
+
+	dacAct, err := coredac.GlobalDACVault.OptimizeTVSDDesorptionCycle("DAC-MAMMOTH-MODULE-99")
+	if err != nil || dacAct.SteamDutyReductionPct <= 0 || dacAct.ProducedCO2PurityPct <= 98.0 || dacAct.AvoidedParasiticEnergyLossUSD <= 0 {
+		t.Fatalf("Failed to optimize DAC TVSD desorption cycle: %+v, err: %v", dacAct, err)
+	}
+
+	dacDossier, err := coredac.GlobalDACVault.GetDACCarbonRemovalDossier("DAC-MAMMOTH-MODULE-99")
+	if err != nil || !dacDossier["iso_14064_2_compliant"].(bool) || !dacDossier["ghg_protocol_certified"].(bool) {
+		t.Fatalf("Failed to compile DAC carbon removal dossier: %+v, err: %v", dacDossier, err)
+	}
+	t.Logf("✓ Industrial Direct Air Capture (DAC) Sorbent Moisture Competition Optimizer Verified: Contactor='%s' (Facility='%s'), AmbientCO2=%.0f ppm, RH=%.1f%%, SorbentMass=%.0f kg, CO2 Rate=%.1f kg/h, H2O Rate=%.1f kg/h, Moisture/CO2 Ratio=%.2f, Langmuir Selectivity=%.1f, SpecificThermalEnergy=%.2f GJ/ton CO2, Status='%s', PreDryingNeeded=%t, SteamReduction=%.1f%%, CO2 Purity=%.1f%%, AvoidedParasiticEnergyLoss=$%.2fM USD",
+		dacTel.ContactorUnitID, dacTel.FacilityID, dacTel.AmbientCO2PPM, dacTel.AmbientRelativeHumidityPct, dacTel.SolidSorbentBedMassKg, dacTel.AdsorbedCO2KgHr, dacTel.AdsorbedMoistureKgHr, dacAssess.CompetitiveMoistureRatio, dacAssess.LangmuirSorbentSelectivity, dacAssess.SpecificDesorptionThermalEnergyGJPerTon, dacAssess.SorptionEfficiencyStatus, dacAssess.PreDryingCycleRequired, dacAct.SteamDutyReductionPct, dacAct.ProducedCO2PurityPct, dacAct.AvoidedParasiticEnergyLossUSD/1e6)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (85 SECTIONS: 95+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD + CONTRACT LEAKAGE SENTINEL + MICROGRID ISLANDING + CARGO GEOFENCE + SHIFT BIDDING FATIGUE + CIRCULAR PACKAGING RTI + INDUSTRIAL WATER ZLD + VENDOR SANCTIONS GRAPH + BOILER TUBE DESCALING + SAAS DUNNING WATERFALL + TOLL MANUFACTURING RECON + SILO AERATION SENTINEL + EPC PROGRESS BILLING ESCROW + DYNAMIC PORT BERTH DEMURRAGE + TRANSFORMER DGA GUARDIAN + CROSS BORDER CASH REPATRIATION + ORE BLENDING OPTIMIZER + PHARMA CRYOGENIC SENTINEL + KILN REFRACTORY GUARDIAN + IP PATENT ANNUITY + TURBINE EOH CREEP + AVIATION MRO FATIGUE + MARINE LNG RELIQUEFACTION + SEMICONDUCTOR FAB YIELD + WASTEWATER BIOMETHANE + RAILWAY WHEEL RCF + NUCLEAR RADIOPHARM DECAY + UTILITY BESS THERMAL SOH + SATELLITE ORBITAL CONJUNCTION + SUBSEA FLOW ASSURANCE + CONNECTED VEHICLE OTA SUMS + BIOPHARMA BIOREACTOR PAT + FLOATING WIND MOORING + HVDC SUBSEA DTS + CCS CO2 ENVELOPE + MINE ROCKBURST SENTINEL + TOKAMAK FUSION DISRUPTION + CRYO LH2 ORTHO-PARA + HYPERSONIC TPS ABLATION + 3D CHIPLET TSV WARPAGE + SUPERHOT EGS GEOTHERMAL SEISMICITY + QUANTUM QKD PHASE GUARDIAN + SEABED NODULE PLUME + CSP MOLTEN SALT FREEZE + SOLID-STATE BATTERY CRACK + DIRECT AIR CAPTURE OPTIMIZER) PASSED 100%!")
 }
