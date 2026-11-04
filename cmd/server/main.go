@@ -14,6 +14,7 @@ import (
 	coreaccount "erp-golang/internal/core/account"
 	coreasset "erp-golang/internal/core/asset"
 	corecosting "erp-golang/internal/core/costing"
+	corecpq "erp-golang/internal/core/cpq"
 	corecrm "erp-golang/internal/core/crm"
 	corecustoms "erp-golang/internal/core/customs"
 	coreedi "erp-golang/internal/core/edi"
@@ -22,10 +23,12 @@ import (
 	corefieldservice "erp-golang/internal/core/fieldservice"
 	corefleet "erp-golang/internal/core/fleet"
 	coregraphql "erp-golang/internal/core/graphql"
+	coregrc "erp-golang/internal/core/grc"
 	corehr "erp-golang/internal/core/hr"
 	coremrp "erp-golang/internal/core/mrp"
 	corepricing "erp-golang/internal/core/pricing"
 	coresystem "erp-golang/internal/core/system"
+	coretax "erp-golang/internal/core/tax"
 	coretradefinance "erp-golang/internal/core/tradefinance"
 	coretreasury "erp-golang/internal/core/treasury"
 	corevmi "erp-golang/internal/core/vmi"
@@ -286,7 +289,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.52.0",
+			"version":    "1.53.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -304,7 +307,7 @@ func main() {
 	ai.RegisterRootProtocolRoutes(r, aiHandler)
 
 	// Register OpenAPI 3.1 & Interactive API Explorer
-	openapi.RegisterRoutes(r, cfg.AppName, "1.52.0")
+	openapi.RegisterRoutes(r, cfg.AppName, "1.53.0")
 
 	// API v1 Router Group
 	apiV1 := r.Group("/api/v1")
@@ -361,6 +364,11 @@ func main() {
 		coretreasury.RegisterDynamicDiscountingRoutes(apiV1, authMiddleware, db)
 		iot.RegisterVibrationFFTRoutes(apiV1, authMiddleware, db)
 		corehr.RegisterTravelPolicyRoutes(apiV1, authMiddleware, db)
+		coretax.RegisterTransferPricingRoutes(apiV1, authMiddleware, db)
+		coreaccount.RegisterLeaseAccountingRoutes(apiV1, authMiddleware, db)
+		corewms.RegisterYardManagementRoutes(apiV1, authMiddleware, db)
+		corecpq.RegisterRoutes(apiV1)
+		coregrc.RegisterRoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend

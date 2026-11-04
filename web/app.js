@@ -25315,6 +25315,280 @@ async function triggerTravelPolicyGuard() {
     }
 }
 
+async function triggerTransferPricingAudit() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi kewajaran transfer pricing antar-entitas (OECD BEPS Action 13)...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const res = await api('/tax/transfer-pricing/audit-margins', 'POST', {
+            tested_party_name: "PT GoERP Asia Assembly",
+            tested_party_country: "ID",
+            tax_year: 2026,
+            transfer_pricing_method: "TNMM",
+            tested_margin: 0.035,
+            revenue: 50000000,
+            operating_profit: 1750000,
+            comparable_set: [
+                { peer_company_name: "Peer Alpha Precision Ltd", country: "SG", operating_margin: 0.038 },
+                { peer_company_name: "Peer Beta Manufacturing Bhd", country: "MY", operating_margin: 0.045 },
+                { peer_company_name: "Peer Gamma Electronics Corp", country: "TW", operating_margin: 0.052 },
+                { peer_company_name: "Peer Delta Industrial SpA", country: "IT", operating_margin: 0.061 },
+                { peer_company_name: "Peer Epsilon Tech GmbH", country: "DE", operating_margin: 0.068 },
+                { peer_company_name: "Peer Zeta Automation NV", country: "NL", operating_margin: 0.075 },
+                { peer_company_name: "Peer Eta Dynamics Inc", country: "US", operating_margin: 0.082 }
+            ]
+        });
+
+        if (badge) badge.textContent = `🌍 TP Audit: ${res.arms_length_status}`;
+        if (answerEl) {
+            let out = `🌍 CROSS-BORDER TRANSFER PRICING & OECD BEPS ACTION 13 AUDIT:\n`;
+            out += `Tested Party: ${res.tested_party_name} (${res.tested_party_country}) | Tahun Pajak: ${res.tax_year}\n`;
+            out += `Metode Transfer Pricing: ${res.transfer_pricing_method} | Rasio Margin Operasi: ${(res.tested_margin * 100).toFixed(2)}%\n`;
+            out += `Status Prinsip Kewajaran (Arm's Length): ${res.arms_length_status}\n\n`;
+            out += `RENTANG INTERKUARTIL PEMBANDING (BENCHMARK RANGE):\n`;
+            out += `• Kuartil Bawah (Q1 25th percentile): ${(res.q1_margin * 100).toFixed(2)}%\n`;
+            out += `• Median (50th percentile): ${(res.median_margin * 100).toFixed(2)}%\n`;
+            out += `• Kuartil Atas (Q3 75th percentile): ${(res.q3_margin * 100).toFixed(2)}%\n\n`;
+            out += `REKONSILIASI KOREKSI FISKAL TP:\n`;
+            out += `• Penyesuaian ke Titik Median: $${res.tax_adjustment_amount.toLocaleString()}\n`;
+            out += `• Catatan Kepatuhan: ${res.remediation_note}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pemeriksaan transfer pricing berbasis TNMM langsung membandingkan laba operasi terhadap rentang interkuartil independen.</li>
+                <li>Jika margin berada di bawah Q1, sistem otomatis mengkalkulasi koreksi laba kena pajak ke titik median OECD.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal melakukan audit transfer pricing: ' + err.message;
+    }
+}
+
+async function triggerLeaseAccountingSchedule() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menghitung amortisasi liabilitas sewa & depresiasi aset hak-guna (IFRS 16 / PSAK 73)...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const sched = await api('/accounting/leases/schedule', 'POST', {
+            lease_id: "LSE-2026-HQ-BLDG",
+            lease_name: "Corporate Headquarters Tower Lease",
+            monthly_payment: 25000,
+            term_months: 36,
+            annual_discount_rate: 0.06,
+            initial_direct_costs: 5000,
+            lease_incentives: 2000
+        });
+
+        if (badge) badge.textContent = `🏢 IFRS 16: PV $${sched.initial_present_value.toLocaleString()}`;
+        if (answerEl) {
+            let out = `🏢 IFRS 16 / PSAK 73 ASSET LEASE ACCOUNTING SCHEDULE:\n`;
+            out += `Kontrak Sewa: ${sched.lease_id} - ${sched.lease_name}\n`;
+            out += `Pembayaran Bulanan: $${sched.monthly_payment.toLocaleString()} | Tenor: ${sched.term_months} Bulan | Suku Bunga Pinjaman Inkremental: ${(sched.annual_discount_rate * 100).toFixed(2)}%\n`;
+            out += `Nilai Kini Awal Liabilitas Sewa (Initial Lease Liability): $${sched.initial_present_value.toLocaleString()}\n`;
+            out += `Nilai Tercatat Awal Aset Hak-Guna (Initial ROU Asset): $${sched.initial_rou_asset.toLocaleString()}\n`;
+            out += `Total Beban Bunga Selama Masa Sewa: $${sched.total_interest_expense.toLocaleString()}\n\n`;
+            out += `CONTOH JADWAL AMORTISASI BULANAN (3 BULAN PERTAMA):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            sched.schedule.slice(0, 3).forEach(s => {
+                out += `Bulan ${s.period}: Angsuran $${s.payment.toFixed(2)} | Bunga $${s.interest_expense.toFixed(2)} | Pokok $${s.principal_reduction.toFixed(2)} | Sisa Liabilitas $${s.ending_liability.toFixed(2)} | Sisa ROU $${s.ending_rou_asset.toFixed(2)}\n`;
+            });
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Liabilitas sewa didiskontokan dengan Incremental Borrowing Rate (IBR) sesuai PSAK 73 / IFRS 16.</li>
+                <li>Beban sewa operasional dipisah menjadi beban bunga amortisasi dan beban penyusutan aset hak-guna garis lurus.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal menghitung amortisasi sewa IFRS 16: ' + err.message;
+    }
+}
+
+async function triggerYardManagementRadar() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memindai radar okupansi dock door & status trailer di yard WMS...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const radar = await api('/wms/yard/dock-radar', 'GET');
+
+        if (badge) badge.textContent = `🚛 Yard: ${radar.occupied_doors}/${radar.total_doors} Doors`;
+        if (answerEl) {
+            let out = `🚛 YARD MANAGEMENT SYSTEM (YMS) & CARRIER DOCK RADAR:\n`;
+            out += `Total Pintu Dock: ${radar.total_doors} | Terisi (Occupied): ${radar.occupied_doors} | Kosong (Available): ${radar.available_doors}\n`;
+            out += `Trailer Aktif di Yard: ${radar.active_trailers_in_yard} | Risiko Biaya Demurrage/Detensi: ${radar.detention_risk_alerts} Truk\n\n`;
+            out += `STATUS REAL-TIME PINTU DOCK:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            radar.dock_doors.forEach(d => {
+                out += `• ${d.door_code} [${d.door_type}]: Status ${d.status}`;
+                if (d.current_carrier_name) {
+                    out += ` | ${d.current_carrier_name} (${d.current_trailer_plate}) | Durasi Parkir: ${d.dwell_time_minutes} menit`;
+                }
+                out += `\n`;
+            });
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penjadwalan slot dock terintegrasi langsung dengan konfirmasi gate check-in pengemudi secara self-service.</li>
+                <li>Dwell-time tracking memberikan peringatan dini sebelum batas toleransi demurrage 120 menit terlewati.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memuat radar yard management: ' + err.message;
+    }
+}
+
+async function triggerCPQConfigurator() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memvalidasi aturan propositional CPQ & mensintesis Bill of Materials dinamis...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const configRes = await api('/cpq/configure-product', 'POST', {
+            base_product_id: "IND-ROBOT-ARM-700",
+            base_product_name: "Heavy Industrial 6-Axis Robot",
+            base_cost: 35000,
+            base_price: 52000,
+            target_margin_floor: 0.25,
+            selected_options: [
+                { feature_id: "VISION-AI-3D", name: "Stereo AI Vision Kit", category: "OPTICS", cost: 4200, base_price: 6800, labor_hours: 12 },
+                { feature_id: "EXPLOSION-PROOF-IP67", name: "ATEX Zone 1 Explosion Proofing", category: "SAFETY", cost: 6500, base_price: 9800, labor_hours: 18 }
+            ],
+            custom_rules: [
+                { rule_id: "R1", name: "Safety Recommends Vision", source_feature_id: "EXPLOSION-PROOF-IP67", target_feature_id: "VISION-AI-3D", condition_type: "RECOMMENDS" }
+            ]
+        });
+
+        const bomRes = await api('/cpq/generate-bom', 'POST', {
+            configuration_id: "CONF-ROBOT-001",
+            base_product_id: "IND-ROBOT-ARM-700",
+            batch_size: 2,
+            selected_options: [
+                { feature_id: "VISION-AI-3D", name: "Stereo AI Vision Kit", category: "OPTICS", cost: 4200, base_price: 6800, labor_hours: 12 },
+                { feature_id: "EXPLOSION-PROOF-IP67", name: "ATEX Zone 1 Explosion Proofing", category: "SAFETY", cost: 6500, base_price: 9800, labor_hours: 18 }
+            ]
+        });
+
+        if (badge) badge.textContent = `⚙️ CPQ: Margin ${(configRes.achieved_margin * 100).toFixed(1)}%`;
+        if (answerEl) {
+            let out = `⚙️ DYNAMIC RULE-BASED PRODUCT CONFIGURATOR & CPQ ENGINE:\n`;
+            out += `Status Validasi Konfigurasi: ${configRes.valid ? 'VALID (PASSED)' : 'INVALID'}\n`;
+            out += `Total Harga Penjualan (Price): $${configRes.total_price.toLocaleString()} | Total Biaya (Cost): $${configRes.total_cost.toLocaleString()}\n`;
+            out += `Gross Margin yang Dicapai: ${(configRes.achieved_margin * 100).toFixed(2)}% (Batas Lantai Margin: 25.00% -> ${configRes.margin_floor_met ? 'TERPENUHI' : 'DITOLAK'})\n`;
+            out += `Total Waktu Perakitan (Labor Routing): ${configRes.total_labor_hours} Jam\n\n`;
+            out += `SINTESIS BILL OF MATERIALS (BOM) PRODUKSI (Batch Size: ${bomRes.batch_size}):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            bomRes.items.forEach(item => {
+                out += `• [${item.item_code}] ${item.description}: Qty ${item.total_quantity} @ $${item.unit_cost.toLocaleString()} = $${item.extended_cost.toLocaleString()}\n`;
+            });
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Total Rollup Biaya Produksi Batch: $${bomRes.total_rollup_cost.toLocaleString()}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Engine CPQ mencegah penjualan opsi yang tidak kompatibel menggunakan logika proposisi (Requires, Excludes).</li>
+                <li>Margin floor guard memblokir diskon sales agresif dan langsung menghasilkan routing labor serta BOM manufaktur.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memvalidasi CPQ & BOM: ' + err.message;
+    }
+}
+
+async function triggerEthicsWhistleblowerVault() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengirimkan laporan pelanggaran etika anonim & enkripsi bukti (ISO 37002)...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const report = await api('/grc/ethics/report-incident', 'POST', {
+            category: "FINANCIAL_FRAUD",
+            business_unit: "Global Procurement APAC",
+            incident_date: "2026-11-01",
+            narrative: "Vendor fiktif ditambahkan tanpa prosedur dual KYC approval untuk mencairkan pembayaran uang muka pengadaan.",
+            evidence_files: ["procurement_invoice_scan.pdf", "approval_bypass_audit.log"],
+            contact_alias: "Whistleblower-Anonymous-07"
+        });
+
+        const dash = await api('/grc/ethics/dashboard', 'GET');
+
+        if (badge) badge.textContent = `🛡️ Ethics: ${report.case_id} (${report.priority})`;
+        if (answerEl) {
+            let out = `🛡️ ISO 37002 ANONYMOUS WHISTLEBLOWER & ETHICS HOTLINE VAULT:\n`;
+            out += `Nomor Kasus Terdaftar: ${report.case_id} | Tingkat Prioritas: ${report.priority}\n`;
+            out += `Token Akses Rahasia Pelapor: ${report.anonymous_token}\n`;
+            out += `(Simpan token ini untuk memantau perkembangan investigasi tanpa mengungkap identitas/IP Anda)\n\n`;
+            out += `Kategori Pelanggaran: ${report.category} | Unit Bisnis: ${report.business_unit}\n`;
+            out += `Skor Risiko Awal (Triage Risk Score): ${report.risk_score} / 100\n\n`;
+            out += `INTEGRITAS BUKTI DIGITAL (CRYPTOGRAPHIC SHA-256 NON-REPUDIATION):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            report.evidence_digests.forEach(e => {
+                out += `• ${e.file_name} -> SHA-256: ${e.sha256_hash}\n`;
+            });
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `RINGKASAN DASHBOARD KOMITE AUDIT GRC:\n`;
+            out += `Total Kasus Masuk: ${dash.total_cases_submitted} | Sedang Diinvestigasi: ${dash.active_investigations} | Terbukti: ${dash.substantiated_cases} | Kasus Selesai: ${dash.closed_cases}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Saluran pengaduan etika ISO 37002 menerapkan prinsip zero-knowledge untuk melindungi identitas pelapor.</li>
+                <li>Setiap dokumen bukti di-hash SHA-256 pada saat pengunggahan untuk menjamin integritas forensik bukti di persidangan.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mencatat laporan etika: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

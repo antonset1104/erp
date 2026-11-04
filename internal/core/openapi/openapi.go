@@ -747,6 +747,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/tax/transfer-pricing/audit-margins": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Cross-Border Transfer Pricing & OECD BEPS Action 13 Hub",
+					"description": "Conducts arm's-length interquartile benchmark analysis (Q1-Q3), TNMM operating margin audits, and transfer pricing tax adjustment calculations.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Interquartile benchmarks, arm's length compliance verdict, and required median adjustments"},
+					},
+				},
+			},
+			"/api/v1/accounting/leases/schedule": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "High-Value Asset Lease Accounting Engine (IFRS 16 / PSAK 73)",
+					"description": "Calculates present value discounting at IBR, monthly liability amortization, straight-line ROU asset depreciation, and dual-column schedules.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Initial present value recognition, total interest, and full monthly amortization schedule"},
+					},
+				},
+			},
+			"/api/v1/wms/yard/dock-radar": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Yard Management System (YMS) & Carrier Dock Appointment Scheduler",
+					"description": "Real-time dock door occupancy radar, carrier gate check-in, detention fee risk detection, and turn-time analytics.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Dock radar status, total doors, occupied doors, active trailers, and detention alerts"},
+					},
+				},
+			},
+			"/api/v1/cpq/configure-product": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Dynamic Rule-Based Product Configurator & CPQ Engine",
+					"description": "Propositional logic constraint checks (Requires, Excludes), margin floor enforcement, and automated multi-level production BOM synthesis.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Validation result, rule violations, cost and pricing totals, and achieved gross margin"},
+					},
+				},
+			},
+			"/api/v1/grc/ethics/report-incident": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Corporate Whistleblower & Anonymous Ethics Hotline Vault (ISO 37002)",
+					"description": "Zero-knowledge anonymous incident disclosure, cryptographic SHA-256 evidence hashing, and independent audit committee investigation workflow.",
+					"responses": map[string]interface{}{
+						"201": map[string]interface{}{"description": "Case ID, anonymous tracking token, evidence digests, and triage risk score"},
+					},
+				},
+			},
 		},
 	}
 }

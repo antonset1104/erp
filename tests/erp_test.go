@@ -24,6 +24,7 @@ import (
 	coreaccount "erp-golang/internal/core/account"
 	coreasset "erp-golang/internal/core/asset"
 	corecosting "erp-golang/internal/core/costing"
+	corecpq "erp-golang/internal/core/cpq"
 	corecrm "erp-golang/internal/core/crm"
 	corecustoms "erp-golang/internal/core/customs"
 	coreedi "erp-golang/internal/core/edi"
@@ -32,10 +33,12 @@ import (
 	corefieldservice "erp-golang/internal/core/fieldservice"
 	corefleet "erp-golang/internal/core/fleet"
 	coregraphql "erp-golang/internal/core/graphql"
+	coregrc "erp-golang/internal/core/grc"
 	corehr "erp-golang/internal/core/hr"
 	coremrp "erp-golang/internal/core/mrp"
 	corepricing "erp-golang/internal/core/pricing"
 	coresystem "erp-golang/internal/core/system"
+	coretax "erp-golang/internal/core/tax"
 	coretradefinance "erp-golang/internal/core/tradefinance"
 	coretreasury "erp-golang/internal/core/treasury"
 	corevmi "erp-golang/internal/core/vmi"
@@ -9605,5 +9608,218 @@ IEA*1*000099123~`
 	t.Logf("✓ Corporate Travel Policy & Per-Diem Verified: Req='%s', Employee='%s' (%s), DestTier='%s', Days=%d, DailyPerDiem=IDR %.0f, TotalPerDiem=IDR %.0f, Status='%s', Advance=IDR %.0f, SettlementDiff=IDR %.0f (%s)",
 		travelEval.RequestID, travelEval.EmployeeName, travelEval.JobGrade, travelEval.DestinationTier, travelEval.TotalDurationDays, travelEval.DailyPerDiemRateIDR, travelEval.TotalPerDiemAllowanceIDR, travelEval.OverallComplianceStatus, travelSettle.PrepaidCashAdvanceIDR, travelSettle.NetReimbursementOrRefundIDR, travelSettle.SettlementStatus)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (66 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM) PASSED 100%!")
+	// ==========================================
+	// SECTION 67: V1.53.0 GLOBAL ENTERPRISE TAX, ASSETS, LOGISTICS, CPQ & GRC:
+	// 1. Cross-Border Transfer Pricing & OECD BEPS Action 13 Hub
+	// 2. High-Value Asset Lease Accounting Engine (IFRS 16 / PSAK 73)
+	// 3. Yard Management System (YMS) & Carrier Dock Appointment Scheduler
+	// 4. Dynamic Rule-Based Product Configurator & CPQ Engine
+	// 5. Corporate Whistleblower & Anonymous Ethics Hotline Vault (ISO 37002)
+	// ==========================================
+	t.Log(`
+		>>> SECTION 67: TRANSFER PRICING, LEASE ACCOUNTING, YARD MANAGEMENT, CPQ CONFIGURATOR & ETHICS VAULT <<<`)
+
+	// 67.1 Cross-Border Transfer Pricing & OECD BEPS Action 13 Hub
+	tpCompliant, err := coretax.AuditTransferPricingMarginsLogic(coretax.IntercompanyTxRequest{
+		TxID:                         "TP-TX-2026-COMPLIANT",
+		SourceEntity:                 "PT GoERP Manufaktur Indonesia",
+		TargetEntity:                 "GoERP Technologies Pte Ltd",
+		TransactionVolumeIDR:         10000000000.0,
+		TestedPartyCostIDR:           9000000000.0,
+		TestedPartyOperatingProfitIDR: 765000000.0, // 8.5% margin (inside Q1 6.50% - Q3 11.20%)
+		MethodUsed:                   "TNMM",
+	})
+	if err != nil || tpCompliant == nil {
+		t.Fatalf("Failed to audit compliant transfer pricing: %v, resp: %+v", err, tpCompliant)
+	}
+	if !tpCompliant.IsWithinArmLength || tpCompliant.AuditRiskLevel != "LOW_AUDIT_RISK_COMPLIANT" {
+		t.Fatalf("Expected compliant arm's-length transfer pricing: %+v", tpCompliant)
+	}
+
+	tpDeficit, err := coretax.AuditTransferPricingMarginsLogic(coretax.IntercompanyTxRequest{
+		TxID:                         "TP-TX-2026-LOW-MARGIN",
+		SourceEntity:                 "PT GoERP Manufaktur Indonesia",
+		TargetEntity:                 "GoERP Europe BV",
+		TransactionVolumeIDR:         12000000000.0,
+		TestedPartyCostIDR:           11000000000.0,
+		TestedPartyOperatingProfitIDR: 330000000.0, // 3.0% margin (below Q1 6.50%)
+		MethodUsed:                   "TNMM",
+	})
+	if err != nil || tpDeficit == nil {
+		t.Fatalf("Failed to audit non-compliant transfer pricing: %v, resp: %+v", err, tpDeficit)
+	}
+	if tpDeficit.IsWithinArmLength || tpDeficit.AuditRiskLevel != "HIGH_EXPOSURE_OUTSIDE_RANGE" || tpDeficit.RecommendedTaxAdjustmentIDR <= 0 {
+		t.Fatalf("Expected transfer pricing adjustment to median: %+v", tpDeficit)
+	}
+
+	cbcrReport, err := coretax.GetCbCRMatrixLogic()
+	if err != nil || cbcrReport == nil || len(cbcrReport.Jurisdictions) != 3 {
+		t.Fatalf("Failed to get CbCR tax matrix: %v, resp: %+v", err, cbcrReport)
+	}
+	t.Logf("✓ Transfer Pricing & CbCR Verified: Compliant='%s' (Margin=%.2f%%, ArmLength=%t), Deficit='%s' (Margin=%.2f%%, ArmLength=%t, TaxAdjustment=IDR %.0f), CbCR Global Rev=IDR %.0f (ETR=%.2f%% across %d jurisdictions)",
+		tpCompliant.TxID, tpCompliant.TestedMarginPct, tpCompliant.IsWithinArmLength, tpDeficit.TxID, tpDeficit.TestedMarginPct, tpDeficit.IsWithinArmLength, tpDeficit.RecommendedTaxAdjustmentIDR, cbcrReport.TotalGroupRevenueIDR, cbcrReport.EffectiveTaxRatePercent, len(cbcrReport.Jurisdictions))
+
+	// 67.2 High-Value Asset Lease Accounting Engine (IFRS 16 / PSAK 73)
+	leaseSched, err := coreaccount.GenerateLeaseScheduleLogic(coreaccount.LeaseContract{
+		LeaseID:                           "LEASE-2026-HQ-BLDG",
+		LeaseContractNumber:               "LC/JKT/2026/088",
+		AssetDescription:                  "Menara Sudirman Level 18-20 Office Space",
+		AssetCategory:                     "REAL_ESTATE_WAREHOUSE",
+		LeaseTermMonths:                   36,
+		MonthlyPaymentIDR:                 150000000.0, // Rp 150 Juta / bln
+		IncrementalBorrowingRateAnnualPct: 6.0,         // 6.0% IBR
+	})
+	if err != nil || leaseSched == nil || len(leaseSched.Schedule) != 36 {
+		t.Fatalf("Failed to generate IFRS 16 lease schedule: %v, resp: %+v", err, leaseSched)
+	}
+	if leaseSched.InitialROUAssetValueIDR <= 0 || leaseSched.InitialLeaseLiabilityIDR <= 0 || leaseSched.TotalInterestExpenseIDR <= 0 {
+		t.Fatalf("Invalid IFRS 16 initial capitalized values: %+v", leaseSched)
+	}
+	lastPeriod := leaseSched.Schedule[35]
+	if lastPeriod.ClosingLiabilityIDR > 1.0 || lastPeriod.ClosingROUNetBookValueIDR > 1.0 {
+		t.Fatalf("Expected fully amortized lease liability and ROU asset at end of term: %+v", lastPeriod)
+	}
+
+	leaseRemeas, err := coreaccount.RemeasureLeaseLogic(coreaccount.LeaseRemeasurementRequest{
+		LeaseID:                  leaseSched.LeaseID,
+		RevisedMonthlyPaymentIDR: 165000000.0,
+		RemainingMonths:          24,
+		ModificationReason:       "Annual CPI Inflation Indexation adjustment",
+	})
+	if err != nil || leaseRemeas == nil || len(leaseRemeas.Schedule) != 24 {
+		t.Fatalf("Failed to remeasure IFRS 16 lease: %v, resp: %+v", err, leaseRemeas)
+	}
+	t.Logf("✓ Lease Accounting IFRS 16 Verified: Lease='%s' (%s), InitialPV=IDR %.0f, TotalInterest=IDR %.0f, TotalCash=IDR %.0f, Remeasured 24-Mo PV=IDR %.0f, Status='%s'",
+		leaseSched.LeaseID, leaseSched.ContractNumber, leaseSched.InitialLeaseLiabilityIDR, leaseSched.TotalInterestExpenseIDR, leaseSched.TotalCashPaymentsIDR, leaseRemeas.InitialLeaseLiabilityIDR, leaseSched.Status)
+
+	// 67.3 Yard Management System (YMS) & Carrier Dock Appointment Scheduler
+	dockSlot, err := corewms.BookDockSlotLogic(corewms.DockSlotAppointment{
+		CarrierName:         "PT Linfox Logistics Indonesia",
+		VehicleLicensePlate: "B 9314 UXA",
+		DriverName:          "Supardi",
+		DriverPhone:         "+6281298765432",
+		CargoType:           "INBOUND_RAW_MATERIALS",
+		EstimatedPallets:    28,
+		ScheduledSlotTime:   "2026-11-04T14:00:00Z",
+	})
+	if err != nil || dockSlot == nil || dockSlot.AppointmentID == "" || dockSlot.AssignedDockDoorID == "" {
+		t.Fatalf("Failed to book carrier dock slot: %v, resp: %+v", err, dockSlot)
+	}
+
+	gatePass, err := corewms.GateCheckinLogic(corewms.GateCheckinRequest{
+		AppointmentID:       dockSlot.AppointmentID,
+		VehicleLicensePlate: dockSlot.VehicleLicensePlate,
+		DriverPhone:         dockSlot.DriverPhone,
+		GeofenceLatitude:    -6.32145,
+		GeofenceLongitude:   107.12345,
+	})
+	if err != nil || gatePass == nil || gatePass.GatePassID == "" || gatePass.AssignedDockDoorID != dockSlot.AssignedDockDoorID {
+		t.Fatalf("Failed to checkin carrier at yard gate: %v, resp: %+v", err, gatePass)
+	}
+
+	yardRadar, err := corewms.GetYardDockRadarLogic()
+	if err != nil || yardRadar == nil || yardRadar.TotalDockDoors != 5 || yardRadar.OccupiedDoors < 1 {
+		t.Fatalf("Failed to get yard dock radar: %v, resp: %+v", err, yardRadar)
+	}
+	t.Logf("✓ Yard Management System (YMS) Verified: Appt='%s', Carrier='%s' (%s), AssignedDock='%s', GatePass='%s', DwellTarget=%d min, YardRadar: %d Total Doors (%d Occupied, %d Vacant, %d Active Trucks)",
+		dockSlot.AppointmentID, dockSlot.CarrierName, dockSlot.VehicleLicensePlate, dockSlot.AssignedDockDoorID, gatePass.GatePassID, gatePass.DwellTimeTargetMinutes, yardRadar.TotalDockDoors, yardRadar.OccupiedDoors, yardRadar.VacantDoors, yardRadar.ActiveTrucksInYard)
+
+	// 67.4 Dynamic Rule-Based Product Configurator & CPQ Engine
+	ruleRequires := corecpq.ConfigurationRule{
+		RuleID:          "RULE-REQ-01",
+		Name:            "Robotic AI Vision requires Heavy Industrial Arm Mount",
+		SourceFeatureID: "FEAT-VISION-AI",
+		TargetFeatureID: "FEAT-HEAVY-MOUNT",
+		ConditionType:   "REQUIRES",
+	}
+	ruleExcludes := corecpq.ConfigurationRule{
+		RuleID:          "RULE-EXC-01",
+		Name:            "Cleanroom Package excludes High Temperature Exhaust",
+		SourceFeatureID: "FEAT-CLEANROOM",
+		TargetFeatureID: "FEAT-HITEMP-EXHAUST",
+		ConditionType:   "EXCLUDES",
+	}
+
+	cpqValid := corecpq.ConfigureProductLogic(corecpq.ConfigureProductRequest{
+		BaseProductID:     "PROD-ROBOT-ARM-700",
+		BaseProductName:   "Industrial 6-Axis Robotic Arm",
+		BaseCost:          28000.0,
+		BasePrice:         42000.0,
+		TargetMarginFloor: 0.25, // 25% margin floor
+		SelectedOptions: []corecpq.SelectedFeature{
+			{FeatureID: "FEAT-VISION-AI", Name: "Stereo 3D AI Vision", Category: "OPTICS", Cost: 3500.0, BasePrice: 6000.0, LaborHours: 8.0},
+			{FeatureID: "FEAT-HEAVY-MOUNT", Name: "Heavy Reinforced Base Mount", Category: "CHASSIS", Cost: 2000.0, BasePrice: 3500.0, LaborHours: 4.0},
+		},
+		CustomRules: []corecpq.ConfigurationRule{ruleRequires, ruleExcludes},
+	})
+	if !cpqValid.Valid || !cpqValid.MarginFloorMet || cpqValid.AchievedMargin < 0.25 || cpqValid.TotalLaborHours != 12.0 {
+		t.Fatalf("Expected valid CPQ configuration meeting margin floor: %+v", cpqValid)
+	}
+
+	// Test rule violation (Requires missing target)
+	cpqInvalid := corecpq.ConfigureProductLogic(corecpq.ConfigureProductRequest{
+		BaseProductID:     "PROD-ROBOT-ARM-700",
+		BaseProductName:   "Industrial 6-Axis Robotic Arm",
+		BaseCost:          28000.0,
+		BasePrice:         42000.0,
+		TargetMarginFloor: 0.25,
+		SelectedOptions: []corecpq.SelectedFeature{
+			{FeatureID: "FEAT-VISION-AI", Name: "Stereo 3D AI Vision", Category: "OPTICS", Cost: 3500.0, BasePrice: 6000.0, LaborHours: 8.0},
+		},
+		CustomRules: []corecpq.ConfigurationRule{ruleRequires, ruleExcludes},
+	})
+	if cpqInvalid.Valid || len(cpqInvalid.Violations) == 0 {
+		t.Fatalf("Expected rule violation for missing required heavy mount: %+v", cpqInvalid)
+	}
+
+	dynamicBOM := corecpq.GenerateDynamicBOMLogic(corecpq.GenerateBOMRequest{
+		ConfigurationID: "CONFIG-2026-ROBOT-01",
+		BaseProductID:   "PROD-ROBOT-ARM-700",
+		BatchSize:       2,
+		SelectedOptions: []corecpq.SelectedFeature{
+			{FeatureID: "FEAT-VISION-AI", Name: "Stereo 3D AI Vision", Category: "OPTICS", Cost: 3500.0, BasePrice: 6000.0, LaborHours: 8.0},
+			{FeatureID: "FEAT-HEAVY-MOUNT", Name: "Heavy Reinforced Base Mount", Category: "CHASSIS", Cost: 2000.0, BasePrice: 3500.0, LaborHours: 4.0},
+		},
+	})
+	if dynamicBOM.BOMID == "" || len(dynamicBOM.Items) != 4 || dynamicBOM.TotalRollupCost <= 0 || dynamicBOM.TotalLaborHours != 24.0 {
+		t.Fatalf("Failed to generate dynamic BOM: %+v", dynamicBOM)
+	}
+	t.Logf("✓ CPQ & Dynamic BOM Engine Verified: ConfigValid=%t (Cost=$%.2f, Price=$%.2f, Margin=%.2f%%, MarginFloorMet=%t, Labor=%.1f hrs), InvalidCaught=%t (%s), DynamicBOM='%s' (%d Items, Batch=%d, RollupCost=$%.2f, LaborHours=%.1f hrs)",
+		cpqValid.Valid, cpqValid.TotalCost, cpqValid.TotalPrice, cpqValid.AchievedMargin*100, cpqValid.MarginFloorMet, cpqValid.TotalLaborHours, !cpqInvalid.Valid, cpqInvalid.Violations[0], dynamicBOM.BOMID, len(dynamicBOM.Items), dynamicBOM.BatchSize, dynamicBOM.TotalRollupCost, dynamicBOM.TotalLaborHours)
+
+	// 67.5 Corporate Whistleblower & Anonymous Ethics Hotline Vault (ISO 37002)
+	ethicsReport := coregrc.SubmitWhistleblowerReportLogic(coregrc.WhistleblowerReportRequest{
+		Category:      "FINANCIAL_FRAUD",
+		BusinessUnit:  "APAC Procurement Division",
+		IncidentDate:  "2026-11-02",
+		Narrative:     "Vendor payment bypass discovered where unauthorized intermediary fee was inserted without dual authorization signoff.",
+		EvidenceFiles: []string{"invoice_scan_001.pdf", "approval_log.txt"},
+		ContactAlias:  "Integrity-Watcher-99",
+	})
+	if ethicsReport.CaseID == "" || ethicsReport.AnonymousToken == "" || len(ethicsReport.EvidenceDigests) != 2 || ethicsReport.RiskScore < 80 || ethicsReport.Priority != "CRITICAL" {
+		t.Fatalf("Failed to register whistleblower report: %+v", ethicsReport)
+	}
+	if len(ethicsReport.EvidenceDigests[0].SHA256Hash) != 64 {
+		t.Fatalf("Expected valid SHA-256 evidence digest: %+v", ethicsReport.EvidenceDigests[0])
+	}
+
+	investigatedCase, err := coregrc.InvestigateCaseLogic(coregrc.InvestigateCaseRequest{
+		CaseID:          ethicsReport.CaseID,
+		InvestigatorID:  "AUDIT-COMMITTEE-DIR-04",
+		Action:          "SUBSTANTIATE",
+		FindingsSummary: "Forensic examination verified unauthorized wire beneficiary insertion.",
+		RemediationPlan: "Vendor contract terminated and forensic referral forwarded to Legal & Compliance.",
+	})
+	if err != nil || investigatedCase == nil || investigatedCase.Status != "SUBSTANTIATED" || investigatedCase.AssignedTo != "AUDIT-COMMITTEE-DIR-04" {
+		t.Fatalf("Failed to investigate ethics case: %v, resp: %+v", err, investigatedCase)
+	}
+
+	ethicsDash := coregrc.GetEthicsDashboardLogic()
+	if ethicsDash.TotalCasesSubmitted < 2 || ethicsDash.SubstantiatedCases < 1 {
+		t.Fatalf("Failed to get ethics dashboard summary: %+v", ethicsDash)
+	}
+	t.Logf("✓ ISO 37002 Ethics Vault Verified: Case='%s' (Token='%s', Cat='%s', Risk=%d, Priority='%s', EvidenceCount=%d, Hash0='%s'), InvestigationStatus='%s' (Assigned='%s'), Dash: %d Total Cases (%d Active, %d Substantiated, AvgRisk=%.1f)",
+		ethicsReport.CaseID, ethicsReport.AnonymousToken, ethicsReport.Category, ethicsReport.RiskScore, ethicsReport.Priority, len(ethicsReport.EvidenceDigests), ethicsReport.EvidenceDigests[0].SHA256Hash[:16]+"...", investigatedCase.Status, investigatedCase.AssignedTo, ethicsDash.TotalCasesSubmitted, ethicsDash.ActiveInvestigations, ethicsDash.SubstantiatedCases, ethicsDash.AverageRiskScore)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (67 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002) PASSED 100%!")
 }

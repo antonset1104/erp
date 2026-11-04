@@ -650,3 +650,33 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Multi-Rule Corporate Travel Policy Audit**: Endpoint `POST /api/v1/hr/travel/evaluate-policy` checks advance booking windows ($\ge 7$ days), cabin class eligibility, and nightly hotel ceiling caps.
 - **City-Tier Per-Diem Matrix**: Automatically computes daily per-diem allowances based on destination tier (Tier 1 Metros vs Regional Tier 2/3 vs International).
 - **Cash Advance & Per-Diem Reconciliation**: Endpoint `POST /api/v1/hr/travel/settle-per-diem` reconciles actual days traveled against prepaid cash advances, issuing automated reimbursement or refund vouchers.
+
+---
+
+## 19. Cross-Border Transfer Pricing, Lease Accounting, Yard Management, CPQ & Ethics Vault (v1.53.0)
+
+### 19.1 Cross-Border Transfer Pricing & OECD BEPS Action 13 Hub (`internal/core/tax/transfer_pricing.go`)
+- **OECD Interquartile Arm's-Length Testing**: Endpoint `POST /api/v1/tax/transfer-pricing/audit-margins` computes tested party operating margins under the Transactional Net Margin Method (TNMM) and audits them against industry benchmark interquartile distributions ($Q1 \le \text{Margin} \le Q3$).
+- **Tax Correction & Exposure Quantification**: Automatically calculates required adjustments to the median for transactions falling below the arm's-length lower quartile ($Q1$), mitigating cross-border tax audit penalties.
+- **Country-by-Country Reporting (CbCR)**: Endpoint `GET /api/v1/tax/transfer-pricing/cbcr-matrix` aggregates global revenues, profit before tax, income tax paid, stated capital, and employee headcount across tax jurisdictions under OECD BEPS Action 13 guidelines.
+
+### 19.2 High-Value Asset Lease Accounting Engine (IFRS 16 / PSAK 73) (`internal/core/account/lease_accounting.go`)
+- **Present Value Discounting at IBR**: Endpoint `POST /api/v1/accounting/leases/schedule` capitalizes operating leases by discounting future monthly rental streams at the entity's Incremental Borrowing Rate (IBR), recognizing initial Lease Liabilities and Right-of-Use (ROU) Assets.
+- **Dual-Amortization Schedule**: Generates full monthly schedules segregating interest expense amortization from straight-line ROU asset depreciation, producing balanced General Ledger journal entries.
+- **Lease Modification & Remeasurement**: Endpoint `POST /api/v1/accounting/leases/remeasure` recalculates net book values and adjusts liabilities upon contract indexation, lease term extensions, or payment changes.
+
+### 19.3 Yard Management System (YMS) & Carrier Dock Appointment Scheduler (`internal/core/wms/yard_management.go`)
+- **Carrier Dock Appointment Scheduling**: Endpoint `POST /api/v1/wms/yard/book-slot` enables self-service slot booking for carriers, matching inbound/outbound cargo types to compatible dock bays.
+- **Geofenced Gate Check-In & Gate Pass Generation**: Endpoint `POST /api/v1/wms/yard/gate-checkin` verifies arrival via mobile GPS or LPR cameras, issues digital gate passes, and assigns vacant dock bays.
+- **Real-Time Dock Radar & Demurrage Mitigation**: Endpoint `GET /api/v1/wms/yard/dock-radar` visualizes dock bay statuses (Vacant, Occupied, Maintenance), tracks trailer dwell time against SLAs (45-minute turnaround), and triggers proactive alerts before detention penalties apply.
+
+### 19.4 Dynamic Rule-Based Product Configurator & CPQ Engine (`internal/core/cpq/configurator.go`)
+- **Propositional Constraint Validation**: Endpoint `POST /api/v1/cpq/configure-product` enforces propositional compatibility rules (*Requires*, *Excludes*, *Recommends*) across customizable hardware, software, and engineering modules.
+- **Hard Margin Floor Enforcement**: Real-time gross margin calculation ($(\text{Price} - \text{Cost}) / \text{Price}$) prevents unapproved sales discounts by blocking quotes breaching the required corporate margin floor.
+- **Dynamic Multi-Level BOM Synthesis**: Endpoint `POST /api/v1/cpq/generate-bom` explodes configured selections into production assembly BOM lines and calculates total labor routing hours and rollup manufacturing costs.
+
+### 19.5 Corporate Whistleblower & Anonymous Ethics Hotline Vault (ISO 37002) (`internal/core/grc/ethics_vault.go`)
+- **Zero-Knowledge Anonymous Disclosure**: Endpoint `POST /api/v1/grc/ethics/report-incident` issues cryptographic tracking tokens to whistleblowers, enabling two-way communication without recording IP addresses, names, or contact metadata.
+- **SHA-256 Cryptographic Evidence Non-Repudiation**: Hashes all uploaded evidence files upon ingestion, creating immutable SHA-256 digital digests to preserve the chain of custody for legal proceedings.
+- **Automated Risk Triage & Audit Committee Workflow**: Endpoints `POST /api/v1/grc/ethics/investigate-case` and `GET /api/v1/grc/ethics/dashboard` classify case risk (0-100), assign independent committee investigators, and track case resolution metrics under ISO 37002 governance standards.
+
