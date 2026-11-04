@@ -547,6 +547,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/hr/roster-optimizer/generate": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "AI Automated Shift Scheduling & Labor Rostering Optimizer",
+					"description": "Constraint satisfaction scheduler adhering to PP 35/2021 overtime ceilings, 11-hour rest intervals, and skill requirements.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Generated shift schedule, labor law compliance score, and overtime breakdown"},
+					},
+				},
+			},
+			"/api/v1/wms/inventory-balancing/evaluate": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Autonomous Multi-Warehouse Stock Equalizer & Inter-Branch Balancer",
+					"description": "Calculates Days-of-Supply, deficit/surplus nodes, and recommends consolidated inter-warehouse transfers (WH/INT).",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Stock evaluation report, transfer recommendations, and working capital savings"},
+					},
+				},
+			},
+			"/api/v1/crm/clv-matrix": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Predictive Customer Lifetime Value (CLV) & Dynamic Churn Preventer",
+					"description": "BG/NBD and Gamma-Gamma predictive CLV, RFM decay metrics, and automated VIP win-back retention playbooks.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Customer equity profiles, churn risk tiers, and retention triggers"},
+					},
+				},
+			},
+			"/api/v1/security/vault/shard-keys": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"System & Protocols"},
+					"summary":     "Zero-Trust Cryptographic Secret Sharing & Quorum Vault",
+					"description": "Shamir's Secret Sharing (k-of-n threshold) for critical ERP operations requiring C-suite quorum consensus.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Generated key shards, master fingerprint, and quorum policy"},
+					},
+				},
+			},
+			"/api/v1/asset/tracking/radar-map": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Real-Time RFID / BLE Asset Tracking Radar & Geofence Demurrage Engine",
+					"description": "Tracks physical asset zones (dock, production, customer site), misplaced asset alerts, and geofence demurrage penalties.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Active asset radar map, zone distributions, and demurrage accruals"},
+					},
+				},
+			},
 		},
 	}
 }

@@ -23,6 +23,7 @@ import (
 	"erp-golang/internal/core/bi"
 	coreaccount "erp-golang/internal/core/account"
 	coreasset "erp-golang/internal/core/asset"
+	corecrm "erp-golang/internal/core/crm"
 	coreedi "erp-golang/internal/core/edi"
 	coreexpense "erp-golang/internal/core/expense"
 	corefleet "erp-golang/internal/core/fleet"
@@ -9055,5 +9056,164 @@ IEA*1*000099123~`
 	t.Logf("✓ Universal Headless GraphQL & Webhook Gateway Verified: QueryExecuted=OK (Nested salesOrder + financialMetrics resolved), Introspection=OK, HMAC-SHA256Sig='%s...'",
 		hmacSig[:16])
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (62 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL) PASSED 100%!")
+	// ==========================================
+	// SECTION 63: V1.49.0 STRATEGIC ENTERPRISE INNOVATIONS:
+	// 1. AI Automated Shift Scheduling & Labor Rostering Optimizer (PP 35/2021)
+	// 2. Autonomous Multi-Warehouse Stock Equalizer & Inter-Branch Balancer
+	// 3. Predictive Customer Lifetime Value (CLV) & Dynamic Churn Preventer
+	// 4. Zero-Trust Cryptographic Secret Sharing & Quorum Vault (Shamir GF(P))
+	// 5. Real-Time RFID / BLE Asset Tracking Radar & Geofence Demurrage
+	// ==========================================
+	t.Log(`
+		>>> SECTION 63: SHIFT ROSTER, STOCK EQUALIZER, CLV CHURN, QUORUM VAULT & RFID RADAR <<<`)
+
+	// 63.1 AI Shift Scheduling & Labor Rostering Optimizer
+	rosterSvc := corehr.NewRosterOptimizerService()
+	rosterResp, err := rosterSvc.GenerateRoster(corehr.GenerateRosterRequest{
+		Department: "Produksi SMT & Perakitan Cikarang",
+		DaysCount:  7,
+	})
+	if err != nil || rosterResp == nil {
+		t.Fatalf("Failed to generate shift roster: %v", err)
+	}
+	if rosterResp.TotalAssignedShifts == 0 || rosterResp.ComplianceScore < 90.0 {
+		t.Fatalf("Expected valid roster with >= 90 compliance, got: %+v", rosterResp)
+	}
+	if len(rosterResp.Assignments) < 2 {
+		t.Fatalf("Expected at least 2 assignments for shift swap, got: %d", len(rosterResp.Assignments))
+	}
+	asgnA := rosterResp.Assignments[0]
+	asgnB := rosterResp.Assignments[1]
+	swapResp, err := rosterSvc.ProcessShiftSwap(corehr.ShiftSwapRequest{
+		ScheduleID: rosterResp.ScheduleID,
+		DateA:      asgnA.Date,
+		ShiftA:     asgnA.ShiftCode,
+		EmpID_A:    asgnA.EmployeeID,
+		DateB:      asgnB.Date,
+		ShiftB:     asgnB.ShiftCode,
+		EmpID_B:    asgnB.EmployeeID,
+		Reason:     "Family emergency mutual coverage",
+	})
+	if err != nil || !swapResp.Approved {
+		t.Fatalf("Shift swap failed: %v, resp: %+v", err, swapResp)
+	}
+	t.Logf("✓ AI Automated Shift Rostering Verified: Dept='%s', Shifts=%d, RegHours=%.1f, OTHours=%.1f, LaborCost=IDR %.0f, Compliance=%.1f/100, SwapApproved=%v",
+		rosterResp.Department, rosterResp.TotalAssignedShifts, rosterResp.TotalRegularHours, rosterResp.TotalOvertimeHours, rosterResp.TotalLaborCostIDR, rosterResp.ComplianceScore, swapResp.Approved)
+
+	// 63.2 Autonomous Multi-Warehouse Stock Equalizer & Inter-Branch Balancer
+	balancerSvc := corewms.NewInventoryBalancerService()
+	balancerResp, err := balancerSvc.EvaluateBalancing(corewms.EvaluateBalancingRequest{
+		SKU:         "SKU-MON-27-QHD",
+		ProductName: "Gaming Monitor 27 Inch QHD 165Hz",
+		UnitCostIDR: 3500000,
+		TargetDays:  21,
+	})
+	if err != nil || balancerResp == nil {
+		t.Fatalf("Failed to evaluate inventory balancing: %v", err)
+	}
+	if balancerResp.DeficitNodesCount == 0 || balancerResp.SurplusNodesCount == 0 || len(balancerResp.Recommendations) == 0 {
+		t.Fatalf("Expected deficit/surplus balancing recommendations, got: %+v", balancerResp)
+	}
+	execBalResp, err := balancerSvc.ExecuteTransfers(corewms.ExecuteTransfersRequest{
+		EvaluationID:    balancerResp.EvaluationID,
+		Recommendations: balancerResp.Recommendations,
+		ApprovedBy:      "Supply Chain Operations Director",
+	})
+	if err != nil || !execBalResp.Success || execBalResp.TransfersExecutedCount == 0 {
+		t.Fatalf("Failed to execute internal balancing transfers: %v", err)
+	}
+	t.Logf("✓ Multi-Warehouse Stock Equalizer Verified: Warehouses=%d, DeficitNodes=%d, SurplusNodes=%d, Transfers=%d, UnitsRedistributed=%.0f, FreightCost=IDR %.0f, CapitalSaved=IDR %.0f, ExecutedMoves=%v",
+		balancerResp.TotalWarehousesAudited, balancerResp.DeficitNodesCount, balancerResp.SurplusNodesCount, balancerResp.TotalTransfersProposed, balancerResp.TotalUnitsToRedistribute, balancerResp.TotalFreightCostIDR, balancerResp.NetWorkingCapitalSavedIDR, execBalResp.GeneratedInternalMoves)
+
+	// 63.3 Predictive Customer Lifetime Value (CLV) & Dynamic Churn Preventer
+	clvSvc := corecrm.NewCLVService()
+	clvMatrix, err := clvSvc.GetCLVMatrix()
+	if err != nil || clvMatrix == nil {
+		t.Fatalf("Failed to get CLV matrix: %v", err)
+	}
+	if clvMatrix.TotalCustomersAnalyzed == 0 || clvMatrix.AtRiskCustomersCount == 0 {
+		t.Fatalf("Expected analyzed and at-risk customers in CLV matrix: %+v", clvMatrix)
+	}
+	retCampaignResp, err := clvSvc.TriggerRetentionCampaign(corecrm.TriggerCampaignRequest{
+		PartnerID:        2,
+		CampaignType:     "EXECUTIVE_VISIT",
+		IncentivePercent: 7.5,
+		Note:             "Schedule on-site meeting with Procurement Director",
+	})
+	if err != nil || retCampaignResp == nil || retCampaignResp.InterventionStatus != "CAMPAIGN_ACTIVATED" {
+		t.Fatalf("Failed to trigger retention campaign: %v, resp: %+v", err, retCampaignResp)
+	}
+	t.Logf("✓ Predictive CLV & Churn Preventer Verified: Customers=%d, HistEquity=IDR %.0f, Projected90dPipeline=IDR %.0f, AtRiskCount=%d (Rev: IDR %.0f), CampaignID='%s', Status='%s'",
+		clvMatrix.TotalCustomersAnalyzed, clvMatrix.TotalHistoricalEquityIDR, clvMatrix.Projected90dPipelineIDR, clvMatrix.AtRiskCustomersCount, clvMatrix.AtRiskRevenueIDR, retCampaignResp.CampaignID, retCampaignResp.InterventionStatus)
+
+	// 63.4 Zero-Trust Cryptographic Secret Sharing & Quorum Vault (Shamir GF(P))
+	vaultSvc := security.NewQuorumVaultService()
+	shardRes, err := vaultSvc.ShardKeys(security.ShardKeysRequest{
+		VaultPolicyName: "Buka Segel Buku Besar Tahun Fiskal 2026",
+		RequiredQuorum:  3,
+	})
+	if err != nil || shardRes == nil || len(shardRes.DistributedShards) != 5 {
+		t.Fatalf("Failed to shard vault master key: %v, resp: %+v", err, shardRes)
+	}
+	// Test under-threshold rejection (< 3 shards)
+	insufficientShards := []security.SubmittedShard{
+		{Index: shardRes.DistributedShards[0].Index, ShareHex: shardRes.DistributedShards[0].ShareHex},
+		{Index: shardRes.DistributedShards[1].Index, ShareHex: shardRes.DistributedShards[1].ShareHex},
+	}
+	rejResp, rejErr := vaultSvc.ExecuteQuorumAction(security.ExecuteQuorumActionRequest{
+		VaultSessionID:  shardRes.VaultSessionID,
+		ActionType:      "UNLOCK_FISCAL_YEAR_GL",
+		TargetReference: "FISCAL-YEAR-2026",
+		SubmittedShards: insufficientShards,
+	})
+	if rejErr == nil || rejResp.Success || rejResp.QuorumSatisfied {
+		t.Fatalf("Expected insufficient quorum rejection with 2 of 3 shares, got: %+v", rejResp)
+	}
+
+	// Test valid quorum execution (>= 3 shards: 0, 1, 2)
+	validShards := []security.SubmittedShard{
+		{Index: shardRes.DistributedShards[0].Index, ShareHex: shardRes.DistributedShards[0].ShareHex},
+		{Index: shardRes.DistributedShards[1].Index, ShareHex: shardRes.DistributedShards[1].ShareHex},
+		{Index: shardRes.DistributedShards[2].Index, ShareHex: shardRes.DistributedShards[2].ShareHex},
+	}
+	execVaultResp, err := vaultSvc.ExecuteQuorumAction(security.ExecuteQuorumActionRequest{
+		VaultSessionID:  shardRes.VaultSessionID,
+		ActionType:      "UNLOCK_FISCAL_YEAR_GL",
+		TargetReference: "FISCAL-YEAR-2026",
+		Justification:   "Audited year-end tax restatement approval",
+		SubmittedShards: validShards,
+	})
+	if err != nil || !execVaultResp.Success || !execVaultResp.QuorumSatisfied {
+		t.Fatalf("Expected successful quorum execution with 3 valid shares: %v, resp: %+v", err, execVaultResp)
+	}
+	t.Logf("✓ Zero-Trust Quorum Vault Verified: Scheme=3-of-5 Shamir, RejectionUnderThreshold=OK, QuorumExecution=OK, AuditCode='%s', CryptographicSeal='%s...'",
+		execVaultResp.AuditExecutionCode, execVaultResp.CryptographicSeal[:16])
+
+	// 63.5 Real-Time RFID / BLE Asset Tracking Radar & Geofence Demurrage
+	rfidSvc := coreasset.NewRFIDTrackerService()
+	radarMap, err := rfidSvc.GetRadarMap()
+	if err != nil || radarMap == nil {
+		t.Fatalf("Failed to fetch asset radar map: %v", err)
+	}
+	if radarMap.TotalTrackedAssets == 0 || radarMap.MisplacedCount == 0 || radarMap.TotalAccruedDemurrage <= 0 {
+		t.Fatalf("Expected tracked assets with misplaced alerts and demurrage accrual: %+v", radarMap)
+	}
+	// Ingest new telemetry ping
+	pingResp, err := rfidSvc.IngestPing(coreasset.RFIDPingRequest{
+		EPCTagID:       "EPC-FORKLIFT-991",
+		AssetID:        771,
+		AssetName:      "Toyota Electric Forklift 3-Ton #02",
+		Category:       coreasset.CategoryMobileMachinery,
+		ReaderID:       "RFID-PROD-GATE-01",
+		CurrentZone:    coreasset.ZoneProductionFloor,
+		SignalStrength: -58.5,
+		BatteryLevel:   85.0,
+	})
+	if err != nil || pingResp == nil {
+		t.Fatalf("Failed to ingest RFID ping: %v", err)
+	}
+	t.Logf("✓ Real-Time RFID Asset Tracking Radar Verified: TotalAssets=%d, MisplacedAlerts=%d, InField=%d, AccruedDemurrage=IDR %.0f, TelemetryIngested=OK (Zone='%s')",
+		radarMap.TotalTrackedAssets, radarMap.MisplacedCount, radarMap.AssetsInFieldCount, radarMap.TotalAccruedDemurrage, pingResp.CurrentZone)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (63 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR) PASSED 100%!")
 }

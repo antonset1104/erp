@@ -537,3 +537,32 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Pure-Go Native GraphQL Engine**: Endpoint `POST /api/v1/graphql` provides a high-performance zero-dependency GraphQL query engine supporting deep relational selections (`salesOrder -> partner -> orderLines -> delivery -> invoice -> financialMetrics`).
 - **Schema Introspection**: Complies with standard GraphQL introspection (`__schema` / `__type`), allowing external tools and frontend client libraries to query schemas directly.
 - **HMAC-SHA256 Webhook Gateway**: Endpoint `POST /api/v1/webhooks/subscriptions` manages event-driven outbound webhooks signed with cryptographic `X-GoERP-Signature` (HMAC-SHA256) headers, enabling secure enterprise integration.
+
+---
+
+## 15. Workforce Rostering, Multi-Warehouse Equalizer, CLV Churn, Quorum Vault & RFID Radar (v1.49.0)
+
+### 15.1 AI Automated Shift Scheduling & Labor Rostering Optimizer (`internal/core/hr/roster_optimizer.go`)
+- **Labor Law Constraint Satisfaction (PP 35/2021)**: Endpoint `POST /api/v1/hr/roster-optimizer/generate` enforces statutory labor boundaries (maximum 40 standard weekly hours, daily overtime caps of 4 hours/day, 18 hours/week maximum, and mandatory 11-hour rest intervals between shifts).
+- **Skill Balancing & Fatigue Index**: Balances shifts (`MORNING`, `AFTERNOON`, `NIGHT`) with required minimum staffing ratios of Supervisors, Senior Technicians, and Operators while minimizing fatigue accumulation.
+- **Automated Mutual Shift Swapping**: Endpoint `POST /api/v1/hr/roster-optimizer/shift-swap` enables employees to submit mutual shift swap proposals, automatically revalidating legal rest periods and computing labor cost deltas.
+
+### 15.2 Autonomous Multi-Warehouse Stock Equalizer & Inter-Branch Balancer (`internal/core/wms/inventory_balancer.go`)
+- **Days-of-Supply (DoS) Health Matrix**: Endpoint `POST /api/v1/wms/inventory-balancing/evaluate` computes real-time days-of-supply across nationwide distribution centers (Jakarta, Surabaya, Medan, Makassar), classifying inventory into `CRITICAL_DEFICIT`, `OPTIMAL_BALANCED`, and `EXCESS_SURPLUS`.
+- **Freight & Transit Cost Optimization**: Balances inter-hub freight rates against supplier purchase costs and delivery lead times.
+- **Automated Transfer Execution**: Endpoint `POST /api/v1/wms/inventory-balancing/execute-transfers` stages and generates internal pickings (`WH/INT/BAL/...`), reallocating surplus stock to deficit nodes and avoiding unnecessary supplier purchases.
+
+### 15.3 Predictive Customer Lifetime Value (CLV) & Dynamic Churn Preventer (`internal/core/crm/clv_churn.go`)
+- **BG/NBD & Gamma-Gamma Predictive Modeling**: Endpoint `GET /api/v1/crm/clv-matrix` evaluates Recency, Frequency, and Monetary (RFM) distributions to forecast customer activity probabilities ($P(\text{Alive})$) and 90-day projected transaction pipelines.
+- **Enterprise Customer Segmentation**: Classifies accounts into tiers (`CHAMPION`, `LOYAL_GROWTH`, `AT_RISK_HIGH_VALUE`, `DORMANT_LOST`) and alerts account managers on high-value accounts exhibiting purchase decay.
+- **1-Click Retention Playbook**: Endpoint `POST /api/v1/crm/churn-preventer/trigger-campaign` deploys targeted customer win-back interventions (volume rebates, executive account reviews) with measurable expected retention uplifts (+35%).
+
+### 15.4 Zero-Trust Cryptographic Secret Sharing & Quorum Vault (`internal/core/security/quorum_vault.go`)
+- **Shamir's Secret Sharing ($k$-of-$n$ Scheme)**: Endpoint `POST /api/v1/security/vault/shard-keys` shards sensitive master cryptographic seeds into $n$ officer shares over Galois Field $GF(P)$ with a threshold $k$ (e.g. 3 of 5 C-suite officers).
+- **Quorum-Protected High-Stakes Operations**: Endpoint `POST /api/v1/security/vault/execute-quorum-action` requires presentation of $\ge k$ valid officer shards via polynomial Lagrange interpolation before permitting critical operations (unsealing locked fiscal year ledgers, master payroll database decryption, tax key rotation).
+- **Immutable Cryptographic Seal**: Reconstructed consensus actions generate signed SHA-256 execution audit seals, preventing unilateral super-admin abuse and insider fraud.
+
+### 15.5 Real-Time RFID / BLE Asset Tracking Radar & Geofence Demurrage Engine (`internal/core/asset/rfid_tracker.go`)
+- **IoT Sensor Telemetry Gateway**: Endpoint `POST /api/v1/asset/tracking/rfid-ping` ingests EPC Gen2 passive/active RFID and BLE beacon signals, tracking returnable containers (pallets, totes), heavy machinery, and precision tooling across geofenced facility zones.
+- **Misplaced Asset Alerts**: Instantly triggers critical warnings when high-precision equipment or maintenance tooling transitions into incorrect staging or outbound areas.
+- **Automated Geofence Demurrage & Radar Overview**: Endpoint `GET /api/v1/asset/tracking/radar-map` visualizes asset distributions and automatically accrues daily detention/demurrage fees for loaner equipment residing at customer sites beyond contracted free periods.

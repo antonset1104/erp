@@ -24317,6 +24317,252 @@ async function triggerHeadlessGraphQL() {
     }
 }
 
+// v1.49.0 Strategic Enterprise Innovation Triggers
+async function triggerRosterOptimizer() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengoptimalkan jadwal shift tenaga kerja & kepatuhan lembur PP 35/2021...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const roster = await api('/hr/roster-optimizer/generate', 'POST', {
+            department: 'Produksi SMT & Perakitan Cikarang',
+            days_count: 7
+        });
+
+        if (badge) badge.textContent = `👥 Shift Roster: ${roster.total_assigned_shifts} Shift (${roster.labor_law_compliance})`;
+        if (answerEl) {
+            let out = `👥 AI AUTOMATED SHIFT SCHEDULING & LABOR ROSTERING OPTIMIZER:\n`;
+            out += `Departemen: ${roster.department} | Periode: ${roster.period_start} s/d ${roster.period_end}\n`;
+            out += `Total Shift Ditugaskan: ${roster.total_assigned_shifts} | Total Jam Reguler: ${roster.total_regular_hours} Jam\n`;
+            out += `Total Jam Lembur: ${roster.total_overtime_hours} Jam | Estimasi Biaya Tenaga Kerja: IDR ${roster.total_labor_cost_idr.toLocaleString()}\n`;
+            out += `Kepatuhan Hukum Tenaga Kerja: ${roster.labor_law_compliance} (Skor: ${roster.compliance_score}/100)\n\n`;
+            out += `RINGKASAN BEBAN KERJA & MITIGASI KELELAHAN (FATIGUE):\n`;
+            Object.entries(roster.workforce_summary || {}).forEach(([k, v]) => {
+                out += `• ${k.replace(/_/g, ' ')}: ${v}\n`;
+            });
+            out += `\nSAMPEL PENUGASAN SHIFT:\n`;
+            out += `--------------------------------------------------\n`;
+            (roster.assignments || []).slice(0, 8).forEach(asgn => {
+                out += `• [${asgn.date}] Shift ${asgn.shift_code} - ${asgn.employee_name} (${asgn.skill}) ${asgn.is_overtime ? '[LEMBUR]' : ''} - Biaya: Rp ${asgn.cost_idr.toLocaleString()}\n`;
+            });
+            if (roster.assignments && roster.assignments.length > 8) {
+                out += `  ... dan ${roster.assignments.length - 8} penugasan shift lainnya.\n`;
+            }
+            out += `--------------------------------------------------\n`;
+            out += `⚡ Kepatuhan Regulasi: Istirahat antar-shift minimal 11 jam terpenuhi dan tidak melanggar batas lembur 18 jam/minggu.`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Algoritma constraint-satisfaction menyeimbangkan shift pagi, siang, dan malam dengan komposisi minimal supervisor/senior teknisi.</li>
+                <li>Tersedia endpoint mandiri pertukaran shift antar-karyawan (Shift Swap) dengan verifikasi otomatis bebas bentrok.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mengoptimasi roster shift: ' + err.message;
+    }
+}
+
+async function triggerInventoryBalancer() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi cadangan stok multi-gudang & menghitung penyeimbangan stok antarcabang...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const bal = await api('/wms/inventory-balancing/evaluate', 'POST', {});
+
+        if (badge) badge.textContent = `🔄 Stock Equalizer: ${bal.total_transfers_proposed} Transfer (Hemat Modal IDR ${bal.net_working_capital_saved_idr.toLocaleString()})`;
+        if (answerEl) {
+            let out = `🔄 AUTONOMOUS MULTI-WAREHOUSE STOCK EQUALIZER & INTER-BRANCH BALANCER:\n`;
+            out += `ID Evaluasi: ${bal.evaluation_id} | Waktu Evaluasi: ${bal.evaluated_at}\n`;
+            out += `Gudang Diaudit: ${bal.total_warehouses_audited} Cabang | Titik Defisit: ${bal.deficit_nodes_count} | Titik Surplus: ${bal.surplus_nodes_count}\n`;
+            out += `Total Unit Redistribusi: ${bal.total_units_to_redistribute} unit | Biaya Ongkir Antargudang: IDR ${bal.total_freight_cost_idr.toLocaleString()}\n`;
+            out += `Penghematan Modal Kerja Bersih: IDR ${bal.net_working_capital_saved_idr.toLocaleString()} (Pembelian PO Vendor Dihindari!)\n\n`;
+            out += `PROFIL STOK MULTI-GUDANG (DAYS OF SUPPLY):\n`;
+            out += `--------------------------------------------------\n`;
+            bal.warehouse_profiles.forEach(w => {
+                out += `• ${w.warehouse_code} (${w.warehouse_name} - ${w.city}):\n`;
+                out += `  Stok Fisik: ${w.on_hand_units} unit | Kecepatan Jual: ${w.daily_velocity} unit/hari | Cadangan: ${w.days_of_supply} Hari [${w.status}]\n`;
+            });
+            out += `--------------------------------------------------\n`;
+            out += `REKOMENDASI TRANSFER STOK ANTARCABANG (WH/INT):\n`;
+            bal.recommendations.forEach((r, idx) => {
+                out += `[${idx+1}] ${r.source_wh} (${r.source_city}) ➔ ${r.destination_wh} (${r.destination_city})\n`;
+                out += `    Jumlah: ${r.transfer_quantity} unit | Estimasi Ongkir: Rp ${r.freight_cost_idr.toLocaleString()} (${r.transit_days} Hari) | Prioritas: ${r.priority}\n`;
+                out += `    Modal Dihemat: Rp ${r.capital_saved_idr.toLocaleString()}\n`;
+            });
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Gudang Surabaya yang surplus dialihkan ke Jakarta dan Medan sebelum pemesanan barang baru ke supplier.</li>
+                <li>Siap menerbitkan dokumen Internal Transfer (WH/INT/BAL) otomatis dengan alokasi armada ekspedisi antarpulau.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal menyeimbangkan stok antar-gudang: ' + err.message;
+    }
+}
+
+async function triggerCLVChurnPreventer() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis Customer Lifetime Value (CLV) & memitigasi akun berisiko churn...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const clv = await api('/crm/clv-matrix', 'GET');
+
+        if (badge) badge.textContent = `🎯 CLV & Churn: ${clv.total_customers_analyzed} Akun (${clv.at_risk_customers_count} At-Risk)`;
+        if (answerEl) {
+            let out = `🎯 PREDICTIVE CUSTOMER LIFETIME VALUE (CLV) & DYNAMIC CHURN PREVENTER:\n`;
+            out += `Pelanggan Dianalisis: ${clv.total_customers_analyzed} Akun B2B | Total Ekuitas Historis: IDR ${clv.total_historical_equity_idr.toLocaleString()}\n`;
+            out += `Proyeksi Pipeline 90-Hari ke Depan: IDR ${clv.projected_90d_pipeline_idr.toLocaleString()}\n`;
+            out += `Akun Kritis Berisiko Churn: ${clv.at_risk_customers_count} Akun (Nilai Omzet Terancam: IDR ${clv.at_risk_revenue_idr.toLocaleString()})\n\n`;
+            out += `SEGMENTASI PELANGGAN & PREDIKSI NILAI SEUMUR HIDUP (CLV):\n`;
+            out += `--------------------------------------------------\n`;
+            clv.profiles.forEach(p => {
+                out += `• [ID ${p.partner_id}] ${p.partner_name} (${p.industry_sector})\n`;
+                out += `  Tier: ${p.tier} | Recency: ${p.recency_days} Hari | Frekuensi: ${p.order_frequency}x Order (Rata-rata: Rp ${p.average_order_val_idr.toLocaleString()})\n`;
+                out += `  Probabilitas Aktif: ${(p.probability_alive*100).toFixed(1)}% | Skor Risiko Churn: ${p.churn_risk_score}/100\n`;
+                out += `  Proyeksi 90 Hari: Rp ${p.predicted_90d_rev_idr.toLocaleString()} | Total Estimasi CLV: Rp ${p.customer_lifetime_val_idr.toLocaleString()}\n`;
+                out += `  ⚡ Tindakan: ${p.recommended_action}\n\n`;
+            });
+            out += `--------------------------------------------------\n`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Model BG/NBD mendeteksi penurunan frekuensi pembelian pada CV Sinar Logistik Cemerlang sebelum akun beralih ke kompetitor.</li>
+                <li>Tersedia 1-klik pemicu kampanye retensi VIP (diskon volume khusus + kunjungan KAM) dengan proyeksi win-back +35%.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal menganalisis CLV: ' + err.message;
+    }
+}
+
+async function triggerQuorumVault() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menyiapkan zero-trust key sharding & menguji eksekusi kuorum kriptografi...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const shardRes = await api('/security/vault/shard-keys', 'POST', {
+            vault_policy_name: 'Buka Segel Buku Besar Tahun Fiskal 2026',
+            required_quorum: 3
+        });
+
+        if (badge) badge.textContent = `🔐 Quorum Vault: ${shardRes.required_quorum}-of-${shardRes.total_shards_issued} Shamir Scheme`;
+        if (answerEl) {
+            let out = `🔐 ZERO-TRUST CRYPTOGRAPHIC SECRET SHARING & QUORUM VAULT:\n`;
+            out += `ID Sesi Vault: ${shardRes.vault_session_id}\n`;
+            out += `Ambang Batas Kuorum (Threshold): ${shardRes.required_quorum} dari ${shardRes.total_shards_issued} Pejabat Eksekutif\n`;
+            out += `Sidik Jari Kunci Master (SHA-256): ${shardRes.master_key_hash}\n`;
+            out += `Pemberitahuan Keamanan: ${shardRes.security_notice}\n\n`;
+            out += `DISTRIBUSI PECAHAN KUNCI (KEY SHARDS):\n`;
+            out += `--------------------------------------------------\n`;
+            shardRes.distributed_shards.forEach(sh => {
+                out += `• Shard #${sh.index}: ${sh.officer_role} (${sh.officer_name})\n`;
+                out += `  Email: ${sh.officer_email} | Shard Hash: ${sh.share_hex.substring(0, 24)}...\n`;
+            });
+            out += `--------------------------------------------------\n`;
+            out += `⚡ Mekanisme Kriptografis: Polinomial Lagrange Interpolation GF(P). Aksi kritis seperti pembukaan audit tahun fiskal tidak dapat dieksekusi secara sepihak oleh Super-Admin tanpa kuorum minimal 3 eksekutif!`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Mencegah ancaman orang dalam (insider threat) dan peretasan akun admin pada transaksi berkosekuensi tinggi.</li>
+                <li>Setiap aksi yang disetujui kuorum mencetak sertifikat digital Cryptographic Seal yang terikat SHA-256.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal menguji Quorum Vault: ' + err.message;
+    }
+}
+
+async function triggerRFIDAssetRadar() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memindai radar aset RFID / BLE & menghitung denda demurrage geofence...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const radar = await api('/asset/tracking/radar-map', 'GET');
+
+        if (badge) badge.textContent = `📡 Asset Radar: ${radar.total_tracked_assets} Aset (${radar.misplaced_count} Misplaced Alert)`;
+        if (answerEl) {
+            let out = `📡 REAL-TIME RFID / BLE ASSET TRACKING RADAR & GEOFENCE DEMURRAGE:\n`;
+            out += `Waktu Pindai: ${radar.generated_at} | Total Aset Dipantau: ${radar.total_tracked_assets} unit\n`;
+            out += `Peringatan Salah Tempat (Misplaced): ${radar.misplaced_count} aset | Aset di Lokasi Mitra/Klien: ${radar.assets_in_field_count} unit\n`;
+            out += `Total Akumulasi Denda Demurrage: IDR ${radar.total_accrued_demurrage_idr.toLocaleString()}\n\n`;
+            out += `DISTRIBUSI ASET DI ZONA FISIK:\n`;
+            Object.entries(radar.zone_distribution || {}).forEach(([z, count]) => {
+                out += `• ${z}: ${count} unit\n`;
+            });
+            out += `\nSTATUS ASET PADA RADAR:\n`;
+            out += `--------------------------------------------------\n`;
+            radar.assets.forEach(a => {
+                out += `• [${a.epc_tag_id}] ${a.asset_name} (${a.category})\n`;
+                out += `  Zona Saat Ini: ${a.current_zone} (Asal: ${a.assigned_home_zone}) | Baterai: ${a.battery_status}\n`;
+                out += `  Durasi Berdiam: ${a.dwell_days_in_zone} Hari | Denda Demurrage: Rp ${a.accrued_demurrage_idr.toLocaleString()} (${a.demurrage_days} Hari Overdue)\n`;
+                if (a.is_misplaced) {
+                    out += `  🚨 ${a.misplaced_alert}\n`;
+                }
+                out += `\n`;
+            });
+            out += `--------------------------------------------------\n`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Sensor mendeteksi Palet Plastik CHEP tertahan di lokasi pelanggan melebihi masa sewa 7 hari dengan denda berjalan Rp 315.000.</li>
+                <li>Radar secara instan membunyikan alarm peringatan ketika cetakan injeksi presisi berada di Outbound Bay alih-alih Maintenance Bay.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memindai radar aset: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

@@ -13,6 +13,7 @@ import (
 	"erp-golang/internal/core/commandcenter"
 	coreaccount "erp-golang/internal/core/account"
 	coreasset "erp-golang/internal/core/asset"
+	corecrm "erp-golang/internal/core/crm"
 	coreedi "erp-golang/internal/core/edi"
 	coreexpense "erp-golang/internal/core/expense"
 	corefleet "erp-golang/internal/core/fleet"
@@ -277,7 +278,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.48.0",
+			"version":    "1.49.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -295,7 +296,7 @@ func main() {
 	ai.RegisterRootProtocolRoutes(r, aiHandler)
 
 	// Register OpenAPI 3.1 & Interactive API Explorer
-	openapi.RegisterRoutes(r, cfg.AppName, "1.48.0")
+	openapi.RegisterRoutes(r, cfg.AppName, "1.49.0")
 
 	// API v1 Router Group
 	apiV1 := r.Group("/api/v1")
@@ -332,6 +333,11 @@ func main() {
 		coreaccount.RegisterCreditRiskRoutes(apiV1, authMiddleware, db)
 		coreasset.RegisterCarbonDepreciationRoutes(apiV1, authMiddleware, db)
 		coregraphql.RegisterGraphQLRoutes(apiV1, authMiddleware, db)
+		corehr.RegisterRosterRoutes(apiV1, authMiddleware, db)
+		corewms.RegisterInventoryBalancerRoutes(apiV1, authMiddleware, db)
+		corecrm.RegisterCLVRoutes(apiV1, authMiddleware, db)
+		security.RegisterQuorumVaultRoutes(apiV1, authMiddleware, db)
+		coreasset.RegisterRFIDTrackerRoutes(apiV1, authMiddleware, db)
 	}
 
 	// Serve Static Web Frontend
