@@ -37,6 +37,7 @@ import (
 	corehr "erp-golang/internal/core/hr"
 	coremrp "erp-golang/internal/core/mrp"
 	corepricing "erp-golang/internal/core/pricing"
+	corescm "erp-golang/internal/core/scm"
 	coresystem "erp-golang/internal/core/system"
 	coretax "erp-golang/internal/core/tax"
 	coretradefinance "erp-golang/internal/core/tradefinance"
@@ -9821,5 +9822,148 @@ IEA*1*000099123~`
 	t.Logf("✓ ISO 37002 Ethics Vault Verified: Case='%s' (Token='%s', Cat='%s', Risk=%d, Priority='%s', EvidenceCount=%d, Hash0='%s'), InvestigationStatus='%s' (Assigned='%s'), Dash: %d Total Cases (%d Active, %d Substantiated, AvgRisk=%.1f)",
 		ethicsReport.CaseID, ethicsReport.AnonymousToken, ethicsReport.Category, ethicsReport.RiskScore, ethicsReport.Priority, len(ethicsReport.EvidenceDigests), ethicsReport.EvidenceDigests[0].SHA256Hash[:16]+"...", investigatedCase.Status, investigatedCase.AssignedTo, ethicsDash.TotalCasesSubmitted, ethicsDash.ActiveInvestigations, ethicsDash.SubstantiatedCases, ethicsDash.AverageRiskScore)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (67 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002) PASSED 100%!")
+	// ==========================================
+	// SECTION 68: V1.54.0 SCM MEIO, DERIVATIVE HEDGING, PHARMA EBR, WHT EQUALIZATION & LOYALTY LEDGER:
+	// 1. Supply Chain Multi-Echelon Inventory Optimization (MEIO) & Risk Pooling
+	// 2. Multi-Currency Hedging & Derivative Accounting (IFRS 9 / PSAK 71)
+	// 3. Electronic Batch Record (EBR) & Regulated Pharma Hub (FDA 21 CFR Part 11)
+	// 4. Corporate Withholding Tax Equalization & Cross-Border DGT-1 Treaty Engine
+	// 5. Omnichannel Customer Loyalty Points & IFRS 15 Contract Liability Ledger
+	// ==========================================
+	t.Log(`
+		>>> SECTION 68: SCM MEIO, DERIVATIVE HEDGING, PHARMA EBR, WHT EQUALIZATION & LOYALTY LEDGER <<<`)
+
+	// 68.1 Supply Chain Multi-Echelon Inventory Optimization (MEIO)
+	meioRes := corescm.OptimizeNetworkInventoryLogic(corescm.MEIOOptimizationRequest{
+		TargetServiceLevel: 0.95,
+	})
+	if meioRes.TotalNodesOptimized != 5 || meioRes.NetUnitsSaved <= 0 || meioRes.TotalCapitalUnlockedIDR <= 0 || meioRes.OverallInventorySavingsPct < 15.0 {
+		t.Fatalf("Failed to optimize multi-echelon inventory network: %+v", meioRes)
+	}
+
+	tradeoffCurve := corescm.GetServiceLevelTradeoffLogic(250000.0, 48000.0)
+	if len(tradeoffCurve) != 4 || tradeoffCurve[3].RequiredSafetyStockUnits <= tradeoffCurve[0].RequiredSafetyStockUnits {
+		t.Fatalf("Failed to calculate service level tradeoff curve: %+v", tradeoffCurve)
+	}
+	t.Logf("✓ SCM MEIO Optimizer Verified: Network='%s' (%d Nodes, SL=%.1f%%, Z=%.3f), DecoupledStock=%.0fu vs MEIO=%.0fu (Saved %.0fu / -%.2f%%), UnlockedCapital=IDR %.0f, AnnualHoldingSavings=IDR %.0f, Curve(90%%=%.0fu, 99%%=%.0fu)",
+		meioRes.NetworkName, meioRes.TotalNodesOptimized, meioRes.TargetServiceLevelPct, meioRes.ZScoreApplied, meioRes.TotalDecoupledStockUnits, meioRes.TotalMEIOStockUnits, meioRes.NetUnitsSaved, meioRes.OverallInventorySavingsPct, meioRes.TotalCapitalUnlockedIDR, meioRes.TotalAnnualHoldingSavings, tradeoffCurve[0].RequiredSafetyStockUnits, tradeoffCurve[3].RequiredSafetyStockUnits)
+
+	// 68.2 Multi-Currency Hedging & Derivative Accounting (IFRS 9 / PSAK 71)
+	hdgContract := coretreasury.CreateHedgeContractLogic(coretreasury.DerivativeHedgeContract{
+		ContractID:         "HDG-2026-EUR-002",
+		CounterpartyBank:   "PT Bank Mandiri (Persero) Tbk",
+		InstrumentType:     "FX_FORWARD",
+		HedgedItemType:     "IMPORT_AP_PAYABLES",
+		HedgeDesignation:   "CASH_FLOW_HEDGE",
+		NotionalAmountFC:   350000.0, // EUR 350,000
+		ForeignCurrency:    "EUR",
+		ContractStrikeRate: 17200.0,  // IDR / EUR
+		InceptionDate:      "2026-11-01",
+		MaturityDate:       "2027-02-01",
+	})
+	if hdgContract.ContractID == "" || hdgContract.Status != "DESIGNATED_ACTIVE" {
+		t.Fatalf("Failed to create designated hedge contract: %+v", hdgContract)
+	}
+
+	mtmRes, err := coretreasury.RevalueHedgeMtMLogic(coretreasury.MtMRevaluationRequest{
+		ContractID:                   hdgContract.ContractID,
+		CurrentSpotRate:              17450.0,
+		ForwardPoints:                40.0,
+		AnnualDiscountRate:           0.055,
+		HedgedItemFairValueChangeIDR: -100000000.0,
+	})
+	if err != nil || mtmRes == nil || !mtmRes.IsHighlyEffective || mtmRes.GrossDerivativeFairValueIDR <= 0 || len(mtmRes.AccountingEntries) < 2 {
+		t.Fatalf("Failed to revalue derivative MtM fair value: %v, resp: %+v", err, mtmRes)
+	}
+
+	hdgPortfolio := coretreasury.GetHedgePortfolioSummaryLogic()
+	if hdgPortfolio.TotalActiveContracts < 2 {
+		t.Fatalf("Expected at least 2 active hedge contracts in treasury portfolio: %+v", hdgPortfolio)
+	}
+	t.Logf("✓ IFRS 9 Hedge Accounting Verified: Contract='%s' (%s, Strike=%.0f, Fwd=%.0f), GrossFairVal=IDR %.0f, PV=IDR %.0f, EffRatio=%.2f%% (HighlyEffective=%t), OCI_Reserve=IDR %.0f, P&L=IDR %.0f, GL Lines=%d, Portfolio Contracts=%d",
+		mtmRes.ContractID, mtmRes.InstrumentType, mtmRes.ContractStrikeRate, mtmRes.CurrentForwardRate, mtmRes.GrossDerivativeFairValueIDR, mtmRes.DiscountedFairValueIDR, mtmRes.EffectivenessRatioPct, mtmRes.IsHighlyEffective, mtmRes.EffectivePortionOCI_IDR, mtmRes.IneffectivePortionPL_IDR, len(mtmRes.AccountingEntries), hdgPortfolio.TotalActiveContracts)
+
+	// 68.3 Electronic Batch Record (EBR) & Regulated Pharma Hub (FDA 21 CFR Part 11)
+	stepExec, err := coremrp.ExecuteEBRStepLogic(coremrp.ExecuteEBRStepRequest{
+		BatchNumber:   "BATCH-2026-PHARMA-001",
+		StepNumber:    2,
+		ObservedValue: "1.92% LOD (Analytical Moisture Analyzer MA-03)",
+		OperatorID:    "OP-RATNA-WULAN",
+		WitnessQAID:   "QA-DR-HENDRA",
+		OperatorPin:   "8821",
+		WitnessQAPin:  "9934",
+	})
+	if err != nil || stepExec == nil || stepExec.Steps[1].StepStatus != "PASSED_WITH_DUAL_SIGNOFF" || stepExec.Steps[1].OperatorSignatureHash == "" || stepExec.Steps[1].WitnessQASignatureHash == "" {
+		t.Fatalf("Failed to execute EBR step with dual 21 CFR Part 11 signatures: %v, resp: %+v", err, stepExec)
+	}
+
+	devSign, err := coremrp.SignEBRDeviationLogic(coremrp.SignEBRDeviationRequest{
+		BatchNumber:      "BATCH-2026-PHARMA-001",
+		StepNumber:       2,
+		Description:      "Brief 1.5-minute temperature excursion during fluid bed drying cycle.",
+		Severity:         "MINOR",
+		RootCause:        "Thermostat PID sensor controller lag during initial heating ramp.",
+		CorrectiveAction: "Re-calibrated PID loop thermocouple and verified granule assay within limits.",
+		QASignedBy:       "QA-DR-HENDRA",
+	})
+	if err != nil || devSign == nil || len(devSign.Deviations) != 1 || devSign.Deviations[0].ResolutionStatus != "CLOSED_APPROVED" {
+		t.Fatalf("Failed to sign and record EBR deviation: %v, resp: %+v", err, devSign)
+	}
+
+	batchRec, err := coremrp.GetEBRBatchRecordLogic("BATCH-2026-PHARMA-001")
+	if err != nil || batchRec == nil || batchRec.BatchNumber != "BATCH-2026-PHARMA-001" {
+		t.Fatalf("Failed to fetch EBR batch record: %v", err)
+	}
+	t.Logf("✓ Pharma EBR (FDA 21 CFR Part 11) Verified: Batch='%s' (%s, Size=%d units), Step 2 Executed='%s' (IPC='%s', OpSig='%s', QASig='%s'), Deviations=%d (DevID='%s', Status='%s', CAPA='%s')",
+		batchRec.BatchNumber, batchRec.ProductName, batchRec.BatchSizeUnits, stepExec.Steps[1].OperationName, stepExec.Steps[1].ObservedValue, stepExec.Steps[1].OperatorSignatureHash[:12]+"...", stepExec.Steps[1].WitnessQASignatureHash[:12]+"...", len(devSign.Deviations), devSign.Deviations[0].DeviationID, devSign.Deviations[0].ResolutionStatus, devSign.Deviations[0].CorrectiveAction)
+
+	// 68.4 Corporate Withholding Tax Equalization & Cross-Border DGT-1 Treaty Engine
+	whtReport := coretax.AuditWHTEqualizationLogic(coretax.WHTEqualizationRequest{})
+	if whtReport.ReportID == "" || whtReport.TotalGLExpensesAuditedIDR <= 0 || whtReport.TotalReportedDPPIDR <= 0 || len(whtReport.Discrepancies) == 0 || whtReport.AuditStatus != "DISCREPANCY_DETECTED" {
+		t.Fatalf("Failed to audit withholding tax equalization: %+v", whtReport)
+	}
+
+	dgtVal := coretax.ValidateDGT1CertificateLogic(coretax.DGT1ValidationRequest{
+		VendorName:                "Acme Cloud Computing Pte Ltd",
+		VendorCountry:             "SG",
+		DGTFormNumber:             "DGT-1/SG/2026/0991",
+		CertificateExpirationDate: "2026-12-31",
+		GrossPaymentIDR:           500000000.0,
+		IncomeCategory:            "ROYALTIES",
+	})
+	if !dgtVal.IsValidCertificate || dgtVal.TreatyRatePct != 10.0 || dgtVal.DomesticWHTRatePct != 20.0 || dgtVal.TaxSavedIDR != 50000000.0 {
+		t.Fatalf("Failed to validate DGT-1 treaty certificate: %+v", dgtVal)
+	}
+	t.Logf("✓ Withholding Tax Equalization & DGT-1 Verified: Rep='%s' (Period='%s', GL Expense=IDR %.0f, DPP=IDR %.0f, Discrepancy=IDR %.0f, Exposure=IDR %.0f, Status='%s'), DGT1='%s' (Country='%s', Valid=%t, Domestic=%.0f%% -> Treaty=%.0f%%, Saved=IDR %.0f, Ref='%s')",
+		whtReport.ReportID, whtReport.FiscalPeriod, whtReport.TotalGLExpensesAuditedIDR, whtReport.TotalReportedDPPIDR, whtReport.TotalDiscrepancyIDR, whtReport.TotalPotentialTaxExposureIDR, whtReport.AuditStatus, dgtVal.DGTFormNumber, "SG", dgtVal.IsValidCertificate, dgtVal.DomesticWHTRatePct, dgtVal.TreatyRatePct, dgtVal.TaxSavedIDR, dgtVal.TreatyArticleApplied)
+
+	// 68.5 Omnichannel Customer Loyalty Points & IFRS 15 Contract Liability Ledger
+	loyaltyEarn, err := corecrm.EarnLoyaltyPointsLogic(corecrm.EarnPointsRequest{
+		MemberID:             "MBR-2026-VIP-001",
+		CustomerName:         "PT Nusantara Retail Perkasa",
+		TransactionAmountIDR: 50000000.0, // Rp 50 Juta
+		SalesOrderID:         "SO/2026/11/0491",
+		Channel:              "B2B_PORTAL",
+	})
+	if err != nil || loyaltyEarn == nil || loyaltyEarn.PointsEarned <= 0 || loyaltyEarn.IFRS15DeferredRevenueIDR <= 0 {
+		t.Fatalf("Failed to earn loyalty points: %v, resp: %+v", err, loyaltyEarn)
+	}
+
+	loyaltyRedeem, err := corecrm.RedeemLoyaltyRewardLogic(corecrm.RedeemRewardRequest{
+		MemberID:          "MBR-2026-VIP-001",
+		PointsToRedeem:    2000,
+		RewardCatalogItem: "VOUCHER-POTONGAN-TAGIHAN-200K",
+	})
+	if err != nil || loyaltyRedeem == nil || loyaltyRedeem.RedemptionCode == "" || loyaltyRedeem.ReleasedIFRS15RevenueIDR <= 0 {
+		t.Fatalf("Failed to redeem loyalty rewards: %v, resp: %+v", err, loyaltyRedeem)
+	}
+
+	mbrProfile, err := corecrm.GetLoyaltyMemberProfileLogic("MBR-2026-VIP-001")
+	if err != nil || mbrProfile == nil || mbrProfile.TotalPointsBalance != loyaltyRedeem.RemainingPointsBalance {
+		t.Fatalf("Failed to get loyalty member profile: %v, resp: %+v", err, mbrProfile)
+	}
+	t.Logf("✓ CRM Loyalty & IFRS 15 Ledger Verified: Member='%s' (%s, Tier='%s'), Earned=+%d Pts (IFRS15 DeferredRev=IDR %.0f), Redeemed=-%d Pts (Code='%s', Item='%s', ReleasedRev=IDR %.0f), FinalPoints=%d (Lifetime=%d, DeferredLiabilityBalance=IDR %.0f)",
+		mbrProfile.MemberID, mbrProfile.CustomerName, mbrProfile.TierLevel, loyaltyEarn.PointsEarned, loyaltyEarn.IFRS15DeferredRevenueIDR, loyaltyRedeem.PointsDeducted, loyaltyRedeem.RedemptionCode, loyaltyRedeem.RewardCatalogItem, loyaltyRedeem.ReleasedIFRS15RevenueIDR, mbrProfile.TotalPointsBalance, mbrProfile.LifetimePointsEarned, mbrProfile.ContractLiabilityDeferredRevIDR)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (68 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15) PASSED 100%!")
 }

@@ -797,6 +797,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/scm/meio/optimize-network": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Multi-Echelon Inventory Optimization (MEIO) & Safety Stock Simulator",
+					"description": "Multi-tier risk pooling across Central DCs, Regional Hubs, and Retail Spokes to minimize holding costs and optimize target service levels.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Optimized safety stock per node, capital unlocked, and holding cost savings"},
+					},
+				},
+			},
+			"/api/v1/treasury/hedging/create-contract": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Multi-Currency Hedging & Derivative Accounting (IFRS 9 / PSAK 71)",
+					"description": "Designates FX derivatives, computes Mark-to-Market fair values, and tests Dollar-Value hedge effectiveness (80%-125% corridor).",
+					"responses": map[string]interface{}{
+						"201": map[string]interface{}{"description": "Hedge contract designation, notional amount, and maturity schedule"},
+					},
+				},
+			},
+			"/api/v1/mrp/ebr/execute-step": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Electronic Batch Record (EBR) & Regulated Pharma Hub (FDA 21 CFR Part 11)",
+					"description": "Step-by-step master formula execution with In-Process Control (IPC) parameters and dual cryptographic operator/QA signatures.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Batch progression, cryptographic signature hashes, and automated CoA release"},
+					},
+				},
+			},
+			"/api/v1/tax/wht/audit-equalization": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Corporate Withholding Tax Equalization & Cross-Border DGT-1 Treaty Engine",
+					"description": "Cross-reconciliation between General Ledger expense accounts and reported WHT tax bases (DPP), detecting unwithheld tax exposure and verifying DGT-1 treaty relief.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Tax equalization report, identified expense discrepancies, and potential tax exposure"},
+					},
+				},
+			},
+			"/api/v1/crm/loyalty/earn-points": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Omnichannel Customer Loyalty Points & IFRS 15 Contract Liability Ledger",
+					"description": "Accrues loyalty points with tier multipliers, automates tier upgrades, and defers contract liabilities under IFRS 15 / PSAK 72.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Points earned, updated balance, tier status, and deferred revenue liability"},
+					},
+				},
+			},
 		},
 	}
 }

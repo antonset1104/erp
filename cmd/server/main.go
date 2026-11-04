@@ -27,6 +27,7 @@ import (
 	corehr "erp-golang/internal/core/hr"
 	coremrp "erp-golang/internal/core/mrp"
 	corepricing "erp-golang/internal/core/pricing"
+	corescm "erp-golang/internal/core/scm"
 	coresystem "erp-golang/internal/core/system"
 	coretax "erp-golang/internal/core/tax"
 	coretradefinance "erp-golang/internal/core/tradefinance"
@@ -289,7 +290,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.53.0",
+			"version":    "1.54.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -307,7 +308,7 @@ func main() {
 	ai.RegisterRootProtocolRoutes(r, aiHandler)
 
 	// Register OpenAPI 3.1 & Interactive API Explorer
-	openapi.RegisterRoutes(r, cfg.AppName, "1.53.0")
+	openapi.RegisterRoutes(r, cfg.AppName, "1.54.0")
 
 	// API v1 Router Group
 	apiV1 := r.Group("/api/v1")
@@ -369,6 +370,11 @@ func main() {
 		corewms.RegisterYardManagementRoutes(apiV1, authMiddleware, db)
 		corecpq.RegisterRoutes(apiV1)
 		coregrc.RegisterRoutes(apiV1)
+		corescm.RegisterRoutes(apiV1)
+		coretreasury.RegisterHedgeAccountingRoutes(apiV1)
+		coremrp.RegisterEBRRoutes(apiV1)
+		coretax.RegisterWHTRoutes(apiV1)
+		corecrm.RegisterLoyaltyRoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend

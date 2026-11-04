@@ -25589,6 +25589,270 @@ async function triggerEthicsWhistleblowerVault() {
     }
 }
 
+async function triggerMEIONetworkOptimizer() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengoptimalkan multi-echelon safety stock & risk pooling jaringan pasok...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const res = await api('/scm/meio/optimize-network', 'POST', {
+            target_service_level: 0.95
+        });
+
+        if (badge) badge.textContent = `📦 MEIO: Hemat ${res.overall_inventory_savings_pct.toFixed(1)}%`;
+        if (answerEl) {
+            let out = `📦 MULTI-ECHELON INVENTORY OPTIMIZATION (MEIO) & RISK POOLING:\n`;
+            out += `Jaringan Pasok: ${res.network_name} | Target Service Level: ${res.target_service_level_pct}% (Z=${res.z_score_applied})\n`;
+            out += `Total Simpul Fasilitas (Nodes): ${res.total_nodes_optimized} Fasilitas\n`;
+            out += `Stok Pengaman Single-Echelon (Decoupled): ${res.total_decoupled_stock_units.toLocaleString()} unit\n`;
+            out += `Stok Pengaman Multi-Echelon Teroptimasi: ${res.total_meio_stock_units.toLocaleString()} unit\n`;
+            out += `Penghematan Stok: ${res.net_units_saved.toLocaleString()} unit (-${res.overall_inventory_savings_pct.toFixed(2)}%)\n`;
+            out += `Modal Kerja yang Dibebaskan (Working Capital Unlocked): Rp ${res.total_capital_unlocked_idr.toLocaleString()}\n`;
+            out += `Penghematan Biaya Simpan Tahunan (Holding Savings): Rp ${res.total_annual_holding_savings.toLocaleString()} / tahun\n\n`;
+            out += `REKOMENDASI BUFFER STOK PER SIMPUL JARINGAN:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            res.recommendations.forEach(r => {
+                out += `• [Tier ${r.tier_level}] ${r.node_name}: Decoupled ${r.single_echelon_safety_stock}u -> MEIO ${r.multi_echelon_safety_stock}u (ROP: ${r.recommended_reorder_point}u) | Hemat Rp ${r.working_capital_saved_idr.toLocaleString()}\n`;
+            });
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Prinsip MEIO mengelompokkan varians permintaan hilir di Central DC untuk memanfaatkan efek diversifikasi risiko.</li>
+                <li>Modal kerja dapat dikurangi signifikan tanpa menurunkan Service Level Pelanggan di tingkat gerai ritel.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mengoptimalkan MEIO: ' + err.message;
+    }
+}
+
+async function triggerHedgeAccountingMtM() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menghitung fair value derivatif FX Forward & uji efektivitas lindung nilai (IFRS 9)...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const res = await api('/treasury/hedging/revalue-mtm', 'POST', {
+            contract_id: "HDG-2026-FX-001",
+            current_spot_rate: 16350.0,
+            forward_points: 30.0,
+            annual_discount_rate: 0.055
+        });
+
+        if (badge) badge.textContent = `📈 IFRS 9: ${res.effectiveness_ratio_pct.toFixed(1)}% Eff`;
+        if (answerEl) {
+            let out = `📈 MULTI-CURRENCY HEDGING & DERIVATIVE ACCOUNTING (IFRS 9 / PSAK 71):\n`;
+            out += `Kontrak Lindung Nilai: ${res.contract_id} [${res.instrument_type}]\n`;
+            out += `Kurs Strike Kontrak: Rp ${res.contract_strike_rate.toLocaleString()} | Kurs Forward Pasar Saat Ini: Rp ${res.current_forward_rate.toLocaleString()}\n`;
+            out += `Nilai Wajar Derivatif Bruto: Rp ${res.gross_derivative_fair_value_idr.toLocaleString()}\n`;
+            out += `Nilai Wajar Terdiskonto (Present Value MtM): Rp ${res.discounted_fair_value_idr.toLocaleString()}\n\n`;
+            out += `UJI EFEKTIVITAS LINDUNG NILAI (DOLLAR-VALUE METHOD 80% - 125%):\n`;
+            out += `• Rasio Efektivitas: ${res.effectiveness_ratio_pct.toFixed(2)}% -> ${res.is_highly_effective ? 'HIGHLY EFFECTIVE (LOLOS UJI)' : 'TIDAK EFEKTIF'}\n`;
+            out += `• Porsi Efektif Masuk Ekuitas (OCI Cash Flow Hedge Reserve): Rp ${res.effective_portion_oci_idr.toLocaleString()}\n`;
+            out += `• Porsi Tidak Efektif Masuk Laba Rugi (P&L): Rp ${res.ineffective_portion_pl_idr.toLocaleString()}\n\n`;
+            out += `JURNAL AKUNTANSI DERIVATIF OTOMATIS (DOUBLE-ENTRY GL):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            res.accounting_entries.forEach(e => {
+                out += `• [${e.account_code}] ${e.account_name}: Debit Rp ${e.debit_idr.toLocaleString()} | Kredit Rp ${e.credit_idr.toLocaleString()}\n`;
+            });
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penerapan akuntansi lindung nilai IFRS 9 mengisolasi volatilitas fluktuasi kurs mata uang asing dari laporan laba rugi.</li>
+                <li>Keuntungan belum terealisasi dicatat ke dalam Cash Flow Hedge Reserve di pos Ekuitas (OCI) hingga transaksi komitmen terealisasi.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal menghitung revaluasi derivatif IFRS 9: ' + err.message;
+    }
+}
+
+async function triggerEBRBatchExecution() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengeksekusi tahapan formula batch farmasi dengan tanda tangan digital ganda (FDA 21 CFR Part 11)...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const res = await api('/mrp/ebr/execute-step', 'POST', {
+            batch_number: "BATCH-2026-PHARMA-001",
+            step_number: 2,
+            observed_value: "1.92% LOD (Optimal)",
+            operator_id: "OP-RATNA-WULAN",
+            witness_qa_id: "QA-DR-HENDRA",
+            operator_pin: "8821",
+            witness_qa_pin: "9934"
+        });
+
+        if (badge) badge.textContent = `💊 EBR: Step ${res.current_step_number}/${res.total_steps}`;
+        if (answerEl) {
+            let out = `💊 ELECTRONIC BATCH RECORD (EBR) & FDA 21 CFR PART 11 REGULATED HUB:\n`;
+            out += `Nomor Batch Produksi: ${res.batch_number} | Produk: ${res.product_name} (${res.product_code})\n`;
+            out += `Ukuran Batch: ${res.batch_size_units.toLocaleString()} Butir | Master Formula: ${res.master_formula_id}\n`;
+            out += `Status Keseluruhan Batch: ${res.overall_batch_status}\n\n`;
+            out += `LOG TAHAPAN FORMULA & KONTROL PROSES (IPC AUDIT TRAIL):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            res.steps.forEach(s => {
+                out += `Tahap ${s.step_number}: ${s.operation_name} [${s.step_status}]\n`;
+                out += `  Target: ${s.target_parameter} | Hasil Observasi: ${s.observed_value || '-'}\n`;
+                if (s.operator_signature_hash) {
+                    out += `  Tanda Tangan Digital Operator: ${s.operator_id} (Sig: ${s.operator_signature_hash.substring(0, 16)}...)\n`;
+                    out += `  Tanda Tangan Saksi QA (Dual-Witness): ${s.witness_qa_id} (Sig: ${s.witness_qa_signature_hash.substring(0, 16)}...)\n`;
+                }
+            });
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Standar FDA 21 CFR Part 11 mewajibkan verifikasi digital dua saksi berpasangan untuk setiap parameter kritis pelepasan obat.</li>
+                <li>Log eksekusi batch terenkripsi SHA-256 menjamin non-repudiation dan kesiapan audit BPOM / FDA.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mencatat eksekusi EBR: ' + err.message;
+    }
+}
+
+async function triggerWHTTaxEqualization() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Merekonsiliasi ekualisasi biaya buku besar terhadap DPP Bukti Potong & validasi DGT-1...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const eq = await api('/tax/wht/audit-equalization', 'POST', {});
+        const dgt = await api('/tax/wht/validate-dgt1', 'POST', {
+            vendor_name: "Acme Cloud Computing Pte Ltd",
+            vendor_country: "SG",
+            dgt_form_number: "DGT-1/SG/2026/0991",
+            certificate_expiration_date: "2026-12-31",
+            gross_payment_idr: 500000000.0,
+            income_category: "ROYALTIES"
+        });
+
+        if (badge) badge.textContent = `📑 WHT: ${eq.audit_status}`;
+        if (answerEl) {
+            let out = `📑 WITHHOLDING TAX EQUALIZATION & CROSS-BORDER DGT-1 TREATY ENGINE:\n`;
+            out += `ID Laporan Ekualisasi: ${eq.report_id} | Periode Pajak: ${eq.fiscal_period}\n`;
+            out += `Total Biaya Beban di Buku Besar: Rp ${eq.total_gl_expenses_audited_idr.toLocaleString()}\n`;
+            out += `Total Dasar Pengenaan Pajak (DPP) Bukti Potong: Rp ${eq.total_reported_dpp_idr.toLocaleString()}\n`;
+            out += `Total PPh yang Telah Dipotong: Rp ${eq.total_tax_withheld_idr.toLocaleString()}\n`;
+            out += `Selisih Ekualisasi Terdeteksi: Rp ${eq.total_discrepancy_idr.toLocaleString()} (Potensi Pajak Terutang: Rp ${eq.total_potential_tax_exposure_idr.toLocaleString()})\n\n`;
+            if (eq.discrepancies.length > 0) {
+                out += `RINCIAN TEMUAN SELISIH EKUALISASI:\n`;
+                out += `------------------------------------------------------------------------------------\n`;
+                eq.discrepancies.forEach(d => {
+                    out += `• Akun ${d.account_code} [${d.tax_type}]: Biaya GL Rp ${d.total_gl_expense_idr.toLocaleString()} vs DPP Rp ${d.total_reported_dpp_idr.toLocaleString()} -> Selisih Rp ${d.discrepancy_amount_idr.toLocaleString()} (Pajak: Rp ${d.potential_tax_exposure_idr.toLocaleString()})\n`;
+                });
+                out += `------------------------------------------------------------------------------------\n\n`;
+            }
+            out += `HASIL VALIDASI FORM DGT-1 (TAX TREATY P3B):\n`;
+            out += `Vendor Luar Negeri: ${dgt.vendor_name} | Form DGT: ${dgt.dgt_form_number}\n`;
+            out += `Status Validitas Sertifikat: ${dgt.is_valid_certificate ? 'SAH & AKTIF' : 'KADALUWARSA/TIDAK VALID'}\n`;
+            out += `Tarif Domestik PPh 26: ${dgt.domestic_wht_rate_pct}% -> Tarif Berdasarkan Treaty: ${dgt.treaty_rate_pct}%\n`;
+            out += `Penghematan Pajak Berkat DGT-1: Rp ${dgt.tax_saved_idr.toLocaleString()} (${dgt.treaty_article_applied})`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Ekualisasi otomatis mencocokkan setiap akun biaya jasa/sewa/royalti dengan SPT Masa unifikasi e-Bupot.</li>
+                <li>Sertifikat DGT-1 divalidasi langsung terhadap ketentuan P3B untuk mengamankan tarif reduksi pajak antar-negara.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal melakukan ekualisasi pajak WHT: ' + err.message;
+    }
+}
+
+async function triggerLoyaltyPointsLedger() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengkalkulasi perolehan poin loyalitas & alokasi liabilitas kontrak IFRS 15...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const earn = await api('/crm/loyalty/earn-points', 'POST', {
+            member_id: "MBR-2026-VIP-001",
+            customer_name: "PT Nusantara Retail Perkasa",
+            transaction_amount_idr: 50000000.0,
+            sales_order_id: "SO/2026/11/0491",
+            channel: "B2B_PORTAL"
+        });
+
+        const rdm = await api('/crm/loyalty/redeem-reward', 'POST', {
+            member_id: "MBR-2026-VIP-001",
+            points_to_redeem: 2000,
+            reward_catalog_item: "VOUCHER-POTONGAN-TAGIHAN-200K"
+        });
+
+        if (badge) badge.textContent = `👑 Loyalty: ${earn.tier_level} (${rdm.remaining_points_balance} pts)`;
+        if (answerEl) {
+            let out = `👑 OMNICHANNEL CUSTOMER LOYALTY & IFRS 15 CONTRACT LIABILITY LEDGER:\n`;
+            out += `ID Member Pelanggan: ${earn.member_id} | Nama: ${earn.customer_name}\n`;
+            out += `Tingkat Keanggotaan (Tier Level): ${earn.tier_level} ${earn.tier_upgraded ? '✨ TIER UPGRADE!' : ''}\n`;
+            out += `Poin yang Baru Diperoleh: +${earn.points_earned.toLocaleString()} Poin\n`;
+            out += `Pendapatan Ditangguhkan Baru (IFRS 15 Deferred Revenue): Rp ${earn.ifrs15_deferred_revenue_idr.toLocaleString()}\n\n`;
+            out += `PENCAIRAN / PENUKARAN HADIAH (REWARD REDEMPTION):\n`;
+            out += `• Kode Voucher Hasil Penukaran: ${rdm.redemption_code}\n`;
+            out += `• Item Hadiah: ${rdm.reward_catalog_item}\n`;
+            out += `• Poin yang Ditukar (Burned): -${rdm.points_deducted.toLocaleString()} Poin\n`;
+            out += `• Sisa Saldo Poin Aktif: ${rdm.remaining_points_balance.toLocaleString()} Poin\n`;
+            out += `• Pendapatan yang Diakui dari Liabilitas Kontrak: Rp ${rdm.released_ifrs15_revenue_idr.toLocaleString()} [Diakui ke P&L General Ledger]`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Poin loyalitas dialokasikan sebagian dari nilai invoice penjualan sebagai Liabilitas Kontrak (Deferred Revenue) sesuai IFRS 15 / PSAK 72.</li>
+                <li>Saat pelanggan menukarkan poin, liabilitas didebit dan pendapatan diakui secara proporsional ke buku besar.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses loyalty ledger: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

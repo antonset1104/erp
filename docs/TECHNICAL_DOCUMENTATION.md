@@ -680,3 +680,33 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **SHA-256 Cryptographic Evidence Non-Repudiation**: Hashes all uploaded evidence files upon ingestion, creating immutable SHA-256 digital digests to preserve the chain of custody for legal proceedings.
 - **Automated Risk Triage & Audit Committee Workflow**: Endpoints `POST /api/v1/grc/ethics/investigate-case` and `GET /api/v1/grc/ethics/dashboard` classify case risk (0-100), assign independent committee investigators, and track case resolution metrics under ISO 37002 governance standards.
 
+---
+
+## 20. SCM MEIO, Derivative Hedging, Pharma EBR, WHT Equalization & Loyalty Ledger (v1.54.0)
+
+### 20.1 Supply Chain Multi-Echelon Inventory Optimization (MEIO) & Risk Pooling (`internal/core/scm/meio.go`)
+- **Multi-Tier Inventory Positioning**: Endpoint `POST /api/v1/scm/meio/optimize-network` calculates safety stock across a 3-tier supply chain network (Central DC, Regional Hubs, Retail Spokes), pooling variance to unlock 15%–30% in working capital without impacting customer fill rates.
+- **Service Level Tradeoff Analytics**: Endpoint `GET /api/v1/scm/meio/tradeoff-curve` models exponential safety stock holding cost curves across service levels (90%, 95%, 98%, and 99%).
+
+### 20.2 Multi-Currency Hedging & Derivative Accounting (IFRS 9 / PSAK 71) (`internal/core/treasury/hedge_accounting.go`)
+- **Derivative Contract Designation**: Endpoint `POST /api/v1/treasury/hedging/create-contract` books and designates FX Forwards and Collars to protect forecasted cross-border revenues and import payables.
+- **Mark-to-Market (MtM) Revaluation**: Endpoint `POST /api/v1/treasury/hedging/revalue-mtm` computes discounted fair values and performs Dollar-Value hedge effectiveness testing against the 80%–125% compliance corridor.
+- **OCI Hedge Reserve vs P&L Segregation**: Segregates effective valuation gains into Equity Other Comprehensive Income (OCI) while routing ineffective portions immediately to Profit & Loss.
+- **Portfolio Hedging Metrics**: Endpoint `GET /api/v1/treasury/hedging/portfolio` tracks active hedge coverage ratios and cumulative OCI reserves.
+
+### 20.3 Electronic Batch Record (EBR) & Regulated Pharma Hub (FDA 21 CFR Part 11) (`internal/core/mrp/ebr.go`)
+- **Step-by-Step Master Formula Execution**: Endpoint `POST /api/v1/mrp/ebr/execute-step` enforces In-Process Control (IPC) parameters and dual operator/QA cryptographic digital signatures with SHA-256 non-repudiation.
+- **Automated CoA Release & Deviation Management**: Endpoint `POST /api/v1/mrp/ebr/sign-deviation` documents root cause analysis and corrective action (CAPA) sign-off, placing critical deviations in quarantine and auto-issuing Certificates of Analysis (CoA) upon recipe completion.
+- **Batch Audit Trail**: Endpoint `GET /api/v1/mrp/ebr/batch-record/:batch_number` exposes the full execution log for regulatory health authority audits (BPOM, FDA).
+
+### 20.4 Corporate Withholding Tax Equalization & Cross-Border DGT-1 Treaty Engine (`internal/core/tax/wht_equalization.go`)
+- **GL to Tax Return Cross-Equalization**: Endpoint `POST /api/v1/tax/wht/audit-equalization` cross-checks General Ledger service/rental/royalty expense accounts against reported tax bases (DPP) in e-Bupot withholding slips, surfacing potential unpaid tax exposure.
+- **Tax Treaty DGT-1 Validation**: Endpoint `POST /api/v1/tax/wht/validate-dgt1` verifies foreign vendor Form DGT-1 validity, applying reduced Double Tax Avoidance (P3B) treaty rates and computing quantifiable tax savings.
+
+### 20.5 Omnichannel Customer Loyalty Points & IFRS 15 Contract Liability Ledger (`internal/core/crm/loyalty_rewards.go`)
+- **Omnichannel Points Accrual & Tier Scaling**: Endpoint `POST /api/v1/crm/loyalty/earn-points` calculates earned points with tier multipliers (Bronze, Silver, Gold, Platinum, VIP) and handles automatic promotions.
+- **IFRS 15 / PSAK 72 Contract Liability Accounting**: Defers unredeemed points value (adjusted for 15% estimated breakage) as Contract Liabilities on the balance sheet, reclassifying amounts to earned revenue upon reward redemption.
+- **Reward Redemption Engine**: Endpoint `POST /api/v1/crm/loyalty/redeem-reward` validates point balances, burns points for vouchers, and derecognizes deferred revenue liabilities.
+- **Member 360 View**: Endpoint `GET /api/v1/crm/loyalty/member/:member_id` provides real-time points balances, tier status, and accounting liability balances.
+
+
