@@ -1097,6 +1097,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/quality/rca/generate-fishbone-tree": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Closed-Loop AI Root Cause Analysis (RCA) & Ishikawa 5-Why CAPA Generator",
+					"description": "Analyzes manufacturing non-conformance defects under 6M taxonomy, performs 5-Why chaining, and issues 8D corrective actions.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Generated Ishikawa fishbone diagram with identified root causes and probability weights"},
+					},
+				},
+			},
+			"/api/v1/treasury/ndf/evaluate-fixing-settlement": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Cross-Border Dual-Currency FX Hedge Accounting & NDF Settlement Engine",
+					"description": "Evaluates Non-Deliverable Forward cash settlement against reference benchmark fixings (JISDOR) and tests IFRS 9 hedge effectiveness.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Calculated USD cash settlement payoff, settlement direction, and journal entries"},
+					},
+				},
+			},
+			"/api/v1/logistics/carrier/quote-optimal-rate": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Multi-Carrier Parcel Shipping Rate Broker & Delivery Slot Booking Engine",
+					"description": "Computes dimensional volumetric weight and discovers optimal shipping carrier quotes balancing freight cost and guaranteed delivery SLAs.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Compiled carrier quote comparison list with recommended optimal service level"},
+					},
+				},
+			},
+			"/api/v1/itops/finops/allocate-cost-centers": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Autonomous Cloud FinOps Cost Allocator & Idle Infrastructure Asset Reaper",
+					"description": "Allocates shared multi-cloud infrastructure to departmental cost centers and executes automated reaping of idle zombie assets.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Allocated cloud cost distribution by business unit and utilization efficiency metrics"},
+					},
+				},
+			},
+			"/api/v1/esg/travel/calculate-trip-emissions": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Smart Corporate Travel Carbon Budget & Green Booking Policy Enforcer",
+					"description": "Computes flight and hotel GHG emissions using ICAO factors, enforces green rail mandates, and manages departmental carbon allowances.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Calculated trip emissions, rail alternative savings, and shadow carbon fee"},
+					},
+				},
+			},
 		},
 	}
 }

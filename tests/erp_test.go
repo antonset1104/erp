@@ -36,9 +36,12 @@ import (
 	coregraphql "erp-golang/internal/core/graphql"
 	coregrc "erp-golang/internal/core/grc"
 	corehr "erp-golang/internal/core/hr"
+	coreitops "erp-golang/internal/core/itops"
+	corelogistics "erp-golang/internal/core/logistics"
 	coremrp "erp-golang/internal/core/mrp"
 	corepricing "erp-golang/internal/core/pricing"
 	coreprocurement "erp-golang/internal/core/procurement"
+	corequality "erp-golang/internal/core/quality"
 	corescm "erp-golang/internal/core/scm"
 	coresystem "erp-golang/internal/core/system"
 	coretax "erp-golang/internal/core/tax"
@@ -10748,5 +10751,162 @@ IEA*1*000099123~`
 	t.Logf("✓ GATT Customs Valuation & TP Harmonizer Verified: Shipment='%s', CIF Dutiable=$%.0f USD (FOB=$120k + Freight=$12.5k + Assists=$6.5k + Royalties=$4.8k), TP Unit=$150 (Q1=$135, Q3=$162, Alignment='%s'), Decl='%s' (Port='%s', Status='%s'), ImportDuty=$%.0f, ImportVAT=$%.0f, PPh22=$%.0f (TotalTaxes=$%.0f USD), Verdict='%s'",
 		gattVal.ShipmentID, gattVal.CalculatedDutiableCIFUSD, tpRecon.AlignmentStatus, customsDecl.DeclarationNumber, customsDecl.PortOfEntry, customsDecl.CustomsStatus, customsDecl.ImportDutyPayableUSD, customsDecl.ImportVATPayableUSD, customsDecl.ImportIncomeTax22USD, customsDecl.TotalCustomsTaxesUSD, customsAudit.AuditVerdict)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (73 SECTIONS: 65+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER) PASSED 100%!")
+	t.Log("\n\t\t>>> SECTION 74: AI 8D CAPA & ISHIKAWA RCA, DUAL-CURRENCY NDF HEDGE, MULTI-CARRIER BROKER, FINOPS CLOUD REAPER & GREEN TRAVEL CARBON BUDGET <<<")
+
+	// 74.1 Closed-Loop AI Root Cause Analysis (RCA) & Ishikawa 5-Why CAPA Generator
+	fishboneDiagram := corequality.GetRCAEngine().GenerateFishbone(corequality.NonConformanceReport{
+		NCRID:           "NCR-2026-MFG-8819",
+		PlantID:         "PLANT-BEKASI-01",
+		LineID:          "LINE-SMT-01",
+		PartNumber:      "PCB-MAIN-CONTROL-REV4",
+		DefectCode:      "SOLDER_BRIDGING_SHORT",
+		DefectQuantity:  42,
+		LotNumber:       "LOT-2026-W09",
+		Severity:        "MAJOR",
+		ImmediateAction: "Karantina batch di buffer inspeksi & hentikan sementara feeder 3",
+		ReportedBy:      "Agus Pratama (QC Inspector)",
+		ReportedAt:      time.Now(),
+	})
+	if fishboneDiagram.NCRID != "NCR-2026-MFG-8819" || len(fishboneDiagram.Branches) != 6 || fishboneDiagram.MostProbableCategory == "" {
+		t.Fatalf("Failed to generate Ishikawa fishbone diagram: %+v", fishboneDiagram)
+	}
+
+	fiveWhyChain := corequality.GetRCAEngine().SolveFiveWhy("NCR-2026-MFG-8819", "Short circuit solder bridging terdeteksi pada 42 unit PCB main controller.")
+	if fiveWhyChain.NCRID != "NCR-2026-MFG-8819" || len(fiveWhyChain.Steps) != 5 || fiveWhyChain.RootCauseType != "PROCESS_DESIGN" {
+		t.Fatalf("Failed to solve 5-Why root cause chain: %+v", fiveWhyChain)
+	}
+
+	capaPkg := corequality.GetRCAEngine().IssueCAPA("NCR-2026-MFG-8819", "Ir. Gunawan Setiadi (QA Director)")
+	if capaPkg.CAPAID == "" || len(capaPkg.Actions) != 2 || capaPkg.OverallStatus != "APPROVED_IN_EXECUTION" {
+		t.Fatalf("Failed to issue 8D CAPA package: %+v", capaPkg)
+	}
+	t.Logf("✓ AI 8D CAPA & Ishikawa RCA Verified: NCR='%s', Defect='SOLDER_BRIDGING_SHORT' (Qty=42), MostProbable='%s', RootCause='%s' (Type='%s'), CAPA='%s' (Actions=%d, Status='%s', Auditor='%s')",
+		fishboneDiagram.NCRID, fishboneDiagram.MostProbableCategory, fiveWhyChain.RootCauseSummary, fiveWhyChain.RootCauseType, capaPkg.CAPAID, len(capaPkg.Actions), capaPkg.OverallStatus, capaPkg.EffectivenessAuditor)
+
+	// 74.2 Cross-Border Dual-Currency FX Hedge Accounting & NDF Settlement Engine
+	ndfTrade := coretreasury.GetNDFEngine().BookContract(coretreasury.NDFContract{
+		ContractID:          "NDF-USDIDR-2026-081",
+		CompanyID:           "CMP-001",
+		CounterpartyBank:    "Citibank N.A. Jakarta Branch",
+		CurrencyPair:        "USD/IDR",
+		NotionalAmountUSD:   5000000.0,
+		ContractForwardRate: 15850.0,
+		FixingBenchmark:     "BI_JISDOR",
+		HedgeDesignation:    "CASH_FLOW_HEDGE",
+	})
+	if ndfTrade.ContractID != "NDF-USDIDR-2026-081" || ndfTrade.Status != "ACTIVE_UNSETTLED" {
+		t.Fatalf("Failed to book NDF contract: %+v", ndfTrade)
+	}
+
+	ndfSettle := coretreasury.GetNDFEngine().EvaluateFixingSettlement("NDF-USDIDR-2026-081", 16120.0)
+	if ndfSettle.SettlementPayoffUSD <= 0 || ndfSettle.SettlementDirection != "BANK_PAYS_COMPANY" || ndfSettle.GLJournalEntryRef == "" {
+		t.Fatalf("Failed to evaluate NDF fixing cash settlement: %+v", ndfSettle)
+	}
+
+	ndfHedgeTest := coretreasury.GetNDFEngine().TestHedgeEffectiveness("NDF-USDIDR-2026-081", ndfSettle.SettlementPayoffUSD, ndfSettle.SettlementPayoffUSD*0.98)
+	if ndfHedgeTest.HedgeQualifyingStatus != "HIGHLY_EFFECTIVE_COMPLIANT" || ndfHedgeTest.EffectivenessRatioPct < 80.0 || ndfHedgeTest.EffectivenessRatioPct > 125.0 {
+		t.Fatalf("Failed IFRS 9 hedge effectiveness test: %+v", ndfHedgeTest)
+	}
+	t.Logf("✓ Dual-Currency NDF FX Hedge Verified: Contract='%s', Notional=$5,000,000 USD, Forward=Rp %.0f -> JISDOR Fixing=Rp %.0f, CashPayoff=$%.2f USD (%s, Ref='%s'), IFRS 9 Ratio=%.1f%% (Status='%s', OCI_Reserve=$%.2f USD)",
+		ndfTrade.ContractID, ndfSettle.AgreedForwardRate, ndfSettle.PublishedFixingRate, ndfSettle.SettlementPayoffUSD, ndfSettle.SettlementDirection, ndfSettle.GLJournalEntryRef, ndfHedgeTest.EffectivenessRatioPct, ndfHedgeTest.HedgeQualifyingStatus, ndfHedgeTest.OCICashFlowReserveUSD)
+
+	// 74.3 Multi-Carrier Parcel Shipping Rate Broker & Delivery Slot Engine
+	carrierQuotes := corelogistics.GetCarrierBrokerEngine().QuoteOptimalRate("JAKARTA", "SURABAYA", corelogistics.ParcelSpec{
+		PackageID:        "PKG-2026-8812",
+		LengthCM:         45.0,
+		WidthCM:          35.0,
+		HeightCM:         20.0,
+		ActualWeightKG:   3.5,
+		IsFragile:        true,
+		DeclaredValueIDR: 8500000.0,
+	})
+	if len(carrierQuotes) == 0 || !carrierQuotes[0].IsRecommendedBest || carrierQuotes[0].ChargeableWeightKG < 3.5 {
+		t.Fatalf("Failed to compile multi-carrier parcel quotes: %+v", carrierQuotes)
+	}
+
+	consignment := corelogistics.GetCarrierBrokerEngine().BookPickupConsignment("JNE", "EXPRESS_NEXT_DAY", "WH-CENTRAL-JAKARTA", "Jl. Pemuda No. 45, Surabaya", 3.5, 115000.0)
+	if consignment.ConsignmentID == "" || consignment.TrackingAWBNumber == "" || consignment.ShipmentStatus != "PICKUP_SCHEDULED" {
+		t.Fatalf("Failed to book carrier pickup consignment: %+v", consignment)
+	}
+
+	carrierAudit := corelogistics.GetCarrierBrokerEngine().ReconcileBilling(consignment.TrackingAWBNumber, "JNE", 3.5, 115000.0)
+	if carrierAudit.AuditVerdict != "MATCHED_CLEAN" || carrierAudit.ClaimableRefundIDR != 0 {
+		t.Fatalf("Failed to reconcile carrier freight billing: %+v", carrierAudit)
+	}
+	t.Logf("✓ Multi-Carrier Shipping Broker Verified: Parcel Volumetric=6.3kg (Chargeable=%.1fkg), BestCarrier='%s' (%s, Rate=Rp %.0f, SLA=%dh, HistOTD=%.1f%%), Booked='%s' (AWB='%s', Status='%s'), BillingAudit='%s'",
+		carrierQuotes[0].ChargeableWeightKG, carrierQuotes[0].CarrierCode, carrierQuotes[0].ServiceLevel, carrierQuotes[0].TotalEstimatedIDR, carrierQuotes[0].EstimatedTransitHrs, carrierQuotes[0].OnTimeSLAHistoryPct, consignment.ConsignmentID, consignment.TrackingAWBNumber, consignment.ShipmentStatus, carrierAudit.AuditVerdict)
+
+	// 74.4 Autonomous Cloud FinOps Cost Allocator & Idle Asset Reaper
+	ingestedCount := coreitops.GetFinOpsEngine().IngestBilling([]coreitops.CloudResourceBilling{
+		{
+			ResourceID:          "i-09827419fa821",
+			CloudProvider:       "AWS",
+			ResourceType:        "COMPUTE_VM",
+			GrossMonthlyCostUSD: 480.0,
+			AverageCPUPercent:   2.1,
+			AverageRAMPercent:   8.5,
+			CostCenterTag:       "CC-DEV-TESTING",
+		},
+		{
+			ResourceID:          "vol-0129a882bf",
+			CloudProvider:       "AWS",
+			ResourceType:        "UNATTACHED_DISK",
+			GrossMonthlyCostUSD: 120.0,
+			AverageCPUPercent:   0.0,
+			AverageRAMPercent:   0.0,
+			CostCenterTag:       "SHARED_POOL",
+		},
+	})
+	if ingestedCount != 2 {
+		t.Fatalf("Failed to ingest cloud billing entries: %d", ingestedCount)
+	}
+
+	finopsAllocs := coreitops.GetFinOpsEngine().AllocateCostCenters("ORG-ENTERPRISE-TECH")
+	if len(finopsAllocs) != 3 || finopsAllocs[0].TotalAllocatedUSD <= 0 {
+		t.Fatalf("Failed to allocate FinOps department cost centers: %+v", finopsAllocs)
+	}
+
+	reapAction := coreitops.GetFinOpsEngine().ReapIdleInfrastructure("ORG-ENTERPRISE-TECH", "i-09827419fa821", "TERMINATED_ZOMBIE_INSTANCE")
+	if reapAction.ActionID == "" || reapAction.AnnualSavingsUSD != (480.0*12.0) {
+		t.Fatalf("Failed to reap idle cloud infrastructure: %+v", reapAction)
+	}
+	t.Logf("✓ FinOps Cloud Cost Allocator Verified: Ingested=%d items, CostCenters=%d (Top: '%s' = $%.0f USD, SharedPoolShare=$%.0f USD, Efficiency=%.1f%%), ReaperAction='%s' (Asset='%s', Action='%s', AnnualSavings=$%.0f USD)",
+		ingestedCount, len(finopsAllocs), finopsAllocs[0].DepartmentName, finopsAllocs[0].TotalAllocatedUSD, finopsAllocs[0].SharedPoolShareUSD, finopsAllocs[0].UtilizationEfficiency, reapAction.ActionID, reapAction.ResourceID, reapAction.ActionTaken, reapAction.AnnualSavingsUSD)
+
+	// 74.5 Smart Corporate Travel Carbon Budget & Green Booking Policy Enforcer
+	tripEmissions := esg.GetTravelCarbonEngine().CalculateTripEmissions(esg.TripSpecification{
+		TripID:              "TRIP-2026-REG-4412",
+		EmployeeID:          "EMP-EXEC-991",
+		DepartmentID:        "DEPT-SALES-APAC",
+		OriginCity:          "CGK",
+		DestinationCity:     "SUB",
+		DistanceKM:          720.0,
+		TravelMode:          "FLIGHT",
+		CabinClass:          "ECONOMY",
+		HotelNights:         2,
+		HotelGreenCertified: true,
+	})
+	if tripEmissions.TotalTripEmissionsKg <= 0 || tripEmissions.InternalCarbonFeeUSD <= 0 {
+		t.Fatalf("Failed to calculate travel GHG footprint: %+v", tripEmissions)
+	}
+
+	policyVerdict := esg.GetTravelCarbonEngine().AuditBookingPolicy(esg.TripSpecification{
+		TripID:              "TRIP-2026-REG-4412",
+		DistanceKM:          720.0,
+		TravelMode:          "FLIGHT",
+		CabinClass:          "ECONOMY",
+		HotelGreenCertified: true,
+	})
+	if policyVerdict.PolicyCompliance != "APPROVED_GREEN_TIER" || policyVerdict.RequiresVPApproval {
+		t.Fatalf("Failed green travel policy audit: %+v", policyVerdict)
+	}
+
+	deptCarbonBudget := esg.GetTravelCarbonEngine().DeductCarbonBudget("DEPT-SALES-APAC", tripEmissions.TotalTripEmissionsKg)
+	if deptCarbonBudget.ConsumedEmissionsTons <= 0 || deptCarbonBudget.DepartmentStanding == "" {
+		t.Fatalf("Failed to deduct departmental carbon budget: %+v", deptCarbonBudget)
+	}
+	t.Logf("✓ Green Travel Carbon Budget Verified: Trip='%s' (CGK->SUB, 720km Economy), Flight=%.1f kg, Hotel=%.1f kg (GreenCert=true), Total=%.1f kg CO2e, ShadowFee=$%.2f USD, Policy='%s' (VP_Approval=%v), Dept='%s' (Alloc=%.1f T, Consumed=%.2f T, Remaining=%.2f T, Burn=%.1f%%, Standing='%s')",
+		tripEmissions.TripID, tripEmissions.FlightEmissionsKgCO2e, tripEmissions.HotelEmissionsKgCO2e, tripEmissions.TotalTripEmissionsKg, tripEmissions.InternalCarbonFeeUSD, policyVerdict.PolicyCompliance, policyVerdict.RequiresVPApproval, deptCarbonBudget.DepartmentID, deptCarbonBudget.AllocatedBudgetTons, deptCarbonBudget.ConsumedEmissionsTons, deptCarbonBudget.RemainingQuotaTons, deptCarbonBudget.BudgetBurnRatePct, deptCarbonBudget.DepartmentStanding)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (74 SECTIONS: 65+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET) PASSED 100%!")
 }

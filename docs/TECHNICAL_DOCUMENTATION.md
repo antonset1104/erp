@@ -856,5 +856,35 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Automated Customs Clearance Declaration**: Endpoint `POST /api/v1/customs/gatt-valuation/generate-clearance-declaration` prepares formal import entry documentation (PIB / Entry Pack) calculating Import Duty, Import VAT, and Article 22 import taxes.
 - **Harmonized Customs & TP Audit Record**: Endpoint `GET /api/v1/customs/gatt-valuation/audit-summary/:shipment_id` delivers unified compliance dossiers aligning Customs and Tax Authority requirements.
 
+---
+
+## 26. AI CAPA RCA, NDF FX Hedge, Multi-Carrier Broker, FinOps Reaper & Green Travel Carbon Budget (v1.60.0)
+
+### 26.1 Closed-Loop AI Root Cause Analysis (RCA) & Ishikawa 5-Why CAPA Generator (`internal/core/quality/ai_capa_rca.go`)
+- **Automated 6M Ishikawa Taxonomy**: Endpoint `POST /api/v1/quality/rca/generate-fishbone-tree` structures non-conformance defects across Man, Machine, Material, Method, Measurement, and Milieu, identifying the highest-probability root cause categories.
+- **Iterative 5-Why Chain Solver**: Endpoint `POST /api/v1/quality/rca/solve-five-why-chain` drills iteratively through operational symptoms to uncover systemic failures and process design gaps with linked audit artifacts.
+- **Actionable 8D CAPA Action Plan**: Endpoints `POST /api/v1/quality/rca/issue-capa-action-plan` and `GET /api/v1/quality/rca/audit-trail/:ncr_id` assign departmental owners, target due dates, and verification criteria for corrective and preventive actions.
+
+### 26.2 Cross-Border Dual-Currency FX Hedge Accounting & NDF Settlement Engine (`internal/core/treasury/ndf_fx_hedge.go`)
+- **NDF Derivative Trade Booking**: Endpoint `POST /api/v1/treasury/ndf/book-contract` records Non-Deliverable Forward derivative contracts across major currency pairs (e.g. USD/IDR) linked to designated cash flow or fair value hedges.
+- **Automated Benchmark Fixing Settlement**: Endpoint `POST /api/v1/treasury/ndf/evaluate-fixing-settlement` consumes official fixing benchmarks (e.g. BI JISDOR) to compute USD net cash settlement payoffs and automated General Ledger accounting entries.
+- **IFRS 9 / PSAK 71 Hedge Effectiveness Testing**: Endpoint `POST /api/v1/treasury/ndf/test-hedge-effectiveness` executes dollar-offset ratio testing ($80\% - 125\%$), routing effective gains to OCI Cash Flow Reserves and ineffectiveness to P&L.
+- **Portfolio Exposure Overview**: Endpoint `GET /api/v1/treasury/ndf/portfolio-exposure/:company_id` summarizes aggregate hedged notional, weighted average rates, and unhedged exposure.
+
+### 26.3 Multi-Carrier Parcel Shipping Rate Broker & Dynamic Delivery Slot Booking Engine (`internal/core/logistics/carrier_broker.go`)
+- **Dimensional Volumetric Rate Brokerage**: Endpoint `POST /api/v1/logistics/carrier/quote-optimal-rate` calculates volumetric weights ($(L \times W \times H) / 5000$) and compares quotes across carriers (JNE, SiCepat, J&T) balancing cost and guaranteed delivery SLAs.
+- **Automated Consignment Booking**: Endpoint `POST /api/v1/logistics/carrier/book-pickup-consignment` reserves warehouse carrier pickup windows and issues real-time tracking Air Waybills (AWBs).
+- **Billing Overcharge Reconciliation**: Endpoints `POST /api/v1/logistics/carrier/reconcile-billing-overcharge` and `GET /api/v1/logistics/carrier/performance-scorecard` audit carrier invoices against ERP booked rates to reclaim weight disparity overcharges.
+
+### 26.4 Autonomous Cloud & IT Infrastructure FinOps Cost Allocator & Idle Asset Reaper (`internal/core/itops/finops_allocator.go`)
+- **Multi-Cloud Billing Ingestion**: Endpoint `POST /api/v1/itops/finops/ingest-cloud-billing` imports hourly resource line items and identifies unallocated shared pools and idle/orphan assets.
+- **Departmental Cost Center Allocation**: Endpoint `POST /api/v1/itops/finops/allocate-cost-centers` distributes shared cluster pools to business units based on proportional direct utilization metrics.
+- **Autonomous Asset Reaper Bot**: Endpoints `POST /api/v1/itops/finops/reap-idle-infrastructure` and `GET /api/v1/itops/finops/executive-dashboard/:org_id` decommission zombie VM instances and unattached disks, recovering substantial annual cloud budgets.
+
+### 26.5 Smart Corporate Travel Carbon Budget & Green Hotel/Flight Policy Enforcer (`internal/core/esg/travel_carbon_budget.go`)
+- **ICAO Travel Emissions Calculator**: Endpoint `POST /api/v1/esg/travel/calculate-trip-emissions` calculates business travel Scope 3 Category 6 emissions based on flight distances, cabin class spatial multipliers, and green hotel certification.
+- **Automated Green Travel Policy Auditing**: Endpoint `POST /api/v1/esg/travel/audit-booking-policy` enforces short-haul rail mandates (<500 km) and regional business class restrictions, requiring VP exceptions when violated.
+- **Departmental Carbon Budget Tracking**: Endpoints `POST /api/v1/esg/travel/deduct-carbon-budget` and `GET /api/v1/esg/travel/department-budget-status/:department_id` debit trip footprints from quarterly departmental carbon quotas and assess internal carbon fees ($50/ton).
+
 
 

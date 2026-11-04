@@ -27356,6 +27356,384 @@ async function triggerGATTCustomsValuation() {
     }
 }
 
+async function triggerAICapaRCA() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis cacat non-conformance dengan diagram Ishikawa & 5-Why RCA...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const ncrID = "NCR-2026-MFG-" + Math.floor(1000 + Math.random() * 9000);
+        const fishbone = await api('/quality/rca/generate-fishbone-tree', 'POST', {
+            ncr_id: ncrID,
+            plant_id: "PLANT-BEKASI-01",
+            line_id: "LINE-SMT-01",
+            part_number: "PCB-MAIN-CONTROL-REV4",
+            defect_code: "SOLDER_BRIDGING_SHORT",
+            defect_quantity: 42,
+            lot_number: "LOT-2026-W09",
+            severity: "MAJOR",
+            immediate_action: "Karantina batch di buffer inspeksi & hentikan sementara feeder 3",
+            reported_by: "Agus Pratama (QC Inspector)"
+        });
+
+        const fiveWhy = await api('/quality/rca/solve-five-why-chain', 'POST', {
+            ncr_id: ncrID,
+            problem_statement: "Short circuit solder bridging terdeteksi pada 42 unit PCB main controller."
+        });
+
+        const capa = await api('/quality/rca/issue-capa-action-plan', 'POST', {
+            ncr_id: ncrID,
+            auditor: "Ir. Gunawan Setiadi (Quality Assurance Director)"
+        });
+
+        if (badge) badge.textContent = `🔬 QMS: ${capa.capa.overall_status}`;
+        if (answerEl) {
+            let out = `🔬 CLOSED-LOOP AI ROOT CAUSE ANALYSIS (RCA) & ISHIKAWA 5-WHY CAPA GENERATOR:\n`;
+            out += `No Laporan Ketidaksesuaian (NCR): ${ncrID}\n`;
+            out += `Kategori 6M Paling Dominan (Most Probable): ${fishbone.diagram.most_probable_category}\n`;
+            out += `Klasifikasi Akar Masalah Sistemik: ${fiveWhy.chain.root_cause_type}\n`;
+            out += `Ringkasan Akar Masalah (Root Cause): ${fiveWhy.chain.root_cause_summary}\n\n`;
+            out += `RESOLUSI RANTAI 5-WHY ITERATIF:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            fiveWhy.chain.steps.forEach(s => {
+                out += `  Why ${s.level}: ${s.question}\n`;
+                out += `  -> Jawab: ${s.answer} (Bukti: ${s.evidence_artifact})\n`;
+            });
+            out += `\nPAKET TINDAKAN KOREKTIF & PREVENTIF (CAPA 8D):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            capa.capa.actions.forEach(a => {
+                out += `  ✓ [${a.action_type}] ${a.description}\n`;
+                out += `     PIC: ${a.assigned_owner} (${a.assigned_department}) | Due: ${a.target_due_date.substring(0, 10)}\n`;
+            });
+            out += `Status CAPA: ${capa.capa.overall_status} | Auditor: ${capa.capa.effectiveness_auditor}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Otomatisasi 8D CAPA mempercepat resolusi masalah mutu pabrik dari hitungan hari menjadi menit.</li>
+                <li>Menghubungkan sensor IoT dengan job card pemeliharaan CMMS untuk mencegah terjadinya insiden berulang.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses AI CAPA RCA: ' + err.message;
+    }
+}
+
+async function triggerNDFFXHedge() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menghitung penyelesaian Non-Deliverable Forward (NDF) & uji efektivitas IFRS 9...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const contractID = "NDF-USDIDR-2026-" + Math.floor(100 + Math.random() * 900);
+        await api('/treasury/ndf/book-contract', 'POST', {
+            contract_id: contractID,
+            company_id: "CMP-001",
+            counterparty_bank: "Citibank N.A. Jakarta Branch",
+            currency_pair: "USD/IDR",
+            notional_amount_usd: 5000000.0,
+            contract_forward_rate: 15850.0,
+            fixing_benchmark: "BI_JISDOR",
+            hedge_designation: "CASH_FLOW_HEDGE"
+        });
+
+        const settle = await api('/treasury/ndf/evaluate-fixing-settlement', 'POST', {
+            contract_id: contractID,
+            published_fixing_rate: 16120.0
+        });
+
+        const test = await api('/treasury/ndf/test-hedge-effectiveness', 'POST', {
+            contract_id: contractID,
+            derivative_delta_usd: settle.settlement.settlement_payoff_usd,
+            hedged_item_delta_usd: settle.settlement.settlement_payoff_usd * 0.98
+        });
+
+        if (badge) badge.textContent = `💱 NDF: ${settle.settlement.settlement_direction}`;
+        if (answerEl) {
+            let out = `💱 CROSS-BORDER DUAL-CURRENCY FX HEDGE ACCOUNTING & NDF SETTLEMENT ENGINE:\n`;
+            out += `ID Kontrak Derivatif: ${settle.settlement.contract_id}\n`;
+            out += `Kurs Forward yang Disepakati (Contract Rate): Rp ${settle.settlement.agreed_forward_rate.toLocaleString()} / USD\n`;
+            out += `Kurs Acuan Penetapan (BI JISDOR Fixing Rate): Rp ${settle.settlement.published_fixing_rate.toLocaleString()} / USD\n`;
+            out += `Selisih Kurs (Fixing Delta): +Rp ${settle.settlement.rate_differential.toFixed(1)} / USD\n\n`;
+            out += `HASIL PENYELESAIAN KAS DERIVATIF (USD CASH SETTLEMENT):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Nilai Payoff Kas: $${settle.settlement.settlement_payoff_usd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} USD\n`;
+            out += `Arah Aliran Kas: ${settle.settlement.settlement_direction} (Kas Diterima Perusahaan)\n`;
+            out += `Referensi Jurnal Akuntansi GL: ${settle.settlement.gl_journal_entry_ref}\n\n`;
+            out += `UJI EFEKTIVITAS LINDUNG NILAI IFRS 9 / PSAK 71 (DOLLAR-OFFSET RATIO):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Rasio Efektivitas: ${test.hedge_test.effectiveness_ratio_pct.toFixed(1)}% (Batas Koridor Wajib: 80% - 125%)\n`;
+            out += `Status Kualifikasi Akuntansi: ${test.hedge_test.hedge_qualifying_status}\n`;
+            out += `Pencadangan Ekuitas OCI (Cash Flow Hedge Reserve): $${test.hedge_test.oci_cash_flow_reserve_usd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} USD\n`;
+            out += `Pengakuan Ketidakefektifan ke Laba/Rugi (P&L): $${test.hedge_test.pnl_ineffectiveness_usd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} USD\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>NDF mengamankan arus kas devisa impor bahan baku tanpa perlu menukar fisik mata uang Rupiah secara langsung.</li>
+                <li>Kepatuhan IFRS 9 memastikan fluktuasi nilai wajar lindung nilai tidak merusak laporan laba rugi bulanan.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses NDF FX hedge: ' + err.message;
+    }
+}
+
+async function triggerCarrierBroker() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mencari tarif kurir multi-carrier terbaik & memesan slot penjemputan paket...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const quotes = await api('/logistics/carrier/quote-optimal-rate', 'POST', {
+            origin_city: "JAKARTA",
+            dest_city: "SURABAYA",
+            parcel: {
+                package_id: "PKG-2026-8812",
+                length_cm: 45.0,
+                width_cm: 35.0,
+                height_cm: 20.0,
+                actual_weight_kg: 3.5,
+                is_fragile: true,
+                declared_value_idr: 8500000.0
+            }
+        });
+
+        const booking = await api('/logistics/carrier/book-pickup-consignment', 'POST', {
+            carrier_code: "JNE",
+            service_level: "EXPRESS_NEXT_DAY",
+            origin_hub: "WH-CENTRAL-JAKARTA",
+            destination_address: "Jl. Pemuda No. 45, Surabaya, Jawa Timur",
+            agreed_freight_cost_idr: 115000.0
+        });
+
+        const audit = await api('/logistics/carrier/reconcile-billing-overcharge', 'POST', {
+            tracking_awb_number: booking.consignment.tracking_awb_number,
+            carrier_code: "JNE",
+            billed_weight_kg: 3.5,
+            billed_amount_idr: 115000.0
+        });
+
+        if (badge) badge.textContent = `📦 Carrier: ${booking.consignment.carrier_code} ${booking.consignment.service_level}`;
+        if (answerEl) {
+            let out = `📦 MULTI-CARRIER PARCEL SHIPPING RATE BROKER & DELIVERY SLOT ENGINE:\n`;
+            out += `No Resi Pengiriman (Air Waybill): ${booking.consignment.tracking_awb_number}\n`;
+            out += `Kurir Terpilih: ${booking.consignment.carrier_code} (${booking.consignment.service_level})\n`;
+            out += `Hub Asal: ${booking.consignment.origin_hub} -> Tujuan: ${booking.consignment.destination_address}\n`;
+            out += `Ongkos Kirim Disepakati: Rp ${booking.consignment.agreed_freight_cost_idr.toLocaleString()}\n`;
+            out += `Status Penjemputan: ${booking.consignment.shipment_status}\n\n`;
+            out += `PERBANDINGAN TARIF MULTI-CARRIER & SLA TEPAT WAKTU:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            quotes.quotes.forEach(q => {
+                out += `  ${q.is_recommended_best ? '★ [REKOMENDASI TERBAIK]' : '  [ALTERNATIF]'} ${q.carrier_code} ${q.service_level}:\n`;
+                out += `     Total Tarif: Rp ${q.total_estimated_idr.toLocaleString()} | Estimasi: ${q.estimated_transit_hrs} jam | Histori OTD SLA: ${q.on_time_sla_history_pct}%\n`;
+            });
+            out += `\nAUDIT TAGIHAN INVOICE KURIR & REKONSILIASI BERAT:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Hasil Audit Faktur: ${audit.audit.audit_verdict}\n`;
+            out += `Berat Terdata di ERP: ${audit.audit.booked_weight_kg} kg | Berat Ditagihkan Kurir: ${audit.audit.billed_weight_kg} kg\n`;
+            out += `Klaim Pengembalian Selisih (Refund Claimable): Rp ${audit.audit.claimable_refund_idr.toLocaleString()}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Broker multi-kurir otomatis memilih rute paling hemat dengan garansi SLA tepat waktu terbaik.</li>
+                <li>Pemeriksaan invoice otomatis mencegah kebocoran jutaan rupiah akibat tagihan berat volumetrik yang salah dari pihak ekspedisi.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses broker kurir pengiriman: ' + err.message;
+    }
+}
+
+async function triggerFinOpsAllocator() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengalokasikan biaya multi-cloud FinOps & mengeksekusi reaper aset zombie...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        await api('/itops/finops/ingest-cloud-billing', 'POST', {
+            items: [
+                {
+                    resource_id: "i-09827419fa821",
+                    cloud_provider: "AWS",
+                    resource_type: "COMPUTE_VM",
+                    gross_monthly_cost_usd: 480.0,
+                    average_cpu_percent: 2.1,
+                    average_ram_percent: 8.5,
+                    cost_center_tag: "CC-DEV-TESTING"
+                },
+                {
+                    resource_id: "vol-0129a882bf",
+                    cloud_provider: "AWS",
+                    resource_type: "UNATTACHED_DISK",
+                    gross_monthly_cost_usd: 120.0,
+                    average_cpu_percent: 0.0,
+                    average_ram_percent: 0.0,
+                    cost_center_tag: "SHARED_POOL"
+                }
+            ]
+        });
+
+        const allocs = await api('/itops/finops/allocate-cost-centers', 'POST', {
+            org_id: "ORG-ENTERPRISE-TECH"
+        });
+
+        const reap = await api('/itops/finops/reap-idle-infrastructure', 'POST', {
+            org_id: "ORG-ENTERPRISE-TECH",
+            resource_id: "i-09827419fa821",
+            action_taken: "TERMINATED_ZOMBIE_INSTANCE"
+        });
+
+        const dash = await api('/itops/finops/executive-dashboard/ORG-ENTERPRISE-TECH', 'GET');
+
+        if (badge) badge.textContent = `☁️ FinOps: $${dash.dashboard.total_cloud_spend_usd.toLocaleString()} Spend`;
+        if (answerEl) {
+            let out = `☁️ AUTONOMOUS CLOUD FINOPS COST ALLOCATOR & IDLE ASSET REAPER:\n`;
+            out += `Organisasi: ${dash.dashboard.org_id} (Periode: ${dash.dashboard.reporting_period})\n`;
+            out += `Total Pengeluaran Cloud Bulanan: $${dash.dashboard.total_cloud_spend_usd.toLocaleString()} USD\n`;
+            out += `Cakupan Alokasi Biaya (Allocation Coverage): ${dash.dashboard.allocation_coverage_pct}%\n`;
+            out += `Potensi Pemborosan Aset Menganggur Terdeteksi: $${dash.dashboard.identified_idle_waste_usd.toLocaleString()} USD/bulan\n`;
+            out += `Estimasi Penghematan Tahunan Berkat Reaper: $${dash.dashboard.annual_reaped_savings_usd.toLocaleString()} USD/tahun\n\n`;
+            out += `DISTRIBUSI ALOKASI BIAYA CLOUD ANTAR-DEPARTEMEN:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            allocs.allocations.forEach(a => {
+                out += `  ★ ${a.department_name} (${a.cost_center_id}):\n`;
+                out += `     Biaya Langsung: $${a.direct_cost_usd.toLocaleString()} | Beban Shared Pool: $${a.shared_pool_share_usd.toFixed(0)} | Total: $${a.total_allocated_usd.toFixed(0)} USD (Efisiensi: ${a.utilization_efficiency}%)\n`;
+            });
+            out += `\nEKSEKUSI PEMBERSIHAN ASET ZOMBIE (REAPER BOT):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `ID Aset: ${reap.action.resource_id} (${reap.action.resource_type})\n`;
+            out += `Tindakan: ${reap.action.action_taken}\n`;
+            out += `Penghematan yang Dihasilkan: $${reap.action.annual_savings_usd.toLocaleString()} USD/tahun (Dieksekusi oleh: ${reap.action.reaped_by_owner})\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>FinOps mengalokasikan cluster cloud bersama (Kubernetes, Database) secara transparan ke masing-masing divisi.</li>
+                <li>Bot reaper otonom menghapus instance testing yang terbengkalai, memangkas pembengkakan tagihan cloud hingga 30%.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses FinOps cloud allocator: ' + err.message;
+    }
+}
+
+async function triggerTravelCarbonBudget() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menghitung emisi Scope 3 perjalanan dinas & memverifikasi kuota karbon...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const tripID = "TRIP-2026-REG-" + Math.floor(1000 + Math.random() * 9000);
+        const emissions = await api('/esg/travel/calculate-trip-emissions', 'POST', {
+            trip_id: tripID,
+            employee_id: "EMP-EXEC-991",
+            department_id: "DEPT-SALES-APAC",
+            origin_city: "CGK",
+            destination_city: "SUB",
+            distance_km: 720.0,
+            travel_mode: "FLIGHT",
+            cabin_class: "ECONOMY",
+            hotel_nights: 2,
+            hotel_green_certified: true
+        });
+
+        const policy = await api('/esg/travel/audit-booking-policy', 'POST', {
+            trip_id: tripID,
+            employee_id: "EMP-EXEC-991",
+            department_id: "DEPT-SALES-APAC",
+            origin_city: "CGK",
+            destination_city: "SUB",
+            distance_km: 720.0,
+            travel_mode: "FLIGHT",
+            cabin_class: "ECONOMY",
+            hotel_nights: 2,
+            hotel_green_certified: true
+        });
+
+        const budget = await api('/esg/travel/deduct-carbon-budget', 'POST', {
+            department_id: "DEPT-SALES-APAC",
+            emissions_kg: emissions.emissions.total_trip_emissions_kg
+        });
+
+        if (badge) badge.textContent = `🌿 ESG: ${policy.verdict.policy_compliance}`;
+        if (answerEl) {
+            let out = `🌿 SMART CORPORATE TRAVEL CARBON BUDGET & GREEN POLICY ENFORCER:\n`;
+            out += `ID Perjalanan Dinas: ${tripID}\n`;
+            out += `Departemen: ${budget.budget.department_id} (Periode: ${budget.budget.quarter_period})\n`;
+            out += `Kepatuhan Kebijakan Hijau: ${policy.verdict.policy_compliance}\n`;
+            out += `Persetujuan VP Khusus: ${policy.verdict.requires_vp_approval ? 'DIPERLUKAN' : 'TIDAK DIPERLUKAN (LOLOS OTOMATIS)'}\n\n`;
+            out += `ANALISIS EMISI GAS RUMAH KACA PERJALANAN (SCOPE 3 CAT 6):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Emisi Penerbangan: ${emissions.emissions.flight_emissions_kg_co2e.toFixed(1)} kg CO2e\n`;
+            out += `Emisi Penginapan Hotel: ${emissions.emissions.hotel_emissions_kg_co2e.toFixed(1)} kg CO2e (Sertifikasi Hijau: YA)\n`;
+            out += `Total Emisi Perjalanan: ${emissions.emissions.total_trip_emissions_kg.toFixed(1)} kg CO2e\n`;
+            out += `Biaya Bayangan Karbon Internal (Carbon Fee @ $50/ton): $${emissions.emissions.internal_carbon_fee_usd.toFixed(2)} USD\n\n`;
+            out += `STATUS KUOTA ANGGARAN KARBON DEPARTEMEN:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Pagu Anggaran Karbon Kuartal: ${budget.budget.allocated_budget_tons} Ton CO2e\n`;
+            out += `Emisi Terpakai Saat Ini: ${budget.budget.consumed_emissions_tons.toFixed(2)} Ton CO2e (${budget.budget.budget_burn_rate_pct.toFixed(1)}% Terpakai)\n`;
+            out += `Sisa Kuota Karbon Departemen: ${budget.budget.remaining_quota_tons.toFixed(2)} Ton CO2e\n`;
+            out += `Status Peringkat Departemen: ${budget.budget.department_standing}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pagu anggaran karbon Scope 3 mengendalikan emisi perjalanan dinas sesuai komitmen Net-Zero korporat.</li>
+                <li>Mendorong pemilihan transportasi kereta cepat atau hotel tersertifikasi hijau melalui audit otomatis sebelum tiket terbit.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses green travel carbon budget: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {
