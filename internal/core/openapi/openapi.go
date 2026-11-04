@@ -1447,6 +1447,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/aviation/mro/evaluate-hard-landing-exceedance": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Aviation MRO Aircraft Structural Fatigue, Flight Cycles & Hard Landing Sentinel (FAA Part 145 & EASA Part-M)",
+					"description": "Classifies touchdown G-force and sink rate exceedances, calculates Palmgren-Miner cumulative airframe fatigue, and issues NDT inspection mandates.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Hard landing severity level, required NDT inspection list, AOG grounding status, and remaining safe cycles"},
+					},
+				},
+			},
+			"/api/v1/marine/lng/optimize-reliquefaction-balance": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Cryogenic Marine LNG Boil-Off Gas (BOG) & Reliquefaction Plant Optimizer (IMO IGC Code & SIGTTO)",
+					"description": "Optimizes dynamic allocation between dual-fuel engine propulsion, Brayton sub-cooler reliquefaction, and gas combustion to stabilize tank pressure.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Hourly BOG rate, reliquefaction allocation, compressor power kW, daily cargo saved USD, and stabilized pressure"},
+					},
+				},
+			},
+			"/api/v1/semiconductor/fab/calculate-wafer-yield-model": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Semiconductor Cleanroom Fab Yield, Particle Defectivity & Die Sort Binning Optimizer (SEMI E10 & ISO 14644-1 Class 1)",
+					"description": "Applies the Murphy-Seeds defect density yield model to 300mm wafer lots, intercepts cleanroom aerosol excursions, and models die yields.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Murphy yield percentage, projected good die count, cleanroom excursion alert, and SEMI compliance digest"},
+					},
+				},
+			},
+			"/api/v1/utilities/digester/evaluate-acidification-stability": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Municipal Wastewater Sludge Anaerobic Digestion & Biomethane RNG Co-Gen Optimizer (EPA Part 503 & EN 16723)",
+					"description": "Monitors FOS/TAC volatile fatty acid to alkalinity ratios to prevent sour digester collapse, optimizes biomethane output, and calculates RNG revenue.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "FOS/TAC ratio, digester health status, sludge feed throttle percentage, and biomethane daily revenue USD"},
+					},
+				},
+			},
+			"/api/v1/railway/wheel/evaluate-flange-safety-and-rcf": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Railway Rolling Stock Wheel-Rail Contact Mechanics & Axle Flaw Sentinel (EN 13262 & UIC 510-2)",
+					"description": "Analyzes wayside WILD impact loads, wheel flat defects, and UIC flange qR factors to prevent wheel climb derailment and schedule CNC lathe reprofiling.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Flange derailment risk, rolling contact fatigue severity, speed restriction command, and CNC lathe mandate"},
+					},
+				},
+			},
 		},
 	}
 }

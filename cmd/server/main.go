@@ -14,6 +14,7 @@ import (
 	coreaccount "erp-golang/internal/core/account"
 	coreagriculture "erp-golang/internal/core/agriculture"
 	coreasset "erp-golang/internal/core/asset"
+	coreaviation "erp-golang/internal/core/aviation"
 	corecosting "erp-golang/internal/core/costing"
 	corecpq "erp-golang/internal/core/cpq"
 	corecrm "erp-golang/internal/core/crm"
@@ -32,6 +33,7 @@ import (
 	corelegal "erp-golang/internal/core/legal"
 	corelogistics "erp-golang/internal/core/logistics"
 	coremaintenance "erp-golang/internal/core/maintenance"
+	coremarine "erp-golang/internal/core/marine"
 	coremining "erp-golang/internal/core/mining"
 	coremrp "erp-golang/internal/core/mrp"
 	corepharma "erp-golang/internal/core/pharma"
@@ -39,13 +41,16 @@ import (
 	coreprocurement "erp-golang/internal/core/procurement"
 	coreproject "erp-golang/internal/core/project"
 	corequality "erp-golang/internal/core/quality"
+	corerailway "erp-golang/internal/core/railway"
 	corescm "erp-golang/internal/core/scm"
+	coresemiconductor "erp-golang/internal/core/semiconductor"
 	coreservice "erp-golang/internal/core/service"
 	coresubscription "erp-golang/internal/core/subscription"
 	coresystem "erp-golang/internal/core/system"
 	coretax "erp-golang/internal/core/tax"
 	coretradefinance "erp-golang/internal/core/tradefinance"
 	coretreasury "erp-golang/internal/core/treasury"
+	coreutilities "erp-golang/internal/core/utilities"
 	corevmi "erp-golang/internal/core/vmi"
 	corewms "erp-golang/internal/core/wms"
 	"erp-golang/internal/core/esg"
@@ -304,7 +309,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.66.0",
+			"version":    "1.67.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -449,6 +454,11 @@ func main() {
 		coremaintenance.RegisterKilnRoutes(apiV1)
 		corelegal.RegisterPatentRoutes(apiV1)
 		coreenergy.RegisterTurbineRoutes(apiV1)
+		coreaviation.RegisterAviationRoutes(apiV1)
+		coremarine.RegisterMarineRoutes(apiV1)
+		coresemiconductor.RegisterSemiconductorRoutes(apiV1)
+		coreutilities.RegisterUtilitiesRoutes(apiV1)
+		corerailway.RegisterRailwayRoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend

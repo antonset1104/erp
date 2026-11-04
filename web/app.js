@@ -30052,6 +30052,405 @@ async function triggerTurbineEOH() {
     }
 }
 
+async function triggerAviationMRO() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis akselerasi pendaratan G-force, kelelahan fusi & sertifikasi kelaikan udara FAA...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const tail = "PK-GIA-777";
+
+        // 1. Ingest telemetry
+        await api('/aviation/mro/ingest-flight-telemetry', 'POST', {
+            tail_number: tail,
+            aircraft_model: "BOEING_777_300ER",
+            flight_number: "GA-882",
+            origin_icao: "WIII",
+            destination_icao: "NRT",
+            total_flight_hours: 28450.0,
+            total_flight_cycles: 4920,
+            touchdown_sink_rate_fps: 10.8,
+            vertical_acceleration_g: 2.82,
+            gross_landing_weight_kg: 242000.0,
+            max_design_landing_weight_kg: 251290.0
+        });
+
+        // 2. Evaluate hard landing
+        const evalRes = await api('/aviation/mro/evaluate-hard-landing-exceedance', 'POST', {
+            tail_number: tail
+        });
+
+        // 3. Issue certificate
+        const certRes = await api('/aviation/mro/issue-airworthiness-release-certificate', 'POST', {
+            tail_number: tail,
+            certificate_type: "FAA_FORM_8130_3",
+            inspector_license: "FAA-A&P-3981120-IA",
+            amo_approval_ref: "GMF-AEROASIA-FAA-PART145-CERT-8812"
+        });
+
+        // 4. Dossier
+        const dossierRes = await api(`/aviation/mro/aircraft-structural-fatigue-dossier/${tail}`, 'GET');
+
+        if (badge) badge.textContent = `✈️ AVIATION: ${evalRes.data.g_force_peak}G Peak | ${certRes.data.airworthiness_status}`;
+        if (answerEl) {
+            let out = `✈️ AVIATION MRO AIRCRAFT STRUCTURAL FATIGUE & HARD LANDING SENTINEL (FAA PART 145 / EASA PART-M):\n`;
+            out += `Pesawat: ${tail} (Boeing 777-300ER) | Penerbangan: GA-882 (Jakarta WIII -> Tokyo NRT)\n`;
+            out += `Akumulasi Jam & Siklus Terbang: ${dossierRes.data.total_flight_hours.toLocaleString()} Jam / ${dossierRes.data.total_flight_cycles.toLocaleString()} Siklus\n\n`;
+            out += `DETEKSI IMPAK PENDARATAN KERAS & ANALISIS KELELAHAN FUSELAGE:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Akselerasi Vertikal Puncak (Vertical Load): ${evalRes.data.g_force_peak} G (Ambang Batas Hard Landing > 2.6G)\n`;
+            out += `• Kecepatan Penurunan Sentuh Landasan (Sink Rate): ${evalRes.data.sink_rate_fps} ft/s (Batas Normal < 6.0 ft/s)\n`;
+            out += `• Klasifikasi Tingkat Keparahan Impak: ${evalRes.data.touchdown_severity_level}\n`;
+            out += `• Indeks Kerusakan Kumulatif Palmgren-Miner: ${evalRes.data.palmgren_miner_damage_index}\n`;
+            out += `• Sisa Siklus Terbang Aman yang Diproyeksikan: ${evalRes.data.remaining_safe_flight_cycles.toLocaleString()} Siklus\n`;
+            out += `• Status Larangan Terbang Darurat (AOG Grounding): ${evalRes.data.aircraft_grounded_aog ? 'GROUNDED UNTUK MANDATORY NDT' : 'LAYAK TERBANG'}\n`;
+            out += `• Mandat Inspeksi NDT: ${evalRes.data.required_ndt_inspections.join(', ')}\n\n`;
+            out += `SERTIFIKASI KELAIKAN UDARA & IZIN PENGOPERASIAN KEMBALI:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Sertifikat Rilis: ${certRes.data.certificate_id} (${certRes.data.certificate_type})\n`;
+            out += `• Organisasi Pemeliharaan Terakreditasi: ${certRes.data.amo_approval_ref}\n`;
+            out += `• Inspektur Berlisensi Pengesah: ${certRes.data.licensed_inspector_license_id}\n`;
+            out += `• Status Akhir Kelaikan Terbang: ${certRes.data.airworthiness_status}\n`;
+            out += `• Hash Tanda Tangan Digital Kriptografis: ${certRes.data.digital_signature_hash.substring(0, 32)}...\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Inspeksi NDT terarah pada trunnion roda pendarat dan wing attach bolts mengeliminasi risiko keretakan fatal struktur sayap.</li>
+                <li>Digitalisasi FAA Form 8130-3 menjamin kepatuhan audit IATA IOSA dan meminimalkan biaya sewa pesawat AOG.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses aviation MRO: ' + err.message;
+    }
+}
+
+async function triggerMarineLNG() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengoptimalkan Boil-Off Gas (BOG) kriogenik, relikuifaksi & proteksi tekanan tangki LNG...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const imo = "IMO-9781200";
+
+        // 1. Ingest telemetry
+        await api('/marine/lng/ingest-cargo-telemetry', 'POST', {
+            vessel_imo: imo,
+            vessel_name: "LNG Nusantara Tangguh",
+            cargo_tank_number: "TANK-NO-1-MEMBRANE-MARK-III",
+            cargo_volume_m3: 42500.0,
+            cargo_temp_c: -161.8,
+            tank_vapor_pressure_kpa: 121.8,
+            ambient_air_temp_c: 31.5,
+            sea_water_temp_c: 29.0,
+            ship_speed_knots: 18.5,
+            dual_fuel_engine_demand_kg_hr: 650.0
+        });
+
+        // 2. Optimize BOG balance
+        const planRes = await api('/marine/lng/optimize-reliquefaction-balance', 'POST', {
+            vessel_imo: imo
+        });
+
+        // 3. Safety safeguard
+        const safetyRes = await api('/marine/lng/trigger-tank-pressure-relief-safeguard', 'POST', {
+            vessel_imo: imo
+        });
+
+        // 4. Dossier
+        const dossierRes = await api(`/marine/lng/voyage-boil-off-dossier/${imo}`, 'GET');
+
+        if (badge) badge.textContent = `🚢 LNG: BOG ${planRes.data.total_bog_generated_kg_hr} kg/h | Saved $${(planRes.data.daily_cargo_saved_usd).toLocaleString()}/day`;
+        if (answerEl) {
+            let out = `🚢 CRYOGENIC MARINE LNG BOIL-OFF GAS (BOG) & RELIQUEFACTION OPTIMIZER (IMO IGC CODE):\n`;
+            out += `Kapal: ${dossierRes.data.vessel_name} (${imo}) | Tangki: ${dossierRes.data.cargo_tank_number}\n`;
+            out += `Suhu Kargo Metana: ${dossierRes.data.cargo_temp_c}°C | Tekanan Uap Tangki Saat Ini: ${dossierRes.data.tank_vapor_pressure_kpa} kPa\n\n`;
+            out += `ALOKASI TERMODINAMIKA BOIL-OFF GAS & EFISIENSI BAHAN BAKAR:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Total Laju Penguapan Alami BOG: ${planRes.data.total_bog_generated_kg_hr} kg/jam\n`;
+            out += `• Alokasi Bahan Bakar Mesin Propulsi Dual-Fuel: ${planRes.data.allocated_fuel_engine_kg_hr} kg/jam\n`;
+            out += `• Alokasi Pencairan Kembali (Sub-Cooler Reliquefaction): ${planRes.data.allocated_reliquefaction_kg_hr} kg/jam\n`;
+            out += `• Alokasi Pembakaran Darurat Gas Combustion Unit (GCU): ${planRes.data.allocated_gcu_kg_hr} kg/jam\n`;
+            out += `• Konsumsi Daya Kompresor Relikuifaksi: ${planRes.data.compressor_power_kw} kW\n`;
+            out += `• Nilai Kargo Berhasil Diselamatkan: $${planRes.data.daily_cargo_saved_usd.toLocaleString()} USD / Hari\n`;
+            out += `• Target Tekanan Tangki Pasca Stabilisasi: ${planRes.data.tank_pressure_stabilized_kpa} kPa (Zona Hijau Aman)\n\n`;
+            out += `SISTEM KESELAMATAN TEKANAN TANGKI KRIOGENIK (SAFETY RELIEF):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Intervensi Darurat GCU Diaktifkan: ${safetyRes.data.emergency_gcu_activated ? 'AKTIF (Mencegah Overpressure)' : 'STANDBY'}\n`;
+            out += `• Mitigasi Risiko Pelepasan Tekanan Berlebih: ${safetyRes.data.overpressure_risk_mitigated ? 'BERHASIL DIMINIMALISIR' : 'KRITIS'}\n`;
+            out += `• Estimasi Kerugian Katastropik Terhindar: $${safetyRes.data.avoided_tank_catastrophic_damage_usd.toLocaleString()} USD (Mencegah Kerusakan Membran Tangki)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pemanfaatan BOG sebagai bahan bakar mesin propulsi menghemat konsumsi minyak bunker berkadar belerang rendah.</li>
+                <li>Pencairan kembali kargo gas metana mengurangi emisi gas rumah kaca dan mempertahankan nilai tonase kargo saat tiba di pelabuhan tujuan.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses marine LNG: ' + err.message;
+    }
+}
+
+async function triggerSemiconductorFab() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memodelkan Murphy wafer yield, kerapatan defek D0 & pemilahan die sort binning...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const lotID = "LOT-4NM-NPU-8820";
+
+        // 1. Ingest cleanroom metrology
+        await api('/semiconductor/fab/ingest-cleanroom-metrology', 'POST', {
+            cleanroom_bay_id: "BAY-LITHO-EUV-01",
+            fab_site_id: "FAB-TSMC-NANO-01",
+            iso_class_level: 1,
+            particle_count_0_1_micron_per_m3: 4.5,
+            particle_count_0_5_micron_per_m3: 0.2,
+            temperature_c: 21.0,
+            relative_humidity_pct: 45.0,
+            air_velocity_mps: 0.46
+        });
+
+        // 2. Calculate wafer yield
+        const yieldRes = await api('/semiconductor/fab/calculate-wafer-yield-model', 'POST', {
+            wafer_lot_id: lotID,
+            product_family_sku: "AI_TENSOR_NPU_4NM",
+            gross_die_count_per_wafer: 520,
+            die_area_mm2: 110.0,
+            defect_density_d0_per_cm2: 0.08
+        });
+
+        // 3. Execute die sort binning
+        const binRes = await api('/semiconductor/fab/execute-die-sort-binning', 'POST', {
+            wafer_lot_id: lotID,
+            total_tested_die_count: 13000
+        });
+
+        // 4. Dossier
+        const dossierRes = await api(`/semiconductor/fab/lot-defectivity-dossier/${lotID}`, 'GET');
+
+        if (badge) badge.textContent = `🔬 SEMI: Yield ${yieldRes.data.murphy_yield_pct}% | Val $${(binRes.data.commercial_valuation_usd/1e6).toFixed(2)}M`;
+        if (answerEl) {
+            let out = `🔬 SEMICONDUCTOR CLEANROOM FAB YIELD & DIE SORT BINNING OPTIMIZER (SEMI E10 & ISO CLASS 1):\n`;
+            out += `Lot Wafer: ${lotID} | Produk: ${yieldRes.data.product_family_sku} (300mm Wafer Node 4nm)\n`;
+            out += `Spesifikasi Bersih: ISO 14644-1 Class 1 (<10 partikel/m3) | Status Fab: TERSERTIFIKASI AMAN\n\n`;
+            out += `HASIL PEMODELAN HASIL PANEN WAFER (MURPHY-SEEDS YIELD MODEL):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Kerapatan Defek Partikel (Defect Density D0): ${yieldRes.data.defect_density_d0_per_cm2} defek/cm²\n`;
+            out += `• Luas Area Die Sirkuit Terpadu: ${yieldRes.data.die_area_mm2} mm² | Gross Die per Wafer: ${yieldRes.data.gross_die_count_per_wafer}\n`;
+            out += `• PERSENTASE WAFER YIELD MURPHY: ${yieldRes.data.murphy_yield_pct}%\n`;
+            out += `• Estimasi Die Berfungsi per Wafer: ${yieldRes.data.projected_good_die_count} Die Sempurna\n`;
+            out += `• Ekskursi Partikel Aerosol: ${yieldRes.data.cleanroom_excursion_detected ? 'TERDETEKSI BAHAYA' : 'NIHIL (KONTROL PENUH)'}\n`;
+            out += `• Karantina Wafer Otomatis: ${yieldRes.data.wafer_quarantine_recommended ? 'DIREKOMENDASIKAN' : 'TIDAK DIPERLUKAN (LOLOS)'}\n\n`;
+            out += `KLASIFIKASI PARAMETRIK PENGUJIAN DIE SORT BINNING (13,000 DIES / 25 WAFERS):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Bin 1 Prime (Frekuensi Tertinggi / Server AI): ${binRes.data.bin_1_prime_count.toLocaleString()} Die @ $450 USD\n`;
+            out += `• Bin 2 Low Voltage (Efisiensi Tinggi / Mobile): ${binRes.data.bin_2_low_voltage_count.toLocaleString()} Die @ $320 USD\n`;
+            out += `• Bin 3 Standard (Frekuensi Standar / Desktop): ${binRes.data.bin_3_standard_count.toLocaleString()} Die @ $220 USD\n`;
+            out += `• Bin 7 Reject Defective (Sirkuit Cacat): ${binRes.data.bin_7_reject_defective_count.toLocaleString()} Die Cacat\n`;
+            out += `• TOTAL ESTIMASI VALUASI KOMERSIAL LOT: $${binRes.data.commercial_valuation_usd.toLocaleString()} USD\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pemisahan die sort binning otomatis memaksimalkan pendapatan komersial dengan mengalokasikan die berkecepatan tertinggi ke akselerator server AI.</li>
+                <li>Pemantauan partikel ISO Class 1 secara real-time mencegah pemborosan biaya pemrosesan kimia pada wafer yang terkontaminasi.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses semiconductor fab: ' + err.message;
+    }
+}
+
+async function triggerBiogasDigester() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis rasio FOS/TAC digester anaerobik, mitigasi asidifikasi & sertifikasi pasteurisasi EPA...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const digesterID = "DIGESTER-WWTP-THERMOPHILIC-01";
+        const plantID = "WWTP-MUNICIPAL-JAKARTA-PULOGEBANG";
+
+        // 1. Ingest telemetry
+        await api('/utilities/digester/ingest-biochemical-telemetry', 'POST', {
+            digester_id: digesterID,
+            sludge_feed_rate_m3_day: 350.0,
+            digester_operating_temp_c: 55.2,
+            volatile_fatty_acids_fos_mgl: 820.0,
+            total_inorganic_carbon_tac_mgl: 3450.0,
+            biogas_production_m3_day: 5200.0,
+            biogas_methane_ch4_pct: 63.5,
+            biogas_h2s_ppm: 165.0,
+            digester_sludge_ph: 7.38
+        });
+
+        // 2. Evaluate stability
+        const evalRes = await api('/utilities/digester/evaluate-acidification-stability', 'POST', {
+            digester_id: digesterID
+        });
+
+        // 3. Certify Class A biosolids
+        const certRes = await api('/utilities/digester/certify-class-a-biosolids-pasteurization', 'POST', {
+            digester_id: digesterID,
+            batch_lot_number: "LOT-BIOSOLID-2026-9901",
+            hold_temp_c: 55.2,
+            hold_days: 3.0
+        });
+
+        // 4. Dossier
+        const dossierRes = await api(`/utilities/digester/biomethane-cogen-dossier/${plantID}`, 'GET');
+
+        if (badge) badge.textContent = `♻️ BIOGAS: FOS/TAC ${evalRes.data.fos_tac_ratio} | CH4 ${evalRes.data.biomethane_net_m3_day} m3/d | EPA OK`;
+        if (answerEl) {
+            let out = `♻️ MUNICIPAL WASTEWATER SLUDGE ANAEROBIC DIGESTION & BIOMETHANE RNG CO-GEN OPTIMIZER (EPA PART 503):\n`;
+            out += `Unit Instalasi IPAL: ${plantID} | Reaktor: ${digesterID} (Thermophilic 55.2°C)\n`;
+            out += `Produksi Biogas Harian: 5,200 m³/hari (Kadar Metana: 63.5% CH4 | Kontaminan H2S: 165 PPM)\n\n`;
+            out += `ANALISIS KESEIMBANGAN BIOKIMIA & PENCEGAHAN SOUR DIGESTER:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Asam Lemak Volatil (FOS): 820.0 mg/L | Kapasitas Buffer Alkalinitas (TAC): 3,450.0 mg/L\n`;
+            out += `• RASIO FOS/TAC STABILITAS: ${evalRes.data.fos_tac_ratio} (Batas Optimal < 0.30)\n`;
+            out += `• Status Kesehatan Biologis Reaktor: ${evalRes.data.digester_health_status}\n`;
+            out += `• Kebutuhan Pengurangan Umpan Lumpur: ${evalRes.data.recommended_sludge_feed_throttle_pct}% (Operasi Penuh Tanpa Hambatan)\n`;
+            out += `• Dosis Buffer Natrium Bikarbonat: ${evalRes.data.sodium_bicarbonate_dosing_kg} kg (Tidak Diperlukan Penambahan)\n`;
+            out += `• Hasil Pemurnian Biometana Bersih: ${evalRes.data.biomethane_net_m3_day.toLocaleString()} m³/hari\n`;
+            out += `• Proyeksi Pendapatan Tarif Biometana (RNG Injection): $${evalRes.data.biomethane_daily_revenue_usd.toLocaleString()} USD / Hari\n\n`;
+            out += `SERTIFIKASI STERILISASI PATOGEN BIOSOLID KELAS A (EPA 40 CFR PART 503):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Sertifikat EPA: ${certRes.data.certificate_id} | Lot: ${certRes.data.batch_lot_number}\n`;
+            out += `• Suhu Kontak Kontinu: ${certRes.data.minimum_continuous_hold_temp_c}°C selama ${certRes.data.continuous_hold_duration_days} Hari (Standar EPA: ${certRes.data.epa_part503_required_days} Hari)\n`;
+            out += `• Konsentrasi Bakteri Fecal Coliform: ${certRes.data.pathogen_fecal_coliform_mpn_gram} MPN/gram (Ambang Batas Maksimal < 1,000 MPN/g)\n`;
+            out += `• Status Sertifikasi Produk: ${certRes.data.certification_status} (Pupuk Pertanian Bebas Edar)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pengawasan rasio FOS/TAC otomatis mendeteksi tanda awal asidifikasi sebelum bakteri metanogen kolaps.</li>
+                <li>Sertifikasi EPA Part 503 membuka pasar komersial penjualan biosolid lumpur kering sebagai pupuk organik ramah lingkungan.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses biogas digester: ' + err.message;
+    }
+}
+
+async function triggerRailwayWheel() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis gaya impak WILD, parameter flensa qR & pembubutan roda CNC kereta api...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const bogieID = "BOGIE-KA-ARGO-BROMO-01";
+        const wheelPos = "AXLE-1-WHEEL-LEFT";
+
+        // 1. Ingest WILD telemetry
+        await api('/railway/wheel/ingest-wayside-wild-telemetry', 'POST', {
+            bogie_id: bogieID,
+            train_consist_id: "KA-10-JAKARTA-SURABAYA",
+            wheel_position_id: wheelPos,
+            dynamic_peak_impact_load_kn: 278.0,
+            flange_height_mm: 34.8,
+            flange_thickness_mm: 21.2,
+            flange_angle_qr_mm: 5.8,
+            ultrasonic_subsurface_defect_detected: true,
+            axle_mileage_km: 385000.0
+        });
+
+        // 2. Evaluate flange & RCF
+        const evalRes = await api('/railway/wheel/evaluate-flange-safety-and-rcf', 'POST', {
+            bogie_id: bogieID,
+            wheel_position_id: wheelPos
+        });
+
+        // 3. Schedule lathe reprofiling
+        const schedRes = await api('/railway/wheel/schedule-wheelset-lathe-reprofiling', 'POST', {
+            bogie_id: bogieID,
+            wheel_position_id: wheelPos,
+            cut_depth_mm: 2.5
+        });
+
+        // 4. Dossier
+        const dossierRes = await api(`/railway/wheel/bogies-safety-dossier/${bogieID}`, 'GET');
+
+        if (badge) badge.textContent = `🚆 RAILWAY: qR ${evalRes.data.flange_angle_qr_mm || 5.8}mm | Spd ${evalRes.data.speed_restriction_command_kph}kph | Lathe OK`;
+        if (answerEl) {
+            let out = `🚆 RAILWAY ROLLING STOCK WHEEL-RAIL CONTACT MECHANICS & AXLE FLAW SENTINEL (EN 13262 & UIC 510-2):\n`;
+            out += `Rangka Bogie: ${bogieID} | Rangkaian: KA-10 Argo Bromo Anggrek | Posisi: ${wheelPos}\n`;
+            out += `Jarak Tempuh Gandar: 385,000 km | Standar Sertifikasi: EN 13262 & UIC 510-2\n\n`;
+            out += `DETEKSI SENSOR WAYSIDE WILD & KEAMANAN FLENSA ANTI-ANJLOKAN:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Gaya Impak Dinamis Roda (WILD Peak Load): 278.0 kN (Ambang Batas Flat Roda > 260 kN)\n`;
+            out += `• Ketebalan Flensa Roda: 21.2 mm (Batas Minimal Kritis < 22.0 mm)\n`;
+            out += `• Sudut Kemiringan Flensa Parameter qR: 5.8 mm (UIC MANDATORI WAJIB >= 6.5 mm)\n`;
+            out += `• Risiko Roda Memanjat Rel (Wheel Climb Derailment): ${evalRes.data.flange_wear_derailment_risk} (BAHAYA TINGGI PADA WESEL)\n`;
+            out += `• Tingkat Kerusakan Kelelahan Kontak Bergulir (RCF): ${evalRes.data.rolling_contact_fatigue_severity}\n`;
+            out += `• Perintah Pembatasan Kecepatan Darurat: ${evalRes.data.speed_restriction_command_kph} km/jam (Dari Maksimal 160 km/jam)\n`;
+            out += `• Mandat Pembubutan Profil Roda: ${evalRes.data.cnc_lathe_reprofiling_mandate ? 'WAJIB MASUK DEPO BUBUT' : 'NORMAL'}\n\n`;
+            out += `WORK ORDER PEMBUBUTAN RODA CNC (UNDERFLOOR WHEEL LATHE):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Perintah Kerja Bengkel Depo: ${schedRes.data.work_order_id}\n`;
+            out += `• Mesin Pembubutan: ${schedRes.data.wheel_lathe_type}\n`;
+            out += `• Kedalaman Pemotongan Tapak Roda: ${schedRes.data.target_tread_cut_depth_mm} mm\n`;
+            out += `• Proyeksi Nilai qR Pasca Pemotongan: ${schedRes.data.post_cut_qr_mm} mm (Kembali Normal Sesuai Profil UIC)\n`;
+            out += `• Estimasi Kerugian Anjlokan Terhindar: $${schedRes.data.avoided_derailment_loss_usd.toLocaleString()} USD (Mencegah Kerusakan Jalur Rel & Korban Jiwa)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Sensor WILD mendeteksi cacat tapak datar sebelum getaran merusak bantalan rol dan motor traksi kereta api.</li>
+                <li>Penegakan ambang batas qR parameter flensa secara otomatis mencegah insiden kereta anjlok di persimpangan wesel lintasan.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses railway wheel: ' + err.message;
+    }
+}
+
 
 
 // Auto-initialize Real-Time SSE Event Stream

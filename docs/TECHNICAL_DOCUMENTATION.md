@@ -1090,6 +1090,41 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Major Turnaround & Rotor Disc Rupture Prevention**: Endpoint `POST /api/v1/energy/turbine/schedule-major-inspection` automates Hot Gas Path Inspection (HGPI) and Major Inspection (MI) outage scheduling, avoiding catastrophic uncontained rotor bursts and multimillion-dollar power grid downtime.
 - **Turbine Rotordynamics Dossier**: Endpoint `GET /api/v1/energy/turbine/rotordynamics-dossier/:turbine_id` compiles complete rotor creep degradation curves, operating cycle breakdowns, and vibration health histories.
 
+---
+
+## 33. Aviation MRO Fatigue, Marine LNG Reliquefaction, Semiconductor Fab Yield, Wastewater Biomethane & Railway Wheel RCF (v1.67.0)
+
+### 33.1 Aviation MRO Aircraft Structural Fatigue, Flight Cycles & Hard Landing Sentinel (`internal/core/aviation/mro_fatigue.go`)
+- **QAR/FDR Flight Telemetry & Cyclic Stress Ingestion**: Endpoint `POST /api/v1/aviation/mro/ingest-flight-telemetry` captures commercial aircraft flight recorder touchdown metrics, tracking vertical G-force loads, sink rates (ft/s), pitch/roll angles, and cumulative flight hours and flight cycles (FH/FC).
+- **Palmgren-Miner Fatigue & Hard Landing Exceedance**: Endpoint `POST /api/v1/aviation/mro/evaluate-hard-landing-exceedance` evaluates touchdown exceedance against Boeing/Airbus maintenance standards, calculates Palmgren-Miner damage increments on Life-Limited Parts (LLP), mandates targeted NDT inspections (Eddy Current, Ultrasonic wing spar pins), and triggers AOG grounding.
+- **Airworthiness Release Certificate (FAA Form 8130-3 / EASA Form 1)**: Endpoint `POST /api/v1/aviation/mro/issue-airworthiness-release-certificate` generates digital airworthiness certificates with licensed A&P mechanic signatures and approved maintenance organization (AMO) accreditation.
+- **Aircraft Structural Fatigue Dossier**: Endpoint `GET /api/v1/aviation/mro/aircraft-structural-fatigue-dossier/:tail_number` compiles 360-degree fuselage cycle histories, NDT compliance verification, and FAA Part 145 audit trails.
+
+### 33.2 Cryogenic Marine LNG Boil-Off Gas (BOG) & Reliquefaction Plant Optimizer (`internal/core/marine/lng_bog_reliquefaction.go`)
+- **Cryogenic Membrane Tank In-Line Metrology**: Endpoint `POST /api/v1/marine/lng/ingest-cargo-telemetry` ingests LNG cargo telemetry at $-162^\circ\text{C}$, monitoring tank vapor pressure (kPa), ambient/seawater temperatures, dual-fuel engine demand, and vessel speed under IMO IGC Code standards.
+- **Thermodynamic Boil-Off Gas & Cargo Arbitrage**: Endpoint `POST /api/v1/marine/lng/optimize-reliquefaction-balance` calculates natural boil-off rates ($kg/\text{hr}$), optimizing dynamic allocation across dual-fuel propulsion engines, sub-cooler reliquefaction compressors, and gas combustion units (GCU) to stabilize vapor pressure and save thousands of dollars in daily cargo loss.
+- **MARVS Tank Overpressurization Safeguard**: Endpoint `POST /api/v1/marine/lng/trigger-tank-pressure-relief-safeguard` commands automated emergency pressure relief and GCU combustion to prevent catastrophic membrane tank rupture and protect multimillion-dollar vessel assets.
+- **Voyage Boil-Off Dossier**: Endpoint `GET /api/v1/marine/lng/voyage-boil-off-dossier/:imo_number` provides complete voyage gas retention metrics, compressor power logs, and SIGTTO safety compliance certification.
+
+### 33.3 Semiconductor Cleanroom Fab Yield, Particle Defectivity & Die Sort Binning Optimizer (`internal/core/semiconductor/fab_yield_sort.go`)
+- **ISO 14644-1 Class 1 Cleanroom Metrology**: Endpoint `POST /api/v1/semiconductor/fab/ingest-cleanroom-metrology` monitors aerosol optical particle counters ($0.1\ \mu\text{m}$ and $0.5\ \mu\text{m}$ particles $/m^3$), laminar air velocity ($m/s$), temperature, and humidity across lithography stepper bays.
+- **Murphy-Seeds Defect Density Wafer Yield Model**: Endpoint `POST /api/v1/semiconductor/fab/calculate-wafer-yield-model` computes microchip yields on 300mm wafer lots using Murphy's mathematical formula, projecting good die counts and recommending lot quarantine upon cleanroom particle excursions.
+- **Parametric Die Sort Binning Manifest**: Endpoint `POST /api/v1/semiconductor/fab/execute-die-sort-binning` categorizes tested dies into commercial performance tiers (Bin 1 Prime, Bin 2 Low Voltage, Bin 3 Standard, Bin 7 Reject) and optimizes package-level revenue under SEMI E10 standards.
+- **Lot Defectivity Dossier**: Endpoint `GET /api/v1/semiconductor/fab/lot-defectivity-dossier/:lot_id` delivers end-to-end yield curves, cleanroom particle logs, and commercial lot valuation summaries.
+
+### 33.4 Municipal Wastewater Sludge Anaerobic Digestion & Biomethane RNG Co-Gen Optimizer (`internal/core/utilities/biogas_anaerobic_digester.go`)
+- **Thermophilic Digestion Biochemical Telemetry**: Endpoint `POST /api/v1/utilities/digester/ingest-biochemical-telemetry` monitors thermophilic/mesophilic anaerobic digester parameters including sludge feed rates ($m^3/\text{day}$), volatile fatty acids (FOS), total inorganic carbon alkalinity (TAC), biogas production, and methane content ($CH_4\%$).
+- **FOS/TAC Acidification Stability Sentinel**: Endpoint `POST /api/v1/utilities/digester/evaluate-acidification-stability` calculates FOS/TAC ratios, issuing early warnings and feed throttling commands to prevent sour digester biological collapse while calculating biomethane grid injection revenues.
+- **EPA 40 CFR Part 503 Class A Biosolids Certification**: Endpoint `POST /api/v1/utilities/digester/certify-class-a-biosolids-pasteurization` validates the EPA time-temperature pathogen destruction equation, certifying treated biosolids for unrestricted agricultural land application with fecal coliform $< 1000\text{ MPN/g}$.
+- **Biomethane Co-Gen Dossier**: Endpoint `GET /api/v1/utilities/digester/biomethane-cogen-dossier/:plant_id` provides aggregated renewable natural gas (RNG) production totals, green tariff revenues, and EN 16723 grid compliance verification.
+
+### 33.5 Railway Rolling Stock Wheel-Rail Contact Mechanics & Axle Flaw Sentinel (`internal/core/railway/wheel_rail_rcf.go`)
+- **Wayside WILD & Wheel Optical Geometry Ingestion**: Endpoint `POST /api/v1/railway/wheel/ingest-wayside-wild-telemetry` captures Wheel Impact Load Detector (WILD) dynamic peak loads ($kN$), wheel flat impacts, flange height, flange thickness, and flange slope parameters ($q_R$) under EN 13262 and UIC 510-2.
+- **UIC $q_R$ Flange Safety & RCF Derailment Classifier**: Endpoint `POST /api/v1/railway/wheel/evaluate-flange-safety-and-rcf` assesses wheel climb derailment risks at railway switches when $q_R < 6.5\text{ mm}$, evaluates subsurface rolling contact fatigue (RCF), enforces emergency train speed restrictions, and issues CNC lathe mandates.
+- **Underfloor CNC Wheel Lathe Reprofiling Work Order**: Endpoint `POST /api/v1/railway/wheel/schedule-wheelset-lathe-reprofiling` generates workshop reprofiling machining work orders with target cut depths, restoring standard UIC tread profiles and preventing multimillion-dollar derailments.
+- **Bogies Safety Dossier**: Endpoint `GET /api/v1/railway/wheel/bogies-safety-dossier/:bogie_id` compiles ultrasonic flaw test histories, wheel wear curves, and track safety compliance metrics.
+
+
 
 
 

@@ -24,6 +24,7 @@ import (
 	coreaccount "erp-golang/internal/core/account"
 	coreagriculture "erp-golang/internal/core/agriculture"
 	coreasset "erp-golang/internal/core/asset"
+	coreaviation "erp-golang/internal/core/aviation"
 	corecosting "erp-golang/internal/core/costing"
 	corecpq "erp-golang/internal/core/cpq"
 	corecrm "erp-golang/internal/core/crm"
@@ -42,6 +43,7 @@ import (
 	corelegal "erp-golang/internal/core/legal"
 	corelogistics "erp-golang/internal/core/logistics"
 	coremaintenance "erp-golang/internal/core/maintenance"
+	coremarine "erp-golang/internal/core/marine"
 	coremining "erp-golang/internal/core/mining"
 	coremrp "erp-golang/internal/core/mrp"
 	corepharma "erp-golang/internal/core/pharma"
@@ -49,13 +51,16 @@ import (
 	coreprocurement "erp-golang/internal/core/procurement"
 	coreproject "erp-golang/internal/core/project"
 	corequality "erp-golang/internal/core/quality"
+	corerailway "erp-golang/internal/core/railway"
 	corescm "erp-golang/internal/core/scm"
+	coresemiconductor "erp-golang/internal/core/semiconductor"
 	coreservice "erp-golang/internal/core/service"
 	coresubscription "erp-golang/internal/core/subscription"
 	coresystem "erp-golang/internal/core/system"
 	coretax "erp-golang/internal/core/tax"
 	coretradefinance "erp-golang/internal/core/tradefinance"
 	coretreasury "erp-golang/internal/core/treasury"
+	coreutilities "erp-golang/internal/core/utilities"
 	corevmi "erp-golang/internal/core/vmi"
 	corewms "erp-golang/internal/core/wms"
 	"erp-golang/internal/core/esg"
@@ -12028,5 +12033,189 @@ IEA*1*000099123~`
 	t.Logf("✓ Gas Turbine EOH & Blade Creep Optimizer Verified: Turbine='%s' (BaseHours=%.1f, FastStarts=%d, Trips=%d, TIT=%.1f°C, EGTSpread=%.1f°C), CalculatedEOH=%.1f hrs, LMP=%.2f, CreepConsumed=%.1f%%, HoursToHGPI=%.1f, Status='%s', OverhaulWorkOrder='%s' (Type='%s', Outage=%d days, AvoidedCatastrophicLoss=$%.2fM USD)",
 		turbineTel.TurbineID, turbineTel.OperatingBaseHours, turbineTel.FastStartsCount, turbineTel.EmergencyTripsCount, turbineTel.TurbineInletTempTIT_C, turbineTel.ExhaustGasTempSpreadEGT_C, turbineAssess.CalculatedEOH, turbineAssess.LarsonMillerParameter, turbineAssess.BladeCreepLifeConsumedPct, turbineAssess.HoursUntilNextHGPI, turbineAssess.TurbineHealthStatus, turbineSched.TurnaroundWorkOrderID, turbineSched.InspectionType, turbineSched.EstimatedOutageDays, turbineSched.AvoidedCatastrophicBladeRuptureUSD/1e6)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (80 SECTIONS: 75+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD + CONTRACT LEAKAGE SENTINEL + MICROGRID ISLANDING + CARGO GEOFENCE + SHIFT BIDDING FATIGUE + CIRCULAR PACKAGING RTI + INDUSTRIAL WATER ZLD + VENDOR SANCTIONS GRAPH + BOILER TUBE DESCALING + SAAS DUNNING WATERFALL + TOLL MANUFACTURING RECON + SILO AERATION SENTINEL + EPC PROGRESS BILLING ESCROW + DYNAMIC PORT BERTH DEMURRAGE + TRANSFORMER DGA GUARDIAN + CROSS BORDER CASH REPATRIATION + ORE BLENDING OPTIMIZER + PHARMA CRYOGENIC SENTINEL + KILN REFRACTORY GUARDIAN + IP PATENT ANNUITY + TURBINE EOH CREEP) PASSED 100%!")
+	// ==========================================
+	// 81. ENTERPRISE INNOVATIONS V1.67.0 (AVIATION MRO, CRYOGENIC MARINE LNG, SEMICONDUCTOR FAB, WASTEWATER BIOMETHANE, RAILWAY WHEEL RCF)
+	// ==========================================
+
+	// 81.1 Aviation MRO Aircraft Structural Fatigue, Flight Cycles & Hard Landing Sentinel (FAA Part 145 / EASA Part-M)
+	avTel := coreaviation.GlobalAviationMROVault.IngestFlightTelemetry(coreaviation.FlightTelemetryRecord{
+		TailNumber:               "PK-GIA-777",
+		AircraftModel:            "BOEING_777_300ER",
+		FlightNumber:             "GA-882",
+		OriginICAO:               "WIII",
+		DestinationICAO:          "NRT",
+		TotalFlightHours:         28450.0,
+		TotalFlightCycles:        4920,
+		TouchdownSinkRateFPS:     10.8,
+		VerticalAccelerationG:    2.82,
+		LateralAccelerationG:     0.45,
+		PitchAngleDeg:            5.2,
+		RollAngleDeg:             2.1,
+		GrossLandingWeightKG:     242000.0,
+		MaxDesignLandingWeightKG: 251290.0,
+	})
+	if avTel.TelemetryID == "" || avTel.VerticalAccelerationG != 2.82 {
+		t.Fatalf("Failed to ingest flight telemetry: %+v", avTel)
+	}
+
+	avAssess, err := coreaviation.GlobalAviationMROVault.EvaluateHardLandingExceedance("PK-GIA-777")
+	if err != nil || avAssess.TouchdownSeverityLevel != "PHASE_1_HARD_LANDING_ALERT" || !avAssess.AircraftGroundedAOG || len(avAssess.RequiredNDTInspections) != 3 {
+		t.Fatalf("Failed to evaluate hard landing exceedance: %+v, err: %v", avAssess, err)
+	}
+
+	avCert, err := coreaviation.GlobalAviationMROVault.IssueAirworthinessReleaseCertificate(
+		"PK-GIA-777", "FAA_FORM_8130_3", "FAA-A&P-3981120-IA", "GMF-AEROASIA-FAA-PART145-CERT-8812",
+	)
+	if err != nil || avCert.AirworthinessStatus != "RETURN_TO_SERVICE_AUTHORIZED" || !avCert.NDTResultsVerified {
+		t.Fatalf("Failed to issue airworthiness release certificate: %+v, err: %v", avCert, err)
+	}
+
+	avDossier, err := coreaviation.GlobalAviationMROVault.GetAircraftStructuralFatigueDossier("PK-GIA-777")
+	if err != nil || !avDossier["faa_part145_compliant"].(bool) {
+		t.Fatalf("Failed to compile aviation fatigue dossier: %+v, err: %v", avDossier, err)
+	}
+	t.Logf("✓ Aviation MRO & Structural Hard Landing Verified: Tail='%s' (%s, FH=%.1f, FC=%d), Touchdown (Load=%.2fG, SinkRate=%.1f fps, Severity='%s', PalmgrenMiner=%.4f, SafeCyclesLeft=%d), AOG=%t, AirworthinessCert='%s' (Type='%s', AMO='%s', Status='%s')",
+		avTel.TailNumber, avTel.AircraftModel, avTel.TotalFlightHours, avTel.TotalFlightCycles, avAssess.GForcePeak, avAssess.SinkRateFPS, avAssess.TouchdownSeverityLevel, avAssess.PalmgrenMinerDamageIndex, avAssess.RemainingSafeFlightCycles, avAssess.AircraftGroundedAOG, avCert.CertificateID, avCert.CertificateType, avCert.AMO_ApprovalRef, avCert.AirworthinessStatus)
+
+	// 81.2 Cryogenic Marine LNG Boil-Off Gas (BOG) & Reliquefaction Plant Optimizer (IMO IGC Code & SIGTTO)
+	lngTel := coremarine.GlobalMarineLNGVault.IngestCargoTelemetry(coremarine.LNGCargoTelemetry{
+		VesselIMO:                "IMO-9781200",
+		VesselName:               "LNG Nusantara Tangguh",
+		CargoTankNumber:          "TANK-NO-1-MEMBRANE-MARK-III",
+		CargoVolumeM3:            42500.0,
+		CargoTempC:               -161.8,
+		TankVaporPressureKPa:     121.8,
+		AmbientAirTempC:          31.5,
+		SeaWaterTempC:            29.0,
+		ShipSpeedKnots:           18.5,
+		DualFuelEngineDemandKGHr: 650.0,
+	})
+	if lngTel.TelemetryID == "" || lngTel.TankVaporPressureKPa != 121.8 {
+		t.Fatalf("Failed to ingest LNG cargo telemetry: %+v", lngTel)
+	}
+
+	lngPlan, err := coremarine.GlobalMarineLNGVault.OptimizeReliquefactionBalance("IMO-9781200")
+	if err != nil || lngPlan.TotalBOGGeneratedKgHr <= 0 || lngPlan.AllocatedFuelEngineKgHr <= 0 || lngPlan.DailyCargoSavedUSD <= 0 {
+		t.Fatalf("Failed to optimize LNG BOG balance: %+v, err: %v", lngPlan, err)
+	}
+
+	lngSafety, err := coremarine.GlobalMarineLNGVault.TriggerTankPressureReliefSafeguard("IMO-9781200")
+	if err != nil || !lngSafety.OverpressureRiskMitigated || lngSafety.AvoidedTankCatastrophicDamageUSD <= 0 {
+		t.Fatalf("Failed to trigger LNG tank safety safeguard: %+v, err: %v", lngSafety, err)
+	}
+
+	lngDossier, err := coremarine.GlobalMarineLNGVault.GetVoyageBoilOffDossier("IMO-9781200")
+	if err != nil || !lngDossier["imo_igc_compliant"].(bool) {
+		t.Fatalf("Failed to compile voyage BOG dossier: %+v, err: %v", lngDossier, err)
+	}
+	t.Logf("✓ Cryogenic Marine LNG BOG & Reliquefaction Verified: Vessel='%s' (%s, Tank='%s', Temp=%.1f°C, Pres=%.1f kPa), BOG Gen=%.1f kg/h (FuelEngine=%.1f, Reliquefaction=%.1f, GCU=%.1f kg/h), Power=%.1f kW, CargoSaved=$%.2f/day, StabilizedPres=%.1f kPa, AvoidedTankRuptureLoss=$%.2fM USD",
+		lngTel.VesselName, lngTel.VesselIMO, lngTel.CargoTankNumber, lngTel.CargoTempC, lngTel.TankVaporPressureKPa, lngPlan.TotalBOGGeneratedKgHr, lngPlan.AllocatedFuelEngineKgHr, lngPlan.AllocatedReliquefactionKgHr, lngPlan.AllocatedGCUKgHr, lngPlan.CompressorPowerKW, lngPlan.DailyCargoSavedUSD, lngPlan.TankPressureStabilizedKPa, lngSafety.AvoidedTankCatastrophicDamageUSD/1e6)
+
+	// 81.3 Semiconductor Cleanroom Fab Yield, Particle Defectivity & Die Sort Binning Optimizer (SEMI E10 & ISO 14644-1 Class 1)
+	semiMetro := coresemiconductor.GlobalSemiconductorFabVault.IngestCleanroomMetrology(coresemiconductor.CleanroomMetrology{
+		CleanroomBayID:             "BAY-LITHO-EUV-01",
+		FabSiteID:                  "FAB-TSMC-NANO-01",
+		ISOClassLevel:              1,
+		ParticleCount01MicronPerM3: 4.5,
+		ParticleCount05MicronPerM3: 0.2,
+		TemperatureC:               21.0,
+		RelativeHumidityPct:        45.0,
+		AirVelocityMPS:             0.46,
+	})
+	if semiMetro.MeasurementID == "" || semiMetro.ParticleCount01MicronPerM3 != 4.5 {
+		t.Fatalf("Failed to ingest cleanroom metrology: %+v", semiMetro)
+	}
+
+	semiYield, err := coresemiconductor.GlobalSemiconductorFabVault.CalculateWaferYieldModel(coresemiconductor.WaferYieldCalculation{
+		WaferLotID:             "LOT-4NM-NPU-8820",
+		ProductFamilySKU:       "AI_TENSOR_NPU_4NM",
+		GrossDieCountPerWafer:  520,
+		DieAreaMM2:             110.0,
+		DefectDensityD0_PerCM2: 0.08,
+	})
+	if err != nil || semiYield.MurphyYieldPct <= 0 || semiYield.ProjectedGoodDieCount <= 0 || semiYield.CleanroomExcursionDetected {
+		t.Fatalf("Failed to calculate wafer yield model: %+v, err: %v", semiYield, err)
+	}
+
+	semiBin, err := coresemiconductor.GlobalSemiconductorFabVault.ExecuteDieSortBinning("LOT-4NM-NPU-8820", 13000)
+	if err != nil || semiBin.Bin1PrimeCount <= 0 || semiBin.CommercialValuationUSD <= 0 {
+		t.Fatalf("Failed to execute die sort binning: %+v, err: %v", semiBin, err)
+	}
+
+	semiDossier, err := coresemiconductor.GlobalSemiconductorFabVault.GetLotDefectivityDossier("LOT-4NM-NPU-8820")
+	if err != nil || !semiDossier["semi_e10_compliance"].(bool) {
+		t.Fatalf("Failed to compile lot defectivity dossier: %+v, err: %v", semiDossier, err)
+	}
+	t.Logf("✓ Semiconductor Fab Yield & Die Sort Binning Verified: Lot='%s' (SKU='%s', GrossDie=%d, Area=%.1fmm2, D0=%.3f/cm2), MurphyYield=%.2f%%, ProjectedGood=%d, Cleanroom=%s (0.1um=%.1f particles/m3), TestedDies=%d (Bin1-Prime=%d, Bin2-LowVolt=%d, Bin3-Std=%d, Reject=%d), Valuation=$%.2fM USD",
+		semiYield.WaferLotID, semiYield.ProductFamilySKU, semiYield.GrossDieCountPerWafer, semiYield.DieAreaMM2, semiYield.DefectDensityD0_PerCM2, semiYield.MurphyYieldPct, semiYield.ProjectedGoodDieCount, semiMetro.CleanroomBayID, semiMetro.ParticleCount01MicronPerM3, semiBin.TotalTestedDieCount, semiBin.Bin1PrimeCount, semiBin.Bin2LowVoltageCount, semiBin.Bin3StandardCount, semiBin.Bin7RejectDefectiveCount, semiBin.CommercialValuationUSD/1e6)
+
+	// 81.4 Municipal Wastewater Sludge Anaerobic Digestion & Biomethane RNG Co-Gen Optimizer (EPA Part 503 & EN 16723)
+	bioTel := coreutilities.GlobalWastewaterDigesterVault.IngestBiochemicalTelemetry(coreutilities.DigesterBiochemicalTelemetry{
+		DigesterID:                  "DIGESTER-WWTP-THERMOPHILIC-01",
+		SludgeFeedRateM3Day:         350.0,
+		DigesterOperatingTempC:      55.2,
+		VolatileFattyAcidsFOS_mgL:   820.0,
+		TotalInorganicCarbonTAC_mgL: 3450.0,
+		BiogasProductionM3Day:       5200.0,
+		BiogasMethaneCH4Pct:         63.5,
+		BiogasH2S_PPM:               165.0,
+		DigesterSludgePH:            7.38,
+	})
+	if bioTel.TelemetryID == "" || bioTel.BiogasMethaneCH4Pct != 63.5 {
+		t.Fatalf("Failed to ingest biochemical telemetry: %+v", bioTel)
+	}
+
+	bioAssess, err := coreutilities.GlobalWastewaterDigesterVault.EvaluateAcidificationStability("DIGESTER-WWTP-THERMOPHILIC-01")
+	if err != nil || bioAssess.FOS_TAC_Ratio >= 0.30 || bioAssess.DigesterHealthStatus != "OPTIMAL_METHANOGENESIS" || bioAssess.BiomethaneDailyRevenueUSD <= 0 {
+		t.Fatalf("Failed to evaluate digester acidification stability: %+v, err: %v", bioAssess, err)
+	}
+
+	bioCert, err := coreutilities.GlobalWastewaterDigesterVault.CertifyClassABiosolidsPasteurization(
+		"DIGESTER-WWTP-THERMOPHILIC-01", "LOT-BIOSOLID-2026-9901", 55.2, 3.0,
+	)
+	if err != nil || bioCert.CertificationStatus != "CLASS_A_EXCEPTIONAL_QUALITY_APPROVED" || bioCert.PathogenFecalColiformMPNGram >= 1000.0 {
+		t.Fatalf("Failed to certify Class A biosolids: %+v, err: %v", bioCert, err)
+	}
+
+	bioDossier, err := coreutilities.GlobalWastewaterDigesterVault.GetBiomethaneCoGenDossier("WWTP-MUNICIPAL-JAKARTA-PULOGEBANG")
+	if err != nil || !bioDossier["en_16723_grid_compliant"].(bool) {
+		t.Fatalf("Failed to compile biomethane dossier: %+v, err: %v", bioDossier, err)
+	}
+	t.Logf("✓ Wastewater Sludge Anaerobic Digester & Biomethane Verified: Digester='%s' (Feed=%.0f m3/d, Temp=%.1f°C, pH=%.2f), FOS/TAC=%.3f (%s, Throttle=%.0f%%, Buffer=%.0fkg), Biogas=%.0f m3/d (CH4=%.1f%%), BiomethaneNet=%.1f m3/d, DailyRevenue=$%.2f USD, EPA 503 Biosolids='%s' (Status='%s', FecalColiform=%.1f MPN/g)",
+		bioTel.DigesterID, bioTel.SludgeFeedRateM3Day, bioTel.DigesterOperatingTempC, bioTel.DigesterSludgePH, bioAssess.FOS_TAC_Ratio, bioAssess.DigesterHealthStatus, bioAssess.RecommendedSludgeFeedThrottlePct, bioAssess.SodiumBicarbonateDosingKg, bioTel.BiogasProductionM3Day, bioTel.BiogasMethaneCH4Pct, bioAssess.BiomethaneNetM3Day, bioAssess.BiomethaneDailyRevenueUSD, bioCert.BatchLotNumber, bioCert.CertificationStatus, bioCert.PathogenFecalColiformMPNGram)
+
+	// 81.5 Railway Rolling Stock Wheel-Rail Contact Mechanics & Axle Flaw Sentinel (EN 13262 & UIC 510-2)
+	railTel := corerailway.GlobalRailwayWheelVault.IngestWaysideWILDTelemetry(corerailway.WheelWaysideTelemetry{
+		BogieID:                            "BOGIE-KA-ARGO-BROMO-01",
+		TrainConsistID:                     "KA-10-JAKARTA-SURABAYA",
+		WheelPositionID:                    "AXLE-1-WHEEL-LEFT",
+		DynamicPeakImpactLoadKN:            278.0,
+		FlangeHeightMM:                     34.8,
+		FlangeThicknessMM:                  21.2,
+		FlangeAngleQR_MM:                   5.8,
+		UltrasonicSubsurfaceDefectDetected: true,
+		AxleMileageKM:                      385000.0,
+	})
+	if railTel.TelemetryID == "" || railTel.FlangeAngleQR_MM != 5.8 {
+		t.Fatalf("Failed to ingest wayside WILD telemetry: %+v", railTel)
+	}
+
+	railAssess, err := corerailway.GlobalRailwayWheelVault.EvaluateFlangeSafetyAndRCF("BOGIE-KA-ARGO-BROMO-01", "AXLE-1-WHEEL-LEFT")
+	if err != nil || railAssess.FlangeWearDerailmentRisk != "CRITICAL_WHEEL_CLIMB_DERAILMENT_RISK" || !railAssess.CNC_LatheReprofilingMandate || railAssess.SpeedRestrictionCommandKPH > 60 {
+		t.Fatalf("Failed to evaluate flange safety and RCF: %+v, err: %v", railAssess, err)
+	}
+
+	railWO, err := corerailway.GlobalRailwayWheelVault.ScheduleWheelsetLatheReprofiling("BOGIE-KA-ARGO-BROMO-01", "AXLE-1-WHEEL-LEFT", 2.5)
+	if err != nil || railWO.WorkOrderID == "" || railWO.PostCutQR_MM < 6.5 || railWO.AvoidedDerailmentLossUSD <= 0 {
+		t.Fatalf("Failed to schedule wheelset reprofiling: %+v, err: %v", railWO, err)
+	}
+
+	railDossier, err := corerailway.GlobalRailwayWheelVault.GetBogiesSafetyDossier("BOGIE-KA-ARGO-BROMO-01")
+	if err != nil || !railDossier["en_13262_compliance"].(bool) {
+		t.Fatalf("Failed to compile bogies safety dossier: %+v, err: %v", railDossier, err)
+	}
+	t.Logf("✓ Railway Wheel-Rail RCF & Flange Derailment Sentinel Verified: Bogie='%s' (Consist='%s', Wheel='%s', Mileage=%.0f km), WILD Impact=%.1f kN, Flange (Height=%.1f, Thick=%.1f, qR=%.1f mm), DerailmentRisk='%s', RCF='%s', SpeedRestriction=%d kph, ReprofileMandate=%t, CNC Lathe WO='%s' (Cut=%.1fmm, PostCut_qR=%.1fmm, AvoidedDerailmentLoss=$%.2fM USD)",
+		railTel.BogieID, railTel.TrainConsistID, railTel.WheelPositionID, railTel.AxleMileageKM, railTel.DynamicPeakImpactLoadKN, railTel.FlangeHeightMM, railTel.FlangeThicknessMM, railTel.FlangeAngleQR_MM, railAssess.FlangeWearDerailmentRisk, railAssess.RollingContactFatigueSeverity, railAssess.SpeedRestrictionCommandKPH, railAssess.CNC_LatheReprofilingMandate, railWO.WorkOrderID, railWO.TargetTreadCutDepthMM, railWO.PostCutQR_MM, railWO.AvoidedDerailmentLossUSD/1e6)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (81 SECTIONS: 75+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD + CONTRACT LEAKAGE SENTINEL + MICROGRID ISLANDING + CARGO GEOFENCE + SHIFT BIDDING FATIGUE + CIRCULAR PACKAGING RTI + INDUSTRIAL WATER ZLD + VENDOR SANCTIONS GRAPH + BOILER TUBE DESCALING + SAAS DUNNING WATERFALL + TOLL MANUFACTURING RECON + SILO AERATION SENTINEL + EPC PROGRESS BILLING ESCROW + DYNAMIC PORT BERTH DEMURRAGE + TRANSFORMER DGA GUARDIAN + CROSS BORDER CASH REPATRIATION + ORE BLENDING OPTIMIZER + PHARMA CRYOGENIC SENTINEL + KILN REFRACTORY GUARDIAN + IP PATENT ANNUITY + TURBINE EOH CREEP + AVIATION MRO FATIGUE + MARINE LNG RELIQUEFACTION + SEMICONDUCTOR FAB YIELD + WASTEWATER BIOMETHANE + RAILWAY WHEEL RCF) PASSED 100%!")
 }
