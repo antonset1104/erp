@@ -28805,6 +28805,402 @@ async function triggerCircularPackaging() {
     }
 }
 
+async function triggerWaterStewardship() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi telemetri efluen limbah cair industri & status Zero-Liquid Discharge (ZLD)...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const facilityID = "FAC-CILEGON-PETROCHEM-01";
+        // 1. Ingest telemetry exceeding COD limits
+        await api('/ehs/water/ingest-effluent-telemetry', 'POST', {
+            telemetry_id: "TEL-EFF-2026-9901",
+            facility_id: facilityID,
+            outfall_gate_id: "OUTFALL-RIVER-EAST-01",
+            ph: 9.8,
+            cod_mg_per_l: 245.0,
+            bod_mg_per_l: 85.0,
+            tss_mg_per_l: 72.0,
+            tds_ppm: 1450.0,
+            flow_rate_m3_per_hour: 45.0
+        });
+
+        // 2. Evaluate compliance and trigger fail-safe gate closure
+        const evalRes = await api('/ehs/water/evaluate-discharge-compliance', 'POST', {
+            facility_id: facilityID
+        });
+
+        // 3. Record recycling volume
+        await api('/ehs/water/record-recycling-volume', 'POST', {
+            facility_id: facilityID,
+            total_water_intake_m3: 100000.0,
+            recycled_water_volume_m3: 96500.0,
+            cooling_tower_reuse_m3: 42000.0
+        });
+
+        // 4. Retrieve complete ZLD dossier
+        const dossierRes = await api(`/ehs/water/zld-environmental-dossier/${facilityID}`, 'GET');
+
+        if (badge) badge.textContent = `💧 ZLD: ${dossierRes.data.recycling_ledger.water_recycling_ratio_pct}% Recycled`;
+        if (answerEl) {
+            let out = `💧 AUTONOMOUS INDUSTRIAL WATER STEWARDSHIP & ZERO-LIQUID DISCHARGE (ZLD) SENTINEL (ISO 14046):\n`;
+            out += `Fasilitas Industri: ${facilityID} (Kawasan Industri Cilegon Banten)\n`;
+            out += `Pintu Pembuangan (Outfall Gate): OUTFALL-RIVER-EAST-01\n\n`;
+            out += `STATUS TELEMETRI EFLUEN & DETEKSI PELANGGARAN AMBANG BATAS:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Kadar pH Efluen: 9.8 (Batas Aman Baku Mutu: 6.0 - 9.0) -> OUT OF BOUNDS\n`;
+            out += `Kadar COD (Chemical Oxygen Demand): 245.0 mg/L (Batas Maksimal: 100.0 mg/L) -> EXCEEDED\n`;
+            out += `Kadar BOD (Biochemical Oxygen Demand): 85.0 mg/L (Batas Maksimal: 50.0 mg/L) -> EXCEEDED\n`;
+            out += `Kadar TSS (Total Suspended Solids): 72.0 mg/L (Batas Maksimal: 50.0 mg/L) -> EXCEEDED\n\n`;
+            out += `TINDAKAN OTOMATIS KATUP DARURAT (FAIL-SAFE INTERCEPTOR):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            if (evalRes.action) {
+                out += `Status Katup Pembuangan Sungai: ${evalRes.action.fail_safe_gate_status}\n`;
+                out += `Kecepatan Reaksi Penutupan Katup: ${evalRes.action.gate_closure_latency_sec} Detik (Sub-10s Statutory Requirement)\n`;
+                out += `Pengalihan Aliran Limbah: Dialihkan ke ${evalRes.action.diverted_retention_basin}\n`;
+                out += `Notifikasi SPARING KLHK: Dispatched ke Pusat Data Pengendalian Pencemaran Lingkungan\n`;
+                out += `Putusan Perlindungan: ${evalRes.action.action_verdict}\n\n`;
+            }
+            out += `NERACA SIRKULARITAS AIR & SERTIFIKASI ZLD (ISO 14046):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Total Asupan Air Baku: ${dossierRes.data.recycling_ledger.total_water_intake_m3.toLocaleString()} m³\n`;
+            out += `Volume Air Terdaur Ulang: ${dossierRes.data.recycling_ledger.recycled_water_volume_m3.toLocaleString()} m³\n`;
+            out += `Pemanfaatan Ulang Cooling Tower: ${dossierRes.data.recycling_ledger.cooling_tower_reuse_m3.toLocaleString()} m³\n`;
+            out += `Rasio Daur Ulang Air (Recycling Ratio): ${dossierRes.data.recycling_ledger.water_recycling_ratio_pct}%\n`;
+            out += `Peringkat Sertifikasi ZLD: ${dossierRes.data.recycling_ledger.zld_certification_tier}\n`;
+            out += `Kepatuhan Lingkungan: ${dossierRes.data.statutory_environmental_compliance}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penutupan katup darurat sub-10 detik mencegah pencemaran sungai dan denda pidana perusakan lingkungan hidup.</li>
+                <li>Pencapaian ZLD Platinum (daur ulang >95%) mengamankan insentif pajak hijau dan kuota air industri musim kemarau.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mengevaluasi water stewardship ZLD: ' + err.message;
+    }
+}
+
+async function triggerVendorSanctions() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menjalankan deduplikasi vendor AI, screening sanksi global OFAC & aturan kepemilikan 50%...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const partnerID = "VEND-PETRO-GAZ-01";
+        // 1. Deduplicate master partner
+        const dedupRes = await api('/grc/sanctions/deduplicate-partner-master', 'POST', {
+            partner_id: partnerID,
+            company_name: "Gazprom Export Energy Trading Prohibited",
+            tax_id: "01.889.991.2-022.000",
+            bank_account_number: "98811223344",
+            bank_name: "Gazprombank",
+            address_city: "Saint Petersburg",
+            ultimate_beneficial_owner: "Sanctioned Oligarch Entity",
+            ubo_sanction_share_pct: 60.0
+        });
+
+        // 2. Screen watchlists with 50% rule
+        const screenRes = await api('/grc/sanctions/screen-ubo-watchlists', 'POST', {
+            partner_id: partnerID
+        });
+
+        // 3. Enforce automated payment freeze
+        const freezeRes = await api('/grc/sanctions/enforce-payment-freeze', 'POST', {
+            partner_id: partnerID,
+            frozen_payable_amount_usd: 1450000.0
+        });
+
+        // 4. Retrieve dossier
+        const dossierRes = await api(`/grc/sanctions/compliance-graph-dossier/${partnerID}`, 'GET');
+
+        if (badge) badge.textContent = `🌐 GRC: AML Freeze $${freezeRes.data.frozen_payable_amount_usd.toLocaleString()}`;
+        if (answerEl) {
+            let out = `🌐 AI VENDOR DEDUPLICATION & SANCTIONS SCREENING GRAPH (OFAC SDN 50% RULE & AML-CFT):\n`;
+            out += `ID Mitra/Vendor: ${partnerID}\n`;
+            out += `Nama Entitas Vendor: Gazprom Export Energy Trading Prohibited\n`;
+            out += `Audit Deduplikasi Master Data: ${dedupRes.data.recommendation} (Confidence: ${dedupRes.data.match_confidence_pct}%)\n\n`;
+            out += `HASIL SCREENING SANKSI GLOBAL & ANALISIS KEPEMILIKAN MANFAAT (UBO):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Status Indikator Sanksi (Watchlist Hit): ${screenRes.data.watchlist_hit ? 'POSITIF TERKENA SANKSI' : 'BERSIH'}\n`;
+            out += `Daftar Sanksi Teridentifikasi: ${screenRes.data.matched_watchlist}\n`;
+            out += `Pemberlakuan OFAC 50% Rule: ${screenRes.data.sdn_50_percent_rule_triggered ? 'AKTIF (Kepemilikan >= 50%)' : 'TIDAK'}\n`;
+            out += `Klasifikasi Risiko Kepatuhan: ${screenRes.data.risk_category}\n`;
+            out += `Tindakan Kepatuhan Diambil: ${screenRes.data.compliance_action}\n\n`;
+            out += `PENEGAKAN PEMBEKUAN PEMBAYARAN HUTANG USAHA (AP PAYMENT FREEZE):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Status Pembayaran Hutang Dagang: ${freezeRes.data.status}\n`;
+            out += `Nominal Pembayaran Dibekukan: $${freezeRes.data.frozen_payable_amount_usd.toLocaleString()} USD\n`;
+            out += `Nomor Referensi Pelaporan Laporan Transaksi Keuangan Mencurigakan (SAR/LTKM): ${freezeRes.data.sar_report_reference}\n`;
+            out += `Hash Kriptografis Regulasi (Audit Trail): ${freezeRes.data.regulatory_hash.substring(0, 32)}...\n`;
+            out += `Kerangka Regulasi: ${dossierRes.data.compliance_framework}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penegakan aturan OFAC 50% Rule melindungi perusahaan dari sanksi sekunder perbankan internasional dan pembekuan aset USD.</li>
+                <li>Penguncian otomatis pada akun AP mencegah pembayaran tidak sah sebelum pelaporan FIU/PPATK tuntas.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses vendor sanctions screening: ' + err.message;
+    }
+}
+
+async function triggerBoilerFouling() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis resistansi kerak boiler, degradasi termal & jadwal descaling ASME...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const assetID = "BOILER-STM-50TPH-01";
+        // 1. Ingest thermal telemetry
+        await api('/maintenance/boiler/ingest-thermal-telemetry', 'POST', {
+            asset_id: assetID,
+            flue_gas_temperature_c: 245.0,
+            steam_output_tph: 48.0,
+            heat_transfer_area_m2: 850.0,
+            log_mean_temp_diff_lmtd: 142.5,
+            clean_design_u_coeff: 1250.0,
+            daily_fuel_cost_usd: 9500.0
+        });
+
+        // 2. Calculate fouling resistance
+        const foulRes = await api('/maintenance/boiler/calculate-fouling-resistance', 'POST', {
+            asset_id: assetID
+        });
+
+        // 3. Schedule descaling turnaround
+        const woRes = await api('/maintenance/boiler/schedule-descaling-turnaround', 'POST', {
+            asset_id: assetID,
+            estimated_cleaning_cost_usd: 12000.0,
+            cleaning_method: "HIGH_PRESSURE_HYDROBLASTING"
+        });
+
+        // 4. Retrieve thermal dossier
+        const dossierRes = await api(`/maintenance/boiler/thermal-efficiency-dossier/${assetID}`, 'GET');
+
+        if (badge) badge.textContent = `🔥 BOILER: ${foulRes.data.fouling_resistance_rf.toFixed(5)} Rf`;
+        if (answerEl) {
+            let out = `🔥 HEAT EXCHANGER & BOILER TUBE FOULING PREDICTIVE DESCALING MANAGER (ASME PTC 4 & SEC I):\n`;
+            out += `Peralatan Boiler/HRSG: ${assetID} (Pembangkit Uap Steam Generator 50 TPH)\n`;
+            out += `Suhu Flue Gas Aktual: 245.0 °C (Desain Bersih: 160.0 °C) -> ELEVATED +85°C\n\n`;
+            out += `HASIL PERHITUNGAN RESISTANSI KERAK & DEGRADASI EFISIENSI TERMAL:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Resistansi Kerak Mineral (Fouling Factor Rf): ${foulRes.data.fouling_resistance_rf.toFixed(6)} m²·K/W\n`;
+            out += `Ketebalan Lapisan Kerak Silika/Kalsium: ${foulRes.data.estimated_scale_microns.toFixed(1)} Mikron (µm)\n`;
+            out += `Efisiensi Termal Saat Ini: ${foulRes.data.thermal_efficiency_pct.toFixed(1)}% (Desain Awal: 94.0%)\n`;
+            out += `Koefisien Heat Transfer Aktual (U): ${foulRes.data.actual_u_coeff} W/m²·K (Desain: 1250.0)\n`;
+            out += `Estimasi Pemborosan Bahan Bakar Harian: $${foulRes.data.daily_fuel_waste_usd.toLocaleString()} USD/Hari\n\n`;
+            out += `WORK ORDER JADWAL DESCALING PREVENTIF (PREVENTIVE TURNAROUND):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Nomor Perintah Kerja: ${woRes.data.work_order_id}\n`;
+            out += `Metode Pembersihan Kerak: ${woRes.data.recommended_cleaning_method}\n`;
+            out += `Estimasi Biaya Pembersihan: $${woRes.data.estimated_cleaning_cost_usd.toLocaleString()} USD\n`;
+            out += `Periode Pengembalian Investasi (Payback Period): ${woRes.data.days_payback_period.toFixed(1)} Hari Operasi\n`;
+            out += `Klasifikasi Urgensi: ${woRes.data.urgency_classification}\n`;
+            out += `Pencegahan Risiko Kegagalan Pipa: Pipa pecah akibat overheating (tube burnout) berhasil dicegah\n`;
+            out += `Standar Inspeksi Ketel Uap: ${dossierRes.data.asme_compliance}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pembersihan kerak berbasis kondisi (CBM) menghemat bahan bakar ribuan dolar per bulan dan memperpanjang umur pakai boiler tube.</li>
+                <li>Mencegah unscheduled outage bernilai jutaan dolar akibat pipa pecah yang melanggar standar keselamatan ASME Section I.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal menganalisis boiler fouling descaling: ' + err.message;
+    }
+}
+
+async function triggerSubscriptionDunning() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengeksekusi smart dunning waterfall, retry cerdas pembayaran & pemulihan MRR SaaS...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const subID = "SUB-ERP-CLOUD-881";
+        const companyID = "COMP-GOERP-SAAS-01";
+
+        // 1. Record payment failure
+        const failRes = await api('/subscription/dunning/record-payment-failure', 'POST', {
+            subscription_id: subID,
+            decline_code: "INSUFFICIENT_FUNDS",
+            failed_amount_usd: 4500.0
+        });
+
+        // 2. Execute smart retry waterfall
+        const retryRes = await api('/subscription/dunning/execute-smart-retry', 'POST', {
+            subscription_id: subID
+        });
+
+        // 3. Enforce progressive access lock
+        const lockRes = await api('/subscription/dunning/enforce-progressive-access-lock', 'POST', {
+            subscription_id: subID
+        });
+
+        // 4. Retrieve metrics
+        const metricsRes = await api(`/subscription/dunning/revenue-recovery-metrics/${companyID}`, 'GET');
+
+        if (badge) badge.textContent = `💳 DUNNING: ${metricsRes.data.involuntary_churn_rate_pct}% Churn`;
+        if (answerEl) {
+            let out = `💳 ENTERPRISE B2B SAAS CHURN RECOVERY & SMART DUNNING WATERFALL ENGINE (IFRS 15):\n`;
+            out += `Nomor Langganan B2B: ${subID}\n`;
+            out += `Entitas Korporat: ${companyID}\n`;
+            out += `Nilai Tagihan Bulanan (MRR): $4,500.00 USD\n\n`;
+            out += `KEGAGALAN TRANSAKSI & SKENARIO WATERFALL RETRY BERTAHAP:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Kode Penolakan Bank: ${failRes.data.decline_code}\n`;
+            out += `Tahap Dunning (Stage): Tahap ${failRes.data.dunning_stage}\n`;
+            out += `Rekomendasi Waktu Tunda Retry: ${failRes.data.suggested_retry_delay_hours} Jam (Sinkronisasi Hari Gajian)\n`;
+            out += `Eksekusi Smart Retry: ${retryRes.data.recovered_successfully ? 'BERHASIL DIPULIHKAN' : 'PENDING'}\n`;
+            out += `Nominal MRR Berhasil Dipulihkan: $${retryRes.data.recovered_amount_usd.toLocaleString()} USD\n`;
+            out += `Nomor Jurnal Pemulihan GL: ${retryRes.data.gl_journal_move_reference}\n\n`;
+            out += `PENERAPAN PROGRESSIVE ACCESS LOCK (PEMBATASAN AKSES BERTAHAP):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Status Akun Berlangganan: ${lockRes.data.account_status}\n`;
+            out += `Kebijakan Akses: Mode Read-Only Akses Data Historis Tanpa Menghentikan Operasional Bisnis Klien\n\n`;
+            out += `METRIK KESEHATAN PENDAPATAN BERKELANJUTAN (MRR RETENTION METRICS):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Total MRR Portofolio Aktif: $${metricsRes.data.total_active_mrr_usd.toLocaleString()} USD\n`;
+            out += `Total Pendapatan Berhasil Dipulihkan: $${metricsRes.data.cumulative_recovered_mrr.toLocaleString()} USD\n`;
+            out += `Involuntary Churn Rate: ${metricsRes.data.involuntary_churn_rate_pct}% (Benchmark Industri: 12.0%)\n`;
+            out += `Net Revenue Retention (NRR): ${metricsRes.data.net_revenue_retention_nrr}%\n`;
+            out += `Standar Akuntansi Pengakuan Pendapatan: ${metricsRes.data.accounting_standard}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Smart dunning waterfall memulihkan 70%+ kegagalan pembayaran kartu tanpa gesekan hubungan pelanggan.</li>
+                <li>Penguncian akses bertahap menjaga kepatuhan pengakuan pendapatan IFRS 15 / PSAK 72 tanpa langsung mematikan layanan.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses subscription dunning waterfall: ' + err.message;
+    }
+}
+
+async function triggerTollManufacturing() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menerbitkan perintah job-work subkontrak, surat jalan bahan baku & audit rekonsiliasi scrap...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const jobWorkID = "JOBWORK-2026-CNC-001";
+
+        // 1. Issue job work order
+        await api('/mrp/subcontracting/issue-jobwork-order', 'POST', {
+            job_work_id: jobWorkID,
+            vendor_id: "VEND-SUBCON-PRECISION-01",
+            vendor_name: "PT Presisi Logam Mandiri",
+            finished_product_sku: "SKU-FLANGE-ALUM-300",
+            planned_finished_units: 1000,
+            bom_material_per_unit_kg: 2.5,
+            raw_material_price_per_kg_usd: 6.0,
+            allowable_scrap_pct: 4.0,
+            processing_fee_per_unit_usd: 3.5
+        });
+
+        // 2. Dispatch raw materials
+        await api('/mrp/subcontracting/dispatch-raw-materials', 'POST', {
+            job_work_id: jobWorkID,
+            vehicle_plate_number: "B 9812 UIX",
+            customs_pass_slip_reference: "BC-2.6-PL-88912",
+            dispatched_material_kg: 2600.0
+        });
+
+        // 3. Reconcile inward receipt and scrap
+        const reconRes = await api('/mrp/subcontracting/reconcile-inward-scrap', 'POST', {
+            job_work_id: jobWorkID,
+            received_finished_units: 1000,
+            returned_scrap_kg: 40.0
+        });
+
+        // 4. Retrieve summary
+        const summaryRes = await api(`/mrp/subcontracting/reconciliation-summary/${jobWorkID}`, 'GET');
+
+        if (badge) badge.textContent = `⚙️ MRP: Job-Work Reconciled`;
+        if (answerEl) {
+            let out = `⚙️ SUBCONTRACTING TOLL-MANUFACTURING JOB-WORK MATERIAL RECONCILIATION & SCRAP GUARD:\n`;
+            out += `Nomor Perintah Kerja Subkontrak (Job-Work): ${jobWorkID}\n`;
+            out += `Vendor Subkontraktor: PT Presisi Logam Mandiri (VEND-SUBCON-PRECISION-01)\n`;
+            out += `Produk Jadi Dihasilkan: SKU-FLANGE-ALUM-300 (Flange Aluminium Presisi)\n`;
+            out += `Total Unit Jadi Diterima: ${reconRes.data.received_finished_units} Unit\n\n`;
+            out += `REKONSILIASI PENGELUARAN & PENGGUNAAN BAHAN BAKU (SURAT JALAN BC 2.6):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Bahan Baku Dikirim ke Subkon: ${summaryRes.data.outward_challan.dispatched_material_kg.toLocaleString()} KG Aluminium Billet\n`;
+            out += `Kebutuhan Standar Sesuai BOM: ${reconRes.data.theoretical_material_needed_kg.toLocaleString()} KG (2.5 KG / Unit)\n`;
+            out += `Batas Toleransi Scrap Wajar (4.0%): ${reconRes.data.allowable_scrap_kg.toFixed(1)} KG\n`;
+            out += `Scrap Dikembalikan: ${reconRes.data.returned_scrap_kg.toFixed(1)} KG\n`;
+            out += `Kelebihan Scrap Tanpa Penjelasan: ${reconRes.data.unexplained_excess_scrap_kg.toFixed(1)} KG (Excess Scrap Wastage)\n\n`;
+            out += `PENERBITAN DEBIT NOTE & POTONGAN ONGKOS JASA SUBKONTRAK:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Total Ongkos Jasa Subkontrak Kotor (Gross Fee): $${reconRes.data.gross_processing_fee_usd.toLocaleString()} USD\n`;
+            out += `Potongan Ganti Rugi Bahan (Contra Debit Note): -$${reconRes.data.excess_scrap_penalty_usd.toFixed(2)} USD\n`;
+            out += `Tagihan Bersih yang Dibayarkan ke Subkon: $${reconRes.data.net_vendor_payable_usd.toFixed(2)} USD\n`;
+            out += `Nomor Referensi Debit Note GL: ${reconRes.data.contra_debit_note_reference || 'N/A'}\n`;
+            out += `Kepatuhan Kawasan Berikat 180 Hari: ${reconRes.data.customs_bonded_compliant ? 'TERPENUHI (Dalam Batas Waktu)' : 'EXPIRED'}\n`;
+            out += `Status Fasilitas Berikat: ${summaryRes.data.customs_bonded_facility}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Otomatisasi rekonsiliasi material mencegah kebocoran bahan baku mahal (aluminium, tembaga) di pabrik subkontraktor.</li>
+                <li>Penerbitan Debit Note otomatis memotong langsung tagihan ongkos jasa subkon tanpa sengketa komersial.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal merekonsiliasi toll-manufacturing job-work: ' + err.message;
+    }
+}
+
 
 
 // Auto-initialize Real-Time SSE Event Stream

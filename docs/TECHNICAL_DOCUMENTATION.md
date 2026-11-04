@@ -988,6 +988,40 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Autonomous Return Reconciliation & Inspection**: Endpoint `POST /api/v1/scm/packaging/reconcile-return-inspection` inspects returned packaging physical condition (Excellent, Needs Chemical Flush, Damaged), assesses cleaning fees, and automatically issues credit note deposit refunds to customer accounts.
 - **EPR & PPWR Circular Economy Ledger**: Endpoint `GET /api/v1/scm/packaging/epr-sustainability-ledger/:company_id` computes packaging circularity rates, avoided single-use plastic waste (metric tons), and avoided Scope 3 carbon footprints.
 
+---
+
+## 30. Industrial Water ZLD, Vendor Sanctions Graph, Boiler Descaling, SaaS Dunning Waterfall & Toll Manufacturing Recon (v1.64.0)
+
+### 30.1 Autonomous Industrial Water Stewardship & Zero-Liquid Discharge (ZLD) Effluent Sentinel (`internal/core/ehs/water_stewardship.go`)
+- **Continuous In-Line Wastewater Effluent Telemetry**: Endpoint `POST /api/v1/ehs/water/ingest-effluent-telemetry` monitors real-time industrial outfall sensor streams across key environmental parameters (pH, COD, BOD, TSS, and TDS).
+- **Sub-10s Fail-Safe Outfall Gate Shutoff**: Endpoint `POST /api/v1/ehs/water/evaluate-discharge-compliance` intercepts regulatory discharge violations, triggering automated fail-safe river outfall shutoff in $< 10$ seconds, diverting toxic effluent to emergency retention basins, and dispatching SPARING KLHK alerts.
+- **Circular Water Accounting & ZLD Tiering (ISO 14046)**: Endpoint `POST /api/v1/ehs/water/record-recycling-volume` tracks raw intake, recycled volumes, and cooling tower reuse, awarding ZLD Platinum certification for recycling ratios $\ge 95\%$.
+- **ZLD Environmental Compliance Dossier**: Endpoint `GET /api/v1/ehs/water/zld-environmental-dossier/:facility_id` provides complete environmental auditing dossiers, river shutoff logs, and water circularity metrics.
+
+### 30.2 AI Autonomous Vendor Deduplication & Global Sanctions Screening Graph (`internal/core/grc/vendor_sanctions_graph.go`)
+- **Multi-Attribute Vendor Master Deduplication**: Endpoint `POST /api/v1/grc/sanctions/deduplicate-partner-master` detects duplicate vendor records using Tax ID (NPWP/TIN), bank account numbers, SWIFT BIC, and fuzzy phonetic matching across complex corporate group hierarchies.
+- **Multi-Tier UBO Sanctions Screening & OFAC 50% Rule**: Endpoint `POST /api/v1/grc/sanctions/screen-ubo-watchlists` screens corporate entities and ultimate beneficial owners (UBO) against US OFAC SDN, EU Consolidated, and UN Security Council watchlists, strictly enforcing the US OFAC 50% aggregate ownership rule.
+- **Automated AP Payment Freeze & SAR Disclosing**: Endpoint `POST /api/v1/grc/sanctions/enforce-payment-freeze` intercepts outgoing accounts payable disbursements to sanctioned entities, placing automated AML payment holds and generating Suspicious Activity Report (SAR) reference codes with SHA-256 regulatory proof.
+- **Vendor Compliance Graph Dossier**: Endpoint `GET /api/v1/grc/sanctions/compliance-graph-dossier/:partner_id` renders 360-degree partner compliance profiles, deduplication logs, UBO ownership trees, and AML audit certificates.
+
+### 30.3 Heat Exchanger & Boiler Tube Fouling Predictive Descaling Manager (`internal/core/maintenance/boiler_fouling_descaling.go`)
+- **Continuous Boiler Thermal Sensor Telemetry**: Endpoint `POST /api/v1/maintenance/boiler/ingest-thermal-telemetry` captures flue gas exhaust temperatures, steam generation rates (TPH), LMTD, heat transfer surface areas, and baseline fuel consumption.
+- **Thermodynamic Fouling Factor ($R_f$) & Fuel Waste Evaluator**: Endpoint `POST /api/v1/maintenance/boiler/calculate-fouling-resistance` calculates heat transfer coefficient ($U$) degradation, mineral scale thickness ($\mu m$), thermal efficiency loss, and daily financial fuel waste resulting from scale insulation under ASME PTC 4 standards.
+- **Economic Descaling Turnaround Scheduler**: Endpoint `POST /api/v1/maintenance/boiler/schedule-descaling-turnaround` automatically schedules chemical CIP or high-pressure hydroblasting work orders when fuel waste payback falls under 15 days, preventing tube overheating and ASME Section I rupture hazards.
+- **Boiler Thermal Efficiency Dossier**: Endpoint `GET /api/v1/maintenance/boiler/thermal-efficiency-dossier/:asset_id` compiles thermal efficiency degradation curves, turnaround payback analyses, and pressure vessel safety compliance reports.
+
+### 30.4 Enterprise B2B SaaS Churn Recovery & Smart Dunning Waterfall Engine (`internal/core/subscription/dunning_waterfall.go`)
+- **Bank Decline Reason & Dunning Stage Tracking**: Endpoint `POST /api/v1/subscription/dunning/record-payment-failure` records credit card and direct debit failure events, classifying decline reasons (insufficient funds, expired cards, network timeouts) into staged dunning sequences.
+- **Intelligent Smart Retry Waterfall**: Endpoint `POST /api/v1/subscription/dunning/execute-smart-retry` executes machine-learned retry timing (payday alignment, banking window optimization) to recover up to 70%+ of failed subscription charges, booking revenue recovery in General Ledger under IFRS 15.
+- **Progressive Soft-Suspension & Grace Period Guard**: Endpoint `POST /api/v1/subscription/dunning/enforce-progressive-access-lock` enforces progressive access limitations (soft read-only access with dashboard payment banners) preserving client operational continuity while safeguarding revenue recognition.
+- **SaaS MRR Recovery & Churn Analytics**: Endpoint `GET /api/v1/subscription/dunning/revenue-recovery-metrics/:company_id` delivers real-time visibility into Monthly Recurring Revenue (MRR), involuntary churn rates, Net Revenue Retention (NRR), and total recovered revenue.
+
+### 30.5 Subcontracting Toll-Manufacturing Job-Work Material Reconciliation & Scrap Guard (`internal/core/mrp/toll_manufacturing_recon.go`)
+- **Subcontracting Job-Work Agreement Issuance**: Endpoint `POST /api/v1/mrp/subcontracting/issue-jobwork-order` establishes toll manufacturing orders linking finished product SKUs, BOM consumption norms, allowable scrap percentages, processing fees, and 180-day Customs Bonded statutory return deadlines.
+- **Material Outward Challan & Customs Pass Slip**: Endpoint `POST /api/v1/mrp/subcontracting/dispatch-raw-materials` tracks physical dispatch of raw materials to third-party processors under Customs Bonded transit permits (BC 2.6 / 2.7).
+- **Yield Audit & Excess Scrap Contra Recovery**: Endpoint `POST /api/v1/mrp/subcontracting/reconcile-inward-scrap` audits returned finished goods and scrap against BOM standards, automatically deducting excess material wastage from subcontractor processing fees via contra debit notes.
+- **Subcontracting Reconciliation Dossier**: Endpoint `GET /api/v1/mrp/subcontracting/reconciliation-summary/:jobwork_id` produces complete yield variance reports, scrap audit trails, debit note references, and Customs Bonded compliance verification.
+
 
 
 

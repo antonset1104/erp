@@ -46,6 +46,7 @@ import (
 	corequality "erp-golang/internal/core/quality"
 	corescm "erp-golang/internal/core/scm"
 	coreservice "erp-golang/internal/core/service"
+	coresubscription "erp-golang/internal/core/subscription"
 	coresystem "erp-golang/internal/core/system"
 	coretax "erp-golang/internal/core/tax"
 	coretradefinance "erp-golang/internal/core/tradefinance"
@@ -11429,5 +11430,172 @@ IEA*1*000099123~`
 	t.Logf("✓ Circular Packaging RTI Deposit-Return Verified: Asset='%s' (GRAI: %s), Type='%s', DispatchDeposit=$%.2f USD, ReturnCondition='%s' (Deduction=$%.2f, RefundCreditNote=$%.2f USD, Ref='%s'), AvoidedPlastic=%.2f Tons, AvoidedCO2=%.2f tCO2e, Circularity=%.1f%%",
 		circAsset.AssetID, circAsset.GRAISerialNumber, circAsset.AssetType, dispRecord.DepositChargedUSD, retInspection.ReturnedCondition, retInspection.DeductionFeeUSD, retInspection.RefundCreditNoteUSD, retInspection.CreditNoteReference, eprLedger["avoided_plastic_tons"].(float64), eprLedger["avoided_scope3_co2e_tons"].(float64), eprLedger["packaging_circularity_pct"].(float64))
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (77 SECTIONS: 75+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD + CONTRACT LEAKAGE SENTINEL + MICROGRID ISLANDING + CARGO GEOFENCE + SHIFT BIDDING FATIGUE + CIRCULAR PACKAGING RTI) PASSED 100%!")
+	// =========================================================================
+	// 78. ENTERPRISE INDUSTRIAL INNOVATIONS & COMPLIANCE (v1.64.0)
+	// =========================================================================
+
+	// 78.1 Autonomous Industrial Water Stewardship & Zero-Liquid Discharge (ZLD) Effluent Sentinel (ISO 14046)
+	wtrTelemetry := coreehs.GlobalWaterStewardshipVault.IngestEffluentTelemetry(coreehs.EffluentTelemetry{
+		TelemetryID:       "TEL-EFF-2026-9901",
+		FacilityID:        "FAC-CILEGON-PETROCHEM-01",
+		OutfallGateID:     "OUTFALL-RIVER-EAST-01",
+		PH:                9.8,
+		COD_mg_per_L:      245.0,
+		BOD_mg_per_L:      85.0,
+		TSS_mg_per_L:      72.0,
+		TDSPPM:            1450.0,
+		FlowRateM3PerHour: 45.0,
+	})
+	if wtrTelemetry.TelemetryID == "" || wtrTelemetry.FacilityID != "FAC-CILEGON-PETROCHEM-01" {
+		t.Fatalf("Failed to ingest water effluent telemetry: %+v", wtrTelemetry)
+	}
+
+	wtrAction, err := coreehs.GlobalWaterStewardshipVault.EvaluateDischargeCompliance("FAC-CILEGON-PETROCHEM-01")
+	if err != nil || wtrAction == nil || wtrAction.FailSafeGateStatus != "CLOSED_RIVER_DISCHARGE_SEALED" || !wtrAction.SPARINGAlertDispatched {
+		t.Fatalf("Failed to intercept effluent breach: %+v, err: %v", wtrAction, err)
+	}
+
+	wtrLedger := coreehs.GlobalWaterStewardshipVault.RecordRecyclingVolume(
+		"FAC-CILEGON-PETROCHEM-01", 100000.0, 96500.0, 42000.0,
+	)
+	if wtrLedger.WaterRecyclingRatio < 95.0 || wtrLedger.ZLDCertificationTier != "ZERO_LIQUID_DISCHARGE_PLATINUM" {
+		t.Fatalf("Failed to verify ZLD recycling tier: %+v", wtrLedger)
+	}
+
+	zldDossier, err := coreehs.GlobalWaterStewardshipVault.GetZLDDossier("FAC-CILEGON-PETROCHEM-01")
+	if err != nil || !zldDossier["has_gate_action"].(bool) {
+		t.Fatalf("Failed to compile ZLD dossier: %+v, err: %v", zldDossier, err)
+	}
+	t.Logf("✓ Water Stewardship & ZLD Sentinel Verified: Facility='%s', BreachAction='%s' (Gate='%s', Latency=%.1fs, DivertedTo='%s'), Recycled=%.1f%% (%s), SPARINGAlert=%t",
+		wtrTelemetry.FacilityID, wtrAction.ActionVerdict, wtrAction.FailSafeGateStatus, wtrAction.GateClosureLatencySec, wtrAction.DivertedRetentionBasin, wtrLedger.WaterRecyclingRatio, wtrLedger.ZLDCertificationTier, wtrAction.SPARINGAlertDispatched)
+
+	// 78.2 AI Autonomous Vendor Deduplication & Global Sanctions Screening Graph (OFAC / PEP / SDN 50% Rule)
+	sncDedup := coregrc.GlobalVendorSanctionsVault.DeduplicatePartnerMaster(coregrc.PartnerCandidate{
+		PartnerID:               "VEND-PETRO-GAZ-01",
+		CompanyName:             "Gazprom Export Energy Trading Prohibited",
+		TaxID:                   "01.889.991.2-022.000",
+		BankAccountNumber:       "98811223344",
+		BankName:                "Gazprombank",
+		AddressCity:             "Saint Petersburg",
+		UltimateBeneficialOwner: "Sanctioned Oligarch Entity",
+		UBOSanctionSharePct:     60.0,
+	})
+	if sncDedup.NewPartnerID == "" {
+		t.Fatalf("Failed to deduplicate vendor partner candidate: %+v", sncDedup)
+	}
+
+	sncScreen, err := coregrc.GlobalVendorSanctionsVault.ScreenUBOWatchlists("VEND-PETRO-GAZ-01")
+	if err != nil || !sncScreen.WatchlistHit || !sncScreen.SDN50PercentRuleTriggered || sncScreen.RiskCategory != "BLOCKED_SANCTIONED_PROPERTY" {
+		t.Fatalf("Failed to screen vendor sanctions under 50%% rule: %+v, err: %v", sncScreen, err)
+	}
+
+	sncFreeze, err := coregrc.GlobalVendorSanctionsVault.EnforcePaymentFreeze("VEND-PETRO-GAZ-01", 1450000.0)
+	if err != nil || sncFreeze.Status != "PAYMENT_BLOCKED_AML_FREEZE" || sncFreeze.FrozenPayableAmountUSD != 1450000.0 {
+		t.Fatalf("Failed to enforce payment freeze: %+v, err: %v", sncFreeze, err)
+	}
+
+	sncDossier, err := coregrc.GlobalVendorSanctionsVault.GetComplianceDossier("VEND-PETRO-GAZ-01")
+	if err != nil || !sncDossier["has_freeze"].(bool) {
+		t.Fatalf("Failed to compile vendor sanctions dossier: %+v, err: %v", sncDossier, err)
+	}
+	t.Logf("✓ Vendor Sanctions Graph & 50%% Rule Verified: Partner='%s', DedupRec='%s' (Match=%.1f%%), WatchlistHit=%t (SDN50Triggered=%t, Matched='%s'), FreezeStatus='%s' ($%.2f USD, SAR='%s', Digest=%s...)",
+		sncDedup.NewPartnerID, sncDedup.Recommendation, sncDedup.MatchConfidencePct, sncScreen.WatchlistHit, sncScreen.SDN50PercentRuleTriggered, sncScreen.MatchedWatchlist, sncFreeze.Status, sncFreeze.FrozenPayableAmountUSD, sncFreeze.SARReportReference, sncFreeze.RegulatoryHash[:16])
+
+	// 78.3 Heat Exchanger & Boiler Tube Fouling Predictive Descaling Manager (ASME PTC 4 & Section I)
+	blrTelemetry := coremaintenance.GlobalBoilerFoulingVault.IngestThermalTelemetry(coremaintenance.BoilerThermalTelemetry{
+		TelemetryID:         "TEL-BLR-2026-4401",
+		AssetID:             "BOILER-STM-50TPH-01",
+		FlueGasTemperatureC: 245.0,
+		SteamOutputTPH:      48.0,
+		HeatTransferAreaM2:  850.0,
+		LogMeanTempDiffLMTD: 142.5,
+		CleanDesignUCoeff:   1250.0,
+		DailyFuelCostUSD:    9500.0,
+	})
+	if blrTelemetry.TelemetryID == "" || blrTelemetry.AssetID != "BOILER-STM-50TPH-01" {
+		t.Fatalf("Failed to ingest boiler thermal telemetry: %+v", blrTelemetry)
+	}
+
+	blrFouling, err := coremaintenance.GlobalBoilerFoulingVault.CalculateFoulingResistance("BOILER-STM-50TPH-01")
+	if err != nil || blrFouling.FoulingResistanceRf <= 0 || blrFouling.DailyFuelWasteUSD <= 0 {
+		t.Fatalf("Failed to calculate boiler fouling resistance: %+v, err: %v", blrFouling, err)
+	}
+
+	blrWO, err := coremaintenance.GlobalBoilerFoulingVault.ScheduleDescalingTurnaround(
+		"BOILER-STM-50TPH-01", 12000.0, "HIGH_PRESSURE_HYDROBLASTING",
+	)
+	if err != nil || blrWO.WorkOrderID == "" || blrWO.UrgencyClassification != "DESCALING_MANDATORY_NOW" {
+		t.Fatalf("Failed to schedule descaling turnaround: %+v, err: %v", blrWO, err)
+	}
+
+	blrDossier, err := coremaintenance.GlobalBoilerFoulingVault.GetThermalDossier("BOILER-STM-50TPH-01")
+	if err != nil || !blrDossier["has_work_order"].(bool) {
+		t.Fatalf("Failed to compile boiler thermal dossier: %+v, err: %v", blrDossier, err)
+	}
+	t.Logf("✓ Boiler Tube Fouling & Predictive Descaling Verified: Asset='%s', Rf=%.6f m²·K/W, Scale=%.1f µm, Efficiency=%.1f%%, DailyFuelWaste=$%.2f USD/day, Urgency='%s', WO='%s' (Cost=$%.2f, Payback=%.1f days, PreventedRupture=%t)",
+		blrTelemetry.AssetID, blrFouling.FoulingResistanceRf, blrFouling.EstimatedScaleMicrons, blrFouling.ThermalEfficiencyPct, blrFouling.DailyFuelWasteUSD, blrWO.UrgencyClassification, blrWO.WorkOrderID, blrWO.EstimatedCleaningCostUSD, blrWO.DaysPaybackPeriod, blrWO.PreventedRuptureRisk)
+
+	// 78.4 Enterprise B2B SaaS Churn Recovery & Smart Dunning Waterfall Engine (IFRS 15 RevRec)
+	dunSub := coresubscription.GlobalDunningWaterfallVault.RegisterSubscription(
+		"SUB-ENTERPRISE-2026-902", "CUST-ACME-CORP", "billing@acme.com", "CORPORATE_CREDIT_CARD", 4500.0,
+	)
+	if dunSub.SubscriptionID == "" || dunSub.AccountStatus != "ACTIVE_GOOD_STANDING" {
+		t.Fatalf("Failed to register subscription for dunning: %+v", dunSub)
+	}
+
+	dunFail, err := coresubscription.GlobalDunningWaterfallVault.RecordPaymentFailure(
+		"SUB-ENTERPRISE-2026-902", "INSUFFICIENT_FUNDS", 4500.0,
+	)
+	if err != nil || dunFail.EventID == "" || dunFail.DunningStage != 1 {
+		t.Fatalf("Failed to record payment failure: %+v, err: %v", dunFail, err)
+	}
+
+	dunRetry, err := coresubscription.GlobalDunningWaterfallVault.ExecuteSmartRetry("SUB-ENTERPRISE-2026-902")
+	if err != nil || !dunRetry.RecoveredSuccessfully || dunRetry.RecoveredAmountUSD != 4500.0 {
+		t.Fatalf("Failed to execute smart retry: %+v, err: %v", dunRetry, err)
+	}
+
+	dunLock, err := coresubscription.GlobalDunningWaterfallVault.EnforceProgressiveAccessLock("SUB-ENTERPRISE-2026-902")
+	if err != nil || dunLock.AccountStatus != "SOFT_SUSPENDED_READONLY" {
+		t.Fatalf("Failed to enforce progressive access lock: %+v, err: %v", dunLock, err)
+	}
+
+	dunMetrics := coresubscription.GlobalDunningWaterfallVault.GetRevenueRecoveryMetrics("COMP-GOERP-SAAS-01")
+	if dunMetrics["total_active_mrr_usd"].(float64) <= 0 || dunMetrics["involuntary_churn_rate_pct"].(float64) > 5.0 {
+		t.Fatalf("Failed to calculate revenue recovery metrics: %+v", dunMetrics)
+	}
+	t.Logf("✓ SaaS Smart Dunning Waterfall & Churn Recovery Verified: SubID='%s' (MRR=$%.2f USD), FailReason='%s' (Stage=%d, Delay=%d hrs), Recovered=%t ($%.2f USD, GL='%s'), LockStatus='%s', ChurnRate=%.1f%%, NRR=%.1f%%",
+		dunSub.SubscriptionID, dunSub.MonthlyRecurringRevenueUSD, dunFail.DeclineCode, dunFail.DunningStage, dunFail.SuggestedRetryDelayHours, dunRetry.RecoveredSuccessfully, dunRetry.RecoveredAmountUSD, dunRetry.GLJournalMoveReference, dunLock.AccountStatus, dunMetrics["involuntary_churn_rate_pct"].(float64), dunMetrics["net_revenue_retention_nrr"].(float64))
+
+	// 78.5 Subcontracting Toll-Manufacturing Job-Work Material Reconciliation & Scrap Guard
+	tollOrder := coremrp.GlobalTollManufacturingVault.IssueJobWorkOrder(
+		"JOBWORK-2026-CNC-001", "VEND-SUBCON-PRECISION-01", "PT Presisi Logam Mandiri",
+		"SKU-FLANGE-ALUM-300", 1000, 2.5, 6.0, 4.0, 3.5,
+	)
+	if tollOrder.JobWorkID == "" || tollOrder.PlannedFinishedUnits != 1000 {
+		t.Fatalf("Failed to issue toll manufacturing job work order: %+v", tollOrder)
+	}
+
+	tollChallan, err := coremrp.GlobalTollManufacturingVault.DispatchRawMaterials(
+		"JOBWORK-2026-CNC-001", "B 9812 UIX", "BC-2.6-PL-88912", 2600.0,
+	)
+	if err != nil || tollChallan.DispatchedMaterialKG != 2600.0 || tollChallan.CustomsPassSlipReference != "BC-2.6-PL-88912" {
+		t.Fatalf("Failed to dispatch raw materials with challan: %+v, err: %v", tollChallan, err)
+	}
+
+	tollRecon, err := coremrp.GlobalTollManufacturingVault.ReconcileInwardScrap(
+		"JOBWORK-2026-CNC-001", 1000, 40.0,
+	)
+	if err != nil || tollRecon.ReceivedFinishedUnits != 1000 || !tollRecon.CustomsBondedCompliant {
+		t.Fatalf("Failed to reconcile toll manufacturing scrap: %+v, err: %v", tollRecon, err)
+	}
+
+	tollSummary, err := coremrp.GlobalTollManufacturingVault.GetReconciliationSummary("JOBWORK-2026-CNC-001")
+	if err != nil || !tollSummary["has_reconciliation"].(bool) {
+		t.Fatalf("Failed to compile toll manufacturing summary: %+v, err: %v", tollSummary, err)
+	}
+	t.Logf("✓ Toll-Manufacturing Job-Work Material Recon Verified: JobWork='%s' (Vendor='%s', SKU='%s'), Dispatched=%.1f KG, Finished=%d Units, ScrapActual=%.1f KG (Allowable=%.1f KG, Excess=%.1f KG), GrossFee=$%.2f USD, Penalty=-$%.2f USD (Ref='%s'), NetPayable=$%.2f USD, CustomsOK=%t",
+		tollOrder.JobWorkID, tollOrder.VendorName, tollOrder.FinishedProductSKU, tollChallan.DispatchedMaterialKG, tollRecon.ReceivedFinishedUnits, tollRecon.ReturnedScrapKG, tollRecon.AllowableScrapKG, tollRecon.UnexplainedExcessScrapKG, tollRecon.GrossProcessingFeeUSD, tollRecon.ExcessScrapPenaltyUSD, tollRecon.ContraDebitNoteReference, tollRecon.NetVendorPayableUSD, tollRecon.CustomsBondedCompliant)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (78 SECTIONS: 75+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD + CONTRACT LEAKAGE SENTINEL + MICROGRID ISLANDING + CARGO GEOFENCE + SHIFT BIDDING FATIGUE + CIRCULAR PACKAGING RTI + INDUSTRIAL WATER ZLD + VENDOR SANCTIONS GRAPH + BOILER TUBE DESCALING + SAAS DUNNING WATERFALL + TOLL MANUFACTURING RECON) PASSED 100%!")
 }

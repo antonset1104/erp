@@ -1297,6 +1297,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/ehs/water/evaluate-discharge-compliance": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Autonomous Industrial Water Stewardship & Zero-Liquid Discharge (ZLD) Effluent Sentinel (ISO 14046)",
+					"description": "Evaluates continuous industrial wastewater effluent telemetry (pH, COD, BOD, TSS) and triggers sub-10s fail-safe river outfall shutoff and emergency retention basin diversion.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Effluent compliance status or emergency fail-safe shutoff action record with SPARING alert dispatch"},
+					},
+				},
+			},
+			"/api/v1/grc/sanctions/screen-ubo-watchlists": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "AI Autonomous Vendor Deduplication & Global Sanctions Screening Graph (OFAC / PEP / SDN 50% Rule)",
+					"description": "Screens multi-tier ultimate beneficial ownership (UBO) against US OFAC SDN, EU, and UN watchlists, applying the 50% aggregate ownership rule and freezing non-compliant AP payments.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Sanctions screening result, aggregate SDN ownership percentage, and compliance risk classification"},
+					},
+				},
+			},
+			"/api/v1/maintenance/boiler/calculate-fouling-resistance": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Heat Exchanger & Boiler Tube Fouling Predictive Descaling Manager (ASME PTC 4 & Section I)",
+					"description": "Computes thermal overall heat transfer degradation, mineral scale thickness, and fuel waste percentage to schedule economic descaling turnarounds before tube rupture.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Fouling resistance (Rf), mineral scale thickness in microns, wasted fuel percentage, and turnaround urgency"},
+					},
+				},
+			},
+			"/api/v1/subscription/dunning/execute-smart-retry": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Enterprise B2B SaaS Churn Recovery & Smart Dunning Waterfall Engine (IFRS 15 RevRec)",
+					"description": "Executes intelligent payment retry waterfalls with exponential backoff and card-updater hooks, enforcing progressive soft-suspension to recover lost MRR.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Smart retry execution log, updated retry attempt count, and payment recovery status"},
+					},
+				},
+			},
+			"/api/v1/mrp/subcontracting/reconcile-inward-scrap": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Subcontracting Toll-Manufacturing Job-Work Material Reconciliation & Scrap Guard",
+					"description": "Reconciles raw material outward challans against finished goods inward receipts, enforces scrap tolerance limits, generates debit notes for excess wastage, and tracks Customs Bonded statutory returns.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Subcontracting material reconciliation ledger, scrap variance percentage, and debit note contra charge"},
+					},
+				},
+			},
 		},
 	}
 }
