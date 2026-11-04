@@ -997,6 +997,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/mrp/eco/create-order": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Closed-Loop Engineering Change Order (ECO) & Revision Rollout Controller",
+					"description": "Evaluates multi-level BOM blast radius, manages inventory disposition (use-up, scrap), and executes revision cut-over.",
+					"responses": map[string]interface{}{
+						"201": map[string]interface{}{"description": "Engineering change order drafted with multi-tier impact analysis"},
+					},
+				},
+			},
+			"/api/v1/fleet/coldchain/telemetry-reading": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Parametric Cold-Chain IoT Excursion & Marine Cargo Insurance Auto-Claim Engine",
+					"description": "Monitors container thermal telemetry and executes automated parametric cargo insurance claims upon threshold breach.",
+					"responses": map[string]interface{}{
+						"201": map[string]interface{}{"description": "Cold-chain telemetry logged and policy excursion thresholds audited"},
+					},
+				},
+			},
+			"/api/v1/treasury/stress-test/simulate-monte-carlo": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Corporate Liquidity Stress Testing & Monte Carlo Value-at-Risk (VaR) Simulator",
+					"description": "Runs 10,000 Monte Carlo macro-shock iterations, calculating LCR, NSFR, and 95%/99% Cash-Flow-at-Risk (CFaR).",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Liquidity stress simulation results, Basel III ratios, and survival horizon"},
+					},
+				},
+			},
+			"/api/v1/grc/csddd/evaluate-supplier": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Supply Chain Human Rights Due Diligence & Modern Slavery Sentinel (EU CSDDD & LkSG)",
+					"description": "Assesses multi-tier vendor forced labor, child labor, and wage risks, generating statutory regulatory filing declarations.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Supplier social audit score, composite CSDDD risk index, and compliance status"},
+					},
+				},
+			},
+			"/api/v1/hr/gigs/post-opportunity": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Internal Talent Mobility & Cross-Departmental Project Gig Marketplace",
+					"description": "Enables fractional agile project staffing (20% time allocation) with automated supervisory release workflows.",
+					"responses": map[string]interface{}{
+						"201": map[string]interface{}{"description": "Internal gig opportunity published to corporate marketplace"},
+					},
+				},
+			},
 		},
 	}
 }

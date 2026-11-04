@@ -793,5 +793,34 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Internal SME Discovery & Cost Optimization**: Endpoint `POST /api/v1/hr/experts/search` matches complex project requirements with internal engineers and specialists across global subsidiaries, quantifying substantial cost savings versus external consulting retainers.
 - **Domain Competency Radar**: Endpoint `GET /api/v1/hr/experts/competency-radar/:skill_domain` visualizes deep technical capability distributions across business units to support strategic resource allocation.
 
+---
+
+## 24. ECO Controller, Cold-Chain Parametric Insurance, Liquidity Stress, CSDDD & Gig Market (v1.58.0)
+
+### 24.1 Closed-Loop Engineering Change Order (ECO) & BOM Revision Rollout Controller (`internal/core/mrp/eco_controller.go`)
+- **Multi-Level BOM Blast-Radius Modeling**: Endpoint `POST /api/v1/mrp/eco/create-order` drafts engineering change orders and calculates affected open Purchase Orders, active WIP assemblies, and obsolete inventory values.
+- **Synchronized Cutover & Inventory Disposition Protocols**: Endpoint `POST /api/v1/mrp/eco/execute-rollout` enforces phase-in/phase-out strategies (date-effective vs serial-number cutover), routing parts to Use-Up Existing Stock or scrap write-off with direct General Ledger postings.
+- **Audit-Compliant Revision History**: Endpoints `POST /api/v1/mrp/eco/evaluate-impact` and `GET /api/v1/mrp/eco/audit-trail/:eco_id` capture multi-disciplinary sign-offs (Chief Engineer, Operations VP) and revision tracking.
+
+### 24.2 Parametric Cold-Chain IoT Excursion & Marine Cargo Insurance Auto-Claim Engine (`internal/core/fleet/coldchain_insurance.go`)
+- **Real-Time Maritime Reefer Sensor Monitoring**: Endpoint `POST /api/v1/fleet/coldchain/telemetry-reading` logs container temperature, relative humidity, tilt, compressor power status, and GPS coordinates.
+- **Smart Contract Parametric Claim Settlement**: Endpoint `POST /api/v1/fleet/coldchain/settle-smart-claim` audits thermal excursions against policy boundaries ($2^\circ\text{C} - 8^\circ\text{C}$ for $> 120$ mins), generating SHA-256 tamper-proof evidence digests and disbursing total loss claims automatically.
+- **Cargo Thermal Traceability Overview**: Endpoints `POST /api/v1/fleet/coldchain/evaluate-excursion` and `GET /api/v1/fleet/coldchain/cargo-status/:shipment_id` display real-time excursion durations, peak recorded temperatures, and underwriter policy details.
+
+### 24.3 Corporate Liquidity Stress Testing & Monte Carlo Value-at-Risk (VaR) Simulator (`internal/core/treasury/liquidity_stress.go`)
+- **Probabilistic 10,000-Iteration Monte Carlo Simulation**: Endpoint `POST /api/v1/treasury/stress-test/simulate-monte-carlo` models concurrent macro shocks (interest rate spikes $+200$ bps, currency depreciation $-15\%$, credit facility haircuts, customer defaults).
+- **Regulatory Basel III Liquidity Ratios**: Endpoint `GET /api/v1/treasury/stress-test/basel3-ratios` computes Liquidity Coverage Ratio (LCR $\ge 100\%$), Net Stable Funding Ratio (NSFR), Cash-Flow-at-Risk (CFaR 95% and 99%), and 30-day liquidity survival horizons.
+- **Executive Contingency Funding Defense**: Endpoint `POST /api/v1/treasury/stress-test/contingency-plan` models pre-approved emergency actions (committed RCF line drawdown, discretionary Capex freezes) to extend corporate survival horizons.
+
+### 24.4 Supply Chain Human Rights Due Diligence & Modern Slavery Sentinel (EU CSDDD & LkSG) (`internal/core/grc/csddd_sentinel.go`)
+- **Multi-Tier Social Responsibility & Labor Auditing**: Endpoint `POST /api/v1/grc/csddd/evaluate-supplier` scores vendors against Forced Labor Indexes, Child Labor Indexes, and Fair Wage ratings under SMETA/SA8000 standards.
+- **Encrypted Supply Chain Grievance Intake**: Endpoint `POST /api/v1/grc/csddd/log-grievance` captures confidential worker disclosures and enforces mandatory remediation corrective actions (CAPA).
+- **Statutory European Regulatory Filing**: Endpoint `GET /api/v1/grc/csddd/annual-declaration` synthesizes the official annual human rights due diligence declaration for EU CSDDD and German LkSG authorities, quantifying fine avoidance metrics.
+
+### 24.5 Internal Talent Mobility & Cross-Departmental Project Gig Marketplace (`internal/core/hr/internal_gig_marketplace.go`)
+- **Fractional Project Opportunity Publishing**: Endpoint `POST /api/v1/hr/gigs/post-opportunity` enables project managers to post agile internal gigs (e.g. 20% time allocation over 6–8 weeks) across global corporate entities.
+- **Semantic Skill Bidding & Manager Release Approval**: Endpoints `POST /api/v1/hr/gigs/apply-match` and `POST /api/v1/hr/gigs/approve-manager-release` calculate employee-gig compatibility scores and process formal supervisor time-release sign-offs.
+- **Active Gig Marketplace & Skill Endorsement**: Endpoint `GET /api/v1/hr/gigs/active-marketplace` displays active corporate project opportunities and awards verified skills to employee HRIS profiles upon gig completion.
+
 
 

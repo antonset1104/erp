@@ -26724,6 +26724,271 @@ async function triggerExpertLocator() {
     }
 }
 
+async function triggerECOController() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis blast-radius revisi BOM & mengeksekusi cut-over ECO...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const rollout = await api('/mrp/eco/execute-rollout', 'POST', {
+            eco_id: "ECO-2026-REV-041",
+            approver_name: "Ir. Gunawan Setiadi (VP Manufacturing Operations)",
+            approver_role: "PLANT_OPERATIONS_VP",
+            effective_serial_number: "SN-CUTOVER-INV-TRAC-250KW-001"
+        });
+
+        if (badge) badge.textContent = `📐 ECO: ${rollout.status}`;
+        if (answerEl) {
+            let out = `📐 CLOSED-LOOP ENGINEERING CHANGE ORDER (ECO) & BOM REVISION CONTROLLER:\n`;
+            out += `Nomor Perintah Revisi (ECO ID): ${rollout.eco_id}\n`;
+            out += `Judul Revisi Teknis: ${rollout.title}\n`;
+            out += `Alasan Perubahan: ${rollout.change_reason} | Diajukan Oleh: ${rollout.requested_by}\n`;
+            out += `Produk Perakitan: ${rollout.product_name} (${rollout.product_sku})\n`;
+            out += `Strategi Cut-Over: ${rollout.rollout_strategy} (Mulai Nomor Seri: ${rollout.effective_serial_number})\n`;
+            out += `Status Perubahan: ${rollout.status}\n\n`;
+            out += `ANALISIS DAMPAK SEBARAN (BLAST-RADIUS IMPACT ANALYSIS):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Revisi BOM: ${rollout.blast_radius.current_bom_revision} ➜ ${rollout.blast_radius.target_bom_revision} (BOM Terdampak: ${rollout.blast_radius.affected_boms_count})\n`;
+            out += `Pesanan Pembelian (PO) Terbuka Terdampak: ${rollout.blast_radius.affected_open_pos_count} PO (Nilai: $${rollout.blast_radius.open_po_value_usd.toLocaleString()} USD)\n`;
+            out += `Perintah Kerja WIP yang Sedang Dirakit: ${rollout.blast_radius.active_wip_work_orders_count} Lini (Nilai: $${rollout.blast_radius.wip_value_usd.toLocaleString()} USD)\n`;
+            out += `Risiko Biaya Transisi & Scrap: $${rollout.blast_radius.total_transition_cost_usd.toLocaleString()} USD\n\n`;
+            out += `PROTOKOL DISPOSISI MATERIAL KOMPONEN USANG:\n`;
+            rollout.dispositions.forEach(disp => {
+                out += `  • [${disp.disposition_strategy}] ${disp.component_name} (${disp.component_sku}):\n`;
+                out += `    Qty di Gudang: ${disp.quantity_on_hand} unit @ $${disp.unit_cost_usd} = $${disp.total_disposition_cost_usd.toLocaleString()} (Posting: ${disp.accounting_gl_posting})\n`;
+            });
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Analisis blast-radius multi-level mencegah lini produksi merakit produk dengan spesifikasi usang.</li>
+                <li>Strategi disposisi Use-Up Existing Stock menghabiskan material lama sebelum memicu scrap write-off di General Ledger.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses controller ECO: ' + err.message;
+    }
+}
+
+async function triggerColdChainInsurance() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi pelanggaran suhu kontainer reefer & mencairkan klaim parametrik...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const claim = await api('/fleet/coldchain/settle-smart-claim', 'POST', {
+            shipment_id: "SHP-REEFER-2026-904",
+            inspector: "Automated Parametric Underwriter Smart Contract Rail"
+        });
+
+        const status = await api('/fleet/coldchain/cargo-status/SHP-REEFER-2026-904', 'GET');
+
+        if (badge) badge.textContent = `❄️ Claim: $${claim.claim_payout_usd.toLocaleString()}`;
+        if (answerEl) {
+            let out = `❄️ PARAMETRIC COLD-CHAIN IOT EXCURSION & MARINE CARGO INSURANCE AUTO-CLAIM:\n`;
+            out += `ID Pengiriman Kargo Laut: ${claim.shipment_id} (No Polis: ${claim.policy_number})\n`;
+            out += `Deskripsi Kargo: ${status.cargo_description}\n`;
+            out += `Konsorsium Penjamin (Underwriter): ${status.underwriter_name}\n`;
+            out += `Rentang Suhu Kontrak: ${status.min_temp_limit_c}°C s/d ${status.max_temp_limit_c}°C (Batas Maksimal Deviasi: ${status.max_allowable_excursion_mins} Menit)\n`;
+            out += `Deviasi Termal Riil Terdeteksi IoT: ${claim.excursion_duration_minutes} Menit (Suhu Puncak: ${claim.peak_recorded_temp_c}°C)\n`;
+            out += `Vonis Kerusakan Kargo: ${claim.cargo_damage_verdict}\n\n`;
+            out += `EKSEKUSI PENCAIRAN ASURANSI PARAMETRIK INSTAN:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Nilai Kompensasi Santunan Klaim: $${claim.claim_payout_usd.toLocaleString()} USD (100% Payout Total Loss)\n`;
+            out += `Bukti Audit Kriptografis Anti-Manipulasi: ${claim.tamper_proof_audit_hash}\n`;
+            out += `Referensi Wire Transfer Otomatis: ${claim.direct_disbursement_ref}\n`;
+            out += `Status Penyelesaian Klaim: ${claim.status} pada ${claim.settled_at}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Sensor IoT kontainer reefer membuktikan pelanggaran suhu tanpa perlu menunggu survei manual pihak ketiga yang lambat.</li>
+                <li>Pencairan dana asuransi parametrik langsung memitigasi kerugian finansial akibat kerusakan produk biologis farmasi bernilai tinggi.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses klaim asuransi cold-chain: ' + err.message;
+    }
+}
+
+async function triggerLiquidityStressTest() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menjalankan simulasi Monte Carlo 10.000 iterasi & uji ketahanan likuiditas Basel III...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const sim = await api('/treasury/stress-test/simulate-monte-carlo', 'POST', {
+            scenario_name: "GLOBAL_STAGFLATION_AND_CURRENCY_CRISIS_2026",
+            interest_rate_shock_bps: 200.0,
+            fx_depreciation_pct: -15.0,
+            customer_default_rate_pct: 10.0,
+            credit_facility_haircut_pct: 20.0
+        });
+
+        if (badge) badge.textContent = `📊 LCR: ${sim.lcr_ratio_pct}%`;
+        if (answerEl) {
+            let out = `📊 CORPORATE LIQUIDITY STRESS TESTING & MONTE CARLO VALUE-AT-RISK (VaR) SIMULATOR:\n`;
+            out += `Skenario Guncangan Makroekonomi: ${sim.scenario_name}\n`;
+            out += `ID Simulasi: ${sim.simulation_id} (10.000 Iterasi Probabilistik Monte Carlo)\n`;
+            out += `Saldo Kas Awal Korporasi: $${sim.baseline_cash_usd.toLocaleString()} USD | Aset Likuid Berkualitas Tinggi (HQLA): $${sim.high_quality_liquid_assets_usd.toLocaleString()} USD\n`;
+            out += `Proyeksi Arus Kas Keluar Bersih 30 Hari (Stress Outflows): $${sim.projected_30_day_outflows_usd.toLocaleString()} USD\n\n`;
+            out += `INDIKATOR KEPATUHAN LIKUIDITAS BASEL III & VaR:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Liquidity Coverage Ratio (LCR): ${sim.lcr_ratio_pct}% (Batas Minimum Regulasi Basel III: ≥ 100%)\n`;
+            out += `• Net Stable Funding Ratio (NSFR): ${sim.nsfr_ratio_pct}% (Batas Minimum Regulasi: ≥ 100%)\n`;
+            out += `• Cash-Flow-at-Risk 95% Confidence (CFaR 95%): $${sim.cash_flow_at_risk_95_usd.toLocaleString()} USD\n`;
+            out += `• Cash-Flow-at-Risk 99% Confidence (CFaR 99%): $${sim.cash_flow_at_risk_99_usd.toLocaleString()} USD\n`;
+            out += `• Daya Tahan Likuiditas Tanpa Pendanaan Eksternal (Survival Horizon): ${sim.survival_horizon_days} Hari\n`;
+            out += `Tingkat Risiko Likuiditas: ${sim.liquidity_risk_tier} (Status Kepatuhan: ${sim.basel3_compliant ? '✅ COMPLIANT' : '⚠️ BREACH'})\n\n`;
+            out += `Rencana Aksi Kontinjensi Likuiditas Otomatis:\n`;
+            sim.contingency_funding_actions.forEach(act => out += `  ➜ ${act}\n`);
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Simulasi Monte Carlo memodelkan guncangan serentak: lonjakan suku bunga, devaluasi valas, dan gagal bayar piutang.</li>
+                <li>Rasio LCR dan NSFR membuktikan ketahanan grup konglomerat di hadapan auditor perbankan dan lembaga pemeringkat kredit.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses stress test likuiditas: ' + err.message;
+    }
+}
+
+async function triggerCSDDDSentinel() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengaudit kepatuhan HAM rantai pasok & menghasilkan deklarasi EU CSDDD / LkSG...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const decl = await api('/grc/csddd/annual-declaration', 'GET');
+
+        if (badge) badge.textContent = `⚖️ CSDDD: ${decl.audit_compliance_status}`;
+        if (answerEl) {
+            let out = `⚖️ SUPPLY CHAIN HUMAN RIGHTS DUE DILIGENCE & MODERN SLAVERY SENTINEL (EU CSDDD & LkSG):\n`;
+            out += `Nomor Deklarasi Kepatuhan Resmi: ${decl.declaration_id} (Tahun Pelaporan: ${decl.reporting_year})\n`;
+            out += `Entitas Korporasi Terdaftar: ${decl.enterprise_name}\n`;
+            out += `Total Pemasok yang Diaudit Sosial: ${decl.total_suppliers_audited} Vendor Multi-Tier\n`;
+            out += `Pemasok Kategori Risiko Tinggi: ${decl.high_risk_suppliers_count} Vendor (Paparan Denda Regulasi: $${decl.statutory_fine_exposure_usd.toLocaleString()} USD)\n`;
+            out += `Total Pengaduan Saluran Whistleblower yang Diinvestigasi: ${decl.grievances_investigated_count} Kasus\n`;
+            out += `Tingkat Keberhasilan Penegakan Tindakan Perbaikan (Remediation CAPA): ${decl.remediation_success_rate_pct}%\n`;
+            out += `Status Kepatuhan Audit Regulasi Eropa: ${decl.audit_compliance_status}\n\n`;
+            out += `AUDIT STATUS PEMASOK SAMPEL (TIER-1 & TIER-2):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            decl.monitored_suppliers.forEach(s => {
+                out += `• ${s.supplier_name} (${s.factory_location}, ${s.country_code}) - Tier ${s.tier_level}:\n`;
+                out += `  Standar Audit: ${s.social_audit_standard} | Indeks Kerja Paksa: ${s.forced_labor_risk_score}/100 | Upah Layak: ${s.fair_wage_score}/100\n`;
+                out += `  Skor Risiko Komposit CSDDD: ${s.composite_csddd_risk_score}/100 ➜ Status: ${s.compliance_standing}\n`;
+            });
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Uji tuntas hak asasi manusia mematuhi regulasi ketat EU CSDDD dan German Supply Chain Due Diligence Act (LkSG).</li>
+                <li>Saluran pengaduan pekerja terenkripsi dan tindakan remediasi terstruktur melindungi perusahaan dari denda berat Uni Eropa.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses sentinel kepatuhan HAM CSDDD: ' + err.message;
+    }
+}
+
+async function triggerInternalGigMarketplace() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mencari lowongan proyek paruh waktu internal & menyetujui izin manager release...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const app = await api('/hr/gigs/apply-match', 'POST', {
+            gig_id: "GIG-2026-AI-01",
+            employee_id: "EMP-2026-ENG-441",
+            employee_name: "Rian Hidayat, S.T.",
+            current_department: "Industrial Automation Engineering",
+            current_supervisor_name: "Ir. Hendro Wijaya (Dept Head)",
+            motivation_statement: "Ingin berkontribusi pada prototipe computer vision inspeksi cacat SMT untuk memperluas kompetensi edge AI."
+        });
+
+        const release = await api('/hr/gigs/approve-manager-release', 'POST', {
+            application_id: app.application_id,
+            approved: true,
+            manager_notes: "Disetujui untuk alokasi 8 jam per minggu (20% waktu kerja) selama 8 minggu."
+        });
+
+        if (badge) badge.textContent = `🚀 Gig: ${release.status}`;
+        if (answerEl) {
+            let out = `🚀 INTERNAL TALENT MOBILITY & CROSS-DEPARTMENTAL PROJECT GIG MARKETPLACE:\n`;
+            out += `ID Lamaran Proyek Internal: ${release.application_id}\n`;
+            out += `Peluang Proyek Gig: ${release.gig_title} (${release.gig_id})\n`;
+            out += `Karyawan Pelamar: ${release.employee_name} (${release.employee_id})\n`;
+            out += `Departemen Asal: ${release.current_department}\n`;
+            out += `Atasan Langsung: ${release.current_supervisor_name}\n`;
+            out += `Kecocokan Kompetensi Semantik AI: ${release.match_score_pct}% Match\n`;
+            out += `Status Persetujuan Izin Atasan (Manager Release): ${release.manager_release_approved ? '✅ APPROVED' : '❌ REJECTED'}\n`;
+            out += `Status Partisipasi Proyek: ${release.status}\n\n`;
+            out += `PORTOFOLIO KOMPETENSI BARU YANG DIVERIFIKASI SAAT SELESAI:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            if (release.verified_skills_earned && release.verified_skills_earned.length > 0) {
+                release.verified_skills_earned.forEach(skill => out += `  ★ ${skill}\n`);
+            }
+            out += `Motivasi Karyawan: "${release.motivation_statement}"\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Internal gig marketplace memungkinkan karyawan mengambil proyek lintas divisi tanpa harus meninggalkan peran utamanya.</li>
+                <li>Meningkatkan kelincahan inovasi perusahaan serta mengurangi retensi turnover dan biaya rekrutmen tenaga lepas luar.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses gig marketplace internal: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

@@ -10456,5 +10456,128 @@ IEA*1*000099123~`
 	t.Logf("✓ SME Expert Discovery Graph Verified: Domain='%s' (Project='%s'), ExpertsFound=%d, TopMatch='%s' (%.1f%% Match, Status='%s', Bandwidth=%.0f%%), Rate=$%.0f/hr, SavingsVsExt=$%.0f, SearchTime=%.2f ms, Step='%s'",
 		expertSearch.QueryDomain, expertSearch.TargetProjectCode, expertSearch.TotalInternalExpertsFound, topExpert.Expert.FullName, topExpert.MatchScorePct, topExpert.AvailabilityStatus, topExpert.Expert.CurrentBandwidthPct, topExpert.Expert.InternalHourlyChargeUSD, topExpert.EstimatedCostSavingsVsExternalUSD, expertSearch.SearchDurationMs, expertSearch.RecommendedNextStep)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (71 SECTIONS: 60+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH) PASSED 100%!")
+	// ==========================================
+	// SECTION 72: V1.58.0 CLOSED-LOOP ECO CONTROLLER, COLD-CHAIN PARAMETRIC INSURANCE, LIQUIDITY STRESS TESTING, CSDDD HUMAN RIGHTS & GIG MARKETPLACE:
+	// 1. Closed-Loop Engineering Change Order (ECO) & BOM Revision Rollout Controller
+	// 2. Parametric Cold-Chain IoT Excursion & Marine Cargo Insurance Auto-Claim Engine
+	// 3. Corporate Liquidity Stress Testing & Monte Carlo Value-at-Risk (VaR) Simulator
+	// 4. Supply Chain Human Rights Due Diligence & Modern Slavery Sentinel (EU CSDDD & LkSG)
+	// 5. Internal Talent Mobility & Cross-Departmental Project Gig Marketplace
+	// ==========================================
+	t.Log(`
+		>>> SECTION 72: CLOSED-LOOP ECO CONTROLLER, COLD-CHAIN PARAMETRIC INSURANCE, LIQUIDITY STRESS TESTING, CSDDD HUMAN RIGHTS & GIG MARKETPLACE <<<`)
+
+	// 72.1 Closed-Loop Engineering Change Order (ECO) & BOM Revision Rollout Controller
+	ecoOrder, err := coremrp.CreateEngineeringChangeOrderLogic(coremrp.CreateECORequest{
+		Title:           "Thermal Interface Heat-Sink Redesign for Traction Inverters",
+		ChangeReason:    "SAFETY_UPGRADE",
+		ProductSKU:      "INV-TRAC-250KW",
+		ProductName:     "250kW Silicon-Carbide Dual-Motor Traction Inverter",
+		RequestedBy:     "Dr. Hartono (Chief Power Electronics Engineer)",
+		RolloutStrategy: "SERIAL_NUMBER_CUTOVER",
+		EffectiveDate:   "2026-04-15",
+	})
+	if err != nil || ecoOrder.ECOID == "" || ecoOrder.Status != "DRAFT" {
+		t.Fatalf("Failed to create engineering change order: %+v, err: %v", ecoOrder, err)
+	}
+
+	ecoRollout, err := coremrp.ExecuteRolloutLogic(coremrp.ExecuteRolloutRequest{
+		ECOID:                 ecoOrder.ECOID,
+		ApproverName:          "Ir. Gunawan Setiadi",
+		ApproverRole:          "PLANT_OPERATIONS_VP",
+		EffectiveSerialNumber: "SN-CUTOVER-INV-TRAC-250KW-001",
+	})
+	if err != nil || ecoRollout.Status != "ROLLED_OUT_ACTIVE" || len(ecoRollout.Approvals) == 0 {
+		t.Fatalf("Failed to execute ECO rollout cutover: %+v, err: %v", ecoRollout, err)
+	}
+	t.Logf("✓ MRP ECO Controller Verified: ECOID='%s' (%s), Strategy='%s', CutoverSN='%s', Status='%s', BlastRadius: BOMs=%d, OpenPOs=%d ($%.0f USD), WIPOrders=%d ($%.0f USD), TransitionCost=$%.0f USD, Approver='%s'",
+		ecoRollout.ECOID, ecoRollout.Title, ecoRollout.RolloutStrategy, ecoRollout.EffectiveSerialNumber, ecoRollout.Status, ecoRollout.BlastRadius.AffectedBOMsCount, ecoRollout.BlastRadius.AffectedOpenPOsCount, ecoRollout.BlastRadius.OpenPOValueUSD, ecoRollout.BlastRadius.ActiveWIPWorkOrdersCount, ecoRollout.BlastRadius.WIPValueUSD, ecoRollout.BlastRadius.TotalTransitionCostUSD, ecoRollout.Approvals[0].ApproverName)
+
+	// 72.2 Parametric Cold-Chain IoT Excursion & Marine Cargo Insurance Auto-Claim
+	coldReading, err := corefleet.IngestColdChainTelemetryLogic(corefleet.ColdChainTelemetryReading{
+		ShipmentID:          "SHP-REEFER-2026-904",
+		ContainerNo:         "MSCU-884210-9",
+		TemperatureCelsius:  14.5,
+		RelativeHumidityPct: 83.0,
+		CompressorStatus:    "POWER_DISCONNECTED",
+		GPSLatitude:         -6.102,
+		GPSLongitude:        106.882,
+	})
+	if err != nil || coldReading.ReadingID == "" {
+		t.Fatalf("Failed to ingest cold chain telemetry reading: %+v, err: %v", coldReading, err)
+	}
+
+	smartClaim, err := corefleet.SettleSmartClaimLogic(corefleet.SettleClaimRequest{
+		ShipmentID: "SHP-REEFER-2026-904",
+		Inspector:  "Automated Parametric Smart Contract Rail",
+	})
+	if err != nil || smartClaim.ClaimID == "" || smartClaim.ClaimPayoutUSD <= 0 || smartClaim.TamperProofAuditHash == "" || smartClaim.Status != "AUTO_DISBURSED" {
+		t.Fatalf("Failed to settle parametric cold chain insurance claim: %+v, err: %v", smartClaim, err)
+	}
+	t.Logf("✓ Parametric Cold-Chain Insurance Verified: ClaimID='%s', Shipment='%s' (Policy='%s'), ExcursionMins=%d (Peak=%.1f C), DamageVerdict='%s', Payout=$%.0f USD, AuditHash='%s', WireRef='%s', Status='%s'",
+		smartClaim.ClaimID, smartClaim.ShipmentID, smartClaim.PolicyNumber, smartClaim.ExcursionDurationMinutes, smartClaim.PeakRecordedTempC, smartClaim.CargoDamageVerdict, smartClaim.ClaimPayoutUSD, smartClaim.TamperProofAuditHash[:16], smartClaim.DirectDisbursementRef, smartClaim.Status)
+
+	// 72.3 Corporate Liquidity Stress Testing & Monte Carlo Value-at-Risk (VaR) Simulator
+	monteCarloSim, err := coretreasury.SimulateMonteCarloLiquidityLogic(coretreasury.MacroShockScenario{
+		ScenarioName:             "GLOBAL_STAGFLATION_AND_CURRENCY_CRISIS_2026",
+		InterestRateShockBps:     200.0,
+		FXDepreciationPct:        -15.0,
+		CustomerDefaultRatePct:   10.0,
+		CreditFacilityHaircutPct: 20.0,
+	})
+	if err != nil || monteCarloSim.SimulationID == "" || monteCarloSim.LCRRatioPct <= 0 || monteCarloSim.CashFlowAtRisk95USD <= 0 || monteCarloSim.SurvivalHorizonDays <= 0 {
+		t.Fatalf("Failed to simulate Monte Carlo liquidity stress test: %+v, err: %v", monteCarloSim, err)
+	}
+
+	contingencyPlan, err := coretreasury.ActivateContingencyPlanLogic(monteCarloSim.SimulationID)
+	if err != nil || contingencyPlan.PlanID == "" || contingencyPlan.RevolvingCreditDrawdownUSD <= 0 || contingencyPlan.Status != "ACTIVATED" {
+		t.Fatalf("Failed to activate liquidity contingency plan: %+v, err: %v", contingencyPlan, err)
+	}
+	t.Logf("✓ Liquidity Stress Testing Verified: SimID='%s' (%s), Cash=$%.0fM, HQLA=$%.0fM, Outflows=$%.0fM, LCR=%.2f%%, NSFR=%.2f%%, CFaR95=$%.0f, CFaR99=$%.0f, Horizon=%d Days (PlanRevised=%d Days), RiskTier='%s', RCF Drawdown=$%.0fM, Status='%s'",
+		monteCarloSim.SimulationID, monteCarloSim.ScenarioName, monteCarloSim.BaselineCashUSD/1000000.0, monteCarloSim.HighQualityLiquidAssetsUSD/1000000.0, monteCarloSim.Projected30DayOutflowsUSD/1000000.0, monteCarloSim.LCRRatioPct, monteCarloSim.NSFRRatioPct, monteCarloSim.CashFlowAtRisk95USD, monteCarloSim.CashFlowAtRisk99USD, monteCarloSim.SurvivalHorizonDays, contingencyPlan.RevisedSurvivalHorizonDays, monteCarloSim.LiquidityRiskTier, contingencyPlan.RevolvingCreditDrawdownUSD/1000000.0, contingencyPlan.Status)
+
+	// 72.4 Supply Chain Human Rights Due Diligence & Modern Slavery Sentinel (EU CSDDD & LkSG)
+	csdddSupplier, err := coregrc.EvaluateSupplierCSDDDLogic(coregrc.EvaluateSupplierRequest{
+		SupplierID:          "SUP-GARMENT-BD-01",
+		SupplierName:        "Apex Textile & Industrial Apparel Ltd",
+		FactoryLocation:     "Dhaka Export Processing Zone",
+		CountryCode:         "BD",
+		TierLevel:           1,
+		SocialAuditStandard: "SMETA_4_PILLAR",
+		ForcedLaborIndex:    18.5,
+		ChildLaborIndex:     8.0,
+		FairWageRating:      88.0,
+	})
+	if err != nil || csdddSupplier.SupplierID == "" || csdddSupplier.CompositeCSDDDRiskScore <= 0 || csdddSupplier.ComplianceStanding != "LOW_RISK_APPROVED" {
+		t.Fatalf("Failed to evaluate supplier CSDDD risk profile: %+v, err: %v", csdddSupplier, err)
+	}
+
+	csdddDecl, err := coregrc.GenerateCSDDDAnnualDeclarationLogic(2026)
+	if err != nil || csdddDecl.DeclarationID == "" || csdddDecl.TotalSuppliersAudited <= 0 || csdddDecl.AuditComplianceStatus == "" {
+		t.Fatalf("Failed to generate CSDDD annual declaration: %+v, err: %v", csdddDecl, err)
+	}
+	t.Logf("✓ EU CSDDD & LkSG Due Diligence Verified: Supplier='%s' (%s, %s Tier-%d), Audit='%s', ForcedLabor=%.1f, ChildLabor=%.1f, FairWage=%.1f, CompositeRisk=%.1f, Standing='%s', AnnualDecl='%s' (Year=%d, Audited=%d, Remediated=%.1f%%, FineExposure=$%.0f, Status='%s')",
+		csdddSupplier.SupplierID, csdddSupplier.SupplierName, csdddSupplier.CountryCode, csdddSupplier.TierLevel, csdddSupplier.SocialAuditStandard, csdddSupplier.ForcedLaborRiskScore, csdddSupplier.ChildLaborRiskScore, csdddSupplier.FairWageScore, csdddSupplier.CompositeCSDDDRiskScore, csdddSupplier.ComplianceStanding, csdddDecl.DeclarationID, csdddDecl.ReportingYear, csdddDecl.TotalSuppliersAudited, csdddDecl.RemediationSuccessRatePct, csdddDecl.StatutoryFineExposureUSD, csdddDecl.AuditComplianceStatus)
+
+	// 72.5 Internal Talent Mobility & Cross-Departmental Project Gig Marketplace
+	gigApp, err := corehr.ApplyGigMatchLogic(corehr.ApplyGigRequest{
+		GigID:                 "GIG-2026-AI-01",
+		EmployeeID:            "EMP-2026-ENG-441",
+		EmployeeName:          "Rian Hidayat, S.T.",
+		CurrentDepartment:     "Industrial Automation Engineering",
+		CurrentSupervisorName: "Ir. Hendro Wijaya (Dept Head)",
+		MotivationStatement:   "Ingin berkontribusi pada prototipe computer vision inspeksi cacat SMT untuk memperluas kompetensi edge AI.",
+	})
+	if err != nil || gigApp.ApplicationID == "" || gigApp.MatchScorePct <= 0 || gigApp.Status != "PENDING_MANAGER_RELEASE" {
+		t.Fatalf("Failed to apply for internal gig opportunity: %+v, err: %v", gigApp, err)
+	}
+
+	gigRelease, err := corehr.ApproveManagerReleaseLogic(gigApp.ApplicationID, true)
+	if err != nil || !gigRelease.ManagerReleaseApproved || gigRelease.Status != "APPROVED_ACTIVE" || len(gigRelease.VerifiedSkillsEarned) == 0 {
+		t.Fatalf("Failed to approve manager release for internal gig: %+v, err: %v", gigRelease, err)
+	}
+	t.Logf("✓ Internal Gig Marketplace Verified: AppID='%s', Gig='%s' (%s), Employee='%s' (%s), Supervisor='%s', MatchScore=%.1f%%, ManagerApproved=%v, Status='%s', VerifiedSkills=%v",
+		gigRelease.ApplicationID, gigRelease.GigTitle, gigRelease.GigID, gigRelease.EmployeeName, gigRelease.CurrentDepartment, gigRelease.CurrentSupervisorName, gigRelease.MatchScorePct, gigRelease.ManagerReleaseApproved, gigRelease.Status, gigRelease.VerifiedSkillsEarned)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (72 SECTIONS: 65+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE) PASSED 100%!")
 }
