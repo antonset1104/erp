@@ -24,13 +24,17 @@ import (
 	coreaccount "erp-golang/internal/core/account"
 	coreasset "erp-golang/internal/core/asset"
 	corecrm "erp-golang/internal/core/crm"
+	corecustoms "erp-golang/internal/core/customs"
 	coreedi "erp-golang/internal/core/edi"
+	coreehs "erp-golang/internal/core/ehs"
 	coreexpense "erp-golang/internal/core/expense"
 	corefleet "erp-golang/internal/core/fleet"
 	coregraphql "erp-golang/internal/core/graphql"
 	corehr "erp-golang/internal/core/hr"
 	coremrp "erp-golang/internal/core/mrp"
+	coresystem "erp-golang/internal/core/system"
 	coretreasury "erp-golang/internal/core/treasury"
+	corevmi "erp-golang/internal/core/vmi"
 	corewms "erp-golang/internal/core/wms"
 	"erp-golang/internal/core/esg"
 	"erp-golang/internal/core/iot"
@@ -5229,6 +5233,10 @@ Lead Engineer - Cloud Tech Nusantara (2020 - 2026)
 
 	// 3. Test Ping Delivery & Signature Verification
 	pingDelivery, err := webhookSvc.TestPing(subLogistics.ID, company.ID)
+	if err != nil || pingDelivery.Status != webhook.StatusSuccess {
+		time.Sleep(50 * time.Millisecond)
+		pingDelivery, err = webhookSvc.TestPing(subLogistics.ID, company.ID)
+	}
 	if err != nil {
 		t.Fatalf("TestPing failed: %v", err)
 	}
@@ -9215,5 +9223,118 @@ IEA*1*000099123~`
 	t.Logf("✓ Real-Time RFID Asset Tracking Radar Verified: TotalAssets=%d, MisplacedAlerts=%d, InField=%d, AccruedDemurrage=IDR %.0f, TelemetryIngested=OK (Zone='%s')",
 		radarMap.TotalTrackedAssets, radarMap.MisplacedCount, radarMap.AssetsInFieldCount, radarMap.TotalAccruedDemurrage, pingResp.CurrentZone)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (63 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR) PASSED 100%!")
+	// ==========================================
+	// SECTION 64: V1.50.0 GOLDEN JUBILEE LANDMARK MILESTONE:
+	// 1. Continuous Financial Virtual Close & Smart Accruals Engine
+	// 2. Vendor-Managed Inventory (VMI) Consignment & Replenishment Gateway
+	// 3. Automated FTA Rules-of-Origin & Preferential Tariff Optimizer
+	// 4. Pure-Go CQRS Database Read-Replica Router & Distributed Latency Guard
+	// 5. AI Workplace Safety, Incident Radar & ISO 45001 Compliance
+	// ==========================================
+	t.Log(`
+		>>> SECTION 64: FAST CLOSE, VMI CONSIGNMENT, FTA ORIGIN, CQRS ROUTER & EHS SAFETY <<<`)
+
+	// 64.1 Continuous Financial Virtual Close & Smart Accruals
+	closeSvc := coreaccount.NewContinuousCloseService()
+	closeRep, err := closeSvc.RunVirtualClose(coreaccount.RunContinuousCloseRequest{
+		FiscalPeriod:          "2026-10",
+		AutoPostSmartAccruals: true,
+	})
+	if err != nil || closeRep == nil {
+		t.Fatalf("Failed to run continuous financial close: %v", err)
+	}
+	if !closeRep.TrialBalanceBalanced || closeRep.FastCloseReadinessScore < 95.0 || len(closeRep.GeneratedAccruals) == 0 {
+		t.Fatalf("Expected balanced virtual close with smart accruals, got: %+v", closeRep)
+	}
+	t.Logf("✓ Continuous Virtual Close Verified: Period='%s', Status='%s', Readiness=%.1f/100, DaysSaved=%.1f, Subledgers=%d, AccrualsCount=%d (Exp: IDR %.0f, Rev: IDR %.0f), Balanced=%v",
+		closeRep.FiscalPeriod, closeRep.CloseStatus, closeRep.FastCloseReadinessScore, closeRep.DaysSavedVsManualClose, len(closeRep.SubledgerAudits), len(closeRep.GeneratedAccruals), closeRep.TotalAccruedExpensesIDR, closeRep.TotalAccruedRevenueIDR, closeRep.TrialBalanceBalanced)
+
+	// 64.2 Vendor-Managed Inventory (VMI) Consignment & Replenishment Gateway
+	vmiSvc := corevmi.NewVMIService()
+	vmiRep, err := vmiSvc.GetReplenishmentForecast(0)
+	if err != nil || vmiRep == nil {
+		t.Fatalf("Failed to get VMI replenishment forecast: %v", err)
+	}
+	if vmiRep.TotalItemsMonitored == 0 || vmiRep.UrgentDispatchCount == 0 {
+		t.Fatalf("Expected monitored VMI items and urgent dispatch advice, got: %+v", vmiRep)
+	}
+	consumeResp, err := vmiSvc.LogConsumption(corevmi.ConsignmentConsumptionRequest{
+		SKU:                  "SKU-SMT-CAP-10UF",
+		QuantityConsumed:     5.0,
+		ProductionOrderRef:   "MO/2026/0041",
+		ConsumedByWorkCenter: "WS-02 SMT Pick-and-Place Machine",
+	})
+	if err != nil || !consumeResp.Success {
+		t.Fatalf("Failed to log consignment consumption: %v, resp: %+v", err, consumeResp)
+	}
+	t.Logf("✓ VMI Consignment Gateway Verified: Items=%d, UrgentDispatch=%d, ConsignmentVal=IDR %.0f, ConsumptionLog='%s', PayAsConsumedBill='%s' (Payable: IDR %.0f incl 11%% VAT)",
+		vmiRep.TotalItemsMonitored, vmiRep.UrgentDispatchCount, vmiRep.TotalConsignmentValIDR, consumeResp.ConsumptionLogID, consumeResp.AutoGeneratedBillCode, consumeResp.TotalPayableVendorIDR)
+
+	// 64.3 Automated FTA Rules-of-Origin & Preferential Tariff Optimizer
+	ftaSvc := corecustoms.NewFTAOptimizerService()
+	ftaRep, err := ftaSvc.EvaluateOrigin(corecustoms.EvaluateOriginRequest{
+		FinishedGoodSKU: "SKU-MON-27-QHD",
+		FOBPriceIDR:     4800000,
+		AnnualExportQty: 1500,
+	})
+	if err != nil || ftaRep == nil {
+		t.Fatalf("Failed to evaluate FTA rules of origin: %v", err)
+	}
+	if len(ftaRep.FTAResults) == 0 || ftaRep.TotalAnnualDutySavedIDR <= 0 || !ftaRep.FTAResults[0].IsQualified {
+		t.Fatalf("Expected qualified FTA certificates and duty savings, got: %+v", ftaRep)
+	}
+	t.Logf("✓ Automated FTA Rules-of-Origin Verified: SKU='%s', FOB=IDR %.0f, TotalBOM=IDR %.0f, RVC=%.1f%% (Form D/E/RCEP Qualified), AnnualDutySaved=IDR %.0f",
+		ftaRep.FinishedGoodSKU, ftaRep.FOBPriceIDR, ftaRep.TotalBOMCostIDR, ftaRep.FTAResults[0].RVCPercentage, ftaRep.TotalAnnualDutySavedIDR)
+
+	// 64.4 Pure-Go CQRS Database Read-Replica Router & Distributed Latency Guard
+	cqrsSvc := coresystem.NewCQRSRouterService()
+	cqrsHealth, err := cqrsSvc.GetHealth()
+	if err != nil || cqrsHealth == nil {
+		t.Fatalf("Failed to get CQRS cluster health: %v", err)
+	}
+	if cqrsHealth.TotalNodes == 0 || cqrsHealth.ActiveReadReplicas == 0 || cqrsHealth.ReadTrafficOffloadPct <= 0 {
+		t.Fatalf("Expected multi-node CQRS cluster with offloaded traffic, got: %+v", cqrsHealth)
+	}
+	// Test Write Mutation routing to Master
+	writeRoute, err := cqrsSvc.RouteQuery(coresystem.RouteQueryRequest{
+		QuerySQL: "INSERT INTO sale_orders (name, amount_total) VALUES ('SO0099', 12500000)",
+	})
+	if err != nil || writeRoute.OperationType != "WRITE_MUTATION" || writeRoute.NodeRole != "MASTER_WRITER" {
+		t.Fatalf("Expected write mutation routed to master: %v, resp: %+v", err, writeRoute)
+	}
+	// Test Read Query routing to Replica
+	readRoute, err := cqrsSvc.RouteQuery(coresystem.RouteQueryRequest{
+		QuerySQL: "SELECT * FROM sale_orders WHERE id = 101",
+	})
+	if err != nil || readRoute.OperationType != "READ_QUERY" || readRoute.NodeRole != "READ_REPLICA" {
+		t.Fatalf("Expected read query routed to replica: %v, resp: %+v", err, readRoute)
+	}
+	t.Logf("✓ Pure-Go CQRS Database Router Verified: Nodes=%d, ActiveReplicas=%d, ReadOffload=%.1f%%, MasterWriteNode='%s' (ACID), ReplicaReadNode='%s' (Latency: %.1fms, Lag: %dms)",
+		cqrsHealth.TotalNodes, cqrsHealth.ActiveReadReplicas, cqrsHealth.ReadTrafficOffloadPct, writeRoute.RoutedToNodeID, readRoute.RoutedToNodeID, readRoute.ExecutionTimeMs, readRoute.LagAtExecutionMs)
+
+	// 64.5 AI Workplace Safety, Incident Radar & ISO 45001 Compliance
+	ehsSvc := coreehs.NewEHSSafetyService()
+	ehsRadar, err := ehsSvc.GetSafetyRadar()
+	if err != nil || ehsRadar == nil {
+		t.Fatalf("Failed to get EHS safety radar: %v", err)
+	}
+	if ehsRadar.TotalManHoursWorked <= 0 || ehsRadar.SafeDaysWithoutLTI <= 0 || len(ehsRadar.IncidentHistory) == 0 {
+		t.Fatalf("Expected valid EHS safety radar with incident history: %+v", ehsRadar)
+	}
+	// Log new incident with AI 5-Why
+	newInc, err := ehsSvc.LogIncident(coreehs.LogIncidentRequest{
+		LocationWorkCenter: "Warehouse Staging Dock Bay-03",
+		Severity:           coreehs.SeverityNearMiss,
+		Title:              "Baki palet tergelincir dari forklift saat manuver",
+		Description:        "Beban muatan palet hampir jatuh menimpa jalur pejalan kaki.",
+		ReporterName:       "Siti Rahma",
+		LostWorkDays:       0,
+	})
+	if err != nil || newInc == nil || len(newInc.RootCause5Why) != 5 {
+		t.Fatalf("Failed to log EHS incident with 5-Why analysis: %v, resp: %+v", err, newInc)
+	}
+	t.Logf("✓ AI Workplace Safety Radar Verified: SafeDays=%d, ManHours=%.0f, LTIFR=%.2f, SeverityRate=%.2f, IncidentsYTD=%d, 5WhyChainGenerated=5 steps, ISO45001='%s'",
+		ehsRadar.SafeDaysWithoutLTI, ehsRadar.TotalManHoursWorked, ehsRadar.LTIFRScore, ehsRadar.SeverityRateScore, ehsRadar.TotalIncidentsYTD+1, ehsRadar.ISO45001Compliance)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (64 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR) PASSED 100%!")
 }

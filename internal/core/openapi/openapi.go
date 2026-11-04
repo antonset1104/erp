@@ -597,6 +597,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/accounting/continuous-close/run": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Continuous Financial Virtual Close & Smart Accruals Engine",
+					"description": "24/7 continuous subledger reconciliation, automated GRNI accruals, and audit-ready fast close readiness.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Virtual close report, smart accruals, and days saved"},
+					},
+				},
+			},
+			"/api/v1/vmi/replenishment-forecast": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Vendor-Managed Inventory (VMI) Consignment & Replenishment Gateway",
+					"description": "Consignment min-max stock bands, automated supplier self-dispatch advice, and pay-as-consumed auto-billing.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "VMI forecast report, replenishment urgency, and consignment values"},
+					},
+				},
+			},
+			"/api/v1/customs/fta-origin/evaluate": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Automated FTA Rules-of-Origin & Preferential Tariff Optimizer",
+					"description": "Evaluates multi-level BOMs for Regional Value Content (RVC >= 40%) across ATIGA Form D, Form E, and RCEP.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "FTA qualification results, origin certificates, and projected duty savings"},
+					},
+				},
+			},
+			"/api/v1/system/cqrs/health": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"System & Protocols"},
+					"summary":     "Pure-Go CQRS Database Read-Replica Router & Cluster Health",
+					"description": "Monitors multi-region database master-replica topology, replication lag, and OLTP write isolation.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "CQRS cluster status, node health, and read traffic offload percentage"},
+					},
+				},
+			},
+			"/api/v1/ehs/safety-radar": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "AI Workplace Safety, Incident Radar & ISO 45001 Compliance",
+					"description": "Lost Time Injury Frequency Rate (LTIFR), Severity Rate (SR), zero-harm streaks, and automated 5-Why root cause CAPA.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "EHS safety report, incident statistics, and ISO 45001 compliance audit trail"},
+					},
+				},
+			},
 		},
 	}
 }

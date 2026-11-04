@@ -566,3 +566,30 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **IoT Sensor Telemetry Gateway**: Endpoint `POST /api/v1/asset/tracking/rfid-ping` ingests EPC Gen2 passive/active RFID and BLE beacon signals, tracking returnable containers (pallets, totes), heavy machinery, and precision tooling across geofenced facility zones.
 - **Misplaced Asset Alerts**: Instantly triggers critical warnings when high-precision equipment or maintenance tooling transitions into incorrect staging or outbound areas.
 - **Automated Geofence Demurrage & Radar Overview**: Endpoint `GET /api/v1/asset/tracking/radar-map` visualizes asset distributions and automatically accrues daily detention/demurrage fees for loaner equipment residing at customer sites beyond contracted free periods.
+
+---
+
+## 16. Continuous Virtual Close, VMI Gateway, FTA Rules of Origin, CQRS DB Router & EHS Safety (v1.50.0 - Golden Jubilee Landmark)
+
+### 16.1 Continuous Financial Virtual Close & Smart Accruals Engine (`internal/core/account/continuous_close.go`)
+- **24/7 Subledger Reconciliation**: Endpoint `POST /api/v1/accounting/continuous-close/run` continuously audits Accounts Receivable (AR), Accounts Payable (AP), Inventory, Fixed Assets, and Intercompany accounts against the General Ledger.
+- **Automated Smart Accrual Generation**: Detects Goods Received Not Invoiced (GRNI) variances and completed project milestones, automatically staging reversing accrual entries (`DR Inventory in Transit / CR Accrued Expenses`) with next-period auto-reversal dates.
+- **Fast-Close Readiness Dashboard**: Endpoint `GET /api/v1/accounting/continuous-close/dashboard` reduces monthly closing latency from 10 days to < 1 day with continuous audit-ready compliance scores.
+
+### 16.2 Vendor-Managed Inventory (VMI) Consignment & Replenishment Gateway (`internal/core/vmi/replenishment_gateway.go`)
+- **Telemetric Consignment Visibility**: Endpoint `POST /api/v1/vmi/replenishment-forecast` provides suppliers with real-time on-hand stock and min-max replenishment bands inside buyer factory staging bays.
+- **Authorized Self-Dispatch**: Empowers key suppliers to self-dispatch restocking shipments without waiting for manual Purchase Orders when stocks drop below safety thresholds.
+- **Pay-as-Consumed Auto-Billing**: Endpoint `POST /api/v1/vmi/consignment-consumption/log` logs production line material drawdowns, instantly releasing inventory into manufacturing and creating auto-generated vendor bills with 11% VAT.
+
+### 16.3 Automated FTA Rules-of-Origin & Preferential Tariff Optimizer (`internal/core/customs/fta_optimizer.go`)
+- **Multi-Level BOM Origin Qualification**: Endpoint `POST /api/v1/customs/fta-origin/evaluate` decomposes multi-level finished good bills of materials against global trade agreement boundaries (ATIGA ASEAN, ACFTA China, RCEP Asia-Pacific).
+- **Regional Value Content (RVC) Engine**: Computes exact regional qualifying content using build-down valuation formulas ($RVC = \frac{P_{\text{FOB}} - V_{\text{NOM}}}{P_{\text{FOB}}} \times 100\%$) and verifies Change in Tariff Heading (CTH).
+- **Preferential Duty Savings**: Endpoint `GET /api/v1/customs/fta-origin/certificate-matrix` certifies Form D, Form E, and Form RCEP eligibility, projecting annual customs tariff duty savings.
+
+### 16.4 Pure-Go CQRS Database Read-Replica Router & Distributed Latency Guard (`internal/core/system/cqrs_router.go`)
+- **Transaction Splitting (CQRS)**: Endpoint `POST /api/v1/system/cqrs/route-query` routes transactional mutations (`INSERT`, `UPDATE`, `DELETE`) to the Master Primary node under full ACID isolation, while streaming analytic scans and reporting queries to least-loaded Read-Replicas.
+- **Replication Lag Monitoring**: Endpoint `GET /api/v1/system/cqrs/health` monitors node health, active connections, query throughput (QPS), and replication lag across multi-region instances, automatically degrading lagging nodes.
+
+### 16.5 AI Workplace Safety, Incident Radar & ISO 45001 Compliance (`internal/core/ehs/safety_radar.go`)
+- **Incident Severity Logging**: Endpoint `POST /api/v1/ehs/incident/report` logs Near-Miss, First Aid, Medical Treatment, and Lost Time Injury (LTI) occurrences with automated 5-Why root-cause reasoning chains and corrective action (CAPA) tracking.
+- **Safety KPIs & Zero-Harm Streaks**: Endpoint `GET /api/v1/ehs/safety-radar` tracks Lost Time Injury Frequency Rate (LTIFR) and Severity Rate (SR) over cumulative man-hours, guaranteeing ISO 45001:2018 audit readiness.

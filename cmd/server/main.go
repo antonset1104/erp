@@ -14,13 +14,17 @@ import (
 	coreaccount "erp-golang/internal/core/account"
 	coreasset "erp-golang/internal/core/asset"
 	corecrm "erp-golang/internal/core/crm"
+	corecustoms "erp-golang/internal/core/customs"
 	coreedi "erp-golang/internal/core/edi"
+	coreehs "erp-golang/internal/core/ehs"
 	coreexpense "erp-golang/internal/core/expense"
 	corefleet "erp-golang/internal/core/fleet"
 	coregraphql "erp-golang/internal/core/graphql"
 	corehr "erp-golang/internal/core/hr"
 	coremrp "erp-golang/internal/core/mrp"
+	coresystem "erp-golang/internal/core/system"
 	coretreasury "erp-golang/internal/core/treasury"
+	corevmi "erp-golang/internal/core/vmi"
 	corewms "erp-golang/internal/core/wms"
 	"erp-golang/internal/core/esg"
 	"erp-golang/internal/core/iot"
@@ -278,7 +282,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.49.0",
+			"version":    "1.50.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -296,7 +300,7 @@ func main() {
 	ai.RegisterRootProtocolRoutes(r, aiHandler)
 
 	// Register OpenAPI 3.1 & Interactive API Explorer
-	openapi.RegisterRoutes(r, cfg.AppName, "1.49.0")
+	openapi.RegisterRoutes(r, cfg.AppName, "1.50.0")
 
 	// API v1 Router Group
 	apiV1 := r.Group("/api/v1")
@@ -338,6 +342,11 @@ func main() {
 		corecrm.RegisterCLVRoutes(apiV1, authMiddleware, db)
 		security.RegisterQuorumVaultRoutes(apiV1, authMiddleware, db)
 		coreasset.RegisterRFIDTrackerRoutes(apiV1, authMiddleware, db)
+		coreaccount.RegisterContinuousCloseRoutes(apiV1, authMiddleware, db)
+		corevmi.RegisterVMIRoutes(apiV1, authMiddleware, db)
+		corecustoms.RegisterFTARoutes(apiV1, authMiddleware, db)
+		coresystem.RegisterCQRSRoutes(apiV1, authMiddleware, db)
+		coreehs.RegisterEHSRoutes(apiV1, authMiddleware, db)
 	}
 
 	// Serve Static Web Frontend

@@ -24563,6 +24563,262 @@ async function triggerRFIDAssetRadar() {
     }
 }
 
+// v1.50.0 Golden Jubilee Landmark Innovations Triggers
+async function triggerContinuousClose() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengeksekusi penutupan virtual 24/7 & menerbitkan jurnal akrual cerdas (Smart Accruals)...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const closeRep = await api('/accounting/continuous-close/run', 'POST', {
+            fiscal_period: '2026-10',
+            auto_post_smart_accruals: true
+        });
+
+        if (badge) badge.textContent = `⚡ Fast Close: ${closeRep.close_status} (${closeRep.days_saved_vs_manual_close} Hari Dihemat)`;
+        if (answerEl) {
+            let out = `⚡ CONTINUOUS FINANCIAL VIRTUAL CLOSE & SMART ACCRUALS ENGINE:\n`;
+            out += `ID Eksekusi: ${closeRep.close_run_id} | Periode Fiskal: ${closeRep.fiscal_period}\n`;
+            out += `Status Penutupan: ${closeRep.close_status} | Skor Kesiapan Audit: ${closeRep.fast_close_readiness_score}/100\n`;
+            out += `Waktu Siklus Dihemat: ${closeRep.days_saved_vs_manual_close} Hari (Dari 10 hari manual menjadi < 1 hari otomatis!)\n`;
+            out += `Total Akrual Beban (GRNI/Prepaid): IDR ${closeRep.total_accrued_expenses_idr.toLocaleString()}\n`;
+            out += `Total Akrual Pendapatan (Unbilled): IDR ${closeRep.total_accrued_revenue_idr.toLocaleString()}\n`;
+            out += `Keseimbangan Neraca Saldo (Trial Balance): ${closeRep.trial_balance_balanced ? 'BALANCED (Σ Debit == Σ Credit)' : 'UNBALANCED'}\n\n`;
+            out += `REKONSILIASI SUB-LEDGER KE BUKU BESAR UTAMA (GENERAL LEDGER):\n`;
+            out += `--------------------------------------------------\n`;
+            closeRep.subledger_audits.forEach(sub => {
+                out += `• ${sub.subledger_name}:\n`;
+                out += `  Entri: ${sub.reconciled_entries}/${sub.total_entries} | Selisih: Rp ${sub.variance_amount_idr.toLocaleString()} | Seimbang: ${sub.is_balanced}\n`;
+                out += `  Catatan: ${sub.audit_note}\n`;
+            });
+            out += `--------------------------------------------------\n`;
+            out += `JURNAL PENYESUAIAN CERDAS (SMART ACCRUALS TERPOSTING):\n`;
+            closeRep.generated_accruals.forEach((acc, idx) => {
+                out += `[${idx+1}] ${acc.accrual_type} (Dokumen: ${acc.source_document})\n`;
+                out += `    Dr: ${acc.debit_account}\n`;
+                out += `    Cr: ${acc.credit_account}\n`;
+                out += `    Nominal: Rp ${acc.amount_idr.toLocaleString()} | Balik Otomatis: ${acc.auto_reversal_date}\n`;
+            });
+            out += `--------------------------------------------------\n`;
+            out += `⚡ Ringkasan CFO: ${closeRep.executive_summary}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penerimaan barang tanpa tagihan (GRNI) senilai Rp 12.500.000 otomatis diakrualkan dengan tanggal pembalikan di awal bulan berikutnya.</li>
+                <li>Laporan keuangan virtual ditutup secara real-time dan siap diaudit oleh kantor akuntan publik kapan saja (Continuous Audit).</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mengeksekusi Fast Close: ' + err.message;
+    }
+}
+
+async function triggerVMIRowGateway() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memuat telemetri Vendor-Managed Inventory (VMI) & prakiraan konsinyasi pemasok...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const vmi = await api('/vmi/replenishment-forecast', 'POST', {});
+
+        if (badge) badge.textContent = `🤝 VMI Gateway: ${vmi.total_items_monitored} SKU (${vmi.urgent_dispatch_count} Urgent Dispatch)`;
+        if (answerEl) {
+            let out = `🤝 VENDOR-MANAGED INVENTORY (VMI) CONSIGNMENT GATEWAY:\n`;
+            out += `ID Laporan: ${vmi.report_id} | Mitra Pemasok: ${vmi.vendor_name}\n`;
+            out += `Total SKU Konsinyasi: ${vmi.total_items_monitored} | Status Pengiriman Mendesak: ${vmi.urgent_dispatch_count} item\n`;
+            out += `Total Nilai Stok Konsinyasi di Gudang: IDR ${vmi.total_consignment_val_idr.toLocaleString()} (Modal Kerja Pembeli: Rp 0!)\n\n`;
+            out += `PANDUAN KONSINYASI PEMASOK:\n`;
+            out += `⚡ ${vmi.consignment_guidelines}\n\n`;
+            out += `STATUS TELEMETRI MIN-MAX BAND PER BARANG:\n`;
+            out += `--------------------------------------------------\n`;
+            vmi.items.forEach(it => {
+                out += `• [${it.sku}] ${it.product_name}\n`;
+                out += `  Lokasi: ${it.warehouse_location} | Biaya Satuan: Rp ${it.unit_cost_idr.toLocaleString()}\n`;
+                out += `  Stok Fisik Konsinyasi: ${it.current_consigned_on_hand} unit (Batas Min: ${it.min_stock_band} / Max: ${it.max_stock_band})\n`;
+                out += `  Proyeksi Konsumsi 14 Hari: ${it.projected_14d_demand} unit | Status: ${it.status}\n`;
+                if (it.suggested_dispatch_qty > 0) {
+                    out += `  🚨 Rekomendasi Self-Dispatch Mandiri: +${it.suggested_dispatch_qty} unit ke pabrik pembeli tanpa PO.\n`;
+                }
+                out += `\n`;
+            });
+            out += `--------------------------------------------------\n`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pemasok memiliki visibilitas langsung atas batas aman stok kapasitor dan dapat mengirim barang secara mandiri.</li>
+                <li>Simulasi pemakaian barang di jalur perakitan memicu otomatis faktur Pay-as-Consumed dengan PPN 11%.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memuat portal VMI: ' + err.message;
+    }
+}
+
+async function triggerFTAOriginOptimizer() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengaudit struktur BOM multi-level & menghitung kandungan regional FTA (Rules of Origin)...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const fta = await api('/customs/fta-origin/evaluate', 'POST', {});
+
+        if (badge) badge.textContent = `🌐 FTA Optimizer: Form D/E/RCEP Qualified (Hemat Bea IDR ${fta.total_annual_duty_saved_idr.toLocaleString()})`;
+        if (answerEl) {
+            let out = `🌐 AUTOMATED FTA RULES-OF-ORIGIN & PREFERENTIAL TARIFF OPTIMIZER:\n`;
+            out += `Produk Ekspor: ${fta.finished_good_name} (${fta.finished_good_sku})\n`;
+            out += `Pos Tarif HS Code: ${fta.finished_good_hs} | Harga FOB Ekspor: IDR ${fta.fob_price_idr.toLocaleString()}\n`;
+            out += `Total Biaya BOM: Rp ${fta.total_bom_cost_idr.toLocaleString()} (Komponen Regional: Rp ${fta.originating_material_cost_idr.toLocaleString()} | Non-Regional: Rp ${fta.non_originating_material_cost_idr.toLocaleString()})\n`;
+            out += `Total Proyeksi Penghematan Bea Masuk Tahunan: IDR ${fta.total_annual_duty_saved_idr.toLocaleString()}\n\n`;
+            out += `HASIL EVALUASI KELAYAKAN SKA (SURAT KETERANGAN ASAL):\n`;
+            out += `--------------------------------------------------\n`;
+            fta.fta_results.forEach(res => {
+                out += `• ${res.official_form_type} (${res.trade_bloc_name}):\n`;
+                out += `  Kandungan Regional (RVC): ${res.rvc_percentage}% (Ambang Batas: ${res.minimum_threshold}%)\n`;
+                out += `  Status Kelayakan: ${res.is_qualified ? 'MEMENUHI SYARAT (QUALIFIED)' : 'TIDAK MEMENUHI'}\n`;
+                out += `  Tarif Bea Normal MFN: ${res.standard_mfn_duty_pct}% ➔ Tarif Preferensi FTA: ${res.preferential_duty_pct}%\n`;
+                out += `  Estimasi Bea Dihemat: Rp ${res.estimated_duty_saved_idr.toLocaleString()}\n\n`;
+            });
+            out += `--------------------------------------------------\n`;
+            out += `⚡ Nasihat Strategis Ekspor: ${fta.strategic_advice}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Kandungan regional (RVC) mencapai 90.6% sehingga berhak atas fasilitas bea masuk 0% di pasar ekspor ASEAN dan RCEP.</li>
+                <li>Siap menerbitkan dokumen Surat Keterangan Asal (SKA Form D dan Form E) secara terintegrasi dengan modul Bea Cukai.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mengoptimasi tarif FTA: ' + err.message;
+    }
+}
+
+async function triggerCQRSRouter() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memeriksa kluster database multi-region & menguji pemisahan rute CQRS (Read-Replica)...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const cqrs = await api('/system/cqrs/health', 'GET');
+        const sampleQuery = await api('/system/cqrs/route-query', 'POST', {
+            query_sql: "SELECT * FROM sale_orders WHERE amount_total > 50000000"
+        });
+
+        if (badge) badge.textContent = `🔀 CQRS DB: ${cqrs.nodes.length} Node (${cqrs.read_traffic_offload_pct}% Traffic Offloaded)`;
+        if (answerEl) {
+            let out = `🔀 PURE-GO CQRS DATABASE READ-REPLICA ROUTER & LATENCY GUARD:\n`;
+            out += `ID Kluster: ${cqrs.cluster_id} | Node Master: ${cqrs.master_node_id}\n`;
+            out += `Total Node Terpasang: ${cqrs.total_nodes} (${cqrs.active_read_replicas} Read-Replicas Aktif)\n`;
+            out += `Beban Baca yang Dialihkan dari Master: ${cqrs.read_traffic_offload_pct}%\n\n`;
+            out += `TOPOLOGI NODE DATABASE & LATENSI REPLIKASI:\n`;
+            out += `--------------------------------------------------\n`;
+            cqrs.nodes.forEach(n => {
+                out += `• [${n.node_id}] ${n.role} - ${n.region}\n`;
+                out += `  Status: ${n.status} | Koneksi: ${n.active_connections}/${n.max_connections} | QPS: ${n.queries_per_sec} | Lag Replikasi: ${n.replication_lag_ms} ms | Latensi Rata-rata: ${n.latency_avg_ms} ms\n`;
+            });
+            out += `--------------------------------------------------\n`;
+            out += `SIMULASI PERUTEAN QUERY OTOMATIS:\n`;
+            out += `• Query: SELECT * FROM sale_orders WHERE amount_total > 50000000\n`;
+            out += `• Dialirkan ke: ${sampleQuery.routed_to_node_id} (${sampleQuery.node_region}) [${sampleQuery.node_role}]\n`;
+            out += `• Tipe Operasi: ${sampleQuery.operation_type} | Waktu Eksekusi: ${sampleQuery.execution_time_ms} ms\n`;
+            out += `• Tingkat Konsistensi: ${sampleQuery.consistency_level} | Lag Replikasi Saat Eksekusi: ${sampleQuery.lag_at_execution_ms} ms\n`;
+            out += `⚡ Penjelasan: ${sampleQuery.message}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Transaksi tulis (INSERT/UPDATE/DELETE) selalu dialirkan ke Master DB dengan integritas ACID penuh.</li>
+                <li>Laporan analitik, pencarian, dan dashboard dialirkan ke Read-Replicas lokal tercepat, mencegah bottleneck pada database utama.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal menguji perutean CQRS: ' + err.message;
+    }
+}
+
+async function triggerEHSSafetyRadar() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memindai radar keselamatan kerja K3 & kepatuhan audit SMK3/ISO 45001...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const ehs = await api('/ehs/safety-radar', 'GET');
+
+        if (badge) badge.textContent = `🦺 Safety Radar: ${ehs.safe_days_without_lti} Safe Days (LTIFR ${ehs.ltifr_score})`;
+        if (answerEl) {
+            let out = `🦺 AI WORKPLACE SAFETY, INCIDENT RADAR & ISO 45001 COMPLIANCE:\n`;
+            out += `Hari Aman Beruntun Tanpa LTI (Zero-Harm Streak): ${ehs.safe_days_without_lti} Hari!\n`;
+            out += `Total Jam Kerja Manusia (Man-Hours Worked): ${ehs.total_man_hours_worked.toLocaleString()} Jam\n`;
+            out += `Skor LTIFR (Lost Time Injury Frequency Rate): ${ehs.ltifr_score} (Tingkat Risiko: ${ehs.active_risk_level})\n`;
+            out += `Skor Severity Rate (SR): ${ehs.severity_rate_score} | Total Insiden YTD: ${ehs.total_incidents_ytd} (Near-Miss: ${ehs.near_miss_reported_count})\n`;
+            out += `Sertifikasi Keselamatan: ${ehs.iso45001_compliance}\n\n`;
+            out += `RIWAYAT INSIDEN K3 & ANALISIS AKAR MASALAH (5-WHY AI):\n`;
+            out += `--------------------------------------------------\n`;
+            ehs.incident_history.forEach(inc => {
+                out += `• [${inc.incident_id}] ${inc.title} (${inc.severity})\n`;
+                out += `  Tanggal: ${inc.incident_date} | Lokasi: ${inc.location_work_center} | Pelapor: ${inc.reporter_name}\n`;
+                out += `  Deskripsi: ${inc.description}\n`;
+                out += `  Analisis Akar Masalah (5-Why):\n`;
+                inc.root_cause_5_why.forEach(w => { out += `    ${w}\n`; });
+                out += `  Tindakan Perbaikan (CAPA): ${inc.assigned_capa} [${inc.capa_status}]\n\n`;
+            });
+            out += `--------------------------------------------------\n`;
+            out += `⚡ Rekomendasi K3: Budaya pelaporan Near-Miss yang proaktif berhasil mencegah insiden kecelakaan fatal selama ${ehs.safe_days_without_lti} hari berturut-turut.`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pelaporan insiden K3 secara instan memicu analisis 5-Why otomatis dan penugasan tindakan perbaikan (CAPA).</li>
+                <li>Data terkompilasi memenuhi seluruh persyaratan audit regulasi ketenagakerjaan dan SMK3 / ISO 45001.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memindai radar keselamatan: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {
