@@ -920,6 +920,40 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Automated Rest & Hydration Mandate Dispatcher**: Endpoint `POST /api/v1/ehs/wearable/dispatch-rest-mandate` triggers automated smart badge notifications instructing workers to take mandatory cooling breaks and hydration intervals, automatically pausing work orders in MES to protect worker health.
 - **Workcenter Safety Heatmap**: Endpoint `GET /api/v1/ehs/wearable/floor-safety-heatmap/:workcenter_id` delivers visual shopfloor heat vulnerability mapping, active worker recovery statuses, and OSHA/ISO ergonomic compliance metrics.
 
+---
+
+## 28. CBAM Green Surcharge, Robotic AGF Cross-Dock, ZBA Cash Sweeping, Spares Cannibalization & AI Insured Credit Guard (v1.62.0)
+
+### 28.1 Autonomous Carbon Border Adjustment Mechanism (CBAM) & Green Export Surcharge Engine (`internal/core/esg/cbam_surcharge.go`)
+- **Granular Embedded Carbon Footprint Decomposition**: Endpoint `POST /api/v1/esg/cbam/calculate-embedded-emissions` calculates Scope 1 direct, Scope 2 indirect, and precursor material emissions to derive verified Specific Embedded Emissions ($SEE$, $\text{tCO}_2\text{e} / \text{t product}$) under EU Regulation (EU) 2023/956.
+- **Dynamic EU ETS Carbon Price Pegging & Green Surcharge**: Endpoint `POST /api/v1/esg/cbam/generate-green-surcharge` benchmarks emissions against prevailing EU ETS carbon prices, nets verified domestic carbon tax credits (e.g. IDXCarbon), and generates transparent green surcharge line items on export commercial invoices.
+- **Official European Commission XML Registry Serializer**: Endpoint `POST /api/v1/esg/cbam/export-cbam-xml-declaration` produces compliant quarterly XML declaration dossiers complete with Declarant EORI, manufacturing installation identifiers, and ISO 14065 auditor verification stamps.
+- **CBAM Regulatory Compliance Audit**: Endpoint `GET /api/v1/esg/cbam/audit-registry/:export_id` consolidates export shipments, embedded emissions records, and customs-ready clearance certificates.
+
+### 28.2 Cross-Docking Robotic Automated Guided Forklift (AGF) & Pallet Swarm Dispatcher (`internal/core/wms/agf_swarm_dispatch.go`)
+- **Zero-Putaway Cross-Docking Matcher**: Endpoint `POST /api/v1/wms/agf/create-crossdock-mission` maps inbound goods receipts (GRN) directly to staged outbound delivery orders (DO), eliminating warehouse racking storage time and double-handling costs.
+- **AGF Swarm Robot Mission Dispatcher**: Endpoint `POST /api/v1/wms/agf/dispatch-swarm-robot` dispatches optimal autonomous forklift units with deadlock avoidance, calculating dock-to-dock transit times and speed modulation based on outbound truck departure windows.
+- **Autonomous Opportunity Charging Telemetry**: Endpoint `POST /api/v1/wms/agf/update-telemetry-charging` streams robot coordinates, payload states, and commands fast-charging when battery state-of-charge drops below operational thresholds.
+- **Facility Swarm Telemetry Dashboard**: Endpoint `GET /api/v1/wms/agf/swarm-status/:facility_id` monitors fleet size, average battery health, dock turnaround acceleration, and cumulative cross-docked pallets.
+
+### 28.3 Corporate Liquidity Zero-Balance Account (ZBA) Sweeping & Virtual Cash Pooling Engine (`internal/core/treasury/zba_cash_sweeping.go`)
+- **Multi-Entity Cash Concentration Hierarchy**: Endpoint `POST /api/v1/treasury/zba/configure-pooling-structure` establishes hierarchical cash pooling structures linking parent master accounts with subsidiary bank sub-accounts across multiple currencies.
+- **End-of-Day (EOD) Two-Way ZBA Sweeper**: Endpoint `POST /api/v1/treasury/zba/execute-eod-sweeping` sweeps surplus cash upward to the parent company and tops down cash to deficit entities, leveling all sub-accounts to target zero balances.
+- **Arm's-Length Intercompany Loan & Tax Withholding Engine**: Endpoint `POST /api/v1/treasury/zba/accrue-intercompany-interest` computes daily running loan interest using market reference rates (BI-Rate / SOFR) plus arm's-length transfer pricing spreads, automatically deducting statutory withholding taxes (PPh 23 / PPh 26).
+- **Consolidated Corporate Cash Pooling Overview**: Endpoint `GET /api/v1/treasury/zba/pooling-overview/:holding_id` provides CFO-level visibility into group-wide consolidated liquidity, subsidiary balances, and bilateral mirror accounting entries.
+
+### 28.4 Heavy Equipment & Industrial Spares Cannibalization & Pool-Exchange Manager (`internal/core/maintenance/spares_cannibalization.go`)
+- **Cannibalization Safety & Airworthiness Matrix**: Endpoint `POST /api/v1/maintenance/cannibalization/evaluate-feasibility` calculates mechanical compatibility, modification parity, remaining Time-Since-Overhaul (TSO) life, and economic downtime loss avoided ($/hr) for critical AOG or mining equipment stoppages.
+- **Bilateral Dual-Work-Order Synchronizer**: Endpoint `POST /api/v1/maintenance/cannibalization/authorize-swap-workorders` simultaneously issues paired work orders (removal from donor overhaul assets and installation onto stopped recipient units) under Chief Reliability Engineer authorization.
+- **Cryptographic Lineage Serial Swap Register**: Endpoint `POST /api/v1/maintenance/cannibalization/commit-serial-lineage-swap` updates serial number tracking with SHA-256 certificate digests to preserve immutable asset pedigree for FAA / mining regulatory audits.
+- **AOG Asset Recovery Summary**: Endpoint `GET /api/v1/maintenance/cannibalization/aog-recovery-summary/:recipient_id` provides complete documentation of operational restoration, avoided downtime savings, and compliance sign-offs.
+
+### 28.5 AI Dynamic Customer Credit Limit Scoring & Insured Trade Credit Guard (`internal/core/finance/dynamic_credit_scoring.go`)
+- **Continuous Behavioral Payment Velocity Scoring**: Endpoint `POST /api/v1/finance/credit/compute-dynamic-score` evaluates customer DSO history, dispute frequency, and overdue ratios to compute a 0-100 dynamic risk score, automatically modulating credit capacity (+25% expansion to credit freeze).
+- **Trade Credit Underwriter Policy Binding**: Endpoint `POST /api/v1/finance/credit/bind-insurance-coverage` binds trade credit insurance policies (Euler Hermes / Allianz Trade, Atradius, PT Askrindo) to secure accounts receivable portfolios against customer insolvencies.
+- **Autonomous Pre-Dispatch Credit Hold Interceptor**: Endpoint `POST /api/v1/finance/credit/evaluate-order-hold` intercepts outgoing sales orders exceeding dynamic limits or past grace period thresholds, enforcing automated holds to protect working capital.
+- **Customer 360 Risk Dossier**: Endpoint `GET /api/v1/finance/credit/customer-risk-profile/:customer_id` delivers real-time visibility into customer risk tier, insured ceilings, uninsured exposure, and personalized payment terms recommendations.
+
 
 
 

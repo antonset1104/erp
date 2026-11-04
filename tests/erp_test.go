@@ -32,12 +32,14 @@ import (
 	coreenergy "erp-golang/internal/core/energy"
 	coreexpense "erp-golang/internal/core/expense"
 	corefieldservice "erp-golang/internal/core/fieldservice"
+	corefinance "erp-golang/internal/core/finance"
 	corefleet "erp-golang/internal/core/fleet"
 	coregraphql "erp-golang/internal/core/graphql"
 	coregrc "erp-golang/internal/core/grc"
 	corehr "erp-golang/internal/core/hr"
 	coreitops "erp-golang/internal/core/itops"
 	corelogistics "erp-golang/internal/core/logistics"
+	coremaintenance "erp-golang/internal/core/maintenance"
 	coremrp "erp-golang/internal/core/mrp"
 	corepricing "erp-golang/internal/core/pricing"
 	coreprocurement "erp-golang/internal/core/procurement"
@@ -11113,5 +11115,175 @@ IEA*1*000099123~`
 	t.Logf("✓ Industrial Wearable Heat Stress Sentinel Verified: Worker='%s' (%s, Workcenter='%s'), Biometrics=(HR=%.0f bpm, CoreTemp=%.1fC, WBGT=%.1fC vs 28.0C limit), PSI=%.1f/10, Zone='%s', RestMandate='%s' (Rest=%d min, Fluid=%d ml, RotationRequired=%v, Sup='%s'), FloorStatus='%s'",
 		wearableBio.WorkerName, wearableBio.WorkerID, wearableBio.WorkcenterID, wearableBio.HeartRateBPM, wearableBio.EstimatedCoreTempC, wearableBio.WetBulbGlobeTempWBGT, heatStressEval.PhysiologicalStrainIndex, heatStressEval.ThermalRiskZone, restMandate.MandateID, restMandate.RestDurationMinutes, restMandate.HydrationTargetML, restMandate.OperatorRotationRequired, restMandate.SupervisorNotified, thermalHeatmap.ThermalSafetyStatus)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (75 SECTIONS: 65+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS) PASSED 100%!")
+	// =========================================================================
+	// SECTION 76: CBAM GREEN SURCHARGE, ROBOTIC AGF CROSS-DOCK, ZBA CASH SWEEPING,
+	//             SPARES CANNIBALIZATION & AI INSURED CREDIT GUARD (v1.62.0)
+	// =========================================================================
+	t.Log(`
+		>>> SECTION 76: CBAM GREEN SURCHARGE, ROBOTIC AGF CROSS-DOCK, ZBA CASH SWEEPING, SPARES CANNIBALIZATION & AI INSURED CREDIT GUARD <<<`)
+
+	// 76.1 Autonomous Carbon Border Adjustment Mechanism (CBAM) & Green Export Surcharge Engine
+	cbamCalc := esg.GlobalCBAMSurchargeVault.CalculateEmbeddedEmissions(
+		"EXP-CBAM-2026-9011", "STEEL-HOT-ROLLED-COIL-Q235", "7208 51 00", "BATCH-BLAST-FURNACE-9011",
+		250.0, 362.5, 87.5, 50.0,
+	)
+	if cbamCalc.TotalEmbeddedCO2e != 500.0 || cbamCalc.SpecificEmbeddedEm != 2.0 {
+		t.Fatalf("Failed to calculate CBAM embedded emissions: %+v", cbamCalc)
+	}
+
+	cbamSurcharge, err := esg.GlobalCBAMSurchargeVault.GenerateGreenSurcharge(
+		"EXP-CBAM-2026-9011", "INV-EXP-2026-EU-0881", "EUR", 85.0, 2.50,
+	)
+	if err != nil || cbamSurcharge.EffectiveCarbonDutyRate != 82.50 || cbamSurcharge.TotalGreenSurchargeEUR != 41250.0 {
+		t.Fatalf("Failed to generate CBAM green surcharge: %+v, err: %v", cbamSurcharge, err)
+	}
+
+	cbamXMLDecl, err := esg.GlobalCBAMSurchargeVault.GenerateCBAMXMLDeclaration(
+		"EXP-CBAM-2026-9011", "NL882910442", "ID-KRAKATAU-STEEL-PLANT-01", "-6.0125,106.0234", "ID", "2026-Q4",
+	)
+	if err != nil || cbamXMLDecl.XMLPayloadDigest == "" {
+		t.Fatalf("Failed to generate CBAM XML declaration: %+v, err: %v", cbamXMLDecl, err)
+	}
+
+	cbamAudit, err := esg.GlobalCBAMSurchargeVault.GetAuditSummary("EXP-CBAM-2026-9011")
+	if err != nil || cbamAudit["status"] != "COMPLIANT_READY_FOR_CUSTOMS" {
+		t.Fatalf("Failed to fetch CBAM audit summary: %+v, err: %v", cbamAudit, err)
+	}
+	t.Logf("✓ CBAM Embedded Emissions & Green Surcharge Verified: Shipment='%s', Product='%s' (CN: %s), NetMass=%.1f T, TotalCO2e=%.1f T (SEE=%.2f tCO2e/t), EffectiveDuty=EUR %.2f/t, Surcharge=EUR %.2f, XML_Digest=%s",
+		cbamCalc.ExportShipmentID, cbamCalc.ProductSKU, cbamCalc.CNCode, cbamCalc.NetMassMetricTons, cbamCalc.TotalEmbeddedCO2e, cbamCalc.SpecificEmbeddedEm, cbamSurcharge.EffectiveCarbonDutyRate, cbamSurcharge.TotalGreenSurchargeEUR, cbamXMLDecl.XMLPayloadDigest[:16])
+
+	// 76.2 Cross-Docking Robotic Automated Guided Forklift (AGF) & Pallet Swarm Dispatcher
+	agfMission := corewms.GlobalAGFSwarmDispatcher.CreateCrossDockMission(
+		"DC-CIKARANG-CENTRAL", "PLT-IN-8890", "DOCK-IN-03", "DOCK-OUT-08",
+		"GRN-2026-9901", "WH/OUT/2026/0991", 1850.0, "EXPEDITE_CRITICAL",
+	)
+	if agfMission.MissionID == "" || agfMission.Status != "QUEUED" {
+		t.Fatalf("Failed to create crossdock mission: %+v", agfMission)
+	}
+
+	agfDispatched, err := corewms.GlobalAGFSwarmDispatcher.DispatchSwarmRobot(agfMission.MissionID)
+	if err != nil || agfDispatched.AssignedRobotID == "" || agfDispatched.Status != "IN_TRANSIT" {
+		t.Fatalf("Failed to dispatch AGF swarm robot: %+v, err: %v", agfDispatched, err)
+	}
+
+	updatedRobot, err := corewms.GlobalAGFSwarmDispatcher.UpdateTelemetryAndCharging(
+		agfDispatched.AssignedRobotID, 88.0, 45.0, 50.0, false,
+	)
+	if err != nil || updatedRobot.BatterySoC != 88.0 {
+		t.Fatalf("Failed to update AGF robot telemetry: %+v, err: %v", updatedRobot, err)
+	}
+
+	swarmStatus := corewms.GlobalAGFSwarmDispatcher.GetSwarmStatus("DC-CIKARANG-CENTRAL")
+	if swarmStatus["fleet_size"].(int) < 2 {
+		t.Fatalf("Failed to get swarm status: %+v", swarmStatus)
+	}
+	t.Logf("✓ Robotic AGF Swarm Cross-Docking Verified: Mission='%s', Pallet='%s' (%.1f kg), Route='%s -> %s', Robot='%s', TransitSec=%.1fs, BatterySoC=%.1f%%, FleetSize=%d",
+		agfMission.MissionID, agfMission.PalletBarcode, agfMission.WeightKG, agfMission.InboundDockDoor, agfMission.OutboundDockDoor, agfDispatched.AssignedRobotID, agfDispatched.EstimatedDurationSec, updatedRobot.BatterySoC, swarmStatus["fleet_size"].(int))
+
+	// 76.3 Corporate Liquidity Zero-Balance Account (ZBA) Sweeping & Virtual Cash Pooling Engine
+	zbaPool := coretreasury.GlobalZBACashSweepingVault.ConfigurePoolingStructure(
+		"HOLDING-CORP-01", "PT GoERP Corporindo Utama Tbk", "ID12BMRI000998877665544", "IDR", 50000000000.0,
+		[]coretreasury.SubAccountNode{
+			{
+				SubsidiaryID:   "SUB-LOGISTICS",
+				SubsidiaryName: "PT GoERP Logistik Global",
+				SubAccountIBAN: "ID12BMRI000112233445566",
+				CurrentBalance: 8500000000.0,
+				TargetBalance:  50000000.0,
+			},
+			{
+				SubsidiaryID:   "SUB-MFG",
+				SubsidiaryName: "PT GoERP Manufaktur Presisi",
+				SubAccountIBAN: "ID12BMRI000223344556677",
+				CurrentBalance: -1200000000.0,
+				TargetBalance:  50000000.0,
+			},
+		},
+	)
+	if zbaPool.PoolID == "" || len(zbaPool.SubAccounts) != 2 {
+		t.Fatalf("Failed to configure ZBA pool structure: %+v", zbaPool)
+	}
+
+	zbaExec, err := coretreasury.GlobalZBACashSweepingVault.ExecuteEODSweeping("HOLDING-CORP-01")
+	if err != nil || zbaExec.TotalSweptUpward <= 0 || zbaExec.TotalToppedDown <= 0 {
+		t.Fatalf("Failed to execute ZBA EOD sweeping: %+v, err: %v", zbaExec, err)
+	}
+
+	zbaInterest, err := coretreasury.GlobalZBACashSweepingVault.AccrueIntercompanyInterest(
+		"HOLDING-CORP-01", "SUB-MFG", 30, 6.00, 1.25, 15.0,
+	)
+	if err != nil || zbaInterest.GrossInterestAmount <= 0 || zbaInterest.TaxWithholdingAmount <= 0 {
+		t.Fatalf("Failed to accrue intercompany interest: %+v, err: %v", zbaInterest, err)
+	}
+
+	zbaOverview, err := coretreasury.GlobalZBACashSweepingVault.GetPoolingOverview("HOLDING-CORP-01")
+	if err != nil || zbaOverview["total_conglomerate_cash"].(float64) <= 0 {
+		t.Fatalf("Failed to fetch pooling overview: %+v, err: %v", zbaOverview, err)
+	}
+	t.Logf("✓ Corporate ZBA Cash Sweeping & Pooling Verified: Holding='%s', MasterBal=Rp %.0f, SweptUp=Rp %.0f, ToppedDown=Rp %.0f, NetMaster=Rp %.0f, IntercompanyInterest (SUB-MFG): Gross=Rp %.0f, PPh23=Rp %.0f, NetPayable=Rp %.0f",
+		zbaPool.HoldingCompanyName, 50000000000.0, zbaExec.TotalSweptUpward, zbaExec.TotalToppedDown, zbaExec.NetMasterCashBalance, zbaInterest.GrossInterestAmount, zbaInterest.TaxWithholdingAmount, zbaInterest.NetInterestPayable)
+
+	// 76.4 Heavy Equipment & Industrial Spares Cannibalization & Pool-Exchange Manager
+	cannibalEval := coremaintenance.GlobalSparesCannibalizationVault.EvaluateFeasibility(
+		"PUMP-HYD-MAIN-350BAR", "SN-HYD-PUMP-98124A", "Main Hydraulic Dual Piston Pump (350 Bar)",
+		"EXCAV-KOM-PC2000-04", "SCHEDULED_MAJOR_OVERHAUL", "EXCAV-KOM-PC2000-09", "AOG_CRITICAL_STOPPAGE",
+		3800.0, 1250.0, 21.0, true,
+	)
+	if !cannibalEval.IsFeasible || cannibalEval.ApprovalStatus != "AUTHORIZED_BY_CHIEF_ENGINEER" || cannibalEval.AvoidedDowntimeCostUSD != 630000.0 {
+		t.Fatalf("Failed to evaluate spares cannibalization feasibility: %+v", cannibalEval)
+	}
+
+	cannibalWO, err := coremaintenance.GlobalSparesCannibalizationVault.AuthorizeSwapWorkOrders(
+		"EXCAV-KOM-PC2000-09", "Ir. Hendra Gunawan, IPM",
+	)
+	if err != nil || cannibalWO.RemovalWorkOrderID == "" || cannibalWO.InstallationWorkOrderID == "" {
+		t.Fatalf("Failed to authorize bilateral swap work orders: %+v, err: %v", cannibalWO, err)
+	}
+
+	cannibalLineage, err := coremaintenance.GlobalSparesCannibalizationVault.CommitSerialLineageSwap(
+		"EXCAV-KOM-PC2000-09", "Flushed hydraulic lines, torqued to 420 Nm. Pressure tested 348 Bar OK.", 14200.0,
+	)
+	if err != nil || cannibalLineage.LineageCertificateHash == "" {
+		t.Fatalf("Failed to commit serial lineage swap: %+v, err: %v", cannibalLineage, err)
+	}
+
+	aogSummary, err := coremaintenance.GlobalSparesCannibalizationVault.GetAOGRecoverySummary("EXCAV-KOM-PC2000-09")
+	if err != nil || aogSummary["operational_restoration"] != "ASSET_RETURNED_TO_SERVICE_SAFELY" {
+		t.Fatalf("Failed to fetch AOG recovery summary: %+v, err: %v", aogSummary, err)
+	}
+	t.Logf("✓ Spares Cannibalization & Lineage Manager Verified: Part='%s' (SN: %s), Donor='%s' -> Recipient='%s', Score=%.1f/100, AvoidedDowntime=$%.0f USD, BilateralWO=(Removal='%s', Install='%s'), LineageCert=%s",
+		cannibalEval.PartDescription, cannibalEval.PartSerialNumber, cannibalEval.DonorAssetID, cannibalEval.RecipientAssetID, cannibalEval.FeasibilityScore, cannibalEval.AvoidedDowntimeCostUSD, cannibalWO.RemovalWorkOrderID, cannibalWO.InstallationWorkOrderID, cannibalLineage.LineageCertificateHash[:16])
+
+	// 76.5 AI Dynamic Customer Credit Limit Scoring & Insured Trade Credit Guard
+	creditProfile := corefinance.GlobalDynamicCreditVault.ComputeDynamicScore(
+		"CUST-STEEL-PACIFIC-01", "PT Pacific Mega Konstruksi Nusantara",
+		500000.0, 380000.0, 0.0, 28.5, 30, 0.01,
+	)
+	if creditProfile.DynamicScore < 80.0 || creditProfile.RiskTier != "TIER_A_PRIME" || creditProfile.AdjustedDynamicLimitUSD != 625000.0 {
+		t.Fatalf("Failed to compute dynamic credit score: %+v", creditProfile)
+	}
+
+	insuranceCov := corefinance.GlobalDynamicCreditVault.BindInsuranceCoverage(
+		"CUST-STEEL-PACIFIC-01", "POL-ALLIANZ-TRADE-2026-992", "Allianz Trade (Euler Hermes)",
+		600000.0, 90.0, 25000.0,
+	)
+	if insuranceCov.BindingID == "" || insuranceCov.PolicyStatus != "ACTIVE_POLICY_BOUND" {
+		t.Fatalf("Failed to bind insurance coverage: %+v", insuranceCov)
+	}
+
+	creditHoldEval, err := corefinance.GlobalDynamicCreditVault.EvaluateOrderHold(
+		"SO-2026-99201", "CUST-STEEL-PACIFIC-01", 120000.0,
+	)
+	if err != nil || creditHoldEval.Decision != "APPROVED_DISPATCH_PERMITTED" {
+		t.Fatalf("Failed to evaluate order credit hold: %+v, err: %v", creditHoldEval, err)
+	}
+
+	custRiskDossier, err := corefinance.GlobalDynamicCreditVault.GetCustomerRiskProfile("CUST-STEEL-PACIFIC-01")
+	if err != nil || !custRiskDossier["has_insurance"].(bool) {
+		t.Fatalf("Failed to fetch customer risk dossier: %+v, err: %v", custRiskDossier, err)
+	}
+	t.Logf("✓ AI Dynamic Credit Scoring & Insured Trade Credit Guard Verified: Customer='%s' (%s), Score=%.1f/100 (%s), BaseLimit=$%.0f, AdjustedLimit=$%.0f USD (+25%%), Underwriter='%s' (Limit=$%.0f USD), Order='%s' ($%.0f USD), Clearance='%s'",
+		creditProfile.CustomerName, creditProfile.CustomerID, creditProfile.DynamicScore, creditProfile.RiskTier, creditProfile.BaseCreditLimitUSD, creditProfile.AdjustedDynamicLimitUSD, insuranceCov.UnderwriterName, insuranceCov.InsuredLimitUSD, creditHoldEval.SalesOrderID, creditHoldEval.OrderAmountUSD, creditHoldEval.Decision)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (76 SECTIONS: 70+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD) PASSED 100%!")
 }

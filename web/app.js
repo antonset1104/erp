@@ -28116,6 +28116,366 @@ async function triggerWearableHeatStress() {
     }
 }
 
+async function triggerCBAMSurcharge() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menghitung Specific Embedded Emissions & tarif CBAM Green Surcharge...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const expID = "EXP-CBAM-2026-" + Math.floor(1000 + Math.random() * 9000);
+        const calcRes = await api('/esg/cbam/calculate-embedded-emissions', 'POST', {
+            export_shipment_id: expID,
+            product_sku: "STEEL-HOT-ROLLED-COIL-Q235",
+            cn_code: "7208 51 00",
+            production_batch_id: "BATCH-BLAST-FURNACE-9011",
+            net_mass_metric_tons: 250.0,
+            direct_scope1_co2e_tons: 362.5,
+            indirect_scope2_co2e_tons: 87.5,
+            precursor_co2e_tons: 50.0
+        });
+
+        const surRes = await api('/esg/cbam/generate-green-surcharge', 'POST', {
+            export_shipment_id: expID,
+            commercial_invoice_no: "INV-EXP-2026-EU-0881",
+            currency: "EUR",
+            eu_ets_carbon_price_eur: 85.0,
+            domestic_carbon_tax_eur: 2.50
+        });
+
+        const xmlRes = await api('/esg/cbam/export-cbam-xml-declaration', 'POST', {
+            export_shipment_id: expID,
+            declarant_eori_number: "NL882910442",
+            installation_id: "ID-KRAKATAU-STEEL-PLANT-01",
+            installation_geo: "-6.0125,106.0234",
+            country_of_origin: "ID",
+            reporting_quarter: "2026-Q4"
+        });
+
+        if (badge) badge.textContent = `🌍 CBAM: €${surRes.data.total_green_surcharge_eur.toLocaleString()} EUR`;
+        if (answerEl) {
+            let out = `🌍 AUTONOMOUS CBAM EMBEDDED EMISSIONS & GREEN EXPORT SURCHARGE (EU REGULATION 2023/956):\n`;
+            out += `ID Pengapalan Ekspor: ${expID} | Komoditas: ${calcRes.data.product_sku} (CN Code: ${calcRes.data.cn_code})\n`;
+            out += `Massa Bersih Produk: ${calcRes.data.net_mass_metric_tons} Ton Metrik | Batch: ${calcRes.data.production_batch_id}\n`;
+            out += `Emisi Tertanam Spesifik (SEE): ${calcRes.data.specific_embedded_emissions.toFixed(4)} tCO2e / Ton Baja\n`;
+            out += `  - Direct Scope 1: ${calcRes.data.direct_scope1_co2e_tons} tCO2e\n`;
+            out += `  - Indirect Scope 2 (Listrik): ${calcRes.data.indirect_scope2_co2e_tons} tCO2e\n`;
+            out += `  - Precursor Materials: ${calcRes.data.precursor_co2e_tons} tCO2e\n`;
+            out += `Total Emisi Tertanam: ${calcRes.data.total_embedded_co2e_tons} tCO2e\n\n`;
+            out += `PERHITUNGAN GREEN CARBON SURCHARGE FAKTUR KOMERSIAL:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Nomor Faktur Komersial: ${surRes.data.commercial_invoice_no}\n`;
+            out += `Harga Karbon Acuan EU ETS: €${surRes.data.eu_ets_carbon_price_eur.toFixed(2)} EUR / tCO2e\n`;
+            out += `Kredit Pajak Karbon Domestik (IDXCarbon): -€${surRes.data.domestic_carbon_tax_eur.toFixed(2)} EUR / tCO2e\n`;
+            out += `Tarif Bersih Kewajiban CBAM: €${surRes.data.effective_carbon_duty_eur.toFixed(2)} EUR / tCO2e\n`;
+            out += `TOTAL SURCHARGE DITAGIHKAN KE BUYER EROPA: €${surRes.data.total_green_surcharge_eur.toLocaleString()} EUR\n\n`;
+            out += `BERKAS RESMI REGISTRY CBAM KOMISI EROPA:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `ID Deklarasi: ${xmlRes.data.declaration_id} | Quarter: ${xmlRes.data.reporting_quarter}\n`;
+            out += `Declarant EORI: ${xmlRes.data.declarant_eori_number} | Instalasi Manufaktur: ${xmlRes.data.installation_id} (${xmlRes.data.country_of_origin})\n`;
+            out += `Status Verifikasi Independen: ${xmlRes.data.verification_status}\n`;
+            out += `SHA-256 Digest: ${xmlRes.data.xml_payload_digest}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Perhitungan emisi tertanam granular mencegah risiko disallowance bea cukai pelabuhan Rotterdam dan Hamburg.</li>
+                <li>Penerusan green surcharge ke Commercial Invoice melindungi margin laba bersih eksportir Indonesia.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses CBAM surcharge: ' + err.message;
+    }
+}
+
+async function triggerAGFSwarmCrossDock() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengoordinasikan misi Cross-Docking & dispatch armada AGF swarm...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const pltID = "PLT-IN-" + Math.floor(1000 + Math.random() * 9000);
+        const msnRes = await api('/wms/agf/create-crossdock-mission', 'POST', {
+            facility_id: "DC-CIKARANG-CENTRAL",
+            pallet_barcode: pltID,
+            inbound_dock_door: "DOCK-IN-03",
+            outbound_dock_door: "DOCK-OUT-08",
+            inbound_receipt_id: "GRN-2026-9901",
+            outbound_delivery_id: "WH/OUT/2026/0991",
+            weight_kg: 1850.0,
+            transfer_priority: "EXPEDITE_CRITICAL"
+        });
+
+        const dispRes = await api('/wms/agf/dispatch-swarm-robot', 'POST', {
+            mission_id: msnRes.data.mission_id
+        });
+
+        const statusRes = await api('/wms/agf/swarm-status/DC-CIKARANG-CENTRAL', 'GET');
+
+        if (badge) badge.textContent = `🤖 AGF: ${dispRes.data.assigned_robot_id} (Transit)`;
+        if (answerEl) {
+            let out = `🤖 ROBOTIC CROSS-DOCKING AGF SWARM DISPATCHER (ZERO-PUTAWAY LOGISTICS):\n`;
+            out += `ID Misi: ${dispRes.data.mission_id} | Palet: ${dispRes.data.pallet_barcode} (${dispRes.data.weight_kg} kg)\n`;
+            out += `Rute Dock: ${dispRes.data.inbound_dock_door} (Inbound GRN: ${dispRes.data.inbound_receipt_id}) -> ${dispRes.data.outbound_dock_door} (Outbound DO: ${dispRes.data.outbound_delivery_id})\n`;
+            out += `Prioritas Transfer: ${dispRes.data.transfer_priority}\n`;
+            out += `Robot AGF Ditugaskan: ${dispRes.data.assigned_robot_id}\n`;
+            out += `Estimasi Waktu Tempuh: ${dispRes.data.estimated_duration_sec} Detik (Kecepatan: 1.5 m/s)\n`;
+            out += `Status Misi: ${dispRes.data.status}\n\n`;
+            out += `STATUS ARMADA SWARM & DOCK TELEMETRI:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Total Armada AGF di Fasilitas: ${statusRes.data.fleet_size} Unit\n`;
+            out += `Rata-rata Kapasitas Baterai (SoC): ${statusRes.data.average_battery_soc}%\n`;
+            out += `Total Palet Ditangani Tanpa Masuk Rak: ${statusRes.data.total_pallets_handled} Palet\n`;
+            out += `Efisiensi Gudang: Zero-Putaway Dock Turnaround Terakselerasi 3.8x\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Eliminasi aktivitas putaway ke rak menghemat waktu transit logistik hingga 40 menit per truk.</li>
+                <li>Manajemen pengisian daya otonom (Opportunity Charging) menjamin ketersediaan armada 24/7.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses AGF swarm crossdock: ' + err.message;
+    }
+}
+
+async function triggerZBACashSweeping() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengeksekusi EOD Two-Way ZBA Sweeping & rekonsiliasi pinjaman antar-entitas...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const sweepRes = await api('/treasury/zba/execute-eod-sweeping', 'POST', {
+            holding_company_id: "HOLDING-CORP-01"
+        });
+
+        const intRes = await api('/treasury/zba/accrue-intercompany-interest', 'POST', {
+            holding_company_id: "HOLDING-CORP-01",
+            subsidiary_id: "SUB-MFG",
+            days_accrued: 30,
+            benchmark_rate_apr: 6.00,
+            spread_rate_apr: 1.25,
+            wht_rate: 15.0
+        });
+
+        const ovRes = await api('/treasury/zba/pooling-overview/HOLDING-CORP-01', 'GET');
+
+        if (badge) badge.textContent = `🏦 ZBA: Rp ${(ovRes.data.total_conglomerate_cash / 1e9).toFixed(1)} M Total`;
+        if (answerEl) {
+            let out = `🏦 CORPORATE ZERO-BALANCE ACCOUNT (ZBA) SWEEPING & VIRTUAL CASH POOLING:\n`;
+            out += `Holding: ${ovRes.data.holding_company_name} (Rekening Induk: ${ovRes.data.master_account_iban})\n`;
+            out += `Strategi Konsentrasi Kas: ${ovRes.data.sweep_strategy}\n`;
+            out += `Total Likuiditas Bersih Terkonsolidasi: Rp ${ovRes.data.total_conglomerate_cash.toLocaleString()} IDR\n\n`;
+            out += `HASIL EKSEKUSI BATCH SWEEP AKHIR HARI (EOD):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Total Dana Ditarik ke Induk (Upward Sweep): Rp ${sweepRes.data.total_swept_upward.toLocaleString()} IDR\n`;
+            out += `Total Dana Ditutup ke Anak Usaha (Downward Top-up): Rp ${sweepRes.data.total_topped_down.toLocaleString()} IDR\n`;
+            out += `Saldo Kas Akhir Rekening Induk: Rp ${sweepRes.data.net_master_cash_balance.toLocaleString()} IDR\n\n`;
+            out += `RINCIAN TRANSAKSI REKONSILIASI ANTAR-ENTITAS:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            sweepRes.data.transactions.forEach(tx => {
+                out += `  ✓ [${tx.sweep_direction}] ${tx.subsidiary_id}: Rp ${tx.sweep_amount.toLocaleString()} IDR (Ref: ${tx.intercompany_move_ref})\n`;
+                out += `     Saldo Sub: Rp ${tx.sub_balance_before.toLocaleString()} -> Rp ${tx.sub_balance_after.toLocaleString()} IDR\n`;
+            });
+            out += `\nPERHITUNGAN BUNGA WAJAR (ARM'S LENGTH) & POTONGAN PAJAK PPh 23:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Entitas Peminjam: ${intRes.data.subsidiary_id} | Pokok Pinjaman: Rp ${intRes.data.principal_loan_amount.toLocaleString()} IDR\n`;
+            out += `Suku Bunga Efektif: ${intRes.data.effective_rate_apr}% APR (BI-Rate ${intRes.data.benchmark_rate_apr}% + Margin ${intRes.data.arms_length_spread_apr}%)\n`;
+            out += `Bunga Bruto (30 Hari): Rp ${intRes.data.gross_interest_amount.toLocaleString()} IDR\n`;
+            out += `Potongan Pajak PPh 23 (15%): Rp ${intRes.data.tax_withholding_amount.toLocaleString()} IDR\n`;
+            out += `Bunga Bersih Dibukukan: Rp ${intRes.data.net_interest_payable.toLocaleString()} IDR\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>ZBA Sweeping otomatis mengeliminasi pinjaman bank eksternal berbunga tinggi di anak usaha.</li>
+                <li>Penghitungan bunga arm's length melindungi holding dari sanksi Transfer Pricing otoritas pajak.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses ZBA cash sweeping: ' + err.message;
+    }
+}
+
+async function triggerSparesCannibalization() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi kelayakan kanibalisasi suku cadang & menerbitkan work order bilateral...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const recID = "EXCAV-KOM-PC2000-09";
+        const evalRes = await api('/maintenance/cannibalization/evaluate-feasibility', 'POST', {
+            part_sku: "PUMP-HYD-MAIN-350BAR",
+            part_serial_number: "SN-HYD-PUMP-98124A",
+            part_description: "Main Hydraulic Dual Piston Pump (350 Bar)",
+            donor_asset_id: "EXCAV-KOM-PC2000-04",
+            donor_asset_status: "SCHEDULED_MAJOR_OVERHAUL",
+            recipient_asset_id: recID,
+            recipient_asset_status: "AOG_CRITICAL_STOPPAGE",
+            remaining_life_hours_tso: 3800.0,
+            hourly_downtime_usd: 1250.0,
+            lead_time_days: 21.0,
+            mod_status_compatible: true
+        });
+
+        const woRes = await api('/maintenance/cannibalization/authorize-swap-workorders', 'POST', {
+            recipient_asset_id: recID,
+            authorized_chief_engineer: "Ir. Hendra Gunawan, IPM (Chief Reliability Engineer)"
+        });
+
+        const linRes = await api('/maintenance/cannibalization/commit-serial-lineage-swap', 'POST', {
+            recipient_asset_id: recID,
+            inspector_note: "Flushed hydraulic lines, replaced O-rings, torqued mounting bolts to 420 Nm. Pressure tested 348 Bar OK.",
+            operating_hours: 14200.0
+        });
+
+        if (badge) badge.textContent = `✈️ CANNIBALIZATION: $${(evalRes.data.avoided_downtime_cost_usd / 1000).toFixed(0)}k Saved`;
+        if (answerEl) {
+            let out = `✈️ HEAVY EQUIPMENT & CRITICAL SPARES CANNIBALIZATION & POOL-EXCHANGE MANAGER:\n`;
+            out += `Unit Penerima Kritis: ${recID} (Status: AOG / Operasi Tambang Terhenti)\n`;
+            out += `Unit Donor Komponen: ${evalRes.data.donor_asset_id} (Status: Overhaul Terjadwal)\n`;
+            out += `Komponen Dipindahkan: ${evalRes.data.part_description} (SN: ${evalRes.data.part_serial_number})\n`;
+            out += `Sisa Jam Kerja Layak (TSO): ${evalRes.data.remaining_life_hours_tso} Jam | Paritas Modifikasi: KOMPATIBEL\n`;
+            out += `Skor Kelayakan Keselamatan: ${evalRes.data.feasibility_score}/100 -> ${evalRes.data.approval_status}\n`;
+            out += `PENGHEMATAN DOWNTIME PRODUKSI: $${evalRes.data.avoided_downtime_cost_usd.toLocaleString()} USD (21 Hari Lead Time Suku Cadang Baru)\n\n`;
+            out += `WORK ORDER BILATERAL SINKRON:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Paket Perintah Kerja: ${woRes.data.swap_package_id}\n`;
+            out += `  1. Perintah Pelepasan: ${woRes.data.removal_work_order_id} (Unit Donor: ${woRes.data.removal_target_asset})\n`;
+            out += `  2. Perintah Pemasangan: ${woRes.data.installation_work_order_id} (Unit Kritis: ${woRes.data.installation_target_asset})\n`;
+            out += `Otorisasi Chief Engineer: ${woRes.data.authorized_chief_engineer}\n\n`;
+            out += `SERTIFIKASI SILSILAH SERIAL KRIPTOGRAFIS:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `ID Silsilah: ${linRes.data.swap_record_id} | Serial: ${linRes.data.part_serial_number}\n`;
+            out += `Histori Pemindahan: ${linRes.data.previous_donor_asset_id} -> ${linRes.data.new_active_asset_id}\n`;
+            out += `Catatan Inspektur Kelaikan: ${linRes.data.regulatory_compliance_note}\n`;
+            out += `Sertifikat Kelaikan SHA-256: ${linRes.data.lineage_certificate_hash}\n`;
+            out += `Standar Regulasi: Kepatuhan Penuh FAA AC 120-84 / ESDM Ditjen Minerba\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Otorisasi bilateral memastikan unit kritis kembali beroperasi dalam hitungan jam tanpa menunggu impor 3 minggu.</li>
+                <li>Pencatatan silsilah serial kriptografis melindungi riwayat aset dari sanksi audit kelaikan regulator.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses spares cannibalization: ' + err.message;
+    }
+}
+
+async function triggerDynamicCreditGuard() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi skor perilaku kredit pelanggan & proteksi asuransi piutang...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const custID = "CUST-STEEL-PACIFIC-01";
+        const scoreRes = await api('/finance/credit/compute-dynamic-score', 'POST', {
+            customer_id: custID,
+            customer_name: "PT Pacific Mega Konstruksi Nusantara",
+            base_credit_limit_usd: 500000.0,
+            current_ar_balance_usd: 380000.0,
+            overdue_balance_usd: 0.0,
+            historical_average_dso_days: 28.5,
+            agreed_terms_days: 30,
+            dispute_frequency_rate: 0.01
+        });
+
+        const insRes = await api('/finance/credit/bind-insurance-coverage', 'POST', {
+            customer_id: custID,
+            policy_number: "POL-ALLIANZ-TRADE-2026-992",
+            underwriter_name: "Allianz Trade (Euler Hermes)",
+            insured_limit_usd: 600000.0,
+            coverage_ratio_percent: 90.0,
+            max_deductible_usd: 25000.0
+        });
+
+        const holdRes = await api('/finance/credit/evaluate-order-hold', 'POST', {
+            sales_order_id: "SO-2026-99201",
+            customer_id: custID,
+            order_amount_usd: 120000.0
+        });
+
+        if (badge) badge.textContent = `🛡️ CREDIT: ${scoreRes.data.risk_tier} (Score: ${scoreRes.data.dynamic_score})`;
+        if (answerEl) {
+            let out = `🛡️ AI DYNAMIC CUSTOMER CREDIT LIMIT SCORING & INSURED TRADE CREDIT GUARD:\n`;
+            out += `Pelanggan: ${scoreRes.data.customer_name} (ID: ${custID})\n`;
+            out += `Skor Perilaku Pembayaran: ${scoreRes.data.dynamic_score}/100 -> ${scoreRes.data.risk_tier}\n`;
+            out += `Histori Kecepatan Bayar (DSO): ${scoreRes.data.historical_average_dso_days} Hari (Syarat Kontrak: Net ${scoreRes.data.agreed_terms_days})\n`;
+            out += `Plafon Kredit Awal: $${scoreRes.data.base_credit_limit_usd.toLocaleString()} USD\n`;
+            out += `Plafon Dinamis Disesuaikan: $${scoreRes.data.adjusted_dynamic_limit_usd.toLocaleString()} USD (+25% Ekspansi Otomatis)\n`;
+            out += `Rekomendasi Kebijakan: ${scoreRes.data.recommended_action}\n\n`;
+            out += `POLIS ASURANSI KREDIT PERDAGANGAN (TRADE CREDIT INSURANCE):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Underwriter Penjamin: ${insRes.data.underwriter_name}\n`;
+            out += `Nomor Polis: ${insRes.data.policy_number} | Batas Proteksi Asuransi: $${insRes.data.insured_limit_usd.toLocaleString()} USD\n`;
+            out += `Rasio Ganti Rugi Default: ${insRes.data.coverage_ratio_percent}%\n\n`;
+            out += `HASIL EVALUASI PRE-DISPATCH SALES ORDER:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Pesanan Penjualan: ${holdRes.data.sales_order_id} (Nilai Pesanan: $${holdRes.data.order_amount_usd.toLocaleString()} USD)\n`;
+            out += `Proyeksi Total Eksposur Piutang: $${holdRes.data.projected_total_exposure_usd.toLocaleString()} USD\n`;
+            out += `Eksposur Tanpa Asuransi (Uninsured Risk): $${holdRes.data.uninsured_exposure_usd.toLocaleString()} USD\n`;
+            out += `PUTUSAN CLEARANCE: ${holdRes.data.decision} (Pelepasan Pengiriman Diizinkan)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pelanggan dengan DSO prima otomatis mendapatkan ekspansi batas kredit tanpa proses komite manual.</li>
+                <li>Integrasi proteksi asuransi mengeliminasi risiko kerugian piutang tak tertagih (Bad Debt Write-off).</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses dynamic credit guard: ' + err.message;
+    }
+}
+
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

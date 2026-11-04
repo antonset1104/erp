@@ -1197,6 +1197,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/esg/cbam/generate-green-surcharge": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Autonomous Carbon Border Adjustment Mechanism (CBAM) & Green Export Surcharge Engine",
+					"description": "Calculates embedded Scope 1 and Scope 2 carbon intensity per ton, assesses EU ETS carbon price differentials, and generates compliant commercial invoice green surcharges.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Embedded carbon calculations, effective duty rates, and total green surcharge amounts in EUR"},
+					},
+				},
+			},
+			"/api/v1/wms/agf/dispatch-swarm-robot": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Cross-Docking Robotic Automated Guided Forklift (AGF) & Pallet Swarm Dispatcher",
+					"description": "Executes zero-putaway dock-to-dock pallet crossdocking, dispatches optimal AGF robots with deadlock avoidance, and commands opportunity fast-charging.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Assigned AGF robot unit, estimated dock-to-dock transit duration, and updated mission status"},
+					},
+				},
+			},
+			"/api/v1/treasury/zba/execute-eod-sweeping": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Corporate Liquidity Zero-Balance Account (ZBA) Sweeping & Virtual Cash Pooling Vault",
+					"description": "Executes autonomous end-of-day two-way ZBA cash concentration sweeps between parent and subsidiaries, logging intercompany loans and tax withholdings.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Batch sweep execution results, total upward swept funds, downward top-ups, and net master balance"},
+					},
+				},
+			},
+			"/api/v1/maintenance/cannibalization/evaluate-feasibility": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Heavy Equipment & Industrial Spares Cannibalization & Pool-Exchange Manager",
+					"description": "Assesses technical airworthiness, remaining TSO life, and economic downtime savings to authorize safe component cannibalization and serial lineage re-binding.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Cannibalization feasibility score, modification parity check, and avoided downtime loss in USD"},
+					},
+				},
+			},
+			"/api/v1/finance/credit/evaluate-order-hold": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "AI Dynamic Customer Credit Limit Scoring & Insured Trade Credit Guard",
+					"description": "Evaluates customer behavioral payment velocity (DSO, dispute ratios) and trade credit insurance coverage to enforce autonomous order dispatch holds.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Order credit hold decision, projected total exposure, dynamic credit limits, and uninsured exposure"},
+					},
+				},
+			},
 		},
 	}
 }

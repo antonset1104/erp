@@ -22,12 +22,14 @@ import (
 	coreenergy "erp-golang/internal/core/energy"
 	coreexpense "erp-golang/internal/core/expense"
 	corefieldservice "erp-golang/internal/core/fieldservice"
+	corefinance "erp-golang/internal/core/finance"
 	corefleet "erp-golang/internal/core/fleet"
 	coregraphql "erp-golang/internal/core/graphql"
 	coregrc "erp-golang/internal/core/grc"
 	corehr "erp-golang/internal/core/hr"
 	coreitops "erp-golang/internal/core/itops"
 	corelogistics "erp-golang/internal/core/logistics"
+	coremaintenance "erp-golang/internal/core/maintenance"
 	coremrp "erp-golang/internal/core/mrp"
 	corepricing "erp-golang/internal/core/pricing"
 	coreprocurement "erp-golang/internal/core/procurement"
@@ -296,7 +298,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.61.0",
+			"version":    "1.62.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -416,6 +418,11 @@ func main() {
 		coreservice.RegisterWarrantyRoutes(apiV1)
 		coretax.RegisterPEPPOLRoutes(apiV1)
 		coreehs.RegisterHeatStressRoutes(apiV1)
+		esg.RegisterCBAMRoutes(apiV1)
+		corewms.RegisterAGFSwarmRoutes(apiV1)
+		coretreasury.RegisterZBARoutes(apiV1)
+		coremaintenance.RegisterCannibalizationRoutes(apiV1)
+		corefinance.RegisterCreditRoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend
