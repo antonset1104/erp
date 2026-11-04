@@ -1056,6 +1056,41 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **International Remittance Dispatcher**: Endpoint `POST /api/v1/treasury/repatriation/dispatch-remittance-order` executes authorized cross-border SWIFT gpi payment instructions backed by central bank permit references and transfer pricing documentation.
 - **Group Treasury Liquidity Dossier**: Endpoint `GET /api/v1/treasury/repatriation/group-liquidity-dossier/:holding_id` provides holding-level consolidated visibility into trapped versus mobilized capital and effective tax withholding minimization.
 
+---
+
+## 32. Ore Blending Optimizer, Pharma Cryogenic Sentinel, Kiln Refractory Guardian, IP Patent Annuity & Turbine EOH Creep (v1.66.0)
+
+### 32.1 Mining & Bulk Mineral Ore Blending & Grade Optimization Engine (`internal/core/mining/ore_blending.go`)
+- **JORC Code Mineral Assay & Stockpile Tracking**: Endpoint `POST /api/v1/mining/ore/register-stockpile-parcel` registers mineral stockpile parcels with JORC-compliant copper grades ($Cu\%$), gold grades ($Au\text{ g/t}$), slag-forming silica ($SiO_2\%$), penalty arsenic ($As\text{ ppm}$), and transportable moisture limits ($TML\%$).
+- **Multi-Parcel Non-Linear Blend Optimization**: Endpoint `POST /api/v1/mining/ore/optimize-blend-recipe` optimizes blend ratios across high-grade and low-grade neutralizer stockpiles to achieve targeted mill head grade while enforcing strict maximum limits on deleterious elements (arsenic $\le 250\text{ ppm}$, silica $\le 60\%$) and predicting froth flotation recovery rate ($Rec\%$).
+- **Smelter Commercial Settlement & TC/RC Valuation**: Endpoint `POST /api/v1/mining/ore/calculate-smelter-commercial-settlement` generates commercial concentrate sale settlements incorporating LME market metal prices, Treatment Charges (TC), Refining Charges (RC), and penalties for excess arsenic and moisture.
+- **Metallurgical Yield & Compliance Dossier**: Endpoint `GET /api/v1/mining/ore/metallurgical-yield-dossier/:mine_site_id` compiles comprehensive site extraction yields, blended tonnage totals, average recovery efficiencies, and JORC compliance verification.
+
+### 32.2 Autonomous Pharma Cryogenic LN2 & Cell/Gene Therapy Transport Sentinel (`internal/core/pharma/cryogenic_transport.go`)
+- **Dry-Vapor Shipper Cryogenic Telemetry**: Endpoint `POST /api/v1/pharma/cryogenic/ingest-telemetry` monitors smart cryogenic transport shippers for autologous CAR-T and cell therapies, capturing core temperatures ($\le -150^\circ\text{C}$), vacuum insulation integrity, tilt angles ($<45^\circ$), and GPS coordinates.
+- **Boil-Off Acceleration & Glass Transition ($T_g$) Sentinel**: Endpoint `POST /api/v1/pharma/cryogenic/evaluate-thermal-hold-time` calculates active liquid nitrogen boil-off rates ($kg/\text{day}$) and remaining static hold time hours, triggering proactive reroute alerts before reaching amorphous water glass transition temperature ($-135^\circ\text{C}$).
+- **Chain of Identity (COI) & 21 CFR Part 1271 Verification**: Endpoint `POST /api/v1/pharma/cryogenic/verify-chain-of-identity` guarantees zero-mix-up autologous patient-to-therapy matching with cryptographic digital signatures and ISPE GAMP 5 compliance audits.
+- **Therapy Integrity Dossier**: Endpoint `GET /api/v1/pharma/cryogenic/therapy-integrity-dossier/:batch_id` certifies complete temperature histories, chain-of-custody handoffs, and infusion readiness.
+
+### 32.3 Rotary Kiln Shell Infrared Thermal Profiling & Refractory Brick Guardian (`internal/core/maintenance/kiln_refractory.go`)
+- **Continuous Infrared Shell Pyrometry Ingestion**: Endpoint `POST /api/v1/maintenance/kiln/ingest-thermal-scan` ingests longitudinal and circumferential thermal scanner profiles along rotary kiln shells operating at burning zone clinker temperatures ($\sim 1455^\circ\text{C}$).
+- **Fourier Radial Conduction & Refractory Wear Assessment**: Endpoint `POST /api/v1/maintenance/kiln/evaluate-refractory-thickness` estimates remaining refractory brick thickness ($mm$), detects shell burn-through hotspots ($>400^\circ\text{C}$), assesses shell tire ovality deformation risks, and de-rates kiln rotation speed (RPM).
+- **Automated Hotspot Cooling Fan Dispatch**: Endpoint `POST /api/v1/maintenance/kiln/trigger-hotspot-cooling` commands targeted forced-draft auxiliary cooling fans and water-mist arrays, reducing shell skin temperatures and averting emergency kiln shutdowns.
+- **Kiln Shell Integrity Dossier**: Endpoint `GET /api/v1/maintenance/kiln/shell-integrity-dossier/:kiln_id` provides complete refractory health histories, thermal scans, and compliance with API 560 and ISO 50001 energy standards.
+
+### 32.4 Corporate Intellectual Property (IP) Patent Portfolio Monetization & Annuity Sentinel (`internal/core/legal/patent_portfolio.go`)
+- **Global Patent Registry & Statutory Fee Tracking**: Endpoint `POST /api/v1/legal/patent/register-patent-asset` manages intellectual property assets across USPTO, EPO, WIPO, and DJKI, mapping filing dates, grant milestones, statutory annuity deadlines, and linked commercial products under IAS 38.
+- **Quantitative Annuity ROI & Pruning Scoring**: Endpoint `POST /api/v1/legal/patent/evaluate-portfolio-annuity-score` calculates patent ROI indexes combining commercial revenue linkage, third-party competitor forward citations, and Freedom-to-Operate (FTO) defensive moat scores to recommend maintenance, pruning, or out-licensing.
+- **Counsel Clearance & SWIFT Payment Authorization**: Endpoint `POST /api/v1/legal/patent/authorize-annuity-payment` records legal counsel approval, dispatches statutory renewal fee remittances via SWIFT gpi, and calculates cost avoidance savings from pruned legacy patents.
+- **IP Valuation & Intangible Audit Dossier**: Endpoint `GET /api/v1/legal/patent/ip-valuation-dossier/:portfolio_id` delivers balance sheet intangible asset valuation summaries, renewal compliance records, and annual statutory budget optimization.
+
+### 32.5 Aviation & Industrial Gas Turbine Equivalent Operating Hours (EOH) & Blade Creep Optimizer (`internal/core/energy/turbine_eoh_creep.go`)
+- **Heavy Gas Turbine Operational Stress Telemetry**: Endpoint `POST /api/v1/energy/turbine/ingest-operating-telemetry` ingests DCS operating parameters under ISO 2314 and API 616, tracking base load hours, normal starts, fast peak-load starts, emergency full-load trips, Turbine Inlet Temperatures (TIT), and exhaust temperature spreads.
+- **OEM Equivalent Operating Hours & Larson-Miller Creep Model**: Endpoint `POST /api/v1/energy/turbine/calculate-eoh-creep-consumption` calculates Equivalent Operating Hours (EOH) with thermal over-firing weighting, Larson-Miller Parameter (LMP) superalloy creep life consumption %, and hot gas path inspection countdowns.
+- **Major Turnaround & Rotor Disc Rupture Prevention**: Endpoint `POST /api/v1/energy/turbine/schedule-major-inspection` automates Hot Gas Path Inspection (HGPI) and Major Inspection (MI) outage scheduling, avoiding catastrophic uncontained rotor bursts and multimillion-dollar power grid downtime.
+- **Turbine Rotordynamics Dossier**: Endpoint `GET /api/v1/energy/turbine/rotordynamics-dossier/:turbine_id` compiles complete rotor creep degradation curves, operating cycle breakdowns, and vibration health histories.
+
+
 
 
 

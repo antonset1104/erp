@@ -29627,6 +29627,431 @@ async function triggerCashRepatriation() {
     }
 }
 
+async function triggerOreBlending() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengoptimalkan formula pencampuran bijih mineral, kadar komposit & kalkulasi smelter TC/RC...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const mineSiteID = "MINE-GRASBERG-PAPUA-01";
+
+        // 1. Register stockpiles
+        await api('/mining/ore/register-stockpile-parcel', 'POST', {
+            parcel_id: "STK-PORPHYRY-HIGH-CU-01",
+            stockpile_name: "Grasberg Deep Ore Zone High Grade Sulfide",
+            ore_type: "PORPHYRY_PRIMARY_SULFIDE",
+            tons: 25000.0,
+            cu_grade_pct: 2.80,
+            au_grade_gpt: 1.25,
+            silica_sio2_pct: 52.0,
+            arsenic_ppm: 380.0,
+            moisture_pct: 7.5
+        });
+
+        await api('/mining/ore/register-stockpile-parcel', 'POST', {
+            parcel_id: "STK-SKARN-LOW-CU-02",
+            stockpile_name: "Ertsberg East Skarn Low Grade Neutralizer",
+            ore_type: "SKARN_OXIDE_CAP",
+            tons: 45000.0,
+            cu_grade_pct: 0.95,
+            au_grade_gpt: 0.35,
+            silica_sio2_pct: 62.5,
+            arsenic_ppm: 75.0,
+            moisture_pct: 6.2
+        });
+
+        // 2. Optimize blend recipe
+        const recipeRes = await api('/mining/ore/optimize-blend-recipe', 'POST', {
+            mine_site_id: mineSiteID,
+            target_tons: 60000.0,
+            target_cu_grade_pct: 1.80,
+            max_silica_sio2_pct: 60.0,
+            max_arsenic_ppm: 250.0,
+            parcel_allocations: {
+                "STK-PORPHYRY-HIGH-CU-01": 20000.0,
+                "STK-SKARN-LOW-CU-02": 40000.0
+            },
+            mining_extraction_cost_usd: 38.50
+        });
+
+        // 3. Commercial Smelter Settlement
+        const settleRes = await api('/mining/ore/calculate-smelter-commercial-settlement', 'POST', {
+            recipe_id: recipeRes.data.recipe_id,
+            lme_cu_price_usd_per_ton: 9450.0,
+            tc_usd_per_ton: 78.50,
+            rc_usd_per_lb: 0.0785
+        });
+
+        // 4. Dossier
+        const dossierRes = await api(`/mining/ore/metallurgical-yield-dossier/${mineSiteID}`, 'GET');
+
+        if (badge) badge.textContent = `⛏️ MINING: Cu ${recipeRes.data.resulting_cu_grade_pct}% | Yield $${(settleRes.data.net_payable_smelter_revenue_usd/1e6).toFixed(1)}M`;
+        if (answerEl) {
+            let out = `⛏️ MINING & BULK MINERAL ORE BLENDING & GRADE OPTIMIZATION ENGINE (JORC):\n`;
+            out += `Wilayah Tambang: ${mineSiteID} (Kepatuhan JORC & Smelter Tolling)\n`;
+            out += `Total Bijih Diformulasi: ${recipeRes.data.total_blended_tons.toLocaleString()} Ton\n`;
+            out += `Komposisi Parcel: Porphyry High-Cu (33.3%) + Skarn Low-Cu Neutralizer (66.7%)\n\n`;
+            out += `HASIL FORMULASI METALURGI & KADAR KOMPOSIT BIJIH:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Kadar Tembaga Komposit (Cu Grade): ${recipeRes.data.resulting_cu_grade_pct}%\n`;
+            out += `• Kadar Emas Komposit (Au Grade): ${recipeRes.data.resulting_au_grade_gpt} g/ton\n`;
+            out += `• Kadar Silika (SiO2 Slag-Former): ${recipeRes.data.resulting_silica_sio2_pct}%\n`;
+            out += `• Kadar Arsenik (Deleterious Penalty): ${recipeRes.data.resulting_arsenic_ppm} PPM\n`;
+            out += `• Prediksi Perolehan Flotasi (Recovery Rate): ${recipeRes.data.flotation_recovery_rate_pct}%\n`;
+            out += `• Status Kepatuhan Kualitas: ${recipeRes.data.blend_quality_compliance ? 'SESUAI SPESIFIKASI MILL' : 'PENALTI KADAR'}\n\n`;
+            out += `PERHITUNGAN KOMERSIAL SMELTER (TC/RC & NET PAYABLE):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Settlement Kontrak: ${settleRes.data.commercial_settlement_reference}\n`;
+            out += `• Logam Cu Terbayar: ${settleRes.data.payable_cu_metal_tons.toLocaleString()} Ton @ $${settleRes.data.lme_cu_price_usd_per_ton.toLocaleString()} /Ton LME\n`;
+            out += `• Logam Au Terbayar: ${settleRes.data.payable_au_metal_ounces.toLocaleString()} Troy Oz\n`;
+            out += `• Nilai Kotor Logam (Gross Valuation): $${settleRes.data.gross_metal_valuation_usd.toLocaleString()} USD\n`;
+            out += `• Biaya Pengolahan Smelter (TC): -$${settleRes.data.treatment_charges_tc_usd.toLocaleString()} USD\n`;
+            out += `• Biaya Pemurnian Logam (RC): -$${settleRes.data.refining_charges_rc_usd.toLocaleString()} USD\n`;
+            out += `• Penalti Unsur Pengotor (Arsenik & Moisture): -$${(settleRes.data.arsenic_penalty_deductions_usd + settleRes.data.moisture_penalty_deductions_usd).toLocaleString()} USD\n`;
+            out += `• PENDAPATAN BERSIH SMELTER (NET PAYABLE): $${settleRes.data.net_payable_smelter_revenue_usd.toLocaleString()} USD\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pencampuran strategis bijih kadar tinggi dan rendah menurunkan penalti silika & arsenik secara signifikan.</li>
+                <li>Simulasi pemulihan flotasi otomatis memaksimalkan net payable revenue pada kontrak penjualan konsentrat smelter.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mengoptimalkan ore blending: ' + err.message;
+    }
+}
+
+async function triggerCryogenicTransport() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memantau dry-vapor LN2 smart shipper, glass transition margin & chain-of-identity...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const shipperID = "DRY-SHIPPER-CAR-T-001";
+        const batchID = "BATCH-KYMRIAH-7721";
+        const patientID = "PAT-ONC-99120";
+
+        // 1. Ingest telemetry
+        await api('/pharma/cryogenic/ingest-telemetry', 'POST', {
+            shipper_id: shipperID,
+            batch_id: batchID,
+            patient_id: patientID,
+            therapy_type: "AUTOLOGOUS_CAR_T_CELL",
+            core_temp_c: -186.5,
+            ambient_temp_c: 24.5,
+            ln2_hold_time_remaining_hours: 115.0,
+            tilt_angle_degrees: 4.2,
+            vacuum_insulation_intact: true,
+            gps_latitude: -6.2088,
+            gps_longitude: 106.8456
+        });
+
+        // 2. Evaluate hold time
+        const evalRes = await api('/pharma/cryogenic/evaluate-thermal-hold-time', 'POST', {
+            shipper_id: shipperID
+        });
+
+        // 3. Verify Chain of Identity (COI)
+        const coiRes = await api('/pharma/cryogenic/verify-chain-of-identity', 'POST', {
+            batch_id: batchID,
+            patient_id: patientID,
+            donor_id: patientID,
+            officer_auth_token: "OFFICER-PHARMA-QA-SECURE-KEY-8819"
+        });
+
+        // 4. Dossier
+        const dossierRes = await api(`/pharma/cryogenic/therapy-integrity-dossier/${batchID}`, 'GET');
+
+        if (badge) badge.textContent = `❄️ CRYO: ${evalRes.data.current_core_temp_c}°C | Hold ${evalRes.data.remaining_static_hold_time_hours}h | COI OK`;
+        if (answerEl) {
+            let out = `❄️ AUTONOMOUS PHARMA CRYOGENIC LN2 & CELL/GENE THERAPY SENTINEL (ISPE GAMP 5 & 21 CFR PART 1271):\n`;
+            out += `Kontainer Smart Shipper: ${shipperID} | Batch Produk: ${batchID}\n`;
+            out += `Jenis Terapi: AUTOLOGOUS CAR-T CELL THERAPY | Pasien: ${patientID}\n\n`;
+            out += `STATUS TERMAL KRIOGENIK & INTEGRITAS GLASS TRANSITION (Tg):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Temperatur Inti Ruang Sampel: ${evalRes.data.current_core_temp_c}°C (Threshold Aman <= -150°C)\n`;
+            out += `• Margin Terhadap Glass Transition Amorf (Tg -135°C): 51.5°C Safety Headroom\n`;
+            out += `• Sisa Waktu Tahan Kuantitatif (Static Hold Time): ${evalRes.data.remaining_static_hold_time_hours} Jam Operasional\n`;
+            out += `• Laju Penguapan Nitrogen Cair (Boil-Off Rate): ${evalRes.data.boil_off_rate_kg_per_day} kg/hari\n`;
+            out += `• Tingkat Risiko Stabilitas Termal: ${evalRes.data.tg_breach_risk_level}\n`;
+            out += `• Kebutuhan Reroute / Pengisian Ulang LN2: ${evalRes.data.dynamic_reroute_dispatched ? 'DIPERLUKAN' : 'TIDAK DIPERLUKAN (RUTE AMAN)'}\n\n`;
+            out += `VERIFIKASI RANTAI IDENTITAS & KUSTODI (CHAIN OF IDENTITY / CHAIN OF CUSTODY):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Sertifikat COI: ${coiRes.data.certificate_id}\n`;
+            out += `• Status Verifikasi Pasien Autologus: ${coiRes.data.chain_status} (Zero Mix-Up Match Guaranteed)\n`;
+            out += `• Jumlah Titik Handoff Tercatat: ${coiRes.data.chain_of_custody_handoff_count} Pihak Terverifikasi\n`;
+            out += `• Audit Trail Digital Signature (21 CFR Part 11): ${coiRes.data.digital_signature_hash.substring(0, 32)}...\n`;
+            out += `• Kepatuhan ISPE GAMP 5 & FDA 21 CFR 1271: ${dossierRes.data.fda_21cfr1271_compliant ? 'TERSERTIFIKASI SIAP INFUSI KLINIS' : 'TERTAHAN KUARANTINA'}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Sensor sudut kemiringan (tilt) dan penguapan real-time mencegah kegagalan pendinginan nitrogen cair pada kargo udara internasional.</li>
+                <li>Verifikasi kriptografis Chain of Identity menjamin pasien onkologi menerima sel autologus miliknya sendiri tanpa risiko fatal tertukar.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memantau cryogenic transport: ' + err.message;
+    }
+}
+
+async function triggerKilnRefractory() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis profil inframerah cangkang kiln, ketebalan refraktori & proteksi hotspot...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const kilnID = "KILN-CEMENT-TUBAN-01";
+        const meter = 42.5;
+
+        // 1. Ingest scan
+        await api('/maintenance/kiln/ingest-thermal-scan', 'POST', {
+            kiln_id: kilnID,
+            longitudinal_meter: meter,
+            circumferential_angle_deg: 185.0,
+            shell_skin_temp_c: 418.0,
+            ambient_temp_c: 32.0,
+            kiln_rpm: 4.2,
+            burning_zone_clinker_temp_c: 1455.0,
+            secondary_air_temp_c: 980.0
+        });
+
+        // 2. Evaluate thickness
+        const evalRes = await api('/maintenance/kiln/evaluate-refractory-thickness', 'POST', {
+            kiln_id: kilnID,
+            longitudinal_meter: meter
+        });
+
+        // 3. Trigger cooling
+        const coolRes = await api('/maintenance/kiln/trigger-hotspot-cooling', 'POST', {
+            kiln_id: kilnID,
+            longitudinal_meter: meter,
+            cooling_fans_count: 4
+        });
+
+        // 4. Dossier
+        const dossierRes = await api(`/maintenance/kiln/shell-integrity-dossier/${kilnID}`, 'GET');
+
+        if (badge) badge.textContent = `🔥 KILN: ${evalRes.data.estimated_remaining_brick_mm}mm Brick | Fan x${coolRes.data.deployed_cooling_fans_count} Deployed`;
+        if (answerEl) {
+            let out = `🔥 ROTARY KILN SHELL INFRARED THERMAL PROFILING & REFRACTORY GUARDIAN (API 560):\n`;
+            out += `Unit Rotary Kiln: ${kilnID} (Pabrik Semen Tuban - Burning Zone)\n`;
+            out += `Posisi Scanning: Meter ${meter} Longitudinal (Zona Klinkerisasi ~1455°C)\n\n`;
+            out += `DIAGNOSA KETEBALAN REFRAKTORI & PERINGATAN HOTSPOT CANGKANG:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Temperatur Kulit Baja Kiln (Shell Skin Temp): 418.0°C (Ambang Batas Merah > 400°C)\n`;
+            out += `• Estimasi Sisa Ketebalan Bata Refraktori: ${evalRes.data.estimated_remaining_brick_mm} mm (Original 220 mm)\n`;
+            out += `• Peringatan Hotspot Cangkang: ${evalRes.data.shell_hotspot_alert ? 'AKTIF - ANCAMAN TERBAKAR TEMBUS' : 'NORMAL'}\n`;
+            out += `• Risiko Deformasi Ovalitas Cangkang Baja: ${evalRes.data.risk_of_ovality_deformation ? 'TINGGI (Distorsi Tyre/Cincin)' : 'AMAN'}\n`;
+            out += `• Pembatasan Putaran Kiln Maksimal (Derate RPM): ${evalRes.data.max_allowed_kiln_rpm} RPM (Mencegah Kelelahan Siklik Baja)\n`;
+            out += `• Status Tindakan Metalurgi: ${evalRes.data.action_status}\n\n`;
+            out += `TINDAKAN MITIGASI DARURAT PENDINGINAN HOTSPOT:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Instruksi Mitigasi: ${coolRes.data.action_id}\n`;
+            out += `• Kipas Pendingin Berkecepatan Tinggi Dikerahkan: ${coolRes.data.deployed_cooling_fans_count} Unit Auxiliary Fans\n`;
+            out += `• Sistem Water-Mist Cooling: ${coolRes.data.water_mist_cooling_active ? 'AKTIF' : 'NON-AKTIF'}\n`;
+            out += `• Estimasi Penurunan Temperatur Cangkang: -${coolRes.data.shell_temp_reduced_c}°C (Kembali ke Zona Aman < 350°C)\n`;
+            out += `• Estimasi Kerugian Shutdown Darurat Terhindar: $${coolRes.data.avoided_kiln_emergency_shutdown_usd.toLocaleString()} USD\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pengerahan kipas pendingin hotspot otomatis memperpanjang usia pakai refraktori hingga jadwal shutdown tahunan.</li>
+                <li>Penyesuaian RPM otomatis mencegah distorsi ovalitas permanen pada cangkang silinder baja rotary kiln.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal menganalisis kiln refractory: ' + err.message;
+    }
+}
+
+async function triggerPatentAnnuity() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi portofolio paten IP, sitasi kompetitor & otorisasi biaya anuitas...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const portfolioID = "PORTFOLIO-ENTERPRISE-AI-2026";
+        const patCore = "PAT-US-11892011-B2";
+        const patLegacy = "PAT-EP-3944120-A1";
+
+        // 1. Evaluate scores
+        const scoreCore = await api('/legal/patent/evaluate-portfolio-annuity-score', 'POST', {
+            patent_id: patCore,
+            commercial_revenue_usd: 12500000.0,
+            citations_count: 14,
+            competitive_fto_blocking_score: 92.0
+        });
+
+        const scoreLegacy = await api('/legal/patent/evaluate-portfolio-annuity-score', 'POST', {
+            patent_id: patLegacy,
+            commercial_revenue_usd: 0.0,
+            citations_count: 0,
+            competitive_fto_blocking_score: 15.0
+        });
+
+        // 2. Authorize payments & pruning
+        const authRes = await api('/legal/patent/authorize-annuity-payment', 'POST', {
+            portfolio_id: portfolioID,
+            approved_patent_ids: [patCore],
+            pruned_patent_ids: [patLegacy],
+            counsel_signature: "LEGAL-COUNSEL-DR-HERMAWAN-SH-LLM"
+        });
+
+        // 3. Dossier
+        const dossierRes = await api(`/legal/patent/ip-valuation-dossier/${portfolioID}`, 'GET');
+
+        if (badge) badge.textContent = `⚖️ IP: Saved $${authRes.data.cost_avoidance_savings_usd.toLocaleString()} | Fee $${authRes.data.total_statutory_fees_usd.toLocaleString()}`;
+        if (answerEl) {
+            let out = `⚖️ CORPORATE INTELLECTUAL PROPERTY (IP) PATENT PORTFOLIO MONETIZATION & ANNUITY SENTINEL:\n`;
+            out += `Portofolio Paten: ${portfolioID} (Standar WIPO / USPTO / EPO / IAS 38)\n`;
+            out += `Kuasa Hukum / General Counsel: ${authRes.data.approved_by_legal_counsel}\n\n`;
+            out += `EVALUASI KUANTITATIF ANUITAS & STRATEGI PEMELIHARAAN PATEN:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Paten Inti (#1): ${patCore} (Enterprise Supply Chain AI Engine)\n`;
+            out += `  - Kaitan Pendapatan Komersial: $12,500,000.00 USD | Sitasi Kompetitor: 14 Sitasi Forward\n`;
+            out += `  - Skor Pertahanan Moat (FTO): 92.0/100 | Indeks ROI Anuitas: ${scoreCore.data.annuity_roi_index}x\n`;
+            out += `  - Keputusan Dewan IP: ${scoreCore.data.decision_verdict} (Pertahankan Hak Monopoli)\n\n`;
+            out += `• Paten Warisan (#2): ${patLegacy} (Legacy Translation Interface)\n`;
+            out += `  - Kaitan Pendapatan Komersial: $0.00 USD | Sitasi Kompetitor: 0 Sitasi\n`;
+            out += `  - Skor Pertahanan Moat (FTO): 15.0/100 | Indeks ROI Anuitas: ${scoreLegacy.data.annuity_roi_index}x\n`;
+            out += `  - Keputusan Dewan IP: ${scoreLegacy.data.decision_verdict} (Lepas Hak Paten & Hemat Biaya)\n\n`;
+            out += `OTORISASI PEMBAYARAN SWIFT & PENGHEMATAN BIAYA ANUITAS:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Otorisasi Legal: ${authRes.data.authorization_id}\n`;
+            out += `• Paten Disetujui Diperpanjang: ${authRes.data.authorized_patents_count} Aset Paten ($${authRes.data.total_statutory_fees_usd.toLocaleString()} USD)\n`;
+            out += `• Paten Dipangkas (Pruned): ${authRes.data.pruned_patents_count} Aset Paten Usang\n`;
+            out += `• Penghematan Anggaran Terhindar (Cost Avoidance): $${authRes.data.cost_avoidance_savings_usd.toLocaleString()} USD\n`;
+            out += `• Referensi Pembayaran SWIFT Kantor Paten: ${authRes.data.swift_payment_ref}\n`;
+            out += `• Kepatuhan Audit Aset Tak Berwujud IAS 38: TERCATAT DAN TERVERIFIKASI\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pruning paten usang yang tidak lagi memiliki kaitan pendapatan menyelamatkan ribuan dolar biaya anuitas tahunan.</li>
+                <li>Perpanjangan otomatis paten strategis mengamankan hak monopoli teknologi inti dan kebebasan beroperasi (Freedom-to-Operate).</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mengevaluasi patent annuity: ' + err.message;
+    }
+}
+
+async function triggerTurbineEOH() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menghitung Equivalent Operating Hours (EOH), creep blade & jadwal overhaul turbin gas...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const turbineID = "GT-FRAME9F-PLN-01";
+
+        // 1. Ingest telemetry
+        await api('/energy/turbine/ingest-operating-telemetry', 'POST', {
+            turbine_id: turbineID,
+            operating_base_hours: 21500.0,
+            fast_starts_count: 42,
+            normal_starts_count: 175,
+            emergency_trips_count: 8,
+            turbine_inlet_temp_tit_c: 1140.0,
+            exhaust_gas_temp_spread_egt_c: 18.2,
+            vibration_velocity_rms_mms: 2.85,
+            fuel_gas_wobbe_index: 49.5
+        });
+
+        // 2. Calculate EOH & Creep
+        const eohRes = await api('/energy/turbine/calculate-eoh-creep-consumption', 'POST', {
+            turbine_id: turbineID
+        });
+
+        // 3. Schedule major inspection
+        const schedRes = await api('/energy/turbine/schedule-major-inspection', 'POST', {
+            turbine_id: turbineID,
+            inspection_type: "HOT_GAS_PATH_INSPECTION_HGPI"
+        });
+
+        // 4. Dossier
+        const dossierRes = await api(`/energy/turbine/rotordynamics-dossier/${turbineID}`, 'GET');
+
+        if (badge) badge.textContent = `🌪️ TURBINE: ${eohRes.data.calculated_eoh.toLocaleString()} EOH | Creep ${eohRes.data.blade_creep_life_consumed_pct}%`;
+        if (answerEl) {
+            let out = `🌪️ AVIATION & INDUSTRIAL GAS TURBINE EQUIVALENT OPERATING HOURS (EOH) & BLADE CREEP OPTIMIZER:\n`;
+            out += `Unit Turbin Gas: ${turbineID} (Heavy-Duty Frame 9F Combined Cycle)\n`;
+            out += `Standar Sertifikasi: ISO 2314 & API 616 Rotordynamics\n\n`;
+            out += `KALKULASI EOH & DEGRADASI RAYAPAN SUDA (BLADE CREEP & LOW CYCLE FATIGUE):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Jam Operasional Jam Dinding (Base Hours): 21,500.0 Jam Operasi Beban Penuh\n`;
+            out += `• Siklus Stres: 175 Start Normal (+3,500 EOH) | 42 Fast Starts (+2,100 EOH) | 8 Emergency Trips (+640 EOH)\n`;
+            out += `• Temperatur Pembakaran (TIT): 1,140°C (Faktor Penuaan Termal: 1.14x Base Hours)\n`;
+            out += `• EQUIVALENT OPERATING HOURS (EOH): ${eohRes.data.calculated_eoh.toLocaleString()} Jam Ekuivalen\n`;
+            out += `• Parameter Larson-Miller (LMP Superalloy): ${eohRes.data.larson_miller_parameter}\n`;
+            out += `• Konsumsi Usia Rayapan Sudu (Blade Creep Consumed): ${eohRes.data.blade_creep_life_consumed_pct}%\n`;
+            out += `• Sisa Jam Menuju Hot Gas Path Inspection (HGPI): ${eohRes.data.hours_until_next_hgpi.toLocaleString()} EOH\n`;
+            out += `• Status Kesehatan Rotordinamika: ${eohRes.data.turbine_health_status}\n\n`;
+            out += `MANAJEMEN OVERHAUL & PERLINDUNGAN ROTOR DISC RUPTURE:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Work Order Pemeliharaan Terjadwal: ${schedRes.data.turnaround_work_order_id}\n`;
+            out += `• Jenis Turnaround: ${schedRes.data.inspection_type}\n`;
+            out += `• Estimasi Hari Pemadaman (Outage Duration): ${schedRes.data.estimated_outage_days} Hari Kalender\n`;
+            out += `• Kerugian Katastropik Terhindar: $${schedRes.data.avoided_catastrophic_blade_rupture_usd.toLocaleString()} USD (Mencegah Uncontained Rotor Burst)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penghitungan EOH multi-faktor secara akurat memperhitungkan kelelahan termal dari fast-start di jaringan listrik beban puncak.</li>
+                <li>Penjadwalan inspeksi HGPI berbasis sisa usia rayapan Larson-Miller mengeliminasi risiko kegagalan katastropik sudu turbin.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal menghitung turbine EOH: ' + err.message;
+    }
+}
+
 
 
 // Auto-initialize Real-Time SSE Event Stream

@@ -39,9 +39,12 @@ import (
 	coregrc "erp-golang/internal/core/grc"
 	corehr "erp-golang/internal/core/hr"
 	coreitops "erp-golang/internal/core/itops"
+	corelegal "erp-golang/internal/core/legal"
 	corelogistics "erp-golang/internal/core/logistics"
 	coremaintenance "erp-golang/internal/core/maintenance"
+	coremining "erp-golang/internal/core/mining"
 	coremrp "erp-golang/internal/core/mrp"
+	corepharma "erp-golang/internal/core/pharma"
 	corepricing "erp-golang/internal/core/pricing"
 	coreprocurement "erp-golang/internal/core/procurement"
 	coreproject "erp-golang/internal/core/project"
@@ -11798,5 +11801,232 @@ IEA*1*000099123~`
 	t.Logf("✓ Cross-Border Cash Repatriation & Trapped Liquidity Verified: Sub='%s' (%s, Trapped=$%.2fM, Avail=$%.2fM USD), TopPathway='%s' (WHT=%.1f%%, NetYield=$%.2fM USD, Efficiency=%.1f%%, LeadTime=%d days), DispatchedRemittance=$%.2fM USD (Permit='%s', IBAN='%s', Status='%s'), GroupEfficiency='%s'",
 		repProfile.SubsidiaryID, repProfile.JurisdictionCountryCode, repProfile.TrappedCashAmountUSD/1e6, repProfile.AvailableForRepatriationUSD/1e6, repSims[0].PathwayType, repSims[0].ApplicableWithholdingTaxPct, repSims[0].NetEffectiveYieldUSD/1e6, repSims[0].NetYieldPercentage, repSims[0].EstimatedRegulatoryLeadTimeDays, repOrder.DispatchedRemittanceUSD/1e6, repOrder.CentralBankPermitReference, repOrder.TargetHoldingAccountIBAN, repOrder.RemittanceStatus, repDossier["repatriation_efficiency"])
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (79 SECTIONS: 75+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD + CONTRACT LEAKAGE SENTINEL + MICROGRID ISLANDING + CARGO GEOFENCE + SHIFT BIDDING FATIGUE + CIRCULAR PACKAGING RTI + INDUSTRIAL WATER ZLD + VENDOR SANCTIONS GRAPH + BOILER TUBE DESCALING + SAAS DUNNING WATERFALL + TOLL MANUFACTURING RECON + SILO AERATION SENTINEL + EPC PROGRESS BILLING ESCROW + DYNAMIC PORT BERTH DEMURRAGE + TRANSFORMER DGA GUARDIAN + CROSS BORDER CASH REPATRIATION) PASSED 100%!")
+	// ==========================================
+	// 80. ENTERPRISE INNOVATIONS V1.66.0 (ORE BLENDING, CRYOGENIC PHARMA, KILN REFRACTORY, IP PATENT ANNUITY, TURBINE EOH CREEP)
+	// ==========================================
+
+	// 80.1 Mining & Bulk Mineral Ore Blending & Grade Optimization Engine (JORC Code & Metallurgical Recovery)
+	oreP1 := coremining.GlobalOreBlendingVault.RegisterStockpileParcel(coremining.OreStockpileParcel{
+		ParcelID:      "STK-PORPHYRY-HIGH-CU-01",
+		StockpileName: "Grasberg Deep Ore Zone High Grade Sulfide",
+		OreType:       "PORPHYRY_PRIMARY_SULFIDE",
+		Tons:          25000.0,
+		CuGradePct:    2.80,
+		AuGradeGpt:    1.25,
+		SilicaSiO2Pct: 52.0,
+		ArsenicPPM:    380.0,
+		MoisturePct:   7.5,
+	})
+	oreP2 := coremining.GlobalOreBlendingVault.RegisterStockpileParcel(coremining.OreStockpileParcel{
+		ParcelID:      "STK-SKARN-LOW-CU-02",
+		StockpileName: "Ertsberg East Skarn Low Grade Neutralizer",
+		OreType:       "SKARN_OXIDE_CAP",
+		Tons:          45000.0,
+		CuGradePct:    0.95,
+		AuGradeGpt:    0.35,
+		SilicaSiO2Pct: 62.5,
+		ArsenicPPM:    75.0,
+		MoisturePct:   6.2,
+	})
+	if oreP1.ParcelID == "" || oreP2.ParcelID == "" {
+		t.Fatalf("Failed to register ore stockpile parcels: %+v, %+v", oreP1, oreP2)
+	}
+
+	oreRecipe, err := coremining.GlobalOreBlendingVault.OptimizeBlendRecipe(coremining.BlendOptimizationRequest{
+		MineSiteID:       "MINE-GRASBERG-PAPUA-01",
+		TargetTons:       60000.0,
+		TargetCuGradePct: 1.80,
+		MaxSilicaSiO2Pct: 60.0,
+		MaxArsenicPPM:    250.0,
+		ParcelAllocations: map[string]float64{
+			"STK-PORPHYRY-HIGH-CU-01": 20000.0,
+			"STK-SKARN-LOW-CU-02":     40000.0,
+		},
+		MiningExtractionCostUSD: 38.50,
+	})
+	if err != nil || oreRecipe.RecipeID == "" || oreRecipe.ResultingCuGradePct <= 0 || !oreRecipe.BlendQualityCompliance {
+		t.Fatalf("Failed to optimize ore blend recipe: %+v, err: %v", oreRecipe, err)
+	}
+
+	oreSettlement, err := coremining.GlobalOreBlendingVault.CalculateSmelterCommercialSettlement(
+		oreRecipe.RecipeID, 9450.0, 78.50, 0.0785,
+	)
+	if err != nil || oreSettlement.NetPayableSmelterRevenueUSD <= 0 || oreSettlement.TreatmentChargesTC_USD <= 0 {
+		t.Fatalf("Failed to calculate smelter commercial settlement: %+v, err: %v", oreSettlement, err)
+	}
+
+	oreDossier, err := coremining.GlobalOreBlendingVault.GetMetallurgicalYieldDossier("MINE-GRASBERG-PAPUA-01")
+	if err != nil || !oreDossier["jorc_metallurgical_compliance"].(bool) {
+		t.Fatalf("Failed to compile metallurgical yield dossier: %+v, err: %v", oreDossier, err)
+	}
+	t.Logf("✓ Ore Blending & Grade Optimization Verified: MineSite='%s', Recipe='%s' (Tons=%.0f, Cu=%.3f%%, Au=%.3fg/t, SiO2=%.1f%%, As=%.1fppm, Rec=%.2f%%, Cost=$%.2f/t), SmelterSettlement='%s' (PayableCu=%.1ft, PayableAu=%.1foz, Gross=$%.2fM, TC=-$%.2f, RC=-$%.2f, Penalty=-$%.2f, NetPayable=$%.2fM USD)",
+		oreRecipe.MineSiteID, oreRecipe.RecipeID, oreRecipe.TotalBlendedTons, oreRecipe.ResultingCuGradePct, oreRecipe.ResultingAuGradeGpt, oreRecipe.ResultingSilicaSiO2Pct, oreRecipe.ResultingArsenicPPM, oreRecipe.FlotationRecoveryRatePct, oreRecipe.CalculatedBlendCostPerTon, oreSettlement.CommercialSettlementReference, oreSettlement.PayableCuMetalTons, oreSettlement.PayableAuMetalOunces, oreSettlement.GrossMetalValuationUSD/1e6, oreSettlement.TreatmentChargesTC_USD, oreSettlement.RefiningChargesRC_USD, oreSettlement.ArsenicPenaltyDeductionsUSD+oreSettlement.MoisturePenaltyDeductionsUSD, oreSettlement.NetPayableSmelterRevenueUSD/1e6)
+
+	// 80.2 Autonomous Pharma Cryogenic LN2 & Cell/Gene Therapy Transport Sentinel (ISPE GAMP 5 & FDA 21 CFR Part 1271)
+	cryoTel := corepharma.GlobalPharmaCryogenicVault.IngestTelemetry(corepharma.CryogenicTelemetry{
+		ShipperID:                 "DRY-SHIPPER-CAR-T-001",
+		BatchID:                   "BATCH-KYMRIAH-7721",
+		PatientID:                 "PAT-ONC-99120",
+		TherapyType:               "AUTOLOGOUS_CAR_T_CELL",
+		CoreTempC:                 -186.5,
+		AmbientTempC:              24.5,
+		LN2HoldTimeRemainingHours: 115.0,
+		TiltAngleDegrees:          4.2,
+		VacuumInsulationIntact:    true,
+		GPSLatitude:               -6.2088,
+		GPSLongitude:              106.8456,
+	})
+	if cryoTel.TelemetryID == "" || cryoTel.GlassTransitionTgMarginC <= 0 {
+		t.Fatalf("Failed to ingest cryogenic telemetry: %+v", cryoTel)
+	}
+
+	cryoEval, err := corepharma.GlobalPharmaCryogenicVault.EvaluateThermalHoldTime("DRY-SHIPPER-CAR-T-001")
+	if err != nil || cryoEval.RemainingStaticHoldTimeHours <= 0 || cryoEval.TgBreachRiskLevel != "SAFE_CRYOGENIC_STABILITY" {
+		t.Fatalf("Failed to evaluate cryogenic thermal hold time: %+v, err: %v", cryoEval, err)
+	}
+
+	cryoCOI, err := corepharma.GlobalPharmaCryogenicVault.VerifyChainOfIdentity(
+		"BATCH-KYMRIAH-7721", "PAT-ONC-99120", "PAT-ONC-99120", "AUTH-OFFICER-QA-KEY-8819",
+	)
+	if err != nil || !cryoCOI.ChainOfIdentityVerified || cryoCOI.ChainStatus != "VERIFIED_AUTHENTIC" {
+		t.Fatalf("Failed to verify chain of identity: %+v, err: %v", cryoCOI, err)
+	}
+
+	cryoDossier, err := corepharma.GlobalPharmaCryogenicVault.GetTherapyIntegrityDossier("BATCH-KYMRIAH-7721")
+	if err != nil || !cryoDossier["fda_21cfr1271_compliant"].(bool) {
+		t.Fatalf("Failed to compile cryogenic therapy integrity dossier: %+v, err: %v", cryoDossier, err)
+	}
+	t.Logf("✓ Pharma Cryogenic LN2 & Cell/Gene Sentinel Verified: Shipper='%s', Batch='%s', Patient='%s' (Therapy='%s', CoreTemp=%.1f°C, TgMargin=%.1f°C, StaticHold=%.1f hrs, BoilOff=%.2f kg/d, Risk='%s'), COI Certificate='%s' (Verified=%t, Status='%s', Audit='%s')",
+		cryoTel.ShipperID, cryoTel.BatchID, cryoTel.PatientID, cryoTel.TherapyType, cryoEval.CurrentCoreTempC, cryoTel.GlassTransitionTgMarginC, cryoEval.RemainingStaticHoldTimeHours, cryoEval.BoilOffRateKgPerDay, cryoEval.TgBreachRiskLevel, cryoCOI.CertificateID, cryoCOI.ChainOfIdentityVerified, cryoCOI.ChainStatus, cryoCOI.ISPE_GAMP5_ComplianceAudit)
+
+	// 80.3 Rotary Kiln Shell Infrared Thermal Profiling & Refractory Brick Guardian (API 560 & ISO 50001)
+	kilnScan := coremaintenance.GlobalKilnRefractoryVault.IngestThermalScan(coremaintenance.KilnThermalScan{
+		KilnID:                  "KILN-CEMENT-TUBAN-01",
+		LongitudinalMeter:       42.5,
+		CircumferentialAngleDeg: 185.0,
+		ShellSkinTempC:          418.0,
+		AmbientTempC:            32.0,
+		KilnRPM:                 4.2,
+		BurningZoneClinkerTempC: 1455.0,
+		SecondaryAirTempC:       980.0,
+	})
+	if kilnScan.ScanID == "" || kilnScan.ShellSkinTempC != 418.0 {
+		t.Fatalf("Failed to ingest kiln thermal scan: %+v", kilnScan)
+	}
+
+	kilnAssess, err := coremaintenance.GlobalKilnRefractoryVault.EvaluateRefractoryThickness("KILN-CEMENT-TUBAN-01", 42.5)
+	if err != nil || !kilnAssess.ShellHotspotAlert || !kilnAssess.RiskOfOvalityDeformation || kilnAssess.EstimatedRemainingBrickMM >= 100.0 {
+		t.Fatalf("Failed to evaluate kiln refractory thickness: %+v, err: %v", kilnAssess, err)
+	}
+
+	kilnCooling, err := coremaintenance.GlobalKilnRefractoryVault.TriggerHotspotCooling("KILN-CEMENT-TUBAN-01", 42.5, 4)
+	if err != nil || kilnCooling.DeployedCoolingFansCount != 4 || kilnCooling.ShellTempReducedC <= 0 {
+		t.Fatalf("Failed to trigger hotspot cooling: %+v, err: %v", kilnCooling, err)
+	}
+
+	kilnDossier, err := coremaintenance.GlobalKilnRefractoryVault.GetShellIntegrityDossier("KILN-CEMENT-TUBAN-01")
+	if err != nil || !kilnDossier["api_560_compliance_status"].(bool) {
+		t.Fatalf("Failed to compile kiln shell integrity dossier: %+v, err: %v", kilnDossier, err)
+	}
+	t.Logf("✓ Rotary Kiln Refractory & Hotspot Guardian Verified: Kiln='%s' @ Meter %.1fm (ShellSkin=%.1f°C, Clinker=%.1f°C), BrickRemaining=%.1f mm, HotspotAlert=%t, OvalityRisk=%t, De-rateRPM=%.1f, CoolingAction='%s' (Fans=%d, TempReduced=-%.1f°C, AvoidedShutdownLoss=$%.2f USD)",
+		kilnScan.KilnID, kilnScan.LongitudinalMeter, kilnScan.ShellSkinTempC, kilnScan.BurningZoneClinkerTempC, kilnAssess.EstimatedRemainingBrickMM, kilnAssess.ShellHotspotAlert, kilnAssess.RiskOfOvalityDeformation, kilnAssess.MaxAllowedKilnRPM, kilnCooling.ActionID, kilnCooling.DeployedCoolingFansCount, kilnCooling.ShellTempReducedC, kilnCooling.AvoidedKilnEmergencyShutdownUSD)
+
+	// 80.4 Corporate Intellectual Property (IP) Patent Portfolio Monetization & Annuity Sentinel (WIPO / USPTO / IAS 38)
+	patCore := corelegal.GlobalPatentPortfolioVault.RegisterPatentAsset(corelegal.PatentAssetRecord{
+		PatentID:                    "PAT-US-11892011-B2",
+		PortfolioID:                 "PORTFOLIO-ENTERPRISE-AI-2026",
+		Title:                       "Multi-Variable Distributed Constraint Optimization Engine for Enterprise Supply Chains",
+		PatentOffice:                "USPTO",
+		PatentType:                  "UTILITY_PATENT",
+		FilingDate:                  time.Now().AddDate(-6, 0, 0),
+		GrantDate:                   time.Now().AddDate(-2, 0, 0),
+		NextAnnuityDueDate:          time.Now().AddDate(0, 5, 15),
+		StatutoryAnnuityFeeUSD:      3760.0,
+		GracePeriodDeadline:         time.Now().AddDate(0, 11, 15),
+		ActiveCommercialProductLink: "GOERP_CORE_OPTIMIZER_V1",
+	})
+	patLegacy := corelegal.GlobalPatentPortfolioVault.RegisterPatentAsset(corelegal.PatentAssetRecord{
+		PatentID:                    "PAT-EP-3944120-A1",
+		PortfolioID:                 "PORTFOLIO-ENTERPRISE-AI-2026",
+		Title:                       "Legacy Synchronous Schema Translation Interface (Obsolete Standard)",
+		PatentOffice:                "EPO",
+		PatentType:                  "UTILITY_PATENT",
+		FilingDate:                  time.Now().AddDate(-12, 0, 0),
+		GrantDate:                   time.Now().AddDate(-8, 0, 0),
+		NextAnnuityDueDate:          time.Now().AddDate(0, 1, 10),
+		StatutoryAnnuityFeeUSD:      2150.0,
+		GracePeriodDeadline:         time.Now().AddDate(0, 7, 10),
+		ActiveCommercialProductLink: "OBSOLETE_DEPRECATED",
+	})
+	if patCore.PatentID == "" || patLegacy.PatentID == "" {
+		t.Fatalf("Failed to register patent assets: %+v, %+v", patCore, patLegacy)
+	}
+
+	scoreCore, err := corelegal.GlobalPatentPortfolioVault.EvaluatePortfolioAnnuityScore(
+		"PAT-US-11892011-B2", 12500000.0, 14, 92.0,
+	)
+	if err != nil || scoreCore.DecisionVerdict != "PAY_MAINTENANCE_ANNUITY" || scoreCore.AnnuityROIIndex <= 1.0 {
+		t.Fatalf("Failed to score core patent annuity: %+v, err: %v", scoreCore, err)
+	}
+
+	scoreLegacy, err := corelegal.GlobalPatentPortfolioVault.EvaluatePortfolioAnnuityScore(
+		"PAT-EP-3944120-A1", 0.0, 0, 15.0,
+	)
+	if err != nil || scoreLegacy.DecisionVerdict != "ABANDON_LET_EXPIRE_PRUNING" {
+		t.Fatalf("Failed to score legacy patent annuity: %+v, err: %v", scoreLegacy, err)
+	}
+
+	patAuth, err := corelegal.GlobalPatentPortfolioVault.AuthorizeAnnuityPayment(
+		"PORTFOLIO-ENTERPRISE-AI-2026",
+		[]string{"PAT-US-11892011-B2"},
+		[]string{"PAT-EP-3944120-A1"},
+		"LEGAL-COUNSEL-DR-HERMAWAN-SH-LLM",
+	)
+	if err != nil || patAuth.AuthorizedPatentsCount != 1 || patAuth.PrunedPatentsCount != 1 || patAuth.CostAvoidanceSavingsUSD != 2150.0 {
+		t.Fatalf("Failed to authorize annuity payment: %+v, err: %v", patAuth, err)
+	}
+
+	patDossier, err := corelegal.GlobalPatentPortfolioVault.GetIPValuationDossier("PORTFOLIO-ENTERPRISE-AI-2026")
+	if err != nil || !patDossier["ias_38_intangible_verified"].(bool) {
+		t.Fatalf("Failed to compile IP valuation dossier: %+v, err: %v", patDossier, err)
+	}
+	t.Logf("✓ IP Patent Portfolio & Annuity Sentinel Verified: Portfolio='%s', CorePatent='%s' (Revenue=$%.2fM, Citations=%d, FTO=%.1f, ROI=%.1fx, Verdict='%s'), LegacyPatent='%s' (Verdict='%s'), Authorization='%s' (Renewed=%d, Fees=$%.2f, Pruned=%d, CostAvoidanceSavings=$%.2f USD, SWIFT='%s')",
+		patAuth.PortfolioID, scoreCore.PatentID, scoreCore.CommercialRevenueLinkageUSD/1e6, scoreCore.ForwardCitationScore, scoreCore.CompetitiveFTOBlockingScore, scoreCore.AnnuityROIIndex, scoreCore.DecisionVerdict, scoreLegacy.PatentID, scoreLegacy.DecisionVerdict, patAuth.AuthorizationID, patAuth.AuthorizedPatentsCount, patAuth.TotalStatutoryFeesUSD, patAuth.PrunedPatentsCount, patAuth.CostAvoidanceSavingsUSD, patAuth.SWIFTPaymentRef)
+
+	// 80.5 Aviation & Industrial Gas Turbine Equivalent Operating Hours (EOH) & Blade Creep Optimizer (ISO 2314 & API 616)
+	turbineTel := coreenergy.GlobalTurbineEOHVault.IngestOperatingTelemetry(coreenergy.TurbineOperatingTelemetry{
+		TurbineID:                 "GT-FRAME9F-PLN-01",
+		OperatingBaseHours:        21500.0,
+		FastStartsCount:           42,
+		NormalStartsCount:         175,
+		EmergencyTripsCount:       8,
+		TurbineInletTempTIT_C:     1140.0,
+		ExhaustGasTempSpreadEGT_C: 18.2,
+		VibrationVelocityRMS_MMs:  2.85,
+		FuelGasWobbeIndex:         49.5,
+	})
+	if turbineTel.TelemetryID == "" || turbineTel.TurbineID != "GT-FRAME9F-PLN-01" {
+		t.Fatalf("Failed to ingest turbine operating telemetry: %+v", turbineTel)
+	}
+
+	turbineAssess, err := coreenergy.GlobalTurbineEOHVault.CalculateEOHCreepConsumption("GT-FRAME9F-PLN-01")
+	if err != nil || turbineAssess.CalculatedEOH <= 21500.0 || turbineAssess.LarsonMillerParameter <= 0 || turbineAssess.BladeCreepLifeConsumedPct <= 0 {
+		t.Fatalf("Failed to calculate turbine EOH & creep: %+v, err: %v", turbineAssess, err)
+	}
+
+	turbineSched, err := coreenergy.GlobalTurbineEOHVault.ScheduleMajorInspection(
+		"GT-FRAME9F-PLN-01", "HOT_GAS_PATH_INSPECTION_HGPI", time.Now().AddDate(0, 2, 0),
+	)
+	if err != nil || turbineSched.TurnaroundID == "" || turbineSched.AvoidedCatastrophicBladeRuptureUSD <= 0 {
+		t.Fatalf("Failed to schedule turbine turnaround: %+v, err: %v", turbineSched, err)
+	}
+
+	turbineDossier, err := coreenergy.GlobalTurbineEOHVault.GetRotordynamicsDossier("GT-FRAME9F-PLN-01")
+	if err != nil || !turbineDossier["iso_2314_compliance"].(bool) {
+		t.Fatalf("Failed to compile rotordynamics dossier: %+v, err: %v", turbineDossier, err)
+	}
+	t.Logf("✓ Gas Turbine EOH & Blade Creep Optimizer Verified: Turbine='%s' (BaseHours=%.1f, FastStarts=%d, Trips=%d, TIT=%.1f°C, EGTSpread=%.1f°C), CalculatedEOH=%.1f hrs, LMP=%.2f, CreepConsumed=%.1f%%, HoursToHGPI=%.1f, Status='%s', OverhaulWorkOrder='%s' (Type='%s', Outage=%d days, AvoidedCatastrophicLoss=$%.2fM USD)",
+		turbineTel.TurbineID, turbineTel.OperatingBaseHours, turbineTel.FastStartsCount, turbineTel.EmergencyTripsCount, turbineTel.TurbineInletTempTIT_C, turbineTel.ExhaustGasTempSpreadEGT_C, turbineAssess.CalculatedEOH, turbineAssess.LarsonMillerParameter, turbineAssess.BladeCreepLifeConsumedPct, turbineAssess.HoursUntilNextHGPI, turbineAssess.TurbineHealthStatus, turbineSched.TurnaroundWorkOrderID, turbineSched.InspectionType, turbineSched.EstimatedOutageDays, turbineSched.AvoidedCatastrophicBladeRuptureUSD/1e6)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (80 SECTIONS: 75+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD + CONTRACT LEAKAGE SENTINEL + MICROGRID ISLANDING + CARGO GEOFENCE + SHIFT BIDDING FATIGUE + CIRCULAR PACKAGING RTI + INDUSTRIAL WATER ZLD + VENDOR SANCTIONS GRAPH + BOILER TUBE DESCALING + SAAS DUNNING WATERFALL + TOLL MANUFACTURING RECON + SILO AERATION SENTINEL + EPC PROGRESS BILLING ESCROW + DYNAMIC PORT BERTH DEMURRAGE + TRANSFORMER DGA GUARDIAN + CROSS BORDER CASH REPATRIATION + ORE BLENDING OPTIMIZER + PHARMA CRYOGENIC SENTINEL + KILN REFRACTORY GUARDIAN + IP PATENT ANNUITY + TURBINE EOH CREEP) PASSED 100%!")
 }

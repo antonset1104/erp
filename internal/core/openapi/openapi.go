@@ -1397,6 +1397,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/mining/ore/optimize-blend-recipe": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Mining & Bulk Mineral Ore Blending & Grade Optimization Engine (JORC Code & Metallurgical Recovery)",
+					"description": "Calculates composite grade, penalizes slag-forming silica and arsenic deleterious elements, and predicts flotation recovery for mill feed optimization.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Optimized composite grade, flotation recovery rate, component parcel blend ratios, and JORC compliance digest"},
+					},
+				},
+			},
+			"/api/v1/pharma/cryogenic/evaluate-thermal-hold-time": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Autonomous Pharma Cryogenic LN2 & Cell/Gene Therapy Transport Sentinel (ISPE GAMP 5 & FDA 21 CFR Part 1271)",
+					"description": "Monitors dry-vapor LN2 smart shippers, models boil-off acceleration from tilt and ambient temperatures, and alerts prior to glass transition threshold breach.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Remaining static hold time hours, boil-off rate, glass transition breach risk, and emergency recharge routing"},
+					},
+				},
+			},
+			"/api/v1/maintenance/kiln/evaluate-refractory-thickness": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Rotary Kiln Shell Infrared Thermal Profiling & Refractory Brick Guardian (API 560 & ISO 50001)",
+					"description": "Continuously models 1D radial heat transfer from IR pyrometer scans to detect brick erosion, prevent shell ovality distortion, and trigger cooling.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Estimated remaining refractory brick mm, hotspot alerts, shell ovality risk, and cooling fan recommendations"},
+					},
+				},
+			},
+			"/api/v1/legal/patent/evaluate-portfolio-annuity-score": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Corporate Intellectual Property (IP) Patent Portfolio Monetization & Annuity Sentinel (WIPO / USPTO / IAS 38)",
+					"description": "Calculates patent ROI from commercial product revenue, third-party forward citations, and defensive FTO moats to automate renewal or pruning.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Annuity ROI index, renewal versus pruning decision verdict, portfolio audit digest, and counsel clearance"},
+					},
+				},
+			},
+			"/api/v1/energy/turbine/calculate-eoh-creep-consumption": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Aviation & Industrial Gas Turbine Equivalent Operating Hours (EOH) & Blade Creep Optimizer (ISO 2314 & API 616)",
+					"description": "Accumulates thermal stress cycles, fast starts, and firing temperature to compute equivalent operating hours and Larson-Miller rotor creep life.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Calculated EOH, Larson-Miller parameter, consumed blade creep percentage, and hot gas path inspection countdown"},
+					},
+				},
+			},
 		},
 	}
 }

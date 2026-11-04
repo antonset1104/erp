@@ -29,9 +29,12 @@ import (
 	coregrc "erp-golang/internal/core/grc"
 	corehr "erp-golang/internal/core/hr"
 	coreitops "erp-golang/internal/core/itops"
+	corelegal "erp-golang/internal/core/legal"
 	corelogistics "erp-golang/internal/core/logistics"
 	coremaintenance "erp-golang/internal/core/maintenance"
+	coremining "erp-golang/internal/core/mining"
 	coremrp "erp-golang/internal/core/mrp"
+	corepharma "erp-golang/internal/core/pharma"
 	corepricing "erp-golang/internal/core/pricing"
 	coreprocurement "erp-golang/internal/core/procurement"
 	coreproject "erp-golang/internal/core/project"
@@ -301,7 +304,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.65.0",
+			"version":    "1.66.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -441,6 +444,11 @@ func main() {
 		corelogistics.RegisterBerthRoutes(apiV1)
 		coremaintenance.RegisterTransformerRoutes(apiV1)
 		coretreasury.RegisterRepatriationRoutes(apiV1)
+		coremining.RegisterOreRoutes(apiV1)
+		corepharma.RegisterCryogenicRoutes(apiV1)
+		coremaintenance.RegisterKilnRoutes(apiV1)
+		corelegal.RegisterPatentRoutes(apiV1)
+		coreenergy.RegisterTurbineRoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend
