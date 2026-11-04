@@ -497,6 +497,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/mrp/line-balancing/analyze": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "AI Production Line Balancing & OEE Bottleneck Optimizer",
+					"description": "Analyzes takt time vs station cycle times, line balance efficiency, and OEE to identify bottlenecks and WIP pile-ups.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Line balance efficiency, bottleneck identification, and rebalancing recommendations"},
+					},
+				},
+			},
+			"/api/v1/fleet/route-optimizer": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Multi-Carrier Last-Mile Dispatch & Route Geometry Optimizer (VRPTW)",
+					"description": "Clusters delivery waypoints, assigns internal vs 3PL fleet, sequences stops, and projects fuel/cost savings.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Optimized route clusters, waypoints sequence, and cost breakdown"},
+					},
+				},
+			},
+			"/api/v1/account/credit-risk/customer/{id}": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Dynamic Customer Credit Limit & Bad Debt Risk Scorer",
+					"description": "Evaluates Altman Z-Score, default probability, DSO, and invoice aging matrix with automated Credit Hold rules.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Customer credit profile, risk rating, aging buckets, and recommendations"},
+					},
+				},
+			},
+			"/api/v1/asset/carbon-depreciation/matrix": map[string]interface{}{
+				"get": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Fixed Asset Depreciation & Carbon Tax Cap-and-Trade Ledger",
+					"description": "Calculates tax depreciation schedules, lifetime energy emissions, regulatory allowance caps, and carbon tax liability.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Asset net book values, annual emissions, cap variances, and tax liabilities"},
+					},
+				},
+			},
+			"/api/v1/graphql": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"System & Protocols"},
+					"summary":     "Universal Pure-Go Headless GraphQL Query Engine",
+					"description": "Executes nested relational GraphQL queries (sales orders, inventory, partners, financials) with schema introspection.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Standard GraphQL data response payload"},
+					},
+				},
+			},
 		},
 	}
 }

@@ -22,9 +22,13 @@ import (
 	"erp-golang/internal/core/audit"
 	"erp-golang/internal/core/bi"
 	coreaccount "erp-golang/internal/core/account"
+	coreasset "erp-golang/internal/core/asset"
 	coreedi "erp-golang/internal/core/edi"
 	coreexpense "erp-golang/internal/core/expense"
+	corefleet "erp-golang/internal/core/fleet"
+	coregraphql "erp-golang/internal/core/graphql"
 	corehr "erp-golang/internal/core/hr"
+	coremrp "erp-golang/internal/core/mrp"
 	coretreasury "erp-golang/internal/core/treasury"
 	corewms "erp-golang/internal/core/wms"
 	"erp-golang/internal/core/esg"
@@ -8912,5 +8916,144 @@ IEA*1*000099123~`
 		rmaDiagRes.RMANumber, rmaDiagRes.WarrantyStatus, rmaDiagRes.WarrantyMonthsElapsed, rmaDiagRes.MaxWarrantyMonths,
 		rmaDiagRes.EconomicDisposition, rmaDiagRes.EstimatedRepairCost, rmaDiagRes.SalvageValueIDR, rmaResExec.GeneratedDocRef, rmaResExec.InventoryAdjustedLocation)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (61 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA) PASSED 100%!")
+	// SECTION 62: PRODUCTION LINE BALANCING & OEE BOTTLENECK OPTIMIZER,
+	// MULTI-CARRIER ROUTE VRPTW, DYNAMIC AR CREDIT RISK & DSO GUARD,
+	// FIXED ASSET CARBON TAX LEDGER & HEADLESS GRAPHQL QUERY ENGINE
+	t.Log(`
+		>>> SECTION 62: LINE BALANCING, ROUTE VRPTW, AR CREDIT RISK, CARBON TAX & GRAPHQL <<<`)
+
+	// 62.1 AI Automated Production Line Balancing & OEE Bottleneck Optimizer
+	lineBalAnalysis := coremrp.AnalyzeLineBalancing(&coremrp.LineBalancingAnalysisRequest{
+		ProductionLineID:  "LINE-SMT-01",
+		LineName:          "Lini Perakitan Elektronik SMT Cikarang",
+		PlannedShiftHours: 8.0,
+		TargetShiftUnits:  480.0,
+	})
+	if lineBalAnalysis == nil || lineBalAnalysis.LineBalanceEfficiencyPct <= 0 || lineBalAnalysis.BottleneckStationID == "" {
+		t.Fatalf("Line balancing analysis failed: %+v", lineBalAnalysis)
+	}
+	if lineBalAnalysis.BottleneckStationID != "WS-03" || lineBalAnalysis.MaximumCycleTimeSeconds != 85.0 {
+		t.Fatalf("Expected WS-03 reflow oven bottleneck at 85s, got: %+v", lineBalAnalysis)
+	}
+
+	rebalRes := coremrp.RebalanceProductionLine(&coremrp.RebalanceRequest{
+		ProductionLineID: lineBalAnalysis.ProductionLineID,
+		TaktTimeSeconds:  lineBalAnalysis.TaktTimeSeconds,
+		Workstations:     lineBalAnalysis.Workstations,
+		Strategy:         "ADD_OPERATOR",
+	})
+	if rebalRes == nil || rebalRes.Status != "SUCCESS_REBALANCED" || rebalRes.EfficiencyGainPct <= 0 {
+		t.Fatalf("Line rebalancing failed: %+v", rebalRes)
+	}
+	t.Logf("✓ AI Production Line Balancing & OEE Bottleneck Verified: Line='%s', Takt=%.1fs, Bottleneck='%s' (%.1fs, WIP=%d), OriginalEff=%.1f%%, RebalancedEff=%.1f%% (Gain: +%.1f%%, Output: +%.1f%%)",
+		lineBalAnalysis.LineName, lineBalAnalysis.TaktTimeSeconds, lineBalAnalysis.BottleneckStationID, lineBalAnalysis.MaximumCycleTimeSeconds,
+		lineBalAnalysis.TotalWIPAccumulationUnits, rebalRes.OriginalEfficiencyPct, rebalRes.RebalancedEfficiencyPct, rebalRes.EfficiencyGainPct, rebalRes.ProjectedOutputIncreasePct)
+
+	// 62.2 Automated Multi-Carrier Last-Mile Dispatch & Route Geometry Optimizer (VRPTW)
+	routeRes := corefleet.OptimizeDeliveryRoutes(&corefleet.RouteOptimizationRequest{
+		HubDepotLocation: "Jakarta Central Logistics Hub",
+	})
+	if routeRes == nil || routeRes.TotalStopsDispatched != 4 || routeRes.RoutesCount != 2 || routeRes.TotalDistanceKM <= 0 {
+		t.Fatalf("Fleet route optimization failed: %+v", routeRes)
+	}
+	if routeRes.ProjectedFuelSavingsIDR <= 0 || routeRes.InternalFleetRoutesCount != 1 || routeRes.ThreePLDispatchedRoutesCount != 1 {
+		t.Fatalf("Expected dual fleet/3PL clusters with fuel savings: %+v", routeRes)
+	}
+
+	manifestRes := corefleet.CreateDispatchManifest(&corefleet.DispatchManifestRequest{
+		ClusterID:         routeRes.RouteClusters[0].ClusterID,
+		AssignedVehicleID: routeRes.RouteClusters[0].AssignedVehicleID,
+	})
+	if manifestRes == nil || manifestRes.ManifestNumber == "" || manifestRes.TrackingURL == "" {
+		t.Fatalf("Create dispatch manifest failed: %+v", manifestRes)
+	}
+	t.Logf("✓ Multi-Carrier Last-Mile Route Optimizer (VRPTW) Verified: Stops=%d, Routes=%d (Internal=%d, 3PL=%d), TotalDist=%.1f KM, FuelSavings=IDR %.0f, Manifest='%s'",
+		routeRes.TotalStopsDispatched, routeRes.RoutesCount, routeRes.InternalFleetRoutesCount, routeRes.ThreePLDispatchedRoutesCount,
+		routeRes.TotalDistanceKM, routeRes.ProjectedFuelSavingsIDR, manifestRes.ManifestNumber)
+
+	// 62.3 Dynamic Customer Credit Limit & Bad Debt Risk Scorer with DSO Aging Guard
+	creditProfileSafe := coreaccount.GetCustomerCreditRiskProfile(db, 1)
+	if creditProfileSafe == nil || creditProfileSafe.RiskRating != "BBB_INVESTMENT" || creditProfileSafe.CreditStatus != "CREDIT_HEALTHY" {
+		t.Fatalf("Customer credit profile evaluation failed: %+v", creditProfileSafe)
+	}
+
+	evalOrderOk := coreaccount.EvaluateOrderCredit(db, &coreaccount.EvaluateOrderCreditRequest{
+		PartnerID:      1,
+		OrderAmountIDR: 25000000,
+	})
+	if evalOrderOk == nil || !evalOrderOk.IsOrderApproved || evalOrderOk.CreditDecision != "APPROVED" {
+		t.Fatalf("Expected order within limit to be approved: %+v", evalOrderOk)
+	}
+
+	creditProfileRisky := coreaccount.GetCustomerCreditRiskProfile(db, 2)
+	if creditProfileRisky == nil || creditProfileRisky.CreditStatus != "CREDIT_HOLD" || creditProfileRisky.RiskRating != "HIGH_DEFAULT_RISK" {
+		t.Fatalf("Expected partner 2 to be in distress/credit hold: %+v", creditProfileRisky)
+	}
+
+	evalOrderHold := coreaccount.EvaluateOrderCredit(db, &coreaccount.EvaluateOrderCreditRequest{
+		PartnerID:      2,
+		OrderAmountIDR: 15000000,
+	})
+	if evalOrderHold == nil || evalOrderHold.IsOrderApproved || evalOrderHold.CreditDecision != "CREDIT_HOLD_BLOCKED" {
+		t.Fatalf("Expected order for partner in credit hold to be blocked: %+v", evalOrderHold)
+	}
+	t.Logf("✓ Dynamic AR Credit Risk & DSO Guard Verified: Partner1='%s' (Rating=%s, Status=%s, DSO=%.1fd, OrderApproved=%v), Partner2='%s' (Rating=%s, Status=%s, Z=%.2f, DefaultProb=%.1f%%, OrderHoldBlocked=%v)",
+		creditProfileSafe.CustomerName, creditProfileSafe.RiskRating, creditProfileSafe.CreditStatus, creditProfileSafe.AverageDSO, evalOrderOk.IsOrderApproved,
+		creditProfileRisky.CustomerName, creditProfileRisky.RiskRating, creditProfileRisky.CreditStatus, creditProfileRisky.AltmanZScoreEquivalent, creditProfileRisky.DefaultProbabilityPct, !evalOrderHold.IsOrderApproved)
+
+	// 62.4 Fixed Asset Depreciation & Carbon Tax Cap-and-Trade Ledger
+	carbonDepMatrix := coreasset.ComputeCarbonDepreciationMatrix(db, 1)
+	if carbonDepMatrix == nil || carbonDepMatrix.TotalAssetsTracked < 3 || carbonDepMatrix.TotalNetBookValueIDR <= 0 {
+		t.Fatalf("Carbon depreciation matrix calculation failed: %+v", carbonDepMatrix)
+	}
+	if carbonDepMatrix.NetGroupCarbonTaxLiabilityIDR <= 0 || carbonDepMatrix.TradableCarbonSurplusValueIDR <= 0 {
+		t.Fatalf("Expected both tax liability and tradable carbon surplus: %+v", carbonDepMatrix)
+	}
+
+	settleRes := coreasset.SettleCarbonAllowance(&coreasset.SettleAllowanceRequest{
+		AssetID:          1,
+		SettlementAction: "PAY_CARBON_TAX",
+		TonnesSettled:    12.25,
+	})
+	if settleRes == nil || settleRes.Status != "SETTLED_CONFIRMED" || settleRes.CertificateNumber == "" {
+		t.Fatalf("Carbon allowance settlement failed: %+v", settleRes)
+	}
+	t.Logf("✓ Fixed Asset Carbon Tax & Cap-and-Trade Ledger Verified: Assets=%d, NetBookVal=IDR %.0f, AnnualEmissions=%.2f tCO2e (Cap=%.0f), CarbonTaxDue=IDR %.0f, SurplusCarbonVal=IDR %.0f, SettlementCert='%s'",
+		carbonDepMatrix.TotalAssetsTracked, carbonDepMatrix.TotalNetBookValueIDR, carbonDepMatrix.TotalAnnualEmissionsTCO2e, carbonDepMatrix.TotalCarbonCapTCO2e,
+		carbonDepMatrix.NetGroupCarbonTaxLiabilityIDR, carbonDepMatrix.TradableCarbonSurplusValueIDR, settleRes.CertificateNumber)
+
+	// 62.5 Universal GraphQL & Webhook Subscription Gateway
+	gqlQuery := `query GetSaleOrderRelationalTree {
+		salesOrder(id: 1) {
+			id
+			name
+			amount_total
+			partner { name email }
+			order_lines { product_code quantity price_subtotal }
+			delivery { name state tracking_number }
+			invoice { name payment_state }
+		}
+		financialMetrics { net_revenue gross_profit ebitda }
+	}`
+	gqlResp := coregraphql.ExecuteGraphQLQuery(db, gqlQuery, 1)
+	if gqlResp == nil || gqlResp.Data == nil || len(gqlResp.Errors) > 0 {
+		t.Fatalf("GraphQL query execution failed: %+v", gqlResp)
+	}
+	if gqlResp.Data["salesOrder"] == nil || gqlResp.Data["financialMetrics"] == nil {
+		t.Fatalf("Expected nested salesOrder and financialMetrics in GraphQL response: %+v", gqlResp.Data)
+	}
+
+	introspectResp := coregraphql.ExecuteGraphQLQuery(db, "{ __schema { queryType { name fields { name } } } }", 1)
+	if introspectResp == nil || introspectResp.Data == nil || introspectResp.Data["__schema"] == nil {
+		t.Fatalf("GraphQL schema introspection failed: %+v", introspectResp)
+	}
+
+	hmacSig := coregraphql.GenerateHMACSignature(`{"event":"sale.order.confirmed","id":1001}`, "whsec_test_secret_9988")
+	if hmacSig == "" || len(hmacSig) != 64 {
+		t.Fatalf("HMAC-SHA256 signature generation failed, got: %s", hmacSig)
+	}
+	t.Logf("✓ Universal Headless GraphQL & Webhook Gateway Verified: QueryExecuted=OK (Nested salesOrder + financialMetrics resolved), Introspection=OK, HMAC-SHA256Sig='%s...'",
+		hmacSig[:16])
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (62 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL) PASSED 100%!")
 }
