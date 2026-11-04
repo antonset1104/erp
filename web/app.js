@@ -30451,7 +30451,348 @@ async function triggerRailwayWheel() {
     }
 }
 
+async function triggerNuclearDecay() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
 
+    if (answerEl) answerEl.textContent = 'Menghitung peluruhan radiofarmaka Lutetium-177 & transient Xenon-135 reaktor nuklir...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const batchID = "BATCH-LU177-2026-9901";
+        const reactorID = "RX-PWR-MURIA-1000MW";
+
+        // 1. Calculate decay activity calibration
+        const decayRes = await api('/nuclear/radiopharm/calculate-decay-activity-calibration', 'POST', {
+            batch_id: batchID,
+            target_time: new Date(Date.now() + 12 * 3600 * 1000).toISOString()
+        });
+
+        // 2. Predict Xenon-135 transient
+        const xenonRes = await api('/nuclear/reactor/predict-xenon-poisoning-transient', 'POST', {
+            reactor_id: reactorID,
+            pre_trip_thermal_power_mwth: 2900.0,
+            hours_since_reactor_trip: 9.6
+        });
+
+        // 3. Dosimetry dossier
+        const dossierRes = await api(`/nuclear/radiopharm/dosimetry-compliance-dossier/${batchID}`, 'GET');
+
+        if (badge) badge.textContent = `☢️ NUCLEAR: Lu-177 ${decayRes.data.remaining_activity_gbq} GBq (${decayRes.data.patient_dose_units_available} Doses) | Xe-135 ${xenonRes.data.xenon_concentration_ratio}x`;
+        if (answerEl) {
+            let out = `☢️ NUCLEAR MEDICINE RADIOPHARMACEUTICAL DECAY & REACTOR POISONING SENTINEL (IAEA & NRC 10 CFR PART 35/50):\n`;
+            out += `Batch Radioisotop: ${batchID} (${decayRes.data.isotope_name}) | Waktu Paruh: 160.8 jam (6.7 Hari)\n`;
+            out += `Reaktor Daya Terhubung: ${reactorID} | Standar Regulasi: IAEA Safeguards & BAPETEN RI\n\n`;
+            out += `DOSIMETRI & KALIBRASI AKTIVITAS RADIOISOTOP KLINIS:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Waktu Peluruhan Berjalan: ${decayRes.data.elapsed_hours} jam sejak produksi hot cell\n`;
+            out += `• Sisa Radioaktivitas Terkalibrasi: ${decayRes.data.remaining_activity_gbq} GBq (Dari 37.0 GBq / 1.0 Curie)\n`;
+            out += `• Persentase Peluruhan Aktivitas: ${decayRes.data.activity_decay_pct}%\n`;
+            out += `• Unit Dosis Pasien Kanker Tersedia: ${decayRes.data.patient_dose_units_available} Dosis Pasien Terapi (7.4 GBq / Dosis)\n`;
+            out += `• Kesiapan Inokulasi Klinis Rumah Sakit: ${decayRes.data.inoculation_readiness}\n`;
+            out += `• Radiasi Permukaan Kontainer Cask Timbal: ${dossierRes.data.surface_dose_micro_sv_hr || 2.4} µSv/jam (Batas Aman Transport < 20 µSv/jam)\n`;
+            out += `• Kriptografis Dosimetry Audit Digest: ${decayRes.data.decay_audit_digest.substring(0, 24)}...\n\n`;
+            out += `PREDIKSI TRANSIENT KERACUNAN NEUTRON XENON-135 REAKTOR:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Daya Termal Sebelum Trip Reaktor: 2,900 MWth\n`;
+            out += `• Waktu Pasca Trip Shutdown: 9.6 jam (Titik Puncak Kurva Peluruhan I-135 ke Xe-135)\n`;
+            out += `• Rasio Konsentrasi Xenon-135: ${xenonRes.data.xenon_concentration_ratio}x Kondisi Tunak (Peak Poisoning)\n`;
+            out += `• Status Reaktivitas Teras: ${xenonRes.data.core_reactivity_status}\n`;
+            out += `• Sisa Waktu Kunci Nyala Ulang (Restart Lockout): ${xenonRes.data.restart_lockout_hours_remaining} jam (Mencegah Deadtime Instability)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Kalibrasi eksponensial radioisotop memastikan dosis terapi bertarget kanker tiba dengan presisi aktivitas tinggi.</li>
+                <li>Simulasi transient Xenon-135 menjamin kepatuhan batas keselamatan fisika reaktor sebelum otorisasi penarikan batang kendali.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses radiopharm & nuclear: ' + err.message;
+    }
+}
+
+async function triggerBESSThermal() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memeriksa telemetri BMS BESS, degradasi SoH & deteksi thermal runaway...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const rackID = "RACK-BESS-LFP-100MW-01";
+
+        // 1. Ingest telemetry with elevated temp and gas
+        await api('/bess/telemetry/ingest-rack-telemetry', 'POST', {
+            rack_id: rackID,
+            energy_storage_plant_id: "PLN-CIRATA-SOLAR-BESS-100MW",
+            cell_chemistry: "LITHIUM_IRON_PHOSPHATE_LFP",
+            total_pack_voltage_v: 854.2,
+            max_cell_voltage_v: 3.42,
+            min_cell_voltage_v: 3.35,
+            cell_voltage_delta_mv: 70.0,
+            max_cell_temp_c: 54.2,
+            ambient_temp_c: 32.0,
+            off_gas_co_ppm: 92.0,
+            off_gas_h2_ppm: 60.0,
+            state_of_charge_pct: 78.0,
+            cumulative_throughput_mwh: 4500.0
+        });
+
+        // 2. Calculate SoH & Capacity Fade
+        const sohRes = await api('/bess/analytics/calculate-soh-and-capacity-fade', 'POST', {
+            rack_id: rackID
+        });
+
+        // 3. Trigger Quarantine Action
+        const quarRes = await api('/bess/safety/trigger-thermal-runaway-quarantine', 'POST', {
+            rack_id: rackID
+        });
+
+        // 4. Rack Dossier
+        const dossierRes = await api(`/bess/analytics/rack-health-warranty-dossier/${rackID}`, 'GET');
+
+        if (badge) badge.textContent = `🔋 BESS: SoH ${sohRes.data.state_of_health_pct}% | Risk: ${sohRes.data.thermal_runaway_risk_level} | Contactor Tripped`;
+        if (answerEl) {
+            let out = `🔋 UTILITY-SCALE BESS BATTERY HEALTH & THERMAL RUNAWAY GUARDIAN (UL 9540A & NFPA 855 / IEC 62619):\n`;
+            out += `Rak Baterai: ${rackID} | PLTS Cirata 100MW BESS | Kimia Sel: LFP (Lithium Iron Phosphate)\n`;
+            out += `Standar Sertifikasi: UL 9540A Flammability Test, NFPA 855 & IEC 62619 Industrial Safety\n\n`;
+            out += `DEGRADASI KAPASITAS & ANALISIS KESEHATAN SEL (ARRHENIUS-SEI AGING):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Status Kesehatan Baterai (State of Health - SoH): ${sohRes.data.state_of_health_pct}%\n`;
+            out += `• Akumulasi Penurunan Kapasitas (Capacity Fade): ${sohRes.data.capacity_fade_loss_pct}%\n`;
+            out += `• Faktor Akselerasi Penuaan Termal (Arrhenius Rate): ${sohRes.data.arrhenius_aging_rate_factor}x dari suhu normal\n`;
+            out += `• Sisa Siklus Pengisian Penuh (Remaining Cycles): ${sohRes.data.remaining_equivalent_full_cycles.toLocaleString()} Siklus\n`;
+            out += `• Status Kepatuhan Garansi Produsen (Warranty SLA): ${sohRes.data.warranty_sla_compliance_status}\n\n`;
+            out += `DETEKSI ANOMALI BMS & RESPON MITIGASI KEBAKARAN RAK:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Ketidakseimbangan Voltase Antar-Sel: 70.0 mV (Ambang Batas Kritis > 60 mV)\n`;
+            out += `• Suhu Maksimum Sel Baterai: 54.2°C (Warning Elevasi Panas)\n`;
+            out += `• Konsentrasi Gas Buang (Off-Gas Venting): CO 92.0 ppm | H2 60.0 ppm (Deteksi Dini Pelepasan Gas Sel)\n`;
+            out += `• Tingkat Risiko Thermal Runaway: ${sohRes.data.thermal_runaway_risk_level}\n`;
+            out += `• Pelepasan Kontaktor String DC (String Contactor Trip): ${quarRes.data.string_contactor_tripped ? 'BERHASIL DIPUTUS OTOMATIS' : 'MANUAL'}\n`;
+            out += `• Kesiapan Sistem Pemadam Aerosol/Gas (Fire Suppression): ${quarRes.data.aerosol_fire_suppression_armed ? 'TERPASANG & SIAGA' : 'NON-AKTIF'}\n`;
+            out += `• Kerugian Fasilitas & Penalti Blackout Terhindar: $${quarRes.data.avoided_facility_destruction_usd.toLocaleString()} USD\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Sensor deteksi off-gas CO/H2 bereaksi 10-15 menit sebelum lonjakan termal eksotermik terjadi.</li>
+                <li>Pemisahan kontaktor DC seketika mengisolasi rak baterai yang rusak tanpa memadamkan seluruh fasilitas BESS gardu induk.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses BESS thermal SoH: ' + err.message;
+    }
+}
+
+async function triggerOrbitalConjunction() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis matriks kovariansi CDM, probabilitas tabrakan Foster & manuver CAM satelit...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const noradID = "SAT-LEO-GOERP-042";
+
+        // 1. Evaluate collision probability
+        const evalRes = await api('/aerospace/conjunction/evaluate-collision-probability', 'POST', {
+            target_satellite_norad_id: noradID
+        });
+
+        // 2. Plan Avoidance Maneuver (CAM)
+        const planRes = await api('/aerospace/conjunction/plan-avoidance-maneuver', 'POST', {
+            target_satellite_norad_id: noradID,
+            flight_director: "FLIGHT-DIRECTOR-DR-SETIAWAN-AEROSPACE"
+        });
+
+        // 3. Satellite Dossier
+        const dossierRes = await api(`/aerospace/conjunction/satellite-constellation-dossier/${noradID}`, 'GET');
+
+        if (badge) badge.textContent = `🛰️ SATELLITE: Pc ${(evalRes.data.probability_of_collision_pc || 0.00045).toExponential(2)} | Miss ${evalRes.data.miss_distance_meters}m | CAM Burn OK`;
+        if (answerEl) {
+            let out = `🛰️ COMMERCIAL SATELLITE CONSTELLATION ORBITAL CONJUNCTION & COLLISION SENTINEL (NASA/ESA CARA & ISO 24113):\n`;
+            out += `Satelit Target: ${noradID} (Nusantara-LEO-Sat-42) | Objek Konjungsi: DEBRIS-COSMOS-2251-FRAG-9120\n`;
+            out += `Protokol Evaluasi: NASA CARA / ESA Space Debris Office & ISO 24113 Space Systems Debris Mitigation\n\n`;
+            out += `ANALISIS RISIKO KONJUNGSI ORBIT RENDAH BUMI (LEO B-PLANE ENCOUNTER):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Jarak Terdekat Paparan (Miss Distance TCA): ${evalRes.data.miss_distance_meters} meter (Peringatan Bahaya < 150m)\n`;
+            out += `• Kecepatan Relatif Paparan: 11.4 km/detik (Kecepatan Hipersonik Orbital)\n`;
+            out += `• Probabilitas Tabrakan Foster 2D (Probability of Collision - Pc): ${(evalRes.data.probability_of_collision_pc || 0).toExponential(4)}\n`;
+            out += `• Ambang Batas Kritis NASA/ESA (Red Threshold): 1.0000e-04 (0.0001)\n`;
+            out += `• Tingkat Keparahan Konjungsi: ${evalRes.data.conjunction_severity_level}\n`;
+            out += `• Mandat Manuver Penghindaran Tabrakan (CAM): ${evalRes.data.collision_maneuver_mandated ? 'WAJIB DIEKSEKUSI (MANDATORY)' : 'NORMAL'}\n`;
+            out += `• Kepatuhan Cadangan Deorbiting 25 Tahun (ISO 24113): ${evalRes.data.iso_24113_deorbit_compliant ? 'TERPENUHI (Delta-V Cukup)' : 'KRITIS'}\n\n`;
+            out += `PERENCANAAN MANUVER PENGHINDARAN (COLLISION AVOIDANCE MANEUVER - CAM):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Rencana Manuver: ${planRes.data.plan_id}\n`;
+            out += `• Mesin Propulsi Pendorong: ${planRes.data.thruster_type}\n`;
+            out += `• Kebutuhan Impuls Delta-V: ${planRes.data.required_delta_v_mps} m/detik (Durasi Pembakaran: ${planRes.data.burn_duration_seconds} detik)\n`;
+            out += `• Proyeksi Jarak Aman Pasca-Manuver (Post-CAM Miss): ${planRes.data.post_maneuver_miss_distance_meters.toLocaleString()} meter (> 1.5 km)\n`;
+            out += `• Pengesahan Direktur Penerbangan Misi: ${planRes.data.approved_by_flight_director}\n`;
+            out += `• Estimasi Kerugian Satelit Terhindar: $${planRes.data.avoided_spacecraft_destruction_usd.toLocaleString()} USD\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Model 2D Foster mengintegrasikan matriks kovariansi posisi satelit terhadap pecahan puing secara presisi.</li>
+                <li>Manuver CAM bertenaga ion Xenon meminimalkan konsumsi propelan sekaligus menyelamatkan wahana dari fragmentasi antariksa.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses satellite conjunction: ' + err.message;
+    }
+}
+
+async function triggerSubseaFlow() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menghitung kurva kesetimbangan hidrat gas Hammerschmidt & optimasi injeksi MEG subsea...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const flowlineID = "FLOWLINE-NATUNA-DEEPWATER-01";
+
+        // 1. Evaluate Hydrate Formation Risk
+        const hydRes = await api('/subsea/flow/evaluate-hydrate-formation-risk', 'POST', {
+            flowline_id: flowlineID
+        });
+
+        // 2. Optimize MEG chemical injection rate
+        const optRes = await api('/subsea/flow/optimize-meg-injection-rate', 'POST', {
+            flowline_id: flowlineID
+        });
+
+        // 3. Subsea Flowline Dossier
+        const dossierRes = await api(`/subsea/flow/subsea-flowline-integrity-dossier/${flowlineID}`, 'GET');
+
+        if (badge) badge.textContent = `🌊 SUBSEA: Hydrate ${hydRes.data.hydrate_blockage_risk} | MEG ${optRes.data.calculated_meg_rate_kg_hr} kg/h | Save $${optRes.data.daily_meg_savings_usd}/d`;
+        if (answerEl) {
+            let out = `🌊 DEEPWATER SUBSEA PIPELINE MULTIPHASE FLOW ASSURANCE & MEG OPTIMIZER (API 17D & DNV-RP-F105):\n`;
+            out += `Jalur Pipa Bawah Laut: ${flowlineID} | Blok: Natuna Laut Dalam | Kedalaman: 1,250 meter\n`;
+            out += `Suhu Dasar Laut (Seabed Ambient): 4.2°C | Tekanan Masuk: 185 Bar | Standar Desain: API 17D & DNV-RP-F105\n\n`;
+            out += `TERMODINAMIKA PEMBENTUKAN HIDRAT GAS (HAMMERSCHMIDT EQUILIBRIUM MODEL):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Titik Kesetimbangan Hidrat Alami (Tanpa Inhibitor): 18.5°C\n`;
+            out += `• Titik Kesetimbangan Terinhibisi Efektif: ${hydRes.data.hydrate_equilibrium_temp_c}°C\n`;
+            out += `• Margin Subcooling Hidrat (ΔT Margin): ${hydRes.data.hydrate_subcooling_margin_c}°C\n`;
+            out += `• Tingkat Risiko Penyumbatan Pipa (Hydrate Plug Risk): ${hydRes.data.hydrate_blockage_risk}\n`;
+            out += `• Indeks Keparahan Slugging Hidrodinamik: ${hydRes.data.slugging_severity_index}/100\n\n`;
+            out += `DOSIS OPTIMASI KIMIA MONOETHYLENE GLYCOL (MEG INHIBITOR):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Target Konsentrasi Fase Air: ${optRes.data.target_meg_weight_pct_water} wt% MEG\n`;
+            out += `• Laju Injeksi MEG Optimal: ${optRes.data.calculated_meg_rate_kg_hr} kg/jam\n`;
+            out += `• Penghematan Kimiawi Harian (Anti-Overdosing): $${optRes.data.daily_meg_savings_usd.toLocaleString()} USD/hari\n`;
+            out += `• Estimasi Kerugian Intervensi Pipa Terhindar: $${optRes.data.avoided_deepwater_plug_downtime_usd.toLocaleString()} USD (Biaya Kapal Coiled Tubing & Downtime)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Algoritma Hammerschmidt secara dinamis menyesuaikan laju injeksi inhibitor glikol seiring fluktuasi water-cut sumur.</li>
+                <li>Mencegah terbentuknya kristal es hidrat padat yang berpotensi mematikan aliran migas laut dalam dan merusak manifold.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses subsea flow assurance: ' + err.message;
+    }
+}
+
+async function triggerAutomotiveOTA() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memverifikasi kepatuhan UNECE R156 SUMS, prasyarat keselamatan kendaraan & flashing OTA...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const campaignID = "CAMP-ADAS-V26-4";
+        const vin = "VIN-ID-EV-2026-981240";
+
+        // 1. Verify Vehicle Target Readiness
+        const readyRes = await api('/automotive/ota/verify-vehicle-target-readiness', 'POST', {
+            vin: vin,
+            campaign_id: campaignID
+        });
+
+        // 2. Dispatch Firmware Update Package
+        const execRes = await api('/automotive/ota/dispatch-firmware-update-package', 'POST', {
+            vin: vin,
+            campaign_id: campaignID
+        });
+
+        // 3. Campaign Compliance Dossier
+        const dossierRes = await api(`/automotive/ota/campaign-compliance-dossier/${campaignID}`, 'GET');
+
+        if (badge) badge.textContent = `🚗 OTA: ${execRes.data.flashing_status} | ECU: ${execRes.data.target_ecu} | UNECE R156 OK`;
+        if (answerEl) {
+            let out = `🚗 CONNECTED VEHICLE GLOBAL OTA FIRMWARE CAMPAIGN & SUMS (UNECE R155/R156 & ISO 24089):\n`;
+            out += `Kampanye Flashing: ${campaignID} | Seri Kendaraan: Hyundai Ioniq EV 2026 | Unit Target VIN: ${vin}\n`;
+            out += `Target Modul ECU: ${execRes.data.target_ecu} | Versi Baru: v2.6.4 (Homologasi RXSWIN: RXSWIN-UNECE-R156-E4-9912)\n`;
+            out += `Standar Sertifikasi: UNECE R155 (Cybersecurity), UNECE R156 (SUMS) & ISO 24089 Road Vehicles OTA\n\n`;
+            out += `VERIFIKASI PRASYARAT KESELAMATAN KENDARAAN (SAFETY PRE-CONDITIONS):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Kecepatan Kendaraan: 0.0 km/jam (Kendaraan Wajib Diam Total)\n`;
+            out += `• Posisi Tuas Transmisi: PARK (Wajib Parkir Terkunci)\n`;
+            out += `• Kapasitas Baterai Traksi (SoC): 74.5% (Ambang Minimal Flashing Aman >= 50.0%)\n`;
+            out += `• Persetujuan Pengemudi (Driver Consent): DIBERIKAN MELALUI HEAD-UNIT\n`;
+            out += `• Status Prasyarat Keselamatan Flashing: ${readyRes.data.safety_preconditions_satisfied ? 'MEMENUHI SYARAT (APPROVED)' : 'DITOLAK (UNSAFE)'}\n\n`;
+            out += `EKSEKUSI FLASHING ECU & INTEGRITAS KRIPTOGRAFIS:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Status Flashing OTA: ${execRes.data.flashing_status}\n`;
+            out += `• Durasi Flashing Aman: ${execRes.data.flashing_duration_seconds} detik\n`;
+            out += `• Kode Validasi Tanda Tangan ECU: ${execRes.data.ecu_validation_code}\n`;
+            out += `• Proteksi Rollback Cadangan A/B Partition: AKTIF (Mencegah Modul Bricking)\n`;
+            out += `• Total Armada Homologasi Terupdate: ${dossierRes.data.successful_updates_count || 1} dari ${dossierRes.data.eligible_fleet_size.toLocaleString()} Kendaraan\n`;
+            out += `• Estimasi Kerugian Pergantian ECU Terhindar: $${execRes.data.avoided_brick_loss_usd.toLocaleString()} USD per unit kendaraan\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penegakan regulasi UNECE R156 SUMS memastikan jejak audit legal dan homologasi sertifikasi tipe sebelum distribusi firmware.</li>
+                <li>Validasi kondisi kecepatan nol, posisi gigi parkir, dan persentase baterai memitigasi total risiko kendaraan macet di jalan saat flashing.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses connected vehicle OTA: ' + err.message;
+    }
+}
 
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {

@@ -22,9 +22,12 @@ import (
 	"erp-golang/internal/core/audit"
 	"erp-golang/internal/core/bi"
 	coreaccount "erp-golang/internal/core/account"
+	coreaerospace "erp-golang/internal/core/aerospace"
 	coreagriculture "erp-golang/internal/core/agriculture"
 	coreasset "erp-golang/internal/core/asset"
+	coreautomotive "erp-golang/internal/core/automotive"
 	coreaviation "erp-golang/internal/core/aviation"
+	corebess "erp-golang/internal/core/bess"
 	corecosting "erp-golang/internal/core/costing"
 	corecpq "erp-golang/internal/core/cpq"
 	corecrm "erp-golang/internal/core/crm"
@@ -46,6 +49,7 @@ import (
 	coremarine "erp-golang/internal/core/marine"
 	coremining "erp-golang/internal/core/mining"
 	coremrp "erp-golang/internal/core/mrp"
+	corenuclear "erp-golang/internal/core/nuclear"
 	corepharma "erp-golang/internal/core/pharma"
 	corepricing "erp-golang/internal/core/pricing"
 	coreprocurement "erp-golang/internal/core/procurement"
@@ -55,6 +59,7 @@ import (
 	corescm "erp-golang/internal/core/scm"
 	coresemiconductor "erp-golang/internal/core/semiconductor"
 	coreservice "erp-golang/internal/core/service"
+	coresubsea "erp-golang/internal/core/subsea"
 	coresubscription "erp-golang/internal/core/subscription"
 	coresystem "erp-golang/internal/core/system"
 	coretax "erp-golang/internal/core/tax"
@@ -12217,5 +12222,186 @@ IEA*1*000099123~`
 	t.Logf("✓ Railway Wheel-Rail RCF & Flange Derailment Sentinel Verified: Bogie='%s' (Consist='%s', Wheel='%s', Mileage=%.0f km), WILD Impact=%.1f kN, Flange (Height=%.1f, Thick=%.1f, qR=%.1f mm), DerailmentRisk='%s', RCF='%s', SpeedRestriction=%d kph, ReprofileMandate=%t, CNC Lathe WO='%s' (Cut=%.1fmm, PostCut_qR=%.1fmm, AvoidedDerailmentLoss=$%.2fM USD)",
 		railTel.BogieID, railTel.TrainConsistID, railTel.WheelPositionID, railTel.AxleMileageKM, railTel.DynamicPeakImpactLoadKN, railTel.FlangeHeightMM, railTel.FlangeThicknessMM, railTel.FlangeAngleQR_MM, railAssess.FlangeWearDerailmentRisk, railAssess.RollingContactFatigueSeverity, railAssess.SpeedRestrictionCommandKPH, railAssess.CNC_LatheReprofilingMandate, railWO.WorkOrderID, railWO.TargetTreadCutDepthMM, railWO.PostCutQR_MM, railWO.AvoidedDerailmentLossUSD/1e6)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (81 SECTIONS: 75+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD + CONTRACT LEAKAGE SENTINEL + MICROGRID ISLANDING + CARGO GEOFENCE + SHIFT BIDDING FATIGUE + CIRCULAR PACKAGING RTI + INDUSTRIAL WATER ZLD + VENDOR SANCTIONS GRAPH + BOILER TUBE DESCALING + SAAS DUNNING WATERFALL + TOLL MANUFACTURING RECON + SILO AERATION SENTINEL + EPC PROGRESS BILLING ESCROW + DYNAMIC PORT BERTH DEMURRAGE + TRANSFORMER DGA GUARDIAN + CROSS BORDER CASH REPATRIATION + ORE BLENDING OPTIMIZER + PHARMA CRYOGENIC SENTINEL + KILN REFRACTORY GUARDIAN + IP PATENT ANNUITY + TURBINE EOH CREEP + AVIATION MRO FATIGUE + MARINE LNG RELIQUEFACTION + SEMICONDUCTOR FAB YIELD + WASTEWATER BIOMETHANE + RAILWAY WHEEL RCF) PASSED 100%!")
+	// =========================================================================
+	// SECTION 82: ENTERPRISE NUCLEAR MEDICINE, UTILITY BESS, SATELLITE CONJUNCTION, SUBSEA MULTIPHASE & VEHICLE OTA SUMS (v1.68.0)
+	// =========================================================================
+	t.Log("\n--- SECTION 82: ENTERPRISE NUCLEAR MEDICINE, UTILITY BESS, SATELLITE CONJUNCTION, SUBSEA MULTIPHASE & VEHICLE OTA SUMS ---")
+
+	// 82.1 Nuclear Power & Radiopharmaceutical Decay Sentinel (IAEA & US NRC 10 CFR Part 35/50)
+	nucBatch := corenuclear.GlobalNuclearVault.RegisterRadioisotopeBatch(corenuclear.RadioisotopeBatch{
+		BatchID:                         "BATCH-LU177-2026-9901",
+		IsotopeName:                     "LUTETIUM_177",
+		HalfLifeHours:                   160.8,
+		InitialActivityGBq:              37.0,
+		ProductionTimestamp:             time.Now().Add(-24 * time.Hour),
+		CalibrationTargetTimestamp:      time.Now().Add(12 * time.Hour),
+		CaskLeadShieldingThicknessMM:    50.0,
+		RadiationDoseAtSurfaceMicroSvHr: 2.4,
+		TransportCaskSerialNo:           "LEAD-CASK-BAPETEN-8812",
+	})
+	if nucBatch.BatchID == "" || nucBatch.InitialActivityGBq != 37.0 {
+		t.Fatalf("Failed to register radioisotope batch: %+v", nucBatch)
+	}
+
+	nucDecay, err := corenuclear.GlobalNuclearVault.CalculateDecayActivityCalibration(
+		"BATCH-LU177-2026-9901", time.Now().Add(12*time.Hour),
+	)
+	if err != nil || nucDecay.RemainingActivityGBq <= 0 || nucDecay.PatientDoseUnitsAvailable < 1 || nucDecay.InoculationReadiness != "READY_FOR_CLINICAL_INFUSION" {
+		t.Fatalf("Failed to calculate radioactive decay calibration: %+v, err: %v", nucDecay, err)
+	}
+
+	nucXenon, err := corenuclear.GlobalNuclearVault.PredictXenonPoisoningTransient(
+		"RX-PWR-MURIA-1000MW", 2900.0, 9.6,
+	)
+	if err != nil || nucXenon.XenonConcentrationRatio <= 1.0 || nucXenon.CoreReactivityStatus != "CRITICAL_RESTART_LOCKOUT" || nucXenon.RestartLockoutHoursRemaining <= 0 {
+		t.Fatalf("Failed to predict reactor xenon poisoning: %+v, err: %v", nucXenon, err)
+	}
+
+	nucDossier, err := corenuclear.GlobalNuclearVault.GetDosimetryComplianceDossier("BATCH-LU177-2026-9901")
+	if err != nil || !nucDossier["iaea_safeguards_compliant"].(bool) || !nucDossier["nrc_10cfr35_certified"].(bool) {
+		t.Fatalf("Failed to compile nuclear dosimetry dossier: %+v, err: %v", nucDossier, err)
+	}
+	t.Logf("✓ Nuclear Radiopharm Decay & Reactor Poisoning Verified: Batch='%s' (Isotope='%s', t1/2=%.1fh), Remaining=%.2f GBq (Decay=%.1f%%, PatientDoses=%d, Status='%s'), SurfaceDose=%.1f uSv/h, Reactor='%s' (PrePower=%.0f MWth, PostTrip=%.1fh), Xe-135=%.2fx (Peak=%.1fh, Lockout=%.1fh, CoreStatus='%s')",
+		nucBatch.BatchID, nucBatch.IsotopeName, nucBatch.HalfLifeHours, nucDecay.RemainingActivityGBq, nucDecay.ActivityDecayPct, nucDecay.PatientDoseUnitsAvailable, nucDecay.InoculationReadiness, nucBatch.RadiationDoseAtSurfaceMicroSvHr, nucXenon.ReactorID, nucXenon.PreTripThermalPowerMWth, nucXenon.HoursSinceReactorTrip, nucXenon.XenonConcentrationRatio, nucXenon.PeakPoisoningHours, nucXenon.RestartLockoutHoursRemaining, nucXenon.CoreReactivityStatus)
+
+	// 82.2 Utility-Scale BESS Degradation & Thermal Runaway Guardian (UL 9540A & NFPA 855 / IEC 62619)
+	bessTel := corebess.GlobalBESSVault.IngestRackTelemetry(corebess.BESSRackTelemetry{
+		RackID:                  "RACK-BESS-LFP-100MW-01",
+		EnergyStoragePlantID:    "PLN-CIRATA-SOLAR-BESS-100MW",
+		CellChemistry:           "LITHIUM_IRON_PHOSPHATE_LFP",
+		TotalPackVoltageV:       854.2,
+		MaxCellVoltageV:         3.42,
+		MinCellVoltageV:         3.35,
+		CellVoltageDeltaMV:      70.0,
+		MaxCellTempC:            54.2,
+		AmbientTempC:            32.0,
+		OffGasCO_PPM:            92.0,
+		OffGasH2_PPM:            60.0,
+		StateOfChargePct:        78.0,
+		CumulativeThroughputMWh: 4500.0,
+	})
+	if bessTel.TelemetryID == "" || bessTel.OffGasCO_PPM != 92.0 {
+		t.Fatalf("Failed to ingest BESS rack telemetry: %+v", bessTel)
+	}
+
+	bessHealth, err := corebess.GlobalBESSVault.CalculateSoHAndCapacityFade("RACK-BESS-LFP-100MW-01")
+	if err != nil || bessHealth.StateOfHealthPct <= 0 || bessHealth.ThermalRunawayRiskLevel != "CRITICAL_OFFGAS_VENTING_HAZARD" || bessHealth.ArrheniusAgingRateFactor <= 1.0 {
+		t.Fatalf("Failed to calculate BESS health and SoH: %+v, err: %v", bessHealth, err)
+	}
+
+	bessQuar, err := corebess.GlobalBESSVault.TriggerThermalRunawayQuarantine("RACK-BESS-LFP-100MW-01")
+	if err != nil || !bessQuar.StringContactorTripped || !bessQuar.AerosolFireSuppressionArmed || bessQuar.AvoidedFacilityDestructionUSD <= 0 {
+		t.Fatalf("Failed to trigger BESS thermal runaway quarantine: %+v, err: %v", bessQuar, err)
+	}
+
+	bessDossier, err := corebess.GlobalBESSVault.GetRackHealthWarrantyDossier("RACK-BESS-LFP-100MW-01")
+	if err != nil || !bessDossier["ul_9540a_compliant"].(bool) || !bessDossier["nfpa_855_certified"].(bool) {
+		t.Fatalf("Failed to compile BESS warranty dossier: %+v, err: %v", bessDossier, err)
+	}
+	t.Logf("✓ Utility-Scale BESS Thermal Runaway & SoH Aging Verified: Rack='%s' (Plant='%s', Chemistry='%s'), VoltageDelta=%.1f mV, Temp=%.1f°C, Off-gas (CO=%.1f ppm, H2=%.1f ppm), SoH=%.2f%% (Fade=%.2f%%, ArrheniusRate=%.2fx, RemCycles=%d, Warranty='%s'), Risk='%s', ContactorTripped=%t, SuppressionArmed=%t, AvoidedLoss=$%.2fM USD",
+		bessTel.RackID, bessTel.EnergyStoragePlantID, bessTel.CellChemistry, bessTel.CellVoltageDeltaMV, bessTel.MaxCellTempC, bessTel.OffGasCO_PPM, bessTel.OffGasH2_PPM, bessHealth.StateOfHealthPct, bessHealth.CapacityFadeLossPct, bessHealth.ArrheniusAgingRateFactor, bessHealth.RemainingEquivalentFullCycles, bessHealth.WarrantySLAComplianceStatus, bessHealth.ThermalRunawayRiskLevel, bessQuar.StringContactorTripped, bessQuar.AerosolFireSuppressionArmed, bessQuar.AvoidedFacilityDestructionUSD/1e6)
+
+	// 82.3 Commercial Satellite Constellation Orbital Conjunction Sentinel (NASA / ESA CARA & ISO 24113)
+	satTel := coreaerospace.GlobalAerospaceVault.IngestCDMTelemetry(coreaerospace.OrbitalConjunctionTelemetry{
+		TargetSatelliteNORAD_ID:   "SAT-LEO-GOERP-042",
+		TargetSatelliteName:       "NUSANTARA-LEO-SAT-42",
+		DebrisCatalogID:           "DEBRIS-COSMOS-2251-FRAG-9120",
+		TimeOfClosestApproachTCA:  time.Now().Add(18 * time.Hour),
+		MissDistanceMeters:        78.5,
+		RadialMissDistanceMeters:  18.2,
+		RelativeVelocityKMpS:      11.4,
+		HardBodyRadiusMeters:      2.8,
+		CombinedCovarianceTraceM2: 2400.0,
+		RemainingDeltaVBudgetMPS:  145.0,
+	})
+	if satTel.TelemetryID == "" || satTel.MissDistanceMeters != 78.5 {
+		t.Fatalf("Failed to ingest satellite CDM telemetry: %+v", satTel)
+	}
+
+	satRisk, err := coreaerospace.GlobalAerospaceVault.EvaluateCollisionProbability("SAT-LEO-GOERP-042")
+	if err != nil || satRisk.ProbabilityOfCollisionPc <= 0 || !satRisk.CollisionManeuverMandated || satRisk.ConjunctionSeverityLevel != "CRITICAL_COLLISION_AVOIDANCE_MANDATED" {
+		t.Fatalf("Failed to evaluate orbital collision probability: %+v, err: %v", satRisk, err)
+	}
+
+	satCAM, err := coreaerospace.GlobalAerospaceVault.PlanAvoidanceManeuver("SAT-LEO-GOERP-042", "FLIGHT-DIRECTOR-DR-SETIAWAN-AEROSPACE")
+	if err != nil || satCAM.RequiredDeltaVMPS <= 0 || satCAM.PostManeuverMissDistanceMeters < 1500.0 || satCAM.AvoidedSpacecraftDestructionUSD <= 0 {
+		t.Fatalf("Failed to plan collision avoidance maneuver: %+v, err: %v", satCAM, err)
+	}
+
+	satDossier, err := coreaerospace.GlobalAerospaceVault.GetSatelliteConstellationDossier("SAT-LEO-GOERP-042")
+	if err != nil || !satDossier["iso_24113_compliance"].(bool) {
+		t.Fatalf("Failed to compile satellite constellation dossier: %+v, err: %v", satDossier, err)
+	}
+	t.Logf("✓ Satellite Orbital Conjunction & Avoidance Maneuver Verified: Satellite='%s' (%s), Debris='%s', MissDistance=%.1fm, RelVelocity=%.1f km/s, Pc=%.4e, Severity='%s', ManeuverMandated=%t, CAM Plan='%s' (DeltaV=%.2f m/s, Burn=%.1fs, PostMiss=%.1fm, Thruster='%s', Director='%s', AvoidedLoss=$%.2fM USD)",
+		satTel.TargetSatelliteNORAD_ID, satTel.TargetSatelliteName, satTel.DebrisCatalogID, satTel.MissDistanceMeters, satTel.RelativeVelocityKMpS, satRisk.ProbabilityOfCollisionPc, satRisk.ConjunctionSeverityLevel, satRisk.CollisionManeuverMandated, satCAM.PlanID, satCAM.RequiredDeltaVMPS, satCAM.BurnDurationSeconds, satCAM.PostManeuverMissDistanceMeters, satCAM.ThrusterType, satCAM.ApprovedByFlightDirector, satCAM.AvoidedSpacecraftDestructionUSD/1e6)
+
+	// 82.4 Deepwater Subsea Pipeline Multiphase Flow Assurance & MEG Optimizer (API 17D & DNV-RP-F105)
+	subTel := coresubsea.GlobalSubseaVault.IngestFlowlineTelemetry(coresubsea.SubseaFlowlineTelemetry{
+		FlowlineID:                  "FLOWLINE-NATUNA-DEEPWATER-01",
+		SubseaFieldID:               "FIELD-SOUTH-NATUNA-SEA",
+		WaterDepthMeters:            1250.0,
+		SeabedAmbientTempC:          4.2,
+		FlowlineInletPressureBar:    185.0,
+		FlowlineOutletPressureBar:   142.0,
+		FluidMassFlowRateKGD:        1500000.0,
+		WaterCutPercentage:          28.0,
+		GasSpecificGravity:          0.68,
+		CurrentMEGInjectionRateKGHr: 180.0,
+	})
+	if subTel.TelemetryID == "" || subTel.WaterDepthMeters != 1250.0 {
+		t.Fatalf("Failed to ingest subsea flowline telemetry: %+v", subTel)
+	}
+
+	subAssess, err := coresubsea.GlobalSubseaVault.EvaluateHydrateFormationRisk("FLOWLINE-NATUNA-DEEPWATER-01")
+	if err != nil || subAssess.RecommendedMEGInjectionRateKGHr <= 0 || subAssess.HydrateBlockageRisk == "" {
+		t.Fatalf("Failed to evaluate hydrate formation risk: %+v, err: %v", subAssess, err)
+	}
+
+	subOpt, err := coresubsea.GlobalSubseaVault.OptimizeMEGInjectionRate("FLOWLINE-NATUNA-DEEPWATER-01")
+	if err != nil || subOpt.CalculatedMEGRateKGHr <= 0 || subOpt.DailyMEGSavingsUSD <= 0 || subOpt.AvoidedDeepwaterPlugDowntimeUSD <= 0 {
+		t.Fatalf("Failed to optimize MEG injection rate: %+v, err: %v", subOpt, err)
+	}
+
+	subDossier, err := coresubsea.GlobalSubseaVault.GetSubseaFlowlineIntegrityDossier("FLOWLINE-NATUNA-DEEPWATER-01")
+	if err != nil || !subDossier["api_17d_compliant"].(bool) || !subDossier["dnv_rp_f105_certified"].(bool) {
+		t.Fatalf("Failed to compile subsea flowline dossier: %+v, err: %v", subDossier, err)
+	}
+	t.Logf("✓ Subsea Flow Assurance & MEG Dosing Optimizer Verified: Flowline='%s' (Field='%s', Depth=%.0fm, SeabedTemp=%.1f°C), Pressure (Inlet=%.1f, Outlet=%.1f bar), WaterCut=%.1f%%, HydrateEquilibrium=%.2f°C, SubcoolingMargin=%.2f°C, HydrateRisk='%s', SluggingIndex=%.1f, OptimalMEG=%.1f kg/h (Target=%.1f wt%%), DailySavings=$%.2f USD/d, AvoidedInterventionLoss=$%.2fM USD",
+		subTel.FlowlineID, subTel.SubseaFieldID, subTel.WaterDepthMeters, subTel.SeabedAmbientTempC, subTel.FlowlineInletPressureBar, subTel.FlowlineOutletPressureBar, subTel.WaterCutPercentage, subAssess.HydrateEquilibriumTempC, subAssess.HydrateSubcoolingMarginC, subAssess.HydrateBlockageRisk, subAssess.SluggingSeverityIndex, subOpt.CalculatedMEGRateKGHr, subOpt.TargetMEGWeightPctWater, subOpt.DailyMEGSavingsUSD, subOpt.AvoidedDeepwaterPlugDowntimeUSD/1e6)
+
+	// 82.5 Connected Vehicle Global OTA Firmware Campaign & SUMS (UNECE R155/R156 & ISO 24089)
+	autoCamp := coreautomotive.GlobalAutomotiveVault.RegisterFirmwareCampaign(coreautomotive.OTAFirmwareCampaign{
+		CampaignID:                "CAMP-ADAS-V26-4",
+		VehicleModelSeries:        "HYUNDAI_IONIQ_EV_2026",
+		TargetECU:                 "CENTRAL_ADAS_AUTONOMOUS_CONTROLLER",
+		CurrentFirmwareVersion:    "v2.5.1",
+		TargetFirmwareVersion:     "v2.6.4",
+		PayloadSizeMB:             428.5,
+		SHA256BinaryHash:          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+		RXSWIN_TypeApprovalNumber: "RXSWIN-UNECE-R156-E4-9912",
+		EligibleFleetSize:         18500,
+		RolloutStrategy:           "CANARY_STAGED_ROLLOUT",
+	})
+	if autoCamp.CampaignID == "" || autoCamp.EligibleFleetSize != 18500 {
+		t.Fatalf("Failed to register automotive firmware campaign: %+v", autoCamp)
+	}
+
+	autoReady, err := coreautomotive.GlobalAutomotiveVault.VerifyVehicleTargetReadiness("VIN-ID-EV-2026-981240", "CAMP-ADAS-V26-4")
+	if err != nil || !autoReady.SafetyPreconditionsSatisfied || autoReady.VehicleSpeedKPH != 0.0 || autoReady.TransmissionGear != "PARK" {
+		t.Fatalf("Failed to verify vehicle target readiness: %+v, err: %v", autoReady, err)
+	}
+
+	autoExec, err := coreautomotive.GlobalAutomotiveVault.DispatchFirmwareUpdatePackage("VIN-ID-EV-2026-981240", "CAMP-ADAS-V26-4")
+	if err != nil || autoExec.FlashingStatus != "FLASHING_SUCCESS_VERIFIED" || autoExec.ECUValidationCode == "" || autoExec.AvoidedBrickLossUSD <= 0 {
+		t.Fatalf("Failed to dispatch automotive firmware package: %+v, err: %v", autoExec, err)
+	}
+
+	autoDossier, err := coreautomotive.GlobalAutomotiveVault.GetCampaignComplianceDossier("CAMP-ADAS-V26-4")
+	if err != nil || !autoDossier["unece_r155_cybersecurity"].(bool) || !autoDossier["unece_r156_sums_approved"].(bool) {
+		t.Fatalf("Failed to compile automotive campaign compliance dossier: %+v, err: %v", autoDossier, err)
+	}
+	t.Logf("✓ Connected Vehicle OTA Campaign & SUMS Readiness Verified: Campaign='%s' (Model='%s', TargetECU='%s', Ver='%s'->'%s', Size=%.1fMB), RXSWIN='%s', FleetSize=%d, VIN='%s' (Speed=%.1f kph, Gear='%s', SoC=%.1f%%, DriverConsent=%t, PreconditionsSatisfied=%t), FlashingStatus='%s' (Duration=%ds, ValidationCode='%s', AvoidedBrickLoss=$%.2f USD), SuccessfulUpdates=%d",
+		autoCamp.CampaignID, autoCamp.VehicleModelSeries, autoCamp.TargetECU, autoCamp.CurrentFirmwareVersion, autoCamp.TargetFirmwareVersion, autoCamp.PayloadSizeMB, autoCamp.RXSWIN_TypeApprovalNumber, autoCamp.EligibleFleetSize, autoReady.VIN, autoReady.VehicleSpeedKPH, autoReady.TransmissionGear, autoReady.BatterySoCPct, autoReady.DriverConsentGranted, autoReady.SafetyPreconditionsSatisfied, autoExec.FlashingStatus, autoExec.FlashingDurationSeconds, autoExec.ECUValidationCode, autoExec.AvoidedBrickLossUSD, autoDossier["successful_updates_count"].(int))
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (82 SECTIONS: 80+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD + CONTRACT LEAKAGE SENTINEL + MICROGRID ISLANDING + CARGO GEOFENCE + SHIFT BIDDING FATIGUE + CIRCULAR PACKAGING RTI + INDUSTRIAL WATER ZLD + VENDOR SANCTIONS GRAPH + BOILER TUBE DESCALING + SAAS DUNNING WATERFALL + TOLL MANUFACTURING RECON + SILO AERATION SENTINEL + EPC PROGRESS BILLING ESCROW + DYNAMIC PORT BERTH DEMURRAGE + TRANSFORMER DGA GUARDIAN + CROSS BORDER CASH REPATRIATION + ORE BLENDING OPTIMIZER + PHARMA CRYOGENIC SENTINEL + KILN REFRACTORY GUARDIAN + IP PATENT ANNUITY + TURBINE EOH CREEP + AVIATION MRO FATIGUE + MARINE LNG RELIQUEFACTION + SEMICONDUCTOR FAB YIELD + WASTEWATER BIOMETHANE + RAILWAY WHEEL RCF + NUCLEAR RADIOPHARM DECAY + UTILITY BESS THERMAL SOH + SATELLITE ORBITAL CONJUNCTION + SUBSEA FLOW ASSURANCE + CONNECTED VEHICLE OTA SUMS) PASSED 100%!")
 }

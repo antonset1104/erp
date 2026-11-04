@@ -12,9 +12,12 @@ import (
 	"erp-golang/internal/core/bi"
 	"erp-golang/internal/core/commandcenter"
 	coreaccount "erp-golang/internal/core/account"
+	coreaerospace "erp-golang/internal/core/aerospace"
 	coreagriculture "erp-golang/internal/core/agriculture"
 	coreasset "erp-golang/internal/core/asset"
+	coreautomotive "erp-golang/internal/core/automotive"
 	coreaviation "erp-golang/internal/core/aviation"
+	corebess "erp-golang/internal/core/bess"
 	corecosting "erp-golang/internal/core/costing"
 	corecpq "erp-golang/internal/core/cpq"
 	corecrm "erp-golang/internal/core/crm"
@@ -36,6 +39,7 @@ import (
 	coremarine "erp-golang/internal/core/marine"
 	coremining "erp-golang/internal/core/mining"
 	coremrp "erp-golang/internal/core/mrp"
+	corenuclear "erp-golang/internal/core/nuclear"
 	corepharma "erp-golang/internal/core/pharma"
 	corepricing "erp-golang/internal/core/pricing"
 	coreprocurement "erp-golang/internal/core/procurement"
@@ -45,6 +49,7 @@ import (
 	corescm "erp-golang/internal/core/scm"
 	coresemiconductor "erp-golang/internal/core/semiconductor"
 	coreservice "erp-golang/internal/core/service"
+	coresubsea "erp-golang/internal/core/subsea"
 	coresubscription "erp-golang/internal/core/subscription"
 	coresystem "erp-golang/internal/core/system"
 	coretax "erp-golang/internal/core/tax"
@@ -309,7 +314,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.67.0",
+			"version":    "1.68.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -459,6 +464,11 @@ func main() {
 		coresemiconductor.RegisterSemiconductorRoutes(apiV1)
 		coreutilities.RegisterUtilitiesRoutes(apiV1)
 		corerailway.RegisterRailwayRoutes(apiV1)
+		corenuclear.RegisterNuclearRoutes(apiV1)
+		corebess.RegisterBESSRoutes(apiV1)
+		coreaerospace.RegisterAerospaceRoutes(apiV1)
+		coresubsea.RegisterSubseaRoutes(apiV1)
+		coreautomotive.RegisterAutomotiveRoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend

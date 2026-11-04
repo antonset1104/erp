@@ -1497,6 +1497,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/nuclear/radiopharm/calculate-decay-activity-calibration": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Nuclear Power & Radiopharmaceutical Exponential Decay Sentinel (IAEA & US NRC 10 CFR Part 35)",
+					"description": "Calculates real-time exponential radioactive decay A(t) = A0 * exp(-lambda * t) for oncology radioisotope batches and available clinical doses.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Elapsed hours, remaining activity in GBq, activity decay percentage, available patient doses, and clinical readiness"},
+					},
+				},
+			},
+			"/api/v1/bess/analytics/calculate-soh-and-capacity-fade": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Utility-Scale Battery Energy Storage System (BESS) Degradation & Thermal Runaway Guardian (UL 9540A & NFPA 855)",
+					"description": "Models Arrhenius-SEI capacity fade, multi-cell voltage delta imbalances, off-gas venting early warnings, and warranty SLA degradation compliance.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "State of Health (SoH) percentage, capacity fade loss, remaining full cycles, thermal runaway risk level, and warranty status"},
+					},
+				},
+			},
+			"/api/v1/aerospace/conjunction/evaluate-collision-probability": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Commercial Satellite Constellation Orbital Conjunction & Space Debris Sentinel (NASA / ESA CARA & ISO 24113)",
+					"description": "Evaluates 2D Foster collision probability (Pc) from Conjunction Data Messages (CDM) against debris fragments and mandates CAM maneuvers.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Probability of collision Pc, miss distance meters, collision avoidance maneuver mandate, and ISO 24113 de-orbit status"},
+					},
+				},
+			},
+			"/api/v1/subsea/flow/evaluate-hydrate-formation-risk": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Deepwater Subsea Pipeline Multiphase Flow Assurance & Hydrate Inhibitor MEG Optimizer (API 17D & DNV-RP-F105)",
+					"description": "Calculates Hammerschmidt hydrate equilibrium temperature depression, subsea subcooling margins, and recommended MEG inhibitor injection rates.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Effective equilibrium temperature, subcooling margin, blockage risk level, and recommended MEG injection rate kg/hr"},
+					},
+				},
+			},
+			"/api/v1/automotive/ota/verify-vehicle-target-readiness": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Connected Vehicle Global Over-the-Air (OTA) Firmware Campaign & Cybersecurity Sentinel (UNECE R155/R156 & ISO 24089)",
+					"description": "Enforces automotive safety pre-conditions (Park gear, 0 kph, SoC >= 50%) and cryptographic authorization before remote ECU flashing.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Safety preconditions satisfaction, vehicle battery SoC, transmission gear verification, and UNECE R156 audit digest"},
+					},
+				},
+			},
 		},
 	}
 }
