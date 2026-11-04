@@ -26,6 +26,7 @@ import (
 	coremrp "erp-golang/internal/core/mrp"
 	corepricing "erp-golang/internal/core/pricing"
 	coresystem "erp-golang/internal/core/system"
+	coretradefinance "erp-golang/internal/core/tradefinance"
 	coretreasury "erp-golang/internal/core/treasury"
 	corevmi "erp-golang/internal/core/vmi"
 	corewms "erp-golang/internal/core/wms"
@@ -285,7 +286,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.51.0",
+			"version":    "1.52.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -303,7 +304,7 @@ func main() {
 	ai.RegisterRootProtocolRoutes(r, aiHandler)
 
 	// Register OpenAPI 3.1 & Interactive API Explorer
-	openapi.RegisterRoutes(r, cfg.AppName, "1.51.0")
+	openapi.RegisterRoutes(r, cfg.AppName, "1.52.0")
 
 	// API v1 Router Group
 	apiV1 := r.Group("/api/v1")
@@ -355,6 +356,11 @@ func main() {
 		esg.RegisterScope3CBAMRoutes(apiV1, authMiddleware, db)
 		corefieldservice.RegisterFieldServiceRoutes(apiV1, authMiddleware, db)
 		corepricing.RegisterDynamicPricingGuardRoutes(apiV1, authMiddleware, db)
+		coremrp.RegisterAndonRoutes(apiV1, authMiddleware, db)
+		coretradefinance.RegisterTradeFinanceRoutes(apiV1, authMiddleware, db)
+		coretreasury.RegisterDynamicDiscountingRoutes(apiV1, authMiddleware, db)
+		iot.RegisterVibrationFFTRoutes(apiV1, authMiddleware, db)
+		corehr.RegisterTravelPolicyRoutes(apiV1, authMiddleware, db)
 	}
 
 	// Serve Static Web Frontend

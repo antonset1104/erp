@@ -697,6 +697,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/mrp/andon/trigger-event": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Smart Factory Floor Andon Visual Control & Shopfloor Anomaly Gateway",
+					"description": "Real-time workstation alert triggering (machine breakdown, material starvation), automated forklift dispatch, and OEE line pacing.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Active Andon event, runner task assignment, and line severity status"},
+					},
+				},
+			},
+			"/api/v1/trade-finance/lc/audit-documents": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Letters of Credit (L/C) & Trade Finance Zero-Discrepancy Engine",
+					"description": "Audits export shipping documents against UCP 600 Letter of Credit clauses, verifying dates, amounts, and zero discrepancy risk.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Zero discrepancy certification, discrepancy risk score, and bank acceptance probability"},
+					},
+				},
+			},
+			"/api/v1/treasury/dynamic-discounting/offer": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Supplier Early-Payment Dynamic Discounting & Supply Chain Finance",
+					"description": "Sliding-scale early settlement discounts for vendor invoices, converting AP cash outflow into high-yield treasury returns.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Dynamic discount offer, net payable amount, and annualized yield APR"},
+					},
+				},
+			},
+			"/api/v1/iot/vibration/analyze-fft": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Predictive Machine Vibration FFT & Remaining Useful Life (RUL) Radar",
+					"description": "Fast Fourier Transform (FFT) harmonic spectral analysis, ISO 10816 severity zoning, and Weibull Remaining Useful Life forecasting.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Vibration analysis result, spectral peaks, remaining hours, and auto-reserved spare part"},
+					},
+				},
+			},
+			"/api/v1/hr/travel/evaluate-policy": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Corporate Travel Policy Engine & Multi-Tier Per-Diem Matrix",
+					"description": "Audits corporate travel booking compliance (advance window, cabin class, hotel ceiling) and calculates city-tier per-diem budgets.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Compliance evaluation, audit checks, per-diem allowance, and total trip budget"},
+					},
+				},
+			},
 		},
 	}
 }

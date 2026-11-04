@@ -25068,6 +25068,253 @@ async function triggerDynamicPriceMarginGuard() {
     }
 }
 
+// v1.52.0 Smart Factory, Trade Finance & Working Capital Triggers
+async function triggerAndonVisualControl() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memicu sinyal visual Andon lantai pabrik & memanggil tugas WMS Forklift Runner...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const ev = await api('/mrp/andon/trigger-event', 'POST', {
+            line_id: 'LINE-SMT-CIKARANG-01',
+            station_id: 'WS-02',
+            issue_type: 'MATERIAL_STARVATION',
+            description: 'Stok reel komponen IC di feeder menipis; dibutuhkan restock cepat.',
+            triggered_by: 'Budi Prabowo (Operator Lini)'
+        });
+        const board = await api(`/mrp/andon/board/${ev.line_id}`, 'GET');
+
+        if (badge) badge.textContent = `🏭 Andon: ${board.overall_line_status} (OEE: ${board.current_line_oee}%)`;
+        if (answerEl) {
+            let out = `🏭 SMART FACTORY FLOOR ANDON VISUAL CONTROL & SHOPFLOOR ANOMALY GATEWAY:\n`;
+            out += `Lini Perakitan: ${board.line_name} (${board.line_id})\n`;
+            out += `Status Keseluruhan Lini: ${board.overall_line_status} | Efisiensi OEE Saat Ini: ${board.current_line_oee}%\n`;
+            out += `Rata-rata Waktu Tanggap (MTTR): ${board.average_mttr_minutes} Menit | Insiden Aktif: ${board.active_incidents_count}\n\n`;
+            out += `INSIDEN TERAKHIR YANG DIPICU (ANDON EVENT):\n`;
+            out += `• ID Sinyal: ${ev.event_id} | Tingkat Keparahan: ${ev.severity}\n`;
+            out += `  Stasiun: ${ev.station_name} (${ev.station_id}) | Jenis Isu: ${ev.issue_type}\n`;
+            out += `  Deskripsi: ${ev.description} (Pelapor: ${ev.triggered_by})\n`;
+            out += `  Status Forklift Runner: ${ev.runner_dispatched ? 'TERDISPATCH OTOMATIS (' + ev.runner_task_id + ')' : 'TIDAK DIPERLUKAN'}\n\n`;
+            out += `STATUS VISUAL STASIUN KERJA DI DINDING PABRIK (ANDON BOARD):\n`;
+            out += `--------------------------------------------------\n`;
+            board.stations.forEach(st => {
+                out += `[${st.current_status}] ${st.station_name} (${st.station_id}):\n`;
+                out += `    Operator: ${st.current_operator} | Output: ${st.hourly_output_units}/${st.target_output_units} unit/jam | Efisiensi: ${st.efficiency_rate}%\n`;
+            });
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pemicu sinyal Andon langsung menugaskan forklift runner untuk mengantar reel komponen sebelum lini perakitan terhenti (Zero Line Starvation).</li>
+                <li>Papan visual terintegrasi secara real-time dengan monitor dinding pabrik untuk respon cepat supervisor dan teknisi pemeliharaan.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memicu Andon visual control: ' + err.message;
+    }
+}
+
+async function triggerTradeFinanceLC() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengaudit dokumen ekspor terhadap klausul Letter of Credit (L/C) UCP 600...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const audit = await api('/trade-finance/lc/audit-documents', 'POST', {});
+        const facil = await api('/trade-finance/lc/collateral-utilization', 'GET');
+
+        if (badge) badge.textContent = `📜 Trade Finance: ${audit.zero_discrepancy_certified ? 'Zero Discrepancy (100% Accept)' : 'Discrepancy Found'}`;
+        if (answerEl) {
+            let out = `📜 LETTERS OF CREDIT (L/C) & TRADE FINANCE ZERO-DISCREPANCY ENGINE:\n`;
+            out += `No L/C: ${audit.lc_number} | Total Dokumen Diaudit: ${audit.total_documents_audited} dokumen pengapalan\n`;
+            out += `Sertifikasi Bebas Diskrepansi: ${audit.zero_discrepancy_certified ? 'TERVERIFIKASI BERSIH (ZERO DISCREPANCY)' : 'ADA PERBEDAAN'}\n`;
+            out += `Skor Risiko Diskrepansi: ${audit.discrepancy_risk_score} | Probabilitas Penerimaan Bank: ${audit.bank_acceptance_probability}%\n`;
+            out += `Ringkasan Audit Bank: ${audit.audit_summary}\n\n`;
+            out += `PLAFON FASILITAS KREDIT PERDAGANGAN DI BANK MITRA (COLLATERAL RADAR):\n`;
+            out += `Total Nilai L/C Aktif: $${facil.total_active_lc_value_usd.toLocaleString()} | Total Agunan Digadaikan: $${facil.total_pledged_collateral_usd.toLocaleString()}\n`;
+            out += `Utilisasi Plafon Keseluruhan: ${facil.overall_utilization_percent}%\n`;
+            out += `--------------------------------------------------\n`;
+            facil.facilities.forEach(f => {
+                out += `• ${f.bank_name} [${f.facility_type}]:\n`;
+                out += `  Plafon: $${f.total_credit_line_usd.toLocaleString()} | Terpakai: $${f.utilized_amount_usd.toLocaleString()} (${f.utilization_percent}%) | Sisa: $${f.available_amount_usd.toLocaleString()}\n`;
+            });
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Seluruh dokumen komersial (Faktur, Bill of Lading, Packing List, SKA) terverifikasi 100% cocok dengan klausul L/C UCP 600.</li>
+                <li>Menghindari denda diskrepansi perbankan ($150 per dokumen) dan mempercepat pencairan devisa ekspor dari 14 hari menjadi 48 jam.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mengaudit dokumen L/C: ' + err.message;
+    }
+}
+
+async function triggerDynamicDiscounting() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menghitung penawaran diskon pelunasan lebih awal untuk pemasok (Dynamic Discounting)...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const offer = await api('/treasury/dynamic-discounting/offer', 'POST', {});
+        const pipe = await api('/treasury/dynamic-discounting/pipeline', 'GET');
+
+        if (badge) badge.textContent = `⚡ Dynamic Discount: Imbal Hasil ${offer.annualized_yield_apr}% APR`;
+        if (answerEl) {
+            let out = `⚡ SUPPLIER EARLY-PAYMENT DYNAMIC DISCOUNTING & SUPPLY CHAIN FINANCE:\n`;
+            out += `ID Penawaran: ${offer.offer_id} | Mitra Pemasok: ${offer.vendor_name}\n`;
+            out += `Referensi Tagihan: ${offer.invoice_ref} | Jatuh Tempo Asli: ${offer.original_due_date}\n`;
+            out += `Percepatan Pembayaran: ${offer.days_accelerated} Hari Lebih Awal\n`;
+            out += `Nominal Tagihan Asli: Rp ${offer.original_amount_idr.toLocaleString()}\n`;
+            out += `Diskon Tunai yang Ditangkap: Rp ${offer.discount_amount_idr.toLocaleString()} (${offer.discount_percent}%)\n`;
+            out += `Nominal Bersih yang Dibayarkan: Rp ${offer.net_payable_amount_idr.toLocaleString()}\n`;
+            out += `Imbal Hasil Perbendaharaan Ekuivalen (Annualized APR): ${offer.annualized_yield_apr}% (Jauh melampaui bunga deposito bank!)\n\n`;
+            out += `PIPELINE WORKING CAPITAL & KAS PERBENDAHARAAN GROUP:\n`;
+            out += `• Total Tagihan Memenuhi Syarat: ${pipe.total_eligible_invoices} faktur senilai Rp ${pipe.total_invoices_value_idr.toLocaleString()}\n`;
+            out += `• Potensi Diskon yang Dapat Ditangkap: Rp ${pipe.potential_discount_captured_idr.toLocaleString()}\n`;
+            out += `• Rata-rata Imbal Hasil Portofolio: ${pipe.average_annualized_yield_apr}% APR\n`;
+            out += `• Dana Kas Likuid Siap Pakai: Rp ${pipe.liquid_cash_pool_available_idr.toLocaleString()}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pemasok memperoleh likuiditas modal kerja instan tanpa perlu mengajukan pinjaman bank komersial berbunga tinggi.</li>
+                <li>Holding menangkap diskon tunai yang memberikan imbal hasil bebas risiko sebesar ${offer.annualized_yield_apr}% APR bagi kas perbendaharaan.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Dynamic Discounting: ' + err.message;
+    }
+}
+
+async function triggerVibrationFFTRUL() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memproses sinyal getaran sensor IIoT dengan Fast Fourier Transform (FFT)...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const fft = await api('/iot/vibration/analyze-fft', 'POST', {});
+        const rul = await api(`/maintenance/predictive-rul/${fft.equipment_id}`, 'GET');
+
+        if (badge) badge.textContent = `🔬 Vibration FFT: ${fft.iso10816_severity_zone} (RUL: ${fft.remaining_useful_life_hours} Jam)`;
+        if (answerEl) {
+            let out = `🔬 PREDICTIVE MACHINE VIBRATION FFT & REMAINING USEFUL LIFE (RUL) RADAR:\n`;
+            out += `ID Mesin: ${fft.equipment_id} | Nama Mesin: ${fft.machine_name}\n`;
+            out += `Kecepatan Getaran RMS (ISO 10816): ${fft.overall_rms_velocity_mms} mm/s | Akselerasi Puncak: ${fft.peak_acceleration_g} G\n`;
+            out += `Zona Tingkat Keparahan Getaran: ${fft.iso10816_severity_zone}\n`;
+            out += `Klasifikasi Cacat Terdeteksi: ${fft.defect_classification}\n`;
+            out += `Proyeksi Sisa Jam Kerja Aman (Remaining Useful Life): ${fft.remaining_useful_life_hours} Jam Operasional\n`;
+            out += `Suku Cadang Dicadangkan Otomatis di WMS: ${fft.auto_reserved_spare_part_sku}\n`;
+            out += `Rekomendasi Tindakan Cerdas: ${fft.action_recommendation}\n\n`;
+            out += `PUNCAK SPEKTRAL FREKUENSI HARMONIK (FFT DECOMPOSITION):\n`;
+            out += `--------------------------------------------------\n`;
+            fft.spectral_peaks.forEach(p => {
+                out += `• Frekuensi ${p.frequency_hz} Hz (${p.harmonics_order}): Amplitudo ${p.amplitude_g} G [Status: ${p.anomaly_risk}]\n`;
+            });
+            out += `--------------------------------------------------\n`;
+            out += `STATUS KESEHATAN ASET (WEIBULL HAZARD RELIABILITY):\n`;
+            out += `Indeks Kesehatan: ${rul.health_index_percent}% | Jam Kerja Kumulatif: ${rul.operating_hours_total} Jam\n`;
+            out += `Jadwal Penggantian Preventif Terencana: ${rul.scheduled_intervention_date}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Analisis spektrum FFT mendeteksi cacat cincin luar bearing (BPFO) pada fase dini sebelum terjadi kerusakan poros motor.</li>
+                <li>Suku cadang bearing pengganti otomatis dicadangkan di gudang untuk intervensi terencana tanpa menghentikan produksi mendadak.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal menganalisis getaran FFT: ' + err.message;
+    }
+}
+
+async function triggerTravelPolicyGuard() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memvalidasi kebijakan perjalanan dinas & menghitung anggaran per-diem kota tujuan...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const policy = await api('/hr/travel/evaluate-policy', 'POST', {});
+        const settle = await api('/hr/travel/settle-per-diem', 'POST', {
+            request_id: policy.request_id,
+            actual_days_traveled: policy.total_duration_days,
+            prepaid_cash_advance_idr: 2000000
+        });
+
+        if (badge) badge.textContent = `✈️ Travel Guard: ${policy.overall_compliance_status}`;
+        if (answerEl) {
+            let out = `✈️ CORPORATE TRAVEL & ENTERTAINMENT (T&E) POLICY ENGINE & PER-DIEM MATRIX:\n`;
+            out += `No Permohonan Perjalanan: ${policy.request_id} | Karyawan: ${policy.employee_name} (${policy.job_grade})\n`;
+            out += `Klasifikasi Kota Tujuan: ${policy.destination_tier} | Durasi Perjalanan: ${policy.total_duration_days} Hari\n`;
+            out += `Status Kepatuhan Kebijakan: ${policy.overall_compliance_status}\n`;
+            out += `Uang Saku Harian (Per-Diem Rate): Rp ${policy.daily_per_diem_rate_idr.toLocaleString()} / hari (Total: Rp ${policy.total_per_diem_allowance_idr.toLocaleString()})\n`;
+            out += `Batas Plafon Hotel Maksimal: Rp ${policy.max_allowed_hotel_per_night_idr.toLocaleString()} / malam\n`;
+            out += `Estimasi Total Biaya Perjalanan Dinas: Rp ${policy.estimated_total_trip_cost_idr.toLocaleString()}\n\n`;
+            out += `HASIL AUDIT ATURAN PERJALANAN (POLICY CHECKS):\n`;
+            out += `--------------------------------------------------\n`;
+            policy.checks.forEach(c => {
+                out += `• ${c.rule_name}: ${c.is_compliant ? 'SESUAI (PASS)' : 'MELANGGAR (VIOLATION)'}\n`;
+                out += `  Batas Kebijakan: ${c.allowed_limit} | Permohonan: ${c.requested_value}\n`;
+            });
+            out += `--------------------------------------------------\n`;
+            out += `REKONSILIASI KAS AKHIR (PER-DIEM SETTLEMENT):\n`;
+            out += `Hak Uang Saku yang Didapat: Rp ${settle.total_per_diem_earned_idr.toLocaleString()}\n`;
+            out += `Uang Muka yang Diterima (Cash Advance): Rp ${settle.prepaid_cash_advance_idr.toLocaleString()}\n`;
+            out += `Penyelesaian Bersih: Rp ${settle.net_reimbursement_or_refund_idr.toLocaleString()} [${settle.settlement_status}]`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pemesanan tiket pesawat dan hotel otomatis diaudit terhadap aturan plafon jabatan dan batas pemesanan 7 hari sebelum keberangkatan.</li>
+                <li>Kalkulasi uang saku harian terstandarisasi berdasarkan tier kota tujuan dan langsung direkonsiliasi dengan uang muka kas.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memvalidasi kebijakan perjalanan dinas: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

@@ -36,6 +36,7 @@ import (
 	coremrp "erp-golang/internal/core/mrp"
 	corepricing "erp-golang/internal/core/pricing"
 	coresystem "erp-golang/internal/core/system"
+	coretradefinance "erp-golang/internal/core/tradefinance"
 	coretreasury "erp-golang/internal/core/treasury"
 	corevmi "erp-golang/internal/core/vmi"
 	corewms "erp-golang/internal/core/wms"
@@ -9463,5 +9464,146 @@ IEA*1*000099123~`
 	t.Logf("✓ Algorithmic Dynamic Pricing & Margin Guard Verified: SKU='%s', Base=IDR %.0f, Cost=IDR %.0f, Floor=IDR %.0f, SuggestedDynamic=IDR %.0f (Adj: %.1f%%, Margin: %.2f%%, GuardEnforced=%t), OrderAudit='%s' (Margin=%.2f%% vs Policy=%.2f%%, Approved=%t)",
 		dynPrice.SKU, dynPrice.BasePriceIDR, dynPrice.CurrentCostIDR, dynPrice.FloorPriceIDR, dynPrice.SuggestedDynamicPriceIDR, dynPrice.AdjustmentPercent, dynPrice.AchievedMarginPercent, dynPrice.MarginGuardEnforced, marginAudit.OrderID, marginAudit.OrderGrossMarginPercent, marginAudit.PolicyThresholdPercent, marginAudit.IsApproved)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (65 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD) PASSED 100%!")
+	// ==========================================
+	// SECTION 66: V1.52.0 SMART FACTORY, TRADE FINANCE & WORKING CAPITAL:
+	// 1. Smart Factory Floor Andon Visual Control & Shopfloor Anomaly Gateway
+	// 2. Letters of Credit (L/C) & Trade Finance Zero-Discrepancy Engine
+	// 3. Supplier Early-Payment Dynamic Discounting & Supply Chain Finance
+	// 4. Predictive Machine Vibration FFT & Remaining Useful Life (RUL) Radar
+	// 5. Corporate Travel & Entertainment (T&E) Policy Engine & Per-Diem Matrix
+	// ==========================================
+	t.Log(`
+		>>> SECTION 66: ANDON VISUAL CONTROL, TRADE FINANCE LC, DYNAMIC DISCOUNTING, VIBRATION FFT & TRAVEL POLICY <<<`)
+
+	// 66.1 Smart Factory Floor Andon Visual Control
+	andonEv, err := coremrp.TriggerAndonEventLogic(coremrp.TriggerAndonEventRequest{
+		LineID:      "LINE-SMT-CIKARANG-01",
+		StationID:   "WS-02",
+		IssueType:   "MATERIAL_STARVATION",
+		Description: "Stok reel komponen IC di feeder menipis; dibutuhkan restock cepat.",
+		TriggeredBy: "Budi Prabowo (Operator Lini)",
+	})
+	if err != nil || andonEv == nil || andonEv.EventID == "" {
+		t.Fatalf("Failed to trigger Andon event: %v, resp: %+v", err, andonEv)
+	}
+	if !andonEv.RunnerDispatched || andonEv.RunnerTaskID == "" {
+		t.Fatalf("Expected automated forklift runner dispatch for material starvation: %+v", andonEv)
+	}
+
+	andonBoard, err := coremrp.GetAndonBoardLogic("LINE-SMT-CIKARANG-01")
+	if err != nil || andonBoard == nil || len(andonBoard.Stations) == 0 {
+		t.Fatalf("Failed to get Andon visual board: %v, resp: %+v", err, andonBoard)
+	}
+	if andonBoard.OverallLineStatus == "" || andonBoard.CurrentLineOEE <= 0 {
+		t.Fatalf("Expected valid Andon line status and OEE: %+v", andonBoard)
+	}
+
+	resolveEv, err := coremrp.ResolveAndonEventLogic(coremrp.ResolveAndonEventRequest{
+		EventID:         andonEv.EventID,
+		ResolutionNotes: "Forklift runner completed reel replenishment.",
+		ResolvedBy:      "Agus (Forklift Runner)",
+	})
+	if err != nil || resolveEv == nil || resolveEv.Status != "RESOLVED" {
+		t.Fatalf("Failed to resolve Andon event: %v, resp: %+v", err, resolveEv)
+	}
+	t.Logf("✓ Andon Visual Control Verified: Line='%s', Status='%s', OEE=%.1f%%, MTTR=%.1f min, Event='%s' (Issue='%s', Severity='%s', RunnerTask='%s', Resolved=%s)",
+		andonBoard.LineName, andonBoard.OverallLineStatus, andonBoard.CurrentLineOEE, andonBoard.AverageMTTRMinutes, andonEv.EventID, andonEv.IssueType, andonEv.Severity, andonEv.RunnerTaskID, resolveEv.Status)
+
+	// 66.2 Letters of Credit (L/C) & Trade Finance Zero-Discrepancy Engine
+	lcAudit, err := coretradefinance.AuditLCDocumentsLogic(coretradefinance.LCAuditRequest{
+		LCNumber: "LC-2026-EU-NL-0089",
+	})
+	if err != nil || lcAudit == nil || lcAudit.TotalDocumentsAudited == 0 {
+		t.Fatalf("Failed to audit LC shipping documents: %v, resp: %+v", err, lcAudit)
+	}
+	if !lcAudit.ZeroDiscrepancyCertified || lcAudit.BankAcceptanceProbability < 95.0 {
+		t.Fatalf("Expected zero discrepancy certification: %+v", lcAudit)
+	}
+
+	tradeFacil, err := coretradefinance.GetCollateralUtilizationLogic()
+	if err != nil || tradeFacil == nil || len(tradeFacil.Facilities) == 0 {
+		t.Fatalf("Failed to get trade finance collateral overview: %v, resp: %+v", err, tradeFacil)
+	}
+	t.Logf("✓ Trade Finance LC Engine Verified: LC='%s', DocsAudited=%d, ZeroDiscrepancy=%t, BankAcceptance=%.1f%%, ActiveLCVal=USD %.0f, CollateralPledged=USD %.0f, TotalCreditLine=USD 10,000,000",
+		lcAudit.LCNumber, lcAudit.TotalDocumentsAudited, lcAudit.ZeroDiscrepancyCertified, lcAudit.BankAcceptanceProbability, tradeFacil.TotalActiveLCValueUSD, tradeFacil.TotalPledgedCollateralUSD)
+
+	// 66.3 Supplier Early-Payment Dynamic Discounting & Supply Chain Finance
+	ddOffer, err := coretreasury.GenerateDynamicDiscountOfferLogic(coretreasury.GenerateOfferRequest{
+		InvoiceRef:      "BILL/2026/11/0491",
+		OriginalAmount:  450000000.0,
+		DaysAccelerated: 45,
+	})
+	if err != nil || ddOffer == nil || ddOffer.OfferID == "" {
+		t.Fatalf("Failed to generate dynamic discount offer: %v, resp: %+v", err, ddOffer)
+	}
+	if ddOffer.DiscountAmountIDR <= 0 || ddOffer.AnnualizedYieldAPR < 10.0 {
+		t.Fatalf("Expected valid discount capture and double-digit treasury APR: %+v", ddOffer)
+	}
+
+	ddAccept, err := coretreasury.AcceptDynamicDiscountLogic(coretreasury.AcceptDiscountRequest{
+		OfferID:  ddOffer.OfferID,
+		VendorID: ddOffer.VendorID,
+	})
+	if err != nil || ddAccept == nil || ddAccept.Status != "ACCEPTED" {
+		t.Fatalf("Failed to accept dynamic discount: %v, resp: %+v", err, ddAccept)
+	}
+
+	ddPipe, err := coretreasury.GetDiscountingPipelineLogic()
+	if err != nil || ddPipe == nil || ddPipe.TotalEligibleInvoices == 0 {
+		t.Fatalf("Failed to get discounting pipeline: %v, resp: %+v", err, ddPipe)
+	}
+	t.Logf("✓ Dynamic Discounting Verified: Offer='%s', Vendor='%s', Bill='%s', Original=IDR %.0f, DaysAcc=%d, Disc=IDR %.0f (%.2f%%), NetPaid=IDR %.0f, TreasuryAPR=%.2f%%, Status='%s', PipelineEligible=%d (PotentialGain: IDR %.0f)",
+		ddOffer.OfferID, ddOffer.VendorName, ddOffer.InvoiceRef, ddOffer.OriginalAmountIDR, ddOffer.DaysAccelerated, ddOffer.DiscountAmountIDR, ddOffer.DiscountPercent, ddOffer.NetPayableAmountIDR, ddOffer.AnnualizedYieldAPR, ddAccept.Status, ddPipe.TotalEligibleInvoices, ddPipe.PotentialDiscountCapturedIDR)
+
+	// 66.4 Predictive Machine Vibration FFT & Remaining Useful Life (RUL) Radar
+	fftRes, err := iot.AnalyzeVibrationFFTLogic(iot.VibrationTelemetryRequest{
+		EquipmentID:  "EQ-SMT-REFLOW-03",
+		MachineName:  "Convection Reflow Soldering Blower Motor",
+		OperatingRPM: 2950.0,
+	})
+	if err != nil || fftRes == nil || len(fftRes.SpectralPeaks) == 0 {
+		t.Fatalf("Failed to analyze vibration FFT: %v, resp: %+v", err, fftRes)
+	}
+	if fftRes.OverallRMSVelocityMMS <= 0 || fftRes.RemainingUsefulLifeHours <= 0 {
+		t.Fatalf("Expected valid vibration RMS velocity and Remaining Useful Life: %+v", fftRes)
+	}
+
+	rulOverview, err := iot.GetPredictiveRULLogic(fftRes.EquipmentID)
+	if err != nil || rulOverview == nil || rulOverview.HealthIndexPercent <= 0 {
+		t.Fatalf("Failed to get predictive RUL overview: %v, resp: %+v", err, rulOverview)
+	}
+	t.Logf("✓ Vibration FFT & RUL Radar Verified: Machine='%s' (%s), RMS=%.2f mm/s, Peak=%.2f G, Zone='%s', Defect='%s', RUL=%.0f Hours, AutoReservedPart='%s', HealthIndex=%.1f%%, NextIntervention='%s'",
+		fftRes.MachineName, fftRes.EquipmentID, fftRes.OverallRMSVelocityMMS, fftRes.PeakAccelerationG, fftRes.ISO10816SeverityZone, fftRes.DefectClassification, fftRes.RemainingUsefulLifeHours, fftRes.AutoReservedSparePartSKU, rulOverview.HealthIndexPercent, rulOverview.ScheduledInterventionDate)
+
+	// 66.5 Corporate Travel & Entertainment (T&E) Policy Engine & Per-Diem Matrix
+	travelEval, err := corehr.EvaluateTravelPolicyLogic(corehr.TravelBookingRequest{
+		EmployeeName:              "Rendra Wicaksono, S.E.",
+		JobGrade:                  "SENIOR_MANAGER",
+		OriginCity:                "Jakarta (CGK)",
+		DestinationCity:           "Surabaya (SUB)",
+		AdvanceBookingDays:        14,
+		CabinClass:                "ECONOMY",
+		RequestedFlightCostIDR:    1850000.0,
+		RequestedHotelPerNightIDR: 850000.0,
+	})
+	if err != nil || travelEval == nil || len(travelEval.Checks) == 0 {
+		t.Fatalf("Failed to evaluate travel policy: %v, resp: %+v", err, travelEval)
+	}
+	if travelEval.OverallComplianceStatus != "FULLY_COMPLIANT_AUTO_APPROVED" || travelEval.DailyPerDiemRateIDR <= 0 {
+		t.Fatalf("Expected fully compliant auto-approved travel evaluation: %+v", travelEval)
+	}
+
+	travelSettle, err := corehr.SettlePerDiemLogic(corehr.PerDiemSettlementRequest{
+		RequestID:             travelEval.RequestID,
+		ActualDaysTraveled:    3,
+		DailyRateAppliedIDR:   travelEval.DailyPerDiemRateIDR,
+		PrepaidCashAdvanceIDR: 2000000.0,
+	})
+	if err != nil || travelSettle == nil || travelSettle.SettlementID == "" {
+		t.Fatalf("Failed to settle travel per-diem: %v, resp: %+v", err, travelSettle)
+	}
+	t.Logf("✓ Corporate Travel Policy & Per-Diem Verified: Req='%s', Employee='%s' (%s), DestTier='%s', Days=%d, DailyPerDiem=IDR %.0f, TotalPerDiem=IDR %.0f, Status='%s', Advance=IDR %.0f, SettlementDiff=IDR %.0f (%s)",
+		travelEval.RequestID, travelEval.EmployeeName, travelEval.JobGrade, travelEval.DestinationTier, travelEval.TotalDurationDays, travelEval.DailyPerDiemRateIDR, travelEval.TotalPerDiemAllowanceIDR, travelEval.OverallComplianceStatus, travelSettle.PrepaidCashAdvanceIDR, travelSettle.NetReimbursementOrRefundIDR, travelSettle.SettlementStatus)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (66 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM) PASSED 100%!")
 }

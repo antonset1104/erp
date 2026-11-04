@@ -621,3 +621,32 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Demand Elasticity & Competitor Repricing**: Endpoint `POST /api/v1/pricing/dynamic/evaluate` evaluates price elasticity of demand (PED), inventory days of supply, and competitor price movements.
 - **Strict Hard-Floor Gross Margin Guard**: Clamps calculated prices to guarantee they never drop below the corporate margin floor ($\text{FloorPrice} = \text{CurrentCost} \times (1 + \frac{\text{MinMargin}}{100})$).
 - **Sales Order Margin Audit**: Endpoint `POST /api/v1/pricing/margin-guard/verify-order` intercepts unapproved order discounting, requiring executive override if overall gross margin breaches corporate compliance policy.
+
+---
+
+## 18. Smart Factory Andon, Trade Finance LC, Dynamic Discounting, Vibration FFT & Travel Policy (v1.52.0)
+
+### 18.1 Smart Factory Floor Andon Visual Control & Shopfloor Anomaly Gateway (`internal/core/mrp/andon_hub.go`)
+- **Real-Time Workstation Status Visualization**: Endpoint `GET /api/v1/mrp/andon/board/:line_id` serves live line visual status (`GREEN` Optimal, `YELLOW` Paced Warning, `RED` Line Stop) directly to wall-mounted production monitors.
+- **Automated Replenishment Forklift Dispatch**: Endpoint `POST /api/v1/mrp/andon/trigger-event` instantly dispatches WMS warehouse replenishment runners for material starvation incidents, preventing assembly line downtime.
+- **Mean Time To Respond (MTTR)**: Endpoint `POST /api/v1/mrp/andon/resolve-event` logs incident clearance duration and operator resolution notes for continuous OEE tracking.
+
+### 18.2 Letters of Credit (L/C) & Trade Finance Zero-Discrepancy Engine (`internal/core/tradefinance/lc_vault.go`)
+- **Automated UCP 600 Pre-Presentation Auditing**: Endpoint `POST /api/v1/trade-finance/lc/audit-documents` verifies commercial invoices, bills of lading, packing lists, and certificates of origin against L/C clauses (tolerance windows, shipment dates, ports).
+- **Zero-Discrepancy Certification**: Certifies clean document presentations, preventing costly banking discrepancy fees (\$150/doc) and eliminating payment settlement delays.
+- **Trade Collateral & Credit Line Radar**: Endpoint `GET /api/v1/trade-finance/lc/collateral-utilization` tracks active commercial LCs, bank guarantees, and pledged collateral across partner financial institutions.
+
+### 18.3 Supplier Early-Payment Dynamic Discounting & Supply Chain Finance (`internal/core/treasury/dynamic_discounting.go`)
+- **Sliding-Scale APR Early Payment**: Endpoint `POST /api/v1/treasury/dynamic-discounting/offer` calculates dynamic discounts for vendor invoices based on acceleration days, generating risk-free double-digit treasury yields (~14.6% APR).
+- **Supplier Acceptance & Instant Settlement**: Endpoint `POST /api/v1/treasury/dynamic-discounting/accept` executes early payment commitments, relieving vendor liquidity constraints while automatically booking cash discount income in the General Ledger.
+- **Working Capital Pipeline Overview**: Endpoint `GET /api/v1/treasury/dynamic-discounting/pipeline` visualizes eligible invoice volume, captured discounts, and available liquid cash pools.
+
+### 18.4 Predictive Machine Vibration FFT & Remaining Useful Life (RUL) Radar (`internal/core/iot/vibration_fft.go`)
+- **Harmonic Spectral Decomposition (FFT)**: Endpoint `POST /api/v1/iot/vibration/analyze-fft` ingests IIoT accelerometer time-series, decomposes fundamental and harmonic peaks ($1\times, 2\times, \text{BPFO}$), and maps overall RMS velocity against ISO 10816 vibration severity zones.
+- **Weibull Remaining Useful Life (RUL)**: Models remaining safe operating hours before mechanical bearing breakdown and automatically stages spare part reservations in WMS.
+- **Asset Health Radar**: Endpoint `GET /api/v1/maintenance/predictive-rul/:equipment_id` monitors machine health indices and scheduled intervention dates.
+
+### 18.5 Corporate Travel & Entertainment (T&E) Policy Engine & Per-Diem Matrix (`internal/core/hr/travel_policy.go`)
+- **Multi-Rule Corporate Travel Policy Audit**: Endpoint `POST /api/v1/hr/travel/evaluate-policy` checks advance booking windows ($\ge 7$ days), cabin class eligibility, and nightly hotel ceiling caps.
+- **City-Tier Per-Diem Matrix**: Automatically computes daily per-diem allowances based on destination tier (Tier 1 Metros vs Regional Tier 2/3 vs International).
+- **Cash Advance & Per-Diem Reconciliation**: Endpoint `POST /api/v1/hr/travel/settle-per-diem` reconciles actual days traveled against prepaid cash advances, issuing automated reimbursement or refund vouchers.
