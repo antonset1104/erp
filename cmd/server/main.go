@@ -19,6 +19,7 @@ import (
 	corecustoms "erp-golang/internal/core/customs"
 	coreedi "erp-golang/internal/core/edi"
 	coreehs "erp-golang/internal/core/ehs"
+	coreenergy "erp-golang/internal/core/energy"
 	coreexpense "erp-golang/internal/core/expense"
 	corefieldservice "erp-golang/internal/core/fieldservice"
 	corefleet "erp-golang/internal/core/fleet"
@@ -291,7 +292,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.58.0",
+			"version":    "1.59.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -396,6 +397,11 @@ func main() {
 		coretreasury.RegisterLiquidityStressRoutes(apiV1)
 		coregrc.RegisterCSDDDRoutes(apiV1)
 		corehr.RegisterGigMarketplaceRoutes(apiV1)
+		coremrp.RegisterTOCRoutes(apiV1)
+		coreenergy.RegisterVPPRoutes(apiV1)
+		coretax.RegisterDTAARoutes(apiV1)
+		security.RegisterZKPRoutes(apiV1)
+		corecustoms.RegisterGATTRoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend

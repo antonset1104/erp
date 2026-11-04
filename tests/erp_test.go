@@ -29,6 +29,7 @@ import (
 	corecustoms "erp-golang/internal/core/customs"
 	coreedi "erp-golang/internal/core/edi"
 	coreehs "erp-golang/internal/core/ehs"
+	coreenergy "erp-golang/internal/core/energy"
 	coreexpense "erp-golang/internal/core/expense"
 	corefieldservice "erp-golang/internal/core/fieldservice"
 	corefleet "erp-golang/internal/core/fleet"
@@ -10579,5 +10580,173 @@ IEA*1*000099123~`
 	t.Logf("✓ Internal Gig Marketplace Verified: AppID='%s', Gig='%s' (%s), Employee='%s' (%s), Supervisor='%s', MatchScore=%.1f%%, ManagerApproved=%v, Status='%s', VerifiedSkills=%v",
 		gigRelease.ApplicationID, gigRelease.GigTitle, gigRelease.GigID, gigRelease.EmployeeName, gigRelease.CurrentDepartment, gigRelease.CurrentSupervisorName, gigRelease.MatchScorePct, gigRelease.ManagerReleaseApproved, gigRelease.Status, gigRelease.VerifiedSkillsEarned)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (72 SECTIONS: 65+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE) PASSED 100%!")
+	t.Log("\n\t\t>>> SECTION 73: TOC DRUM-BUFFER-ROPE, VPP ENERGY ARBITRAGE, DTAA TAX TREATY, ZKP ANTI-COUNTERFEIT & GATT CUSTOMS TP HARMONIZER <<<")
+
+	// 73.1 Theory of Constraints (TOC) Drum-Buffer-Rope & WIP Bottleneck Radar
+	coremrp.GetTOCEngine().IngestTelemetry(coremrp.WorkcenterTelemetry{
+		PlantID:            "PLANT-BEKASI-01",
+		WorkcenterID:       "WC-SMT-CHIP-MOUNTER-01",
+		WorkcenterName:     "High-Speed SMT Chip Mounter Line 1",
+		IsDrumBottleneck:   true,
+		CycleTimeSeconds:   8.0,
+		TargetCycleSeconds: 7.5,
+		CurrentWIPUnits:    95,
+		BufferCapacityMax:  300,
+		MicroStoppagesMin:  12.5,
+		MTBFHours:          180.0,
+		MTTRMinutes:        25.0,
+		CurrentOEEPercent:  88.5,
+		Timestamp:          time.Now(),
+	})
+
+	tocAudit := coremrp.GetTOCEngine().EvaluateBuffer("PLANT-BEKASI-01", "WC-SMT-CHIP-MOUNTER-01")
+	if tocAudit.PlantID != "PLANT-BEKASI-01" || tocAudit.BufferZone == "" || tocAudit.PenetrationPercent <= 0 {
+		t.Fatalf("Failed to evaluate TOC buffer penetration: %+v", tocAudit)
+	}
+
+	ropeOrder := coremrp.GetTOCEngine().AdjustRopeRelease("PLANT-BEKASI-01", "WC-SMT-CHIP-MOUNTER-01", 450)
+	if ropeOrder.ReleaseOrderID == "" || ropeOrder.TargetReleaseUnitsHr <= 0 {
+		t.Fatalf("Failed to calculate TOC rope material release: %+v", ropeOrder)
+	}
+
+	tocRadar := coremrp.GetTOCEngine().GetBottleneckRadar("PLANT-BEKASI-01")
+	if tocRadar.ActiveDrumConstraint == "" || tocRadar.DrumThroughputUnitsHr <= 0 || tocRadar.TotalWIPCapitalUSD <= 0 {
+		t.Fatalf("Failed to compile TOC plant bottleneck radar: %+v", tocRadar)
+	}
+	t.Logf("✓ TOC Drum-Buffer-Rope Verified: Plant='%s', Drum='%s' (Throughput=%.1f u/hr), Penetration=%.1f%% (Zone='%s', Action='%s'), RopeOrder='%s' (Rate=%d u/hr, Status='%s'), TotalWIPCapital=$%.0f USD",
+		tocRadar.PlantID, tocRadar.ActiveDrumConstraint, tocRadar.DrumThroughputUnitsHr, tocAudit.PenetrationPercent, tocAudit.BufferZone, tocAudit.RecommendedAction, ropeOrder.ReleaseOrderID, ropeOrder.TargetReleaseUnitsHr, ropeOrder.RopeStatus, tocRadar.TotalWIPCapitalUSD)
+
+	// 73.2 Autonomous Factory Energy Arbitrage & Virtual Power Plant (VPP) Dispatch Engine
+	coreenergy.GetVPPEngine().IngestTariffCurve("SITE-CIKARANG-FACILITY-01", []coreenergy.TariffInterval{
+		{HourOfDay: 2, ImportTariffPerKWh: 0.055, ExportTariffPerKWh: 0.04, TariffTier: "OFF_PEAK"},
+		{HourOfDay: 18, ImportTariffPerKWh: 0.285, ExportTariffPerKWh: 0.22, TariffTier: "CRITICAL_PEAK"},
+	}, coreenergy.BESSAsset{
+		BatteryID:           "BESS-TESLA-MEGA-2MWH",
+		TotalCapacityKWh:    2000.0,
+		CurrentSoCPercent:   35.0,
+		MaxChargeRateKW:     500.0,
+		MaxDischargeRateKW:  500.0,
+		RoundTripEfficiency: 0.92,
+		DegradationCostKWh:  0.012,
+	})
+
+	vppPlan := coreenergy.GetVPPEngine().OptimizeDispatch("SITE-CIKARANG-FACILITY-01")
+	if vppPlan.PlanID == "" || len(vppPlan.HourlySchedule) != 24 || vppPlan.PeakDemandReductionKW <= 0 {
+		t.Fatalf("Failed to optimize VPP 24h dispatch schedule: %+v", vppPlan)
+	}
+
+	vppCurtailment := coreenergy.GetVPPEngine().ExecuteCurtailment("SITE-CIKARANG-FACILITY-01", 350.0, 60, []string{"HVAC-CHILLER-01", "FURNACE-PREHEAT-02"})
+	if vppCurtailment.EventID == "" || vppCurtailment.ExecutionStatus != "SHEDDING_ACTIVE" || vppCurtailment.IncentiveCreditUSD <= 0 {
+		t.Fatalf("Failed to execute VPP curtailment event: %+v", vppCurtailment)
+	}
+
+	vppPnL := coreenergy.GetVPPEngine().GetArbitragePnL("SITE-CIKARANG-FACILITY-01")
+	if vppPnL.NetEconomicGainUSD <= 0 || vppPnL.NetCarbonAbatedTons <= 0 {
+		t.Fatalf("Failed to calculate VPP arbitrage PnL: %+v", vppPnL)
+	}
+	t.Logf("✓ VPP Energy Arbitrage Verified: Site='%s', PlanID='%s', PeakShaving=%.0f kW, Charged=%.1f kWh, Discharged=%.1f kWh, Curtailment='%s' ($%.2f credit), MonthlyGain=$%.0f USD (Savings=$%.0f, DemandAvoid=$%.0f), CO2Abated=%.2f Tons",
+		vppPnL.SiteID, vppPlan.PlanID, vppPlan.PeakDemandReductionKW, vppPlan.TotalChargedKWh, vppPlan.TotalDischargedKWh, vppCurtailment.EventID, vppCurtailment.IncentiveCreditUSD, vppPnL.NetEconomicGainUSD, vppPnL.GrossTariffSavingsUSD, vppPnL.DemandChargeAvoidanceUSD, vppPnL.NetCarbonAbatedTons)
+
+	// 73.3 Cross-Border Tax Withholding & Double Tax Treaty (DTAA) Automated Validator
+	dtaaVendor := coretax.GetDTAAEngine().ValidateResidency(coretax.VendorTaxResidency{
+		VendorID:                  "VND-CLOUD-SG-01",
+		VendorName:                "Apex Cloud Enterprise Pte Ltd",
+		CountryOfResidence:        "SG",
+		ForeignTIN:                "201829384G",
+		CoRDocNumber:              "COR-IRAS-SG-2026-9901",
+		CoRExpiryDate:             time.Now().AddDate(1, 0, 0),
+		IsBeneficialOwner:         true,
+		HasNoAgentIntermediary:    true,
+		HasPermanentEstablishment: false,
+		ConsultantDaysInCountry:   14,
+	})
+	if dtaaVendor.VerifiedStatus != "VALID_TREATY_ELIGIBLE" {
+		t.Fatalf("Failed to validate tax treaty residency: %+v", dtaaVendor)
+	}
+
+	dtaaRate := coretax.GetDTAAEngine().ComputeWithholdingRate("VND-CLOUD-SG-01", "ROYALTY_SOFTWARE", 85000.0)
+	if dtaaRate.TreatyRatePercent != 10.0 || dtaaRate.TaxSavingsUSD != 8500.0 || dtaaRate.PEWarning {
+		t.Fatalf("Failed to compute correct DTAA treaty withholding rate: %+v", dtaaRate)
+	}
+
+	dtaaCert := coretax.GetDTAAEngine().GenerateCertificate("VND-CLOUD-SG-01", "ROYALTY_SOFTWARE", 85000.0)
+	if dtaaCert.CertificateNumber == "" || dtaaCert.DigitalCertificateHash == "" || dtaaCert.TaxWithheldUSD != 8500.0 {
+		t.Fatalf("Failed to generate DTAA tax certificate: %+v", dtaaCert)
+	}
+
+	dtaaAudit := coretax.GetDTAAEngine().GetAuditSummary("VND-CLOUD-SG-01")
+	if dtaaAudit.AuditVerdict != "COMPLIANT_FULL_DTAA_RELIEF" || dtaaAudit.TotalTreatySavingsUSD <= 0 {
+		t.Fatalf("Failed to compile DTAA tax compliance audit: %+v", dtaaAudit)
+	}
+	t.Logf("✓ DTAA Tax Treaty Validator Verified: Vendor='%s' (%s, Status='%s'), Income='ROYALTY_SOFTWARE', Gross=$85,000 USD, Statutory=20%% -> Treaty=10%% (%s), TaxWithheld=$%.0f, NetPaid=$%.0f, TaxSavings=$%.0f USD, Cert='%s' (Hash=%s), Verdict='%s'",
+		dtaaVendor.VendorName, dtaaVendor.CountryOfResidence, dtaaVendor.VerifiedStatus, dtaaRate.TreatyArticleCited, dtaaRate.TaxWithheldAmountUSD, dtaaRate.NetPayableAmountUSD, dtaaRate.TaxSavingsUSD, dtaaCert.CertificateNumber, dtaaCert.DigitalCertificateHash[:16], dtaaAudit.AuditVerdict)
+
+	// 73.4 Supply Chain Anti-Counterfeit Serialization & Zero-Knowledge Proof (ZKP) Provenance Ledger
+	zkpSerial := "SGTIN-01-0899482910-SN773921"
+	mintedProof := security.GetZKPEngine().MintSerialProof(security.SerializedProductProof{
+		SerialNumber:      zkpSerial,
+		ProductSKU:        "MED-BIOLOGIC-VACC-009",
+		ProductName:       "Recombinant Monoclonal Sterile Vial 50mg",
+		BatchNumber:       "BATCH-BIO-2026-Q1-88",
+		ManufacturerID:    "MFG-BIOFARMA-STERILE-01",
+		ManufacturingDate: time.Now(),
+		ExpiryDate:        time.Now().AddDate(2, 0, 0),
+	})
+	if mintedProof.ZKProofHash == "" || mintedProof.MerkleRootCommitment == "" || !mintedProof.SecretSaltHidden || mintedProof.CurrentStatus != "GENUINE_IN_CIRCULATION" {
+		t.Fatalf("Failed to mint zero-knowledge serial proof: %+v", mintedProof)
+	}
+
+	handshake1 := security.GetZKPEngine().VerifyCustodyChain(zkpSerial, "AIR_FREIGHT_CARRIER", "Garuda Cargo Express", "JAKARTA_ID")
+	if !handshake1.ValidHandshake {
+		t.Fatalf("Failed to verify custody handshake 1: %+v", handshake1)
+	}
+
+	handshake2 := security.GetZKPEngine().VerifyCustodyChain(zkpSerial, "CENTRAL_DC", "PT Cold Logistics Hub Surabaya", "SURABAYA_ID")
+	if !handshake2.ValidHandshake {
+		t.Fatalf("Failed to verify custody handshake 2: %+v", handshake2)
+	}
+
+	zkpLineage := security.GetZKPEngine().GetItemLineage(zkpSerial)
+	if zkpLineage.AuthenticityRank != "AUTHENTIC_GENUINE_100" || len(zkpLineage.CustodyTrail) < 3 {
+		t.Fatalf("Failed to compile item lineage: %+v", zkpLineage)
+	}
+	t.Logf("✓ ZKP Anti-Counterfeit Verified: Serial='%s' (Batch='%s'), ZKProof='%s', MerkleRoot='%s', SecretBOMHidden=%v, CustodySteps=%d, AuthenticityRank='%s', Status='%s'",
+		zkpLineage.SerialNumber, zkpLineage.ProofDetails.BatchNumber, zkpLineage.ProofDetails.ZKProofHash, zkpLineage.ProofDetails.MerkleRootCommitment, zkpLineage.ProofDetails.SecretSaltHidden, len(zkpLineage.CustodyTrail), zkpLineage.AuthenticityRank, zkpLineage.ProofDetails.CurrentStatus)
+
+	// 73.5 Cross-Border GATT Customs Valuation & Transfer Pricing Harmonizer
+	gattVal := corecustoms.GetGATTHarmonizerEngine().EvaluateTransactionValue(corecustoms.GATTTransactionValue{
+		ShipmentID:              "SHP-IMP-GATT-9901",
+		ImporterEntity:          "PT Golang ERP Industri Nusantara",
+		ExporterAffiliate:       "GoERP Global Logistics Ltd (Hong Kong)",
+		BaseInvoiceFOBUSD:       120000.0,
+		InternationalFreightUSD: 12500.0,
+		MarineInsuranceUSD:      2100.0,
+		DutiableAssistsUSD:      6500.0,
+		RoyaltiesLicenseFeesUSD: 4800.0,
+		PackingAndContainersUSD: 1600.0,
+		SellingCommissionsUSD:   2500.0,
+	})
+	expectedCIF := 120000.0 + 12500.0 + 2100.0 + 6500.0 + 4800.0 + 1600.0 + 2500.0 // 150,000.0 USD
+	if gattVal.CalculatedDutiableCIFUSD != expectedCIF || gattVal.ValuationMethodCited == "" {
+		t.Fatalf("Failed to compute GATT Article VII transaction value: %+v (expected CIF: %.2f)", gattVal, expectedCIF)
+	}
+
+	tpRecon := corecustoms.GetGATTHarmonizerEngine().ReconcileTransferPricing("SHP-IMP-GATT-9901", 150.0, 135.0, 148.0, 162.0)
+	if tpRecon.AlignmentStatus != "HARMONIZED_IN_RANGE" || tpRecon.CustomsDutyExposureUSD != 0 {
+		t.Fatalf("Failed to reconcile TP interquartile range: %+v", tpRecon)
+	}
+
+	customsDecl := corecustoms.GetGATTHarmonizerEngine().GenerateClearanceDeclaration("SHP-IMP-GATT-9901", "8471.50.10", 7.5, "IDTPP")
+	if customsDecl.DeclarationNumber == "" || customsDecl.DeclaredCIFValueUSD != expectedCIF || customsDecl.CustomsStatus != "GREEN_LINE_CLEARED" || customsDecl.TotalCustomsTaxesUSD <= 0 {
+		t.Fatalf("Failed to generate customs clearance declaration: %+v", customsDecl)
+	}
+
+	customsAudit := corecustoms.GetGATTHarmonizerEngine().GetAuditSummary("SHP-IMP-GATT-9901")
+	if customsAudit.AuditVerdict != "FULL_GATT_AND_OECD_HARMONIZED" {
+		t.Fatalf("Failed to compile customs TP harmonizer audit: %+v", customsAudit)
+	}
+	t.Logf("✓ GATT Customs Valuation & TP Harmonizer Verified: Shipment='%s', CIF Dutiable=$%.0f USD (FOB=$120k + Freight=$12.5k + Assists=$6.5k + Royalties=$4.8k), TP Unit=$150 (Q1=$135, Q3=$162, Alignment='%s'), Decl='%s' (Port='%s', Status='%s'), ImportDuty=$%.0f, ImportVAT=$%.0f, PPh22=$%.0f (TotalTaxes=$%.0f USD), Verdict='%s'",
+		gattVal.ShipmentID, gattVal.CalculatedDutiableCIFUSD, tpRecon.AlignmentStatus, customsDecl.DeclarationNumber, customsDecl.PortOfEntry, customsDecl.CustomsStatus, customsDecl.ImportDutyPayableUSD, customsDecl.ImportVATPayableUSD, customsDecl.ImportIncomeTax22USD, customsDecl.TotalCustomsTaxesUSD, customsAudit.AuditVerdict)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (73 SECTIONS: 65+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER) PASSED 100%!")
 }

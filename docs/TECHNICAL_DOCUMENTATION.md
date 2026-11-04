@@ -822,5 +822,39 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Semantic Skill Bidding & Manager Release Approval**: Endpoints `POST /api/v1/hr/gigs/apply-match` and `POST /api/v1/hr/gigs/approve-manager-release` calculate employee-gig compatibility scores and process formal supervisor time-release sign-offs.
 - **Active Gig Marketplace & Skill Endorsement**: Endpoint `GET /api/v1/hr/gigs/active-marketplace` displays active corporate project opportunities and awards verified skills to employee HRIS profiles upon gig completion.
 
+---
+
+## 25. TOC Drum-Buffer-Rope, VPP Energy Arbitrage, DTAA Tax Treaty, ZKP Anti-Counterfeit & GATT Customs TP Harmonizer (v1.59.0)
+
+### 25.1 Predictive WIP Bottleneck Radar & Theory of Constraints (TOC) Drum-Buffer-Rope Engine (`internal/core/mrp/toc_dbr_engine.go`)
+- **TOC Constraint & Drum Identification**: Identifies the critical factory bottleneck workstation (Drum) and tracks its cycle times, OEE, micro-stoppages, and maximum buffer capacity.
+- **Buffer Penetration Monitoring**: Endpoint `POST /api/v1/mrp/toc-dbr/evaluate-buffer-penetration` classifies buffer consumption into Green (0-33%), Yellow (34-66%), and Red (67-100%+) zones, alerting supervisors before constraint starvation occurs.
+- **Dynamic Rope Choke Rate Throttling**: Endpoint `POST /api/v1/mrp/toc-dbr/adjust-rope-release-rate` modulates upstream material release pacing to prevent excess shopfloor WIP inventory build-up while keeping the drum constraint running at 100% throughput.
+- **Plant Bottleneck Radar**: Endpoint `GET /api/v1/mrp/toc-dbr/bottleneck-radar/:plant_id` provides diagnostic visibility into active constraints, predicted next bottleneck migrations, and total WIP capital tied up on the shopfloor.
+
+### 25.2 Autonomous Factory Energy Arbitrage & Virtual Power Plant (VPP) Dispatch Engine (`internal/core/energy/vpp_dispatch.go`)
+- **Dynamic Tariff & BESS Orchestration**: Endpoint `POST /api/v1/energy/vpp/ingest-tariffs` ingests 24-hour day-ahead and intraday tariff curves alongside industrial Battery Energy Storage System (BESS) state-of-charge (SoC) parameters.
+- **Arbitrage Dispatch Optimization**: Endpoint `POST /api/v1/energy/vpp/optimize-dispatch-schedule` generates an optimal 24-hour charging and discharging schedule, charging batteries during off-peak periods and discharging during peak tariff windows to avoid high demand charges.
+- **Demand Response & Load Curtailment**: Endpoint `POST /api/v1/energy/vpp/execute-curtailment-event` sheds non-critical industrial loads (HVAC chillers, thermal furnaces) during grid stress events, capturing utility incentive credits.
+- **Arbitrage PnL & Carbon Abatement**: Endpoint `GET /api/v1/energy/vpp/arbitrage-pnl/:site_id` computes monthly net economic gains, grid feed-in revenues, battery degradation cost amortization, and avoided Scope 2 CO2 emissions.
+
+### 25.3 Cross-Border Tax Withholding & Double Tax Treaty (DTAA / P3B) Automated Validator (`internal/core/tax/dtaa_validator.go`)
+- **Residency & Beneficial Ownership Validation**: Endpoint `POST /api/v1/tax/dtaa/validate-vendor-residency` verifies foreign vendor Certificates of Residence (Form DGT / W-8BEN-E) and beneficial owner documentation.
+- **Automated Treaty Rate Matrix Calculation**: Endpoint `POST /api/v1/tax/dtaa/compute-withholding-rate` evaluates bilateral Double Tax Avoidance Agreements (DTAA) to apply reduced withholding rates (e.g. 10% vs default 20% statutory PPh 26) with permanent establishment (PE) time-test monitoring.
+- **Statutory Withholding Tax Certificate Issuance**: Endpoint `POST /api/v1/tax/dtaa/generate-tax-certificate` issues official withholding vouchers (e-Bupot equivalent) with digital cryptographic integrity hashes and automated General Ledger accounting entries.
+- **Treaty Compliance Audit File**: Endpoint `GET /api/v1/tax/dtaa/treaty-compliance-audit/:vendor_id` compiles complete cross-border tax audit files demonstrating statutory tax defense and cumulative savings.
+
+### 25.4 Supply Chain Anti-Counterfeit Serialization & Zero-Knowledge Proof (ZKP) Provenance Ledger (`internal/core/security/zkp_anti_counterfeit.go`)
+- **Zero-Knowledge Serial Proof Minting**: Endpoint `POST /api/v1/security/zkp-trace/mint-serial-proof` mints cryptographic GS1 serialized identifiers with zk-SNARK origin commitments, concealing proprietary bill-of-materials and pricing secrets.
+- **Immutable Custody Handshake Verification**: Endpoint `POST /api/v1/security/zkp-trace/verify-custody-chain` authenticates each custody handover across manufacturers, air carriers, distribution centers, and dispensing pharmacies.
+- **Anti-Counterfeit & Velocity Anomaly Detection**: Endpoint `POST /api/v1/security/zkp-trace/flag-counterfeit-anomaly` detects duplicate scans, unauthorized geographic jumps, or illicit diversion, immediately locking affected batches in WMS.
+- **End-to-End Cryptographic Lineage**: Endpoint `GET /api/v1/security/zkp-trace/item-lineage/:serial_no` provides the complete cryptographic provenance tree and authenticity ranking for regulatory inspection.
+
+### 25.5 Cross-Border GATT Customs Valuation & Transfer Pricing Harmonizer (`internal/core/customs/gatt_tp_harmonizer.go`)
+- **WTO GATT Article VII Valuation Engine**: Endpoint `POST /api/v1/customs/gatt-valuation/evaluate-transaction-value` calculates statutory dutiable CIF customs values by incorporating FOB invoice prices, assists, royalties, packing, and international freight.
+- **OECD Arm's Length Interquartile Benchmarking**: Endpoint `POST /api/v1/customs/gatt-valuation/reconcile-transfer-pricing` benchmarks declared customs prices against Transfer Pricing Local File interquartile ranges ($Q_1$, Median, $Q_3$) to mitigate customs undervaluation penalties and corporate income tax disallowances.
+- **Automated Customs Clearance Declaration**: Endpoint `POST /api/v1/customs/gatt-valuation/generate-clearance-declaration` prepares formal import entry documentation (PIB / Entry Pack) calculating Import Duty, Import VAT, and Article 22 import taxes.
+- **Harmonized Customs & TP Audit Record**: Endpoint `GET /api/v1/customs/gatt-valuation/audit-summary/:shipment_id` delivers unified compliance dossiers aligning Customs and Tax Authority requirements.
+
 
 

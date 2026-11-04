@@ -1047,6 +1047,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/mrp/toc-dbr/evaluate-buffer-penetration": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Predictive WIP Bottleneck Radar & Theory of Constraints (TOC) DBR Engine",
+					"description": "Monitors drum constraint buffer zones (Green, Yellow, Red) and modulates upstream rope material release pace.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Buffer penetration status, zone classification, and recommended action"},
+					},
+				},
+			},
+			"/api/v1/energy/vpp/optimize-dispatch-schedule": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Autonomous Factory Energy Arbitrage & Virtual Power Plant (VPP) Dispatch Engine",
+					"description": "Optimizes 24-hour industrial BESS battery dispatch across dynamic tariffs to maximize cost savings and avoid peak demand charges.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Hourly charging/discharging schedule, economic savings, and carbon abatement metrics"},
+					},
+				},
+			},
+			"/api/v1/tax/dtaa/compute-withholding-rate": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Cross-Border Tax Withholding & Double Tax Treaty (DTAA) Automated Validator",
+					"description": "Validates Certificate of Residence (CoR) and computes reduced bilateral treaty withholding tax rates with PE risk detection.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Applicable treaty rate, tax savings, statutory comparison, and PE alerts"},
+					},
+				},
+			},
+			"/api/v1/security/zkp-trace/mint-serial-proof": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Supply Chain Anti-Counterfeit Serialization & Zero-Knowledge Proof (ZKP) Provenance Ledger",
+					"description": "Mints cryptographic item serialization with zk-SNARK authentic origin proofs concealing proprietary BOM and pricing data.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Minted serial proof with cryptographic zero-knowledge commitment hash"},
+					},
+				},
+			},
+			"/api/v1/customs/gatt-valuation/evaluate-transaction-value": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Cross-Border GATT Customs Valuation & Transfer Pricing Harmonizer",
+					"description": "Computes dutiable customs CIF value under WTO GATT Article VII and benchmarks against OECD Arm's Length TP ranges.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Calculated dutiable CIF value, transfer pricing interquartile reconciliation, and import duties"},
+					},
+				},
+			},
 		},
 	}
 }

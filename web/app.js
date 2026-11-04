@@ -26989,6 +26989,373 @@ async function triggerInternalGigMarketplace() {
     }
 }
 
+async function triggerTOCBottleneckRadar() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi Theory of Constraints Drum-Buffer-Rope & radar bottleneck pabrik...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        await api('/mrp/toc-dbr/ingest-workcenter-telemetry', 'POST', {
+            plant_id: "PLANT-BEKASI-01",
+            workcenter_id: "WC-SMT-CHIP-MOUNTER-01",
+            workcenter_name: "High-Speed SMT Chip Mounter Line 1",
+            is_drum_bottleneck: true,
+            cycle_time_seconds: 8.0,
+            target_cycle_seconds: 7.5,
+            current_wip_units: 95,
+            buffer_capacity_max: 300,
+            micro_stoppages_min: 12.5,
+            mtbf_hours: 180.0,
+            mttr_minutes: 25.0,
+            current_oee_percent: 88.5
+        });
+
+        const audit = await api('/mrp/toc-dbr/evaluate-buffer-penetration', 'POST', {
+            plant_id: "PLANT-BEKASI-01",
+            drum_workcenter_id: "WC-SMT-CHIP-MOUNTER-01"
+        });
+
+        const rope = await api('/mrp/toc-dbr/adjust-rope-release-rate', 'POST', {
+            plant_id: "PLANT-BEKASI-01",
+            drum_workcenter_id: "WC-SMT-CHIP-MOUNTER-01",
+            original_release_rate: 450
+        });
+
+        const radar = await api('/mrp/toc-dbr/bottleneck-radar/PLANT-BEKASI-01', 'GET');
+
+        if (badge) badge.textContent = `⏱️ TOC: ${audit.audit.buffer_zone}`;
+        if (answerEl) {
+            let out = `⏱️ PREDICTIVE WIP BOTTLENECK RADAR & THEORY OF CONSTRAINTS (TOC) DBR ENGINE:\n`;
+            out += `Pabrik: ${radar.radar.plant_id}\n`;
+            out += `Stasiun Kerja Kendala Utama (Drum Constraint): ${radar.radar.active_drum_constraint}\n`;
+            out += `Throughput Kapasitas Drum: ${radar.radar.drum_throughput_units_hr} unit/jam\n`;
+            out += `Aliran Efektif Pabrik (Overall Flow Rate): ${radar.radar.plant_overall_flow_rate.toFixed(1)} unit/jam\n`;
+            out += `Prediksi Potensi Kendala Berikutnya (Next Drum): ${radar.radar.predicted_next_drum}\n`;
+            out += `Total Modal Kerja Tertahan di WIP: $${radar.radar.total_wip_capital_usd.toLocaleString()}\n\n`;
+            out += `STATUS BUFFER PENETRATION PADA DRUM CONSTRAINT:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Penetrasi Buffer Saat Ini: ${audit.audit.penetration_percent.toFixed(1)}% (Zona: ${audit.audit.buffer_zone})\n`;
+            out += `WIP Aktual di Depan Drum: ${audit.audit.wip_units_before_drum} unit / Kapasitas Buffer Max: ${audit.audit.buffer_capacity_units} unit\n`;
+            out += `Rekomendasi Tindakan: ${audit.audit.recommended_action}\n\n`;
+            out += `PENGATURAN LAJU PELEPASAN MATERIAL HULU (ROPE RELEASE ADJUSTMENT):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `No Order Rilis Tali (Rope Order): ${rope.order.release_order_id}\n`;
+            out += `Status Throttling: ${rope.order.rope_status}\n`;
+            out += `Laju Rilis Material yang Disesuaikan: ${rope.order.target_release_units_hr} unit/jam (Semula: ${rope.order.original_release_rate} unit/jam)\n`;
+            out += `Justifikasi: ${rope.order.justification}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Prinsip TOC Drum-Buffer-Rope mencegah membludaknya WIP di lantai pabrik dan menjaga stasiun kendala beroperasi 100%.</li>
+                <li>Radar prediktif mengantisipasi migrasi bottleneck stasiun kerja sebelum terjadi bottleneck starving.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses TOC Drum-Buffer-Rope: ' + err.message;
+    }
+}
+
+async function triggerVPPArbitrage() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengoptimalkan jadwal Virtual Power Plant (VPP) & arbitrase energi BESS...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        await api('/energy/vpp/ingest-tariffs', 'POST', {
+            site_id: "SITE-CIKARANG-FACILITY-01",
+            intervals: [
+                { hour_of_day: 2, import_tariff_per_kwh: 0.055, export_tariff_per_kwh: 0.04, tariff_tier: "OFF_PEAK" },
+                { hour_of_day: 18, import_tariff_per_kwh: 0.285, export_tariff_per_kwh: 0.22, tariff_tier: "CRITICAL_PEAK" }
+            ],
+            bess: {
+                battery_id: "BESS-TESLA-MEGA-2MWH",
+                total_capacity_kwh: 2000.0,
+                current_soc_percent: 35.0,
+                max_charge_rate_kw: 500.0,
+                max_discharge_rate_kw: 500.0,
+                round_trip_efficiency: 0.92,
+                degradation_cost_kwh: 0.012
+            }
+        });
+
+        const opt = await api('/energy/vpp/optimize-dispatch-schedule', 'POST', {
+            site_id: "SITE-CIKARANG-FACILITY-01"
+        });
+
+        const pnl = await api('/energy/vpp/arbitrage-pnl/SITE-CIKARANG-FACILITY-01', 'GET');
+
+        if (badge) badge.textContent = `⚡ VPP: Net +$${pnl.pnl.net_economic_gain_usd.toLocaleString()}`;
+        if (answerEl) {
+            let out = `⚡ AUTONOMOUS FACTORY ENERGY ARBITRAGE & VIRTUAL POWER PLANT (VPP) DISPATCH:\n`;
+            out += `Lokasi Fasilitas: ${pnl.pnl.site_id}\n`;
+            out += `Periode Akuntansi: ${pnl.pnl.period_month}\n`;
+            out += `Reduksi Beban Puncak (Peak Shaving): ${opt.plan.peak_demand_reduction_kw} kW\n`;
+            out += `Total Pengisian Daya Baterai (Charging): ${opt.plan.total_charged_kwh.toFixed(1)} kWh (pada tarif terendah)\n`;
+            out += `Total Pelepasan Daya Baterai (Discharging): ${opt.plan.total_discharged_kwh.toFixed(1)} kWh (pada tarif termahal)\n\n`;
+            out += `ANALISIS PNL ARBITRASE ENERGI BULANAN:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Penghematan Tarif Listrik Bruto: $${pnl.pnl.gross_tariff_savings_usd.toLocaleString()}\n`;
+            out += `Pendapatan Penjualan Daya ke Jaringan (Feed-in): $${pnl.pnl.grid_feed_in_revenue_usd.toLocaleString()}\n`;
+            out += `Penghematan Biaya Beban Puncak (Demand Charge): $${pnl.pnl.demand_charge_avoidance_usd.toLocaleString()}\n`;
+            out += `Amortisasi Keausan Baterai (Degradation Cost): -$${pnl.pnl.battery_wear_expense_usd.toLocaleString()}\n`;
+            out += `Keuntungan Bersih Ekonomis (Net Economic Gain): $${pnl.pnl.net_economic_gain_usd.toLocaleString()}\n`;
+            out += `Reduksi Karbon Scope 2 Terhindar: ${pnl.pnl.net_carbon_abated_tons.toFixed(2)} Ton CO2e\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>VPP dispatching secara cerdas mengisi daya saat listrik murah dan melepas daya saat jam beban puncak PLN.</li>
+                <li>Meningkatkan keandalan daya fasilitas sekaligus memberikan pendapatan tambahan melalui partisipasi respon permintaan (demand-response).</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mengoptimalkan VPP energy arbitrage: ' + err.message;
+    }
+}
+
+async function triggerDTAATaxValidator() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memvalidasi sertifikat domisili pajak asing & menghitung tarif treaty P3B / DTAA...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        await api('/tax/dtaa/validate-vendor-residency', 'POST', {
+            vendor_id: "VND-CLOUD-SG-01",
+            vendor_name: "Apex Cloud Enterprise Pte Ltd",
+            country_of_residence: "SG",
+            foreign_tin: "201829384G",
+            cor_doc_number: "COR-IRAS-SG-2026-9901",
+            cor_expiry_date: "2027-12-31T00:00:00Z",
+            is_beneficial_owner: true,
+            has_no_agent_intermediary: true,
+            has_permanent_establishment: false,
+            consultant_days_in_country: 14
+        });
+
+        const rate = await api('/tax/dtaa/compute-withholding-rate', 'POST', {
+            vendor_id: "VND-CLOUD-SG-01",
+            income_category: "ROYALTY_SOFTWARE",
+            gross_amount_usd: 85000.0
+        });
+
+        const cert = await api('/tax/dtaa/generate-tax-certificate', 'POST', {
+            vendor_id: "VND-CLOUD-SG-01",
+            income_category: "ROYALTY_SOFTWARE",
+            gross_amount_usd: 85000.0
+        });
+
+        if (badge) badge.textContent = `🌐 DTAA: ${rate.result.treaty_rate_percent}% WHT`;
+        if (answerEl) {
+            let out = `🌐 CROSS-BORDER TAX WITHHOLDING & DOUBLE TAX TREATY (DTAA) AUTOMATED VALIDATOR:\n`;
+            out += `Vendor Internasional: ${cert.certificate.vendor_name} (${cert.certificate.vendor_id})\n`;
+            out += `Yurisdiksi Domisili Fiskal: ${cert.certificate.residence_country} (Singapura)\n`;
+            out += `Kategori Penghasilan: ${cert.certificate.income_category}\n`;
+            out += `Nomor Bukti Potong Pajak (e-Bupot): ${cert.certificate.certificate_number}\n`;
+            out += `Referensi Jurnal GL: ${cert.certificate.accounting_entry_ref}\n`;
+            out += `Hash Verifikasi Kriptografis: ${cert.certificate.digital_certificate_hash.substring(0, 24)}...\n\n`;
+            out += `PERHITUNGAN WITHHOLDING TAX (PPH PASAL 26 TREATY BENEFIT):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Nilai Faktur Bruto (Gross Invoiced): $${cert.certificate.gross_amount_usd.toLocaleString()} USD\n`;
+            out += `Tarif Pajak Statutori Normal: ${rate.result.statutory_rate_percent}%\n`;
+            out += `Tarif Efektif P3B / DTAA: ${rate.result.treaty_rate_percent}%\n`;
+            out += `Dasar Hukum Treaty: ${rate.result.treaty_article_cited}\n`;
+            out += `Pajak yang Dipotong (Tax Withheld): $${cert.certificate.tax_withheld_usd.toLocaleString()} USD\n`;
+            out += `Nilai Bersih Dibayarkan ke Vendor: $${cert.certificate.net_remitted_usd.toLocaleString()} USD\n`;
+            out += `Penghematan Beban Pajak Bersih Berkat Treaty: $${rate.result.tax_savings_usd.toLocaleString()} USD\n`;
+            out += `Peringatan Bentuk Usaha Tetap (PE Warning): ${rate.result.pe_warning ? '⚠️ WASPADA PE TERBENTUK' : '✅ AMAN (NON-PE)'}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>P3B/DTAA otomatis mencegah kelebihan potong pajak atas vendor perangkat lunak & jasa teknik asing.</li>
+                <li>Memenuhi audit kepatuhan perpajakan internasional (tax audit defensibility) secara seketika.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memvalidasi tax treaty DTAA: ' + err.message;
+    }
+}
+
+async function triggerZKPAntiCounterfeit() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mencetak serialisasi autentikasi Zero-Knowledge Proof (ZKP) & rantai kustodi...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const serialNo = "SGTIN-01-0899482910-SN" + Math.floor(100000 + Math.random() * 900000);
+        const minted = await api('/security/zkp-trace/mint-serial-proof', 'POST', {
+            serial_no: serialNo,
+            product_sku: "MED-BIOLOGIC-VACC-009",
+            product_name: "Recombinant Monoclonal Sterile Vial 50mg",
+            batch_number: "BATCH-BIO-2026-Q1-88",
+            manufacturer_id: "MFG-BIOFARMA-STERILE-01"
+        });
+
+        await api('/security/zkp-trace/verify-custody-chain', 'POST', {
+            serial_no: serialNo,
+            custodian_type: "CENTRAL_DC",
+            custodian_entity: "PT Cold Logistics Express Hub Jakarta",
+            location_geo: "JAKARTA_ID"
+        });
+
+        const lineage = await api(`/security/zkp-trace/item-lineage/${serialNo}`, 'GET');
+
+        if (badge) badge.textContent = `🛡️ ZKP: ${lineage.lineage.authenticity_rank}`;
+        if (answerEl) {
+            let out = `🛡️ SUPPLY CHAIN ANTI-COUNTERFEIT SERIALIZATION & ZERO-KNOWLEDGE PROOF (ZKP):\n`;
+            out += `Nomor Seri Item Terverifikasi: ${lineage.lineage.serial_no}\n`;
+            out += `Nama Produk: ${lineage.lineage.proof_details.product_name}\n`;
+            out += `Nomor Batch Produksi: ${lineage.lineage.proof_details.batch_number}\n`;
+            out += `Status Autentisitas: ${lineage.lineage.authenticity_rank}\n`;
+            out += `Komitmen Kriptografis ZK-SNARK: ${lineage.lineage.proof_details.zk_proof_hash}\n`;
+            out += `Akar Merkle Induk Batch: ${lineage.lineage.proof_details.merkle_root_commitment}\n`;
+            out += `Proteksi Rahasia Dagang Pabrikan: ${lineage.lineage.proof_details.secret_salt_hidden ? '🔒 RAHASIA BOM & BIAYA TERSEMBUNYI (ZERO-KNOWLEDGE)' : 'TERBUKA'}\n\n`;
+            out += `REKAM JEJAK KUSTODI TERVERIFIKASI (IMMUTABLE CUSTODY TRAIL):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            if (lineage.lineage.custody_trail) {
+                lineage.lineage.custody_trail.forEach(c => {
+                    out += `  ✓ [${c.custodian_type}] ${c.custodian_entity} (${c.location_geo}) - Valid: ${c.valid_handshake ? 'YA' : 'TIDAK'}\n`;
+                });
+            }
+            out += `Jumlah Anomali / Kloning Terdeteksi: ${lineage.lineage.anomalies ? lineage.lineage.anomalies.length : 0}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>ZKP membuktikan bahwa obat atau komponen bernilai tinggi 100% orisinil tanpa membongkar rahasia resep formulasi atau harga vendor hulu.</li>
+                <li>Sensor anomali langsung mendeteksi upaya penggandaan serial fisik bila terjadi pemindaian ganda tak wajar.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mencetak serial ZKP: ' + err.message;
+    }
+}
+
+async function triggerGATTCustomsValuation() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menghitung nilai pabean GATT Article VII & rekonsiliasi transfer pricing bea cukai...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const shipmentID = "SHP-IMP-GATT-" + Math.floor(100000 + Math.random() * 900000);
+        await api('/customs/gatt-valuation/evaluate-transaction-value', 'POST', {
+            shipment_id: shipmentID,
+            importer_entity: "PT Golang ERP Industri Nusantara",
+            exporter_affiliate: "GoERP Global Logistics Ltd (Hong Kong)",
+            base_invoice_fob_usd: 120000.0,
+            international_freight_usd: 12500.0,
+            marine_insurance_usd: 2100.0,
+            dutiable_assists_usd: 6500.0,
+            royalties_license_fees_usd: 4800.0,
+            packing_and_containers_usd: 1600.0,
+            selling_commissions_usd: 2500.0
+        });
+
+        const recon = await api('/customs/gatt-valuation/reconcile-transfer-pricing', 'POST', {
+            shipment_id: shipmentID,
+            unit_cif: 150.0,
+            q1: 135.0,
+            median: 148.0,
+            q3: 162.0
+        });
+
+        const decl = await api('/customs/gatt-valuation/generate-clearance-declaration', 'POST', {
+            shipment_id: shipmentID,
+            hs_code: "8471.50.10",
+            duty_rate: 7.5,
+            port: "IDTPP" // Tanjung Priok Port Jakarta
+        });
+
+        const audit = await api(`/customs/gatt-valuation/audit-summary/${shipmentID}`, 'GET');
+
+        if (badge) badge.textContent = `🚢 GATT: ${decl.declaration.customs_status}`;
+        if (answerEl) {
+            let out = `🚢 CROSS-BORDER GATT CUSTOMS VALUATION & TRANSFER PRICING HARMONIZER (WTO AGREEMENT):\n`;
+            out += `ID Pengiriman Impor: ${audit.audit.shipment_id}\n`;
+            out += `Importir: ${audit.audit.gatt_valuation.importer_entity}\n`;
+            out += `Afiliasi Eksportir Asing: ${audit.audit.gatt_valuation.exporter_affiliate}\n`;
+            out += `Metode Penilaian Pabean: ${audit.audit.gatt_valuation.valuation_method_cited}\n`;
+            out += `Nomor Pemberitahuan Impor Barang (PIB): ${decl.declaration.declaration_number}\n`;
+            out += `Pelabuhan Masuk (Port of Entry): ${decl.declaration.port_of_entry} (Tanjung Priok)\n`;
+            out += `Jalur Bea Cukai: ${decl.declaration.customs_status}\n\n`;
+            out += `RINCIAN NILAI TRANSAKSI PABEAN CIF (WTO GATT ARTICLE VII & ART 8):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Nilai Faktur Komersial (FOB): $${audit.audit.gatt_valuation.base_invoice_fob_usd.toLocaleString()} USD\n`;
+            out += `Ongkos Angkut Internasional: $${audit.audit.gatt_valuation.international_freight_usd.toLocaleString()} USD\n`;
+            out += `Asuransi Kargo Laut: $${audit.audit.gatt_valuation.marine_insurance_usd.toLocaleString()} USD\n`;
+            out += `Bantuan Material/Alat Cetak (Assists): $${audit.audit.gatt_valuation.dutiable_assists_usd.toLocaleString()} USD\n`;
+            out += `Royalti & Biaya Lisensi: $${audit.audit.gatt_valuation.royalties_license_fees_usd.toLocaleString()} USD\n`;
+            out += `Total Nilai Pabean Pungutan (CIF Dutiable): $${audit.audit.gatt_valuation.calculated_dutiable_cif_usd.toLocaleString()} USD\n\n`;
+            out += `PUNGUTAN BEA MASUK & PAJAK DALAM RANGKA IMPOR (PDRI):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Bea Masuk (${decl.declaration.import_duty_rate_percent}%): $${decl.declaration.import_duty_payable_usd.toLocaleString()} USD\n`;
+            out += `PPN Impor (${decl.declaration.import_vat_rate_percent}%): $${decl.declaration.import_vat_payable_usd.toLocaleString()} USD\n`;
+            out += `PPh Pasal 22 Impor (2.5%): $${decl.declaration.import_income_tax_22_usd.toLocaleString()} USD\n`;
+            out += `Total Tagihan Pabean & PDRI: $${decl.declaration.total_customs_taxes_usd.toLocaleString()} USD\n\n`;
+            out += `REKONSILIASI DENGAN TRANSFER PRICING LOCAL FILE (OECD ARM'S LENGTH):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Harga CIF per Unit: $${recon.reconciliation.customs_CIF_unit_price_usd || recon.reconciliation.customs_cif_unit_price_usd} USD (Rentang Kuartil TP: $${recon.reconciliation.tp_lower_quartile_q1_usd} - $${recon.reconciliation.tp_upper_quartile_q3_usd})\n`;
+            out += `Status Harmonisasi Pabean & Pajak: ${recon.reconciliation.alignment_status}\n`;
+            out += `Rekomendasi Tindakan: ${recon.reconciliation.recommended_action}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Harmonisasi GATT Article VII & OECD Transfer Pricing menghilangkan sengketa nilai pabean antara Bea Cukai dan Ditjen Pajak.</li>
+                <li>Penyusunan PIB otomatis mempercepat *port clearance* jalur hijau dan mencegah denda notul kepabeanan.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses GATT customs valuation: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {
