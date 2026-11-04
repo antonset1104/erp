@@ -11285,5 +11285,149 @@ IEA*1*000099123~`
 	t.Logf("✓ AI Dynamic Credit Scoring & Insured Trade Credit Guard Verified: Customer='%s' (%s), Score=%.1f/100 (%s), BaseLimit=$%.0f, AdjustedLimit=$%.0f USD (+25%%), Underwriter='%s' (Limit=$%.0f USD), Order='%s' ($%.0f USD), Clearance='%s'",
 		creditProfile.CustomerName, creditProfile.CustomerID, creditProfile.DynamicScore, creditProfile.RiskTier, creditProfile.BaseCreditLimitUSD, creditProfile.AdjustedDynamicLimitUSD, insuranceCov.UnderwriterName, insuranceCov.InsuredLimitUSD, creditHoldEval.SalesOrderID, creditHoldEval.OrderAmountUSD, creditHoldEval.Decision)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (76 SECTIONS: 70+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD) PASSED 100%!")
+	// =========================================================================
+	// SECTION 77: CONTRACT LEAKAGE SENTINEL, MICROGRID ISLANDING, CARGO GEOFENCE,
+	//             SHIFT BIDDING FATIGUE & CIRCULAR PACKAGING RTI (v1.63.0)
+	// =========================================================================
+	t.Log(`
+		>>> SECTION 77: CONTRACT LEAKAGE SENTINEL, MICROGRID ISLANDING, CARGO GEOFENCE, SHIFT BIDDING FATIGUE & CIRCULAR PACKAGING RTI <<<`)
+
+	// 77.1 Autonomous AI Contract Leakage Sentinel & Obligation Milestone Interceptor
+	ctrAudit, err := coregrc.GlobalContractLeakageVault.AuditLeakagePerformance(
+		"CTR-CLOUD-SLA-9901", "2026-Q4", 98.4, 11.5, 1350000.0, 95.0,
+	)
+	if err != nil || ctrAudit.SLAPenaltyRecoverableUSD <= 0 || ctrAudit.RebateRecoverableUSD <= 0 || ctrAudit.TotalValueRecoveredUSD <= 0 {
+		t.Fatalf("Failed to audit contract leakage performance: %+v, err: %v", ctrAudit, err)
+	}
+
+	debitNoteCommit, err := coregrc.GlobalContractLeakageVault.IssuePenaltyDebitNote("CTR-CLOUD-SLA-9901")
+	if err != nil || debitNoteCommit["status"] != "POSTED_AND_APPLIED_TO_NEXT_BILLING" {
+		t.Fatalf("Failed to issue penalty debit note: %+v, err: %v", debitNoteCommit, err)
+	}
+
+	ctrDossier, err := coregrc.GlobalContractLeakageVault.GetContractDossier("CTR-CLOUD-SLA-9901")
+	if err != nil || !ctrDossier["has_audit"].(bool) {
+		t.Fatalf("Failed to get contract dossier: %+v, err: %v", ctrDossier, err)
+	}
+	t.Logf("✓ Contract Leakage Sentinel Verified: Contract='%s', SLA Penalties=$%.2f USD, Volume Rebates=$%.2f USD, Total Recovered=$%.2f USD, DebitNote='%s', NoticeAlert='%s'",
+		ctrAudit.ContractID, ctrAudit.SLAPenaltyRecoverableUSD, ctrAudit.RebateRecoverableUSD, ctrAudit.TotalValueRecoveredUSD, ctrAudit.DebitNoteReference, ctrAudit.EvergreenNoticeAlert)
+
+	// 77.2 Industrial Microgrid Autonomous Virtual Islanding & Peak-Load Shedding Orchestrator
+	coreenergy.GlobalMicrogridVault.IngestGridTelemetry(coreenergy.MicrogridTelemetry{
+		FacilityID:           "FAC-PLANT-CILEGON-01",
+		GridFrequencyHz:      48.92,
+		GridVoltageKV:        17.65,
+		SolarGenerationKW:    1450.0,
+		BESSChargePct:        91.0,
+		ActiveDemandLoadKW:   4800.0,
+		GridTieBreakerStatus: "CLOSED_GRID_TIED",
+	})
+
+	islandEvent, err := coreenergy.GlobalMicrogridVault.TriggerVirtualIslanding("FAC-PLANT-CILEGON-01")
+	if err != nil || islandEvent.NewOperatingMode != "ISLANDED_AUTONOMOUS" || islandEvent.IslandingLatencyMS > 50.0 {
+		t.Fatalf("Failed to trigger virtual islanding: %+v, err: %v", islandEvent, err)
+	}
+
+	shedDispatch, err := coreenergy.GlobalMicrogridVault.DispatchLoadShedding(
+		"FAC-PLANT-CILEGON-01", 2900.0, 1900.0, 125000.0,
+	)
+	if err != nil || shedDispatch.EstimatedSavedCostUSD != 500000.0 || len(shedDispatch.MESThrottledOrders) == 0 {
+		t.Fatalf("Failed to dispatch load shedding: %+v, err: %v", shedDispatch, err)
+	}
+
+	mgScorecard, err := coreenergy.GlobalMicrogridVault.GetResilienceScorecard("FAC-PLANT-CILEGON-01")
+	if err != nil || !mgScorecard["has_islanding_event"].(bool) {
+		t.Fatalf("Failed to get microgrid scorecard: %+v, err: %v", mgScorecard, err)
+	}
+	t.Logf("✓ Industrial Microgrid Virtual Islanding Verified: Facility='%s', Trigger='%s', Latency=%.1fms, Mode='%s', ProtectedLoad=%.0f kW, ShedLoad=%.0f kW, SavedDowntimeCost=$%.0f USD, Standards='%s'",
+		islandEvent.FacilityID, islandEvent.TriggerCause, islandEvent.IslandingLatencyMS, islandEvent.NewOperatingMode, shedDispatch.Tier1CriticalLoadKW, shedDispatch.Tier2SheddableLoadKW, shedDispatch.EstimatedSavedCostUSD, mgScorecard["standards"])
+
+	// 77.3 High-Value Cargo Geofence Anti-Theft & Route Corridor Deviation Interceptor
+	cargoCorridor := corefleet.GlobalGeofenceSentinelVault.RegisterHighValueCorridor(
+		"SHP-NICKEL-MATTE-8819", "WH/OUT/2026/08819", "B 9918 XTR",
+		"Yanto Kusuma", "Refined Nickel Matte Concentrates (28 Metric Tons)",
+		850000.0, 28450.0, 500.0,
+	)
+	if cargoCorridor.ShipmentID == "" || cargoCorridor.Status != "ACTIVE_IN_TRANSIT" {
+		t.Fatalf("Failed to register high-value cargo corridor: %+v", cargoCorridor)
+	}
+
+	theftAlarm, err := corefleet.GlobalGeofenceSentinelVault.IngestCargoTelemetry(corefleet.CargoSensorTelemetry{
+		ShipmentID:              "SHP-NICKEL-MATTE-8819",
+		CurrentLatitude:         -6.1824,
+		CurrentLongitude:        106.7412,
+		SpeedKPH:                0.0,
+		CargoDoorOpen:           true,
+		CurrentAxleWeightKG:     26800.0,
+		DistanceFromRouteMeters: 2450.0,
+		AuthorizedStopZone:      false,
+	})
+	if err != nil || theftAlarm == nil || !theftAlarm.EngineImmobilized || !theftAlarm.WMSDeliveryOrderLocked || theftAlarm.ForensicCertificateHash == "" {
+		t.Fatalf("Failed to intercept cargo breach and trigger immobilizer: %+v, err: %v", theftAlarm, err)
+	}
+
+	cargoForensics, err := corefleet.GlobalGeofenceSentinelVault.GetForensicDossier("SHP-NICKEL-MATTE-8819")
+	if err != nil || !cargoForensics["has_alarm"].(bool) {
+		t.Fatalf("Failed to get forensic dossier: %+v, err: %v", cargoForensics, err)
+	}
+	t.Logf("✓ High-Value Cargo Geofence Sentinel Verified: Shipment='%s', Cargo='%s' ($%.0f USD), Alarm='%s' (Immobilized=%v, WMSLocked=%v, PoliceBroadcast=%v), Anomalies=%d, ForensicCert=%s",
+		cargoCorridor.ShipmentID, cargoCorridor.CargoDescription, cargoCorridor.CargoValueUSD, theftAlarm.ThreatSeverity, theftAlarm.EngineImmobilized, theftAlarm.WMSDeliveryOrderLocked, theftAlarm.PoliceDispatchBroadcast, len(theftAlarm.IdentifiedAnomalies), theftAlarm.ForensicCertificateHash[:16])
+
+	// 77.4 Enterprise Dynamic Shift Bidding & Fair-Work Predictive Fatigue Guardian (ILO C171)
+	openShift := corehr.GlobalShiftBiddingVault.PublishOpenShift(
+		"SHF-SMT-NIGHT-991", "WC-SMT-LINE-02", "SMT Production Line Lead",
+		"NIGHT_SHIFT_GRAVEYARD", 8.0, 24.0, 9.50, "IPC-A-610_CERTIFIED",
+	)
+	if openShift.ShiftID == "" || openShift.Status != "OPEN_FOR_BIDDING" {
+		t.Fatalf("Failed to publish open shift opportunity: %+v", openShift)
+	}
+
+	fatigueRejectedBid, err := corehr.GlobalShiftBiddingVault.SubmitShiftBid("SHF-SMT-NIGHT-991", "WRK-OP-102")
+	if err != nil || fatigueRejectedBid.BidVerdict != "REJECTED_ILO_FATIGUE_PREVENTION" || fatigueRejectedBid.ILORestRequirementMet {
+		t.Fatalf("Failed to enforce ILO rest and fatigue prevention: %+v, err: %v", fatigueRejectedBid, err)
+	}
+
+	awardedBid, err := corehr.GlobalShiftBiddingVault.SubmitShiftBid("SHF-SMT-NIGHT-991", "WRK-OP-101")
+	if err != nil || awardedBid.BidVerdict != "AWARDED_APPROVED" || !awardedBid.ILORestRequirementMet || !awardedBid.FatigueSafetyScoreOK {
+		t.Fatalf("Failed to award shift to fit-for-duty worker: %+v, err: %v", awardedBid, err)
+	}
+
+	fairWorkStats := corehr.GlobalShiftBiddingVault.GetFairWorkMetrics("WC-SMT-LINE-02")
+	if fairWorkStats["roster_equity_index"].(float64) < 90.0 {
+		t.Fatalf("Failed to verify fair work metrics: %+v", fairWorkStats)
+	}
+	t.Logf("✓ Fair-Work Shift Bidding & Fatigue Guardian Verified: Shift='%s' (%s, $%.2f/hr), RejectedBid (WRK-OP-102: Verdict='%s', Reason='%s'), AwardedBid (WRK-OP-101: Verdict='%s', Earnings=$%.2f USD), EquityIndex=%.1f%%",
+		openShift.ShiftID, openShift.JobRole, openShift.BaseHourlyRateUSD+openShift.SurgeDifferentialUSD, fatigueRejectedBid.BidVerdict, fatigueRejectedBid.RejectionReason, awardedBid.BidVerdict, awardedBid.TotalShiftEarningsUSD, fairWorkStats["roster_equity_index"].(float64))
+
+	// 77.5 B2B Circular Packaging & Reusable Pallet / IBC Tote Deposit-Return Ledger (EPR)
+	circAsset := corescm.GlobalCircularPackagingVault.RegisterReusableAsset(
+		"IBC-TOTE-9920", "urn:epc:id:grai:8991234.001.992000", "IBC_TOTE_1000L", 150.0, 58.5,
+	)
+	if circAsset.AssetID == "" || circAsset.CurrentHolderType != "INTERNAL_WAREHOUSE" {
+		t.Fatalf("Failed to register reusable packaging asset: %+v", circAsset)
+	}
+
+	dispRecord, err := corescm.GlobalCircularPackagingVault.DispatchWithDeposit(
+		"IBC-TOTE-9920", "CUST-CHEM-POLYMER-01", "PT Nusantara Polymer Coatings Tbk",
+		"SO-2026-IBC-771", "WH/OUT/2026/09912",
+	)
+	if err != nil || dispRecord.DepositChargedUSD != 150.0 {
+		t.Fatalf("Failed to dispatch packaging with deposit: %+v, err: %v", dispRecord, err)
+	}
+
+	retInspection, err := corescm.GlobalCircularPackagingVault.ReconcileReturnInspection(
+		"IBC-TOTE-9920", "CUST-CHEM-POLYMER-01", "NEEDS_WASHING_CHEMICAL_FLUSH",
+	)
+	if err != nil || retInspection.RefundCreditNoteUSD != 135.0 || retInspection.DeductionFeeUSD != 15.0 {
+		t.Fatalf("Failed to reconcile packaging return inspection: %+v, err: %v", retInspection, err)
+	}
+
+	eprLedger := corescm.GlobalCircularPackagingVault.GetEPRSustainabilityLedger("COMP-GOERP-01")
+	if eprLedger["packaging_circularity_pct"].(float64) < 90.0 {
+		t.Fatalf("Failed to get EPR sustainability ledger: %+v", eprLedger)
+	}
+	t.Logf("✓ Circular Packaging RTI Deposit-Return Verified: Asset='%s' (GRAI: %s), Type='%s', DispatchDeposit=$%.2f USD, ReturnCondition='%s' (Deduction=$%.2f, RefundCreditNote=$%.2f USD, Ref='%s'), AvoidedPlastic=%.2f Tons, AvoidedCO2=%.2f tCO2e, Circularity=%.1f%%",
+		circAsset.AssetID, circAsset.GRAISerialNumber, circAsset.AssetType, dispRecord.DepositChargedUSD, retInspection.ReturnedCondition, retInspection.DeductionFeeUSD, retInspection.RefundCreditNoteUSD, retInspection.CreditNoteReference, eprLedger["avoided_plastic_tons"].(float64), eprLedger["avoided_scope3_co2e_tons"].(float64), eprLedger["packaging_circularity_pct"].(float64))
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (77 SECTIONS: 75+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD + CONTRACT LEAKAGE SENTINEL + MICROGRID ISLANDING + CARGO GEOFENCE + SHIFT BIDDING FATIGUE + CIRCULAR PACKAGING RTI) PASSED 100%!")
 }

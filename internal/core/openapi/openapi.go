@@ -1247,6 +1247,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/grc/contract/audit-leakage-performance": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Autonomous AI Contract Leakage Sentinel & Obligation Milestone Interceptor",
+					"description": "Audits SLA uptime and cumulative purchasing spend against contracts to automatically recover value leakage, issuing debit notes and flagging evergreen renewal deadlines.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Recoverable SLA penalties, volume rebate calculations, and evergreen renewal notice countdown alerts"},
+					},
+				},
+			},
+			"/api/v1/energy/microgrid/trigger-virtual-islanding": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Industrial Microgrid Autonomous Virtual Islanding & Peak-Load Shedding Orchestrator",
+					"description": "Executes sub-second virtual islanding under frequency/voltage deviations and orchestrates OpenADR 2.0b load shedding to protect critical production lines.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Islanding event details, trip latency in milliseconds, and islanded operating state"},
+					},
+				},
+			},
+			"/api/v1/fleet/geofence/ingest-cargo-telemetry": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "High-Value Cargo Geofence Anti-Theft & Route Corridor Deviation Interceptor",
+					"description": "Monitors in-transit cargo spatial deviations, unauthorized door opening, and siphoning weight loss to trigger remote engine immobilizers and security lockdown.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Corridor tracking status or emergency lockdown alarm with cryptographic forensic certificate"},
+					},
+				},
+			},
+			"/api/v1/hr/shifts/submit-shift-bid": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Enterprise Dynamic Shift Bidding & Fair-Work Predictive Fatigue Guardian (ILO C171)",
+					"description": "Adjudicates operator shift auction bids against circadian fatigue scores and mandatory 11-hour minimum rest intervals to eliminate workplace accident hazards.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Bid adjudication verdict, safety check results, and calculated shift earnings"},
+					},
+				},
+			},
+			"/api/v1/scm/packaging/reconcile-return-inspection": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "B2B Circular Packaging & Reusable Pallet / IBC Tote Deposit-Return Ledger",
+					"description": "Reconciles returned serialized GS1 GRAI reusable containers, inspects condition, and automates credit note deposit refunds under EPR frameworks.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Return inspection record, condition rating, deduction fees, and refund credit note reference"},
+					},
+				},
+			},
 		},
 	}
 }

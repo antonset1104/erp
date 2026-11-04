@@ -954,6 +954,40 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Autonomous Pre-Dispatch Credit Hold Interceptor**: Endpoint `POST /api/v1/finance/credit/evaluate-order-hold` intercepts outgoing sales orders exceeding dynamic limits or past grace period thresholds, enforcing automated holds to protect working capital.
 - **Customer 360 Risk Dossier**: Endpoint `GET /api/v1/finance/credit/customer-risk-profile/:customer_id` delivers real-time visibility into customer risk tier, insured ceilings, uninsured exposure, and personalized payment terms recommendations.
 
+---
+
+## 29. Contract Leakage Sentinel, Microgrid Islanding, Cargo Geofence, Shift Bidding Fatigue & Circular Packaging RTI (v1.63.0)
+
+### 29.1 Autonomous AI Contract Leakage Sentinel & Obligation Milestone Interceptor (`internal/core/grc/contract_leakage_sentinel.go`)
+- **Structured Obligation & SLA Metric Tracking**: Endpoint `POST /api/v1/grc/contract/register-obligation` registers contract terms, SLA targets (availability %, OTIF delivery), liquidated damages penalty hourly rates, and tiered volume rebate thresholds.
+- **Autonomous Leakage Cross-Audit**: Endpoint `POST /api/v1/grc/contract/audit-leakage-performance` audits actual operational telemetry (outage hours, spend, delivery delays) to calculate recoverable SLA damages and volume rebates, alerting on evergreen auto-renewal deadlines.
+- **Automated Penalty Debit Note Issuance**: Endpoint `POST /api/v1/grc/contract/issue-penalty-debit-note` posts formal Accounts Payable contra debit notes to recover contract leakage against upcoming vendor invoices.
+- **Contract Governance Dossier**: Endpoint `GET /api/v1/grc/contract/contract-dossier/:contract_id` provides complete contract obligation compliance status, audit histories, and value recovery metrics.
+
+### 29.2 Industrial Microgrid Autonomous Virtual Islanding & Peak-Load Shedding Orchestrator (`internal/core/energy/microgrid_islanding.go`)
+- **Sub-Second Grid Frequency & Voltage Monitoring**: Endpoint `POST /api/v1/energy/microgrid/ingest-grid-telemetry` monitors real-time industrial electrical parameters (nominal 50 Hz, 20 kV), solar photovoltaic output, and battery storage (BESS) state-of-charge.
+- **Autonomous Virtual Islanding Trigger**: Endpoint `POST /api/v1/energy/microgrid/trigger-virtual-islanding` opens grid tie breakers within milliseconds (16.8 ms IEC 61850 GOOSE trip) under grid frequency deviations ($< 49.5\text{ Hz}$) or voltage sags ($> 10\%$), maintaining uninterrupted islanded operation.
+- **OpenADR 2.0b Dynamic Load Shedding**: Endpoint `POST /api/v1/energy/microgrid/dispatch-load-shedding` sheds non-critical facility loads (office HVAC, EV chargers) while keeping chemical reactors, cold rooms, and MES servers 100% online, throttling energy-intensive manufacturing work orders.
+- **Microgrid Resilience Scorecard**: Endpoint `GET /api/v1/energy/microgrid/resilience-scorecard/:facility_id` calculates avoided production blackout losses ($USD) and validates IEC 61850 / OpenADR compliance.
+
+### 29.3 High-Value Cargo Geofence Anti-Theft & Route Corridor Deviation Interceptor (`internal/core/fleet/geofence_sentinel.go`)
+- **High-Value Protected Transit Corridor**: Endpoint `POST /api/v1/fleet/geofence/register-highvalue-corridor` establishes dynamic spatial geofence polygons for high-value freight (e.g. nickel concentrates, bullion, electronics) with allowable tolerance buffers.
+- **Multimodal Anomaly & Breach Interception**: Endpoint `POST /api/v1/fleet/geofence/ingest-cargo-telemetry` analyzes GPS deviations ($> 1.5\text{ km}$), unauthorized cargo door openings, and in-transit axle weight reductions ($> 500\text{ kg}$ siphoning theft).
+- **Autonomous Remote Engine Immobilizer**: Endpoint `POST /api/v1/fleet/geofence/trigger-emergency-immobilizer` triggers immediate vehicle engine cutoff, locks associated delivery orders in WMS, and broadcasts emergency police and security dispatch.
+- **Tamper-Proof Digital Forensics Dossier**: Endpoint `GET /api/v1/fleet/geofence/forensic-dossier/:shipment_id` delivers cryptographic SHA-256 chain of custody evidence for police reports and underwriter insurance claims.
+
+### 29.4 Enterprise Dynamic Shift Bidding & Fair-Work Predictive Fatigue Guardian (`internal/core/hr/shift_bidding_fatigue.go`)
+- **Open Shift Auction Marketplace**: Endpoint `POST /api/v1/hr/shifts/publish-open-shift` publishes vacant and surge production shifts with transparent base rates, surge differentials, and skill certification prerequisites.
+- **Circadian Fatigue Risk Evaluator (ILO Convention 171)**: Endpoint `POST /api/v1/hr/shifts/evaluate-fatigue-safety` computes worker circadian fatigue scores based on 14-day cumulative hours, consecutive night shifts, and mandatory 11-hour rest intervals between shifts.
+- **Autonomous Shift Safety Interceptor**: Endpoint `POST /api/v1/hr/shifts/submit-shift-bid` automatically rejects bids from fatigued workers ($Score > 70$ or Rest $< 11\text{ hrs}$) to eliminate workplace accident hazards, awarding shifts to fit-for-duty operators.
+- **Fair-Work Roster Equity Dashboard**: Endpoint `GET /api/v1/hr/shifts/fair-work-metrics/:workcenter_id` tracks overtime distribution equity indices and operator fatigue distributions across workcenters.
+
+### 29.5 B2B Circular Packaging & Reusable Pallet / IBC Tote Deposit-Return Ledger (`internal/core/scm/circular_packaging.go`)
+- **GS1 GRAI Reusable Asset Registration**: Endpoint `POST /api/v1/scm/packaging/register-reusable-asset` registers serialized Reusable Transport Items (IBC totes, heavy-duty plastic pallets) with GS1 Global Returnable Asset Identifiers (GRAI) and deposit values.
+- **Outbound Deposit Liability Dispatch**: Endpoint `POST /api/v1/scm/packaging/dispatch-with-deposit` attaches packaging deposits to outbound customer delivery orders, tracking container custody in customer facilities.
+- **Autonomous Return Reconciliation & Inspection**: Endpoint `POST /api/v1/scm/packaging/reconcile-return-inspection` inspects returned packaging physical condition (Excellent, Needs Chemical Flush, Damaged), assesses cleaning fees, and automatically issues credit note deposit refunds to customer accounts.
+- **EPR & PPWR Circular Economy Ledger**: Endpoint `GET /api/v1/scm/packaging/epr-sustainability-ledger/:company_id` computes packaging circularity rates, avoided single-use plastic waste (metric tons), and avoided Scope 3 carbon footprints.
+
 
 
 

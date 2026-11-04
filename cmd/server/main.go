@@ -298,7 +298,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.62.0",
+			"version":    "1.63.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -423,6 +423,11 @@ func main() {
 		coretreasury.RegisterZBARoutes(apiV1)
 		coremaintenance.RegisterCannibalizationRoutes(apiV1)
 		corefinance.RegisterCreditRoutes(apiV1)
+		coregrc.RegisterContractLeakageRoutes(apiV1)
+		coreenergy.RegisterMicrogridRoutes(apiV1)
+		corefleet.RegisterGeofenceRoutes(apiV1)
+		corehr.RegisterShiftBiddingRoutes(apiV1)
+		corescm.RegisterPackagingRoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend

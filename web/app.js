@@ -28475,6 +28475,337 @@ async function triggerDynamicCreditGuard() {
     }
 }
 
+async function triggerContractLeakage() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengaudit kebocoran nilai kontrak SLA & batas pemberitahuan perpanjangan otomatis...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const ctrID = "CTR-CLOUD-SLA-9901";
+        const auditRes = await api('/grc/contract/audit-leakage-performance', 'POST', {
+            contract_id: ctrID,
+            reporting_period: "2026-Q4",
+            actual_availability_pct: 98.4,
+            actual_outage_hours: 11.5,
+            cumulative_spend_usd: 1350000.0,
+            actual_delivery_otif_pct: 95.0
+        });
+
+        const debitRes = await api('/grc/contract/issue-penalty-debit-note', 'POST', {
+            contract_id: ctrID
+        });
+
+        const dosRes = await api(`/grc/contract/contract-dossier/${ctrID}`, 'GET');
+
+        if (badge) badge.textContent = `⚖️ LEAKAGE: $${auditRes.data.total_value_recovered_usd.toLocaleString()} USD Recovered`;
+        if (answerEl) {
+            let out = `⚖️ AUTONOMOUS AI CONTRACT LEAKAGE SENTINEL & OBLIGATION MILESTONE INTERCEPTOR:\n`;
+            out += `Kontrak: ${dosRes.data.obligation.contract_title} (ID: ${ctrID})\n`;
+            out += `Penyedia Layanan: ${dosRes.data.obligation.counterparty_name}\n`;
+            out += `Target Ketersediaan SLA: ${dosRes.data.obligation.sla_availability_pct_target}% vs Aktual: 98.4% (Outage: 11.5 Jam)\n`;
+            out += `KLAIM PENALTI SLA KONTRAK: $${auditRes.data.sla_penalty_recoverable_usd.toLocaleString()} USD ($750/Jam)\n`;
+            out += `KLAIM DISKON VOLUME REBATE: $${auditRes.data.rebate_recoverable_usd.toLocaleString()} USD (4.5% dari Total Belanja $1.35M USD)\n`;
+            out += `TOTAL NILAI KONTRAK TERSELAMATKAN: $${auditRes.data.total_value_recovered_usd.toLocaleString()} USD\n\n`;
+            out += `STATUS NOTA DEBIT PEMOTONGAN PEMBAYARAN VENDOR:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Nomor Nota Debit: ${debitRes.debit_note_number}\n`;
+            out += `Jurnal GL Otomatis: Debit [${debitRes.gl_posting_debit}] / Kredit [${debitRes.gl_posting_credit}]\n`;
+            out += `Status Pemotongan: ${debitRes.status}\n\n`;
+            out += `PERINGATAN EVERGREEN AUTO-RENEWAL NOTICE:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Sisa Batas Waktu Pemberitahuan Terminasi: ${auditRes.data.days_to_renewal_notice} Hari\n`;
+            out += `Status Peringatan: ⚠️ ${auditRes.data.evergreen_notice_alert}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Otomasi penagihan penalti SLA dan volume rebate mengamankan margin kas tanpa perselisihan hukum manual.</li>
+                <li>Peringatan dini auto-renewal mencegah perpanjangan kontrak yang merugikan perusahaan secara sepihak.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses contract leakage audit: ' + err.message;
+    }
+}
+
+async function triggerMicrogridIslanding() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mendeteksi deviasi frekuensi grid PLN & mengeksekusi virtual islanding sub-detik...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const facID = "FAC-PLANT-CILEGON-01";
+        await api('/energy/microgrid/ingest-grid-telemetry', 'POST', {
+            facility_id: facID,
+            grid_frequency_hz: 48.92, // Undervoltage/frequency event
+            grid_voltage_kv: 17.65,
+            solar_generation_kw: 1450.0,
+            bess_charge_percent: 91.0,
+            active_demand_load_kw: 4800.0,
+            grid_tie_breaker_status: "CLOSED_GRID_TIED"
+        });
+
+        const islRes = await api('/energy/microgrid/trigger-virtual-islanding', 'POST', {
+            facility_id: facID
+        });
+
+        const shedRes = await api('/energy/microgrid/dispatch-load-shedding', 'POST', {
+            facility_id: facID,
+            tier1_critical_load_kw: 2900.0,
+            tier2_sheddable_load_kw: 1900.0,
+            hourly_downtime_loss_usd: 125000.0
+        });
+
+        if (badge) badge.textContent = `⚡ MICROGRID: ${islRes.data.new_operating_mode} (${islRes.data.islandingLatencyMS || islRes.data.islanding_latency_ms}ms)`;
+        if (answerEl) {
+            let out = `⚡ INDUSTRIAL MICROGRID AUTONOMOUS VIRTUAL ISLANDING & LOAD SHEDDING (IEC 61850 & OpenADR 2.0b):\n`;
+            out += `Fasilitas Industri: ${facID}\n`;
+            out += `Penyebab Gangguan Transmisi: ${islRes.data.trigger_cause}\n`;
+            out += `Frekuensi Terdeteksi: ${islRes.data.detected_frequency_hz} Hz (Batas Aman: 50.00 Hz) | Tegangan: ${islRes.data.detected_voltage_kv} kV\n`;
+            out += `Kecepatan Pemutusan Jaringan (Islanding Latency): ${islRes.data.islanding_latency_ms} Milidetik (Zero-Loss Power Continuity)\n`;
+            out += `Mode Operasi Baru: 🛡️ ${islRes.data.new_operating_mode}\n\n`;
+            out += `HASIL PELEPASAN BEBAN DINAMIS (OpenADR 2.0b DEMAND RESPONSE):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Protokol Standar: ${shedRes.data.protocol_standard}\n`;
+            out += `Beban Kritis Tier 1 (100% Terlindungi): ${shedRes.data.tier1_critical_load_kw} kW (Tanur Peleburan & Reaktor)\n`;
+            out += `Beban Non-Kritis Tier 2 (Dilepas Seketika): ${shedRes.data.tier2_sheddable_load_kw} kW (Chiller Kantor & Charger EV)\n`;
+            out += `Work Order MES Ditunda Sementara: ${shedRes.data.mes_throttled_orders.join(', ')}\n`;
+            out += `PENCEGAHAN KERUGIAN PRODUKSI PABRIK: $${shedRes.data.estimated_saved_cost_usd.toLocaleString()} USD (4 Jam Trip Prevention)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pemisahan jaringan otonom sub-detik (16.8 ms) mencegah kerusakan fatal pada reaktor kimia dan tanur induksi.</li>
+                <li>Integrasi OpenADR 2.0b menyelaraskan kapasitas baterai internal dengan prioritas lini produksi MES.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses microgrid virtual islanding: ' + err.message;
+    }
+}
+
+async function triggerCargoGeofence() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memverifikasi koridor geofence kargo bernilai tinggi & sensor pintu kontainer...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const shpID = "SHP-NICKEL-MATTE-8819";
+        await api('/fleet/geofence/register-highvalue-corridor', 'POST', {
+            shipment_id: shpID,
+            delivery_order_id: "WH/OUT/2026/08819",
+            vehicle_plate_number: "B 9918 XTR",
+            driver_name: "Yanto Kusuma (Authorized Hazmat/High-Value Escort)",
+            cargo_description: "Refined High-Purity Nickel Matte Concentrates (28 Metric Tons)",
+            cargo_value_usd: 850000.0,
+            initial_loaded_weight_kg: 28450.0,
+            corridor_tolerance_meters: 500.0
+        });
+
+        const alertRes = await api('/fleet/geofence/ingest-cargo-telemetry', 'POST', {
+            shipment_id: shpID,
+            current_latitude: -6.1824,
+            current_longitude: 106.7412,
+            speed_kph: 0.0,
+            cargo_door_open: true, // Breach
+            current_axle_weight_kg: 26800.0, // 1,650 kg missing
+            distance_from_route_meters: 2450.0, // 2.45 km off-route
+            authorized_stop_zone: false
+        });
+
+        const dosRes = await api(`/fleet/geofence/forensic-dossier/${shpID}`, 'GET');
+
+        if (badge) badge.textContent = `🚨 GEOFENCE: BREACH INTERCEPTED`;
+        if (answerEl) {
+            let out = `🚨 HIGH-VALUE CARGO GEOFENCE ANTI-THEFT & ROUTE DEVIATION INTERCEPTOR:\n`;
+            out += `ID Pengiriman Kargo: ${shpID} | Armada: ${dosRes.data.corridor_profile.vehicle_plate_number} (${dosRes.data.corridor_profile.driver_name})\n`;
+            out += `Muatan Bernilai Tinggi: ${dosRes.data.corridor_profile.cargo_description}\n`;
+            out += `Nilai Kargo Dilindungi: $${dosRes.data.corridor_profile.cargo_value_usd.toLocaleString()} USD | Berat Awal: ${dosRes.data.corridor_profile.initial_loaded_weight_kg} kg\n`;
+            out += `Status Pengamanan Terkini: 🚨 ${dosRes.data.corridor_profile.status}\n\n`;
+            out += `DETEKSI ANOMALI & TINDAKAN PENANGGULANGAN OTOMATIS:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            if (dosRes.data.threat_alarm_record && dosRes.data.threat_alarm_record.identified_anomalies) {
+                dosRes.data.threat_alarm_record.identified_anomalies.forEach(anom => {
+                    out += `  ⚠️ ANOMALI: ${anom}\n`;
+                });
+            }
+            out += `\nESKALASI SISTEM KEAMANAN DARURAT:\n`;
+            out += `  ✓ Remote Engine Immobilizer: DIAKTIFKAN (Mesin Kendaraan Dimatikan Otonom)\n`;
+            out += `  ✓ Penguncian DO WMS: STATUS LOCKED (Pencegahan Validasi Bongkar Ilegal)\n`;
+            out += `  ✓ Siaran Darurat Aparat: POLICE DISPATCH & SECURITY HQ BROADCASTED\n`;
+            out += `  ✓ Sertifikat Bukti Forensik SHA-256: ${dosRes.data.threat_alarm_record.forensic_certificate_hash}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Sensor gandar dan pintu kontainer mendeteksi pencurian isi muatan secara instan di luar rest area resmi.</li>
+                <li>Sertifikasi forensik satelit mempercepat investigasi aparat kepolisian dan klaim asuransi kargo tanpa sengketa.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses geofence anti-theft: ' + err.message;
+    }
+}
+
+async function triggerShiftBiddingFatigue() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi lelang shift terbuka & audit kelelahan kerja ILO Convention 171...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const shfID = "SHF-SMT-NIGHT-991";
+        await api('/hr/shifts/publish-open-shift', 'POST', {
+            shift_id: shfID,
+            workcenter_id: "WC-SMT-LINE-02",
+            job_role: "SMT Production Line Lead",
+            shift_type: "NIGHT_SHIFT_GRAVEYARD",
+            shift_duration_hours: 8.0,
+            base_hourly_rate_usd: 24.0,
+            surge_differential_usd: 9.50,
+            required_skill_cert: "IPC-A-610_CERTIFIED"
+        });
+
+        // Test bid from fatigued worker (Budi Prasetyo - Rest 6.5h vs 11h ILO min)
+        const bidRes = await api('/hr/shifts/submit-shift-bid', 'POST', {
+            shift_id: shfID,
+            worker_id: "WRK-OP-102"
+        });
+
+        const metricsRes = await api('/hr/shifts/fair-work-metrics/WC-SMT-LINE-02', 'GET');
+
+        if (badge) badge.textContent = `🛌 SHIFT: ${bidRes.data.bid_verdict}`;
+        if (answerEl) {
+            let out = `🛌 ENTERPRISE DYNAMIC SHIFT BIDDING & FAIR-WORK FATIGUE GUARDIAN (ILO C171 & OSHA):\n`;
+            out += `Kode Peluang Shift: ${shfID} (Workcenter: WC-SMT-LINE-02)\n`;
+            out += `Operator Pengaju Tawaran (Bidder): ${bidRes.data.worker_name} (${bidRes.data.worker_id})\n`;
+            out += `Estimasi Penghasilan Shift: $${bidRes.data.total_shift_earnings_usd.toFixed(2)} USD (Tarif $33.50/Jam Termasuk Surge Bonus)\n\n`;
+            out += `HASIL AUDIT KESELAMATAN & KELAIKAN KERJA (FIT FOR DUTY):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Kualifikasi Sertifikasi Keahlian: ${bidRes.data.skill_certified ? '✓ TERVERIFIKASI' : '❌ TIDAK SESUAI'}\n`;
+            out += `Syarat Istirahat Minimum 11 Jam (ILO C171): ${bidRes.data.ilo_rest_requirement_met ? '✓ TERPENUHI' : '❌ DILANGGAR (HANYA ISTIRAHAT 6.5 JAM)'}\n`;
+            out += `Ambang Batas Kelelahan Sirkadian: ${bidRes.data.fatigue_safety_score_ok ? '✓ AMAN' : '❌ BAHAYA KELELAHAN EKSTREM (SKOR > 70)'}\n`;
+            out += `PUTUSAN BID SHIFT: 🛑 ${bidRes.data.bid_verdict}\n`;
+            out += `Alasan Penolakan Otomatis: ${bidRes.data.rejection_reason}\n\n`;
+            out += `METRIK KETENAGAKERJAAN ADIL (FAIR WORK EQUITY INDEX):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Indeks Keadilan Roster: ${metricsRes.roster_equity_index}%\n`;
+            out += `Pekerja Bugar Siap Tugas: ${metricsRes.fit_for_duty_workers} dari ${metricsRes.active_workers_count} Operator\n`;
+            out += `Rata-rata Skor Kelelahan Shift: ${metricsRes.average_fatigue_score}/100\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pencegahan overwork otomatis mengeliminasi risiko kecelakaan fatal di lantai kerja pabrik 24/7.</li>
+                <li>Kepatuhan Konvensi ILO No. 171 melindungi perusahaan dari gugatan ketenagakerjaan dan sanksi audit serikat pekerja.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses shift bidding fatigue: ' + err.message;
+    }
+}
+
+async function triggerCircularPackaging() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Merekonsiliasi inspeksi pengembalian wadah kemasan sirkular & deposit refund...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const assetID = "IBC-TOTE-8812";
+        await api('/scm/packaging/dispatch-with-deposit', 'POST', {
+            asset_id: assetID,
+            customer_id: "CUST-CHEM-POLYMER-01",
+            customer_name: "PT Nusantara Polymer Coatings Tbk",
+            sales_order_id: "SO-2026-IBC-771",
+            delivery_order_id: "WH/OUT/2026/09912"
+        });
+
+        const retRes = await api('/scm/packaging/reconcile-return-inspection', 'POST', {
+            asset_id: assetID,
+            customer_id: "CUST-CHEM-POLYMER-01",
+            returned_condition: "NEEDS_WASHING_CHEMICAL_FLUSH" // 90% refund ($15 deduction)
+        });
+
+        const eprRes = await api('/scm/packaging/epr-sustainability-ledger/COMP-GOERP-01', 'GET');
+
+        if (badge) badge.textContent = `🔄 CIRCULAR: $${retRes.data.refund_credit_note_usd} Refund`;
+        if (answerEl) {
+            let out = `🔄 B2B CIRCULAR PACKAGING & REUSABLE IBC TOTE DEPOSIT-RETURN LEDGER (EU PPWR & EPR):\n`;
+            out += `Aset Kemasan Pakai Ulang: ${retRes.data.asset_id} (Tipe: Intermediate Bulk Container / IBC Tote 1000L)\n`;
+            out += `Serial GS1 GRAI Unik: ${retRes.data.grai_serial_number}\n`;
+            out += `Pelanggan Pengembali: ${retRes.data.customer_id}\n`;
+            out += `Total Siklus Pemakaian (Trips): ${retRes.data.trips_updated} Kali Penggunaan Kembali\n\n`;
+            out += `HASIL INSPEKSI FISIK & REKONSILIASI DEPOSIT JAMINAN:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Kondisi Fisik Diterima: ${retRes.data.returned_condition}\n`;
+            out += `Uang Jaminan Awal (Deposit): $${retRes.data.deposit_originally_paid_usd.toFixed(2)} USD\n`;
+            out += `Biaya Pembersihan Kimia (Washing Fee): -$${retRes.data.deduction_fee_usd.toFixed(2)} USD\n`;
+            out += `NILAI PENGEMBALIAN DEPOSIT (CREDIT NOTE): $${retRes.data.refund_credit_note_usd.toFixed(2)} USD\n`;
+            out += `Nomor Referensi Credit Note GL: ${retRes.data.credit_note_reference}\n\n`;
+            out += `INDIKATOR EKONOMI SIRKULAR & PELAPORAN EPR:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Tingkat Sirkularitas Kemasan Pabrik: ${eprRes.packaging_circularity_pct}%\n`;
+            out += `Total Sampah Plastik Sekali Pakai Dicegah: ${eprRes.avoided_plastic_tons} Ton Plastik HDPE\n`;
+            out += `Penurunan Emisi Karbon Scope 3: ${eprRes.avoided_scope3_co2e_tons} tCO2e\n`;
+            out += `Kepatuhan Regulasi: ${eprRes.regulatory_compliance}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Skema jaminan deposit (Deposit-Refund) menurunkan tingkat kehilangan aset kemasan (shrinkage) hingga mendekati nol.</li>
+                <li>Kepatuhan pelaporan EPR memenuhi prasyarat regulasi kemasan sirkular Uni Eropa (PPWR) untuk pasar ekspor.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses circular packaging RTI: ' + err.message;
+    }
+}
+
+
 
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
