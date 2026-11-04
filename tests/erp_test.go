@@ -10107,5 +10107,232 @@ IEA*1*000099123~`
 	t.Logf("✓ 9-Box Talent Matrix & Succession Verified: Employee='%s' (%s), Coord='%s', Class='%s', Action='%s', TargetRole='%s' (Readiness='%s'), RoleBench='%s' (%s, Nominees=%d, ReadyNow=%d, Ready1-2Yrs=%d, Status='%s')",
 		talentEval.EmployeeName, talentEval.CurrentJobTitle, talentEval.GridCoordinates, talentEval.NineBoxClassification, talentEval.DevelopmentActionPlan, talentEval.TargetLeadershipRole, talentEval.ReadinessTimeline, benchSummary.RoleTitle, benchSummary.IncumbentName, benchSummary.TotalSuccessorsNominated, benchSummary.ReadyNowCount, benchSummary.Ready1To2YearsCount, benchSummary.BenchVulnerabilityStatus)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (69 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION) PASSED 100%!")
+	// ==========================================
+	// SECTION 70: V1.56.0 DIGITAL PRODUCT PASSPORT, SPOT FREIGHT AUCTION, GLOBAL LIQUIDITY SWEEPER, CPQ DEAL DESK & EHS OSHA SENTINEL:
+	// 1. Digital Product Passport (DPP) & Circular Economy Lifecycle Engine (EU ESPR & Battery Directive)
+	// 2. Autonomous Spot Freight Bidding & Reverse Auction Carrier Engine
+	// 3. Multi-Currency Global Liquidity Sweeper & Notional Cash Pooling Vault
+	// 4. Enterprise CPQ Constraint Solver & Deal Desk Sentinel
+	// 5. EHS Incident Sentinel & OSHA / ISO 45001 Compliance Engine
+	// ==========================================
+	t.Log(`
+		>>> SECTION 70: DIGITAL PRODUCT PASSPORT, SPOT FREIGHT AUCTION, GLOBAL LIQUIDITY SWEEPER, CPQ DEAL DESK & EHS OSHA SENTINEL <<<`)
+
+	// 70.1 Digital Product Passport (DPP)
+	dppReq := corescm.IssuePassportRequest{
+		ProductSKU:            "EV-BAT-100KWH",
+		ProductName:           "Enterprise High-Density 100kWh Traction Battery Pack",
+		BatchNumber:           "BATCH-2026-TEST-01",
+		SerialNumber:          "SN-TEST-88190",
+		ManufacturerName:      "GoERP Clean Mobility Systems SE",
+		ManufacturingFacility: "Gigafactory Berlin-Brandenburg",
+		Components: []corescm.MaterialComponent{
+			{
+				ComponentID:           "CMP-BAT-01",
+				Name:                  "Recycled Cathode NMC 811",
+				MaterialType:          "Cobalt & Nickel",
+				WeightKg:              30.0,
+				RecycledPercentage:    70.0,
+				CriticalRawMaterial:   true,
+				SupplierOriginCountry: "DE",
+				RoHSCompliant:         true,
+				REACHCompliant:        true,
+			},
+			{
+				ComponentID:           "CMP-ENC-02",
+				Name:                  "Recycled Aluminum Enclosure",
+				MaterialType:          "Post-Consumer Aluminum",
+				WeightKg:              20.0,
+				RecycledPercentage:    90.0,
+				CriticalRawMaterial:   false,
+				SupplierOriginCountry: "NO",
+				RoHSCompliant:         true,
+				REACHCompliant:        true,
+			},
+		},
+		Scope1KgCO2e:         300.0,
+		Scope2KgCO2e:         150.0,
+		Scope3KgCO2e:         550.0,
+		RepairabilityScore:   8.9,
+		DisassemblySteps:     10,
+		SparePartsYears:      15,
+		RecyclabilityRatePct: 96.0,
+		DisassemblyManualURL: "https://circular.goerp.io/manuals/EV-BAT-100KWH-v2.pdf",
+	}
+	dppPassport, err := corescm.IssueProductPassportLogic(dppReq)
+	if err != nil || dppPassport.PassportID == "" || dppPassport.TotalWeightKg != 50.0 || dppPassport.OverallRecycledContent != 78.0 || dppPassport.CarbonGenealogy.TotalCradleToGateCO2e != 1000.0 || dppPassport.DigitalSignatureHash == "" {
+		t.Fatalf("Failed to issue digital product passport: %+v, err: %v", dppPassport, err)
+	}
+
+	dppVerify, err := corescm.VerifyPassportLogic(dppPassport.PassportID)
+	if err != nil || !dppVerify.Authentic || !dppVerify.EUPassportCompliant {
+		t.Fatalf("Failed to verify digital product passport: %+v, err: %v", dppVerify, err)
+	}
+	t.Logf("✓ Digital Product Passport Verified: PassportID='%s', Product='%s', Weight=%.1fkg, Recycled=%.1f%%, CradleToGate=%.1f kgCO2e, Repairability=%.1f/10, Recyclability=%.1f%%, Hash='%s', EUCompliant=%v",
+		dppPassport.PassportID, dppPassport.ProductName, dppPassport.TotalWeightKg, dppPassport.OverallRecycledContent, dppPassport.CarbonGenealogy.TotalCradleToGateCO2e, dppPassport.Circularity.RepairabilityScore, dppPassport.Circularity.RecyclabilityRatePercentage, dppPassport.DigitalSignatureHash[:16], dppVerify.EUPassportCompliant)
+
+	// 70.2 Autonomous Spot Freight Bidding & Reverse Auction Carrier Engine
+	auctionReq := corefleet.CreateAuctionRequest{
+		OriginLocation:        "Tanjung Priok Port, Jakarta (IDTPP)",
+		DestinationLocation:   "Port of Rotterdam, Netherlands (NLRTM)",
+		CargoType:             "40ft High-Cube Reefer",
+		WeightMetricTons:      24.0,
+		TargetDeparture:       "2026-03-25",
+		MaximumCeilingRateUSD: 5000.0,
+		BenchmarkCarbonKgCO2e: 3000.0,
+	}
+	auction, err := corefleet.CreateAuctionLogic(auctionReq)
+	if err != nil || auction.AuctionID == "" || auction.Status != "OPEN" {
+		t.Fatalf("Failed to create freight auction: %+v, err: %v", auction, err)
+	}
+
+	carrierBid1, err := corefleet.SubmitBidLogic(corefleet.SubmitBidRequest{
+		AuctionID:            auction.AuctionID,
+		CarrierID:            "CAR-MAERSK-TEST",
+		CarrierName:          "Maersk Ocean Line",
+		ProposedRateUSD:      4300.0,
+		EstimatedTransitDays: 21.0,
+		CarbonEmissionKgCO2e: 2400.0,
+		HistoricalOnTimeRate: 0.95,
+		VesselOrFlightRef:    "Vessel MSC Oscar",
+	})
+	if err != nil || carrierBid1.CompositeScore <= 0 {
+		t.Fatalf("Failed to submit bid 1: %+v, err: %v", carrierBid1, err)
+	}
+
+	carrierBid2, err := corefleet.SubmitBidLogic(corefleet.SubmitBidRequest{
+		AuctionID:            auction.AuctionID,
+		CarrierID:            "CAR-HAPAG-TEST",
+		CarrierName:          "Hapag-Lloyd Green Express",
+		ProposedRateUSD:      3950.0,
+		EstimatedTransitDays: 23.0,
+		CarbonEmissionKgCO2e: 2050.0,
+		HistoricalOnTimeRate: 0.93,
+		VesselOrFlightRef:    "Vessel Berlin Express",
+	})
+	if err != nil || carrierBid2.CompositeScore <= 0 {
+		t.Fatalf("Failed to submit bid 2: %+v, err: %v", carrierBid2, err)
+	}
+
+	awardResult, err := corefleet.AwardAuctionLogic(corefleet.AwardAuctionRequest{AuctionID: auction.AuctionID})
+	if err != nil || awardResult.Status != "CLOSED_AWARDED" || awardResult.DigitalShippingOrderNo == "" || awardResult.TotalSavingsUSD <= 0 {
+		t.Fatalf("Failed to award freight auction: %+v, err: %v", awardResult, err)
+	}
+	t.Logf("✓ Spot Freight Auction Verified: AuctionID='%s', Status='%s', Winner='%s' ($%.2f), DSO='%s', Ceiling=$%.2f, Savings=$%.2f (%.1f%%), CarbonRating='%s', Score=%.2f",
+		awardResult.AuctionID, awardResult.Status, awardResult.WinningBid.CarrierName, awardResult.AwardedRateUSD, awardResult.DigitalShippingOrderNo, awardResult.CeilingRateUSD, awardResult.TotalSavingsUSD, awardResult.SavingsPercentage, awardResult.CarbonEfficiencyRating, awardResult.WinningBid.CompositeScore)
+
+	// 70.3 Multi-Currency Global Liquidity Sweeper & Notional Cash Pooling Vault
+	sweepReq := coretreasury.CrossBorderSweepRequest{
+		SweepPlanID:                "SWEEP-TEST-RUN-01",
+		ConcentrationMasterAccount: "TREASURY-CORP-USD-MASTER",
+		MasterCurrency:             "USD",
+		ExecuteViaRail:             "WHOLESALE_CBDC_MBRIDGE",
+		Accounts: []coretreasury.LiquiditySweepAccount{
+			{
+				AccountID:                "ACC-SG-01",
+				EntityName:               "GoERP Asia Pacific Pte Ltd",
+				CountryCode:              "SG",
+				Currency:                 "SGD",
+				OpeningBalance:           3000000.0,
+				TargetFloorBalance:       1000000.0,
+				ExchangeRateToUSD:        0.75,
+				CapitalControlRestricted: false,
+			},
+			{
+				AccountID:                "ACC-ID-02",
+				EntityName:               "PT GoERP Solusi Nusantara",
+				CountryCode:              "ID",
+				Currency:                 "IDR",
+				OpeningBalance:           40000000000.0,
+				TargetFloorBalance:       10000000000.0,
+				ExchangeRateToUSD:        0.000062,
+				CapitalControlRestricted: true,
+				DailyTransferQuotaUSD:    1200000.0,
+			},
+			{
+				AccountID:                "ACC-DE-03",
+				EntityName:               "GoERP Europe GmbH",
+				CountryCode:              "DE",
+				Currency:                 "EUR",
+				OpeningBalance:           600000.0,
+				TargetFloorBalance:       1000000.0,
+				ExchangeRateToUSD:        1.08,
+				CapitalControlRestricted: false,
+			},
+		},
+	}
+	sweepRes, err := coretreasury.ExecuteCrossBorderSweepLogic(sweepReq)
+	if err != nil || sweepRes.TotalSweptUpstreamUSD <= 0 || sweepRes.TotalFundedDownstreamUSD <= 0 || sweepRes.NetLiquidityGainUSD <= 0 || len(sweepRes.Movements) < 3 {
+		t.Fatalf("Failed to execute cross border sweep: %+v, err: %v", sweepRes, err)
+	}
+
+	cbdcSettlement, err := coretreasury.SettleCorridorLogic(coretreasury.SettleCorridorRequest{
+		DebtorEntity:   "GoERP Asia Pacific Pte Ltd",
+		CreditorEntity: "GoERP Europe GmbH",
+		AmountUSD:      450000.0,
+		CorridorName:   "mBridge-ASEAN-EUR",
+		InvoiceRef:     "INV-INTERCO-2026-991",
+	})
+	if err != nil || cbdcSettlement.Status != "SETTLED" || cbdcSettlement.AtomicFinalityProof == "" {
+		t.Fatalf("Failed to settle CBDC corridor: %+v, err: %v", cbdcSettlement, err)
+	}
+	t.Logf("✓ Global Liquidity Sweeper Verified: Plan='%s', Rail='%s', SweptUp=$%.2f, FundedDown=$%.2f, NetLiquidity=$%.2f, IntercoInterest=$%.2f, Movements=%d, CBDC Settle='%s' ($%.2f proof='%s')",
+		sweepRes.SweepPlanID, sweepRes.SettlementRailUsed, sweepRes.TotalSweptUpstreamUSD, sweepRes.TotalFundedDownstreamUSD, sweepRes.NetLiquidityGainUSD, sweepRes.IntercompanyInterestEarnedUSD, len(sweepRes.Movements), cbdcSettlement.SettlementRef, cbdcSettlement.SettledAmountUSD, cbdcSettlement.AtomicFinalityProof[:20])
+
+	// 70.4 Enterprise CPQ Constraint Solver & Deal Desk Sentinel
+	dealQuote, err := corecpq.EvaluateDealQuoteLogic(corecpq.EvaluateQuoteRequest{
+		CustomerName:       "PT Astra Logistik Multimodal Tbk",
+		IndustrySegment:    "LOGISTICS_TRANSPORTATION",
+		ContractTermMonths: 36,
+		ListPrice:          750000.0,
+		OfferedDiscountPct: 18.0,
+		TotalEstimatedCost: 420000.0,
+		NonStandardTerms:   []string{"Net 60 Days Invoicing"},
+	})
+	if err != nil || dealQuote.QuoteID == "" || dealQuote.NetPrice != 615000.0 || dealQuote.DealDeskStatus != "PENDING_SALES_DIRECTOR" {
+		t.Fatalf("Failed to evaluate deal quote: %+v, err: %v", dealQuote, err)
+	}
+
+	approvedQuote, err := corecpq.ApproveDiscountLogic(corecpq.ApproveDiscountRequest{
+		QuoteID:      dealQuote.QuoteID,
+		ApproverRole: "SALES_DIRECTOR",
+		ApproverName: "Budi Santoso (Commercial VP)",
+		Decision:     "APPROVED",
+		Remarks:      "Strategic account expansion approved with standard 36-month commitment",
+	})
+	if err != nil || approvedQuote.DealDeskStatus != "APPROVED_BY_MANAGEMENT" || len(approvedQuote.ApprovalHistory) == 0 {
+		t.Fatalf("Failed to approve deal quote: %+v, err: %v", approvedQuote, err)
+	}
+	t.Logf("✓ CPQ Deal Desk Verified: Quote='%s' (%s), List=$%.2f, Disc=%.1f%%, Net=$%.2f, Cost=$%.2f, Margin=%.2f%%, RiskScore=%.1f, InitialStatus='%s', FinalStatus='%s', Approver='%s'",
+		approvedQuote.QuoteID, approvedQuote.CustomerName, approvedQuote.ListPrice, approvedQuote.OfferedDiscountPct, approvedQuote.NetPrice, approvedQuote.TotalEstimatedCost, approvedQuote.GrossMarginPct, approvedQuote.MarginLeakageRiskScore, dealQuote.DealDeskStatus, approvedQuote.DealDeskStatus, approvedQuote.ApprovalHistory[0].ApproverName)
+
+	// 70.5 EHS Incident Sentinel & OSHA / ISO 45001 Compliance Engine
+	sensorAlert, err := coreehs.IngestZoneAlertLogic(coreehs.SensorZoneAlert{
+		WorkCenter:      "Automated Press Stamping Bay C",
+		AlertType:       "FORKLIFT_PROXIMITY_BREACH",
+		ConfidenceScore: 0.99,
+	})
+	if err != nil || sensorAlert.AlertID == "" || sensorAlert.Status != "DISPATCHED_SUPERVISOR" || sensorAlert.ImmediateMitigationAction == "" {
+		t.Fatalf("Failed to ingest EHS sensor alert: %+v, err: %v", sensorAlert, err)
+	}
+
+	oshaSummary, err := coreehs.GenerateOSHA300SummaryLogic(2026)
+	if err != nil || oshaSummary.TotalHoursWorked <= 0 || oshaSummary.TRIRScore <= 0 || oshaSummary.DARTScore <= 0 || oshaSummary.ISO45001AuditStatus == "" {
+		t.Fatalf("Failed to generate OSHA 300 summary: %+v, err: %v", oshaSummary, err)
+	}
+
+	capaEscalation, err := coreehs.EscalateCAPALogic(coreehs.EscalateCAPARequest{
+		LinkedCaseNo:      "OSHA-2026-002",
+		RootCauseCategory: "ERGONOMIC_HAZARD",
+		ActionPlan:        "Deploy vacuum lift assist at Dock 7 and re-train warehouse team on ergonomic lifting",
+		AssignedTo:        "Hendra Setiawan (K3 Safety Specialist)",
+		DeadlineDays:      21,
+	})
+	if err != nil || capaEscalation.CAPAID == "" || capaEscalation.Status != "ASSIGNED" {
+		t.Fatalf("Failed to escalate K3 CAPA: %+v, err: %v", capaEscalation, err)
+	}
+	t.Logf("✓ EHS Sentinel Verified: AlertID='%s' (%s at %s, Mitigate='%s'), OSHA Year=%d (Hours=%.0f, Employees=%d, Recordable=%d, TRIR=%.2f, DART=%.2f, Severity=%.2f, AuditStatus='%s'), CAPA='%s' (Case='%s', Root='%s', Assigned='%s', Due='%s')",
+		sensorAlert.AlertID, sensorAlert.AlertType, sensorAlert.WorkCenter, sensorAlert.ImmediateMitigationAction, oshaSummary.Year, oshaSummary.TotalHoursWorked, oshaSummary.AverageAnnualEmployees, oshaSummary.TotalRecordableCases, oshaSummary.TRIRScore, oshaSummary.DARTScore, oshaSummary.SeverityIndex, oshaSummary.ISO45001AuditStatus, capaEscalation.CAPAID, capaEscalation.LinkedCaseNo, capaEscalation.RootCauseCategory, capaEscalation.AssignedTo, capaEscalation.Deadline)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (70 SECTIONS: 55+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL) PASSED 100%!")
 }

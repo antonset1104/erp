@@ -735,5 +735,34 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **McKinsey/GE 9-Box Grid Mapping**: Endpoint `POST /api/v1/hr/succession/evaluate-talent` plots performance (1-3) vs potential (1-3) into standard 9-box classifications (*Star Future Leader*, *High Performer*, *Solid Professional*, etc.) and generates tailored executive development action plans.
 - **Role Succession Bench Strength & Key Person Risk**: Endpoint `GET /api/v1/hr/succession/bench-strength/:role_id` tracks readiness timelines (*Ready Now*, *Ready in 1-2 Years*) for mission-critical executive roles to prevent organizational disruption.
 
+---
+
+## 22. Digital Product Passport, Spot Freight Auction, Global Liquidity Sweeper, CPQ Deal Desk & EHS Sentinel (v1.56.0)
+
+### 22.1 Digital Product Passport (DPP) & Circular Economy Lifecycle Engine (`internal/core/scm/product_passport.go`)
+- **EU ESPR & Battery Directive Compliance**: Endpoint `POST /api/v1/scm/dpp/issue` mints cryptographically signed Digital Product Passports tracking material composition, recycled material %, critical raw materials (CRM Act), and cradle-to-gate carbon intensity ($\text{kgCO}_2\text{e}/\text{kg}$).
+- **Repairability & Circular Lifecycle Metrics**: Computes repairability scores (1.0-10.0), spare parts availability commitments, disassembly steps, and end-of-life closed-loop recycling guidance.
+- **Cryptographic Public Verification & Audit Registry**: Endpoints `GET /api/v1/scm/dpp/verify/:passport_id` and `GET /api/v1/scm/dpp/registry` validate SHA-256 digital signatures, providing public QR/NFC inspection payloads for customs, consumers, and recyclers.
+
+### 22.2 Autonomous Spot Freight Bidding & Reverse Auction Carrier Engine (`internal/core/fleet/freight_auction.go`)
+- **Dynamic Multimodal Freight Auctions**: Endpoint `POST /api/v1/fleet/freight-auction/create` initiates spot market reverse auctions for ocean containers, air express, and full-truckload freight under defined ceiling rate caps.
+- **Multi-Factor Composite Carrier Scoring**: Endpoint `POST /api/v1/fleet/freight-auction/submit-bid` ranks forwarder bids based on a balanced scorecard: Proposed Rate (40%), Transit Speed (25%), Carbon Emissions (20%), and Historical Carrier Reliability (15%).
+- **Automated Digital Shipping Order (DSO) Issuance**: Endpoints `POST /api/v1/fleet/freight-auction/award` and `GET /api/v1/fleet/freight-auction/list` select the optimal composite bid, lock contractual rates, and instantly issue Digital Shipping Orders linked to WMS dispatch.
+
+### 22.3 Multi-Currency Global Liquidity Sweeper & Notional Cash Pooling Vault (`internal/core/treasury/liquidity_sweeper.go`)
+- **Automated Cross-Border Cash Sweeping**: Endpoint `POST /api/v1/treasury/liquidity/cross-border-sweep` executes Zero-Balance Account (ZBA) and target balancing runs across multi-currency overseas subsidiary accounts, calculating daily intercompany arm's-length interest (SOFR/EURIBOR + 75 bps).
+- **Central Bank Capital Control Gateway**: Enforces statutory foreign exchange export quotas, automatically routing restricted funds into local regulatory escrow.
+- **Notional Cash Pooling & CBDC Settlement Rail**: Endpoints `GET /api/v1/treasury/liquidity/notional-pool-summary` and `POST /api/v1/treasury/liquidity/settle-corridor` calculate group-wide notional interest netting and execute atomic cross-border payments via wholesale mBridge CBDC rails.
+
+### 22.4 Enterprise CPQ Constraint Solver & Deal Desk Sentinel (`internal/core/cpq/deal_desk.go`)
+- **Commercial Margin Leakage Guardrail**: Endpoint `POST /api/v1/cpq/deal-desk/evaluate-quote` evaluates multi-year B2B sales proposals, identifying non-standard contractual terms (Net 60/90, uncapped liability) and calculating Margin Leakage Risk Scores.
+- **Hierarchical Deal Desk Sign-Off Routing**: Implements governance policy matrices where proposals below margin floors or with discounts exceeding 25% are locked until reviewed by Commercial Sales Directors or the CFO.
+- **Audit-Compliant Executive Sign-Off**: Endpoints `POST /api/v1/cpq/deal-desk/approve-discount` and `GET /api/v1/cpq/deal-desk/audit-trail` log management decisions, conditions, and full governance audit trails.
+
+### 22.5 EHS Incident Sentinel & OSHA / ISO 45001 Compliance Engine (`internal/core/ehs/sentinel.go`)
+- **Automated Vision & IoT Hazard Ingestion**: Endpoint `POST /api/v1/ehs/sentinel/telemetry-alert` ingests real-time safety alerts (PPE violations, forklift proximity breaches, confined-space gas leaks) and triggers instantaneous audio sirens and supervisor alerts.
+- **Statutory OSHA 300 & Form 300A Analytics**: Endpoint `GET /api/v1/ehs/sentinel/osha-300-summary` computes official occupational health metrics: Total Recordable Incident Rate (TRIR), Days Away, Restricted or Transferred (DART), and ISO 45001 compliance audit standing.
+- **Structured CAPA Escalation**: Endpoint `POST /api/v1/ehs/sentinel/capa-escalate` initiates formal Corrective and Preventive Action workflows with root cause categories, responsible assignees, and statutory resolution deadlines.
+
 
 

@@ -26124,6 +26124,328 @@ async function triggerNineBoxSuccession() {
     }
 }
 
+async function triggerDigitalProductPassport() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menerbitkan Digital Product Passport (DPP) & memvalidasi kepatuhan EU ESPR...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const passport = await api('/scm/dpp/issue', 'POST', {
+            product_sku: "EV-BAT-100KWH",
+            product_name: "100kWh High-Density Industrial Traction Battery Pack",
+            batch_number: "BATCH-2026-EU-09",
+            serial_number: "SN-99410-X12",
+            manufacturer_name: "GoERP Clean Mobility Systems SE",
+            manufacturing_facility: "Gigafactory Berlin-Brandenburg",
+            components: [
+                {
+                    component_id: "CMP-CAT-01",
+                    name: "Recycled Prismatic Nickel-Manganese-Cobalt Cell",
+                    material_type: "Recycled NMC 811",
+                    weight_kg: 34.0,
+                    recycled_percentage: 65.0,
+                    critical_raw_material: true,
+                    supplier_origin_country: "DE",
+                    rohs_compliant: true,
+                    reach_compliant: true
+                },
+                {
+                    component_id: "CMP-CSG-02",
+                    name: "Structural Lightweight Enclosure",
+                    material_type: "Post-Consumer 6000-series Aluminum",
+                    weight_kg: 16.5,
+                    recycled_percentage: 88.0,
+                    critical_raw_material: false,
+                    supplier_origin_country: "NO",
+                    rohs_compliant: true,
+                    reach_compliant: true
+                }
+            ],
+            scope1_kg_co2e: 380.0,
+            scope2_kg_co2e: 140.0,
+            scope3_kg_co2e: 620.0,
+            repairability_score: 8.8,
+            disassembly_steps: 10,
+            spare_parts_years: 15,
+            recyclability_rate_pct: 95.0,
+            disassembly_manual_url: "https://circular.goerp.io/manuals/EV-BAT-100KWH-v2.pdf"
+        });
+
+        const verify = await api(`/scm/dpp/verify/${passport.passport_id}`, 'GET');
+
+        if (badge) badge.textContent = `📦 DPP: ${passport.passport_id}`;
+        if (answerEl) {
+            let out = `📦 DIGITAL PRODUCT PASSPORT (DPP) & CIRCULAR LIFECYCLE (EU ESPR COMPLIANT):\n`;
+            out += `Nomor Paspor Digital: ${passport.passport_id}\n`;
+            out += `Produk: ${passport.product_name} (${passport.product_sku})\n`;
+            out += `Pabrik Manufaktur: ${passport.manufacturing_facility} (${passport.manufacturer_name})\n`;
+            out += `Total Bobot Produk: ${passport.total_weight_kg} kg | Total Kandungan Daur Ulang: ${passport.overall_recycled_content.toFixed(1)}%\n`;
+            out += `Jejak Karbon Cradle-to-Gate: ${passport.carbon_genealogy.total_cradle_to_gate_co2e} kg CO2e (${passport.carbon_genealogy.carbon_intensity_ratio.toFixed(2)} kgCO2e/kg)\n`;
+            out += `Skor Kemudahan Perbaikan (Repairability): ${passport.circularity.repairability_score}/10 | Ketersediaan Suku Cadang: ${passport.circularity.spare_parts_availability_years} Tahun\n`;
+            out += `Tingkat Daur Ulang Akhir Masa Pakai: ${passport.circularity.recyclability_rate_percentage}%\n`;
+            out += `Status Kepatuhan EU ESPR: ${verify.eu_passport_compliant ? '✅ COMPLIANT' : '⚠️ NON-COMPLIANT'}\n`;
+            out += `Tanda Tangan Kriptografis SHA-256: ${passport.digital_signature_hash}\n`;
+            out += `URL Verifikasi Terbuka: ${passport.public_verification_url}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Digital Product Passport (DPP) mematuhi EU Ecodesign for Sustainable Products Regulation (ESPR) dan Battery Directive.</li>
+                <li>QR/NFC payload siap discan oleh otoritas pabean Eropa dan fasilitas daur ulang baterai.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses paspor digital produk: ' + err.message;
+    }
+}
+
+async function triggerSpotFreightAuction() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengeksekusi lelang terbalik spot freight & optimasi alokasi transporter multimodal...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const award = await api('/fleet/freight-auction/award', 'POST', {
+            auction_id: "AUC-FRT-2026-0812"
+        });
+
+        if (badge) badge.textContent = `🚢 Freight: ${award.winning_bid.carrier_name}`;
+        if (answerEl) {
+            let out = `🚢 AUTONOMOUS SPOT FREIGHT REVERSE AUCTION & CARRIER ALLOCATION:\n`;
+            out += `ID Lelang Kargo: ${award.auction_id}\n`;
+            out += `Status Lelang: ${award.status}\n`;
+            out += `Transporter Pemenang: ${award.winning_bid.carrier_name} (${award.winning_bid.carrier_id})\n`;
+            out += `Nomor Digital Shipping Order (DSO): ${award.digital_shipping_order_no}\n`;
+            out += `Tarif Maksimal Plafon: $${award.ceiling_rate_usd.toLocaleString()} ➜ Tarif Pemenang: $${award.awarded_rate_usd.toLocaleString()}\n`;
+            out += `Efisiensi Penghematan Biaya: $${award.total_savings_usd.toLocaleString()} (${award.savings_percentage.toFixed(1)}%)\n`;
+            out += `Estimasi Waktu Tempuh: ${award.winning_bid.estimated_transit_days} Hari | Skor Komposit: ${award.winning_bid.composite_score}/100\n`;
+            out += `Emisi Karbon Pengangkutan: ${award.winning_bid.carbon_emission_kg_co2e} kg CO2e (Rating Efisiensi: ${award.carbon_efficiency_rating})\n`;
+            out += `Justifikasi Keputusan AI: ${award.award_justification}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pemenang lelang ditentukan berdasarkan multi-kriteria seimbang: Tarif (40%), Kecepatan (25%), Rendah Emisi (20%), dan Keandalan Transporter (15%).</li>
+                <li>Digital Shipping Order (DSO) diterbitkan secara otomatis dan terintegrasi dengan WMS Dispatch.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses lelang spot freight: ' + err.message;
+    }
+}
+
+async function triggerGlobalLiquiditySweeper() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengeksekusi cross-border liquidity sweep & konsolidasi cash pool korporasi...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const sweep = await api('/treasury/liquidity/cross-border-sweep', 'POST', {
+            sweep_plan_id: "SWEEP-GLOBAL-EOD-01",
+            concentration_master_account: "TREASURY-CORP-USD-MASTER",
+            master_currency: "USD",
+            execute_via_rail: "WHOLESALE_CBDC_MBRIDGE",
+            accounts: [
+                {
+                    account_id: "ACC-OPS-SG-01",
+                    entity_name: "GoERP Asia Pacific Pte Ltd (Singapore)",
+                    country_code: "SG",
+                    currency: "SGD",
+                    opening_balance: 4500000.0,
+                    target_floor_balance: 1000000.0,
+                    exchange_rate_to_usd: 0.76,
+                    capital_control_restricted: false,
+                    daily_transfer_quota_usd: 0
+                },
+                {
+                    account_id: "ACC-OPS-ID-02",
+                    entity_name: "PT GoERP Solusi Nusantara (Indonesia)",
+                    country_code: "ID",
+                    currency: "IDR",
+                    opening_balance: 48000000000.0,
+                    target_floor_balance: 15000000000.0,
+                    exchange_rate_to_usd: 0.000062,
+                    capital_control_restricted: true,
+                    daily_transfer_quota_usd: 1500000.0
+                },
+                {
+                    account_id: "ACC-OPS-DE-03",
+                    entity_name: "GoERP Europe GmbH (Frankfurt)",
+                    country_code: "DE",
+                    currency: "EUR",
+                    opening_balance: 500000.0,
+                    target_floor_balance: 1200000.0,
+                    exchange_rate_to_usd: 1.08,
+                    capital_control_restricted: false,
+                    daily_transfer_quota_usd: 0
+                }
+            ]
+        });
+
+        const pool = await api('/treasury/liquidity/notional-pool-summary', 'GET');
+
+        if (badge) badge.textContent = `💵 Liquidity: +$${Math.round(sweep.net_liquidity_gain_usd).toLocaleString()}`;
+        if (answerEl) {
+            let out = `💵 MULTI-CURRENCY GLOBAL LIQUIDITY SWEEPER & NOTIONAL POOLING VAULT:\n`;
+            out += `ID Rencana Konsentrasi: ${sweep.sweep_plan_id} | Jalur Settlement: ${sweep.settlement_rail_used}\n`;
+            out += `Rekening Induk Pusat Treasury: ${sweep.master_account_id}\n`;
+            out += `Total Dana Ditarik ke Induk (Upstream Sweep): $${Math.round(sweep.total_swept_upstream_usd).toLocaleString()} USD\n`;
+            out += `Total Defisit Didanai ke Cabang (Downstream Funding): $${Math.round(sweep.total_funded_downstream_usd).toLocaleString()} USD\n`;
+            out += `Surplus Likuiditas Bersih Terkonsentrasi: $${Math.round(sweep.net_liquidity_gain_usd).toLocaleString()} USD\n`;
+            out += `Bunga Intercompany Arm's Length Diperoleh: $${sweep.intercompany_interest_earned_usd.toFixed(2)} USD (SOFR + 75 bps)\n\n`;
+            out += `STATUS NOTIONAL POOLING GROUP KORPORASI:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Total Saldo Konsolidasi Pool: $${pool.total_consolidated_balance_usd.toLocaleString()} USD (Entitas: ${pool.participating_entities})\n`;
+            out += `Efisiensi Penghematan Pajak & Bunga Valas: $${pool.interest_tax_optimization_saved_usd.toLocaleString()} USD | Imbal Hasil: ${pool.net_effective_yield_pct}%\n`;
+            if (sweep.capital_control_notes && sweep.capital_control_notes.length > 0) {
+                out += `Catatan Regulasi Devisa (Central Bank Capital Control):\n`;
+                sweep.capital_control_notes.forEach(note => out += `  ⚠️ ${note}\n`);
+            }
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penyapuan saldo otomatis (ZBA & Target Balancing) memangkas pinjaman overdraft lokal yang mahal.</li>
+                <li>Settlement via mBridge CBDC memberikan finalitas transaksi instan dalam hitungan detik lintas zona waktu.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses global liquidity sweeper: ' + err.message;
+    }
+}
+
+async function triggerCPQDealDesk() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi batas diskon CPQ & menjalankan penjaga gerbang margin Deal Desk...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const quote = await api('/cpq/deal-desk/evaluate-quote', 'POST', {
+            customer_name: "PT Semen Nusantara Perkasa Tbk",
+            industry_segment: "MANUFACTURING_HEAVY_INDUSTRY",
+            contract_term_months: 24,
+            list_price: 850000.0,
+            offered_discount_pct: 18.5,
+            total_estimated_cost: 480000.0,
+            non_standard_terms: ["Net 60 Days Invoicing", "SLA Penalty Tier 2"]
+        });
+
+        if (badge) badge.textContent = `💼 CPQ: ${quote.deal_desk_status}`;
+        if (answerEl) {
+            let out = `💼 ENTERPRISE CPQ DYNAMIC CONSTRAINT SOLVER & DEAL DESK SENTINEL:\n`;
+            out += `Nomor Penawaran (Quote ID): ${quote.quote_id}\n`;
+            out += `Pelanggan: ${quote.customer_name} | Segmen Industri: ${quote.industry_segment}\n`;
+            out += `Durasi Kontrak: ${quote.contract_term_months} Bulan\n`;
+            out += `Harga Daftar (List Price): $${quote.list_price.toLocaleString()}\n`;
+            out += `Diskon Ditawarkan Sales: ${quote.offered_discount_pct}% ➜ Harga Bersih (Net Price): $${quote.net_price.toLocaleString()}\n`;
+            out += `Estimasi Biaya Produksi: $${quote.total_estimated_cost.toLocaleString()} | Margin Kotor: ${quote.gross_margin_pct}%\n`;
+            out += `Status Deal Desk: ${quote.deal_desk_status}\n`;
+            out += `Aturan Kebijakan Otorisasi: ${quote.approval_threshold_rule}\n`;
+            out += `Skor Risiko Margin Leakage: ${quote.margin_leakage_risk_score}/100\n`;
+            if (quote.non_standard_terms && quote.non_standard_terms.length > 0) {
+                out += `Klausul Non-Standar Terdeteksi:\n`;
+                quote.non_standard_terms.forEach(term => out += `  • ${term}\n`);
+            }
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pencegahan margin leakage otomatis mendeteksi diskon yang menggerus profitabilitas perusahaan.</li>
+                <li>Alur persetujuan hierarkis mengunci proposal hingga ditandatangani oleh Commercial Sales Director atau CFO.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Deal Desk CPQ: ' + err.message;
+    }
+}
+
+async function triggerEHSSentinel() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis telemetri keselamatan kerja, log OSHA 300 & indikator ISO 45001...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const alert = await api('/ehs/sentinel/telemetry-alert', 'POST', {
+            work_center: "Automated Robotic Welding Cell B",
+            alert_type: "FORKLIFT_PROXIMITY_BREACH",
+            confidence_score: 0.985
+        });
+
+        const osha = await api('/ehs/sentinel/osha-300-summary', 'GET');
+
+        if (badge) badge.textContent = `🛡️ EHS: ${osha.iso45001_audit_status}`;
+        if (answerEl) {
+            let out = `🛡️ EHS INCIDENT SENTINEL & STATUTORY OSHA / ISO 45001 COMPLIANCE ENGINE:\n`;
+            out += `Telemetri AI Terdeteksi: ${alert.alert_type} di ${alert.work_center} (Akurasi: ${(alert.confidence_score*100).toFixed(1)}%)\n`;
+            out += `Tindakan Mitigasi Seketika: ${alert.immediate_mitigation_action}\n`;
+            out += `Status Notifikasi: ${alert.status}\n\n`;
+            out += `RINGKASAN TAHUNAN STATUTORIS OSHA FORM 300A (${osha.year}):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Fasilitas Manufaktur: ${osha.establishment_name}\n`;
+            out += `Total Jam Kerja Karyawan: ${osha.total_hours_worked.toLocaleString()} Jam | Jumlah Tenaga Kerja: ${osha.average_annual_employees} Orang\n`;
+            out += `Total Kasus Tercatat (Recordable Cases): ${osha.total_recordable_cases} Kasus (Kematian: ${osha.total_deaths})\n`;
+            out += `• Kasus Kehilangan Hari Kerja (Days Away): ${osha.total_cases_with_days_away} (Total Hari: ${osha.total_days_away})\n`;
+            out += `• Kasus Pembatasan Tugas (Job Restriction): ${osha.total_cases_with_restriction} (Total Hari: ${osha.total_days_restricted})\n`;
+            out += `Metrik Keselamatan K3 Berstandar Global:\n`;
+            out += `  ➜ TRIR (Total Recordable Incident Rate): ${osha.trir_score} (Ambang Aman Industri < 2.0)\n`;
+            out += `  ➜ DART (Days Away, Restricted or Transferred Rate): ${osha.dart_score}\n`;
+            out += `  ➜ Indeks Keparahan (Severity Index): ${osha.severity_index} Hari/Kasus\n`;
+            out += `Status Audit ISO 45001 K3: ${osha.iso45001_audit_status}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Sensor vision & AI mendeteksi pelanggaran APD dan batas jarak forklift secara real-time untuk mencegah kecelakaan fatal.</li>
+                <li>Laporan OSHA 300A dan metrik TRIR/DART dihasilkan secara otomatis untuk kepatuhan audit K3 Disnaker & ISO 45001.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses sentinel EHS OSHA: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

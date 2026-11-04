@@ -291,7 +291,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.55.0",
+			"version":    "1.56.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -309,7 +309,7 @@ func main() {
 	ai.RegisterRootProtocolRoutes(r, aiHandler)
 
 	// Register OpenAPI 3.1 & Interactive API Explorer
-	openapi.RegisterRoutes(r, cfg.AppName, "1.55.0")
+	openapi.RegisterRoutes(r, cfg.AppName, "1.56.0")
 
 	// API v1 Router Group
 	apiV1 := r.Group("/api/v1")
@@ -381,6 +381,11 @@ func main() {
 		coreprocurement.RegisterEscrowRoutes(apiV1)
 		coreaccount.RegisterRevRecRoutes(apiV1)
 		corehr.RegisterSuccessionRoutes(apiV1)
+		corescm.RegisterDPPRoutes(apiV1)
+		corefleet.RegisterFreightAuctionRoutes(apiV1)
+		coretreasury.RegisterLiquiditySweeperRoutes(apiV1)
+		corecpq.RegisterDealDeskRoutes(apiV1)
+		coreehs.RegisterEHSSentinelRoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend

@@ -897,6 +897,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/scm/dpp/issue": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Digital Product Passport (DPP) & Circular Economy Lifecycle Engine (EU ESPR)",
+					"description": "Mints cryptographic DPP payloads tracking recycled material %, cradle-to-gate carbon intensity, and repairability score.",
+					"responses": map[string]interface{}{
+						"201": map[string]interface{}{"description": "Digital Product Passport issued with SHA-256 signature and public verification URL"},
+					},
+				},
+			},
+			"/api/v1/fleet/freight-auction/create": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Autonomous Spot Freight Bidding & Reverse Auction Carrier Engine",
+					"description": "Initiates spot freight reverse auction with multi-factor scoring (rate, transit time, carbon emission, carrier reliability).",
+					"responses": map[string]interface{}{
+						"201": map[string]interface{}{"description": "Freight auction created and open for carrier reverse bidding"},
+					},
+				},
+			},
+			"/api/v1/treasury/liquidity/cross-border-sweep": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Multi-Currency Global Liquidity Sweeper & Notional Cash Pooling Vault",
+					"description": "Performs cross-border multi-currency cash concentration, target balancing, capital control checks, and arm's-length interest compounding.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Liquidity sweep execution results, movements, and net concentrated liquidity in USD"},
+					},
+				},
+			},
+			"/api/v1/cpq/deal-desk/evaluate-quote": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Enterprise CPQ Constraint Solver & Deal Desk Sentinel",
+					"description": "Evaluates complex commercial quotes against margin leakage guardrails, non-standard terms, and hierarchical approval thresholds.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Quote evaluation, margin analysis, and required approval routing tier"},
+					},
+				},
+			},
+			"/api/v1/ehs/sentinel/telemetry-alert": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "EHS Incident Sentinel & OSHA / ISO 45001 Compliance Engine",
+					"description": "Ingests computer vision and IoT sensor hazard events, triggers immediate safety mitigation, and escalates CAPA actions.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Safety alert logged, automated mitigation dispatched, and supervisor notified"},
+					},
+				},
+			},
 		},
 	}
 }
