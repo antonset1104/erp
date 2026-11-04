@@ -1147,6 +1147,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/treasury/scf/request-early-drawdown": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Autonomous Vendor Early-Payment & Supply Chain Reverse Factoring (SCF) Vault",
+					"description": "Calculates dynamic APR discounting curves and processes supplier early drawdowns backed by buyer irrevocable undertakings.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Early drawdown quotation, applicable APR %, discount charges, and net disbursed funds"},
+					},
+				},
+			},
+			"/api/v1/logistics/hazmat/audit-stowage-segregation": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Autonomous HAZMAT Transport Compliance & UN Dangerous Goods (IMDG/ADR) Sentinel",
+					"description": "Audits container chemical stowage compatibility against IMDG Code Segregation Table 7.2.4 and generates dangerous goods declarations.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Stowage segregation compliance status, incompatible chemical pairings, and tunnel restriction codes"},
+					},
+				},
+			},
+			"/api/v1/service/warranty/audit-telemetric-fraud": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Predictive Warranty Claim Fraud Sentinel & Telemetric Anomaly Interceptor",
+					"description": "Cross-references repair claims with actual IoT telemetry (hours, thermal abuse, drop shocks) to intercept fraudulent claims.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Telemetric fraud audit findings, fraud risk score (0-100), and adjudication recommendations"},
+					},
+				},
+			},
+			"/api/v1/finance/peppol/serialize-ubl-invoice": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Global PEPPOL BIS Billing 3.0 & Real-Time CTC Tax Clearance Router",
+					"description": "Serializes compliant UBL 2.1 XML invoices with cryptographic chaining, digital signatures, and PEPPOL AS4 Access Point dispatch.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Serialized PEPPOL BIS 3.0 UBL XML string and canonical SHA-256 hash digest"},
+					},
+				},
+			},
+			"/api/v1/ehs/wearable/evaluate-heat-stress-risk": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Industrial Wearable Biometrics & Ergonomic Heat-Stress Sentinel (ISO 7243)",
+					"description": "Monitors real-time worker heart rate, core temperature, and ambient WBGT index to evaluate physiological strain index (PSI) and dispatch rest breaks.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Physiological strain index, thermal risk zone, and recommended mandatory rest/hydration intervals"},
+					},
+				},
+			},
 		},
 	}
 }

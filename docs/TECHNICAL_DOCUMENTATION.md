@@ -886,5 +886,40 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Automated Green Travel Policy Auditing**: Endpoint `POST /api/v1/esg/travel/audit-booking-policy` enforces short-haul rail mandates (<500 km) and regional business class restrictions, requiring VP exceptions when violated.
 - **Departmental Carbon Budget Tracking**: Endpoints `POST /api/v1/esg/travel/deduct-carbon-budget` and `GET /api/v1/esg/travel/department-budget-status/:department_id` debit trip footprints from quarterly departmental carbon quotas and assess internal carbon fees ($50/ton).
 
+---
+
+## 27. SCF Reverse Factoring, HAZMAT Dangerous Goods, Warranty Fraud Sentinel, PEPPOL BIS 3.0 & ISO 7243 Heat Stress (v1.61.0)
+
+### 27.1 Autonomous Vendor Early-Payment & Supply Chain Reverse Factoring (SCF) Liquidity Vault (`internal/core/treasury/scf_reverse_factoring.go`)
+- **Buyer-Centric Dynamic Invoicing Facility**: Endpoint `POST /api/v1/treasury/scf/publish-invoice-facility` allows enterprise buyers to publish approved AP invoices into the reverse factoring liquidity vault with dynamic APR discount curves based on days remaining to invoice maturity.
+- **Instant Vendor Early Drawdown**: Endpoint `POST /api/v1/treasury/scf/request-early-drawdown` enables pre-qualified suppliers to draw accelerated working capital funds, applying early payment discounts ($APR \times \frac{\text{Days}}{360}$) and netting bank processing fees.
+- **Irrevocable Payment Undertaking (IPU) Generation**: Endpoint `POST /api/v1/treasury/scf/issue-irrevocable-undertaking` issues cryptographically stamped IPUs guaranteeing fund transfer to partner financial institutions upon original invoice maturity date.
+- **Program Liquidity & Discount Dashboard**: Endpoint `GET /api/v1/treasury/scf/program-liquidity-dashboard/:buyer_id` tracks available enterprise credit facilities, early payment capture rates, cumulative supplier financial savings, and net financing yield.
+
+### 27.2 Autonomous Hazardous Materials (HAZMAT) Transport Compliance & UN Dangerous Goods (IMDG/ADR/IATA) Sentinel (`internal/core/logistics/hazmat_compliance.go`)
+- **Automated UN Dangerous Goods Classification**: Endpoint `POST /api/v1/logistics/hazmat/classify-consignment` maps material line items against UN numbers, Proper Shipping Names (PSN), primary hazard classes (Class 1-9), packing groups (PG I, II, III), and flashpoints.
+- **Multi-Modal Segregation & Stowage Matrix Auditor**: Endpoint `POST /api/v1/logistics/hazmat/audit-stowage-segregation` cross-checks multi-item containers against IMDG 7.2.4 segregation tables (Away From, Separated From, Separated by a Complete Compartment) to prevent explosive or flammable incompatibility.
+- **Multimodal Dangerous Goods Declaration (DGD) Signer**: Endpoint `POST /api/v1/logistics/hazmat/generate-dangerous-goods-declaration` produces verified DGD documents complete with 24/7 emergency response contacts, EMS codes, marine pollutant declarations, and digital compliance signatures.
+- **Shipment Compliance Manifest**: Endpoint `GET /api/v1/logistics/hazmat/compliance-manifest/:shipment_id` provides real-time auditability of hazardous goods stowage plans, emergency procedures, and carrier safety sign-offs.
+
+### 27.3 Predictive Warranty Claim Fraud Sentinel & Telemetric Anomaly Interceptor (`internal/core/service/warranty_fraud_sentinel.go`)
+- **Warranty Claim Submission & Telemetry Intake**: Endpoint `POST /api/v1/service/warranty/submit-repair-claim` registers warranty repair claims from service centers with reported failure symptoms, claimed labor hours, and replacement parts.
+- **IoT Sensor & Operational Telemetry Cross-Audit**: Endpoint `POST /api/v1/service/warranty/audit-telemetric-fraud` cross-analyzes claims against real-time IoT black-box data (operating hours vs warranty meter tampering, thermal over-temperature abuse, drop impact shocks, and unauthorized firmware flashes).
+- **Automated Claim Adjudication & Fraud Scoring**: Endpoint `POST /api/v1/service/warranty/adjudicate-claim-decision` computes a composite fraud risk score ($0-100$) and automatically approves genuine repairs while rejecting claims with telemetric evidence of operational abuse or meter rollback.
+- **Dealer Fraud Radar & Anomaly Scorecard**: Endpoint `GET /api/v1/service/warranty/dealer-fraud-radar/:dealer_id` detects dealer-level claim anomalies, claim padding trends, and unauthorized part replacement patterns.
+
+### 27.4 Global PEPPOL BIS Billing 3.0 & Real-Time CTC Tax Clearance Router (`internal/core/tax/peppol_clearance.go`)
+- **PEPPOL BIS Billing 3.0 (UBL 2.1) Serializer**: Endpoint `POST /api/v1/finance/peppol/serialize-ubl-invoice` formats standard ERP billing documents into compliant UBL 2.1 XML structure incorporating Electronic Address Schemes (EAS) and tax category breakdown.
+- **Cryptographic Tax Clearance & QR Code Generation**: Endpoint `POST /api/v1/finance/peppol/generate-clearance-signature` computes SHA-256 canonical invoice hashes, ECDSA secp256k1 digital signatures, and generates compliant Tag-Length-Value (TLV) QR codes for point-of-sale clearance.
+- **AS4 Access Point Real-Time Dispatcher**: Endpoint `POST /api/v1/finance/peppol/dispatch-as4-clearance` securely transmits e-invoices to certified PEPPOL Access Points / Government Continuous Transaction Control (CTC) tax portals, logging clearance UUIDs and approval receipts.
+- **Tax Clearance Audit Trail**: Endpoint `GET /api/v1/finance/peppol/clearance-audit/:invoice_id` provides immutable audit records of tax clearance timestamps, digital certificates, and jurisdiction clearance tokens.
+
+### 27.5 Industrial Wearable Biometrics & Ergonomic Heat-Stress Sentinel (ISO 7243) (`internal/core/ehs/wearable_heat_stress.go`)
+- **Real-Time Worker Biometrics & Environmental Ingestion**: Endpoint `POST /api/v1/ehs/wearable/ingest-biometrics` streams worker physiological data (heart rate, core skin temperature, accelerometry) alongside ambient Wet Bulb Globe Temperature (WBGT) and humidity.
+- **ISO 7243 WBGT & Physiological Strain Index (PSI) Evaluator**: Endpoint `POST /api/v1/ehs/wearable/evaluate-heat-stress-risk` computes metabolic workload ratings and real-time Physiological Strain Index ($0-10$), flagging acute thermal stress and exhaustion risk.
+- **Automated Rest & Hydration Mandate Dispatcher**: Endpoint `POST /api/v1/ehs/wearable/dispatch-rest-mandate` triggers automated smart badge notifications instructing workers to take mandatory cooling breaks and hydration intervals, automatically pausing work orders in MES to protect worker health.
+- **Workcenter Safety Heatmap**: Endpoint `GET /api/v1/ehs/wearable/floor-safety-heatmap/:workcenter_id` delivers visual shopfloor heat vulnerability mapping, active worker recovery statuses, and OSHA/ISO ergonomic compliance metrics.
+
+
 
 

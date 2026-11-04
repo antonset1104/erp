@@ -27734,6 +27734,388 @@ async function triggerTravelCarbonBudget() {
     }
 }
 
+async function triggerSCFReverseFactoring() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menerbitkan fasilitas Reverse Factoring (SCF) & menghitung pencairan awal vendor...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const facID = "SCF-INV-2026-" + Math.floor(1000 + Math.random() * 9000);
+        await api('/treasury/scf/publish-invoice-facility', 'POST', {
+            facility_invoice_id: facID,
+            buyer_id: "BUYER-INDORAMA-HOLDING-01",
+            buyer_name: "PT Indorama Polychem Nusantara Tbk",
+            buyer_credit_rating: "AAA_INVESTMENT_GRADE",
+            supplier_id: "SUP-TEXTILE-JBR-88",
+            supplier_name: "PT Mitra Benang Serat Prima",
+            original_invoice_no: "INV-SPL-2026-904",
+            invoice_amount_usd: 350000.0,
+            funder_bank_id: "BANK-MANDIRI-SCF-DESK",
+            base_benchmark_rate_pct: 5.25,
+            buyer_margin_spread_pct: 1.25
+        });
+
+        const quote = await api('/treasury/scf/request-early-drawdown', 'POST', {
+            facility_invoice_id: facID
+        });
+
+        const ipu = await api('/treasury/scf/issue-irrevocable-undertaking', 'POST', {
+            facility_invoice_id: facID,
+            funder_bank_id: "BANK-MANDIRI-SCF-DESK"
+        });
+
+        if (badge) badge.textContent = `💰 SCF: ${ipu.undertaking.accounting_classification}`;
+        if (answerEl) {
+            let out = `💰 AUTONOMOUS VENDOR EARLY-PAYMENT & REVERSE FACTORING (SCF) LIQUIDITY VAULT:\n`;
+            out += `ID Fasilitas Faktur SCF: ${facID}\n`;
+            out += `Pembeli (Anchor Buyer): PT Indorama Polychem Nusantara Tbk (Peringkat Kredit: AAA)\n`;
+            out += `Pemasok Penerima Manfaat: PT Mitra Benang Serat Prima\n`;
+            out += `Bank Penyandang Dana (Funder): BANK-MANDIRI-SCF-DESK\n`;
+            out += `Komitmen Pembayaran Tak Bersyarat (IPU): ${ipu.undertaking.ipu_reference_no}\n`;
+            out += `Klasifikasi Akuntansi (IFRS 9/7): ${ipu.undertaking.accounting_classification} (Bebas Reklasifikasi Pinjaman Bank)\n\n`;
+            out += `PERHITUNGAN DISKON DINAMIS & PENCAIRAN AWAL VENDOR:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Nilai Tagihan Pokok: $${quote.quote.net_disbursed_usd + quote.quote.discount_charge_usd} USD\n`;
+            out += `Hari Percepatan Pembayaran: ${quote.quote.days_accelerated} hari lebih awal\n`;
+            out += `Tarif Bunga Efektif (APR): ${quote.quote.applicable_apr_pct}% p.a.\n`;
+            out += `Biaya Diskon Pembiayaan: $${quote.quote.discount_charge_usd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} USD\n`;
+            out += `Dana Bersih Diterima Vendor (Hari Ini): $${quote.quote.net_disbursed_usd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} USD\n`;
+            out += `Preservasi DPO Modal Kerja Pembeli: ${quote.quote.buyer_working_cap_dpo} Hari (Kas Internal Tetap Utuh)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Reverse factoring memungkinkan vendor mendapatkan likuiditas murah pada Hari ke-5 tanpa menguras kas internal pembeli.</li>
+                <li>Penerbitan IPU digital mengikat bank dan pembeli secara sah tanpa mengubah status utang usaha menjadi pinjaman modal kerja.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses SCF reverse factoring: ' + err.message;
+    }
+}
+
+async function triggerHazmatCompliance() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengaudit pemisahan kimia IMDG & menerbitkan dokumen Dangerous Goods (DGD)...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const shpID = "SHP-HAZMAT-" + Math.floor(1000 + Math.random() * 9000);
+        await api('/logistics/hazmat/classify-consignment', 'POST', {
+            shipment_id: shpID,
+            items: [
+                {
+                    item_sku: "BAT-LITHIUM-CELL-48V",
+                    un_number: "UN 3480",
+                    proper_shipping_name: "LITHIUM ION BATTERIES",
+                    primary_hazard_class: "CLASS_9",
+                    subsidiary_risk: "NONE",
+                    packing_group: "PG_II",
+                    quantity_packages: 120,
+                    package_type_description: "FIBREBOARD_BOX_4G",
+                    net_mass_per_package_kg: 18.5,
+                    is_marine_pollutant: false
+                },
+                {
+                    item_sku: "SOLV-ETHYL-ACETATE-IND",
+                    un_number: "UN 1173",
+                    proper_shipping_name: "ETHYL ACETATE",
+                    primary_hazard_class: "CLASS_3",
+                    subsidiary_risk: "NONE",
+                    packing_group: "PG_II",
+                    quantity_packages: 20,
+                    package_type_description: "STEEL_DRUM_1A1",
+                    net_mass_per_package_kg: 200.0,
+                    flash_point_celsius: -4.0,
+                    is_marine_pollutant: false
+                }
+            ]
+        });
+
+        const audit = await api('/logistics/hazmat/audit-stowage-segregation', 'POST', {
+            shipment_id: shpID,
+            container_number: "MSCU-881920-4"
+        });
+
+        const dgd = await api('/logistics/hazmat/generate-dangerous-goods-declaration', 'POST', {
+            shipment_id: shpID,
+            consignor_shipper: "PT Chandra Asri Petrochemical Tbk, Cilegon",
+            consignee_receiver: "Apex Advanced Materials Corp, Kaohsiung, TW",
+            transport_mode: "MARITIME_IMDG",
+            vessel_flight_number: "EVER GIVEN V.0881W",
+            port_of_loading: "Tanjung Priok, Jakarta (IDTPP)",
+            port_of_discharge: "Port of Kaohsiung (TWKHH)",
+            emergency_telephone_24hr: "+62-21-500-CHEM (CHEMTREC)",
+            emergency_contact_person: "Ir. Dedi Sulaeman (EHS Hazmat Specialist)"
+        });
+
+        const manifest = await api(`/logistics/hazmat/compliance-manifest/${shpID}`, 'GET');
+
+        if (badge) badge.textContent = `☣️ HAZMAT: ${manifest.manifest.compliance_verdict}`;
+        if (answerEl) {
+            let out = `☣️ AUTONOMOUS HAZARDOUS MATERIALS (HAZMAT) & UN DANGEROUS GOODS SENTINEL:\n`;
+            out += `ID Pengiriman: ${shpID} | Kontainer: ${audit.audit.container_number}\n`;
+            out += `Moda Transportasi: ${dgd.declaration.transport_mode} (Kapal: ${dgd.declaration.vessel_flight_number})\n`;
+            out += `Status Kepatuhan Pemisahan Kimia (IMDG Segregation): ${audit.audit.segregationStatus || audit.audit.segregation_status}\n`;
+            out += `Putusan Verifikasi: ${manifest.manifest.compliance_verdict}\n`;
+            out += `Plakat Wajib Petikemas: ${manifest.manifest.placard_requirement}\n\n`;
+            out += `DOKUMEN MULTIMODAL DANGEROUS GOODS DECLARATION (DGD):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Nomor Referensi DGD Resmi: ${dgd.declaration.dgd_reference_number}\n`;
+            out += `Pengirim (Shipper): ${dgd.declaration.consignor_shipper}\n`;
+            out += `Penerima (Consignee): ${dgd.declaration.consignee_receiver}\n`;
+            out += `Pelabuhan Muat: ${dgd.declaration.port_of_loading} -> Bongkar: ${dgd.declaration.port_of_discharge}\n`;
+            out += `Kontak Darurat 24 Jam: ${dgd.declaration.emergency_telephone_24hr} (${dgd.declaration.emergency_contact_person})\n`;
+            out += `Tanda Tangan Digital Shipper: ${dgd.declaration.shipper_certification_hash}\n\n`;
+            out += `RINCIAN KLASIFIKASI BAHAN BERBAHAYA PBB (UN DANGEROUS GOODS):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            dgd.declaration.items.forEach(it => {
+                out += `  ✓ [${it.un_number}] ${it.proper_shipping_name} - ${it.primary_hazard_class} (${it.packing_group})\n`;
+                out += `     Kemasan: ${it.package_type_description} (Qty: ${it.quantity_packages} koli, Net/koli: ${it.net_mass_per_package_kg} kg)\n`;
+            });
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pemeriksaan otomatis tabel pemisahan IMDG 7.2.4 mencegah penempatan zat reaktif dalam satu kontainer kargo.</li>
+                <li>DGD terstandardisasi dengan tanda tangan kriptografis mempercepat clearance kepabeanan pelabuhan ekspor.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses HAZMAT dangerous goods: ' + err.message;
+    }
+}
+
+async function triggerWarrantyFraudSentinel() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengkorelasikan klaim garansi dengan log telemetri IoT mesin...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const clmID = "CLM-WAR-2026-" + Math.floor(1000 + Math.random() * 9000);
+        await api('/service/warranty/submit-repair-claim', 'POST', {
+            claim_id: clmID,
+            dealer_id: "DLR-SURABAYA-TECH-04",
+            dealer_name: "PT Nusantara Heavy Equipment Service Hub Surabaya",
+            product_serial_number: "SN-EXCAV-HYD-882109",
+            product_model_sku: "EXCAV-200HP-DIESEL",
+            customer_name: "PT Tambang Makmur Sejahtera",
+            claimed_defect_code: "MOTOR_ARMATURE_BURN",
+            reported_operating_hrs: 45.0,
+            parts_replaced_sku: "SP-HYD-MOTOR-PUMP-GEN2",
+            parts_cost_usd: 6800.0,
+            labor_cost_usd: 1200.0
+        });
+
+        const audit = await api('/service/warranty/audit-telemetric-fraud', 'POST', {
+            claim_id: clmID,
+            actual_hours: 840.0,
+            peak_temp_celsius: 128.5,
+            max_shock_impact_g: 14.2,
+            firmware_tampered: true
+        });
+
+        const adj = await api('/service/warranty/adjudicate-claim-decision', 'POST', {
+            claim_id: clmID
+        });
+
+        if (badge) badge.textContent = `🛡️ Warranty: ${adj.adjudication.adjudication_status}`;
+        if (answerEl) {
+            let out = `🛡️ PREDICTIVE WARRANTY CLAIM FRAUD SENTINEL & TELEMETRIC ANOMALY INTERCEPTOR:\n`;
+            out += `No Klaim Servis Garansi: ${clmID}\n`;
+            out += `Dealer Pengaju: PT Nusantara Heavy Equipment Service Hub Surabaya\n`;
+            out += `No Seri Unit Terklaim: SN-EXCAV-HYD-882109\n`;
+            out += `Skor Risiko Penipuan (Fraud Risk Score): ${audit.audit.fraud_risk_score}/100\n`;
+            out += `Status Keputusan Adjudikasi: ${adj.adjudication.adjudication_status}\n\n`;
+            out += `AUDIT CROSS-CHECK TELEMETRI IOT VS KLAIM DEALER:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Jam Operasi Terklaim: ${audit.audit.claimed_hours} jam  VS  Jam Aktual IoT: ${audit.audit.actual_iot_hours} jam (Disparitas Manipulasi: ${audit.audit.operating_hours_disparity ? '⚠️ TERBUKTI PALSU' : 'SESUAI'})\n`;
+            out += `Suhu Puncak Operasional: ${audit.audit.peak_operating_temp_c}°C (Pelanggaran Termal SOP: ${audit.audit.thermal_overheat_abuse ? '⚠️ YA (OVERHEATED)' : 'NORMAL'})\n`;
+            out += `Sensor Benturan Fisik: ${audit.audit.max_shock_impact_g}G (Indikasi Kerusakan Jatuh: ${audit.audit.drop_shock_abuse_detected ? '⚠️ TERDETEKSI BENTURAN' : 'NORMAL'})\n`;
+            out += `Integritas Firmware ECU: ${audit.audit.firmware_tampered ? '⚠️ DIMODIFIKASI SECARA ILEGAL' : 'ORISINIL'}\n\n`;
+            out += `KEPUTUSAN KEUANGAN KLAIM:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Nilai Klaim Disetujui: $${adj.adjudication.approved_payout_usd.toLocaleString()} USD\n`;
+            out += `Nilai Klaim Ditolak (Penghematan Korporat): $${adj.adjudication.disallowed_amount_usd.toLocaleString()} USD\n`;
+            out += `Alasan Penolakan: ${adj.adjudication.denial_reason}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Cross-check telemetri IoT langsung mengidentifikasi klaim fiktif atau kerusakan akibat kelalaian operasional konsumen.</li>
+                <li>Mencegah kebocoran anggaran after-sales pabrikan otomotif dan alat berat hingga miliaran rupiah per tahun.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses warranty fraud sentinel: ' + err.message;
+    }
+}
+
+async function triggerPEPPOLClearance() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menyusun UBL 2.1 PEPPOL BIS 3.0 & meminta real-time tax clearance...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const invID = "INV-PEPPOL-2026-" + Math.floor(1000 + Math.random() * 9000);
+        const ubl = await api('/finance/peppol/serialize-ubl-invoice', 'POST', {
+            invoice_id: invID,
+            seller_endpoint_id: "0088:7300010000001",
+            seller_vat_registration: "DE123456789",
+            seller_legal_name: "GoERP Global Manufacturing GmbH",
+            buyer_endpoint_id: "0088:7300020000002",
+            buyer_vat_registration: "FR987654321",
+            buyer_legal_name: "Airbus Safran Aerostructures SAS",
+            currency_code: "EUR",
+            line_extension_amount: 100000.0,
+            tax_exclusive_amount: 100000.0,
+            tax_inclusive_amount: 120000.0,
+            vat_amount: 20000.0,
+            preceding_invoice_hash: "0x88921a9fb2301982736184910294819283719283"
+        });
+
+        const sig = await api('/finance/peppol/generate-clearance-signature', 'POST', {
+            invoice_id: invID
+        });
+
+        const clr = await api('/finance/peppol/dispatch-as4-clearance', 'POST', {
+            invoice_id: invID
+        });
+
+        if (badge) badge.textContent = `📑 PEPPOL: ${clr.receipt.clearance_status}`;
+        if (answerEl) {
+            let out = `📑 GLOBAL PEPPOL BIS BILLING 3.0 & REAL-TIME CTC TAX CLEARANCE ROUTER:\n`;
+            out += `No Faktur Internasional: ${invID}\n`;
+            out += `Profil Standar Global: ${ubl.ubl.profile_id}\n`;
+            out += `Penjual: GoERP Global Manufacturing GmbH (Endpoint: 0088:7300010000001)\n`;
+            out += `Pembeli: Airbus Safran Aerostructures SAS (Endpoint: 0088:7300020000002)\n`;
+            out += `Status Kliring Pajak Real-Time: ${clr.receipt.clearance_status}\n`;
+            out += `UUID Kliring Otoritas: ${clr.receipt.clearance_uuid}\n`;
+            out += `Stempel Resmi Otoritas Pajak: ${clr.receipt.official_clearing_stamp}\n\n`;
+            out += `INTEGRITAS KRIPTOGRAFIS & RANTAI FAKTUR (CRYPTOGRAPHIC CHAINING):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Hash Kanonikal SHA-256 UBL: ${ubl.ubl.canonical_hash_sha256}\n`;
+            out += `Tanda Tangan Digital ECDSA secp256k1: ${sig.signature.ecdsa_signature_hex.substring(0, 32)}...\n`;
+            out += `Nomor Sertifikat Publik Otoritas: ${sig.signature.public_certificate_sn}\n`;
+            out += `Payload Kode QR Pajak CTC (Base64 TLV): ${sig.signature.qr_code_base64}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>PEPPOL BIS Billing 3.0 memastikan interoperabilitas faktur elektronik lintas negara Uni Eropa, ZATCA Arab Saudi, dan Asia.</li>
+                <li>Protokol CTC clearance real-time mencegah penolakan faktur dan mempercepat siklus penagihan antar-korporasi multinasional.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses PEPPOL e-invoicing: ' + err.message;
+    }
+}
+
+async function triggerWearableHeatStress() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menyerap biometrik wearable & mengevaluasi risiko heat-stress ISO 7243...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        await api('/ehs/wearable/ingest-biometrics', 'POST', {
+            worker_id: "WRK-FOUNDRY-4412",
+            worker_name: "Joko Subroto (Operator Tungku Induksi)",
+            workcenter_id: "WC-HOT-FOUNDRY-01",
+            heart_rate_bpm: 142.0,
+            skin_temperature_c: 37.8,
+            estimated_core_temp_c: 38.8,
+            continuous_work_minutes: 80,
+            exertion_workload: "HEAVY",
+            ambient_temperature_c: 41.0,
+            relative_humidity_pct: 70.0,
+            wet_bulb_globe_temp_wbgt: 32.5
+        });
+
+        const eval = await api('/ehs/wearable/evaluate-heat-stress-risk', 'POST', {
+            worker_id: "WRK-FOUNDRY-4412"
+        });
+
+        const mnd = await api('/ehs/wearable/dispatch-rest-mandate', 'POST', {
+            worker_id: "WRK-FOUNDRY-4412",
+            supervisor_name: "Bambang Wijaya (Shift Supervisor)"
+        });
+
+        const heatmap = await api('/ehs/wearable/floor-safety-heatmap/WC-HOT-FOUNDRY-01', 'GET');
+
+        if (badge) badge.textContent = `🌡️ Heat Stress: ${eval.evaluation.thermal_risk_zone}`;
+        if (answerEl) {
+            let out = `🌡️ INDUSTRIAL WEARABLE BIOMETRICS & ERGONOMIC HEAT-STRESS SENTINEL (ISO 7243):\n`;
+            out += `ID Pekerja: WRK-FOUNDRY-4412 (Joko Subroto)\n`;
+            out += `Stasiun Kerja: WC-HOT-FOUNDRY-01 (${heatmap.heatmap.workcenter_name})\n`;
+            out += `Indeks Suhu Lingkungan (WBGT Actual): ${heatmap.heatmap.current_wbgt_celsius}°C (Ambang Batas ISO 7243: 28.0°C)\n`;
+            out += `Indeks Ketegangan Fisiologis (Physiological Strain Index): ${eval.evaluation.physiological_strain_index.toFixed(1)} / 10.0\n`;
+            out += `Zona Risiko Termal: ${eval.evaluation.thermal_risk_zone}\n`;
+            out += `Instruksi Keselamatan: ${eval.evaluation.safety_advice}\n\n`;
+            out += `MANDAT ISTIRAHAT OTOMATIS & PROTOKOL HIDRASI:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `No Mandat Sistem: ${mnd.mandate.mandate_id}\n`;
+            out += `Durasi Istirahat Wajib: ${mnd.mandate.rest_duration_minutes} Menit di Ruang Berpendingin (Cooling Refuge)\n`;
+            out += `Target Asupan Cairan Elektrolit: ${mnd.mandate.hydration_target_ml} mL\n`;
+            out += `Supervisor Terpanggil: ${mnd.mandate.supervisor_notified}\n`;
+            out += `Rotasi Operator Pengganti: ${mnd.mandate.operator_rotation_required ? '⚠️ WAJIB DIGANTIKAN (OPERATOR ROTATION ACTIVATED)' : 'TIDAK WAJIB'}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pemantauan biometrik wearable melindungi pekerja dari ancaman dehidrasi dan heat-stroke sebelum terjadi kolaps fisik.</li>
+                <li>Kepatuhan ISO 7243 menjaga keberlanjutan produktivitas pabrik tanpa mengorbankan keselamatan dan kesehatan kerja (K3).</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses wearable heat stress sentinel: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {
