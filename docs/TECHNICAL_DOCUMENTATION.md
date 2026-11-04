@@ -764,5 +764,34 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Statutory OSHA 300 & Form 300A Analytics**: Endpoint `GET /api/v1/ehs/sentinel/osha-300-summary` computes official occupational health metrics: Total Recordable Incident Rate (TRIR), Days Away, Restricted or Transferred (DART), and ISO 45001 compliance audit standing.
 - **Structured CAPA Escalation**: Endpoint `POST /api/v1/ehs/sentinel/capa-escalate` initiates formal Corrective and Preventive Action workflows with root cause categories, responsible assignees, and statutory resolution deadlines.
 
+---
+
+## 23. CRM Resilience, Industrial Energy Peak-Shaving, SLL Green Loans, Dynamic Slotting & SME Graph (v1.57.0)
+
+### 23.1 Critical Raw Material (CRM) Dual-Sourcing & Geopolitical Resilience Engine (`internal/core/procurement/crm_resilience.go`)
+- **Geopolitical Risk & Tariff Modeling**: Endpoint `POST /api/v1/procurement/crm/evaluate-resilience` models critical raw material supply chains (Lithium, Rare Earth Elements, Gallium, Nickel) against country Geopolitical Risk Indexes (GRI) and tariff schedules, calculating optimal dual-sourcing splits (e.g. 70/30 primary vs nearshore secondary).
+- **Automated BOM Component Substitution**: Endpoint `POST /api/v1/procurement/crm/simulate-substitution` simulates engineering, homologation, and financial impacts of substitute materials (e.g. Sodium-ion hard carbon), providing payback horizons and qualification roadmaps.
+- **Critical Material Supervisory Radar**: Endpoint `GET /api/v1/procurement/crm/material-radar` delivers an enterprise-wide overview of monitored raw materials, supply security statuses, and active geopolitical risk exposures.
+
+### 23.2 Industrial Energy Peak-Shaving & Demand Response Dispatcher (ISO 50001) (`internal/core/asset/energy_optimizer.go`)
+- **Real-Time Sub-Meter IoT Ingestion**: Endpoint `POST /api/v1/asset/energy/telemetry-reading` ingests active power (kW), reactive power (kVAR), and power factor metrics from heavy machinery sub-meters.
+- **Predictive Peak Shaving & BESS Dispatch**: Endpoint `POST /api/v1/asset/energy/orchestrate-peak-shaving` evaluates facility load against contractual grid demand limits during peak tariff windows (WBP), orchestrating automated battery energy storage (BESS) discharge and rescheduling non-critical batch processes.
+- **Statutory ISO 50001 Compliance Reporting**: Endpoint `GET /api/v1/asset/energy/iso50001-audit` tracks facility Energy Performance Indicators (EnPI in kWh/ton), cumulative cost savings, carbon reduction metrics, and official energy management certification status.
+
+### 23.3 Sustainability-Linked Loan (SLL) & Green Bond Dynamic Coupon Adjuster (`internal/core/treasury/sustainability_loan.go`)
+- **Contractual ESG Performance Target (SPT) Auditing**: Endpoint `POST /api/v1/treasury/sll/evaluate-kpi-coupon` audits verified operational actuals (Scope 1/2 GHG reduction %, renewable energy share %, LTIFR safety) against syndicated loan covenants.
+- **Automated Step-Down / Step-Up Margin Mechanism**: Adjusts loan interest margins (-25 bps discount for target achievement vs +25 bps penalty for breach) and posts interest adjustments to the General Ledger with full audit certificate tracking.
+- **Corporate Green Debt Portfolio Overview**: Endpoint `GET /api/v1/treasury/sll/portfolio-summary` aggregates total syndicated facility principals, weighted average coupon rates, and annual financial savings.
+
+### 23.4 Dynamic Warehouse Velocity Slotting & Co-Order Affinity Profiler (`internal/core/wms/dynamic_slotting.go`)
+- **ABC Velocity & Golden Zone Profiling**: Endpoint `POST /api/v1/wms/slotting/analyze-velocity` analyzes picking velocity and maps high-frequency Class A items into ergonomic Golden Zones (waist-to-shoulder height) while reallocating slow movers to upper storage levels.
+- **Market Basket Co-Order Affinity Clustering**: Identifies SKU pairings frequently ordered together, clustering them in adjacent bin locations to minimize picker transit distance.
+- **Automated Reshuffle Work Order Generation**: Endpoints `POST /api/v1/wms/slotting/generate-reshuffle-plan` and `GET /api/v1/wms/slotting/heatmap` generate off-shift night reshuffle orders, unlocking projected 30%–40% reductions in warehouse picker travel time.
+
+### 23.5 Enterprise Skill & Subject Matter Expert (SME) Discovery Graph (`internal/core/hr/expert_locator.go`)
+- **Semantic Talent & Capability Graph**: Endpoint `POST /api/v1/hr/experts/index-profile` indexes specialized employee credentials, certifications (ASME, TUV, ISA), patents, language proficiencies, and current bandwidth availability.
+- **Internal SME Discovery & Cost Optimization**: Endpoint `POST /api/v1/hr/experts/search` matches complex project requirements with internal engineers and specialists across global subsidiaries, quantifying substantial cost savings versus external consulting retainers.
+- **Domain Competency Radar**: Endpoint `GET /api/v1/hr/experts/competency-radar/:skill_domain` visualizes deep technical capability distributions across business units to support strategic resource allocation.
+
 
 

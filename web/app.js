@@ -26446,6 +26446,284 @@ async function triggerEHSSentinel() {
     }
 }
 
+async function triggerCRMDualSourcing() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi indeks risiko geopolitik bahan baku kritis & optimasi dual-sourcing...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const evalRes = await api('/procurement/crm/evaluate-resilience', 'POST', {
+            material_id: "MAT-CRM-LITHIUM-01",
+            material_name: "Battery-Grade Lithium Hydroxide Monohydrate",
+            monthly_demand_tons: 120.0,
+            target_primary_pct: 70.0,
+            primary_supplier: {
+                supplier_id: "VND-SICHUAN-LITHIUM",
+                supplier_name: "Sichuan Tianqi Lithium Corp",
+                country_code: "CN",
+                geopolitical_risk_index: 76.5,
+                current_tariff_rate_pct: 25.0,
+                unit_cost_usd: 21500.0,
+                lead_time_days: 35,
+                max_monthly_capacity_tons: 250.0,
+                supplier_tier: "PRIMARY"
+            },
+            secondary_supplier: {
+                supplier_id: "VND-ALBEMARLE-CHILE",
+                supplier_name: "Albemarle Salar Operations",
+                country_code: "CL",
+                geopolitical_risk_index: 28.0,
+                current_tariff_rate_pct: 5.0,
+                unit_cost_usd: 23800.0,
+                lead_time_days: 28,
+                max_monthly_capacity_tons: 100.0,
+                supplier_tier: "SECONDARY_NEARSHORE"
+            }
+        });
+
+        if (badge) badge.textContent = `⛏️ CRM: ${evalRes.supply_security_status}`;
+        if (answerEl) {
+            let out = `⛏️ CRITICAL RAW MATERIAL (CRM) DUAL-SOURCING & GEOPOLITICAL RESILIENCE:\n`;
+            out += `Material Kritis: ${evalRes.material_name} (${evalRes.material_id})\n`;
+            out += `Rekomendasi Alokasi Volume (Dual-Sourcing Split): ${evalRes.recommended_split_ratio} (Pemasok Utama / Sekunder)\n`;
+            out += `Biaya Satuan Terbobot (Blended Unit Cost): $${evalRes.blended_unit_cost_usd.toLocaleString()} / Ton\n`;
+            out += `Skor Eksposur Geopolitik Rantai Pasok: ${evalRes.geopolitical_exposure_score}/100\n`;
+            out += `Estimasi Beban Tarif Pabean Bulanan: $${evalRes.estimated_tariff_exposure_usd.toLocaleString()} USD\n`;
+            out += `Status Keamanan Pasokan: ${evalRes.supply_security_status}\n\n`;
+            out += `Rekomendasi Strategis Mitigasi Risiko:\n`;
+            evalRes.mitigation_recommendations.forEach(rec => out += `  ➜ ${rec}\n`);
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penyaluran pasokan aktif 70/30 menjaga agar pemasok sekunder tetap terkualifikasi jika terjadi embargo.</li>
+                <li>Simulasi substitusi material mengkalkulasi waktu homologasi OEM untuk menjamin kepatuhan SNI/UN 38.3.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses ketahanan bahan baku kritis: ' + err.message;
+    }
+}
+
+async function triggerEnergyPeakShaving() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi telemetri daya puncak pabrik & mengorkestrasi pelepasan beban ISO 50001...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const order = await api('/asset/energy/orchestrate-peak-shaving', 'POST', {
+            facility_id: "PLANT-CIKARANG-01",
+            contract_demand_limit_kw: 8000.0,
+            current_total_demand_kw: 8650.0,
+            grid_tariff_period: "ON_PEAK_WBP",
+            battery_bess_state_pct: 85.0
+        });
+
+        const audit = await api('/asset/energy/iso50001-audit', 'GET');
+
+        if (badge) badge.textContent = `⚡ Energy: -${order.shaving_target_kw} kW`;
+        if (answerEl) {
+            let out = `⚡ INDUSTRIAL ENERGY PEAK-SHAVING & DEMAND RESPONSE (ISO 50001):\n`;
+            out += `Fasilitas Manufaktur: ${order.facility_id} | Periode Tarif Listrik: ${order.grid_tariff_period}\n`;
+            out += `Batas Daya Kontrak (Demand Limit): ${order.contract_demand_limit_kw.toLocaleString()} kW ➜ Beban Riil: ${order.current_demand_kw.toLocaleString()} kW\n`;
+            out += `Kelebihan Beban di Atas Kuota (Over-Limit): ${order.over_limit_excess_kw.toLocaleString()} kW (Target Pemangkasan: ${order.shaving_target_kw} kW)\n`;
+            out += `Status Orkestrasi: ${order.status}\n`;
+            out += `Tindakan Pelepasan Beban Puncak Otomatis:\n`;
+            order.actions_executed.forEach(act => out += `  • ${act}\n`);
+            if (order.deferred_batch_processes && order.deferred_batch_processes.length > 0) {
+                out += `Proses Batch yang Ditunda ke Jam Non-Puncak (LWBP):\n`;
+                order.deferred_batch_processes.forEach(proc => out += `    - ${proc}\n`);
+            }
+            out += `\nESTIMASI PENGHEMATAN & KEPATUHAN AUDIT ISO 50001:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Biaya Penalti Beban Puncak yang Dihindari: Rp ${order.avoided_peak_demand_cost_idr.toLocaleString()}\n`;
+            out += `Total Penghematan Energi Kumulatif YTD: Rp ${audit.total_cost_avoided_idr.toLocaleString()} (Reduksi Emisi: ${audit.carbon_reduction_tons_co2} Ton CO2)\n`;
+            out += `Indeks Kinerja Energi (EnPI): ${audit.energy_performance_index_enpi} kWh/Ton Produk\n`;
+            out += `Status Sertifikasi Manajemen Energi: ${audit.compliance_certification_status}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pelepasan daya otomatis dari BESS 1.2 MWh memangkas lonjakan beban tanpa mengganggu lini produksi kritis.</li>
+                <li>Menghindari denda kelebihan pemakaian daya puncak PLN sebesar Rp 88.000 per kVA per bulan.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses optimasi energi ISO 50001: ' + err.message;
+    }
+}
+
+async function triggerSLLGreenBond() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengaudit capaian KPI ESG fasilitas pinjaman & menghitung diskon kupon bunga SLL...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const result = await api('/treasury/sll/evaluate-kpi-coupon', 'POST', {
+            facility_id: "SLL-2026-SYNDICATE-01",
+            evaluation_period: "2026-Q1",
+            current_sofr_rate_pct: 4.85,
+            achieved_ghg_reduction_pct: 18.5,
+            achieved_renewable_share_pct: 46.2,
+            achieved_ltifr: 0.45
+        });
+
+        const portfolio = await api('/treasury/sll/portfolio-summary', 'GET');
+
+        if (badge) badge.textContent = `🌱 SLL: ${result.margin_adjustment_bps} bps`;
+        if (answerEl) {
+            let out = `🌱 SUSTAINABILITY-LINKED LOAN (SLL) & GREEN BOND DYNAMIC COUPON ADJUSTER:\n`;
+            out += `Fasilitas Pinjaman Sindikasi: ${result.facility_id} ($${result.principal_amount_usd.toLocaleString()} USD)\n`;
+            out += `Periode Evaluasi Audit Kepatuhan: ${result.evaluation_period} | Ref Sertifikasi: ${result.audit_certificate_ref}\n`;
+            out += `Hasil Verifikasi Target SPT: ${result.targets_met_count} dari ${result.total_targets_count} Target Tercapai (100% COMPLIANT)\n`;
+            out += `Tingkat Kupon Bunga Awal: ${result.prior_coupon_rate_pct.toFixed(2)}% (SOFR + 175 bps)\n`;
+            out += `Penyesuaian Margin Bunga Hijau: ${result.margin_adjustment_bps} bps (Diskon Efisiensi)\n`;
+            out += `Kupon Bunga Efektif Direvisi: ${result.revised_coupon_rate_pct.toFixed(2)}% per tahun\n`;
+            out += `Penghematan Beban Bunga Tahunan Korporasi: $${Math.abs(result.net_annual_interest_delta_usd).toLocaleString()} USD\n`;
+            out += `No Jurnal Penyesuaian Beban Bunga GL: ${result.ledger_journal_entry_no}\n`;
+            out += `Penilaian Kinerja ESG Perbankan: ${result.esg_performance_verdict}\n\n`;
+            out += `PORTFOLIO FINANSIAL HIJAU GRUP:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Total Pokok Utang SLL Dikelola: $${portfolio.total_principal_financed_usd.toLocaleString()} USD (${portfolio.total_facilities_count} Fasilitas)\n`;
+            out += `Kupon Rata-Rata Tertimbang: ${portfolio.weighted_average_coupon_pct}% | Total Penghematan Kumulatif: $${portfolio.total_cumulative_savings_usd.toLocaleString()} USD\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Integrasi telemetri ESG ERP langsung ke perjanjian pinjaman bank mengeliminasi manipulasi audit greenwashing.</li>
+                <li>Diskon kupon bunga 25 basis poin langsung memangkas beban keuangan (financing cost) perusahaan.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses pinjaman berbasis ESG: ' + err.message;
+    }
+}
+
+async function triggerDynamicSlotting() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis perputaran barang gudang & merancang penataan ulang rak Golden Zone...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const heatmap = await api('/wms/slotting/heatmap?warehouse_id=WH-CENTRAL-DC-01', 'GET');
+
+        if (badge) badge.textContent = `🏬 Slotting: -${heatmap.estimated_picker_travel_reductionPct || 34.5}% Travel`;
+        if (answerEl) {
+            let out = `🏬 DYNAMIC WAREHOUSE VELOCITY SLOTTING & CO-ORDER AFFINITY PROFILER:\n`;
+            out += `Pusat Distribusi (DC): ${heatmap.warehouse_id} | Total Bin Dipetakan: ${heatmap.total_bins_profiled}\n`;
+            out += `Komposisi Kecepatan Perputaran Barang (ABC Velocity):\n`;
+            out += `  • Fast-Moving (Class A): ${heatmap.class_a_count} SKU (Diprioritaskan ke Golden Zone)\n`;
+            out += `  • Medium-Moving (Class B): ${heatmap.class_b_count} SKU\n`;
+            out += `  • Slow-Moving (Class C): ${heatmap.class_c_count} SKU (Dialihkan ke rak atas/mezzanine)\n`;
+            out += `Utilisasi Rak Golden Zone (Tinggi Pinggang–Dada): ${heatmap.golden_zone_utilization_pct}%\n`;
+            out += `Proyeksi Pemotongan Jarak Tempuh Staf Picker: ${heatmap.estimated_picker_travel_reduction_pct}%\n`;
+            out += `Total Perintah Pemindahan Rak (Reshuffle Orders): ${heatmap.recommended_moves_count} Perintah (${heatmap.total_reshuffle_minutes} Menit)\n\n`;
+            out += `JADWAL RESHUFFLE RAK SHIFT MALAM (02:00 - 05:00):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            heatmap.work_orders.forEach(wo => {
+                out += `➜ [${wo.priority}] ${wo.sku_name} (${wo.sku_id}):\n`;
+                out += `  Pindah: ${wo.from_bin_location} ➜ ${wo.to_bin_location} (Qty: ${wo.unit_quantity} unit, Est: ${wo.estimated_time_minutes} mnt)\n`;
+            });
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penataan ulang rak menempatkan barang laris di rak Golden Zone (antara pinggang dan bahu) untuk efisiensi ergonomis.</li>
+                <li>Barang komplementer yang sering dipesan bersamaan (co-order affinity) diletakkan bersebelahan untuk mempercepat order fulfillment.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses penataan dinamis gudang: ' + err.message;
+    }
+}
+
+async function triggerExpertLocator() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mencari Subject Matter Expert (SME) internal grup perusahaan...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const result = await api('/hr/experts/search', 'POST', {
+            required_domain: "HYDROGEN_ENERGY",
+            mandatory_skills: ["Liquid Hydrogen LH2", "ASME Section VIII"],
+            preferred_languages: ["Indonesian", "English"],
+            minimum_bandwidth_pct: 20.0,
+            target_project_code: "PRJ-CLEAN-PROPULSION-01"
+        });
+
+        if (badge) badge.textContent = `🔍 Experts: ${result.total_internal_experts_found} Found`;
+        if (answerEl) {
+            let out = `🔍 ENTERPRISE SKILL & SUBJECT MATTER EXPERT (SME) DISCOVERY GRAPH:\n`;
+            out += `Domain Kebutuhan Proyek: ${result.query_domain} (Proyek: ${result.target_project_code})\n`;
+            out += `Pakar Internal Teridentifikasi: ${result.total_internal_experts_found} Tenaga Ahli (Waktu Pencarian: ${result.search_duration_ms} ms)\n`;
+            out += `Potensi Penghematan Biaya Konsultan Eksternal: $${result.total_potential_savings_usd.toLocaleString()} USD\n\n`;
+            out += `DAFTAR PAKAR INTERNAL TERPILIH:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            result.matched_candidates.forEach((cand, idx) => {
+                out += `${idx + 1}. ${cand.expert.full_name} (${cand.match_score_pct}% Match - ${cand.availability_status})\n`;
+                out += `   Jabatan: ${cand.expert.current_job_title} | Entitas: ${cand.expert.subsidiary_entity}\n`;
+                out += `   Lokasi: ${cand.expert.location_city} | Sisa Kapasitas Kerja: ${cand.expert.current_bandwidth_pct}%\n`;
+                out += `   Sertifikasi & Paten: ${cand.expert.certifications.join(', ')} (${cand.expert.patents_authored} Paten)\n`;
+                out += `   Tarif Internal: $${cand.expert.internal_hourly_charge_usd}/jam (Hemat vs Konsultan Luar: $${cand.estimated_cost_savings_vs_external_usd.toLocaleString()})\n\n`;
+            });
+            out += `Langkah Lanjutan: ${result.recommended_next_step}\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pencarian grafik talenta mengidentifikasi pakar berkualifikasi tinggi di anak perusahaan lintas negara.</li>
+                <li>Menghilangkan ketergantungan pada konsultan eksternal yang memakan biaya hingga ratusan ribu dolar.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mencari tenaga ahli internal: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

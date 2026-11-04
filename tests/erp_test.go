@@ -10334,5 +10334,127 @@ IEA*1*000099123~`
 	t.Logf("✓ EHS Sentinel Verified: AlertID='%s' (%s at %s, Mitigate='%s'), OSHA Year=%d (Hours=%.0f, Employees=%d, Recordable=%d, TRIR=%.2f, DART=%.2f, Severity=%.2f, AuditStatus='%s'), CAPA='%s' (Case='%s', Root='%s', Assigned='%s', Due='%s')",
 		sensorAlert.AlertID, sensorAlert.AlertType, sensorAlert.WorkCenter, sensorAlert.ImmediateMitigationAction, oshaSummary.Year, oshaSummary.TotalHoursWorked, oshaSummary.AverageAnnualEmployees, oshaSummary.TotalRecordableCases, oshaSummary.TRIRScore, oshaSummary.DARTScore, oshaSummary.SeverityIndex, oshaSummary.ISO45001AuditStatus, capaEscalation.CAPAID, capaEscalation.LinkedCaseNo, capaEscalation.RootCauseCategory, capaEscalation.AssignedTo, capaEscalation.Deadline)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (70 SECTIONS: 55+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL) PASSED 100%!")
+	// ==========================================
+	// SECTION 71: V1.57.0 CRM RESILIENCE, INDUSTRIAL ENERGY PEAK-SHAVING, SLL GREEN LOANS, DYNAMIC SLOTTING & SME EXPERT GRAPH:
+	// 1. Critical Raw Material (CRM) Dual-Sourcing & Geopolitical Resilience Engine
+	// 2. Industrial Energy Peak-Shaving & Demand Response Dispatcher (ISO 50001)
+	// 3. Sustainability-Linked Loan (SLL) & Green Bond Dynamic Coupon Adjuster
+	// 4. Dynamic Warehouse Velocity Slotting & Co-Order Affinity Profiler
+	// 5. Enterprise Skill & Subject Matter Expert (SME) Discovery Graph
+	// ==========================================
+	t.Log(`
+		>>> SECTION 71: CRM RESILIENCE, INDUSTRIAL ENERGY PEAK-SHAVING, SLL GREEN LOANS, DYNAMIC SLOTTING & SME EXPERT GRAPH <<<`)
+
+	// 71.1 Critical Raw Material (CRM) Dual-Sourcing & Geopolitical Resilience
+	crmEval, err := coreprocurement.EvaluateResilienceLogic(coreprocurement.EvaluateResilienceRequest{
+		MaterialID:        "MAT-CRM-LITHIUM-01",
+		MaterialName:      "Battery-Grade Lithium Hydroxide Monohydrate",
+		MonthlyDemandTons: 120.0,
+		TargetPrimaryPct:  70.0,
+		PrimarySupplier: coreprocurement.RawMaterialSupplier{
+			SupplierID:             "VND-SICHUAN-LITHIUM",
+			SupplierName:           "Sichuan Tianqi Lithium Corp",
+			CountryCode:            "CN",
+			GeopoliticalRiskIndex:  76.5,
+			CurrentTariffRatePct:   25.0,
+			UnitCostUSD:            21500.0,
+			LeadTimeDays:           35,
+			MaxMonthlyCapacityTons: 250.0,
+			SupplierTier:           "PRIMARY",
+		},
+		SecondarySupplier: coreprocurement.RawMaterialSupplier{
+			SupplierID:             "VND-ALBEMARLE-CHILE",
+			SupplierName:           "Albemarle Salar Operations",
+			CountryCode:            "CL",
+			GeopoliticalRiskIndex:  28.0,
+			CurrentTariffRatePct:   5.0,
+			UnitCostUSD:            23800.0,
+			LeadTimeDays:           28,
+			MaxMonthlyCapacityTons: 100.0,
+			SupplierTier:           "SECONDARY_NEARSHORE",
+		},
+	})
+	if err != nil || crmEval.MaterialID == "" || crmEval.BlendedUnitCostUSD <= 0 || crmEval.GeopoliticalExposureScore <= 0 || crmEval.SupplySecurityStatus == "" {
+		t.Fatalf("Failed to evaluate CRM dual-sourcing resilience: %+v, err: %v", crmEval, err)
+	}
+
+	bomSub, err := coreprocurement.SimulateSubstitutionLogic(coreprocurement.SimulateSubstitutionRequest{
+		FinishedProductSKU:  "PRD-EV-BATTERY-PACK",
+		OriginalMaterialID:  crmEval.MaterialID,
+		SubstituteMaterial:  "Sodium-Ion Hard Carbon Cathode Blend",
+		MonthlyVolumeTons:   120.0,
+		SubstituteUnitCost:  16000.0,
+		ReEngineeringCost:   350000.0,
+		QualWeeks:           20,
+		RegulatoryReapprove: false,
+	})
+	if err != nil || bomSub.SimulationID == "" || bomSub.StrategicVerdict == "" {
+		t.Fatalf("Failed to simulate BOM material substitution: %+v, err: %v", bomSub, err)
+	}
+	t.Logf("✓ CRM Resilience Verified: Material='%s' (%s), Split='%s', BlendedCost=$%.2f/ton, GeoRiskScore=%.1f/100, TariffExpo=$%.2f, Status='%s', BOM Sub='%s' (CostDelta=$%.2f/yr, Payback=%.1f mos, Verdict='%s')",
+		crmEval.MaterialID, crmEval.MaterialName, crmEval.RecommendedSplitRatio, crmEval.BlendedUnitCostUSD, crmEval.GeopoliticalExposureScore, crmEval.EstimatedTariffExposureUSD, crmEval.SupplySecurityStatus, bomSub.SubstituteMaterial, bomSub.AnnualCostDeltaUSD, bomSub.PaybackMonths, bomSub.StrategicVerdict)
+
+	// 71.2 Industrial Energy Peak-Shaving & Demand Response (ISO 50001)
+	energyOrder, err := coreasset.OrchestratePeakShavingLogic(coreasset.PeakShavingRequest{
+		FacilityID:            "PLANT-CIKARANG-01",
+		ContractDemandLimitKW: 8000.0,
+		CurrentTotalDemandKW:  8650.0,
+		GridTariffPeriod:      "ON_PEAK_WBP",
+		BatteryBESSStatePct:   85.0,
+	})
+	if err != nil || energyOrder.DispatchID == "" || energyOrder.Status != "EXECUTED_LOAD_SHED" || energyOrder.ShavingTargetKW <= 0 || energyOrder.AvoidedPeakDemandCostIDR <= 0 {
+		t.Fatalf("Failed to orchestrate energy peak shaving: %+v, err: %v", energyOrder, err)
+	}
+
+	energyAudit, err := coreasset.GetISO50001AuditLogic()
+	if err != nil || energyAudit.TotalConsumptionMWh <= 0 || energyAudit.ComplianceCertificationStatus != "CERTIFIED_ISO50001_COMPLIANT" {
+		t.Fatalf("Failed to get ISO 50001 audit metrics: %+v, err: %v", energyAudit, err)
+	}
+	t.Logf("✓ Energy Peak-Shaving Verified: Dispatch='%s', Facility='%s', Limit=%.0f kW vs Demand=%.0f kW (Excess=%.0f kW), Shaved=%.0f kW (BESS=%.0f kW), AvoidedCost=Rp %.0f, SavedKWh=%.0f, ISO50001='%s' (TotalSaved=Rp %.0f, CO2=%.1f t)",
+		energyOrder.DispatchID, energyOrder.FacilityID, energyOrder.ContractDemandLimitKW, energyOrder.CurrentDemandKW, energyOrder.OverLimitExcessKW, energyOrder.ShavingTargetKW, energyOrder.BESSDischargeKW, energyOrder.AvoidedPeakDemandCostIDR, energyOrder.NetEnergySavedKWh, energyAudit.ComplianceCertificationStatus, energyAudit.TotalCostAvoidedIDR, energyAudit.CarbonReductionTonsCO2)
+
+	// 71.3 Sustainability-Linked Loan (SLL) Dynamic Coupon Adjuster
+	sllRes, err := coretreasury.EvaluateSLLCouponLogic(coretreasury.EvaluateSLLCouponRequest{
+		FacilityID:                "SLL-2026-SYNDICATE-01",
+		EvaluationPeriod:          "2026-Q1",
+		CurrentSOFRRatePct:        4.85,
+		AchievedGHGReductionPct:   18.5,
+		AchievedRenewableSharePct: 46.2,
+		AchievedLTIFR:             0.45,
+	})
+	if err != nil || sllRes.FacilityID == "" || sllRes.MarginAdjustmentBps != -25.0 || sllRes.RevisedCouponRatePct != 6.35 || sllRes.TargetsMetCount != 3 {
+		t.Fatalf("Failed to evaluate SLL coupon adjustment: %+v, err: %v", sllRes, err)
+	}
+
+	sllPortfolio, err := coretreasury.GetSLLPortfolioSummaryLogic()
+	if err != nil || sllPortfolio.TotalPrincipalFinancedUSD <= 0 || sllPortfolio.TotalCumulativeSavingsUSD <= 0 {
+		t.Fatalf("Failed to get SLL portfolio summary: %+v, err: %v", sllPortfolio, err)
+	}
+	t.Logf("✓ Sustainability-Linked Loan Verified: Facility='%s' ($%.0f USD), Met=%d/%d, PriorCoupon=%.2f%%, MarginAdj=%.1f bps, RevisedCoupon=%.2f%%, Savings=$%.0f/yr, GL='%s', Verdict='%s', Portfolio: %d Facilities ($%.0f USD, WtdCoupon=%.2f%%)",
+		sllRes.FacilityID, sllRes.PrincipalAmountUSD, sllRes.TargetsMetCount, sllRes.TotalTargetsCount, sllRes.PriorCouponRatePct, sllRes.MarginAdjustmentBps, sllRes.RevisedCouponRatePct, math.Abs(sllRes.NetAnnualInterestDeltaUSD), sllRes.LedgerJournalEntryNo, sllRes.ESGPerformanceVerdict, sllPortfolio.TotalFacilitiesCount, sllPortfolio.TotalPrincipalFinancedUSD, sllPortfolio.WeightedAverageCouponPct)
+
+	// 71.4 Dynamic Warehouse Velocity Slotting & Co-Order Affinity Profiler
+	slottingHeatmap, err := corewms.GenerateReshufflePlanLogic("WH-CENTRAL-DC-01")
+	if err != nil || slottingHeatmap.WarehouseID == "" || slottingHeatmap.ClassACount <= 0 || slottingHeatmap.EstimatedPickerTravelReductionPct <= 0 || len(slottingHeatmap.WorkOrders) == 0 {
+		t.Fatalf("Failed to generate warehouse reshuffle plan: %+v, err: %v", slottingHeatmap, err)
+	}
+	t.Logf("✓ Dynamic Slotting Verified: Warehouse='%s', ProfiledBins=%d (ClassA=%d, ClassB=%d, ClassC=%d), GoldenZoneUtil=%.1f%%, TravelReduction=%.1f%%, ReshuffleOrders=%d (TotalMin=%.1f m), TopMove: SKU='%s' from %s -> %s (%s)",
+		slottingHeatmap.WarehouseID, slottingHeatmap.TotalBinsProfiled, slottingHeatmap.ClassACount, slottingHeatmap.ClassBCount, slottingHeatmap.ClassCCount, slottingHeatmap.GoldenZoneUtilizationPct, slottingHeatmap.EstimatedPickerTravelReductionPct, slottingHeatmap.RecommendedMovesCount, slottingHeatmap.TotalReshuffleMinutes, slottingHeatmap.WorkOrders[0].SKUName, slottingHeatmap.WorkOrders[0].FromBinLocation, slottingHeatmap.WorkOrders[0].ToBinLocation, slottingHeatmap.WorkOrders[0].Priority)
+
+	// 71.5 Enterprise Skill & Subject Matter Expert (SME) Discovery Graph
+	expertSearch, err := corehr.SearchExpertsLogic(corehr.ExpertSearchQuery{
+		RequiredDomain:      "HYDROGEN_ENERGY",
+		MandatorySkills:     []string{"Liquid Hydrogen LH2", "ASME Section VIII"},
+		PreferredLanguages:  []string{"Indonesian", "English"},
+		MinimumBandwidthPct: 20.0,
+		TargetProjectCode:   "PRJ-CLEAN-PROPULSION-01",
+	})
+	if err != nil || expertSearch.TotalInternalExpertsFound <= 0 || len(expertSearch.MatchedCandidates) == 0 || expertSearch.MatchedCandidates[0].MatchScorePct <= 0 {
+		t.Fatalf("Failed to search enterprise experts: %+v, err: %v", expertSearch, err)
+	}
+	topExpert := expertSearch.MatchedCandidates[0]
+	t.Logf("✓ SME Expert Discovery Graph Verified: Domain='%s' (Project='%s'), ExpertsFound=%d, TopMatch='%s' (%.1f%% Match, Status='%s', Bandwidth=%.0f%%), Rate=$%.0f/hr, SavingsVsExt=$%.0f, SearchTime=%.2f ms, Step='%s'",
+		expertSearch.QueryDomain, expertSearch.TargetProjectCode, expertSearch.TotalInternalExpertsFound, topExpert.Expert.FullName, topExpert.MatchScorePct, topExpert.AvailabilityStatus, topExpert.Expert.CurrentBandwidthPct, topExpert.Expert.InternalHourlyChargeUSD, topExpert.EstimatedCostSavingsVsExternalUSD, expertSearch.SearchDurationMs, expertSearch.RecommendedNextStep)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (71 SECTIONS: 60+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH) PASSED 100%!")
 }

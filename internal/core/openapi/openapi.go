@@ -947,6 +947,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/procurement/crm/evaluate-resilience": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Critical Raw Material (CRM) Dual-Sourcing & Geopolitical Resilience Engine",
+					"description": "Evaluates raw material supply chain vulnerability against geopolitical risk indexes, tariffs, and dual-sourcing splits.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Dual-sourcing evaluation, blended unit cost, and supply security status"},
+					},
+				},
+			},
+			"/api/v1/asset/energy/orchestrate-peak-shaving": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Industrial Energy Peak-Shaving & Demand Response Dispatcher (ISO 50001)",
+					"description": "Predicts and orchestrates peak load shaving via BESS battery storage discharge and non-critical batch rescheduling.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Peak shaving dispatch order, avoided peak penalty cost, and energy saved"},
+					},
+				},
+			},
+			"/api/v1/treasury/sll/evaluate-kpi-coupon": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Sustainability-Linked Loan (SLL) & Green Bond Dynamic Coupon Adjuster",
+					"description": "Audits corporate ESG performance targets against loan covenants, adjusting interest rate margins (step-up / step-down bps).",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Coupon adjustment result, margin discount/penalty, and GL interest adjustment"},
+					},
+				},
+			},
+			"/api/v1/wms/slotting/analyze-velocity": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Dynamic Warehouse Velocity Slotting & Co-Order Affinity Profiler",
+					"description": "Profiles SKU picking velocity, co-order affinities, and Golden Zone ergonomics to generate off-shift reshuffle plans.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Warehouse slotting heatmap, travel reduction %, and work orders"},
+					},
+				},
+			},
+			"/api/v1/hr/experts/search": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Enterprise Skill & Subject Matter Expert (SME) Discovery Graph",
+					"description": "Discovers internal niche engineering specialists and subject matter experts across corporate subsidiaries.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Ranked expert match candidates, skill overlap, and external consultant savings"},
+					},
+				},
+			},
 		},
 	}
 }
