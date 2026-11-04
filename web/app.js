@@ -24819,6 +24819,255 @@ async function triggerEHSSafetyRadar() {
     }
 }
 
+// v1.51.0 Global Enterprise Tier Innovations Triggers
+async function triggerCashPoolingNetting() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengeksekusi penyapuan saldo kas grup (Treasury Sweeping) & Multilateral Netting...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const sweepRep = await api('/treasury/cash-pool/sweep', 'POST', {});
+        const nettingRep = await api('/treasury/netting/run-cycle', 'POST', {});
+
+        if (badge) badge.textContent = `💰 Cash Pool & Netting: FX Compression ${nettingRep.fx_volume_compression_percent}%`;
+        if (answerEl) {
+            let out = `💰 GLOBAL TREASURY CASH POOLING, IN-HOUSE BANKING & MULTILATERAL NETTING:\n`;
+            out += `Siklus Sweeping Kas: ${sweepRep.sweep_cycle_id} | Rekening Induk: ${sweepRep.header_account_id}\n`;
+            out += `Total Dana Tersapu ke Induk (Upstream): Rp ${sweepRep.total_funds_swept_upstream.toLocaleString()}\n`;
+            out += `Total Pendanaan Anak Defisit (Downstream): Rp ${sweepRep.total_deficit_funded_downstream.toLocaleString()}\n`;
+            out += `Net Likuiditas Terkonsentrasi: Rp ${sweepRep.net_liquidity_concentrated.toLocaleString()}\n`;
+            out += `Total Bunga Pinjaman Internal (Arm's-Length Yield): Rp ${sweepRep.total_daily_interest_yield.toLocaleString()}/hari\n\n`;
+            out += `TRANSAKSI PENYAPUAN SALDO AKUN ANAK PERUSAHAAN:\n`;
+            out += `--------------------------------------------------\n`;
+            sweepRep.transactions.forEach(tx => {
+                out += `• [${tx.account_id}] ${tx.entity_name} (${tx.currency}):\n`;
+                out += `  Arah: ${tx.sweep_direction} | Nominal: ${tx.sweep_amount.toLocaleString()}\n`;
+                out += `  Saldo Awal: ${tx.pre_balance.toLocaleString()} -> Saldo Akhir: ${tx.post_balance.toLocaleString()}\n`;
+            });
+            out += `--------------------------------------------------\n`;
+            out += `HASIL MULTILATERAL INTERCOMPANY NETTING (SIKLUS: ${nettingRep.cycle_id}):\n`;
+            out += `Total Volume Faktur Bruto: $${nettingRep.total_gross_volume_usd.toLocaleString()} (${nettingRep.total_gross_invoices_count} faktur intercompany)\n`;
+            out += `Total Penyelesaian Bersih (Net Settlement): $${nettingRep.total_net_settlement_usd.toLocaleString()}\n`;
+            out += `Kompresi Volume Valas (FX Compression): ${nettingRep.fx_volume_compression_percent}% (Penghematan Biaya Bank/Spread: $${nettingRep.estimated_banking_fees_saved_usd.toLocaleString()})\n\n`;
+            nettingRep.participants.forEach(p => {
+                out += `  - ${p.entity_name}: Hutang $${p.gross_payables_usd.toLocaleString()} | Piutang $${p.gross_receivables_usd.toLocaleString()} -> Posisi: ${p.net_position} ($${p.net_amount_usd.toLocaleString()})\n`;
+            });
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Likuiditas grup anak perusahaan berhasil disatukan di In-House Bank tanpa perlu pinjaman komersial eksternal.</li>
+                <li>Penyelesaian hutang-piutang silang intercompany dikompresi sebesar ${nettingRep.fx_volume_compression_percent}%, memangkas risiko valas dan biaya perbankan secara signifikan.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mengeksekusi Cash Pooling & Netting: ' + err.message;
+    }
+}
+
+async function triggerLandedCostAllocation() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengalokasikan biaya logistik impor (Ocean Freight, Duty, THC) ke nilai persediaan...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const lc = await api('/costing/landed-cost/allocate', 'POST', {});
+
+        if (badge) badge.textContent = `🚢 Landed Cost: Rp ${lc.total_landed_expenses.toLocaleString()} Kapitalisasi`;
+        if (answerEl) {
+            let out = `🚢 AUTOMATED LANDED COST ALLOCATION & MULTI-MODAL FREIGHT ACCRUAL:\n`;
+            out += `ID Alokasi: ${lc.allocation_id} | No Penerimaan: ${lc.receipt_number} (${lc.receipt_id})\n`;
+            out += `Metode Pembagian: ${lc.allocation_method} | Referensi Jurnal Buku Besar: ${lc.general_ledger_move_ref}\n`;
+            out += `Total Beban Logistik Dikapitalisasi: Rp ${lc.total_landed_expenses.toLocaleString()}\n`;
+            out += `Nilai Buku Persediaan Sebelum: Rp ${lc.total_inventory_pre_value.toLocaleString()}\n`;
+            out += `Nilai Buku Persediaan Setelah: Rp ${lc.total_inventory_post_value.toLocaleString()}\n`;
+            out += `Penyesuaian HPP Retroaktif (Barang Terlanjur Terpakai): Rp ${lc.total_retroactive_cogs.toLocaleString()}\n\n`;
+            out += `RINCIAN PERUBAHAN HARGA POKOK PER UNIT (VALUATION LAYER):\n`;
+            out += `--------------------------------------------------\n`;
+            lc.allocated_lines.forEach(line => {
+                out += `• ${line.product_name} (${line.product_id}):\n`;
+                out += `  Kuantitas: ${line.quantity_received} unit | Berat Kotor: ${line.gross_weight_kg} kg | Volume: ${line.volume_cbm} CBM\n`;
+                out += `  HPP Awal: Rp ${line.original_unit_cost.toLocaleString()} -> HPP Baru: Rp ${line.new_landed_unit_cost.toLocaleString()} (+${line.cost_increase_percent}%)\n`;
+                out += `  Alokasi Biaya: Rp ${line.allocated_landed_cost.toLocaleString()} | Layer ID: ${line.stock_valuation_layer_id}\n`;
+                if (line.retroactive_cogs_adjustment > 0) {
+                    out += `  Penyesuaian Retroaktif HPP: Rp ${line.retroactive_cogs_adjustment.toLocaleString()}\n`;
+                }
+            });
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Biaya pengapalan laut, bea masuk pelabuhan, dan asuransi berhasil dikapitalisasi ke nilai persediaan barang masuk.</li>
+                <li>Jurnal akrual logistik secara otomatis diperbarui di buku besar dengan rekonsiliasi faktur tiga arah (Three-Way Matching).</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mengalokasikan Landed Cost: ' + err.message;
+    }
+}
+
+async function triggerScope3CBAMPassport() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menghitung jejak karbon Scope 3 hulu & menerbitkan paspor produk EU CBAM...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const passport = await api('/esg/scope3/calculate-product-passport', 'POST', {});
+        const cbamDecl = await api(`/esg/cbam/export-declaration/${passport.sku}`, 'GET');
+
+        if (badge) badge.textContent = `🌿 Scope 3 CBAM: ${passport.embedded_emissions_tons_per_ton} tCO2e/ton`;
+        if (answerEl) {
+            let out = `🌿 SUPPLY CHAIN SCOPE 3 CARBON ACCOUNTING & EU CBAM PASSPORT:\n`;
+            out += `ID Paspor Karbon: ${passport.passport_id} | SKU Produk: ${passport.sku}\n`;
+            out += `Nama Produk: ${passport.product_name} | Kode CN / Pos Tarif: ${passport.cn_code}\n`;
+            out += `Berat Bersih Produk: ${passport.net_weight_kg} kg | Status CBAM: ${passport.cbam_compliance_status}\n\n`;
+            out += `DEKOMPOSISI EMISI CRADLE-TO-GATE:\n`;
+            out += `  • Scope 1 (Emisi Langsung Pabrik): ${passport.scope1_emissions_kg_co2e} kg CO2e\n`;
+            out += `  • Scope 2 (Listrik Cleanroom & Assembly): ${passport.scope2_emissions_kg_co2e} kg CO2e\n`;
+            out += `  • Scope 3 (Bahan Baku Supplier Hulu): ${passport.scope3_upstream_materials_kg_co2e} kg CO2e\n`;
+            out += `  • Scope 3 (Logistik Transportasi Maritim): ${passport.scope3_logistics_kg_co2e} kg CO2e\n`;
+            out += `  Total Emisi per Unit: ${passport.total_cradle_to_gate_kg_co2e} kg CO2e\n`;
+            out += `  Intensitas Karbon Tertanam (Embedded Emissions): ${passport.embedded_emissions_tons_per_ton} tCO2e / metric ton\n\n`;
+            out += `KOMPONEN SUPPLIER HULU (SUPPLY CHAIN TRANSPARENCY):\n`;
+            passport.components_breakdown.forEach(comp => {
+                out += `  - [${comp.component_sku}] ${comp.component_name} (${comp.supplier_name}, ${comp.supplier_country}): ${comp.total_emissions_kg_co2e} kg CO2e [Grade: ${comp.supplier_esg_grade}]\n`;
+            });
+            out += `--------------------------------------------------\n`;
+            out += `DOKUMEN DEKLARASI RESMI EU CBAM (PERIODE: 2026/Q4):\n`;
+            out += `ID Deklarasi: ${cbamDecl.declaration_id} | EORI Importir Uni Eropa: ${cbamDecl.importer_eori_number}\n`;
+            out += `Total Massa Bersih Ekspor: ${cbamDecl.net_mass_metric_tons} Ton | Total Emisi Tertanam: ${cbamDecl.total_embedded_emissions_tco2e} tCO2e\n`;
+            out += `Pajak Karbon Telah Dibayar di RI (Deduction): Rp ${cbamDecl.origin_carbon_price_paid_idr.toLocaleString()} (€${cbamDecl.origin_carbon_price_deduction_eur})\n`;
+            out += `Kewajiban Bersih Sertifikat CBAM Uni Eropa: €${cbamDecl.net_eu_cbam_obligation_eur} (${cbamDecl.status})\n`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Paspor Karbon Produk terintegrasi penuh dengan dekomposisi emisi hulu (Scope 3) dari seluruh pemasok bahan baku.</li>
+                <li>Pengurangan pajak karbon domestik (Nilai Ekonomi Karbon) otomatis dipotongkan dari liabilitas sertifikat CBAM Uni Eropa.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Paspor Karbon & CBAM: ' + err.message;
+    }
+}
+
+async function triggerFieldServiceDispatch() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis matriks dispatch geospatial teknisi & suku cadang bagasi mobil (Van Stock)...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const dispatch = await api('/field-service/dispatch/recommend', 'POST', {});
+
+        if (badge) badge.textContent = `🚐 Field Dispatch: ${dispatch.recommended_technician.name} (Skor ${dispatch.recommended_technician.composite_score})`;
+        if (answerEl) {
+            let out = `🚐 FIELD SERVICE LIGHTNING, GEOSPATIAL DISPATCHING & VAN STOCK RADAR:\n`;
+            out += `No Work Order: ${dispatch.work_order_id} | Tingkat Kegentingan: ${dispatch.urgency_tier}\n`;
+            out += `Batas Waktu SLA: ${dispatch.sla_deadline} | Evaluasi Kandidat Teknisi: ${dispatch.total_technicians_evaluated} personil\n`;
+            out += `Saran Penugasan Sistem: ${dispatch.dispatchAdvice}\n\n`;
+            out += `TEKNISI UTAMA DIREKOMENDASIKAN (TERTINGGI KOMPOSIT):\n`;
+            const rec = dispatch.recommended_technician;
+            out += `• Nama: ${rec.name} (${rec.technician_id})\n`;
+            out += `  Kendaraan Servis: ${rec.van_id} | Jarak ke Lokasi Pelanggan: ${rec.distance_km} KM (Estimasi Tiba: ${rec.est_arrival_minutes} menit)\n`;
+            out += `  Kecocokan Keahlian (Skill Match): ${rec.skill_match_percent}% | Suku Cadang Lengkap di Mobil: ${rec.has_all_parts_in_van ? 'YA (SIAP LANGSUNG PASANG)' : 'TIDAK'}\n`;
+            out += `  Skor Komposit Algoritmik: ${rec.composite_score}/100\n\n`;
+            out += `KANDIDAT ALTERNATIF CADANGAN:\n`;
+            dispatch.alternative_candidates.forEach(alt => {
+                out += `  - ${alt.name}: Jarak ${alt.distance_km} KM | Skor ${alt.composite_score} | Status: ${alt.current_status}\n`;
+            });
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Algoritma geospatial Haversine memprioritaskan teknisi terdekat yang membawa suku cadang pengganti lengkap di bagasi mobilnya.</li>
+                <li>Penyelesaian perbaikan di lokasi langsung memotong persediaan mobil servis (Van Stock) dan menerbitkan faktur berbasis e-signature pelanggan.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mengeksekusi rekomendasi dispatch: ' + err.message;
+    }
+}
+
+async function triggerDynamicPriceMarginGuard() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menghitung harga dinamis berbasis elastisitas & memverifikasi batas marjin kotor (Margin Guard)...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const evalRes = await api('/pricing/dynamic/evaluate', 'POST', {});
+        const auditRes = await api('/pricing/margin-guard/verify-order', 'POST', {});
+
+        if (badge) badge.textContent = `🏷️ Dynamic Price: Rp ${evalRes.suggested_dynamic_price_idr.toLocaleString()} (Margin ${evalRes.achieved_margin_percent}%)`;
+        if (answerEl) {
+            let out = `🏷️ ALGORITHMIC DYNAMIC PRICING & MARGIN GUARD INTELLIGENCE:\n`;
+            out += `SKU Produk: ${evalRes.sku} (${evalRes.product_name})\n`;
+            out += `Harga Dasar (Base Price): Rp ${evalRes.base_price_idr.toLocaleString()} | Biaya Pokok (HPP): Rp ${evalRes.current_cost_idr.toLocaleString()}\n`;
+            out += `Batas Bawah Harga Keras (Floor Price): Rp ${evalRes.floor_price_idr.toLocaleString()}\n`;
+            out += `Harga Jual Dinamis Direkomendasikan: Rp ${evalRes.suggested_dynamic_price_idr.toLocaleString()} (Penyesuaian: ${evalRes.adjustment_percent}%)\n`;
+            out += `Marjin Kotor Tercapai: ${evalRes.achieved_margin_percent}% | Proteksi Marjin Aktif: ${evalRes.margin_guard_enforced ? 'YA (DILINDUNGI)' : 'TIDAK'}\n`;
+            out += `Proyeksi Lonjakan Volume Penjualan: +${evalRes.projected_volume_gain_pct}%\n`;
+            out += `Alasan Penyesuaian: ${evalRes.reprice_reason}\n`;
+            out += `Sinkronisasi Omnichannel: ${evalRes.omnichannel_sync_status} (POS Kasir & eCommerce Terbarui)\n\n`;
+            out += `AUDIT PROTEKSI MARJIN PESANAN PENJUALAN (MARGIN GUARD AUDIT):\n`;
+            out += `--------------------------------------------------\n`;
+            out += `No Pesanan: ${auditRes.order_id} | Pelanggan: ${auditRes.customer_name}\n`;
+            out += `Total Nilai Pesanan: Rp ${auditRes.total_order_revenue_idr.toLocaleString()} | Total HPP: Rp ${auditRes.total_order_cogs_idr.toLocaleString()}\n`;
+            out += `Laba Kotor Pesanan: Rp ${auditRes.gross_profit_idr.toLocaleString()} (Marjin: ${auditRes.order_gross_margin_percent}% vs Ambang Kebijakan: ${auditRes.policy_threshold_percent}%)\n`;
+            out += `Status Persetujuan Otomatis: ${auditRes.is_approved ? 'APPROVED' : 'BLOCKED'} [${auditRes.compliance_status}]\n`;
+            out += `Catatan Kepatuhan: ${auditRes.audit_notes}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Harga jual dihitung secara dinamis mengikuti pergerakan kompetitor dan kecepatan perputaran stok di gudang.</li>
+                <li>Margin Guard memastikan harga jual tidak pernah jebol di bawah batas marjin kotor minimum perusahaan (18%).</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mengevaluasi harga dinamis: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

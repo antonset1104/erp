@@ -13,15 +13,18 @@ import (
 	"erp-golang/internal/core/commandcenter"
 	coreaccount "erp-golang/internal/core/account"
 	coreasset "erp-golang/internal/core/asset"
+	corecosting "erp-golang/internal/core/costing"
 	corecrm "erp-golang/internal/core/crm"
 	corecustoms "erp-golang/internal/core/customs"
 	coreedi "erp-golang/internal/core/edi"
 	coreehs "erp-golang/internal/core/ehs"
 	coreexpense "erp-golang/internal/core/expense"
+	corefieldservice "erp-golang/internal/core/fieldservice"
 	corefleet "erp-golang/internal/core/fleet"
 	coregraphql "erp-golang/internal/core/graphql"
 	corehr "erp-golang/internal/core/hr"
 	coremrp "erp-golang/internal/core/mrp"
+	corepricing "erp-golang/internal/core/pricing"
 	coresystem "erp-golang/internal/core/system"
 	coretreasury "erp-golang/internal/core/treasury"
 	corevmi "erp-golang/internal/core/vmi"
@@ -282,7 +285,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.50.0",
+			"version":    "1.51.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -300,7 +303,7 @@ func main() {
 	ai.RegisterRootProtocolRoutes(r, aiHandler)
 
 	// Register OpenAPI 3.1 & Interactive API Explorer
-	openapi.RegisterRoutes(r, cfg.AppName, "1.50.0")
+	openapi.RegisterRoutes(r, cfg.AppName, "1.51.0")
 
 	// API v1 Router Group
 	apiV1 := r.Group("/api/v1")
@@ -347,6 +350,11 @@ func main() {
 		corecustoms.RegisterFTARoutes(apiV1, authMiddleware, db)
 		coresystem.RegisterCQRSRoutes(apiV1, authMiddleware, db)
 		coreehs.RegisterEHSRoutes(apiV1, authMiddleware, db)
+		coretreasury.RegisterCashPoolingRoutes(apiV1, authMiddleware, db)
+		corecosting.RegisterLandedCostRoutes(apiV1, authMiddleware, db)
+		esg.RegisterScope3CBAMRoutes(apiV1, authMiddleware, db)
+		corefieldservice.RegisterFieldServiceRoutes(apiV1, authMiddleware, db)
+		corepricing.RegisterDynamicPricingGuardRoutes(apiV1, authMiddleware, db)
 	}
 
 	// Serve Static Web Frontend

@@ -593,3 +593,31 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 ### 16.5 AI Workplace Safety, Incident Radar & ISO 45001 Compliance (`internal/core/ehs/safety_radar.go`)
 - **Incident Severity Logging**: Endpoint `POST /api/v1/ehs/incident/report` logs Near-Miss, First Aid, Medical Treatment, and Lost Time Injury (LTI) occurrences with automated 5-Why root-cause reasoning chains and corrective action (CAPA) tracking.
 - **Safety KPIs & Zero-Harm Streaks**: Endpoint `GET /api/v1/ehs/safety-radar` tracks Lost Time Injury Frequency Rate (LTIFR) and Severity Rate (SR) over cumulative man-hours, guaranteeing ISO 45001:2018 audit readiness.
+
+---
+
+## 17. Global Treasury Cash Pooling, Landed Costs, Scope 3 CBAM, Field Service & Dynamic Pricing (v1.51.0)
+
+### 17.1 Global Treasury Cash Pooling, In-House Banking & Multilateral Netting (`internal/core/treasury/cash_pooling.go`)
+- **End-of-Day Zero-Balance Account (ZBA) Sweeps**: Endpoint `POST /api/v1/treasury/cash-pool/sweep` concentrates liquidity from subsidiaries to the holding header account, or funds operational deficits, calculating intercompany arm's-length daily interest yields.
+- **Multilateral Intercompany Netting**: Endpoint `POST /api/v1/treasury/netting/run-cycle` consolidates cross-border invoices across subsidiaries, calculating pairwise offsetting matrix positions and compressing total FX wire volume by 50–80%.
+- **In-House Bank Overview**: Endpoint `GET /api/v1/treasury/in-house-bank/balances` delivers consolidated group liquidity surplus, average cost of capital, and internal deposit metrics.
+
+### 17.2 Automated Landed Cost Allocation & Multi-Modal Freight Accrual Engine (`internal/core/costing/landed_cost.go`)
+- **Dynamic Cost Capitalization**: Endpoint `POST /api/v1/costing/landed-cost/allocate` apportions ocean freight, customs import duties, terminal handling (THC), and insurance across imported lines by gross weight, volume (CBM), or CIF value into `stock.valuation.layer`.
+- **Retroactive COGS Adjustment**: Automatically posts General Ledger adjustment entries for quantities consumed or sold prior to vendor freight bill arrival.
+- **Valuation Layer Audit Trail**: Endpoint `GET /api/v1/costing/landed-cost/audit-layer/:receipt_id` exposes full component buildup from initial PO price to capitalized landed unit cost.
+
+### 17.3 Supply Chain Scope 3 Carbon Accounting & EU CBAM Passport (`internal/core/esg/scope3_cbam.go`)
+- **Cradle-to-Gate Scope 3 Intensity**: Endpoint `POST /api/v1/esg/scope3/calculate-product-passport` aggregates supplier tier-1 BOM emission factors, cleanroom electricity (Scope 2), direct manufacturing (Scope 1), and maritime freight to establish product carbon intensity (tCO2e / metric ton).
+- **Official EU CBAM Declaration**: Endpoint `GET /api/v1/esg/cbam/export-declaration/:export_order_id` generates compliant export declarations according to EU Regulation 2023/956, deducting domestic Indonesian carbon tax paid from the final net EU CBAM certificate obligation.
+
+### 17.4 Field Service Lightning, Geospatial Dispatching & Van Stock Radar (`internal/core/fieldservice/dispatch_radar.go`)
+- **Multi-Criteria Geospatial Dispatch**: Endpoint `POST /api/v1/field-service/dispatch/recommend` calculates Haversine distance, certified skill matching, and on-board van spare parts availability to select optimal technicians within SLA penalty windows.
+- **Work Order Sign-Off & Mobile Stock Relief**: Endpoint `POST /api/v1/field-service/work-order/complete` consumes replacement parts from mobile vehicle inventory, issues customer billing, and records cryptographic customer e-signatures.
+- **Van Stock Inventory Radar**: Endpoint `GET /api/v1/field-service/van-stock/:technician_id` monitors real-time inventory inside technician vans with automated reorder warnings.
+
+### 17.5 Algorithmic Dynamic Pricing & Margin Guard Intelligence (`internal/core/pricing/dynamic_guard.go`)
+- **Demand Elasticity & Competitor Repricing**: Endpoint `POST /api/v1/pricing/dynamic/evaluate` evaluates price elasticity of demand (PED), inventory days of supply, and competitor price movements.
+- **Strict Hard-Floor Gross Margin Guard**: Clamps calculated prices to guarantee they never drop below the corporate margin floor ($\text{FloorPrice} = \text{CurrentCost} \times (1 + \frac{\text{MinMargin}}{100})$).
+- **Sales Order Margin Audit**: Endpoint `POST /api/v1/pricing/margin-guard/verify-order` intercepts unapproved order discounting, requiring executive override if overall gross margin breaches corporate compliance policy.

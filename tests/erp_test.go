@@ -23,15 +23,18 @@ import (
 	"erp-golang/internal/core/bi"
 	coreaccount "erp-golang/internal/core/account"
 	coreasset "erp-golang/internal/core/asset"
+	corecosting "erp-golang/internal/core/costing"
 	corecrm "erp-golang/internal/core/crm"
 	corecustoms "erp-golang/internal/core/customs"
 	coreedi "erp-golang/internal/core/edi"
 	coreehs "erp-golang/internal/core/ehs"
 	coreexpense "erp-golang/internal/core/expense"
+	corefieldservice "erp-golang/internal/core/fieldservice"
 	corefleet "erp-golang/internal/core/fleet"
 	coregraphql "erp-golang/internal/core/graphql"
 	corehr "erp-golang/internal/core/hr"
 	coremrp "erp-golang/internal/core/mrp"
+	corepricing "erp-golang/internal/core/pricing"
 	coresystem "erp-golang/internal/core/system"
 	coretreasury "erp-golang/internal/core/treasury"
 	corevmi "erp-golang/internal/core/vmi"
@@ -9336,5 +9339,129 @@ IEA*1*000099123~`
 	t.Logf("✓ AI Workplace Safety Radar Verified: SafeDays=%d, ManHours=%.0f, LTIFR=%.2f, SeverityRate=%.2f, IncidentsYTD=%d, 5WhyChainGenerated=5 steps, ISO45001='%s'",
 		ehsRadar.SafeDaysWithoutLTI, ehsRadar.TotalManHoursWorked, ehsRadar.LTIFRScore, ehsRadar.SeverityRateScore, ehsRadar.TotalIncidentsYTD+1, ehsRadar.ISO45001Compliance)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (64 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR) PASSED 100%!")
+	// ==========================================
+	// SECTION 65: V1.51.0 GLOBAL ENTERPRISE TIER INNOVATIONS:
+	// 1. Global Treasury Cash Pooling, In-House Banking & Multilateral Netting
+	// 2. Automated Landed Cost Allocation & Multi-Modal Freight Accrual Engine
+	// 3. Supply Chain Scope 3 Carbon Accounting & EU CBAM Passport
+	// 4. Field Service Lightning, Geospatial Dispatching & Van Stock Radar
+	// 5. Algorithmic Dynamic Pricing & Margin Guard Intelligence
+	// ==========================================
+	t.Log(`
+		>>> SECTION 65: CASH POOLING, LANDED COST, SCOPE 3 CBAM, FIELD SERVICE & DYNAMIC PRICING <<<`)
+
+	// 65.1 Global Treasury Cash Pooling & Multilateral Netting
+	sweepRep, err := coretreasury.ExecuteSweepLogic(coretreasury.SweepExecutionRequest{
+		HeaderAccountID: "ACC-TREASURY-HEADER-01",
+	})
+	if err != nil || sweepRep == nil || len(sweepRep.Transactions) == 0 {
+		t.Fatalf("Failed to execute treasury cash pool sweep: %v, resp: %+v", err, sweepRep)
+	}
+	if sweepRep.NetLiquidityConcentrated <= 0 || sweepRep.TotalDailyInterestYield <= 0 {
+		t.Fatalf("Expected positive liquidity concentration and daily interest yield: %+v", sweepRep)
+	}
+
+	nettingRep, err := coretreasury.RunNettingCycleLogic(coretreasury.NettingCycleRequest{
+		SettlementCurrency: "USD",
+	})
+	if err != nil || nettingRep == nil || len(nettingRep.Participants) == 0 {
+		t.Fatalf("Failed to run multilateral netting cycle: %v, resp: %+v", err, nettingRep)
+	}
+	if nettingRep.FXVolumeCompressionPercent < 45.0 || nettingRep.EstimatedBankingFeesSavedUSD <= 0 {
+		t.Fatalf("Expected significant FX compression and fee savings: %+v", nettingRep)
+	}
+	t.Logf("✓ Treasury Cash Pooling & Netting Verified: Header='%s', SweptUpstream=IDR %.0f, NetLiquidity=IDR %.0f, DailyInterest=IDR %.0f, GrossVolume=USD %.0f, NetSettlement=USD %.0f, FXCompression=%.1f%%, FeesSaved=USD %.0f",
+		sweepRep.HeaderAccountID, sweepRep.TotalFundsSweptUpstream, sweepRep.NetLiquidityConcentrated, sweepRep.TotalDailyInterestYield, nettingRep.TotalGrossVolumeUSD, nettingRep.TotalNetSettlementUSD, nettingRep.FXVolumeCompressionPercent, nettingRep.EstimatedBankingFeesSavedUSD)
+
+	// 65.2 Automated Landed Cost Allocation & Multi-Modal Freight Accrual
+	lcRes, err := corecosting.AllocateLandedCostLogic(corecosting.AllocateLandedCostRequest{
+		ReceiptID:        "WH/IN/IMP-2026-089",
+		ReceiptNumber:    "RCV-IMP-0089",
+		AllocationMethod: "BY_GROSS_WEIGHT",
+	})
+	if err != nil || lcRes == nil || len(lcRes.AllocatedLines) == 0 {
+		t.Fatalf("Failed to allocate landed cost: %v, resp: %+v", err, lcRes)
+	}
+	if lcRes.TotalLandedExpenses <= 0 || lcRes.TotalInventoryPostValue <= lcRes.TotalInventoryPreValue {
+		t.Fatalf("Expected capitalized inventory valuation post-landed-cost: %+v", lcRes)
+	}
+	t.Logf("✓ Landed Cost Engine Verified: AllocID='%s', Receipt='%s', Method='%s', TotalExpenses=IDR %.0f, PreVal=IDR %.0f, PostVal=IDR %.0f, RetroCOGS=IDR %.0f, GLMoveRef='%s'",
+		lcRes.AllocationID, lcRes.ReceiptNumber, lcRes.AllocationMethod, lcRes.TotalLandedExpenses, lcRes.TotalInventoryPreValue, lcRes.TotalInventoryPostValue, lcRes.TotalRetroactiveCOGS, lcRes.GeneralLedgerMoveRef)
+
+	// 65.3 Supply Chain Scope 3 Carbon Accounting & EU CBAM Passport
+	passport, err := esg.CalculateProductPassportLogic(esg.ProductCarbonPassportRequest{
+		SKU:                "SKU-MON-27-QHD",
+		ProductName:        "Gaming Monitor 27-inch IPS QHD",
+		CNCode:             "8528.52.00",
+		ExportOrderID:      "EXP-ORD-2026-EU-01",
+		DestinationCountry: "DE",
+		NetWeightKg:        5.8,
+	})
+	if err != nil || passport == nil || len(passport.ComponentsBreakdown) == 0 {
+		t.Fatalf("Failed to calculate carbon passport: %v, resp: %+v", err, passport)
+	}
+	if passport.EmbeddedEmissionsTonsPerTon <= 0 || passport.Scope3UpstreamMaterialsKgCO2e <= 0 {
+		t.Fatalf("Expected valid Scope 3 cradle-to-gate carbon intensity: %+v", passport)
+	}
+
+	cbamDecl, err := esg.GenerateCBAMDeclarationLogic(passport.SKU)
+	if err != nil || cbamDecl == nil {
+		t.Fatalf("Failed to generate CBAM declaration: %v, resp: %+v", err, cbamDecl)
+	}
+	t.Logf("✓ Scope 3 & EU CBAM Passport Verified: PassportID='%s', SKU='%s', CradleToGate=%.2f kgCO2e/unit, EmbeddedIntensity=%.3f tCO2e/ton, Status='%s', Declaration='%s', NetCBAMObligation=EUR %.2f (OriginTaxDeduction=EUR %.2f)",
+		passport.PassportID, passport.SKU, passport.TotalCradleToGateKgCO2e, passport.EmbeddedEmissionsTonsPerTon, passport.CBAMComplianceStatus, cbamDecl.DeclarationID, cbamDecl.NetEUCBAMObligationEUR, cbamDecl.OriginCarbonPriceDeductionEUR)
+
+	// 65.4 Field Service Lightning, Geospatial Dispatching & Van Stock Radar
+	dispatch, err := corefieldservice.RecommendDispatchLogic(corefieldservice.WorkOrderRequest{
+		WorkOrderID:   "WO-FIELD-20261104-001",
+		SiteLatitude:  -6.2297,
+		SiteLongitude: 106.8272,
+		FaultSeverity: "HIGH",
+	})
+	if err != nil || dispatch == nil || dispatch.RecommendedTechnician.TechnicianID == "" {
+		t.Fatalf("Failed to recommend field service technician: %v, resp: %+v", err, dispatch)
+	}
+	if dispatch.RecommendedTechnician.CompositeScore <= 0 || dispatch.RecommendedTechnician.DistanceKM <= 0 {
+		t.Fatalf("Expected valid geospatial distance and composite score: %+v", dispatch)
+	}
+
+	woComp, err := corefieldservice.CompleteWorkOrderLogic(corefieldservice.WorkOrderCompletionRequest{
+		WorkOrderID:        dispatch.WorkOrderID,
+		TechnicianID:       dispatch.RecommendedTechnician.TechnicianID,
+		LaborHoursSpent:    2.5,
+		CustomerSignerName: "Bambang Wijaya (Facility Manager)",
+	})
+	if err != nil || woComp == nil || woComp.CryptographicSeal == "" {
+		t.Fatalf("Failed to complete work order: %v, resp: %+v", err, woComp)
+	}
+	t.Logf("✓ Field Service Lightning Verified: WO='%s', Tech='%s' (%s, Score=%.1f, Dist=%.1f KM, VanPartsReady=%t), Completed='%s', TotalBilled=IDR %.0f, Seal='%s...'",
+		dispatch.WorkOrderID, dispatch.RecommendedTechnician.Name, dispatch.RecommendedTechnician.VanID, dispatch.RecommendedTechnician.CompositeScore, dispatch.RecommendedTechnician.DistanceKM, dispatch.RecommendedTechnician.HasAllPartsInVan, woComp.Status, woComp.GrandTotalBilledIDR, woComp.CryptographicSeal[:16])
+
+	// 65.5 Algorithmic Dynamic Pricing & Margin Guard Intelligence
+	dynPrice, err := corepricing.EvaluateDynamicPriceLogic(corepricing.DynamicPriceRequest{
+		SKU:                   "SKU-MON-27-QHD",
+		BasePriceIDR:          4800000.0,
+		CurrentCostIDR:        3450000.0,
+		MinMarginPercent:      18.0,
+		CompetitorPriceIDR:    4250000.0,
+		InventoryDaysOfSupply: 75.0,
+	})
+	if err != nil || dynPrice == nil {
+		t.Fatalf("Failed to evaluate dynamic pricing: %v, resp: %+v", err, dynPrice)
+	}
+	if dynPrice.SuggestedDynamicPriceIDR < dynPrice.FloorPriceIDR || dynPrice.AchievedMarginPercent < 18.0 {
+		t.Fatalf("Dynamic price breached margin floor: %+v", dynPrice)
+	}
+
+	marginAudit, err := corepricing.VerifyOrderMarginLogic(corepricing.OrderMarginVerificationRequest{
+		CustomerName:       "PT Mega Retail Nusantara",
+		MinPolicyMarginPct: 15.0,
+	})
+	if err != nil || marginAudit == nil || !marginAudit.IsApproved {
+		t.Fatalf("Expected approved healthy order margin: %v, resp: %+v", err, marginAudit)
+	}
+	t.Logf("✓ Algorithmic Dynamic Pricing & Margin Guard Verified: SKU='%s', Base=IDR %.0f, Cost=IDR %.0f, Floor=IDR %.0f, SuggestedDynamic=IDR %.0f (Adj: %.1f%%, Margin: %.2f%%, GuardEnforced=%t), OrderAudit='%s' (Margin=%.2f%% vs Policy=%.2f%%, Approved=%t)",
+		dynPrice.SKU, dynPrice.BasePriceIDR, dynPrice.CurrentCostIDR, dynPrice.FloorPriceIDR, dynPrice.SuggestedDynamicPriceIDR, dynPrice.AdjustmentPercent, dynPrice.AchievedMarginPercent, dynPrice.MarginGuardEnforced, marginAudit.OrderID, marginAudit.OrderGrossMarginPercent, marginAudit.PolicyThresholdPercent, marginAudit.IsApproved)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (65 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD) PASSED 100%!")
 }

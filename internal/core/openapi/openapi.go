@@ -647,6 +647,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/treasury/cash-pool/sweep": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Global Treasury Cash Pooling, In-House Banking & Multilateral Netting",
+					"description": "End-of-day zero-balance account (ZBA) sweeps, intercompany arm's-length interest, and multilateral cross-border netting.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Sweep execution report, liquidity concentration, and interest accrual metrics"},
+					},
+				},
+			},
+			"/api/v1/costing/landed-cost/allocate": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Automated Landed Cost Allocation & Multi-Modal Freight Accrual",
+					"description": "Capitalizes freight, customs duties, and terminal fees into inventory valuation layers with retroactive COGS adjustments.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Allocated product line costs, new unit valuation, and GL journal entry reference"},
+					},
+				},
+			},
+			"/api/v1/esg/scope3/calculate-product-passport": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Supply Chain Scope 3 Carbon Accounting & EU CBAM Passport",
+					"description": "Calculates cradle-to-gate embedded emissions (Scope 1, 2, 3) per ton and generates EU CBAM export declarations.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Product carbon passport, supplier Scope 3 breakdown, and CBAM obligation deduction"},
+					},
+				},
+			},
+			"/api/v1/field-service/dispatch/recommend": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Field Service Lightning & Geospatial Dispatching Radar",
+					"description": "Haversine distance routing, certified technician skill matching, and on-board van spare parts availability scoring.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Ranked dispatch recommendations, ETA, and SLA window advice"},
+					},
+				},
+			},
+			"/api/v1/pricing/dynamic/evaluate": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Algorithmic Dynamic Pricing & Margin Guard Intelligence",
+					"description": "Calculates demand-elastic repricing with competitor intelligence while strictly enforcing gross margin floor protection.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Suggested dynamic price, margin achieved, and omnichannel sync status"},
+					},
+				},
+			},
 		},
 	}
 }
