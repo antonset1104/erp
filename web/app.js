@@ -31882,6 +31882,318 @@ async function triggerDACDirectAir() {
     }
 }
 
+async function triggerEVTOLCorridor() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi jejak akustik Blade-Vortex Interaction (BVI) eVTOL & wind shear vertiport...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const flightID = "FLIGHT-EVTOL-SKYTAXI-01";
+        await api('/evtol/corridor/ingest-flight-telemetry', 'POST', {
+            flight_id: flightID,
+            aircraft_tail_id: "N902VT-ARCHER-MIDNIGHT",
+            corridor_id: "UAM-CORRIDOR-MANHATTAN-JFK",
+            altitude_meters_agl: 380.0,
+            airspeed_knots: 110.0,
+            distributed_rotor_rpm: 1480.0,
+            rotor_blade_phase_offset_deg: 0.0,
+            measured_acoustic_noise_dba: 71.5,
+            blade_vortex_interaction_bvi: 0.84,
+            vertiport_wind_shear_knots: 19.2
+        });
+
+        const evalRes = await api('/evtol/corridor/evaluate-acoustic-and-windshear', 'POST', { flight_id: flightID });
+        const actRes = await api('/evtol/corridor/trigger-phase-and-glide-control', 'POST', { flight_id: flightID });
+        const dossierRes = await api(`/evtol/corridor/uam-safety-dossier/${flightID}`, 'GET');
+
+        if (badge) badge.textContent = `🚁 eVTOL: Margin ${evalRes.data.aeroacoustic_noise_margin_dba} dBA | Status: ${evalRes.data.acoustic_exceedance_severity_level} | Glide: ${actRes.data.modulated_glide_slope_deg}°`;
+        if (answerEl) {
+            let out = `🚁 AUTONOMOUS ELECTRIC VTOL (eVTOL) ACOUSTIC NOISE & VERTIPORT CORRIDOR SENTINEL (FAA PART 36 & EASA SC-VTOL):\n`;
+            out += `Penerbangan eVTOL: ${flightID} (${dossierRes.data.aircraft_tail_id}) | Koridor Vertiport: ${dossierRes.data.corridor_id}\n`;
+            out += `Telemetri Penerbangan: Ketinggian ${dossierRes.data.altitude_m_agl} m AGL, Kecepatan 110.0 kts, Rotor RPM 1480.0\n\n`;
+            out += `ANALISIS AKUSTIK INTERAKSI PISAU-VORTEX (BVI) & WIND SHEAR KORIDOR PERKOTAAN:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Emisi Akustik Terukur: 71.5 dBA | Batas Kebisingan Permukiman: 65.0 dBA\n`;
+            out += `• Margin Pelanggaran Kebisingan: +${evalRes.data.aeroacoustic_noise_margin_dba} dBA (Melebihi Ambang Batas Curfew Perkotaan)\n`;
+            out += `• Tingkat Keparahan Kebisingan: ${evalRes.data.acoustic_exceedance_severity_level}\n`;
+            out += `• Bahaya Microburst Wind Shear Vertiport: ${evalRes.data.wind_shear_stall_hazard_level} (Kecepatan Geser Angin: 19.2 kts)\n`;
+            out += `• Mandat Desinkronisasi Fasa Rotor: ${evalRes.data.phase_cancellation_required ? 'DIPERLUKAN SEGERA' : 'NORMAL'}\n`;
+            out += `• Mandat Pendekatan Curam (Steep Glide): ${evalRes.data.steep_glide_approach_mandate ? 'AKTIFKAN PENDEKATAN 7.5°' : 'NORMAL'}\n\n`;
+            out += `DISPOSISI AKUSTIK AKTIF (DESINKRONISASI ROTOR & DINAMIKA PENDEKATAN):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Tindakan Keselamatan: ${actRes.data.action_id}\n`;
+            out += `• Pergeseran Fasa Sudut Rotor yang Diperintahkan: ${actRes.data.modulated_phase_offset_deg}° (Interferensi Destruktif Gelombang BVI)\n`;
+            out += `• Sudut Luncur Pendekatan Baru: ${actRes.data.modulated_glide_slope_deg}° (Menjauhkan Jalur Turbulensi Sayap Vertiport)\n`;
+            out += `• Atenuasi Kebisingan Akustik Tercapai: ${actRes.data.noise_attenuation_dba} dBA\n`;
+            out += `• Estimasi Denda Curfew & Kerugian Terhindar: $${actRes.data.avoided_curfew_fine_and_loss_usd.toLocaleString()} USD (Mempertahankan Lisensi Operasi Vertiport FAA/EASA)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penyesuaian pergeseran fasa bilah rotor 15° menghilangkan interferensi konstruktif gelombang BVI di koridor perkotaan.</li>
+                <li>Peningkatan sudut luncur ke 7.5° memotong turbulensi mikro-angin gedung dan mematuhi batas kebisingan EASA SC-VTOL-01.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses eVTOL sentinel: ' + err.message;
+    }
+}
+
+async function triggerHyperloopPod() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi risiko quench magnet superkonduktor HTS & limit Kantrowitz pod Hyperloop...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const podID = "POD-HYPERLOOP-MACH08-01";
+        await api('/hyperloop/pod/ingest-pod-telemetry', 'POST', {
+            pod_id: podID,
+            tube_track_id: "TUBE-ROUTE-CHICAGO-PITTSBURGH",
+            pod_speed_kph: 980.0,
+            tube_ambient_pressure_pa: 125.0,
+            hts_coil_temperature_kelvin: 90.2,
+            coil_operating_current_amps: 510.0,
+            kantrowitz_choke_ratio: 0.47,
+            tube_expansion_deflection_mm: 38.0
+        });
+
+        const evalRes = await api('/hyperloop/pod/evaluate-magnet-quench-and-vacuum', 'POST', { pod_id: podID });
+        const actRes = await api('/hyperloop/pod/trigger-quench-dump-and-expansion-control', 'POST', { pod_id: podID });
+        const dossierRes = await api(`/hyperloop/pod/hyperloop-system-dossier/${podID}`, 'GET');
+
+        if (badge) badge.textContent = `🚄 Hyperloop: ${evalRes.data.hts_magnet_quench_hazard_level} | Margin: ${evalRes.data.superconducting_margin_kelvin} K | Choke: ${evalRes.data.kantrowitz_shockwave_risk_level}`;
+        if (answerEl) {
+            let out = `🚄 ULTRA-DEEP HIGH-SPEED HYPERLOOP / MAGLEV MAGNET QUENCH & VACUUM TUBE SENTINEL (CEN/CLC & IEEE 1475):\n`;
+            out += `Pod Maglev Superkonduktor: ${podID} | Segmen Tabung Vakum Rendah: ${dossierRes.data.tube_track_id}\n`;
+            out += `Kecepatan Pod Jelajah: 980.0 km/jam | Tekanan Tabung: 125.0 Pa | Arus Kumparan: 510.0 A\n\n`;
+            out += `STABILITAS SUPERKONDUKTOR HTS REBCO & LIMIT AERODINAMIKA KANTROWITZ:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Suhu Kumparan HTS REBCO: 90.2 K (Margin Superkonduktor ke Tc: ${evalRes.data.superconducting_margin_kelvin} K)\n`;
+            out += `• Tingkat Bahaya Quench Magnet: ${evalRes.data.hts_magnet_quench_hazard_level}\n`;
+            out += `• Risiko Gelombang Kejut Kantrowitz: ${evalRes.data.kantrowitz_shockwave_risk_level} (Rasio Choking Tabung: 0.47)\n`;
+            out += `• Mandat Pelepasan Energi Quench Dump: ${evalRes.data.quench_dump_discharge_mandate ? 'DIPERLUKAN (AKTIFKAN DUMP RESISTOR)' : 'STANDBY'}\n`;
+            out += `• Peningkatan Pendinginan Nitrogen Cair (LN2 Subcooling Boost): ${evalRes.data.ln2_subcooling_boost_active ? 'AKTIF CEPAT' : 'STANDBY'}\n\n`;
+            out += `TINDAKAN PERLINDUNGAN QUENCH & PENGEREMAN ARUS EDDY NON-KONTAK:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Mitigasi: ${actRes.data.action_id}\n`;
+            out += `• Waktu Pelepasan Arus ke Dump Resistor: ${actRes.data.quench_dump_discharge_time_ms} ms (Sangat Cepat Sebelum Thermal Runaway)\n`;
+            out += `• Gaya Pengereman Eddy Current Non-Kontak: ${actRes.data.eddy_current_braking_force_kn} kN\n`;
+            out += `• Estimasi Kerugian Kerusakan Pod & Tabung Terhindar: $${actRes.data.avoided_levitation_crash_loss_usd.toLocaleString()} USD (Mencegah Kehancuran Struktur Pod & Kebocoran Tabung Vakum)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pelepasan energi magnetik ke resistor dump dalam 4.2 ms mencegah titik panas leleh pada pita superkonduktor REBCO.</li>
+                <li>Injeksi LN2 subdingin memulihkan fase superkonduktivitas kumparan tanpa pembongkaran suspensi maglev.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Hyperloop sentinel: ' + err.message;
+    }
+}
+
+async function triggerDeepwaterBOP() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi kapasitas pemotongan Blind Shear Ram & telemetri akustik MUX BOP laut dalam...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const bopID = "BOP-STACK-DEEPWATER-3000M-01";
+        await api('/bop/wellhead/ingest-bop-telemetry', 'POST', {
+            bop_stack_id: bopID,
+            wellbore_id: "WELL-GULF-OF-MEXICO-BLOCK-252",
+            water_depth_meters: 2850.0,
+            accumulator_pressure_bar: 315.0,
+            wellbore_pressure_bar: 920.0,
+            acoustic_channel_snr_db: 11.2,
+            blind_shear_ram_required_force_kn: 2520.0,
+            shear_ram_closing_time_sec: 13.8,
+            rov_hot_stab_connected: true,
+            autoshear_sequence_armed: true
+        });
+
+        const evalRes = await api('/bop/wellhead/evaluate-shear-ram-and-acoustic-link', 'POST', { bop_stack_id: bopID });
+        const actRes = await api('/bop/wellhead/trigger-emergency-autoshear-sequence', 'POST', { bop_stack_id: bopID });
+        const dossierRes = await api(`/bop/wellhead/bop-integrity-dossier/${bopID}`, 'GET');
+
+        if (badge) badge.textContent = `⚓ BOP: Margin ${evalRes.data.accumulator_polytropic_energy_margin_pct}% | MUX SNR: ${evalRes.data.acoustic_telemetry_reliability_level} | Kick: ${evalRes.data.wellbore_kick_blowout_risk_level}`;
+        if (answerEl) {
+            let out = `⚓ SUBSEA DEEPWATER BLOWOUT PREVENTER (BOP) ACOUSTIC MULTIPLEX & SHEAR RAM SENTINEL (API 16D & API 53):\n`;
+            out += `Stack BOP Subsea: ${bopID} | Sumur Pengeboran: ${dossierRes.data.wellbore_id}\n`;
+            out += `Kedalaman Air: ${dossierRes.data.water_depth_m} m | Tekanan Akumulator: ${dossierRes.data.accumulator_press_bar} bar | Tekanan Sumur: 920.0 bar\n\n`;
+            out += `ANALISIS GAYA POTONG PIPA DRILL PIPE & LINK TELEMETRI AKUSTIK FSK:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Margin Energi Politropik Akumulator N2: +${evalRes.data.accumulator_polytropic_energy_margin_pct}% (Di Atas Ambang Batas 210 bar)\n`;
+            out += `• Keandalan Tautan Akustik MUX Bawah Air: ${evalRes.data.acoustic_telemetry_reliability_level} (SNR: 11.2 dB Melintasi Lapisan Termoklin)\n`;
+            out += `• Tingkat Risiko Kick & Blowout Sumur: ${evalRes.data.wellbore_kick_blowout_risk_level}\n`;
+            out += `• Mandat Pemicu Autoshear & Deadman: ${evalRes.data.autoshear_deadman_trigger_mandate ? 'DIPERINTAHKAN AKTIF SEGERA' : 'NORMAL'}\n\n`;
+            out += `PENYIAPAN AUTOSHEAR & PROTOKOL EMERGENCY DISCONNECT SYSTEM (EDS):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Kesiapsiagaan Darurat: ${actRes.data.action_id}\n`;
+            out += `• Tekanan Penutupan Blind Shear Ram: ${actRes.data.blind_shear_ram_closing_pressure_bar} bar\n`;
+            out += `• Status Keberhasilan Pemotongan Pipa Bor: ${actRes.data.pipe_severed_successfully ? 'PIPA TERPOTONG & SUMUR TERSEGEL PENUH' : 'GAGAL'}\n`;
+            out += `• Estimasi Kerugian Blowout Macondo Terhindar: $${actRes.data.avoided_macondo_blowout_loss_usd.toLocaleString()} USD (Mencegah Bencana Ekologis & Tumpahan Minyak Mentah)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Akumulator gas nitrogen politropik menyediakan cadangan hidrolik 345 bar instan untuk memotong drill pipe berkekuatan tinggi dalam 13.8 detik.</li>
+                <li>Telemetri akustik multi-kanal FSK memastikan komando penutupan sumur darurat tetap berfungsi meskipun tali kendali fisik MUX terputus.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Subsea BOP sentinel: ' + err.message;
+    }
+}
+
+async function triggerCARTBioprocess() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengoptimasi pemisahan akustik microfluidic gelombang tegak & transduksi lentiviral CAR-T...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const batchID = "BATCH-CART-CD19-2026-001";
+        await api('/cart/bioprocess/ingest-culture-telemetry', 'POST', {
+            batch_id: batchID,
+            patient_donor_id: "DONOR-AUTOLOGOUS-PT-9801",
+            piezo_rf_transducer_freq_mhz: 2.15,
+            acoustic_radiation_force_pn: 18.5,
+            acoustic_contrast_factor_phi: 0.28,
+            viable_lymphocyte_count_per_ml: 4.8e7,
+            target_cell_viability_pct: 93.5,
+            lentiviral_moi_ratio: 4.6,
+            car_expression_efficiency_pct: 62.0,
+            endotoxin_level_eu_per_ml: 0.03
+        });
+
+        const evalRes = await api('/cart/bioprocess/evaluate-acoustic-sorting-and-moi', 'POST', { batch_id: batchID });
+        const actRes = await api('/cart/bioprocess/trigger-piezo-tuning-and-transduction-control', 'POST', { batch_id: batchID });
+        const dossierRes = await api(`/cart/bioprocess/cart-cgmp-dossier/${batchID}`, 'GET');
+
+        if (badge) badge.textContent = `🧬 CAR-T: Kemurnian ${evalRes.data.acoustic_sorting_purity_pct}% | Status: ${evalRes.data.viral_transduction_efficiency_status} | Piezo: ${actRes.data.tuned_piezo_frequency_mhz} MHz`;
+        if (answerEl) {
+            let out = `🧬 BIOPROCESS CAR-T CELL THERAPY ACOUSTIC SORTING & VIRAL TRANSDUCTION SENTINEL (FDA 21 CFR 1271 & ISCT):\n`;
+            out += `Batch Bioreaktor Terapi Sel: ${batchID} | Pasien Autologous: ${dossierRes.data.patient_donor_id}\n`;
+            out += `Kepadatan Sel T: 4.8e7/mL | Viabilitas Sel Target: 93.5% | Faktor Kontras Akustik (Phi): 0.28\n\n`;
+            out += `PEMISAHAN GELOMBANG TEGAK AKUSTIK MIKROFLUIDIK & TRANSDUKSI GEN:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Kemurnian Pemisahan Akustik (Sorting Purity): ${evalRes.data.acoustic_sorting_purity_pct}%\n`;
+            out += `• Status Efisiensi Transduksi Lentiviral: ${evalRes.data.viral_transduction_efficiency_status} (Ekspresi Awal: 62.0%)\n`;
+            out += `• Kebutuhan Penyetelan Frekuensi Piezo: ${evalRes.data.piezo_frequency_tuning_required ? 'DIPERLUKAN PENYESUAIAN NODE GELOMBANG' : 'OPTIMAL'}\n`;
+            out += `• Titrasi Ajuvan Polybrene yang Dianjurkan: ${evalRes.data.polybrene_adjuvant_titration_ppm} PPM\n\n`;
+            out += `OPTIMASI TRANSDUKSI RETROVIRAL & PROTOKOL PANEN STERIL cGMP:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Bioproses Steril: ${actRes.data.action_id}\n`;
+            out += `• Frekuensi RF Transduser Piezo Baru: ${actRes.data.tuned_piezo_frequency_mhz} MHz\n`;
+            out += `• Volume Injeksi Ajuvan Polybrene: ${actRes.data.injected_adjuvant_volume_microliter} µL\n`;
+            out += `• Estimasi Kerugian Batch Imunoterapi Terhindar: $${actRes.data.avoided_cell_batch_loss_usd.toLocaleString()} USD (Menyelamatkan Batch Terapi Kanker Pasien Tanpa Kegagalan Panen)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penyetelan frekuensi piezo ke 2.18 MHz memposisikan limfosit T pada node tekanan akustik sentral dengan kemurnian > 98%.</li>
+                <li>Titrasi polybrene yang presisi meningkatkan adsorpsi kapsid lentivirus tanpa menyebabkan sitotoksisitas pada sel pasien.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses CAR-T bioprocess: ' + err.message;
+    }
+}
+
+async function triggerPlasticPyrolysis() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis kinetika depolimerisasi pirolisis plastik limbah & penekanan dioksin klorinasi...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const reactorID = "PYRO-CIRCULAR-PLASTIC-50TPD-01";
+        await api('/pyrolysis/reactor/ingest-reactor-telemetry', 'POST', {
+            reactor_id: reactorID,
+            facility_location: "ANTWERP-CIRCULAR-POLYMER-HUB",
+            pyrolysis_bed_temp_c: 490.0,
+            feedstock_feed_rate_kg_hr: 2150.0,
+            gas_recycle_loop_temp_c: 320.0,
+            chlorine_content_ppm: 52.0,
+            hcl_acid_gas_ppm: 195.0,
+            calcium_sorbent_dosing_rate_kg_hr: 22.0,
+            pyrolysis_oil_yield_pct: 79.0
+        });
+
+        const evalRes = await api('/pyrolysis/reactor/evaluate-depolymerization-and-dioxin', 'POST', { reactor_id: reactorID });
+        const actRes = await api('/pyrolysis/reactor/trigger-quench-and-dechlorination', 'POST', { reactor_id: reactorID });
+        const dossierRes = await api(`/pyrolysis/reactor/pyrolysis-circularity-dossier/${reactorID}`, 'GET');
+
+        if (badge) badge.textContent = `♻️ Pyrolysis: Konversi ${evalRes.data.depolymerization_conversion_pct}% | Dioxin: ${evalRes.data.dioxin_de_novo_synthesis_risk_level} | Quench: -${actRes.data.quench_temperature_drop_c}°C`;
+        if (answerEl) {
+            let out = `♻️ INDUSTRIAL WASTE PLASTIC PYROLYSIS DEPOLYMERIZATION & DIOXIN SENTINEL (ASTM D8338 & EPA METHOD 23):\n`;
+            out += `Reaktor Pirolisis Kimia Sirkular: ${reactorID} (${dossierRes.data.facility_location})\n`;
+            out += `Suhu Bed Pirolisis: 490.0°C | Laju Umpan Plastik: 2,150 kg/jam | Hasil Minyak (Pyoil Yield): 79.0%\n\n`;
+            out += `KINETIKA DEPOLIMERISASI TERMAL & RISIKO SINTESIS DE NOVO DIOKSIN/FURAN (PCDD/F):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Konversi Depolimerisasi Random Scission: ${evalRes.data.depolymerization_conversion_pct}%\n`;
+            out += `• Tingkat Risiko Sintesis De Novo Dioksin: ${evalRes.data.dioxin_de_novo_synthesis_risk_level} (Suhu Loop Gas: 320.0°C)\n`;
+            out += `• Status Kepatuhan Umpan Steam Cracker: ${evalRes.data.steam_cracker_feedstock_compliance_status} (Klorin: 52.0 ppm, Ambang Batas < 10 ppm)\n`;
+            out += `• Mandat Pendinginan Cepat Gas (Rapid Gas Quench): ${evalRes.data.rapid_gas_quench_required ? 'DIPERLUKAN SEGERA (HENTIKAN DE NOVO PCDD/F)' : 'NORMAL'}\n`;
+            out += `• Dosis Sorbent Kalsium Direkomendasikan: ${evalRes.data.recommended_sorbent_boost_kg_hr} kg/jam\n\n`;
+            out += `OPTIMASI QUENCH SEMPROTAN MINYAK DINGIN & DEKLORINASI IN-SITU:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Deklorinasi & Emisi: ${actRes.data.action_id}\n`;
+            out += `• Penurunan Suhu Quench Gas Seketika: -${actRes.data.quench_temperature_drop_c}°C (Mendinginkan Gas ke Bawah 200°C dalam 0.6 Detik)\n`;
+            out += `• Dosis Injeksi Sorbent Kalsium yang Disesuaikan: ${actRes.data.tuned_sorbent_injection_kg_hr} kg/jam\n`;
+            out += `• Estimasi Kerusakan Katalis Cracker & Denda EPA Terhindar: $${actRes.data.avoided_refinery_catalyst_loss_usd.toLocaleString()} USD (Melindungi Katalis Hydrotreater Kilang Minyak)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pendinginan ultra-cepat (ultra-rapid quench) menurunkan suhu 135°C dalam tempo 0.6 detik melewati rentang bahaya 250-400°C pembentukan dioksin.</li>
+                <li>Injeksi kalsium sorbent 52 kg/jam mengikat gas asam HCl menjadi kalsium klorida stabil untuk menjamin minyak pirolisis memenuhi spesifikasi ISCC PLUS.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses pirolisis plastik sentinel: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

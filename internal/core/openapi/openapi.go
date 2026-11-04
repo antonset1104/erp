@@ -1697,6 +1697,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/evtol/corridor/evaluate-acoustic-and-windshear": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Autonomous Electric Vertical Take-Off & Landing (eVTOL) Acoustic Noise Signature & Vertiport Corridor Sentinel (FAA 14 CFR Part 36 & EASA SC-VTOL-01)",
+					"description": "Monitors Blade-Vortex Interaction (BVI) acoustic emissions, urban vertiport micro-weather wind shear, rotor RPM desynchronization, and steep glide slope dynamic routing.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Acoustic footprint assessment, urban noise compliance status, rotor phase offset command, and corridor approach slope"},
+					},
+				},
+			},
+			"/api/v1/hyperloop/pod/evaluate-magnet-quench-and-vacuum": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Ultra-Deep High-Speed Hyperloop / Maglev Superconducting Magnet Quench & Vacuum Tube Expansion Sentinel (CEN/CLC/JTC 20 & IEEE 1475)",
+					"description": "Evaluates high-temperature superconducting (HTS) REBCO coil thermal runaway, Kantrowitz aerodynamic limit choking ratio, subcooled LN2 cryogenic boost, and rapid energy dump resistor circuit.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Magnet quench risk tier, tube Kantrowitz limit ratio, cryogenic cooling actuation, and vacuum tube expansion telemetry"},
+					},
+				},
+			},
+			"/api/v1/bop/wellhead/evaluate-shear-ram-and-acoustic-link": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Subsea Deepwater Wellhead Blowout Preventer (BOP) Acoustic Multiplex Control & Shear Ram Sentinel (API Spec 16D & API Spec 53)",
+					"description": "Calculates polytropic accumulator nitrogen expansion under 3,000 m hydrostatic pressure, acoustic FSK telemetry signal-to-noise ratio, drill pipe shear force, and autoshear/deadman circuit readiness.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "BOP wellhead integrity assessment, acoustic MUX SNR status, blind shear ram shear capability, and emergency disconnect system (EDS) sequencing"},
+					},
+				},
+			},
+			"/api/v1/cart/bioprocess/evaluate-acoustic-sorting-and-moi": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Bioprocess Continuous CAR-T Cell Therapy Microfluidic Acoustic Sorting & Viral Transduction Sentinel (FDA cGMP 21 CFR 1271 & ISCT)",
+					"description": "Optimizes label-free microfluidic acoustic standing wave cell focusing, acoustic contrast factor sorting, lentiviral multiplicity of infection (MOI), and polybrene titration for clinical immunotherapy.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Acoustic radiation force metrics, cell viability and sorting purity, lentiviral MOI optimization, and automated harvest protocol"},
+					},
+				},
+			},
+			"/api/v1/pyrolysis/reactor/evaluate-depolymerization-and-dioxin": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Industrial Waste Plastic Pyrolysis Depolymerization & Chlorinated Dioxin Dechlorination Sentinel (ASTM D8338 & EPA Method 23)",
+					"description": "Monitors polymer random scission depolymerization kinetics, de novo synthesis dioxin/furan window (250-400°C), ultra-rapid gas quench (<200°C in <0.8 s), and in-situ calcium sorbent dechlorination.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Pyrolysis depolymerization reaction rate, condensable oil yield, dioxin de novo synthesis hazard, and rapid gas quench actuation"},
+					},
+				},
+			},
 		},
 	}
 }

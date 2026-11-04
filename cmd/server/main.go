@@ -19,6 +19,8 @@ import (
 	coreaviation "erp-golang/internal/core/aviation"
 	corebess "erp-golang/internal/core/bess"
 	corebiopharma "erp-golang/internal/core/biopharma"
+	corebop "erp-golang/internal/core/bop"
+	corecart "erp-golang/internal/core/cart"
 	coreccus "erp-golang/internal/core/ccus"
 	corecosting "erp-golang/internal/core/costing"
 	corecpq "erp-golang/internal/core/cpq"
@@ -29,6 +31,7 @@ import (
 	coreedi "erp-golang/internal/core/edi"
 	coreehs "erp-golang/internal/core/ehs"
 	coreenergy "erp-golang/internal/core/energy"
+	coreevtol "erp-golang/internal/core/evtol"
 	coreexpense "erp-golang/internal/core/expense"
 	corefieldservice "erp-golang/internal/core/fieldservice"
 	corefinance "erp-golang/internal/core/finance"
@@ -39,6 +42,7 @@ import (
 	coregraphql "erp-golang/internal/core/graphql"
 	coregrc "erp-golang/internal/core/grc"
 	corehr "erp-golang/internal/core/hr"
+	corehyperloop "erp-golang/internal/core/hyperloop"
 	corehypersonic "erp-golang/internal/core/hypersonic"
 	coreitops "erp-golang/internal/core/itops"
 	corelegal "erp-golang/internal/core/legal"
@@ -55,6 +59,7 @@ import (
 	corepricing "erp-golang/internal/core/pricing"
 	coreprocurement "erp-golang/internal/core/procurement"
 	coreproject "erp-golang/internal/core/project"
+	corepyrolysis "erp-golang/internal/core/pyrolysis"
 	corequality "erp-golang/internal/core/quality"
 	corequantum "erp-golang/internal/core/quantum"
 	corerailway "erp-golang/internal/core/railway"
@@ -329,7 +334,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.71.0",
+			"version":    "1.72.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -499,6 +504,11 @@ func main() {
 		coremoltensalt.RegisterMoltenSaltRoutes(apiV1)
 		coresolidstate.RegisterSolidStateRoutes(apiV1)
 		coredac.RegisterDACRoutes(apiV1)
+		coreevtol.RegisterEVTOLRoutes(apiV1)
+		corehyperloop.RegisterHyperloopRoutes(apiV1)
+		corebop.RegisterBOPRoutes(apiV1)
+		corecart.RegisterCARTRoutes(apiV1)
+		corepyrolysis.RegisterPyrolysisRoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend

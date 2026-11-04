@@ -29,6 +29,8 @@ import (
 	coreaviation "erp-golang/internal/core/aviation"
 	corebess "erp-golang/internal/core/bess"
 	corebiopharma "erp-golang/internal/core/biopharma"
+	corebop "erp-golang/internal/core/bop"
+	corecart "erp-golang/internal/core/cart"
 	coreccus "erp-golang/internal/core/ccus"
 	corecosting "erp-golang/internal/core/costing"
 	corecpq "erp-golang/internal/core/cpq"
@@ -39,6 +41,7 @@ import (
 	coreedi "erp-golang/internal/core/edi"
 	coreehs "erp-golang/internal/core/ehs"
 	coreenergy "erp-golang/internal/core/energy"
+	coreevtol "erp-golang/internal/core/evtol"
 	coreexpense "erp-golang/internal/core/expense"
 	corefieldservice "erp-golang/internal/core/fieldservice"
 	corefinance "erp-golang/internal/core/finance"
@@ -49,6 +52,7 @@ import (
 	coregraphql "erp-golang/internal/core/graphql"
 	coregrc "erp-golang/internal/core/grc"
 	corehr "erp-golang/internal/core/hr"
+	corehyperloop "erp-golang/internal/core/hyperloop"
 	corehypersonic "erp-golang/internal/core/hypersonic"
 	coreitops "erp-golang/internal/core/itops"
 	corelegal "erp-golang/internal/core/legal"
@@ -65,6 +69,7 @@ import (
 	corepricing "erp-golang/internal/core/pricing"
 	coreprocurement "erp-golang/internal/core/procurement"
 	coreproject "erp-golang/internal/core/project"
+	corepyrolysis "erp-golang/internal/core/pyrolysis"
 	corequality "erp-golang/internal/core/quality"
 	corequantum "erp-golang/internal/core/quantum"
 	corerailway "erp-golang/internal/core/railway"
@@ -12940,5 +12945,182 @@ IEA*1*000099123~`
 	t.Logf("✓ Industrial Direct Air Capture (DAC) Sorbent Moisture Competition Optimizer Verified: Contactor='%s' (Facility='%s'), AmbientCO2=%.0f ppm, RH=%.1f%%, SorbentMass=%.0f kg, CO2 Rate=%.1f kg/h, H2O Rate=%.1f kg/h, Moisture/CO2 Ratio=%.2f, Langmuir Selectivity=%.1f, SpecificThermalEnergy=%.2f GJ/ton CO2, Status='%s', PreDryingNeeded=%t, SteamReduction=%.1f%%, CO2 Purity=%.1f%%, AvoidedParasiticEnergyLoss=$%.2fM USD",
 		dacTel.ContactorUnitID, dacTel.FacilityID, dacTel.AmbientCO2PPM, dacTel.AmbientRelativeHumidityPct, dacTel.SolidSorbentBedMassKg, dacTel.AdsorbedCO2KgHr, dacTel.AdsorbedMoistureKgHr, dacAssess.CompetitiveMoistureRatio, dacAssess.LangmuirSorbentSelectivity, dacAssess.SpecificDesorptionThermalEnergyGJPerTon, dacAssess.SorptionEfficiencyStatus, dacAssess.PreDryingCycleRequired, dacAct.SteamDutyReductionPct, dacAct.ProducedCO2PurityPct, dacAct.AvoidedParasiticEnergyLossUSD/1e6)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (85 SECTIONS: 95+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD + CONTRACT LEAKAGE SENTINEL + MICROGRID ISLANDING + CARGO GEOFENCE + SHIFT BIDDING FATIGUE + CIRCULAR PACKAGING RTI + INDUSTRIAL WATER ZLD + VENDOR SANCTIONS GRAPH + BOILER TUBE DESCALING + SAAS DUNNING WATERFALL + TOLL MANUFACTURING RECON + SILO AERATION SENTINEL + EPC PROGRESS BILLING ESCROW + DYNAMIC PORT BERTH DEMURRAGE + TRANSFORMER DGA GUARDIAN + CROSS BORDER CASH REPATRIATION + ORE BLENDING OPTIMIZER + PHARMA CRYOGENIC SENTINEL + KILN REFRACTORY GUARDIAN + IP PATENT ANNUITY + TURBINE EOH CREEP + AVIATION MRO FATIGUE + MARINE LNG RELIQUEFACTION + SEMICONDUCTOR FAB YIELD + WASTEWATER BIOMETHANE + RAILWAY WHEEL RCF + NUCLEAR RADIOPHARM DECAY + UTILITY BESS THERMAL SOH + SATELLITE ORBITAL CONJUNCTION + SUBSEA FLOW ASSURANCE + CONNECTED VEHICLE OTA SUMS + BIOPHARMA BIOREACTOR PAT + FLOATING WIND MOORING + HVDC SUBSEA DTS + CCS CO2 ENVELOPE + MINE ROCKBURST SENTINEL + TOKAMAK FUSION DISRUPTION + CRYO LH2 ORTHO-PARA + HYPERSONIC TPS ABLATION + 3D CHIPLET TSV WARPAGE + SUPERHOT EGS GEOTHERMAL SEISMICITY + QUANTUM QKD PHASE GUARDIAN + SEABED NODULE PLUME + CSP MOLTEN SALT FREEZE + SOLID-STATE BATTERY CRACK + DIRECT AIR CAPTURE OPTIMIZER) PASSED 100%!")
+	// =========================================================================
+	// SECTION 86: AEROSPACE UAM ACOUSTIC NOISE & VERTIPORT, HYPERLOOP MAGLEV QUENCH,
+	// SUBSEA WELLHEAD BOP SHEAR RAM, CAR-T CELL ACOUSTIC SORTING, PLASTIC PYROLYSIS
+	// =========================================================================
+
+	// 86.1 Autonomous Electric VTOL (eVTOL) Acoustic Noise Signature & Vertiport Corridor Sentinel (FAA 14 CFR Part 36 & EASA SC-VTOL-01)
+	evtolTel := coreevtol.GlobalEVTOLVault.IngestFlightTelemetry(coreevtol.EVTOLFlightTelemetry{
+		TelemetryID:               "TEL-EVTOL-9901",
+		FlightID:                  "FLIGHT-EVTOL-SKYTAXI-99",
+		AircraftTailID:            "N902VT-ARCHER-MIDNIGHT",
+		CorridorID:                "UAM-CORRIDOR-MANHATTAN-JFK",
+		AltitudeMetersAGL:         380.0,
+		AirspeedKnots:             110.0,
+		DistributedRotorRPM:       1480.0,
+		RotorBladePhaseOffsetDeg:  0.0,
+		MeasuredAcousticNoiseDBA:  71.5,
+		BladeVortexInteractionBVI: 0.84,
+		VertiportWindShearKnots:   19.2,
+	})
+	if evtolTel.FlightID == "" || evtolTel.AltitudeMetersAGL != 380.0 {
+		t.Fatalf("Failed to ingest eVTOL flight telemetry: %+v", evtolTel)
+	}
+
+	evtolAssess, err := coreevtol.GlobalEVTOLVault.EvaluateAcousticAndWindShear("FLIGHT-EVTOL-SKYTAXI-99")
+	if err != nil || evtolAssess.AeroacousticNoiseMarginDBA <= 0 || evtolAssess.AcousticExceedanceSeverityLevel != "CRITICAL_RESIDENTIAL_NOISE_CURFEW_BREACH" || evtolAssess.WindShearStallHazardLevel != "CRITICAL_VERTIPORT_MICROBURST_HAZARD" || !evtolAssess.PhaseCancellationRequired || !evtolAssess.SteepGlideApproachMandate {
+		t.Fatalf("Failed to evaluate eVTOL acoustic and wind shear: %+v, err: %v", evtolAssess, err)
+	}
+
+	evtolAct, err := coreevtol.GlobalEVTOLVault.TriggerRotorPhaseAndGlideControl("FLIGHT-EVTOL-SKYTAXI-99")
+	if err != nil || evtolAct.ModulatedPhaseOffsetDeg <= 0 || evtolAct.ModulatedGlideSlopeDeg != 7.5 || evtolAct.NoiseAttenuationDBA >= 0 || evtolAct.AvoidedCurfewFineAndLossUSD <= 0 {
+		t.Fatalf("Failed to optimize eVTOL rotor phase and glide slope: %+v, err: %v", evtolAct, err)
+	}
+
+	evtolDossier, err := coreevtol.GlobalEVTOLVault.GetEVTOLFlightSafetyDossier("FLIGHT-EVTOL-SKYTAXI-99")
+	if err != nil || !evtolDossier["faa_part36_compliant"].(bool) || !evtolDossier["easa_sc_vtol_certified"].(bool) {
+		t.Fatalf("Failed to compile eVTOL UAM safety dossier: %+v, err: %v", evtolDossier, err)
+	}
+	t.Logf("✓ Autonomous eVTOL Acoustic Noise & Vertiport Corridor Sentinel Verified: Flight='%s' (Tail='%s', Corridor='%s'), Alt=%.1fm, Airspeed=%.0fkts, RotorRPM=%.0f, NoiseMargin=+%.1f dBA, AcousticSeverity='%s', WindShear='%s', ModPhase=%.1f°, ModGlide=%.1f°, Attenuation=%.1f dBA, AvoidedLoss=$%.2fM USD",
+		evtolTel.FlightID, evtolTel.AircraftTailID, evtolTel.CorridorID, evtolTel.AltitudeMetersAGL, evtolTel.AirspeedKnots, evtolTel.DistributedRotorRPM, evtolAssess.AeroacousticNoiseMarginDBA, evtolAssess.AcousticExceedanceSeverityLevel, evtolAssess.WindShearStallHazardLevel, evtolAct.ModulatedPhaseOffsetDeg, evtolAct.ModulatedGlideSlopeDeg, evtolAct.NoiseAttenuationDBA, evtolAct.AvoidedCurfewFineAndLossUSD/1e6)
+
+	// 86.2 Ultra-Deep High-Speed Hyperloop / Maglev Superconducting Magnet Quench & Vacuum Tube Sentinel (CEN/CLC/JTC 20 & IEEE 1475)
+	hloopTel := corehyperloop.GlobalHyperloopVault.IngestPodTelemetry(corehyperloop.HyperloopPodTelemetry{
+		TelemetryID:               "TEL-HYPERLOOP-9901",
+		PodID:                     "POD-HYPERLOOP-MACH08-99",
+		TubeTrackID:               "TUBE-ROUTE-CHICAGO-PITTSBURGH",
+		PodSpeedKPH:               980.0,
+		TubeAmbientPressurePa:     125.0,
+		HTSCoilTemperatureKelvin:   90.2,
+		CoilOperatingCurrentAmps:  510.0,
+		KantrowitzChokeRatio:      0.47,
+		TubeExpansionDeflectionMM: 38.0,
+	})
+	if hloopTel.PodID == "" || hloopTel.PodSpeedKPH != 980.0 {
+		t.Fatalf("Failed to ingest Hyperloop pod telemetry: %+v", hloopTel)
+	}
+
+	hloopAssess, err := corehyperloop.GlobalHyperloopVault.EvaluateMagnetQuenchAndVacuum("POD-HYPERLOOP-MACH08-99")
+	if err != nil || hloopAssess.HTSMagnetQuenchHazardLevel != "CRITICAL_THERMAL_QUENCH_IMMINENT" || hloopAssess.SuperconductingMarginKelvin <= 0 || hloopAssess.KantrowitzShockwaveRiskLevel != "CRITICAL_KANTROWITZ_BLOWBY_CHOKING" || !hloopAssess.QuenchDumpDischargeMandate || !hloopAssess.LN2SubcoolingBoostActive {
+		t.Fatalf("Failed to evaluate Hyperloop quench and vacuum: %+v, err: %v", hloopAssess, err)
+	}
+
+	hloopAct, err := corehyperloop.GlobalHyperloopVault.TriggerQuenchDumpAndExpansionControl("POD-HYPERLOOP-MACH08-99")
+	if err != nil || hloopAct.QuenchDumpDischargeTimeMS <= 0 || hloopAct.EddyCurrentBrakingForceKN <= 0 || hloopAct.AvoidedLevitationCrashLossUSD <= 0 {
+		t.Fatalf("Failed to actuate Hyperloop quench protection and braking: %+v, err: %v", hloopAct, err)
+	}
+
+	hloopDossier, err := corehyperloop.GlobalHyperloopVault.GetHyperloopSystemDossier("POD-HYPERLOOP-MACH08-99")
+	if err != nil || !hloopDossier["cen_clc_jtc20_compliant"].(bool) || !hloopDossier["ieee_1475_certified"].(bool) {
+		t.Fatalf("Failed to compile Hyperloop safety dossier: %+v, err: %v", hloopDossier, err)
+	}
+	t.Logf("✓ Hyperloop Maglev Superconducting Magnet Quench & Vacuum Tube Sentinel Verified: Pod='%s' (Track='%s'), Speed=%.0f km/h, CoilTemp=%.1fK, Margin=%.2fK, Current=%.0fA, QuenchHazard='%s', Kantrowitz='%s', DumpMandate=%t, LN2Boost=%t, DumpTime=%.1f ms, EddyBraking=%.0f kN, AvoidedLoss=$%.2fM USD",
+		hloopTel.PodID, hloopTel.TubeTrackID, hloopTel.PodSpeedKPH, hloopTel.HTSCoilTemperatureKelvin, hloopAssess.SuperconductingMarginKelvin, hloopTel.CoilOperatingCurrentAmps, hloopAssess.HTSMagnetQuenchHazardLevel, hloopAssess.KantrowitzShockwaveRiskLevel, hloopAssess.QuenchDumpDischargeMandate, hloopAssess.LN2SubcoolingBoostActive, hloopAct.QuenchDumpDischargeTimeMS, hloopAct.EddyCurrentBrakingForceKN, hloopAct.AvoidedLevitationCrashLossUSD/1e6)
+
+	// 86.3 Subsea Deepwater Wellhead Blowout Preventer (BOP) Acoustic Multiplex & Shear Ram Sentinel (API Spec 16D & API Spec 53)
+	bopTel := corebop.GlobalBOPVault.IngestBOPTelemetry(corebop.DeepwaterBOPTelemetry{
+		TelemetryID:                  "TEL-BOP-9901",
+		BOPStackID:                   "BOP-STACK-DEEPWATER-3000M-99",
+		WellboreID:                   "WELL-GULF-OF-MEXICO-BLOCK-252",
+		WaterDepthMeters:             2850.0,
+		AccumulatorPressureBar:       315.0,
+		WellborePressureBar:          920.0,
+		AcousticChannelSNRDB:         11.2,
+		BlindShearRamRequiredForceKN: 2520.0,
+		ShearRamClosingTimeSec:       13.8,
+		ROVHotStabConnected:          true,
+		AutoshearSequenceArmed:       true,
+	})
+	if bopTel.BOPStackID == "" || bopTel.WaterDepthMeters != 2850.0 {
+		t.Fatalf("Failed to ingest BOP stack telemetry: %+v", bopTel)
+	}
+
+	bopAssess, err := corebop.GlobalBOPVault.EvaluateShearRamAndAcousticLink("BOP-STACK-DEEPWATER-3000M-99")
+	if err != nil || bopAssess.AccumulatorPolytropicEnergyMarginPct <= 0 || bopAssess.AcousticTelemetryReliabilityLevel != "ATTENUATED_THERMOCLINE_MARGINAL" || bopAssess.WellboreKickBlowoutRiskLevel != "CRITICAL_UNCONTROLLED_BLOWOUT_IMMINENT" || !bopAssess.AutoshearDeadmanTriggerMandate {
+		t.Fatalf("Failed to evaluate BOP shear ram and acoustic link: %+v, err: %v", bopAssess, err)
+	}
+
+	bopAct, err := corebop.GlobalBOPVault.TriggerEmergencyAutoshearSequence("BOP-STACK-DEEPWATER-3000M-99")
+	if err != nil || bopAct.BlindShearRamClosingPressureBar <= 0 || !bopAct.PipeSeveredSuccessfully || bopAct.AvoidedMacondoBlowoutLossUSD <= 0 {
+		t.Fatalf("Failed to arm BOP autoshear and EDS sequence: %+v, err: %v", bopAct, err)
+	}
+
+	bopDossier, err := corebop.GlobalBOPVault.GetBOPIntegrityDossier("BOP-STACK-DEEPWATER-3000M-99")
+	if err != nil || !bopDossier["api_spec_16d_compliant"].(bool) || !bopDossier["api_spec_53_certified"].(bool) {
+		t.Fatalf("Failed to compile BOP wellhead safety dossier: %+v, err: %v", bopDossier, err)
+	}
+	t.Logf("✓ Subsea Deepwater BOP Acoustic MUX & Shear Ram Sentinel Verified: BOP='%s' (Wellbore='%s', Depth=%.0fm), AccPress=%.0f bar, WellPress=%.0f bar, PolytropicMargin=+%.1f%%, AcousticMUX='%s', KickRisk='%s', AutoshearMandate=%t, ShearClosingPress=%.0f bar, PipeSevered=%t, AvoidedMacondoLoss=$%.2fM USD",
+		bopTel.BOPStackID, bopTel.WellboreID, bopTel.WaterDepthMeters, bopTel.AccumulatorPressureBar, bopTel.WellborePressureBar, bopAssess.AccumulatorPolytropicEnergyMarginPct, bopAssess.AcousticTelemetryReliabilityLevel, bopAssess.WellboreKickBlowoutRiskLevel, bopAssess.AutoshearDeadmanTriggerMandate, bopAct.BlindShearRamClosingPressureBar, bopAct.PipeSeveredSuccessfully, bopAct.AvoidedMacondoBlowoutLossUSD/1e6)
+
+	// 86.4 Bioprocess Continuous CAR-T Cell Therapy Microfluidic Acoustic Sorting & Viral Transduction Sentinel (FDA cGMP 21 CFR 1271 & ISCT)
+	cartTel := corecart.GlobalCARTVault.IngestCultureTelemetry(corecart.CARTCultureTelemetry{
+		TelemetryID:                "TEL-CART-9901",
+		BatchID:                    "BATCH-CART-CD19-2026-99",
+		PatientDonorID:             "DONOR-AUTOLOGOUS-PT-9801",
+		PiezoRFTransducerFreqMHz:   2.15,
+		AcousticRadiationForcePN:   18.5,
+		AcousticContrastFactorPhi:  0.28,
+		ViableLymphocyteCountPerML: 4.8e7,
+		TargetCellViabilityPct:     93.5,
+		LentiviralMOIRatio:         4.6,
+		CARExpressionEfficiencyPct: 62.0,
+		EndotoxinLevelEUPerML:      0.03,
+	})
+	if cartTel.BatchID == "" || cartTel.PatientDonorID == "" {
+		t.Fatalf("Failed to ingest CAR-T cell culture telemetry: %+v", cartTel)
+	}
+
+	cartAssess, err := corecart.GlobalCARTVault.EvaluateAcousticSortingAndMOI("BATCH-CART-CD19-2026-99")
+	if err != nil || cartAssess.AcousticSortingPurityPct <= 90.0 || cartAssess.ViralTransductionEfficiencyStatus != "SUBOPTIMAL_CAPSID_UPTAKE" || !cartAssess.PiezoFrequencyTuningRequired || cartAssess.PolybreneAdjuvantTitrationPPM <= 0 {
+		t.Fatalf("Failed to evaluate CAR-T acoustic sorting and MOI: %+v, err: %v", cartAssess, err)
+	}
+
+	cartAct, err := corecart.GlobalCARTVault.TriggerPiezoTuningAndTransductionControl("BATCH-CART-CD19-2026-99")
+	if err != nil || cartAct.TunedPiezoFrequencyMHz <= 0 || cartAct.InjectedAdjuvantVolumeMicroliter <= 0 || cartAct.AvoidedCellBatchLossUSD <= 0 {
+		t.Fatalf("Failed to optimize CAR-T transduction and harvest: %+v, err: %v", cartAct, err)
+	}
+
+	cartDossier, err := corecart.GlobalCARTVault.GetCARTCGMPDossier("BATCH-CART-CD19-2026-99")
+	if err != nil || !cartDossier["fda_21cfr1271_compliant"].(bool) || !cartDossier["isct_standards_approved"].(bool) {
+		t.Fatalf("Failed to compile CAR-T bioprocess dossier: %+v, err: %v", cartDossier, err)
+	}
+	t.Logf("✓ Bioprocess Continuous CAR-T Acoustic Sorting & Viral Transduction Sentinel Verified: Batch='%s' (Donor='%s'), ViableCells=%.1e/mL, Viability=%.1f%%, RadForce=%.1f pN, Purity=%.1f%%, TransductionStatus='%s', PiezoTuneReq=%t, PolybreneTitration=%.1f ppm, TunedPiezo=%.2f MHz, AdjuvantVol=%.1f µL, AvoidedBatchLoss=$%.2fM USD",
+		cartTel.BatchID, cartTel.PatientDonorID, cartTel.ViableLymphocyteCountPerML, cartTel.TargetCellViabilityPct, cartTel.AcousticRadiationForcePN, cartAssess.AcousticSortingPurityPct, cartAssess.ViralTransductionEfficiencyStatus, cartAssess.PiezoFrequencyTuningRequired, cartAssess.PolybreneAdjuvantTitrationPPM, cartAct.TunedPiezoFrequencyMHz, cartAct.InjectedAdjuvantVolumeMicroliter, cartAct.AvoidedCellBatchLossUSD/1e6)
+
+	// 86.5 Industrial Waste Plastic Pyrolysis Depolymerization & Chlorinated Dioxin Sentinel (ASTM D8338 & EPA Method 23)
+	pyroTel := corepyrolysis.GlobalPyrolysisVault.IngestReactorTelemetry(corepyrolysis.PyrolysisReactorTelemetry{
+		TelemetryID:                 "TEL-PYRO-9901",
+		ReactorID:                   "PYRO-CIRCULAR-PLASTIC-50TPD-99",
+		FacilityLocation:            "ANTWERP-CIRCULAR-POLYMER-HUB",
+		PyrolysisBedTempC:           490.0,
+		FeedstockFeedRateKgHr:       2150.0,
+		GasRecycleLoopTempC:         320.0,
+		ChlorineContentPPM:          52.0,
+		HClAcidGasPPM:               195.0,
+		CalciumSorbentDosingRateKgHr: 22.0,
+		PyrolysisOilYieldPct:        79.0,
+	})
+	if pyroTel.ReactorID == "" || pyroTel.PyrolysisBedTempC != 490.0 {
+		t.Fatalf("Failed to ingest plastic pyrolysis telemetry: %+v", pyroTel)
+	}
+
+	pyroAssess, err := corepyrolysis.GlobalPyrolysisVault.EvaluateDepolymerizationAndDioxin("PYRO-CIRCULAR-PLASTIC-50TPD-99")
+	if err != nil || pyroAssess.DepolymerizationConversionPct <= 90.0 || pyroAssess.DioxinDeNovoSynthesisRiskLevel != "CRITICAL_DIOXIN_SYNTHESIS_AND_CATALYST_POISON_HAZARD" || pyroAssess.SteamCrackerFeedstockComplianceStatus != "OFF_SPEC_CHLORINE_CORROSION_RISK" || !pyroAssess.RapidGasQuenchRequired || pyroAssess.RecommendedSorbentBoostKgHr <= 0 {
+		t.Fatalf("Failed to evaluate plastic pyrolysis depolymerization and dioxin: %+v, err: %v", pyroAssess, err)
+	}
+
+	pyroAct, err := corepyrolysis.GlobalPyrolysisVault.TriggerQuenchAndDechlorination("PYRO-CIRCULAR-PLASTIC-50TPD-99")
+	if err != nil || pyroAct.QuenchTemperatureDropC <= 0 || pyroAct.TunedSorbentInjectionKgHr <= 0 || pyroAct.AvoidedRefineryCatalystLossUSD <= 0 {
+		t.Fatalf("Failed to optimize plastic pyrolysis quench and dechlorination: %+v, err: %v", pyroAct, err)
+	}
+
+	pyroDossier, err := corepyrolysis.GlobalPyrolysisVault.GetPyrolysisCircularityDossier("PYRO-CIRCULAR-PLASTIC-50TPD-99")
+	if err != nil || !pyroDossier["astm_d8338_compliant"].(bool) || !pyroDossier["epa_method_23_certified"].(bool) {
+		t.Fatalf("Failed to compile plastic pyrolysis dossier: %+v, err: %v", pyroDossier, err)
+	}
+	t.Logf("✓ Industrial Waste Plastic Pyrolysis Depolymerization & Dioxin Sentinel Verified: Reactor='%s' (Facility='%s'), BedT=%.1f°C, Rate=%.0f kg/h, Conversion=%.1f%%, PyoilYield=%.1f%%, GasLoopT=%.1f°C, Cl=%.1f ppm, DioxinRisk='%s', CrackerCompliance='%s', RapidQuenchReq=%t, QuenchDrop=-%.1f°C, TunedSorbent=%.1f kg/h, AvoidedCatalystLoss=$%.2fM USD",
+		pyroTel.ReactorID, pyroTel.FacilityLocation, pyroTel.PyrolysisBedTempC, pyroTel.FeedstockFeedRateKgHr, pyroAssess.DepolymerizationConversionPct, pyroTel.PyrolysisOilYieldPct, pyroTel.GasRecycleLoopTempC, pyroTel.ChlorineContentPPM, pyroAssess.DioxinDeNovoSynthesisRiskLevel, pyroAssess.SteamCrackerFeedstockComplianceStatus, pyroAssess.RapidGasQuenchRequired, pyroAct.QuenchTemperatureDropC, pyroAct.TunedSorbentInjectionKgHr, pyroAct.AvoidedRefineryCatalystLossUSD/1e6)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (86 SECTIONS: 95+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD + CONTRACT LEAKAGE SENTINEL + MICROGRID ISLANDING + CARGO GEOFENCE + SHIFT BIDDING FATIGUE + CIRCULAR PACKAGING RTI + INDUSTRIAL WATER ZLD + VENDOR SANCTIONS GRAPH + BOILER TUBE DESCALING + SAAS DUNNING WATERFALL + TOLL MANUFACTURING RECON + SILO AERATION SENTINEL + EPC PROGRESS BILLING ESCROW + DYNAMIC PORT BERTH DEMURRAGE + TRANSFORMER DGA GUARDIAN + CROSS BORDER CASH REPATRIATION + ORE BLENDING OPTIMIZER + PHARMA CRYOGENIC SENTINEL + KILN REFRACTORY GUARDIAN + IP PATENT ANNUITY + TURBINE EOH CREEP + AVIATION MRO FATIGUE + MARINE LNG RELIQUEFACTION + SEMICONDUCTOR FAB YIELD + WASTEWATER BIOMETHANE + RAILWAY WHEEL RCF + NUCLEAR RADIOPHARM DECAY + UTILITY BESS THERMAL SOH + SATELLITE ORBITAL CONJUNCTION + SUBSEA FLOW ASSURANCE + CONNECTED VEHICLE OTA SUMS + BIOPHARMA BIOREACTOR PAT + FLOATING WIND MOORING + HVDC SUBSEA DTS + CCS CO2 ENVELOPE + MINE ROCKBURST SENTINEL + TOKAMAK FUSION DISRUPTION + CRYO LH2 ORTHO-PARA + HYPERSONIC TPS ABLATION + 3D CHIPLET TSV WARPAGE + SUPERHOT EGS GEOTHERMAL SEISMICITY + QUANTUM QKD PHASE GUARDIAN + SEABED NODULE PLUME + CSP MOLTEN SALT FREEZE + SOLID-STATE BATTERY CRACK + DIRECT AIR CAPTURE OPTIMIZER + EVTOL ACOUSTIC SENTINEL + HYPERLOOP MAGLEV QUENCH + SUBSEA DEEPWATER BOP + CAR-T ACOUSTIC SORTING + PLASTIC PYROLYSIS DIOXIN SENTINEL) PASSED 100%!")
 }
