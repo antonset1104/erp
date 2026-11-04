@@ -25853,6 +25853,277 @@ async function triggerLoyaltyPointsLedger() {
     }
 }
 
+async function triggerInternalCarbonPricing() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi shadow carbon price ($75/ton) & alokasi Green Innovation Fund...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const res = await api('/esg/carbon-pricing/evaluate-capex', 'POST', {
+            proposal_id: "CPX-2026-SOLAR-001",
+            project_name: "Solar PV Rooftop & Fleet Electrification Phase 1",
+            business_unit: "Supply Chain & Factory Logistics",
+            baseline_capex_idr: 2500000000.0,
+            annual_opex_idr: 120000000.0,
+            project_life_years: 5,
+            projected_emissions_tons_co2e_year: 25.0,
+            shadow_carbon_price_usd_per_ton: 75.0,
+            fx_rate_usd_to_idr: 16300.0,
+            is_green_initiative: true
+        });
+
+        const pool = await api('/esg/carbon-pricing/internal-tax-pool', 'GET');
+
+        if (badge) badge.textContent = `🌱 ICP: ${res.approval_status}`;
+        if (answerEl) {
+            let out = `🌱 INTERNAL CARBON PRICING (ICP) & SHADOW CARBON FEE LEDGER:\n`;
+            out += `Proposal Investasi: ${res.proposal_id} - ${res.project_name}\n`;
+            out += `Unit Bisnis: ${res.business_unit} | Status: ${res.approval_status}\n`;
+            out += `Nilai Investasi Awal (Baseline Capex): Rp ${res.baseline_capex_idr.toLocaleString()}\n`;
+            out += `Pajak Karbon Bayangan Tahunan (Shadow Fee): Rp ${res.annual_shadow_carbon_fee_idr.toLocaleString()} / tahun (Total Masa Proyek: Rp ${res.lifetime_carbon_fee_idr.toLocaleString()})\n`;
+            out += `Biaya Kepemilikan Disesuaikan Karbon (Carbon-Adjusted TCO): Rp ${res.carbon_adjusted_tco_idr.toLocaleString()}\n`;
+            out += `Subsidi Dana Hijau Internal (Green Fund Grant): Rp ${res.green_fund_subsidy_granted_idr.toLocaleString()}\n`;
+            out += `Net Investasi Bersih yang Disetujui: Rp ${res.net_approved_investment_idr.toLocaleString()}\n\n`;
+            out += `STATUS BRANKAS DANA HIJAU PERUSAHAAN (GREEN INNOVATION FUND POOL):\n`;
+            out += `• Total Pungutan Karbon Internal Terkumpul: Rp ${pool.total_carbon_levies_collected_idr.toLocaleString()}\n`;
+            out += `• Total Subsidi Proyek Ramah Lingkungan Disalurkan: Rp ${pool.total_green_subsidies_disbursed_idr.toLocaleString()}\n`;
+            out += `• Saldo Dana Hijau Tersedia: Rp ${pool.available_green_fund_balance_idr.toLocaleString()}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penerapan shadow carbon price mendisiplinkan keputusan Capex agar memprioritaskan teknologi rendah emisi.</li>
+                <li>Denda karbon internal secara otomatis dialokasikan kembali sebagai hibah subsidi untuk proyek dekarbonisasi.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal mengevaluasi harga karbon internal: ' + err.message;
+    }
+}
+
+async function triggerAMRFleetRadar() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menghubungkan ke armada robot otonom AMR & menjadwalkan misi angkut...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const mission = await api('/wms/amr/dispatch-mission', 'POST', {
+            mission_id: "MSN-AMR-2026-0891",
+            mission_type: "GOODS_TO_PERSON_PICK",
+            source_bin_id: "BIN-AISLE-A1-04",
+            destination_bay_id: "PACK-STATION-02",
+            cargo_weight_kg: 180.0,
+            priority_level: 1
+        });
+
+        const radar = await api('/wms/amr/fleet-radar', 'GET');
+
+        if (badge) badge.textContent = `🤖 AMR: ${radar.active_navigating_robots} Active / ${radar.total_fleet_size} Bots`;
+        if (answerEl) {
+            let out = `🤖 AUTONOMOUS WAREHOUSE MOBILE ROBOT (AMR & AGV) FLEET ORCHESTRATOR:\n`;
+            out += `Misi Robotic Terjadwal: ${mission.mission_id} [${mission.mission_type}]\n`;
+            out += `Robot yang Ditugaskan: ${mission.assigned_robot_id} | Muatan: ${mission.cargo_weight_kg} kg | Estimasi Waktu: ${mission.estimated_duration_minutes} menit\n`;
+            out += `Rute Lintasan Bebas Tabrakan (Collision-Free Waypoints):\n`;
+            mission.waypoints.forEach(w => {
+                out += `  ➜ ${w}\n`;
+            });
+            out += `\nRADAR REAL-TIME ARMADA ROBOT GUDANG:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Pusat Distribusi: ${radar.warehouse_id} | Rata-rata Baterai: ${radar.average_battery_soc}%\n`;
+            out += `Status Armada: ${radar.active_navigating_robots} Beroperasi, ${radar.idle_available_robots} Siaga, ${radar.charging_robots} Mengisi Daya\n\n`;
+            radar.robots.forEach(b => {
+                out += `• ${b.robot_id} (${b.model}): Baterai ${b.battery_soc_percent}% [${b.status}] di ${b.current_zone} (Posisi: X=${b.coordinate_x}, Y=${b.coordinate_y})\n`;
+            });
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Orchestrator robot secara mandiri memilih AMR dengan kapasitas angkut dan baterai paling optimal.</li>
+                <li>Jika level baterai robot turun di bawah batas kritis (<20%), sistem otomatis mengarahkan ke stasiun pengisian cepat.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memuat radar robot AMR: ' + err.message;
+    }
+}
+
+async function triggerSmartMilestoneEscrow() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memverifikasi bukti termin pengadaan & mengeksekusi pelepasan dana escrow...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const verify = await api('/procurement/escrow/verify-release', 'POST', {
+            contract_id: "ESCROW-2026-EPC-001",
+            milestone_id: "MS-02-SITE-COMMISSIONING",
+            fulfilled_condition_code: "CALIBRATION_CERTIFICATE",
+            verification_proof_ref: "CAL-CERT-SMT-2026-081",
+            approverID: "ENG-DIR-AGUS"
+        });
+
+        const vault = await api('/procurement/escrow/vault-summary', 'GET');
+
+        if (badge) badge.textContent = `🔒 Escrow: ${verify.status}`;
+        if (answerEl) {
+            let out = `🔒 SMART MILESTONE ESCROW & CONDITION-BASED PAYMENT ENGINE:\n`;
+            out += `Kontrak Pengadaan: ${verify.contract_id} | Milestone: ${verify.milestone_id}\n`;
+            out += `Kondisi Terverifikasi: ${verify.condition_verified} (Semua Syarat Terpenuhi: ${verify.all_conditions_met ? 'YA' : 'BELUM'})\n`;
+            out += `Status Pencairan Dana: ${verify.status}\n`;
+            if (verify.all_conditions_met) {
+                out += `Dana yang Dicairkan ke Rekening Vendor: Rp ${verify.amount_disbursed_idr.toLocaleString()} (No Referensi Bank: ${verify.disbursement_tx_id})\n`;
+            }
+            out += `Sisa Saldo Rekening Escrow Terkunci: Rp ${verify.remaining_escrow_balance_idr.toLocaleString()}\n\n`;
+            out += `RINGKASAN TOTAL REKENING ESCROW KORPORASI:\n`;
+            out += `• Total Kontrak Aktif: ${vault.total_active_contracts} Proyek EPC\n`;
+            out += `• Total Dana di Bawah Pengawasan Escrow: Rp ${vault.total_escrow_under_custody_idr.toLocaleString()}\n`;
+            out += `• Total Dana yang Telah Dicairkan: Rp ${vault.total_disbursed_to_date_idr.toLocaleString()}\n`;
+            out += `• Total Saldo Masih Terkunci: Rp ${vault.total_remaining_locked_idr.toLocaleString()}`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pelepasan termin kontrak bernilai miliaran terkunci secara matematis hingga seluruh verifikasi kondisi fisik terpenuhi.</li>
+                <li>Menghilangkan risiko sengketa proyek (dispute) dan menjamin vendor menerima pembayaran instan begitu pekerjaan tuntas.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses escrow: ' + err.message;
+    }
+}
+
+async function triggerMultiElementRevRec() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengalokasikan harga transaksi bundle berdasarkan Standalone Selling Price (IFRS 15)...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const ssp = await api('/accounting/revrec/allocate-ssp', 'POST', {
+            contract_id: "IFRS15-CTR-2026-TELCO-01",
+            customer_name: "PT Telekomunikasi Enterprise Nusantara",
+            total_transaction_price_idr: 1200000000.0
+        });
+
+        if (badge) badge.textContent = `📊 IFRS 15: Diskon ${ssp.discount_percentage}%`;
+        if (answerEl) {
+            let out = `📊 MULTI-ELEMENT REVENUE RECOGNITION (IFRS 15 / PSAK 72):\n`;
+            out += `No Kontrak Pelanggan: ${ssp.contract_id} | Pelanggan: ${ssp.customer_name}\n`;
+            out += `Total Harga Standalone Normal (SSP): Rp ${ssp.total_standalone_price_idr.toLocaleString()}\n`;
+            out += `Total Nilai Paket Kontrak Disepakati: Rp ${ssp.total_transaction_price_idr.toLocaleString()} (Diskon Bundle: Rp ${ssp.total_bundle_discount_idr.toLocaleString()} / -${ssp.discount_percentage}%)\n\n`;
+            out += `ALOKASI HARGA TRANSAKSI PROPERSIONAL PER KEWAJIBAN PELAKSANAAN (POB):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            ssp.allocated_obligations.forEach(o => {
+                out += `• [${o.pob_id}] ${o.description}\n`;
+                out += `  Harga Standalone: Rp ${o.standalone_selling_price_idr.toLocaleString()} -> Terdistribusi: Rp ${o.allocated_transaction_price_idr.toLocaleString()} (Pola: ${o.recognition_pattern})\n`;
+                if (o.monthly_amortization_idr > 0) {
+                    out += `  Jadwal Pengakuan Pendapatan Bulanan: Rp ${o.monthly_amortization_idr.toLocaleString()} / bulan (${o.duration_months} Bulan)\n`;
+                }
+            });
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Diskon paket bundling didistribusikan secara proporsional ke seluruh elemen kontrak berdasarkan nilai wajar standalone.</li>
+                <li>Mencegah penggelembungan laba di awal (revenue front-loading) untuk kewajiban pemeliharaan jangka panjang.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal menghitung alokasi IFRS 15: ' + err.message;
+    }
+}
+
+async function triggerNineBoxSuccession() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memetakan talenta ke 9-Box Grid & mengevaluasi kesiapan suksesi kepemimpinan...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const talent = await api('/hr/succession/evaluate-talent', 'POST', {
+            employee_id: "EMP-TALENT-2026-091",
+            employee_name: "Dian Kusuma, S.T., M.M.",
+            current_job_title: "Head of Industrial Engineering",
+            department: "Operations & Manufacturing",
+            performance_rating: 3,
+            potential_rating: 3,
+            target_leadership_role: "ROLE-VP-PLANT-OPERATIONS",
+            readiness_timeline: "READY_NOW"
+        });
+
+        const bench = await api('/hr/succession/bench-strength/ROLE-VP-PLANT-OPERATIONS', 'GET');
+
+        if (badge) badge.textContent = `🎯 9-Box: ${talent.nine_box_classification}`;
+        if (answerEl) {
+            let out = `🎯 9-BOX TALENT MATRIX & STRATEGIC SUCCESSION BENCH STRENGTH ANALYZER:\n`;
+            out += `Karyawan Dinilai: ${talent.employee_name} (${talent.current_job_title})\n`;
+            out += `Departemen: ${talent.department} | Koordinat: ${talent.grid_coordinates}\n`;
+            out += `Klasifikasi 9-Box: ${talent.nine_box_classification}\n`;
+            out += `Rencana Pengembangan Kepemimpinan: ${talent.development_action_plan}\n`;
+            out += `Protokol Retensi Risiko Kepergian: ${talent.flight_risk_protection}\n\n`;
+            out += `ANALISIS KESIAPAN SUKSESI POSISI KRITIKAL:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `Posisi Jabatan Kunci: ${bench.role_title}\n`;
+            out += `Pejabat Saat Ini: ${bench.incumbent_name}\n`;
+            out += `Status Saluran Suksesi: ${bench.bench_vulnerabilityStatus} (Total Kandidat: ${bench.total_successors_nominated})\n`;
+            out += `• Siap Menjabat Segera (Ready Now): ${bench.ready_now_count} Orang\n`;
+            out += `• Siap dalam 1-2 Tahun (Developing): ${bench.ready_1_to_2_years_count} Orang\n`;
+            bench.nominees.forEach(n => {
+                out += `  ➜ [${n.readiness_timeline}] ${n.employee_name} - ${n.current_role} (${n.nine_box_classification})\n`;
+            });
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Matriks 9-Box mengidentifikasi High Potential (HiPo) dan calon suksesor untuk mengamankan kelangsungan bisnis.</li>
+                <li>Rasio kekuatan cadangan (bench strength) memberikan peringatan dini jika posisi kepemimpinan kunci mengalami krisis suksesi.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses matriks suksesi 9-box: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

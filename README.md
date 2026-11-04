@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![CI Status](https://img.shields.io/badge/CI-Passing-success?style=flat&logo=githubactions)](https://github.com/antonset1104/erp/actions)
 [![Modules](https://img.shields.io/badge/Modules-50_Enterprise-indigo)](docs/FUNCTIONAL_DOCUMENTATION.md)
-[![Release](https://img.shields.io/badge/Release-v1.54.0-emerald)](https://github.com/antonset1104/erp/releases)
+[![Release](https://img.shields.io/badge/Release-v1.55.0-emerald)](https://github.com/antonset1104/erp/releases)
 [![Open Source](https://img.shields.io/badge/Open_Source-Community_Driven-purple)](docs/OPEN_SOURCE_GUIDE.md)
 
 **GoERP** is a modern, high-performance, enterprise-grade Enterprise Resource Planning (ERP) platform built natively with **Golang**. Engineered with a clean **Modular Monolith** architecture comprising **50 integrated business modules**, GoERP delivers single-binary static compilation, native Go concurrency, ultra-low memory overhead (~25 MB idle RAM), and strict transactional integrity for mission-critical enterprise workloads.
@@ -101,6 +101,11 @@ GoERP includes built-in executive productivity tools to accelerate day-to-day op
 - **💊 Electronic Batch Record (EBR) & Regulated Pharma Hub (FDA 21 CFR Part 11) (`POST /api/v1/mrp/ebr/execute-step`, `POST /api/v1/mrp/ebr/sign-deviation`, `GET /api/v1/mrp/ebr/batch-record/:batch_number`)**: Step-by-step master manufacturing formula execution, In-Process Control (IPC) parameters, dual operator/QA cryptographic digital signatures, deviation containment, and automated Certificate of Analysis (CoA) release.
 - **📑 Corporate Withholding Tax Equalization & Cross-Border DGT-1 Treaty Engine (`POST /api/v1/tax/wht/audit-equalization`, `POST /api/v1/tax/wht/validate-dgt1`)**: Cross-reconciliation between General Ledger expense accounts and reported WHT tax bases (DPP), detecting unwithheld tax exposure and validating foreign vendor Form DGT-1 treaty certificates (P3B) for rate reduction.
 - **👑 Omnichannel Customer Loyalty Points & IFRS 15 Contract Liability Ledger (`POST /api/v1/crm/loyalty/earn-points`, `POST /api/v1/crm/loyalty/redeem-reward`, `GET /api/v1/crm/loyalty/member/:member_id`)**: Multi-tier rewards accrual, automatic promotion thresholds, and IFRS 15 / PSAK 72 contract liability deferral and release upon redemption.
+- **🌱 Internal Carbon Pricing (ICP) & Shadow Carbon Fee Ledger (`POST /api/v1/esg/carbon-pricing/evaluate-capex`, `GET /api/v1/esg/carbon-pricing/internal-tax-pool`)**: Evaluates capital investments with internal shadow carbon pricing ($75/ton CO2e), carbon-adjusted TCO, and corporate Green Innovation Fund grants.
+- **🤖 Autonomous Warehouse Mobile Robot (AMR & AGV) Fleet Orchestrator (`POST /api/v1/wms/amr/dispatch-mission`, `POST /api/v1/wms/amr/telemetry-update`, `GET /api/v1/wms/amr/fleet-radar`)**: Real-time collision-free robot mission dispatching, State-of-Charge battery monitoring, and opportunistic fast-charging management.
+- **🔒 Smart Milestone Escrow & Condition-Based Payment Engine (`POST /api/v1/procurement/escrow/create-milestone`, `POST /api/v1/procurement/escrow/verify-release`, `GET /api/v1/procurement/escrow/vault-summary`)**: Condition-governed escrow fund locking and automated milestone releases based on IoT proof, WMS receipts, and dual e-signature BASTs.
+- **📊 Dynamic Multi-Element Revenue Recognition (IFRS 15 / PSAK 72) (`POST /api/v1/accounting/revrec/allocate-ssp`, `POST /api/v1/accounting/revrec/modify-contract`)**: Relative Standalone Selling Price (SSP) allocation across bundled obligations and prospective/cumulative contract modifications.
+- **🎯 9-Box Talent Matrix & Strategic Succession Bench Strength Analyzer (`POST /api/v1/hr/succession/evaluate-talent`, `GET /api/v1/hr/succession/bench-strength/:role_id`)**: Maps performance vs potential on the 9-box grid, automates executive development action plans, and tracks Key Person Risk across mission-critical roles.
 - **🌓 Dark / Light Enterprise Theme Modes**: Seamless visual theme switcher (`☀️ Light` / `🌙 Dark`) with state persisted across browser sessions.
 
 ---

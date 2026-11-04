@@ -37,6 +37,7 @@ import (
 	corehr "erp-golang/internal/core/hr"
 	coremrp "erp-golang/internal/core/mrp"
 	corepricing "erp-golang/internal/core/pricing"
+	coreprocurement "erp-golang/internal/core/procurement"
 	corescm "erp-golang/internal/core/scm"
 	coresystem "erp-golang/internal/core/system"
 	coretax "erp-golang/internal/core/tax"
@@ -9965,5 +9966,146 @@ IEA*1*000099123~`
 	t.Logf("✓ CRM Loyalty & IFRS 15 Ledger Verified: Member='%s' (%s, Tier='%s'), Earned=+%d Pts (IFRS15 DeferredRev=IDR %.0f), Redeemed=-%d Pts (Code='%s', Item='%s', ReleasedRev=IDR %.0f), FinalPoints=%d (Lifetime=%d, DeferredLiabilityBalance=IDR %.0f)",
 		mbrProfile.MemberID, mbrProfile.CustomerName, mbrProfile.TierLevel, loyaltyEarn.PointsEarned, loyaltyEarn.IFRS15DeferredRevenueIDR, loyaltyRedeem.PointsDeducted, loyaltyRedeem.RedemptionCode, loyaltyRedeem.RewardCatalogItem, loyaltyRedeem.ReleasedIFRS15RevenueIDR, mbrProfile.TotalPointsBalance, mbrProfile.LifetimePointsEarned, mbrProfile.ContractLiabilityDeferredRevIDR)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (68 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15) PASSED 100%!")
+	// ==========================================
+	// SECTION 69: V1.55.0 CARBON PRICING, AMR ROBOTICS, MILESTONE ESCROW, REVREC & 9-BOX SUCCESSION:
+	// 1. Internal Carbon Pricing (ICP) & Shadow Carbon Fee Ledger
+	// 2. Autonomous Warehouse Mobile Robot (AMR & AGV) Fleet Orchestrator
+	// 3. Smart Milestone Escrow & Condition-Based Payment Engine
+	// 4. Dynamic Multi-Element Revenue Recognition & Contract Modifications (IFRS 15 / PSAK 72)
+	// 5. 9-Box Talent Matrix & Strategic Succession Bench Strength Analyzer
+	// ==========================================
+	t.Log(`
+		>>> SECTION 69: CARBON PRICING, AMR ROBOTICS, MILESTONE ESCROW, REVREC & 9-BOX SUCCESSION <<<`)
+
+	// 69.1 Internal Carbon Pricing (ICP) & Shadow Carbon Fee Ledger
+	carbonEval := esg.EvaluateCapexCarbonLogic(esg.CapexCarbonEvaluationRequest{
+		ProposalID:                     "CPX-2026-SOLAR-001",
+		ProjectName:                    "Solar PV Rooftop & Fleet Electrification Phase 1",
+		BusinessUnit:                   "Supply Chain & Factory Logistics",
+		BaselineCapexIDR:               2500000000.0,
+		AnnualOpexIDR:                  120000000.0,
+		ProjectLifeYears:               5,
+		ProjectedEmissionsTonsCO2eYear: 25.0,
+		ShadowCarbonPriceUSDPerTon:     75.0,
+		FXRateUSDToIDR:                 16300.0,
+		IsGreenInitiative:              true,
+	})
+	if carbonEval.ProposalID == "" || carbonEval.ApprovalStatus != "APPROVED_WITH_GREEN_SUBSIDY" || carbonEval.GreenFundSubsidyGrantedIDR <= 0 || carbonEval.CarbonAdjustedTCOIDR <= 0 {
+		t.Fatalf("Failed to evaluate internal carbon pricing capex: %+v", carbonEval)
+	}
+
+	carbonTaxPool := esg.GetGreenTaxPoolSummaryLogic()
+	if carbonTaxPool.AvailableGreenFundBalanceIDR <= 0 || len(carbonTaxPool.EvaluatedProposals) == 0 {
+		t.Fatalf("Failed to retrieve green tax pool summary: %+v", carbonTaxPool)
+	}
+	t.Logf("✓ Internal Carbon Pricing Verified: Proposal='%s' (%s), Capex=IDR %.0f, AnnualShadowFee=IDR %.0f (Total=IDR %.0f), AdjustedTCO=IDR %.0f, Subsidy=IDR %.0f, NetInvest=IDR %.0f, Status='%s', GreenPool Available=IDR %.0f",
+		carbonEval.ProposalID, carbonEval.ProjectName, carbonEval.BaselineCapexIDR, carbonEval.AnnualShadowCarbonFeeIDR, carbonEval.LifetimeCarbonFeeIDR, carbonEval.CarbonAdjustedTCOIDR, carbonEval.GreenFundSubsidyGrantedIDR, carbonEval.NetApprovedInvestmentIDR, carbonEval.ApprovalStatus, carbonTaxPool.AvailableGreenFundBalanceIDR)
+
+	// 69.2 Autonomous Warehouse Mobile Robot (AMR & AGV) Fleet Orchestrator
+	amrMission, err := corewms.DispatchAMRMissionLogic(corewms.DispatchMissionRequest{
+		MissionID:        "MSN-AMR-2026-0891",
+		MissionType:      "GOODS_TO_PERSON_PICK",
+		SourceBinID:      "BIN-AISLE-A1-04",
+		DestinationBayID: "PACK-STATION-02",
+		CargoWeightKg:    180.0,
+		PriorityLevel:    1,
+	})
+	if err != nil || amrMission == nil || amrMission.AssignedRobotID == "" || len(amrMission.Waypoints) == 0 || amrMission.Status != "DISPATCHED" {
+		t.Fatalf("Failed to dispatch AMR robotic mission: %v, resp: %+v", err, amrMission)
+	}
+
+	updatedAMR, err := corewms.UpdateAMRTelemetryLogic(corewms.AMRTelemetryUpdateRequest{
+		RobotID:           amrMission.AssignedRobotID,
+		CoordinateX:       18.5,
+		CoordinateY:       12.0,
+		BatterySOCPercent: 85.0,
+		Status:            "NAVIGATING_MISSION",
+	})
+	if err != nil || updatedAMR == nil || updatedAMR.CoordinateX != 18.5 || updatedAMR.BatterySOCPercent != 85.0 {
+		t.Fatalf("Failed to update AMR telemetry: %v, resp: %+v", err, updatedAMR)
+	}
+
+	amrRadar := corewms.GetAMRFleetRadarLogic()
+	if amrRadar.TotalFleetSize < 4 || amrRadar.ActiveNavigatingRobots < 1 {
+		t.Fatalf("Failed to get AMR fleet radar: %+v", amrRadar)
+	}
+	t.Logf("✓ AMR Fleet Orchestrator Verified: Mission='%s' (%s, Assigned='%s', Weight=%.0f kg, Duration=%.1f min, Waypoints=%d), BotTelemetry='%s' (Pos=X:%.1f,Y:%.1f, SOC=%.0f%%), Radar: %d Total Bots (%d Navigating, %d Idle, %d Charging, AvgSOC=%.1f%%)",
+		amrMission.MissionID, amrMission.MissionType, amrMission.AssignedRobotID, amrMission.CargoWeightKg, amrMission.EstimatedDurationMinutes, len(amrMission.Waypoints), updatedAMR.RobotID, updatedAMR.CoordinateX, updatedAMR.CoordinateY, updatedAMR.BatterySOCPercent, amrRadar.TotalFleetSize, amrRadar.ActiveNavigatingRobots, amrRadar.IdleAvailableRobots, amrRadar.ChargingRobots, amrRadar.AverageBatterySOC)
+
+	// 69.3 Smart Milestone Escrow & Condition-Based Payment Engine
+	escrowContract := coreprocurement.CreateEscrowContractLogic(coreprocurement.CreateMilestoneEscrowRequest{
+		ContractID:            "ESCROW-2026-HV-002",
+		VendorID:              "VEND-ABB-ID",
+		VendorName:            "PT ABB Industrial Automation",
+		ProjectName:           "High-Voltage Substation Retrofit Project",
+		TotalContractValueIDR: 8500000000.0,
+	})
+	if escrowContract.ContractID == "" || len(escrowContract.Milestones) != 3 || escrowContract.RemainingEscrowBalanceIDR != 8500000000.0 {
+		t.Fatalf("Failed to create milestone escrow contract: %+v", escrowContract)
+	}
+
+	escrowRelease, err := coreprocurement.VerifyMilestoneReleaseLogic(coreprocurement.VerifyMilestoneReleaseRequest{
+		ContractID:             "ESCROW-2026-EPC-001",
+		MilestoneID:            "MS-02-SITE-COMMISSIONING",
+		FulfilledConditionCode: "CALIBRATION_CERTIFICATE",
+		VerificationProofRef:   "CAL-CERT-SMT-2026-081",
+		ApproverID:             "ENG-DIR-AGUS",
+	})
+	if err != nil || escrowRelease == nil || !escrowRelease.AllConditionsMet || escrowRelease.AmountDisbursedIDR != 4800000000.0 || escrowRelease.DisbursementTxID == "" {
+		t.Fatalf("Failed to verify and disburse escrow milestone: %v, resp: %+v", err, escrowRelease)
+	}
+
+	vaultSummary := coreprocurement.GetEscrowVaultSummaryLogic()
+	if vaultSummary.TotalActiveContracts < 2 || vaultSummary.TotalDisbursedToDateIDR < 4800000000.0 {
+		t.Fatalf("Failed to get escrow vault summary: %+v", vaultSummary)
+	}
+	t.Logf("✓ Smart Milestone Escrow Verified: Created='%s' (Value=IDR %.0f, Milestones=%d), Released='%s' on Contract '%s' (ConditionsMet=%t, Disbursed=IDR %.0f, TxID='%s', Remaining=IDR %.0f), Vault: %d Contracts (TotalFunded=IDR %.0f, Disbursed=IDR %.0f, Locked=IDR %.0f)",
+		escrowContract.ContractID, escrowContract.TotalContractValueIDR, len(escrowContract.Milestones), escrowRelease.MilestoneID, escrowRelease.ContractID, escrowRelease.AllConditionsMet, escrowRelease.AmountDisbursedIDR, escrowRelease.DisbursementTxID, escrowRelease.RemainingEscrowBalanceIDR, vaultSummary.TotalActiveContracts, vaultSummary.TotalEscrowUnderCustodyIDR, vaultSummary.TotalDisbursedToDateIDR, vaultSummary.TotalRemainingLockedIDR)
+
+	// 69.4 Dynamic Multi-Element Revenue Recognition & Contract Modifications (IFRS 15 / PSAK 72)
+	sspAllocation := coreaccount.AllocateSSPLogic(coreaccount.SSPAllocationRequest{
+		ContractID:               "IFRS15-CTR-2026-TELCO-01",
+		CustomerName:             "PT Telekomunikasi Enterprise Nusantara",
+		TotalTransactionPriceIDR: 1200000000.0,
+	})
+	if sspAllocation.ContractID == "" || sspAllocation.TotalBundleDiscountIDR <= 0 || len(sspAllocation.AllocatedObligations) != 4 || sspAllocation.AllocatedObligations[1].MonthlyAmortizationIDR <= 0 {
+		t.Fatalf("Failed to allocate Standalone Selling Prices: %+v", sspAllocation)
+	}
+
+	revrecMod := coreaccount.ModifyContractLogic(coreaccount.ContractModificationRequest{
+		ContractID:                sspAllocation.ContractID,
+		ModificationType:          "PROSPECTIVE_ADJUSTMENT",
+		AdditionalPriceIDR:        240000000.0,
+		RemainingMonthsToAmortize: 24,
+		Reason:                    "Additional 50 Enterprise User Seats added to contract",
+	})
+	if revrecMod.RevisedMonthlyRevenueIDR != 10000000.0 || revrecMod.CumulativeCatchUpRevenueIDR != 0.0 {
+		t.Fatalf("Failed to process prospective contract modification: %+v", revrecMod)
+	}
+	t.Logf("✓ IFRS 15 Multi-Element RevRec Verified: Contract='%s' (%s), TotalSSP=IDR %.0f vs Bundle=IDR %.0f (Discount=IDR %.0f / %.2f%%), POBs=%d (Hardware=IDR %.0f, SaaS=IDR %.0f [Amort=IDR %.0f/mo], Services=IDR %.0f, SLA=IDR %.0f), Modification='%s' (RevisedAmort=IDR %.0f/mo over %d mos)",
+		sspAllocation.ContractID, sspAllocation.CustomerName, sspAllocation.TotalStandalonePriceIDR, sspAllocation.TotalTransactionPriceIDR, sspAllocation.TotalBundleDiscountIDR, sspAllocation.DiscountPercentage, len(sspAllocation.AllocatedObligations), sspAllocation.AllocatedObligations[0].AllocatedTransactionPriceIDR, sspAllocation.AllocatedObligations[1].AllocatedTransactionPriceIDR, sspAllocation.AllocatedObligations[1].MonthlyAmortizationIDR, sspAllocation.AllocatedObligations[2].AllocatedTransactionPriceIDR, sspAllocation.AllocatedObligations[3].AllocatedTransactionPriceIDR, revrecMod.ModificationType, revrecMod.RevisedMonthlyRevenueIDR, revrecMod.RemainingMonths)
+
+	// 69.5 9-Box Talent Matrix & Strategic Succession Bench Strength Analyzer
+	talentEval := corehr.EvaluateTalentMatrixLogic(corehr.TalentAssessmentRequest{
+		EmployeeID:           "EMP-TALENT-2026-091",
+		EmployeeName:         "Dian Kusuma, S.T., M.M.",
+		CurrentJobTitle:      "Head of Industrial Engineering",
+		Department:           "Operations & Manufacturing",
+		PerformanceRating:    3,
+		PotentialRating:      3,
+		TargetLeadershipRole: "ROLE-VP-PLANT-OPERATIONS",
+		ReadinessTimeline:    "READY_NOW",
+	})
+	if talentEval.NineBoxClassification != "STAR_FUTURE_LEADER" || talentEval.ReadinessTimeline != "READY_NOW" {
+		t.Fatalf("Failed to evaluate 9-Box talent assessment: %+v", talentEval)
+	}
+
+	benchSummary := corehr.GetRoleBenchStrengthLogic("ROLE-VP-PLANT-OPERATIONS")
+	if benchSummary.TotalSuccessorsNominated < 1 || benchSummary.ReadyNowCount < 1 || benchSummary.BenchVulnerabilityStatus != "ROBUST_SUCCESSION_PIPELINE" {
+		t.Fatalf("Failed to get role succession bench strength: %+v", benchSummary)
+	}
+	t.Logf("✓ 9-Box Talent Matrix & Succession Verified: Employee='%s' (%s), Coord='%s', Class='%s', Action='%s', TargetRole='%s' (Readiness='%s'), RoleBench='%s' (%s, Nominees=%d, ReadyNow=%d, Ready1-2Yrs=%d, Status='%s')",
+		talentEval.EmployeeName, talentEval.CurrentJobTitle, talentEval.GridCoordinates, talentEval.NineBoxClassification, talentEval.DevelopmentActionPlan, talentEval.TargetLeadershipRole, talentEval.ReadinessTimeline, benchSummary.RoleTitle, benchSummary.IncumbentName, benchSummary.TotalSuccessorsNominated, benchSummary.ReadyNowCount, benchSummary.Ready1To2YearsCount, benchSummary.BenchVulnerabilityStatus)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (69 SECTIONS: 50+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION) PASSED 100%!")
 }

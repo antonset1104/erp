@@ -709,4 +709,31 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Reward Redemption Engine**: Endpoint `POST /api/v1/crm/loyalty/redeem-reward` validates point balances, burns points for vouchers, and derecognizes deferred revenue liabilities.
 - **Member 360 View**: Endpoint `GET /api/v1/crm/loyalty/member/:member_id` provides real-time points balances, tier status, and accounting liability balances.
 
+---
+
+## 21. Carbon Pricing, AMR Robotics, Milestone Escrow, RevRec & 9-Box Succession (v1.55.0)
+
+### 21.1 Internal Carbon Pricing (ICP) & Shadow Carbon Fee Ledger (`internal/core/esg/carbon_pricing.go`)
+- **Internal Shadow Carbon Levies**: Endpoint `POST /api/v1/esg/carbon-pricing/evaluate-capex` simulates shadow carbon pricing ($75/ton CO2e) against capital investment proposals, computing carbon-adjusted Total Cost of Ownership (TCO).
+- **Green Innovation Fund Pool**: Endpoint `GET /api/v1/esg/carbon-pricing/internal-tax-pool` collects internal shadow carbon levies from carbon-intensive projects and redistributes grants to subsidize green decarbonization initiatives.
+
+### 21.2 Autonomous Warehouse Mobile Robot (AMR & AGV) Fleet Orchestrator (`internal/core/wms/amr_orchestrator.go`)
+- **Intelligent Robotic Mission Dispatch**: Endpoint `POST /api/v1/wms/amr/dispatch-mission` dispatches transport and picking orders to AMR/AGV robots based on payload weight, proximity, and battery State-of-Charge (SoC).
+- **Collision-Free Waypoint Navigation & Fast Charging**: Endpoint `POST /api/v1/wms/amr/telemetry-update` monitors live robot coordinates ($X, Y$), rerouting low-battery units ($\le 20\%$) to automated fast-charging docks.
+- **Supervisory Fleet Radar**: Endpoint `GET /api/v1/wms/amr/fleet-radar` delivers a bird's-eye view of active, idle, and charging robots across warehouse aisles.
+
+### 21.3 Smart Milestone Escrow & Condition-Based Payment Engine (`internal/core/procurement/escrow_vault.go`)
+- **Condition-Governed Escrow Vault**: Endpoint `POST /api/v1/procurement/escrow/create-milestone` locks high-value EPC and equipment contract funds into secure escrow accounts.
+- **Multi-Factor Condition Verification & Instant Disbursement**: Endpoint `POST /api/v1/procurement/escrow/verify-release` validates technical milestones (IoT tests, WMS goods receipt, dual e-signature BASTs), automatically triggering instant wire disbursements to vendors once all conditions are certified.
+- **Corporate Escrow Portfolio Overview**: Endpoint `GET /api/v1/procurement/escrow/vault-summary` aggregates locked custody balances, disbursed totals, and active contract statuses.
+
+### 21.4 Dynamic Multi-Element Revenue Recognition (IFRS 15 / PSAK 72) (`internal/core/account/revrec_engine.go`)
+- **Relative Standalone Selling Price (SSP) Allocation**: Endpoint `POST /api/v1/accounting/revrec/allocate-ssp` distributes bundled transaction consideration across distinct performance obligations (Hardware, SaaS licenses, Implementation, and SLA support) in proportion to their relative standalone prices.
+- **Contract Modifications & Catch-Up Adjustments**: Endpoint `POST /api/v1/accounting/revrec/modify-contract` models cumulative catch-up vs prospective accounting adjustments when contract scope, pricing, or subscription seats are modified mid-term.
+
+### 21.5 9-Box Talent Matrix & Strategic Succession Bench Strength Analyzer (`internal/core/hr/succession_matrix.go`)
+- **McKinsey/GE 9-Box Grid Mapping**: Endpoint `POST /api/v1/hr/succession/evaluate-talent` plots performance (1-3) vs potential (1-3) into standard 9-box classifications (*Star Future Leader*, *High Performer*, *Solid Professional*, etc.) and generates tailored executive development action plans.
+- **Role Succession Bench Strength & Key Person Risk**: Endpoint `GET /api/v1/hr/succession/bench-strength/:role_id` tracks readiness timelines (*Ready Now*, *Ready in 1-2 Years*) for mission-critical executive roles to prevent organizational disruption.
+
+
 

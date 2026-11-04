@@ -847,6 +847,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/esg/carbon-pricing/evaluate-capex": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Internal Carbon Pricing (ICP) & Shadow Carbon Fee Ledger",
+					"description": "Evaluates capital investments with internal shadow carbon pricing ($75/ton CO2e) and manages corporate Green Innovation Fund grants.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Carbon-adjusted TCO, lifetime carbon fee, and green subsidy verdict"},
+					},
+				},
+			},
+			"/api/v1/wms/amr/dispatch-mission": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Autonomous Warehouse Mobile Robot (AMR & AGV) Fleet Orchestrator",
+					"description": "Assigns collision-free transport and picking missions to warehouse robots based on battery State-of-Charge and payload capacity.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Dispatched robotic mission, assigned AMR unit, waypoints, and ETA"},
+					},
+				},
+			},
+			"/api/v1/procurement/escrow/create-milestone": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Smart Milestone Escrow & Condition-Based Payment Engine",
+					"description": "Locks procurement funds in escrow, releasing disbursements only upon verified multi-factor conditions (IoT, WMS, e-signature BAST).",
+					"responses": map[string]interface{}{
+						"201": map[string]interface{}{"description": "Escrow contract created, funded balance, and milestone release schedules"},
+					},
+				},
+			},
+			"/api/v1/accounting/revrec/allocate-ssp": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Multi-Element Revenue Recognition (IFRS 15 / PSAK 72)",
+					"description": "Allocates bundled transaction prices across distinct performance obligations based on relative Standalone Selling Prices (SSP).",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Relative SSP allocation, allocated discount, and monthly revenue schedules"},
+					},
+				},
+			},
+			"/api/v1/hr/succession/evaluate-talent": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "9-Box Talent Matrix & Strategic Succession Bench Strength Analyzer",
+					"description": "Evaluates performance vs potential on the 9-box grid and monitors Key Person Risk across mission-critical leadership roles.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "9-Box classification, development action plan, and succession readiness status"},
+					},
+				},
+			},
 		},
 	}
 }
