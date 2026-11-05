@@ -32519,6 +32519,334 @@ async function triggerUHVDCConverter() {
     }
 }
 
+async function triggerSubseaCCS() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi efek Joule-Thomson, pembentukan hidrat CO2, dan integritas batuan tudung caprock subsea CCS...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const wellID = "WELL-NORTHERN-LIGHTS-CO2-01";
+        await api('/ccs/injection/ingest-wellhead-telemetry', 'POST', {
+            wellhead_id: wellID,
+            reservoir_field: "FIELD-AURORA-SALINE-AQUIFER",
+            seabed_water_depth_m: 1250.0,
+            wellhead_pressure_bar: 92.5,
+            wellhead_temperature_c: 7.5,
+            choke_pressure_drop_bar: 36.0,
+            downhole_reservoir_pressure_bar: 182.0,
+            co2_mass_flow_kg_s: 85.0,
+            caprock_fracture_margin_bar: 12.0,
+            water_moisture_content_ppm: 125.0
+        });
+
+        const evalRes = await api('/ccs/injection/evaluate-hydrate-and-phase-risk', 'POST', { wellhead_id: wellID });
+        const actRes = await api('/ccs/injection/trigger-hydrate-mitigation-and-choke-control', 'POST', { wellhead_id: wellID });
+        const dossierRes = await api(`/ccs/injection/subsea-ccs-safety-dossier/${wellID}`, 'GET');
+
+        if (badge) badge.textContent = `🌊 Subsea CCS: ${evalRes.data.hydrate_formation_risk} | PostChoke: ${evalRes.data.post_choke_temperature_c}°C | Caprock: ${evalRes.data.caprock_breach_risk}`;
+        if (answerEl) {
+            let out = `🌊 SUBSEA CARBON DIOXIDE INJECTION & HYDRATE/SUPERCRITICAL PHASE SENTINEL (ISO 27914 & DNV-RP-J202):\n`;
+            out += `Sumur Injeksi Subsea: ${wellID} | Lapangan Akuifer: ${dossierRes.data.telemetry.reservoir_field}\n`;
+            out += `Kedalaman Dasar Laut: ${dossierRes.data.telemetry.seabed_water_depth_m} m | Laju Alir CO2: ${dossierRes.data.telemetry.co2_mass_flow_kg_s} kg/s (Fase Superkritis)\n\n`;
+            out += `ANALISIS PENDINGINAN JOULE-THOMSON & RISIKO PENYUMBATAN GAS HIDRAT:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Tekanan Kepala Sumur: ${dossierRes.data.telemetry.wellhead_pressure_bar} bar | Penurunan Tekanan Choke (ΔP): ${dossierRes.data.telemetry.choke_pressure_drop_bar} bar\n`;
+            out += `• Efek Pendinginan Joule-Thomson (ΔT): -${evalRes.data.joule_thomson_cooling_delta_t}°C (Koefisien μJT = 0.65 °C/bar)\n`;
+            out += `• Suhu Pasca-Choke: ${evalRes.data.post_choke_temperature_c}°C (Di Bawah Titik Kesetimbangan Hidrat ${evalRes.data.hydrate_equilibrium_temp_c}°C)\n`;
+            out += `• Tingkat Risiko Pembentukan Kristal Hidrat: ${evalRes.data.hydrate_formation_risk}\n`;
+            out += `• Status Stabilitas Transisi Fase CO2: ${evalRes.data.phase_inversion_risk}\n`;
+            out += `• Margin Tekanan Rekah Batuan Tudung (Caprock): ${dossierRes.data.telemetry.caprock_fracture_margin_bar} bar (${evalRes.data.caprock_breach_risk})\n`;
+            out += `• Mandat Injeksi Inhibitor Termodinamik: ${evalRes.data.automated_inhibitor_dosing_mandate ? 'DIPERLUKAN SEGERA' : 'NORMAL'}\n\n`;
+            out += `AKTUASI KONTROL MITIGASI SUBSEA (INHIBITOR, TRACE HEATING & CHOKE THROTTLING):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Proteksi Sumur Bawah Laut: ${actRes.data.action_id}\n`;
+            out += `• Dosis Injeksi Inhibitor Metanol/Glikol: ${actRes.data.commanded_methanol_dosing_rate_l_hr} L/jam (Melarutkan Formasi Kristal Hidrat)\n`;
+            out += `• Daya Pemanas Listrik Subsea (Electric Trace Heating): ${actRes.data.trace_heating_power_kw} kW\n`;
+            out += `• Modulasi Bukaan Katup Choke: ${actRes.data.modulated_choke_opening_pct}% (Meredam Gradien Ekspansi Joule-Thomson)\n`;
+            out += `• Estimasi Kerugian Intervensi Sumur & Rekah Caprock Terhindar: $${actRes.data.avoided_subsea_intervention_usd.toLocaleString()} USD (Mencegah Penyumbatan Coiled Tubing & Kebocoran Geologis)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Injeksi metanol 58.5 L/jam dan pemanas elektrik subsea 155 kW menekan titik beku hidrat di bawah suhu pasca-choke.</li>
+                <li>Modulasi bukaan choke valve melunakkan penurunan tekanan ekspansi tanpa melanggar ambang batas rekah hidrolik formasi caprock batuan penutup.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses subsea CCS sentinel: ' + err.message;
+    }
+}
+
+async function triggerScramjetPropulsion() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi penyerapan panas endotermik, pembentukan coking, dan stabilitas unstart mesin scramjet hipersonik...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const engineID = "SCRAMJET-X43D-MACH7-01";
+        await api('/scramjet/propulsion/ingest-combustor-telemetry', 'POST', {
+            engine_id: engineID,
+            vehicle_id: "VEHICLE-AURORA-HYPERSONIC-DEMO",
+            flight_mach_number: 6.85,
+            combustor_stagnation_temp_k: 2150.0,
+            combustor_wall_heat_flux_mwm2: 18.5,
+            fuel_cooling_jacket_inlet_pressure_bar: 68.0,
+            fuel_cooling_jacket_outlet_temp_k: 965.0,
+            endothermic_cracking_conversion_pct: 74.5,
+            isolator_shock_train_position_mm: 138.0,
+            combustor_acoustic_rms_db: 164.5
+        });
+
+        const evalRes = await api('/scramjet/propulsion/evaluate-coking-and-unstart', 'POST', { engine_id: engineID });
+        const actRes = await api('/scramjet/propulsion/trigger-fuel-split-and-isolator-control', 'POST', { engine_id: engineID });
+        const dossierRes = await api(`/scramjet/propulsion/hypersonic-propulsion-dossier/${engineID}`, 'GET');
+
+        if (badge) badge.textContent = `🚀 Scramjet: Mach ${dossierRes.data.telemetry.flight_mach_number} | HeatSink: ${evalRes.data.endothermic_heat_sink_absorbed_kj_kg} kJ/kg | Unstart: ${evalRes.data.thermal_choke_risk}`;
+        if (answerEl) {
+            let out = `🚀 HYPERSONIC SCRAMJET PROPULSION & ENDOTHERMIC FUEL CRACKING SENTINEL (AIAA S-113A & NASA-STD-5001):\n`;
+            out += `Unit Mesin Scramjet: ${engineID} | Wahana Penerbangan: ${dossierRes.data.telemetry.vehicle_id}\n`;
+            out += `Kecepatan Terbang: Mach ${dossierRes.data.telemetry.flight_mach_number} | Fluks Kalor Ruang Bakar: ${dossierRes.data.telemetry.combustor_wall_heat_flux_mwm2} MW/m²\n\n`;
+            out += `KAPASITAS HEAT SINK KIMIAWI & ANALISIS COKING SALURAN PENDINGIN:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Suhu Stagnasi Ruang Bakar: ${dossierRes.data.telemetry.combustor_stagnation_temp_k} K | Suhu Saluran Jaket Keluar: ${dossierRes.data.telemetry.fuel_cooling_jacket_outlet_temp_k} K\n`;
+            out += `• Konversi Perengkahan Katalitik Endotermik JP-7: ${dossierRes.data.telemetry.endothermic_cracking_conversion_pct}%\n`;
+            out += `• Total Penyerapan Kalor Heat Sink: ${evalRes.data.endothermic_heat_sink_absorbed_kj_kg} kJ/kg (Pemanasan Sensibel + Entalpi Reaksi)\n`;
+            out += `• Indeks Kecenderungan Pembentukan Karbon Coking: ${evalRes.data.coking_propensity_index} (${evalRes.data.coking_hazard_level})\n`;
+            out += `• Posisi Gelombang Kejut Isolator (Shock Train): ${dossierRes.data.telemetry.isolator_shock_train_position_mm} mm dari Bibir Intake\n`;
+            out += `• Waktu Tunda Penyalaan Supersonik: ${evalRes.data.supersonic_ignition_delay_ms} ms (Margin Waktu Tinggal: Sangat Cepat)\n`;
+            out += `• Status Risiko Termal Choking / Isolator Unstart: ${evalRes.data.thermal_choke_risk}\n\n`;
+            out += `AKTUASI KONTROL PROPULSI HIPERSONIK (FUEL SPLIT, BLEED DOOR & ANTI-COKING):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Penerbangan Hipersonik: ${actRes.data.action_id}\n`;
+            out += `• Perintah Pembagian Aliran Bahan Bakar (Fuel Split): ${actRes.data.commanded_endothermic_fuel_split_pct}% Melintasi Katalis Endotermik\n`;
+            out += `• Sudut Bukaan Katup Bleed Isolator: ${actRes.data.isolator_bleed_door_angle_deg}° (Membuang Lapisan Batas Supersonik untuk Menahan Gelombang Kejut)\n`;
+            out += `• Injeksi Aditif Nano-Dispersan Anti-Coking: ${actRes.data.aero_anti_coking_additive_ppm} ppm\n`;
+            out += `• Estimasi Kerugian Kerusakan Wahana Hipersonik Terhindar: $${actRes.data.avoided_hypersonic_loss_usd.toLocaleString()} USD (Mencegah Pelelehan Dinding Scramjet & Unstart Breakup)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pembagian aliran bahan bakar 78.5% ke reaktor katalitik endotermik memaksimalkan disipasi panas 1,850 kJ/kg tanpa memicu dekomposisi karbon padat.</li>
+                <li>Katup pembuang lapisan batas pada isolator mengunci shock train tetap stabil dan mencegah unstart berkecepatan Mach 6.85.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses scramjet propulsion sentinel: ' + err.message;
+    }
+}
+
+async function triggerMRNALNP() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi adveksi kaotik mikrofluida, indeks polidispersitas PDI, dan efisiensi enkapsulasi mRNA-LNP...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const batchID = "BATCH-MRNA-LNP-ONCOLOGY-042";
+        await api('/lnp/formulation/ingest-microfluidic-telemetry', 'POST', {
+            batch_id: batchID,
+            formulation_line_id: "LINE-HERRINGBONE-CHIP-02",
+            aqueous_flow_rate_ml_min: 12.0,
+            ethanol_flow_rate_ml_min: 4.0,
+            total_flow_rate_ml_min: 16.0,
+            microfluidic_chip_delta_p_bar: 2.45,
+            inline_ph: 4.05,
+            dls_hydrodynamic_diameter_nm: 74.2,
+            polydispersity_index_pdi: 0.065,
+            encapsulation_efficiency_pct: 96.2
+        });
+
+        const evalRes = await api('/lnp/formulation/evaluate-pdi-and-encapsulation', 'POST', { batch_id: batchID });
+        const actRes = await api('/lnp/formulation/trigger-pump-servo-and-buffer-trim', 'POST', { batch_id: batchID });
+        const dossierRes = await api(`/lnp/formulation/mrna-lnp-cgmp-dossier/${batchID}`, 'GET');
+
+        if (badge) badge.textContent = `🧬 mRNA-LNP: PDI ${dossierRes.data.telemetry.polydispersity_index_pdi} | Size: ${dossierRes.data.telemetry.dls_hydrodynamic_diameter_nm} nm | Encaps: ${dossierRes.data.telemetry.encapsulation_efficiency_pct}%`;
+        if (answerEl) {
+            let out = `🧬 CONTINUOUS BIOPHARMACEUTICAL mRNA-LNP MICROFLUIDIC FORMULATION SENTINEL (FDA 21 CFR 211 & ICH Q8/Q10):\n`;
+            out += `Batch Terapi Gen mRNA: ${batchID} | Lini Mikrofluida: ${dossierRes.data.telemetry.formulation_line_id}\n`;
+            out += `Debit Total Aliran: ${dossierRes.data.telemetry.total_flow_rate_ml_min} mL/min | Penurunan Tekanan Chip (ΔP): ${dossierRes.data.telemetry.microfluidic_chip_delta_p_bar} bar\n\n`;
+            out += `KARAKTERISASI NANOPARTIKEL LIPID & KINERJA ENKAPSULASI NUKLEOTIDA:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Rasio Debit Aliran (FRR Aqueous / Ethanol): ${evalRes.data.flow_rate_ratio_frr}:1 (Nominal 3.0:1)\n`;
+            out += `• pH Aliran Formasi In-Line: ${dossierRes.data.telemetry.inline_ph} pH (Optimasi Protonasi Gugus Amina Tersier Lipid)\n`;
+            out += `• Diameter Hidrodinamik Rata-Rata (Z-Average DLS): ${dossierRes.data.telemetry.dls_hydrodynamic_diameter_nm} nm (Deviasi: ${evalRes.data.size_drift_from_target_nm} nm dari Target 70 nm)\n`;
+            out += `• Indeks Polidispersitas (Polydispersity Index - PDI): ${dossierRes.data.telemetry.polydispersity_index_pdi} (${evalRes.data.pdi_compliance_status})\n`;
+            out += `• Efisiensi Enkapsulasi mRNA: ${dossierRes.data.telemetry.encapsulation_efficiency_pct}% (${evalRes.data.encapsulation_quality})\n`;
+            out += `• Mandat Kalibrasi Servo Pompa Presisi: ${evalRes.data.pump_servo_trim_mandate ? 'DIPERLUKAN' : 'STANDBY'}\n\n`;
+            out += `TINDAKAN FORMULASI CGMP OTOMATIS (PUMP SERVO TRIM & TFF BUFFER DIAFILTRATION):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Sertifikasi Pelepasan Batch Biofarmasi: ${actRes.data.action_id}\n`;
+            out += `• Koreksi Pompa Servo Larutan Aqueous mRNA: ${actRes.data.commanded_aqueous_servo_trim_ml_min} mL/min\n`;
+            out += `• Koreksi Pompa Servo Larutan Lipid Organik: ${actRes.data.commanded_ethanol_servo_trim_ml_min} mL/min\n`;
+            out += `• Pertukaran Volume Diafiltrasi TFF: ${actRes.data.tff_diafiltration_volume_exchange} Diavolumes (Pembersihan Etanol Residu < 0.5%)\n`;
+            out += `• Estimasi Kerugian Penolakan Batch Onkologi Terhindar: $${actRes.data.avoided_cgmp_batch_rejection_usd.toLocaleString()} USD (Mencegah Pembuangan Batch Klinis & Kegagalan Formulasi)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penyetelan servo pompa mikrofluida secara real-time mengunci rasio 3.0:1 dan mempertahankan PDI monodisperse di bawah 0.08.</li>
+                <li>Proses diafiltrasi membran TFF otomatis menukar bufer hingga 6.8 diavolumes untuk menjamin integritas dan stabilitas partikel mRNA terapeutik.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses mRNA-LNP sentinel: ' + err.message;
+    }
+}
+
+async function triggerCPOTransceiver() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi pergeseran panjang gelombang laser DFB, mode hopping, dan skew SerDes Co-Packaged Optics...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const moduleID = "CPO-SWITCH-3.2T-AI-RACK-08";
+        await api('/cpo/transceiver/ingest-optical-telemetry', 'POST', {
+            module_id: moduleID,
+            laser_array_id: "LASER-DFB-CW-WDM-16CH",
+            laser_junction_temp_c: 58.5,
+            micro_tec_current_ma: 385.0,
+            laser_optical_power_dbm: 13.8,
+            micro_ring_resonator_volt_mv: 840.0,
+            carrier_wavelength_drift_pm: 85.0,
+            lane_to_lane_skew_ps: 18.5,
+            pre_fec_bit_error_rate: 0.00042
+        });
+
+        const evalRes = await api('/cpo/transceiver/evaluate-mode-hop-and-skew', 'POST', { module_id: moduleID });
+        const actRes = await api('/cpo/transceiver/trigger-tec-pid-and-deskew-control', 'POST', { module_id: moduleID });
+        const dossierRes = await api(`/cpo/transceiver/cpo-reliability-dossier/${moduleID}`, 'GET');
+
+        if (badge) badge.textContent = `💡 CPO: Shift ${evalRes.data.wavelength_shift_ghz} GHz | Skew: ${evalRes.data.serdes_skew_hazard} | ModeHop: ${evalRes.data.laser_mode_hop_risk}`;
+        if (answerEl) {
+            let out = `💡 SILICON PHOTONICS CO-PACKAGED OPTICS (CPO 3.2T) THERMAL & SKEW SENTINEL (OIF-CPO & IEEE 802.3df):\n`;
+            out += `Modul Optik CPO: ${moduleID} | Larik Laser DFB: ${dossierRes.data.telemetry.laser_array_id}\n`;
+            out += `Suhu Sambungan Laser: ${dossierRes.data.telemetry.laser_junction_temp_c}°C (Beban GPU 1.2 kW) | Daya Optik: ${dossierRes.data.telemetry.laser_optical_power_dbm} dBm\n\n`;
+            out += `ANALISIS MODA TRANSMISI OPTIK & PENYIMPANGAN KELOMPOK WAKTU SERDES:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Pergeseran Panjang Gelombang Pembawa (Carrier Drift): ${dossierRes.data.telemetry.carrier_wavelength_drift_pm} pm\n`;
+            out += `• Pergeseran Frekuensi Optik Terhitung: ${evalRes.data.wavelength_shift_ghz} GHz\n`;
+            out += `• Tingkat Risiko Lompatan Moda Laser (Mode Hopping): ${evalRes.data.laser_mode_hop_risk}\n`;
+            out += `• Keterlambatan Antar Jalur (Lane-to-Lane Skew 200G): ${dossierRes.data.telemetry.lane_to_lane_skew_ps} ps\n`;
+            out += `• Pre-FEC Bit Error Rate (BER): ${dossierRes.data.telemetry.pre_fec_bit_error_rate} (Batas Kritis > 1.0e-4)\n`;
+            out += `• Tingkat Bahaya Asinkronitas SerDes: ${evalRes.data.serdes_skew_hazard}\n`;
+            out += `• Mandat Trimming Termal Mikro-TEC: ${evalRes.data.micro_tec_pid_trim_mandate ? 'DIPERLUKAN PID SUB-MILIDETIK' : 'NORMAL'}\n\n`;
+            out += `AKTUASI KOMPENSASI TERMO-OPTIK & DIGITAL DESKEW (MICRO-TEC & DLL DELAY):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Integritas Sinyal Fotonik: ${actRes.data.action_id}\n`;
+            out += `• Arus Kompensasi Pendingin Mikro-TEC: ${actRes.data.commanded_micro_tec_current_ma} mA (Menstabilkan Sambungan Laser pada 48°C)\n`;
+            out += `• Tegangan Penalaan Resonator Cincin Mikro: ${actRes.data.micro_ring_tuning_volt_mv} mV (Kompensasi Fase Termo-Optik)\n`;
+            out += `• Kompensasi Keterlambatan Jalur Digital (SerDes DLL): ${actRes.data.serdes_dll_deskew_delay_ps} ps (Menyelaraskan Mata Sinyal Optik)\n`;
+            out += `• Estimasi Kerugian Downtime Kluster AI Terhindar: $${actRes.data.avoided_hyperscale_outage_usd.toLocaleString()} USD (Mencegah Stalling Latihan Model AI & Penggantian Modul Lapangan)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Arus mikro-TEC dinaikkan ke 415 mA untuk mendinginkan laser DFB dan mencegah lompatan moda gelombang optik.</li>
+                <li>Digital delay line mengoreksi diferensial keterlambatan 18.2 ps antar-lane SerDes 200G, memulihkan BER ke bawah 1.0e-5.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses CPO optical transceiver sentinel: ' + err.message;
+    }
+}
+
+async function triggerSOECEFuel() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi kesetimbangan Nernst-Boudouard, coking karbon, dan rasio stoikiometri syngas SOEC e-SAF...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const stackID = "SOEC-COELECTROLYSIS-MW-05";
+        await api('/soec/stack/ingest-coelectrolysis-telemetry', 'POST', {
+            stack_id: stackID,
+            plant_id: "PLANT-SAF-PTL-SYNTHESIS-01",
+            stack_operating_temp_c: 815.0,
+            stack_current_density_acm2: 1.25,
+            steam_inlet_flow_kg_hr: 420.0,
+            carbon_dioxide_inlet_flow_kg_hr: 680.0,
+            produced_syngas_h2_co_ratio: 2.08,
+            ft_reactor_temp_c: 225.0,
+            ft_catalyst_delta_p_bar: 3.45,
+            carbon_activity_ac: 1.15
+        });
+
+        const evalRes = await api('/soec/stack/evaluate-boudouard-and-syngas-ratio', 'POST', { stack_id: stackID });
+        const actRes = await api('/soec/stack/trigger-steam-trim-and-ramp-limiting', 'POST', { stack_id: stackID });
+        const dossierRes = await api(`/soec/stack/soec-efuel-sustainability-dossier/${stackID}`, 'GET');
+
+        if (badge) badge.textContent = `✈️ SOEC SAF: Ratio ${dossierRes.data.telemetry.produced_syngas_h2_co_ratio} | Boudouard: ${evalRes.data.boudouard_carbon_coking_risk} | Carbon ac: ${dossierRes.data.telemetry.carbon_activity_ac}`;
+        if (answerEl) {
+            let out = `✈️ SOLID OXIDE CO-ELECTROLYSIS (SOEC) & SYNTHETIC AVIATION FUEL E-KEROSENE SENTINEL (ASTM D7566 & ISO 50001):\n`;
+            out += `Stack Keramik SOEC: ${stackID} | Pabrik Power-to-Liquid: ${dossierRes.data.telemetry.plant_id}\n`;
+            out += `Suhu Tumpukan Keramik: ${dossierRes.data.telemetry.stack_operating_temp_c}°C | Kerapatan Arus: ${dossierRes.data.telemetry.stack_current_density_acm2} A/cm²\n\n`;
+            out += `KESETIMBANGAN ELEKTROKIMIA NERNST & ANALISIS PENGENDAPAN KARBON BOUDOUARD:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Aliran Uap Air (Steam): ${dossierRes.data.telemetry.steam_inlet_flow_kg_hr} kg/jam | Aliran Karbon Dioksida: ${dossierRes.data.telemetry.carbon_dioxide_inlet_flow_kg_hr} kg/jam\n`;
+            out += `• Rasio Stoikiometri Syngas H2/CO: ${dossierRes.data.telemetry.produced_syngas_h2_co_ratio} (Target Ideal 2.10:1 untuk Katalis Kobalt FT)\n`;
+            out += `• Deviasi Stoikiometri Syngas: ${evalRes.data.stoichiometric_deviation_pct}%\n`;
+            out += `• Aktivitas Karbon Reaksi Boudouard (ac): ${dossierRes.data.telemetry.carbon_activity_ac} (Batas Kritis > 1.0 Memicu Jelaga Padat)\n`;
+            out += `• Penurunan Tekanan Reaktor Fischer-Tropsch (ΔP): ${dossierRes.data.telemetry.ft_catalyst_delta_p_bar} bar\n`;
+            out += `• Tingkat Risiko Coking Katalis FT: ${evalRes.data.boudouard_carbon_coking_risk}\n`;
+            out += `• Risiko Re-Oksidasi Elektroda Ni-YSZ SOEC: ${evalRes.data.soec_electrode_reoxidation_risk}\n\n`;
+            out += `AKTUASI KONTROL PABRIK E-FUEL (STEAM RATIO TRIM, RAMP LIMITING & TAIL-GAS RECYCLE):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Bahan Bakar Berkelanjutan (SAF): ${actRes.data.action_id}\n`;
+            out += `• Penyesuaian Debit Aliran Uap Air Inflow: Ditingkatkan ke ${actRes.data.modulated_steam_inlet_flow_kg_hr} kg/jam (Meredam Aktivitas Karbon ac < 0.70)\n`;
+            out += `• Pembatasan Kerapatan Arus Listrik Stack: Maksimal ${actRes.data.commanded_current_density_limit_acm2} A/cm² (Mencegah Delaminasi Anoda Keramik)\n`;
+            out += `• Rasio Resirkulasi Gas Ekor (Tail-Gas Recycle): ${actRes.data.ft_tail_gas_recycle_ratio} (Mempertahankan Rasio H2/CO Tepat 2.10)\n`;
+            out += `• Estimasi Kerugian Stack SOEC & Katalis Terhindar: $${actRes.data.avoided_efuel_plant_loss_usd.toLocaleString()} USD (Mencegah Kerusakan Stack Elektroliser & Peracunan Katalis Kobalt)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Peningkatan pasokan uap ke 450 kg/jam menekan aktivitas karbon Boudouard di bawah 0.70 dan menyeimbangkan rasio syngas ke 2.10.</li>
+                <li>Ramp limiter arus menjaga tumpukan keramik Ni-YSZ tetap tereduksi stabil dari goncangan daya energi terbarukan intermiten.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses SOEC e-fuel sentinel: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

@@ -1797,6 +1797,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/ccs/injection/evaluate-hydrate-and-phase-risk": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Subsea Carbon Dioxide Injection & Wellhead Hydrate/Supercritical Phase Inversion Sentinel (ISO 27914 & DNV-RP-J202)",
+					"description": "Calculates Joule-Thomson cooling across subsea chokes, CO2 hydrate equilibrium phase boundaries, and caprock geomechanical fracture margins.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Joule-Thomson delta T, post-choke temperature, hydrate formation risk, caprock breach risk, and thermodynamic inhibitor dosing command"},
+					},
+				},
+			},
+			"/api/v1/scramjet/propulsion/evaluate-coking-and-unstart": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Hypersonic Scramjet Propulsion Thermal Management & Cryogenic Endothermic Fuel Cracking Sentinel (AIAA S-113A & NASA-STD-5001)",
+					"description": "Evaluates hypersonic scramjet wall heat flux, endothermic hydrocarbon fuel cracking conversion, pyrolytic carbon coking propensity, and isolator unstart margin.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Endothermic heat sink absorbed, coking index, supersonic auto-ignition delay, thermal choke hazard, and fuel split ratio command"},
+					},
+				},
+			},
+			"/api/v1/lnp/formulation/evaluate-pdi-and-encapsulation": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Biopharmaceutical Continuous mRNA Lipid Nanoparticle (LNP) Microfluidic Chaotic Advection Sentinel (FDA 21 CFR 211 & ICH Q8/Q10)",
+					"description": "Monitors microfluidic flow rate ratio (FRR), hydrodynamic diameter Z-average, polydispersity index (PDI), and inline mRNA encapsulation efficiency.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Flow rate ratio FRR, size drift nm, PDI compliance status, encapsulation quality level, and pump servo trim commands"},
+					},
+				},
+			},
+			"/api/v1/cpo/transceiver/evaluate-mode-hop-and-skew": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Silicon Photonics Co-Packaged Optics (CPO) Thermal Laser Array Mode Hopping & SerDes Skew Sentinel (OIF-CPO 3.2T & IEEE 802.3df)",
+					"description": "Evaluates multi-wavelength DFB laser carrier wavelength drift, thermo-optic waveguide phase shift, mode hopping risk, and SerDes lane-to-lane skew.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Optical frequency shift GHz, laser mode hop risk, SerDes skew hazard, micro-TEC current trim command, and DLL deskew delay"},
+					},
+				},
+			},
+			"/api/v1/soec/stack/evaluate-boudouard-and-syngas-ratio": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Solid Oxide Co-Electrolysis (SOEC) Syngas Fischer-Tropsch E-Fuel Catalyst Coking Sentinel (ASTM D7566 & ISO 50001)",
+					"description": "Calculates high-temperature SOEC Nernst equilibrium, Boudouard carbon deposition activity, syngas H2/CO stoichiometric ratio, and cobalt catalyst deactivation.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Syngas ratio deviation %, Boudouard coking risk, Ni-YSZ re-oxidation hazard, steam inlet trim command, and tail gas recycle ratio"},
+					},
+				},
+			},
 		},
 	}
 }

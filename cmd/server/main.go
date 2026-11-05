@@ -24,6 +24,7 @@ import (
 	corecart "erp-golang/internal/core/cart"
 	coreccus "erp-golang/internal/core/ccus"
 	corecosting "erp-golang/internal/core/costing"
+	corecpo "erp-golang/internal/core/cpo"
 	corecpq "erp-golang/internal/core/cpq"
 	corecrm "erp-golang/internal/core/crm"
 	corecryo "erp-golang/internal/core/cryo"
@@ -47,6 +48,7 @@ import (
 	corehypersonic "erp-golang/internal/core/hypersonic"
 	coreitops "erp-golang/internal/core/itops"
 	corelegal "erp-golang/internal/core/legal"
+	corelnp "erp-golang/internal/core/lnp"
 	corelogistics "erp-golang/internal/core/logistics"
 	coremaintenance "erp-golang/internal/core/maintenance"
 	coremarine "erp-golang/internal/core/marine"
@@ -68,12 +70,15 @@ import (
 	corerailway "erp-golang/internal/core/railway"
 	corerenewables "erp-golang/internal/core/renewables"
 	corescm "erp-golang/internal/core/scm"
+	corescramjet "erp-golang/internal/core/scramjet"
 	coreseabed "erp-golang/internal/core/seabed"
 	coresemiconductor "erp-golang/internal/core/semiconductor"
 	coresmr "erp-golang/internal/core/smr"
+	coresoec "erp-golang/internal/core/soec"
 	coresolidstate "erp-golang/internal/core/solidstate"
 	coreservice "erp-golang/internal/core/service"
 	coresubsea "erp-golang/internal/core/subsea"
+	coresubseaccs "erp-golang/internal/core/subsea_ccs"
 	coresubscription "erp-golang/internal/core/subscription"
 	coresystem "erp-golang/internal/core/system"
 	coretax "erp-golang/internal/core/tax"
@@ -339,7 +344,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.73.0",
+			"version":    "1.74.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -519,6 +524,11 @@ func main() {
 		coresmr.RegisterSMRRoutes(apiV1)
 		corepellicle.RegisterPellicleRoutes(apiV1)
 		coreuhvdc.RegisterUHVDCRoutes(apiV1)
+		coresubseaccs.RegisterSubseaCCSRoutes(apiV1)
+		corescramjet.RegisterScramjetRoutes(apiV1)
+		corelnp.RegisterMRNALNPRoutes(apiV1)
+		corecpo.RegisterCPORoutes(apiV1)
+		coresoec.RegisterSOECRoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend
