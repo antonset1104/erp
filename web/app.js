@@ -354,6 +354,7 @@ function loadCurrentTab() {
         case 'fraud-graph-sentinel': loadFraudSentinelData(); break;
         case 'self-healing-data': loadSelfHealingData(); break;
         case 'ambient-vision-dock': loadAmbientVisionData(); break;
+        case 'contract-legal-copilot': loadLegalCopilotData(); break;
     }
 }
 
@@ -37288,4 +37289,477 @@ function triggerVisionScanModal() {
     if (!ref) return;
 
     simulateVisionScan('NORMAL');
+}
+
+
+// =========================================================================
+// SECTION 102: AUTONOMOUS LEGAL CONTRACT RISK & REDLINING COPILOT
+// =========================================================================
+
+let cachedLegalOverview = null;
+let activeLegalAudit = null;
+let activeLegalClauses = [];
+let selectedLegalClause = null;
+let currentLegalSubtab = 'contracts';
+
+async function loadLegalCopilotData() {
+    try {
+        const res = await api('/ai/contracts/overview');
+        const overview = (res && res.data) ? res.data : (res || {});
+        cachedLegalOverview = overview;
+
+        renderLegalOverview(overview);
+
+        const audits = overview.recent_audits || [];
+        const highRiskClauses = overview.high_risk_clauses || [];
+
+        const elCountContracts = document.getElementById('countSubtabContracts');
+        const elCountClauses = document.getElementById('countSubtabClauses');
+        if (elCountContracts) elCountContracts.textContent = audits.length;
+        if (elCountClauses) elCountClauses.textContent = highRiskClauses.length;
+
+        if (audits.length > 0) {
+            let targetId = audits[0].id;
+            if (activeLegalAudit) {
+                const found = audits.find(a => a.id === activeLegalAudit.id);
+                if (found) targetId = found.id;
+            }
+            await selectContractAudit(targetId);
+        } else {
+            renderLegalEmptyState();
+        }
+
+        renderLegalContractsTable(audits);
+        renderLegalClausesTable(highRiskClauses);
+    } catch (err) {
+        console.error('Error loading legal copilot data:', err);
+        if (typeof showToast === 'function') {
+            showToast('Gagal memuat data Legal Copilot: ' + err.message, 'error');
+        }
+    }
+}
+
+function renderLegalOverview(overview) {
+    if (!overview) return;
+
+    const elTotal = document.getElementById('legalStatTotalContracts');
+    const elCritical = document.getElementById('legalStatCriticalCount');
+    const elAvgRisk = document.getElementById('legalStatAvgRiskScore');
+    const elAvgRiskLabel = document.getElementById('legalStatAvgRiskLabel');
+    const elSafeguarded = document.getElementById('legalStatTotalSafeguarded');
+    const elTotalRedlines = document.getElementById('legalStatTotalRedlines');
+
+    if (elTotal) elTotal.textContent = overview.total_contracts_audited || 0;
+    if (elCritical) elCritical.textContent = (overview.critical_exposure_contracts || 0) + ' Kontrak';
+    if (elAvgRisk) elAvgRisk.textContent = (overview.average_risk_score || 0).toFixed(1) + '%';
+    if (elAvgRiskLabel) {
+        const avg = overview.average_risk_score || 0;
+        if (avg >= 70) {
+            elAvgRiskLabel.textContent = 'STATUS: PAPARAN KRITIS';
+            elAvgRiskLabel.style.color = '#ef4444';
+        } else if (avg >= 40) {
+            elAvgRiskLabel.textContent = 'STATUS: RISIKO TINGGI';
+            elAvgRiskLabel.style.color = '#f59e0b';
+        } else {
+            elAvgRiskLabel.textContent = 'STATUS: TERKENDALI / AMAN';
+            elAvgRiskLabel.style.color = '#10b981';
+        }
+    }
+    if (elSafeguarded) elSafeguarded.textContent = formatCurrency(overview.total_safeguarded_value_idr || 0);
+    if (elTotalRedlines) elTotalRedlines.textContent = overview.redlines_generated_count || 0;
+}
+
+async function selectContractAudit(auditId) {
+    try {
+        const res = await api('/ai/contracts/audits/' + auditId);
+        const audit = (res && res.data) ? res.data : null;
+        const clauses = (res && res.clauses) ? res.clauses : [];
+
+        activeLegalAudit = audit;
+        activeLegalClauses = clauses;
+
+        renderActiveContract(audit, clauses);
+
+        if (clauses.length > 0) {
+            selectLegalClause(clauses[0].id);
+        } else {
+            renderClauseEmptyState();
+        }
+    } catch (err) {
+        console.error('Error fetching audit detail:', err);
+    }
+}
+
+function renderActiveContract(audit, clauses) {
+    if (!audit) return;
+
+    const elTitle = document.getElementById('legalActiveTitle');
+    const elCounterparty = document.getElementById('legalActiveCounterparty');
+    const elBadge = document.getElementById('legalActiveRiskBadge');
+    const elCode = document.getElementById('legalActiveCode');
+    const elValue = document.getElementById('legalActiveValue');
+    const elSummary = document.getElementById('legalActiveSummary');
+    const elCount = document.getElementById('legalActiveClauseCount');
+
+    if (elTitle) elTitle.textContent = audit.contract_title || 'Perjanjian Kerjasama';
+    if (elCounterparty) elCounterparty.textContent = 'Mitra: ' + (audit.counterparty_name || '--') + ' | ' + (audit.contract_type || 'PKS');
+    if (elBadge) {
+        elBadge.textContent = (audit.risk_level || 'LOW') + ' (' + (audit.risk_score || 0).toFixed(1) + '%)';
+        if (audit.risk_level === 'CRITICAL') {
+            elBadge.style.background = 'rgba(239, 68, 68, 0.15)';
+            elBadge.style.color = '#ef4444';
+        } else if (audit.risk_level === 'HIGH') {
+            elBadge.style.background = 'rgba(245, 158, 11, 0.15)';
+            elBadge.style.color = '#f59e0b';
+        } else {
+            elBadge.style.background = 'rgba(16, 185, 129, 0.15)';
+            elBadge.style.color = '#10b981';
+        }
+    }
+    if (elCode) elCode.textContent = audit.audit_code || '--';
+    if (elValue) elValue.textContent = formatCurrency(audit.contract_value_idr || 0);
+    if (elSummary) elSummary.textContent = audit.executive_summary || 'Tinjauan hukum AI selesai tanpa catatan kritis.';
+    if (elCount) {
+        elCount.textContent = clauses.length + ' KLAUSUL';
+        elCount.style.background = clauses.length > 0 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)';
+        elCount.style.color = clauses.length > 0 ? '#ef4444' : '#10b981';
+    }
+
+    // Render Clause Pills
+    const container = document.getElementById('legalClauseListContainer');
+    if (!container) return;
+
+    if (!clauses || clauses.length === 0) {
+        container.innerHTML = '<div style="color: var(--text-muted); font-size: 0.75rem; text-align: center; padding: 2rem 0;">Semua klausul aman dan memenuhi standar kepatuhan.</div>';
+        return;
+    }
+
+    let html = '';
+    clauses.forEach(c => {
+        let borderCol = '#ef4444';
+        let bgCol = 'rgba(239, 68, 68, 0.1)';
+        if (c.risk_severity === 'HIGH') {
+            borderCol = '#f59e0b';
+            bgCol = 'rgba(245, 158, 11, 0.1)';
+        } else if (c.risk_severity === 'MEDIUM') {
+            borderCol = '#38bdf8';
+            bgCol = 'rgba(56, 189, 248, 0.1)';
+        } else if (c.risk_severity === 'LOW') {
+            borderCol = '#10b981';
+            bgCol = 'rgba(16, 185, 129, 0.1)';
+        }
+
+        const isSelected = selectedLegalClause && selectedLegalClause.id === c.id;
+        const activeStyle = isSelected ? 'border: 2px solid #a855f7; box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);' : 'border: 1px solid rgba(255, 255, 255, 0.08);';
+
+        html += `
+            <div onclick="selectLegalClause(${c.id})" style="cursor: pointer; padding: 0.65rem; border-radius: 6px; background: rgba(255, 255, 255, 0.02); ${activeStyle} transition: all 0.2s ease;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                    <strong style="font-size: 0.8rem; color: #e2e8f0;">${c.clause_number}</strong>
+                    <span class="badge" style="background: ${bgCol}; color: ${borderCol}; font-size: 0.65rem; font-weight: 700; padding: 0.15rem 0.45rem; border-radius: 999px;">
+                        ${c.risk_severity}
+                    </span>
+                </div>
+                <div style="font-size: 0.7rem; color: #a855f7; font-weight: 600; margin-bottom: 0.2rem;">
+                    ${c.clause_category.replace(/_/g, ' ')}
+                </div>
+                <div style="font-size: 0.7rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    ${c.risk_explanation}
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+function selectLegalClause(clauseId) {
+    if (!activeLegalClauses) return;
+    const found = activeLegalClauses.find(c => c.id === clauseId);
+    if (!found) return;
+
+    selectedLegalClause = found;
+
+    // Refresh clause pill selection styling
+    renderActiveContract(activeLegalAudit, activeLegalClauses);
+
+    const elHeader = document.getElementById('redlineClauseHeader');
+    const elCategory = document.getElementById('redlineClauseCategory');
+    const elSeverity = document.getElementById('redlineSeverityBadge');
+    const elOrig = document.getElementById('redlineOriginalText');
+    const elExpl = document.getElementById('redlineExplanationText');
+    const elCounter = document.getElementById('redlineCounterText');
+    const elStatus = document.getElementById('redlineStatusLabel');
+
+    if (elHeader) elHeader.textContent = found.clause_number + ' - ' + found.clause_category.replace(/_/g, ' ');
+    if (elCategory) elCategory.textContent = 'KATEGORI RISIKO: ' + found.clause_category;
+    if (elSeverity) {
+        elSeverity.textContent = found.risk_severity + ' EXPOSURE';
+        if (found.risk_severity === 'CRITICAL') {
+            elSeverity.style.background = 'rgba(239, 68, 68, 0.15)';
+            elSeverity.style.color = '#ef4444';
+        } else if (found.risk_severity === 'HIGH') {
+            elSeverity.style.background = 'rgba(245, 158, 11, 0.15)';
+            elSeverity.style.color = '#f59e0b';
+        } else {
+            elSeverity.style.background = 'rgba(16, 185, 129, 0.15)';
+            elSeverity.style.color = '#10b981';
+        }
+    }
+    if (elOrig) elOrig.textContent = found.original_clause_text;
+    if (elExpl) elExpl.textContent = found.risk_explanation;
+    if (elCounter) elCounter.textContent = found.recommended_counter_text;
+    if (elStatus) elStatus.textContent = 'STATUS NEGOSIASI: ' + found.acceptance_status;
+}
+
+function renderClauseEmptyState() {
+    const elOrig = document.getElementById('redlineOriginalText');
+    const elExpl = document.getElementById('redlineExplanationText');
+    const elCounter = document.getElementById('redlineCounterText');
+    if (elOrig) elOrig.textContent = 'Tidak ada klausul berisiko ditemukan.';
+    if (elExpl) elExpl.textContent = 'Kontrak selaras dengan standar legal playbook.';
+    if (elCounter) elCounter.textContent = 'Tidak diperlukan perubahan klausul.';
+}
+
+function renderLegalEmptyState() {
+    const container = document.getElementById('legalClauseListContainer');
+    if (container) {
+        container.innerHTML = '<div style="color: var(--text-muted); font-size: 0.75rem; text-align: center; padding: 2rem 0;">Belum ada kontrak dianalisis. Silakan gunakan simulasi skenario.</div>';
+    }
+}
+
+function renderLegalContractsTable(audits) {
+    const tbody = document.getElementById('legalContractsTableBody');
+    if (!tbody) return;
+
+    if (!audits || audits.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted" style="padding: 2rem;">Belum ada riwayat audit kontrak.</td></tr>';
+        return;
+    }
+
+    let rows = '';
+    audits.forEach(a => {
+        let badgeBg = 'rgba(16, 185, 129, 0.15)';
+        let badgeColor = '#10b981';
+        if (a.risk_level === 'CRITICAL') {
+            badgeBg = 'rgba(239, 68, 68, 0.15)';
+            badgeColor = '#ef4444';
+        } else if (a.risk_level === 'HIGH') {
+            badgeBg = 'rgba(245, 158, 11, 0.15)';
+            badgeColor = '#f59e0b';
+        }
+
+        const dateStr = a.created_at ? new Date(a.created_at).toLocaleDateString('id-ID') : '--';
+
+        rows += `
+            <tr style="cursor: pointer;" onclick="selectContractAudit(${a.id})">
+                <td style="font-family: monospace; font-size: 0.8rem; color: #a855f7; font-weight: 600;">${a.audit_code}</td>
+                <td>${dateStr}</td>
+                <td>
+                    <div style="font-weight: 600; color: #e2e8f0;">${a.contract_title}</div>
+                    <small style="color: var(--text-muted);">${a.counterparty_name || '--'}</small>
+                </td>
+                <td style="font-size: 0.75rem;">${a.contract_type}</td>
+                <td style="font-weight: 600; color: #10b981;">${formatCurrency(a.contract_value_idr)}</td>
+                <td>
+                    <strong style="color: ${a.risk_score >= 70 ? '#ef4444' : (a.risk_score >= 40 ? '#f59e0b' : '#10b981')};">
+                        ${a.risk_score.toFixed(1)}%
+                    </strong>
+                </td>
+                <td>
+                    <span class="badge" style="background: ${badgeBg}; color: ${badgeColor}; font-weight: 600; padding: 0.2rem 0.5rem; border-radius: 999px; font-size: 0.7rem;">
+                        ${a.risk_level}
+                    </span>
+                </td>
+                <td style="font-size: 0.75rem; color: #06b6d4;">${a.negotiation_status}</td>
+                <td>
+                    <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); selectContractAudit(${a.id})">
+                        🔍 Buka Redline
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = rows;
+}
+
+function renderLegalClausesTable(clauses) {
+    const tbody = document.getElementById('legalClausesTableBody');
+    if (!tbody) return;
+
+    if (!clauses || clauses.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted" style="padding: 2rem;">Belum ada temuan klausul berisiko tinggi.</td></tr>';
+        return;
+    }
+
+    let rows = '';
+    clauses.forEach(c => {
+        let badgeBg = 'rgba(239, 68, 68, 0.15)';
+        let badgeColor = '#ef4444';
+        if (c.risk_severity === 'HIGH') {
+            badgeBg = 'rgba(245, 158, 11, 0.15)';
+            badgeColor = '#f59e0b';
+        }
+
+        rows += `
+            <tr>
+                <td style="font-family: monospace; font-size: 0.75rem;">#${c.id}</td>
+                <td style="font-weight: 600;">${c.clause_number}</td>
+                <td style="font-size: 0.75rem; color: #a855f7;">${c.clause_category.replace(/_/g, ' ')}</td>
+                <td>
+                    <span class="badge" style="background: ${badgeBg}; color: ${badgeColor}; font-weight: 600; padding: 0.15rem 0.45rem; border-radius: 999px; font-size: 0.7rem;">
+                        ${c.risk_severity}
+                    </span>
+                </td>
+                <td style="font-size: 0.75rem; max-width: 250px; color: #f87171; line-height: 1.4;">
+                    ${c.original_clause_text}
+                </td>
+                <td style="font-size: 0.75rem; max-width: 250px; color: #34d399; line-height: 1.4;">
+                    ${c.recommended_counter_text}
+                </td>
+                <td style="font-size: 0.75rem; color: #06b6d4; font-weight: 600;">${c.acceptance_status}</td>
+                <td>
+                    <button class="btn btn-sm btn-secondary" onclick="updateClauseAcceptance(${c.id}, 'ACCEPTED_BY_COUNTERPARTY')">
+                        ✅ Terima
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = rows;
+}
+
+async function simulateContractAudit(scenario) {
+    try {
+        let payload = {};
+        if (scenario === 'LOGISTICS_CRITICAL') {
+            payload = {
+                contract_title: 'Perjanjian Kerjasama Angkutan & Distribusi Nasional 2026-2027',
+                contract_type: 'PROCUREMENT_PKS',
+                counterparty_name: 'PT Mega Logistik Trans Nusantara',
+                contract_value_idr: 14500000000.0,
+                raw_contract_text: 'Pasal 9.4: Keterlambatan pembayaran dikenakan denda sebesar 2% per hari tanpa batasan akumulasi maksimal. Pasal 12.1: Pembeli menanggung segala kerugian operasional dan membebaskan vendor dari segala tuntutan pihak ketiga tanpa batas nominal pertanggungjawaban (unlimited liability sepihak). Pasal 15.2: Pihak Kedua berhak mengakhiri Perjanjian secara sepihak seketika dengan pemberitahuan tertulis 3 hari kerja tanpa ganti rugi.',
+                created_by: 'Legal Procurement Specialist'
+            };
+        } else if (scenario === 'CLOUD_MSA') {
+            payload = {
+                contract_title: 'Master Service Agreement SaaS Cloud ERP Integration',
+                contract_type: 'VENDOR_MSA',
+                counterparty_name: 'PT Cloud Sentra Informatika',
+                contract_value_idr: 4800000000.0,
+                raw_contract_text: 'Pasal 11.3: Seluruh modifikasi, integrasi API, dan data kustomisasi sistem sepenuhnya menjadi hak milik eksklusif Pihak Kedua. Pasal 14.1: Para Pihak menjaga kerahasiaan tanpa kewajiban sertifikasi keamanan data khusus. Pasal 12.1: Pihak Kedua tidak bertanggung jawab atas kerugian tidak langsung sepihak.',
+                created_by: 'IT Corporate Governance'
+            };
+        } else if (scenario === 'NDA_MUTUAL') {
+            payload = {
+                contract_title: 'Bilateral Mutual Non-Disclosure Agreement (NDA)',
+                contract_type: 'NDA',
+                counterparty_name: 'PT Sinar Abadi Perkasa',
+                contract_value_idr: 500000000.0,
+                raw_contract_text: 'Pasal 18.1: Perjanjian ini diatur dan ditafsirkan berdasarkan hukum Negara Republik Indonesia. Segala perselisihan diselesaikan melalui musyawarah secara berimbang untuk melindungi rahasia dagang kedua belah pihak.',
+                created_by: 'Corporate Secretary'
+            };
+        }
+
+        const res = await api('/ai/contracts/analyze-full', 'POST', payload);
+        if (typeof showToast === 'function') {
+            const audit = res.data || {};
+            showToast('Audit Kontrak Selesai! Skor Risiko: ' + (audit.risk_score || 0).toFixed(1) + '% (' + audit.risk_level + ')', 'success');
+        }
+        await loadLegalCopilotData();
+        if (res.data && res.data.id) {
+            await selectContractAudit(res.data.id);
+        }
+    } catch (err) {
+        console.error('Error simulating contract audit:', err);
+        if (typeof showToast === 'function') {
+            showToast('Gagal simulasi audit: ' + err.message, 'error');
+        }
+    }
+}
+
+async function updateCurrentClauseStatus(status) {
+    if (!selectedLegalClause) return;
+    await updateClauseAcceptance(selectedLegalClause.id, status);
+}
+
+async function updateClauseAcceptance(clauseId, status) {
+    try {
+        const res = await api('/ai/contracts/clauses/' + clauseId + '/status', 'POST', { status: status });
+        if (typeof showToast === 'function') {
+            showToast('Status negosiasi klausul berhasil diperbarui ke: ' + status, 'success');
+        }
+        await loadLegalCopilotData();
+    } catch (err) {
+        console.error('Error updating clause status:', err);
+        if (typeof showToast === 'function') {
+            showToast('Gagal update status klausul: ' + err.message, 'error');
+        }
+    }
+}
+
+function copyCounterClauseText() {
+    if (!selectedLegalClause || !selectedLegalClause.recommended_counter_text) {
+        if (typeof showToast === 'function') showToast('Tidak ada klausul tandingan untuk disalin', 'warning');
+        return;
+    }
+    navigator.clipboard.writeText(selectedLegalClause.recommended_counter_text).then(() => {
+        if (typeof showToast === 'function') showToast('Teks klausul tandingan berhasil disalin ke clipboard!', 'success');
+    }).catch(() => {
+        alert(selectedLegalClause.recommended_counter_text);
+    });
+}
+
+async function exportActiveContractMemo() {
+    if (!activeLegalAudit) return;
+    try {
+        const res = await api('/ai/contracts/audits/' + activeLegalAudit.id + '/export');
+        const memoText = (res && res.data) ? res.data : '';
+        alert(memoText);
+    } catch (err) {
+        console.error('Error exporting contract memo:', err);
+    }
+}
+
+async function seedLegalDemoData() {
+    try {
+        await api('/ai/contracts/seed-demo', 'POST');
+        if (typeof showToast === 'function') {
+            showToast('Data demo audit kontrak dan redlines berhasil disuntikkan & diverifikasi!', 'success');
+        }
+        await loadLegalCopilotData();
+    } catch (err) {
+        console.error('Error seeding legal demo data:', err);
+        if (typeof showToast === 'function') {
+            showToast('Gagal menyuntikkan data demo: ' + err.message, 'error');
+        }
+    }
+}
+
+function switchLegalSubtab(tabName) {
+    currentLegalSubtab = tabName;
+    const btnContracts = document.getElementById('btnLegalSubtabContracts');
+    const btnClauses = document.getElementById('btnLegalSubtabClauses');
+    const viewContracts = document.getElementById('legalSubtabContractsView');
+    const viewClauses = document.getElementById('legalSubtabClausesView');
+
+    if (tabName === 'contracts') {
+        if (btnContracts) { btnContracts.classList.add('btn-primary'); btnContracts.classList.remove('btn-secondary'); }
+        if (btnClauses) { btnClauses.classList.add('btn-secondary'); btnClauses.classList.remove('btn-primary'); }
+        if (viewContracts) viewContracts.style.display = 'block';
+        if (viewClauses) viewClauses.style.display = 'none';
+    } else {
+        if (btnContracts) { btnContracts.classList.add('btn-secondary'); btnContracts.classList.remove('btn-primary'); }
+        if (btnClauses) { btnClauses.classList.add('btn-primary'); btnClauses.classList.remove('btn-secondary'); }
+        if (viewContracts) viewContracts.style.display = 'none';
+        if (viewClauses) viewClauses.style.display = 'block';
+    }
+}
+
+function triggerLegalAuditModal() {
+    const title = prompt('Masukkan Judul Kontrak Perjanjian:', 'Perjanjian Jasa Vendor Pengadaan IT 2026');
+    if (!title) return;
+    simulateContractAudit('LOGISTICS_CRITICAL');
 }

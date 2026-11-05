@@ -280,6 +280,10 @@
                     <span class="nav-icon">👁️</span>
                     <span class="nav-label">Ambient Vision Logistics</span>
                 </button>
+                <button class="nav-item" data-tab="contract-legal-copilot">
+                    <span class="nav-icon">⚖️</span>
+                    <span class="nav-label">Legal Contract AI</span>
+                </button>
             </nav>
 
             <div class="user-profile">
@@ -4340,6 +4344,251 @@
                                     </thead>
                                     <tbody id="visionRMAsTableBody">
                                         <tr><td colspan="9" class="text-center text-muted" style="padding: 2rem;">Memuat daftar klaim RMA...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                
+                <!-- ===================================================== -->
+                <!-- SECTION: AUTONOMOUS LEGAL CONTRACT RISK & REDLINING   -->
+                <!-- ===================================================== -->
+                <section id="tab-contract-legal-copilot" class="tab-view">
+                    <div class="content-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                                <h2>Autonomous Legal Contract Risk &amp; Intelligent Negotiation Redlining Copilot</h2>
+                                <span class="badge" style="background: rgba(168, 85, 247, 0.15); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3); font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.75rem;">ENTERPRISE LEGAL PLAYBOOK &amp; SMART REDLINES</span>
+                            </div>
+                            <p class="subtitle">Pemeriksaan risiko klausul perjanjian vendor/klien secara semantik, visualisasi perbandingan klausul tandingan (side-by-side redlines), mitigasi liabilitas hukum timpang, dan ekspor draf memo negosiasi otomatis.</p>
+                        </div>
+                        <div class="header-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <button class="btn btn-primary" onclick="triggerLegalAuditModal()" style="background: linear-gradient(135deg, #a855f7, #7e22ce); border: none; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.25);">
+                                <span>📋</span> Audit Draf Kontrak Baru
+                            </button>
+                            <button class="btn btn-secondary" onclick="seedLegalDemoData()" title="Injeksi data demo kontrak PKS, MSA SaaS, dan NDA bilateral">
+                                <span>🧪</span> Injeksi Data Demo Kontrak
+                            </button>
+                            <button class="btn btn-secondary" onclick="loadLegalCopilotData()" title="Segarkan Data Legal Copilot">
+                                <span>🔄</span> Refresh Legal Copilot
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 5 KPI Metric Cards -->
+                    <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                        <div class="card stat-card" style="border-top: 3px solid #a855f7;">
+                            <div class="stat-icon" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;">⚖️</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Total Kontrak Dianalisis</span>
+                                <h3 id="legalStatTotalContracts" class="stat-value">0</h3>
+                                <small style="color: #a855f7; font-size: 0.75rem; font-weight: 600;">SEMANTIC PLAYBOOK AUDIT</small>
+                            </div>
+                        </div>
+
+                        <div class="card stat-card" style="border-top: 3px solid #ef4444;">
+                            <div class="stat-icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">🚨</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Kontrak Paparan Risiko Kritis</span>
+                                <h3 id="legalStatCriticalCount" class="stat-value" style="color: #ef4444;">0</h3>
+                                <small style="color: var(--text-muted); font-size: 0.75rem;">Liabilitas &amp; Denda Ekstrem</small>
+                            </div>
+                        </div>
+
+                        <div class="card stat-card" style="border-top: 3px solid #f59e0b;">
+                            <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">📊</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Rata-Rata Skor Risiko Portofolio</span>
+                                <h3 id="legalStatAvgRiskScore" class="stat-value" style="color: #f59e0b;">0.0%</h3>
+                                <small id="legalStatAvgRiskLabel" style="color: #f59e0b; font-size: 0.75rem; font-weight: 600;">STATUS RISIKO: --</small>
+                            </div>
+                        </div>
+
+                        <div class="card stat-card" style="border-top: 3px solid #10b981;">
+                            <div class="stat-icon" style="background: rgba(168, 85, 247, 0.15); color: #10b981;">🛡️</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Nilai Kontrak Terproteksi</span>
+                                <h3 id="legalStatTotalSafeguarded" class="stat-value" style="color: #10b981;">Rp 0</h3>
+                                <small style="color: #10b981; font-size: 0.75rem; font-weight: 600;">TOTAL PORTFOLIO VALUE</small>
+                            </div>
+                        </div>
+
+                        <div class="card stat-card" style="border-top: 3px solid #06b6d4;">
+                            <div class="stat-icon" style="background: rgba(6, 182, 212, 0.15); color: #06b6d4;">✍️</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Klausul Tandingan (Redlines)</span>
+                                <h3 id="legalStatTotalRedlines" class="stat-value" style="color: #06b6d4;">0</h3>
+                                <small style="color: #06b6d4; font-size: 0.75rem; font-weight: 600;">COUNTER-OFFERS DRAFTED</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Workspace: Contract Navigator & Side-by-Side Redlines -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                        <!-- Left Column: Active Contract & Clause Navigator -->
+                        <div class="card" style="padding: 1.25rem; display: flex; flex-direction: column;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <div>
+                                    <h4 id="legalActiveTitle" style="margin: 0; font-size: 1rem; font-weight: 600; color: #e2e8f0;">Pilih Kontrak untuk Ditinjau</h4>
+                                    <small id="legalActiveCounterparty" style="color: var(--text-muted); font-size: 0.75rem;">Mitra: --</small>
+                                </div>
+                                <span id="legalActiveRiskBadge" class="badge" style="background: rgba(168, 85, 247, 0.15); color: #a855f7; font-weight: 700; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 999px;">AUDIT READY</span>
+                            </div>
+
+                            <!-- Executive Summary Box -->
+                            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span style="font-size: 0.75rem; color: var(--text-muted);">Kode Audit:</span>
+                                    <strong id="legalActiveCode" style="font-size: 0.8rem; font-family: monospace; color: #a855f7;">LGL-AUD-READY</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span style="font-size: 0.75rem; color: var(--text-muted);">Nilai Kontrak:</span>
+                                    <strong id="legalActiveValue" style="font-size: 0.8rem; color: #10b981;">Rp 0</strong>
+                                </div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.5;" id="legalActiveSummary">
+                                    Silakan pilih kontrak dari daftar riwayat atau gunakan tombol simulasi skenario di bawah ini untuk memulai tinjauan cerdas.
+                                </div>
+                            </div>
+
+                            <!-- Clause Pills Navigator -->
+                            <div style="flex: 1; display: flex; flex-direction: column;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                    <span style="font-size: 0.75rem; font-weight: 600;">Daftar Temuan Klausul Berisiko:</span>
+                                    <span id="legalActiveClauseCount" class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; font-size: 0.7rem;">0 TEMUAN</span>
+                                </div>
+                                <div id="legalClauseListContainer" style="flex: 1; max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; padding-right: 0.25rem;">
+                                    <div style="color: var(--text-muted); font-size: 0.75rem; text-align: center; padding: 2rem 0;">Belum ada klausul dimuat.</div>
+                                </div>
+                            </div>
+
+                            <!-- Quick Preset Triggers -->
+                            <div style="margin-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 0.75rem;">
+                                <div style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600;">SIMULASI SKENARIO KONTRAK ENTERPRISE:</div>
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                    <button class="btn btn-sm btn-secondary" onclick="simulateContractAudit('LOGISTICS_CRITICAL')" style="border-color: #ef4444; color: #ef4444;">
+                                        📜 PKS Distribusi (Denda 2% &amp; Liabilitas Timpang)
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="simulateContractAudit('CLOUD_MSA')" style="border-color: #f59e0b; color: #f59e0b;">
+                                        ☁️ Cloud SaaS MSA (Hak Cipta IP &amp; Privasi Data)
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="simulateContractAudit('NDA_MUTUAL')" style="border-color: #10b981; color: #10b981;">
+                                        🤝 Bilateral NDA (Kerahasiaan Berimbang BANI)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Side-by-Side Redline Diff & Counter-Offer Generator -->
+                        <div class="card" style="padding: 1.25rem; display: flex; flex-direction: column;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <div>
+                                    <h4 id="redlineClauseHeader" style="margin: 0; font-size: 1rem; font-weight: 600;">Editor Klausul Tandingan</h4>
+                                    <small id="redlineClauseCategory" style="color: #a855f7; font-size: 0.75rem; font-weight: 600;">KATEGORI: --</small>
+                                </div>
+                                <span id="redlineSeverityBadge" class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; font-weight: 700; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 999px;">CRITICAL</span>
+                            </div>
+
+                            <!-- Original Clause Box (Redline Deletions) -->
+                            <div style="margin-bottom: 1rem;">
+                                <div style="font-size: 0.75rem; font-weight: 600; color: #f87171; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.25rem;">
+                                    <span>⚠️ Teks Klausul Asli Vendor (Draft Pengadaan):</span>
+                                </div>
+                                <div id="redlineOriginalText" style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-left: 4px solid #ef4444; border-radius: 6px; padding: 0.75rem; font-size: 0.75rem; color: #fca5a5; line-height: 1.5; text-decoration: line-through;">
+                                    Pilih klausul untuk meninjau redline.
+                                </div>
+                            </div>
+
+                            <!-- Risk Explanation Alert -->
+                            <div style="margin-bottom: 1rem;">
+                                <div style="font-size: 0.75rem; font-weight: 600; color: #fbbf24; margin-bottom: 0.25rem;">
+                                    <span>🔍 Analisis Paparan Risiko Hukum (Legal Risk Rationale):</span>
+                                </div>
+                                <div id="redlineExplanationText" style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-left: 4px solid #f59e0b; border-radius: 6px; padding: 0.75rem; font-size: 0.75rem; color: #fcd34d; line-height: 1.5;">
+                                    Pertimbangan hukum AI akan dimuat di sini.
+                                </div>
+                            </div>
+
+                            <!-- Recommended Counter-Offer Clause (Additions) -->
+                            <div style="flex: 1; display: flex; flex-direction: column; margin-bottom: 1rem;">
+                                <div style="font-size: 0.75rem; font-weight: 600; color: #34d399; margin-bottom: 0.25rem; display: flex; justify-content: space-between;">
+                                    <span>✅ Usulan Klausul Tandingan Berimbang (AI Counter-Offer):</span>
+                                    <small id="redlineStatusLabel" style="color: #06b6d4;">STATUS: PROPOSED</small>
+                                </div>
+                                <div id="redlineCounterText" style="flex: 1; min-height: 80px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-left: 4px solid #10b981; border-radius: 6px; padding: 0.75rem; font-size: 0.75rem; color: #a7f3d0; line-height: 1.5;">
+                                    Klausul tandingan rekomendasi AI berstandar hukum B2B akan dimuat di sini.
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                <button class="btn btn-sm btn-primary" onclick="updateCurrentClauseStatus('ACCEPTED_BY_COUNTERPARTY')" style="background: linear-gradient(135deg, #10b981, #059669); border: none;">
+                                    ✅ Tandai Diterima Rekanan
+                                </button>
+                                <button class="btn btn-sm btn-secondary" onclick="copyCounterClauseText()">
+                                    📋 Salin Klausul Tandingan
+                                </button>
+                                <button class="btn btn-sm btn-secondary" onclick="exportActiveContractMemo()" style="border-color: #a855f7; color: #a855f7;">
+                                    📄 Ekspor Memo Negosiasi
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subtabs Section: 1. All Contract Audits, 2. High-Risk Clauses Catalog -->
+                    <div class="card" style="padding: 1.25rem;">
+                        <div style="display: flex; gap: 0.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                            <button id="btnLegalSubtabContracts" class="btn btn-sm btn-primary" onclick="switchLegalSubtab('contracts')">
+                                📋 Riwayat Audit Kontrak (<span id="countSubtabContracts">0</span>)
+                            </button>
+                            <button id="btnLegalSubtabClauses" class="btn btn-sm btn-secondary" onclick="switchLegalSubtab('clauses')">
+                                📑 Katalog Klausul Berisiko Tinggi (<span id="countSubtabClauses">0</span>)
+                            </button>
+                        </div>
+
+                        <!-- Subtab 1: Contracts Table -->
+                        <div id="legalSubtabContractsView">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Kode Audit</th>
+                                            <th>Waktu Audit</th>
+                                            <th>Judul Kontrak &amp; Mitra</th>
+                                            <th>Tipe Perjanjian</th>
+                                            <th>Nilai Kontrak (IDR)</th>
+                                            <th>Skor Risiko</th>
+                                            <th>Tingkat Risiko</th>
+                                            <th>Status Negosiasi</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="legalContractsTableBody">
+                                        <tr><td colspan="9" class="text-center text-muted" style="padding: 2rem;">Memuat daftar audit kontrak...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Subtab 2: Clauses Catalog Table -->
+                        <div id="legalSubtabClausesView" style="display: none;">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nomor Pasal</th>
+                                            <th>Kategori Risiko</th>
+                                            <th>Tingkat Keparahan</th>
+                                            <th>Teks Klausul Asli</th>
+                                            <th>Usulan Klausul Tandingan</th>
+                                            <th>Status Persetujuan</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="legalClausesTableBody">
+                                        <tr><td colspan="8" class="text-center text-muted" style="padding: 2rem;">Memuat katalog klausul berisiko...</td></tr>
                                     </tbody>
                                 </table>
                             </div>

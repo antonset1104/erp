@@ -911,6 +911,120 @@ func (h *Handler) SeedCargoVisionDemoData(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Demo cargo vision scans and RMAs successfully seeded"})
 }
 
+// Autonomous Legal Contract Risk & Intelligent Negotiation Redlining Copilot
+func (h *Handler) GetLegalContractsOverview(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	engine := GetLegalRedlineEngine(h.db)
+	overview, err := engine.GetOverview(companyID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": overview})
+}
+
+func (h *Handler) GetLegalContractAudits(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	riskLevel := c.Query("risk_level")
+	engine := GetLegalRedlineEngine(h.db)
+	audits, err := engine.GetAudits(companyID, riskLevel, 50)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": audits, "count": len(audits)})
+}
+
+func (h *Handler) GetLegalContractAuditDetail(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	idStr := c.Param("id")
+	var id uint
+	if _, err := fmt.Sscanf(idStr, "%d", &id); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid audit ID"})
+		return
+	}
+	engine := GetLegalRedlineEngine(h.db)
+	audit, clauses, err := engine.GetAuditByID(companyID, id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Contract audit not found"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": audit, "clauses": clauses})
+}
+
+func (h *Handler) AnalyzeContractFull(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	var req AnalyzeContractRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	engine := GetLegalRedlineEngine(h.db)
+	audit, clauses, err := engine.AnalyzeContract(companyID, req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Legal contract audit and redline analysis completed",
+		"data":    audit,
+		"clauses": clauses,
+	})
+}
+
+type UpdateClauseStatusRequest struct {
+	Status string `json:"status"`
+}
+
+func (h *Handler) UpdateLegalClauseStatus(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	idStr := c.Param("id")
+	var id uint
+	if _, err := fmt.Sscanf(idStr, "%d", &id); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid clause ID"})
+		return
+	}
+	var req UpdateClauseStatusRequest
+	_ = c.ShouldBindJSON(&req)
+	if req.Status == "" {
+		req.Status = "ACCEPTED_BY_COUNTERPARTY"
+	}
+	engine := GetLegalRedlineEngine(h.db)
+	clause, err := engine.UpdateClauseStatus(companyID, id, req.Status)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Clause negotiation status updated", "data": clause})
+}
+
+func (h *Handler) ExportLegalCounterProposal(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	idStr := c.Param("id")
+	var id uint
+	if _, err := fmt.Sscanf(idStr, "%d", &id); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid audit ID"})
+		return
+	}
+	engine := GetLegalRedlineEngine(h.db)
+	memo, err := engine.GenerateFullExportDoc(companyID, id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": memo, "audit_id": id})
+}
+
+func (h *Handler) SeedLegalContractDemoData(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	engine := GetLegalRedlineEngine(h.db)
+	if err := engine.SeedDemoData(companyID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Demo legal contract audits and redlines successfully seeded"})
+}
+
 // RegisterRootProtocolRoutes registers public protocol discovery endpoints like /.well-known/agent.json and /mcp
 func RegisterRootProtocolRoutes(r *gin.Engine, h *Handler) {
 	r.GET("/.well-known/agent.json", h.GetA2AAgentCard)
@@ -1023,6 +1137,15 @@ func RegisterAIRoutes(router *gin.RouterGroup, authMiddleware gin.HandlerFunc, h
 			authed.POST("/vision/scans/:id/rma", h.GenerateCargoRMA)
 			authed.GET("/vision/rmas", h.GetCargoRMAs)
 			authed.POST("/vision/seed-demo", h.SeedCargoVisionDemoData)
+
+			// Autonomous Legal Contract Risk & Intelligent Negotiation Redlining Copilot
+			authed.GET("/contracts/overview", h.GetLegalContractsOverview)
+			authed.GET("/contracts/audits", h.GetLegalContractAudits)
+			authed.GET("/contracts/audits/:id", h.GetLegalContractAuditDetail)
+			authed.POST("/contracts/analyze-full", h.AnalyzeContractFull)
+			authed.POST("/contracts/clauses/:id/status", h.UpdateLegalClauseStatus)
+			authed.GET("/contracts/audits/:id/export", h.ExportLegalCounterProposal)
+			authed.POST("/contracts/seed-demo", h.SeedLegalContractDemoData)
 		}
 	}
 }

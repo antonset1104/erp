@@ -1762,3 +1762,34 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - `POST /api/v1/ai/vision/scans/:id/rma`: Issues an automated RMA claim and AP debit memo for an inspected parcel.
 - `GET /api/v1/ai/vision/rmas`: Lists active supplier return authorizations and chargeback records.
 - `POST /api/v1/ai/vision/seed-demo`: Seeds realistic receiving scenarios (pristine cargo, crushed electronics pallets, oversized plastic totes, compromised cold-chain pharmaceuticals, and heavy crated machinery).
+
+
+## 54. Autonomous Legal Contract Risk & Intelligent Negotiation Redlining Copilot
+
+### 54.1 Semantic Legal Playbook & Risk Exposure Analyzer (`internal/core/ai/legal_redline_copilot.go`)
+- **Automated Agreement Ingestion**: Ingests vendor Master Service Agreements (MSAs), procurement cooperation agreements (*Perjanjian Kerjasama / PKS*), customer SLAs, and non-disclosure agreements (NDAs).
+- **Heuristic & Semantic Playbook Mapping**: Scans clauses against corporate legal governance standards to detect asymmetric risk exposures:
+  - `CRITICAL` ($35\text{ pts}$): Unilateral unlimited buyer liabilities, uncapped liquidated damages, and indemnities protecting third parties without reciprocity.
+  - `HIGH` ($22\text{ pts}$): Asymmetric intellectual property assignment (appropriating internal custom ERP integrations), unilateral 3-day immediate termination without cause.
+  - `MEDIUM` ($12\text{ pts}$): Non-compliance with statutory data privacy mandates (Indonesian Personal Data Protection Law - UU PDP No. 27/2022).
+  - `LOW` ($5\text{ pts}$): Standard governing law and jurisdiction clauses.
+- **Contract Risk Score & Exposure Tiers**:
+  $$\text{Risk Score} = \min\left(100.0, \sum_{\text{clauses}} \text{SeverityWeight}\right)$$
+  - Score $\ge 70.0\%$: `CRITICAL` (Executive escalation required before execution).
+  - $45.0\% \le \text{Score} < 70.0\%$: `HIGH` (Mandatory redlining counter-proposal).
+  - $20.0\% \le \text{Score} < 45.0\%$: `MODERATE` (Commercial legal review recommended).
+  - Score $< 20.0\%$: `LOW` (Acceptable baseline risk).
+
+### 54.2 Generative B2B Counter-Offer Formulation & Diff Markup
+- **Smart Redline Diff Generation**: Constructs visual inline deletion (`<del class="redline-del">`) and insertion (`<ins class="redline-ins">`) markup illustrating equitable commercial compromises.
+- **Statutory Indonesian Civil Code Harmonization**: Reframes aggressive late fees ($\ge 2\%/\text{day}$) into standard commercial permil terms ($1‰/\text{day}$, capped at $5\%$ of outstanding invoices) consistent with Article 1338 KUHPerdata.
+- **Automated Negotiation Memorandum**: Generates formal executive counter-proposal memorandums ready for dispatch to counterparties via PDF or procurement portals.
+
+### 54.3 REST API Specification & Negotiation Workflow
+- `GET /api/v1/ai/contracts/overview`: Aggregates total agreements audited, critical risk portfolio distribution, safeguarded transaction capital, and redline counts.
+- `GET /api/v1/ai/contracts/audits`: Queries contract assessments with optional filtering by risk severity tier (`CRITICAL`, `HIGH`, `MODERATE`, `LOW`).
+- `GET /api/v1/ai/contracts/audits/:id`: Fetches detailed contract audit telemetry along with all categorized clause redlines and diff HTML.
+- `POST /api/v1/ai/contracts/analyze-full`: Analyzes raw contract text, extracts high-risk clauses, computes aggregate exposure score, and drafts counter-offers.
+- `POST /api/v1/ai/contracts/clauses/:id/status`: Updates individual clause negotiation progress (`PROPOSED`, `ACCEPTED_BY_COUNTERPARTY`, `WAIVED`, `REJECTED`).
+- `GET /api/v1/ai/contracts/audits/:id/export`: Exports a formal B2B legal redline memorandum.
+- `POST /api/v1/ai/contracts/seed-demo`: Injects representative enterprise contracts (logistics PKS with extreme late penalties, cloud infrastructure MSA with IP ownership overreach, and bilateral balanced NDA).
