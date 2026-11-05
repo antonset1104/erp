@@ -93,6 +93,11 @@ import (
 	corecryoquantum "erp-golang/internal/core/cryo_quantum"
 	coreammoniamarine "erp-golang/internal/core/ammonia_marine"
 	corelunarsintering "erp-golang/internal/core/lunar_sintering"
+	coredgrcanister "erp-golang/internal/core/dgr_canister"
+	corefusionblanket "erp-golang/internal/core/fusion_blanket"
+	corespacesolar "erp-golang/internal/core/space_solar"
+	corehighnaeuv "erp-golang/internal/core/highna_euv"
+	corecrisprpat "erp-golang/internal/core/crispr_pat"
 	corescramjet "erp-golang/internal/core/scramjet"
 	coreseabed "erp-golang/internal/core/seabed"
 	coresemiconductor "erp-golang/internal/core/semiconductor"
@@ -369,7 +374,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.79.0",
+			"version":    "1.80.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -579,6 +584,11 @@ func main() {
 		corecryoquantum.RegisterCryoQuantumRoutes(apiV1)
 		coreammoniamarine.RegisterAmmoniaMarineRoutes(apiV1)
 		corelunarsintering.RegisterLunarSinteringRoutes(apiV1)
+		coredgrcanister.RegisterDGRCanisterRoutes(apiV1)
+		corefusionblanket.RegisterFusionBlanketRoutes(apiV1)
+		corespacesolar.RegisterSpaceSolarRoutes(apiV1)
+		corehighnaeuv.RegisterHighNAEUVRoutes(apiV1)
+		corecrisprpat.RegisterCRISPRPATRoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend

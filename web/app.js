@@ -34482,6 +34482,328 @@ async function triggerLunarSintering() {
 }
 
 
+
+async function triggerDGRCanister() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis integritas tabung tembaga KBS-3, tekanan pembengkakan lempung bentonit, dan pergeseran patahan batuan geologi dalam...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const canID = "CANISTER-KBS3-COPPER-01";
+        await api('/nuclear/dgr-canister/ingest-canister-telemetry', 'POST', {
+            canister_id: canID,
+            repository_tunnel_id: "TUNNEL-ONKALO-EAST-DEEP-04",
+            host_rock_depth_meters: 505.0,
+            copper_canister_surface_temp_c: 96.2,
+            bentonite_swelling_pressure_mpa: 4.65,
+            microbial_sulfide_ppm: 1.25,
+            bedrock_shear_displacement_mm: 52.5,
+            electron_beam_weld_integrity_pct: 99.8,
+            gamma_dose_rate_gy_per_hr: 0.38
+        });
+
+        const evalRes = await api('/nuclear/dgr-canister/evaluate-canister-integrity', 'POST', { canister_id: canID });
+        const actRes = await api('/nuclear/dgr-canister/trigger-hydration-and-bulkhead-seal', 'POST', { canister_id: canID });
+        const dossierRes = await api(`/nuclear/dgr-canister/dgr-safety-dossier/${canID}`, 'GET');
+
+        if (badge) badge.textContent = `☢️ DGR KBS-3: Swelling ${dossierRes.data.bentonite_swelling_mpa} MPa | Sulfide: ${dossierRes.data.microbial_sulfide_ppm} ppm | Status: ${evalRes.data.containment_integrity_status}`;
+        if (answerEl) {
+            let out = `☢️ DEEP GEOLOGICAL REPOSITORY (DGR) SPENT FUEL KBS-3 CANISTER & BENTONITE SENTINEL (IAEA SSG-14 & ISO 12749):\n`;
+            out += `Tabung Tembaga KBS-3: ${canID} | Terowongan Repositori: ${dossierRes.data.repository_tunnel_id} | Kedalaman Batuan Induk: ${dossierRes.data.host_rock_depth_meters} meter\n`;
+            out += `Kepatuhan Standar Keselamatan Radiologis: IAEA SSG-14 (${dossierRes.data.iaea_ssg14_compliant ? 'Compliant' : 'Warning'}) | ISO 12749 (Certified)\n\n`;
+            out += `SUHU TABUNG, TEKANAN BENTONIT, KOROSI SULFIDA MIKROBA & PERGESERAN SESAR:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Suhu Permukaan Tabung Tembaga: ${dossierRes.data.copper_canister_temp_c}°C (Batas Maksimum Desain < 95.0°C)\n`;
+            out += `• Tekanan Pembengkakan Buffer Lempung Bentonit: ${dossierRes.data.bentonite_swelling_mpa} MPa (Ambang Batas Minimum Kekedapan Air < 5.0 MPa)\n`;
+            out += `• Konsentrasi Sulfida Bakteri Pereduksi Sulfat (SRB): ${dossierRes.data.microbial_sulfide_ppm} ppm (Batas Korosi Tegangan < 1.0 ppm)\n`;
+            out += `• Pergeseran Sesar Batuan Kristalin (Rock Shear): ${dossierRes.data.bedrock_shear_mm} mm (Ambang Batas Pecah Geser Tabung > 50.0 mm)\n`;
+            out += `• Status Integritas Pengungkungan Radiologis 100.000 Tahun: ${evalRes.data.containment_integrity_status}\n`;
+            out += `• Keadaan Buffer Penahan Bentonit: ${evalRes.data.bentonite_buffer_state}\n`;
+            out += `• Bahaya Pergeseran Sesar Seismik: ${evalRes.data.host_rock_shear_hazard}\n\n`;
+            out += `INJEKSI HIDRASI BENTONIT, POLARISASI ANODA KORBAN & PENGUNCIAN BULKHEAD TEROWONGAN:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Keselamatan Geologi Nuklir: ${actRes.data.action_id}\n`;
+            out += `• Laju Injeksi Air Tanah Hidrasi Buffer Bentonit: ${actRes.data.commanded_bentonite_hydration_rate_liters_per_day} L/hari (Memulihkan Tekanan Swelling ke > 7.0 MPa)\n`;
+            out += `• Arus Polarisasi Proteksi Katodik Anoda Korban: ${actRes.data.sacrificial_anode_current_milli_amps} mA (Menekan Laju Korosi Sulfida Tembaga)\n`;
+            out += `• Tekanan Segel Bulkhead Isolasi Terowongan: ${actRes.data.tunnel_bulkhead_seal_pressure_bar} bar (Menyegel Kompartemen Repositori dari Aliran Air Tanah)\n`;
+            out += `• Estimasi Kerugian Bencana Lingkungan Terhindar: $${actRes.data.avoided_geological_disaster_loss_usd.toLocaleString()} USD (Mencegah Kebocoran Radioaktif ke Biosfer dan Pembatalan Repositori)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Hidrasi bentonit 85 L/hari menaikkan kembali tekanan pengembangan hingga 7.5 MPa dan menutup jalur rembesan air tanah di sekitar tabung tembaga.</li>
+                <li>Penguncian bulkhead pneumatik 45 bar mengisolasi terowongan Onkalo dari potensi intrusi mikroba anaerobik dan pergeseran patahan batuan.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses DGR Nuclear Canister sentinel: ' + err.message;
+    }
+}
+
+async function triggerFusionBlanket() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi rasio pembiakan tritium TBR, hambatan tekanan magnetohidrodinamika MHD PbLi, dan kebocoran permeasi tritium...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const modID = "BLANKET-FUSION-PBLI-01";
+        await api('/nuclear/fusion-blanket/ingest-blanket-telemetry', 'POST', {
+            blanket_module_id: modID,
+            fusion_reactor_id: "REACTOR-TOKAMAK-COMMERCIAL-500MW",
+            tritium_breeding_ratio: 1.02,
+            mhd_pressure_drop_mpa: 1.92,
+            pb_li_coolant_velocity_m_per_sec: 1.25,
+            toroidal_magnetic_field_tesla: 12.0,
+            tritium_permeation_ci_per_day: 12.5,
+            rafm_steel_corrosion_rate_microns_yr: 28.5,
+            neutron_wall_load_mw_per_m2: 2.65
+        });
+
+        const evalRes = await api('/nuclear/fusion-blanket/evaluate-blanket-integrity', 'POST', { blanket_module_id: modID });
+        const actRes = await api('/nuclear/fusion-blanket/trigger-fci-bias-and-permeator-boost', 'POST', { blanket_module_id: modID });
+        const dossierRes = await api(`/nuclear/fusion-blanket/fusion-blanket-dossier/${modID}`, 'GET');
+
+        if (badge) badge.textContent = `⚛️ Fusion Blanket: TBR ${dossierRes.data.tritium_breeding_ratio} | MHD: ${dossierRes.data.mhd_pressure_drop_mpa} MPa | Status: ${evalRes.data.tritium_self_sufficiency_status}`;
+        if (answerEl) {
+            let out = `⚛️ COMMERCIAL FUSION REACTOR LIQUID METAL (PbLi) BLANKET & TRITIUM BREEDING SENTINEL (ASME BPVC SEC III DIV 4 & ITER CODE):\n`;
+            out += `Modul Blanket Eutektik Pb-15.7Li: ${modID} | Reaktor Fusi Nuklir: ${dossierRes.data.fusion_reactor_id}\n`;
+            out += `Kepatuhan Standar Keselamatan Fasilitas Fusi: ASME BPVC Div 4 (${dossierRes.data.asme_bpvc_div4_compliant ? 'Compliant' : 'Warning'}) | ITER Tritium Code (${dossierRes.data.iter_tritium_code_certified ? 'Certified' : 'Review'})\n\n`;
+            out += `RASIO PEMBIAKAN TRITIUM (TBR), TEKANAN MAGNETOHIDRODINAMIKA & PERMEASI TRITIUM:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Rasio Pembiakan Tritium (TBR): ${dossierRes.data.tritium_breeding_ratio} (Batas Kritis Swasembada Bahan Bakar Fusi > 1.05) | Defisit: -${(evalRes.data.tbr_deficit_ratio * 100).toFixed(1)}%\n`;
+            out += `• Penurunan Tekanan Hambat Magnetohidrodinamika (MHD Delta-P): ${dossierRes.data.mhd_pressure_drop_mpa} MPa (Ambang Batas Choking Fluida > 1.85 MPa)\n`;
+            out += `• Kecepatan Alir Logam Cair Eutektik Timbal-Litium: ${dossierRes.data.pb_li_velocity_m_s} m/s (Rentang Desain 1.5 - 3.0 m/s)\n`;
+            out += `• Laju Kebocoran Permeasi Tritium Dinding Baja RAFM: ${dossierRes.data.tritium_permeation_ci_day} Ci/hari (Batas Kepatuhan Radiologis < 10.0 Ci/hari)\n`;
+            out += `• Status Keberlanjutan Swasembada Bahan Bakar Tritium: ${evalRes.data.tritium_self_sufficiency_status}\n`;
+            out += `• Tingkat Bahaya Stagnasi Aliran Termal MHD: ${evalRes.data.mhd_hazard}\n\n`;
+            out += `BIAS DIELEKTRIK FLOW CHANNEL INSERT (FCI) & EKSTRAKSI VAKUM PERMEATOR TRITIUM:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Keseimbangan Blanket Fusi: ${actRes.data.action_id}\n`;
+            out += `• Tegangan Bias Dielektrik Flow Channel Insert (FCI): ${actRes.data.commanded_fci_dielectric_bias_volts} V (Memutus Sirkulasi Arus Korsleting Hartmann MHD)\n`;
+            out += `• Kecepatan Pompa Turbomolekuler Vakum Permeator: ${actRes.data.vacuum_permeator_pumping_speed_liters_per_sec.toLocaleString()} L/s (Memaksimalkan Ekstraksi Gas Tritium)\n`;
+            out += `• Penyesuaian Aliran Sirkulasi Eutektik Pb-Li: +${actRes.data.pb_li_loop_flow_trim_pct}% (Menghilangkan Titik Panas Hotspot Sudut Blanket)\n`;
+            out += `• Estimasi Kerugian Kerusakan Blanket Fusi Terhindar: $${actRes.data.avoided_fusion_blanket_damage_usd.toLocaleString()} USD (Mencegah Meltdown Blanket dan Pemadaman Reaktor Komersial)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pemberian bias dielektrik 320V pada FCI memangkas hambatan seret Lorentz MHD sebesar 40% dan mengembalikan kecepatan aliran di atas 2.0 m/s.</li>
+                <li>Pompa vakum 15.000 L/s mengekstraksi tritium terlarut secara kontinu sehingga rasio TBR pulih ke 1.16 surplus mandiri.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Fusion Blanket sentinel: ' + err.message;
+    }
+}
+
+async function triggerSpaceSolar() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi penguncian berkas gelombang mikro retrodirective gigawatt, radiasi sidelobe rectenna bumi, dan stabilitas ionosfer...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const satID = "SATELLITE-SBSP-GW-ARRAY-01";
+        await api('/space/space-solar/ingest-solar-telemetry', 'POST', {
+            satellite_array_id: satID,
+            orbital_slot_geo: "GEO_122.5_WEST",
+            transmitted_rf_power_gigawatts: 1.45,
+            retrodirective_beam_drift_deg: 0.00062,
+            rectenna_sidelobe_flux_milliwatts_per_cm2: 1.35,
+            ionospheric_self_focusing_index: 0.82,
+            solar_mirror_thermal_distortion_mm: 1.85,
+            pilot_uplink_carrier_to_noise_db: 21.5,
+            array_thermal_skin_temp_kelvin: 392.0
+        });
+
+        const evalRes = await api('/space/space-solar/evaluate-beam-containment', 'POST', { satellite_array_id: satID });
+        const actRes = await api('/space/space-solar/trigger-fast-cutoff-and-gimbal-trim', 'POST', { satellite_array_id: satID });
+        const dossierRes = await api(`/space/space-solar/space-solar-dossier/${satID}`, 'GET');
+
+        if (badge) badge.textContent = `🛰️ Space Solar: Transmit ${dossierRes.data.transmitted_gw} GW | Sidelobe: ${dossierRes.data.sidelobe_flux_mw_cm2} mW/cm² | Status: ${evalRes.data.beam_pointing_containment_status}`;
+        if (answerEl) {
+            let out = `🛰️ SPACE SOLAR POWER (SBSP) GIGAWATT PHASED-ARRAY MICROWAVE BEAM SENTINEL (ITU ARTICLE 21 & NASA SP-8000):\n`;
+            out += `Satelit Transmisi Surya GEO: ${satID} | Slot Orbit Geostasioner: ${dossierRes.data.orbital_slot_geo}\n`;
+            out += `Kepatuhan Alokasi Frekuensi & Keselamatan Radiasi: ITU Radio Regs Art 21 (${dossierRes.data.itu_radio_reg_art21_cleared ? 'Cleared' : 'Warning'}) | IEEE C95.1 (${dossierRes.data.ieee_c95_1_certified ? 'Certified' : 'Review'})\n\n`;
+            out += `DAYA RF TERPANCAR, DEVIASI BERKAS RETRODIRECTIVE & RADIASI SIDELOBE BUMI:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Total Daya Gelombang Mikro Terpancar: ${dossierRes.data.transmitted_gw} Gigawatt (Frekuensi 2.45 GHz / 5.8 GHz)\n`;
+            out += `• Deviasi Sudut Berkas Retrodirective (Beam Drift): ${dossierRes.data.beam_drift_deg.toFixed(5)}° (Batas Toleransi Presisi < 0.00050°)\n`;
+            out += `• Fluks Daya Sidelobe di Batas Rectenna Bumi: ${dossierRes.data.sidelobe_flux_mw_cm2} mW/cm² (Batas Aman Paparan Sipil < 1.0 mW/cm²) | Ekses: +${evalRes.data.sidelobe_power_excess_margin_pct.toFixed(1)}%\n`;
+            out += `• Status Penguncian & Integritas Berkas Daya: ${evalRes.data.beam_pointing_containment_status}\n`;
+            out += `• Bahaya Distorsi Termal Ionosfer Bumi: ${evalRes.data.ionospheric_hazard}\n\n`;
+            out += `PEMADAM CEPAT SUB-MIKRODETIK RF, REDUKSI DAYA BERTAHAP & KOREKSI GIMBAL:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Integritas Transmisi Antariksa: ${actRes.data.action_id}\n`;
+            out += `• Waktu Respon Pemadam Berkas Sub-Mikrodetik: ${actRes.data.commanded_fast_cutoff_response_micro_sec} µs (Memadamkan Berkas Sebelum Mengenai Zona Non-Rectenna)\n`;
+            out += `• Atenuasi Daya Susunan Pemancar Array: ${actRes.data.array_power_attenuation_db} dB (Meredam Daya RF ke Tingkat Aman)\n`;
+            out += `• Koreksi Orientasi Boresight Gimbal Kontrol Reaksi: ${actRes.data.reaction_control_gimbal_correction_deg.toFixed(5)}° (Menyelaraskan Sumbu Antena dengan Pilot Uplink)\n`;
+            out += `• Estimasi Kerugian Bencana Antariksa Terhindar: $${actRes.data.avoided_orbital_sps_disaster_usd.toLocaleString()} USD (Mencegah Radiasi Bahaya ke Area Sipil dan Kehilangan Satelit GEO)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pemutusan fase dalam 0.65 mikrodetik seketika mendifraksi berkas gelombang mikro sehingga densitas fluks di bumi anjlok di bawah 0.05 mW/cm2.</li>
+                <li>Koreksi mikro-gimbal mengembalikan sumbu pancar ke tengah stasiun rectenna dan meredam ketidakstabilan ionosfer.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Space Solar Power sentinel: ' + err.message;
+    }
+}
+
+async function triggerHighNAEUV() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis aberasi muka gelombang Zernike optik High-NA EUV 0.55 NA, pembengkokan fototermal retikel, dan LER...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const scannerID = "SCANNER-EUV-HIGHNA-055-01";
+        await api('/semicon/highna-euv/ingest-scanner-telemetry', 'POST', {
+            scanner_id: scannerID,
+            fab_cleanroom_id: "FAB-GIGA-SUB1NM-TAINAN",
+            numerical_aperture: 0.55,
+            reticle_thermal_bowing_nm: 1.15,
+            zernike_astigmatism_aberration_lambda: 0.092,
+            line_edge_roughness_nm: 0.94,
+            stochastic_defect_density_per_cm2: 0.068,
+            euv_source_power_watts: 1050.0,
+            pellicle_hydrogen_pressure_mbar: 2.1
+        });
+
+        const evalRes = await api('/semicon/highna-euv/evaluate-wavefront-and-reticle-bowing', 'POST', { scanner_id: scannerID });
+        const actRes = await api('/semicon/highna-euv/trigger-adaptive-cooling-and-wavefront-trim', 'POST', { scanner_id: scannerID });
+        const dossierRes = await api(`/semicon/highna-euv/highna-euv-quality-dossier/${scannerID}`, 'GET');
+
+        if (badge) badge.textContent = `🔬 High-NA 0.55 EUV: Bowing ${dossierRes.data.reticle_bowing_nm} nm | Zernike: ${dossierRes.data.zernike_astigmatism_lambda} λ | Status: ${evalRes.data.anamorphic_wavefront_integrity}`;
+        if (answerEl) {
+            let out = `🔬 SEMICONDUCTOR HIGH-NA (0.55 NA) EUV ANAMORPHIC WAVEFRONT & RETICLE BOWING SENTINEL (SEMI P48 & IEEE 1855):\n`;
+            out += `Scanner Litografi High-NA EUV: ${scannerID} | Cleanroom Fab Sub-1nm: ${dossierRes.data.fab_cleanroom_id} | Apertur Numerik: ${dossierRes.data.numerical_aperture} NA\n`;
+            out += `Sertifikasi Penanganan Fotomasker & Optik: SEMI P48 (${dossierRes.data.semi_p48_compliant ? 'Compliant' : 'Warning'}) | IEEE 1855 (Certified)\n\n`;
+            out += `PEMBENGKOKAN RETIKEL, ABERASI MUKA GELOMBANG ZERNIKE & KEKASARAN TEPI (LER):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Pembengkokan Fototermal Retikel Fotomasker: ${dossierRes.data.reticle_bowing_nm} nm (Ambang Batas Distorsi Lensa < 1.00 nm)\n`;
+            out += `• Aberasi Astigmatisme Muka Gelombang Zernike: ${dossierRes.data.zernike_astigmatism_lambda} λ (Batas Toleransi Optik Anamorfik < 0.080 λ)\n`;
+            out += `• Kekasaran Tepi Garis Pola Transistor (Line-Edge Roughness / LER): ${dossierRes.data.line_edge_roughness_nm} nm (Target Desain < 0.85 nm)\n`;
+            out += `• Kerapatan Cacat Stokastik Wafer (Stochastic Defects): ${dossierRes.data.stochastic_defect_density} cacat/cm² (Batas Kritis < 0.050)\n`;
+            out += `• Integritas Muka Gelombang Anamorfik 4x/8x: ${evalRes.data.anamorphic_wavefront_integrity}\n`;
+            out += `• Bahaya Pembengkokan Cermin Retikel Mo/Si: ${evalRes.data.reticle_thermal_bowing_hazard}\n\n`;
+            out += `PENDINGINAN BALIK LASER INFRAMERAH RETIKEL, KOREKSI PIEZO & PURGE HIDROGEN:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Presisi Litografi Sub-1nm: ${actRes.data.action_id}\n`;
+            out += `• Daya Pendinginan Balik Laser Inframerah Adaptif (IR Back-Cooling): ${actRes.data.commanded_ir_laser_back_cooling_power_watts} W (Menetralkan Gradient Termal Masker)\n`;
+            out += `• Koreksi Pergeseran Cermin Muka Gelombang Piezoelektrik: ${actRes.data.piezo_wavefront_correction_nm} nm (Meniadakan Aberasi Astigmatisme)\n`;
+            out += `• Laju Purge Gas Hidrogen Pelindung Membran Pellicle: ${actRes.data.hydrogen_purge_rate_sccm.toLocaleString()} sccm (Meredam Debris dan Oksidasi)\n`;
+            out += `• Estimasi Kerugian Wafer Scrap Terhindar: $${actRes.data.avoided_high_na_wafer_scrap_usd.toLocaleString()} USD (Mencegah Pembuangan Batch Wafer Sub-1nm dan Kerusakan Masker EUV)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pendinginan laser IR 185W meratakan kembali retikel fotomasker hingga distorsi termal turun di bawah 0.45 nm.</li>
+                <li>Aktuator piezoelektrik sub-nanometer mengeliminasi aberasi Zernike dan mengembalikan yield transistor logika sub-1nm ke level optimal 94%.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses High-NA EUV sentinel: ' + err.message;
+    }
+}
+
+async function triggerCRISPRPAT() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memantau pemotongan DNA off-target in-vivo CRISPR-Cas, persistensi enzim Cas aktif, dan pembacaan sekuensing nanopore...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const batchID = "BATCH-CRISPR-INVIVO-THERAPY-01";
+        await api('/biopharma/crispr-pat/ingest-editing-telemetry', 'POST', {
+            bioreactor_batch_id: batchID,
+            patient_therapy_id: "PATIENT-SICKLE-CELL-CURE-09",
+            on_target_indel_efficiency_pct: 88.5,
+            off_target_cleavage_frequency_pct: 0.0145,
+            active_cas_enzyme_persistence_hours: 8.8,
+            guide_rna_mismatch_delta_g_kcal_mol: -13.2,
+            nanopore_cleavage_read_depth: 65000.0,
+            innate_cytokine_release_ppm: 28.5,
+            viable_cell_fraction_pct: 93.5
+        });
+
+        const evalRes = await api('/biopharma/crispr-pat/evaluate-editing-precision', 'POST', { batch_id: batchID });
+        const actRes = await api('/biopharma/crispr-pat/trigger-anti-crispr-acr-and-quench', 'POST', { batch_id: batchID });
+        const dossierRes = await api(`/biopharma/crispr-pat/crispr-safety-dossier/${batchID}`, 'GET');
+
+        if (badge) badge.textContent = `🧬 CRISPR PAT: On-Target ${dossierRes.data.on_target_indel_pct}% | Off-Target: ${dossierRes.data.off_target_cleavage_pct}% | Status: ${evalRes.data.gene_editing_precision_status}`;
+        if (answerEl) {
+            let out = `🧬 IN-VIVO CRISPR-Cas THERAPEUTIC GENE EDITING OFF-TARGET & NANOPORE PAT SENTINEL (FDA CBER & ISO 20387):\n`;
+            out += `Batch Bioreaktor Terapi Gen In-Vivo: ${batchID} | ID Terapi Pasien: ${dossierRes.data.patient_therapy_id}\n`;
+            out += `Kepatuhan Regulasi Terapi Sel & Gen: FDA CBER Guidance (${dossierRes.data.fda_cber_compliant ? 'Compliant' : 'Warning'}) | ISO 20387 (Certified)\n\n`;
+            out += `EFISIENSI ON-TARGET, FREKUENSI OFF-TARGET & PEMBACAAN NANOPORE IN-LINE:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Efisiensi Insersi/Delesi On-Target (Indel): ${dossierRes.data.on_target_indel_pct}% (Target Kemanjuran Klinis > 85.0%)\n`;
+            out += `• Frekuensi Pemotongan DNA Di Luar Target (Off-Target Cleavage): ${dossierRes.data.off_target_cleavage_pct}% (Batas Keamanan Mutlak FDA < 0.0100%) | Ekses: +${evalRes.data.off_target_cleavage_excess_pct.toFixed(1)}%\n`;
+            out += `• Waktu Paruh Persistensi Enzim Cas Nuklease Aktif: ${dossierRes.data.active_cas_hours} jam (Batas Keamanan Paparan Seluler < 8.0 jam)\n`;
+            out += `• Kedalaman Pembacaan Sekuensing Nanopore Real-Time: ${dossierRes.data.nanopore_read_depth.toLocaleString()}x Read Depth\n`;
+            out += `• Status Presisi Pengeditan Gen Terapi: ${evalRes.data.gene_editing_precision_status}\n`;
+            out += `• Tingkat Bahaya Pemotongan DNA Non-Spesifik (Onkogenesis): ${evalRes.data.hazard_status}\n\n`;
+            out += `INFUSI PROTEIN ANTI-CRISPR Acr, PEMBILASAN QUENCH & MODIFIKASI FOSFOROTIOAT:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Klinis Terapi Genetik: ${actRes.data.action_id}\n`;
+            out += `• Dosis Mikro-Infusi Protein Inhibitor Anti-CRISPR (AcrIIA4): ${actRes.data.commanded_acr_protein_dosing_mg_per_liter} mg/L (Memblokir Sisi Aktif Enzim Cas)\n`;
+            out += `• Durasi Pembilasan Kelasi Kimiawi (Chemical Quench Rinse): ${actRes.data.enzyme_quench_rinse_time_sec} detik (Menghentikan Reaksi Pemotongan Residual)\n`;
+            out += `• Rasio Modifikasi Kimiawi 2'-O-Metil Fosforotioat: ${actRes.data.phosphorothioate_trim_ratio} (Meningkatkan Spesifisitas Target gRNA)\n`;
+            out += `• Estimasi Kerugian Terapi Gen Klinis Terhindar: $${actRes.data.avoided_gene_therapy_failure_usd.toLocaleString()} USD (Mencegah Onkogenesis Pasien, Kegagalan Uji Klinis, dan Lot Loss)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Infusi protein anti-CRISPR AcrIIA4 12.5 mg/L menghentikan aktivitas Cas nuclease tepat waktu dan menekan off-target cleavage di bawah 0.002%.</li>
+                <li>Pembilasan kelasi sitrat 45 detik menetralkan kofaktor kation divalen magnesium sehingga tidak ada pemotongan DNA sekunder di luar lokus gen target.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses CRISPR PAT sentinel: ' + err.message;
+    }
+}
+
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

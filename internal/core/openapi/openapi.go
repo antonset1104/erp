@@ -2097,6 +2097,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/nuclear/dgr-canister/evaluate-canister-integrity": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Deep Geological Repository (DGR) Spent Nuclear Fuel KBS-3 Copper Canister Sentinel (IAEA SSG-14 & ISO 12749)",
+					"description": "Monitors copper canister surface temperatures, bentonite buffer swelling pressure, microbial sulfide concentration, and bedrock shear displacement.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Containment integrity status, bentonite buffer state, host rock shear hazard, hydration rate L/day, and tunnel bulkhead seal bar"},
+					},
+				},
+			},
+			"/api/v1/nuclear/fusion-blanket/evaluate-blanket-integrity": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Commercial Fusion Reactor Molten Liquid Metal (PbLi) Blanket & TBR Sentinel (ASME BPVC Sec III Div 4 & ITER Code)",
+					"description": "Monitors Tritium Breeding Ratio TBR, magnetohydrodynamic MHD pressure drop, PbLi coolant velocity, and tritium permeation through RAFM steel.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Tritium self-sufficiency status, MHD flow suppression hazard, TBR deficit ratio, FCI dielectric bias volts, and vacuum permeator pumping speed"},
+					},
+				},
+			},
+			"/api/v1/space/space-solar/evaluate-beam-containment": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Space Solar Power (SBSP) Gigawatt Microwave Phased-Array Retrodirective Beam Sentinel (ITU Radio Regs & NASA SP-8000)",
+					"description": "Monitors retrodirective beam pointing drift, ground rectenna sidelobe power flux, ionospheric self-focusing, and satellite planar thermal distortion.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Beam pointing containment status, ionospheric distortion hazard, sidelobe power excess margin %, and sub-microsecond RF cutoff response"},
+					},
+				},
+			},
+			"/api/v1/semicon/highna-euv/evaluate-wavefront-and-reticle-bowing": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "High-NA (0.55 NA) EUV Anamorphic Wavefront Aberration Drift & Reticle Bowing Sentinel (SEMI P48 & IEEE 1855)",
+					"description": "Monitors photothermal reticle bowing nm, Zernike astigmatism wavefront aberration lambda, line-edge roughness, and stochastic defect density.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Anamorphic wavefront integrity, reticle thermal bowing hazard, adaptive IR laser back-cooling power watts, and piezo wavefront correction nm"},
+					},
+				},
+			},
+			"/api/v1/biopharma/crispr-pat/evaluate-editing-precision": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "In-Vivo CRISPR-Cas Therapeutic Gene Editing Off-Target Cleavage & Nanopore PAT Sentinel (FDA CBER Guidance & ISO 20387)",
+					"description": "Monitors on-target indel efficiency, off-target double-stranded break DSB frequency, active Cas enzyme persistence hours, and nanopore sequencing read depth.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Gene editing precision status, off-target cleavage hazard, excess cleavage %, anti-CRISPR Acr protein dosing mg/L, and chemical quench rinse seconds"},
+					},
+				},
+			},
 		},
 	}
 }
