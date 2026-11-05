@@ -35,15 +35,18 @@ import (
 	coreenergy "erp-golang/internal/core/energy"
 	coreevtol "erp-golang/internal/core/evtol"
 	coreexpense "erp-golang/internal/core/expense"
+	corefermentation "erp-golang/internal/core/fermentation"
 	corefieldservice "erp-golang/internal/core/fieldservice"
 	corefinance "erp-golang/internal/core/finance"
 	corefleet "erp-golang/internal/core/fleet"
 	corefusion "erp-golang/internal/core/fusion"
+	coregaafet "erp-golang/internal/core/gaafet"
 	coregeotech "erp-golang/internal/core/geotech"
 	coregeothermal "erp-golang/internal/core/geothermal"
 	coregeothermalshr "erp-golang/internal/core/geothermal_shr"
 	coregraphql "erp-golang/internal/core/graphql"
 	coregrc "erp-golang/internal/core/grc"
+	corehallthruster "erp-golang/internal/core/hallthruster"
 	corehr "erp-golang/internal/core/hr"
 	corehyperloop "erp-golang/internal/core/hyperloop"
 	corehypersonic "erp-golang/internal/core/hypersonic"
@@ -57,6 +60,7 @@ import (
 	coremining "erp-golang/internal/core/mining"
 	coremoltensalt "erp-golang/internal/core/moltensalt"
 	coremrp "erp-golang/internal/core/mrp"
+	coremsr "erp-golang/internal/core/msr"
 	corenuclear "erp-golang/internal/core/nuclear"
 	corepackaging "erp-golang/internal/core/packaging"
 	corepellicle "erp-golang/internal/core/pellicle"
@@ -73,6 +77,7 @@ import (
 	corerailway "erp-golang/internal/core/railway"
 	corerenewables "erp-golang/internal/core/renewables"
 	corescm "erp-golang/internal/core/scm"
+	coresaltcavern "erp-golang/internal/core/saltcavern"
 	corescramjet "erp-golang/internal/core/scramjet"
 	coreseabed "erp-golang/internal/core/seabed"
 	coresemiconductor "erp-golang/internal/core/semiconductor"
@@ -349,7 +354,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.75.0",
+			"version":    "1.76.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -539,6 +544,11 @@ func main() {
 		corewetchem.RegisterH2O2RunawayRoutes(apiV1)
 		corelyo.RegisterLyophilizationRoutes(apiV1)
 		coreqled.RegisterQLEDRoutes(apiV1)
+		corehallthruster.RegisterHallThrusterRoutes(apiV1)
+		coregaafet.RegisterGAAFETRoutes(apiV1)
+		corefermentation.RegisterFermentationRoutes(apiV1)
+		coresaltcavern.RegisterSaltCavernRoutes(apiV1)
+		coremsr.RegisterMSRRoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend

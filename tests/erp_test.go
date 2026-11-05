@@ -45,15 +45,18 @@ import (
 	coreenergy "erp-golang/internal/core/energy"
 	coreevtol "erp-golang/internal/core/evtol"
 	coreexpense "erp-golang/internal/core/expense"
+	corefermentation "erp-golang/internal/core/fermentation"
 	corefieldservice "erp-golang/internal/core/fieldservice"
 	corefinance "erp-golang/internal/core/finance"
 	corefleet "erp-golang/internal/core/fleet"
 	corefusion "erp-golang/internal/core/fusion"
+	coregaafet "erp-golang/internal/core/gaafet"
 	coregeotech "erp-golang/internal/core/geotech"
 	coregeothermal "erp-golang/internal/core/geothermal"
 	coregeothermalshr "erp-golang/internal/core/geothermal_shr"
 	coregraphql "erp-golang/internal/core/graphql"
 	coregrc "erp-golang/internal/core/grc"
+	corehallthruster "erp-golang/internal/core/hallthruster"
 	corehr "erp-golang/internal/core/hr"
 	corehyperloop "erp-golang/internal/core/hyperloop"
 	corehypersonic "erp-golang/internal/core/hypersonic"
@@ -67,6 +70,7 @@ import (
 	coremining "erp-golang/internal/core/mining"
 	coremoltensalt "erp-golang/internal/core/moltensalt"
 	coremrp "erp-golang/internal/core/mrp"
+	coremsr "erp-golang/internal/core/msr"
 	corenuclear "erp-golang/internal/core/nuclear"
 	corepackaging "erp-golang/internal/core/packaging"
 	corepellicle "erp-golang/internal/core/pellicle"
@@ -83,6 +87,7 @@ import (
 	corerailway "erp-golang/internal/core/railway"
 	corerenewables "erp-golang/internal/core/renewables"
 	corescm "erp-golang/internal/core/scm"
+	coresaltcavern "erp-golang/internal/core/saltcavern"
 	corescramjet "erp-golang/internal/core/scramjet"
 	coreseabed "erp-golang/internal/core/seabed"
 	coresemiconductor "erp-golang/internal/core/semiconductor"
@@ -13675,5 +13680,184 @@ IEA*1*000099123~`
 	t.Logf("✓ Cadmium-Free Quantum Dot (QLED) Inkjet Printing & PLQY Sentinel Verified: Printer='%s' (Substrate='%s'), InPCore=%.2f nm, DropletVol=%.2f pL, Vel=%.2f m/s, GloveboxO2=%.2f ppm, H2O=%.2f ppm, PLQY=%.1f%% (Margin=%.1f%%), MarangoniRatio=%.2f, MuraSeverity='%s', Compliance='%s', PiezoVolt=%.1f V, SVSA_Pressure=%.1f mbar, UVCure=%.1f s, AvoidedLoss=$%.2fM USD",
 		qledTel.PrinterID, qledTel.SubstrateBatchID, qledTel.NanocrystalInPCoreDiameterNm, qledTel.DropletVolumePicoLiters, qledTel.DropletVelocityMPerSec, qledTel.GloveboxOxygenPpm, qledTel.GloveboxMoisturePpm, qledTel.PhotoluminescenceYieldPLQYPct, qledAssess.PLQYDegradationMarginPct, qledTel.SubPixelMarangoniRatio, qledAssess.CoffeeRingMuraSeverity, qledAssess.QuantumEfficiencyCompliance, qledAct.TunedPiezoAcousticVoltageVolts, qledAct.SVSASolventChamberPressureMbar, qledAct.InSituUVCureExposureDurationSec, qledAct.AvoidedDisplayScrapLossUSD/1e6)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (89 SECTIONS: 105+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD + CONTRACT LEAKAGE SENTINEL + MICROGRID ISLANDING + CARGO GEOFENCE + SHIFT BIDDING FATIGUE + CIRCULAR PACKAGING RTI + INDUSTRIAL WATER ZLD + VENDOR SANCTIONS GRAPH + BOILER TUBE DESCALING + SAAS DUNNING WATERFALL + TOLL MANUFACTURING RECON + SILO AERATION SENTINEL + EPC PROGRESS BILLING ESCROW + DYNAMIC PORT BERTH DEMURRAGE + TRANSFORMER DGA GUARDIAN + CROSS BORDER CASH REPATRIATION + ORE BLENDING OPTIMIZER + PHARMA CRYOGENIC SENTINEL + KILN REFRACTORY GUARDIAN + IP PATENT ANNUITY + TURBINE EOH CREEP + AVIATION MRO FATIGUE + MARINE LNG RELIQUEFACTION + SEMICONDUCTOR FAB YIELD + WASTEWATER BIOMETHANE + RAILWAY WHEEL RCF + NUCLEAR RADIOPHARM DECAY + UTILITY BESS THERMAL SOH + SATELLITE ORBITAL CONJUNCTION + SUBSEA FLOW ASSURANCE + CONNECTED VEHICLE OTA SUMS + BIOPHARMA BIOREACTOR PAT + FLOATING WIND MOORING + HVDC SUBSEA DTS + CCS CO2 ENVELOPE + MINE ROCKBURST SENTINEL + TOKAMAK FUSION DISRUPTION + CRYO LH2 ORTHO-PARA + HYPERSONIC TPS ABLATION + 3D CHIPLET TSV WARPAGE + SUPERHOT EGS GEOTHERMAL SEISMICITY + QUANTUM QKD PHASE GUARDIAN + SEABED NODULE PLUME + CSP MOLTEN SALT FREEZE + SOLID-STATE BATTERY CRACK + DIRECT AIR CAPTURE OPTIMIZER + EVTOL ACOUSTIC SENTINEL + HYPERLOOP MAGLEV QUENCH + SUBSEA DEEPWATER BOP + CAR-T ACOUSTIC SORTING + PLASTIC PYROLYSIS DIOXIN SENTINEL + GREEN AMMONIA SENTINEL + ROCKET POGO SENTINEL + SMR PASSIVE CONTAINMENT + EUV PELLICLE SENTINEL + UHVDC CONVERTER SENTINEL + SUBSEA CCS CO2 HYDRATE + HYPERSONIC SCRAMJET FUEL CRACKING + MRNA LNP MICROFLUIDIC + SILICON PHOTONICS CPO SKEW + SOEC EFUEL COELECTROLYSIS + SUPERHOT ROCK GEOTHERMAL SHR + SUBSEA AUV DOCKING IPT + ELECTRONIC H2O2 RUNAWAY + BIOPHARMA CONTROLLED ICE FOG LYO + CADMIUM FREE QLED INK PRINTING) PASSED 100%!")
+	// ==========================================
+	// SECTION 90: FRONTIER INDUSTRIAL PROCESS & ADVANCED ATOMIC-AEROSPACE SENTINEL (v1.76.0)
+	// ==========================================
+
+	// 90.1 Aerospace & Satellite High-Power Hall-Effect Thruster (HET) Electric Propulsion Sentinel (ECSS-E-ST-20-07C & AIAA S-110)
+	hetTel := corehallthruster.GlobalHallThrusterVault.IngestThrusterTelemetry(corehallthruster.HallThrusterTelemetry{
+		TelemetryID:                     "TEL-HET-9901",
+		ThrusterID:                      "HET-EP-GEO-SATELLITE-99",
+		SatelliteBusID:                  "BUS-COMM-ORBITAL-7000",
+		DischargePowerKw:                12.5,
+		DischargeVoltageV:               300.0,
+		DischargeCurrentA:               41.67,
+		AnodeXenonFlowSccm:              185.0,
+		CathodeKeeperVoltageV:           24.5,
+		ChannelWallErosionRateUmPerKh:   14.8,
+		PlumeBeamDivergenceHalfAngleDeg: 44.5,
+		NeutralizerElectronMarginPct:    91.2,
+	})
+	if hetTel.ThrusterID == "" || hetTel.DischargeVoltageV != 300.0 {
+		t.Fatalf("Failed to ingest Hall thruster telemetry: %+v", hetTel)
+	}
+
+	hetAssess, err := corehallthruster.GlobalHallThrusterVault.EvaluateErosionAndNeutralization("HET-EP-GEO-SATELLITE-99")
+	if err != nil || hetAssess.CathodeErosionRiskLevel != "CRITICAL_POLE_PIECE_SPUTTER_COLLAPSE" || hetAssess.PlumeNeutralizationStatus != "SOLAR_ARRAY_SPUTTER_HAZARD" || !hetAssess.MagneticCoilTrimMandate || !hetAssess.VoltageStepDownMandate {
+		t.Fatalf("Failed to evaluate Hall thruster erosion and plume: %+v, err: %v", hetAssess, err)
+	}
+
+	hetAct, err := corehallthruster.GlobalHallThrusterVault.TriggerMagneticTrimAndVoltageStepDown("HET-EP-GEO-SATELLITE-99")
+	if err != nil || hetAct.CommandedDischargeVoltageV != 250.0 || hetAct.ModulatedMagneticCoilCurrentA <= 8.0 || hetAct.CathodePropellantFlowBoostPct <= 0 || hetAct.AvoidedSatelliteLossUSD <= 0 {
+		t.Fatalf("Failed to trigger Hall thruster magnetic trim and voltage step down: %+v, err: %v", hetAct, err)
+	}
+
+	hetDossier, err := corehallthruster.GlobalHallThrusterVault.GetHallThrusterReliabilityDossier("HET-EP-GEO-SATELLITE-99")
+	if err != nil || !hetDossier["ecss_e_st_20_07c_compliant"].(bool) || !hetDossier["aiaa_s_110_certified"].(bool) {
+		t.Fatalf("Failed to compile Hall thruster reliability dossier: %+v, err: %v", hetDossier, err)
+	}
+	t.Logf("✓ Satellite High-Power Hall-Effect Thruster Sentinel Verified: Thruster='%s' (Bus='%s'), Power=%.1f kW, V_dis=%.0f V, I_dis=%.1f A, Flow=%.0f sccm, Keeper=%.1f V, WallErosion=%.1f µm/kh, Divergence=%.1f°, NeutralizerMargin=%.1f%%, ErosionRisk='%s', PlumeStatus='%s', StepDownV=%.0f V, CoilCurrent=%.1f A, FlowBoost=+%.1f%%, AvoidedLoss=$%.2fM USD",
+		hetTel.ThrusterID, hetTel.SatelliteBusID, hetTel.DischargePowerKw, hetTel.DischargeVoltageV, hetTel.DischargeCurrentA, hetTel.AnodeXenonFlowSccm, hetTel.CathodeKeeperVoltageV, hetTel.ChannelWallErosionRateUmPerKh, hetTel.PlumeBeamDivergenceHalfAngleDeg, hetTel.NeutralizerElectronMarginPct, hetAssess.CathodeErosionRiskLevel, hetAssess.PlumeNeutralizationStatus, hetAct.CommandedDischargeVoltageV, hetAct.ModulatedMagneticCoilCurrentA, hetAct.CathodePropellantFlowBoostPct, hetAct.AvoidedSatelliteLossUSD/1e6)
+
+	// 90.2 Semiconductor Sub-2nm GAAFET Nanosheet Selective Etch & ALD High-k Metal Gate Sentinel (SEMI E10 & IEEE IRDS)
+	gaaTel := coregaafet.GlobalGAAFETVault.IngestWaferTelemetry(coregaafet.GAAFETWaferTelemetry{
+		TelemetryID:                     "TEL-GAA-9901",
+		WaferLotID:                      "LOT-GAA-2NM-A14-99",
+		FabChamberID:                    "CHAMBER-ALE-ALD-TEL-01",
+		NanosheetChannelWidthNm:         28.5,
+		NanosheetChannelThicknessNm:     5.2,
+		SiGeSelectiveEtchRatio:          112.5,
+		EquivalentOxideThicknessEotNm:   0.72,
+		CryoChuckTemperatureC:          -28.5,
+		HfO2ALDPrecursorPulseDurationMs: 14.5,
+		ThermalBudgetDtDiffMargin:       1.28,
+		SubthresholdSwingMvPerDec:       68.5,
+	})
+	if gaaTel.WaferLotID == "" || gaaTel.NanosheetChannelWidthNm != 28.5 {
+		t.Fatalf("Failed to ingest GAAFET wafer telemetry: %+v", gaaTel)
+	}
+
+	gaaAssess, err := coregaafet.GlobalGAAFETVault.EvaluateEtchSelectivityAndThermalBudget("LOT-GAA-2NM-A14-99")
+	if err != nil || gaaAssess.NanosheetStictionCollapseHazard != "CRITICAL_STICTION_COLLAPSE_SHORT" || gaaAssess.GateDielectricLeakageCompliance != "OFF_SPEC_GATE_LEAKAGE_REJECT" || !gaaAssess.CryoChuckCoolingMandate || !gaaAssess.ALDPulseShapingMandate {
+		t.Fatalf("Failed to evaluate GAAFET nanosheet selectivity and thermal budget: %+v, err: %v", gaaAssess, err)
+	}
+
+	gaaAct, err := coregaafet.GlobalGAAFETVault.TriggerCryoEtchAndALDPulseShaping("LOT-GAA-2NM-A14-99")
+	if err != nil || gaaAct.TunedCryoChuckTemperatureC >= -40.0 || gaaAct.ModulatedALDPulseDurationMs >= 10.0 || gaaAct.RadicalScavengerPressureMtorr <= 0 || gaaAct.AvoidedWaferScrapLossUSD <= 0 {
+		t.Fatalf("Failed to trigger GAAFET cryo etch and ALD pulse shaping: %+v, err: %v", gaaAct, err)
+	}
+
+	gaaDossier, err := coregaafet.GlobalGAAFETVault.GetGAAFETReliabilityDossier("LOT-GAA-2NM-A14-99")
+	if err != nil || !gaaDossier["semi_e10_compliant"].(bool) || !gaaDossier["ieee_irds_certified"].(bool) {
+		t.Fatalf("Failed to compile GAAFET reliability dossier: %+v, err: %v", gaaDossier, err)
+	}
+	t.Logf("✓ Semiconductor Sub-2nm GAAFET Nanosheet Sentinel Verified: Lot='%s' (Chamber='%s'), Channel=%.1fx%.1f nm, Selectivity=%.1f:1 (Margin=%.1f), EOT=%.2f nm, ChuckT=%.1f°C, ALDPulse=%.1f ms, ThermalDt=%.2f (+%.1f%%), StictionHazard='%s', Compliance='%s', TunedChuck=%.1f°C, TruncatedPulse=%.1f ms, Scavenger=%.1f mTorr, AvoidedLoss=$%.2fM USD",
+		gaaTel.WaferLotID, gaaTel.FabChamberID, gaaTel.NanosheetChannelWidthNm, gaaTel.NanosheetChannelThicknessNm, gaaTel.SiGeSelectiveEtchRatio, gaaAssess.NanosheetReleaseSelectivityMargin, gaaTel.EquivalentOxideThicknessEotNm, gaaTel.CryoChuckTemperatureC, gaaTel.HfO2ALDPrecursorPulseDurationMs, gaaTel.ThermalBudgetDtDiffMargin, gaaAssess.ThermalBudgetExceedancePct, gaaAssess.NanosheetStictionCollapseHazard, gaaAssess.GateDielectricLeakageCompliance, gaaAct.TunedCryoChuckTemperatureC, gaaAct.ModulatedALDPulseDurationMs, gaaAct.RadicalScavengerPressureMtorr, gaaAct.AvoidedWaferScrapLossUSD/1e6)
+
+	// 90.3 Precision Biomanufacturing Large-Scale Fermentation Foam-Out, kLa & pCO2 Stripping Sentinel (ASME BPE & ISO 22000)
+	fermTel := corefermentation.GlobalFermentationVault.IngestFermenterTelemetry(corefermentation.FermenterTelemetry{
+		TelemetryID:                  "TEL-FERM-9901",
+		VesselID:                     "FERM-INDUSTRIAL-BIOVESSEL-150KL-99",
+		BatchID:                      "BATCH-WHEY-PROTEIN-EXPRESS-99",
+		WorkingVolumeLiters:          120000.0,
+		AgitatorPowerPerVolumeKwM3:   4.25,
+		SuperficialGasVelocityMPerSec: 0.052,
+		DissolvedCarbonDioxideMbar:   115.0,
+		DissolvedOxygenPercentAirSat: 21.5,
+		HeadspaceFoamCapacitancePf:   68.5,
+		GasHoldUpFraction:            0.185,
+		VolumetricMassTransferKlaHr:  245.0,
+	})
+	if fermTel.VesselID == "" || fermTel.WorkingVolumeLiters != 120000.0 {
+		t.Fatalf("Failed to ingest fermenter telemetry: %+v", fermTel)
+	}
+
+	fermAssess, err := corefermentation.GlobalFermentationVault.EvaluateFoamAndGasTransfer("FERM-INDUSTRIAL-BIOVESSEL-150KL-99")
+	if err != nil || fermAssess.FoamOutRiskLevel != "CRITICAL_HEPA_FOAM_OUT_BLOWOUT_HAZARD" || fermAssess.HypercapnicMetabolicStress != "SEVERE_RESPIRATORY_ARREST_COLLAPSE" || !fermAssess.MechanicalFoamBreakerMandate || !fermAssess.CO2GasStrippingEnrichmentMandate {
+		t.Fatalf("Failed to evaluate fermentation foam and gas transfer: %+v, err: %v", fermAssess, err)
+	}
+
+	fermAct, err := corefermentation.GlobalFermentationVault.TriggerFoamBreakerAndCO2Stripping("FERM-INDUSTRIAL-BIOVESSEL-150KL-99")
+	if err != nil || fermAct.CommandedFoamCentrifugeRpm < 2500.0 || fermAct.PulsedAntifoamDoseMlPerMin <= 0 || fermAct.EnrichedInletOxygenFractionPct <= 25.0 || fermAct.AvoidedBioprocessLossUSD <= 0 {
+		t.Fatalf("Failed to trigger fermentation foam breaker and gas stripping: %+v, err: %v", fermAct, err)
+	}
+
+	fermDossier, err := corefermentation.GlobalFermentationVault.GetFermentationSafetyDossier("FERM-INDUSTRIAL-BIOVESSEL-150KL-99")
+	if err != nil || !fermDossier["asme_bpe_compliant"].(bool) || !fermDossier["iso_22000_certified"].(bool) {
+		t.Fatalf("Failed to compile fermentation safety dossier: %+v, err: %v", fermDossier, err)
+	}
+	t.Logf("✓ Precision Biomanufacturing Large-Scale Fermentation Sentinel Verified: Vessel='%s' (Batch='%s'), Vol=%.0f L, P/V=%.2f kW/m³, vs=%.3f m/s, pCO2=%.1f mbar, DO=%.1f%%, FoamCap=%.1f pF, HoldUp=%.3f, kLa=%.1f /h, RQ=%.2f, FoamRisk='%s', HypercapnicStress='%s', Centrifuge=%.0f RPM, Antifoam=%.0f mL/min, O2_Enrich=%.1f%%, AvoidedLoss=$%.2fM USD",
+		fermTel.VesselID, fermTel.BatchID, fermTel.WorkingVolumeLiters, fermTel.AgitatorPowerPerVolumeKwM3, fermTel.SuperficialGasVelocityMPerSec, fermTel.DissolvedCarbonDioxideMbar, fermTel.DissolvedOxygenPercentAirSat, fermTel.HeadspaceFoamCapacitancePf, fermTel.GasHoldUpFraction, fermTel.VolumetricMassTransferKlaHr, fermAssess.RespiratoryQuotientRQ, fermAssess.FoamOutRiskLevel, fermAssess.HypercapnicMetabolicStress, fermAct.CommandedFoamCentrifugeRpm, fermAct.PulsedAntifoamDoseMlPerMin, fermAct.EnrichedInletOxygenFractionPct, fermAct.AvoidedBioprocessLossUSD/1e6)
+
+	// 90.4 Geological Salt Cavern Green Hydrogen Storage Halite Creep, Dilatancy & Microbial Souring Sentinel (ISO 27913 & API RP 1114)
+	cavTel := coresaltcavern.GlobalSaltCavernVault.IngestCavernTelemetry(coresaltcavern.SaltCavernTelemetry{
+		TelemetryID:                        "TEL-CAV-9901",
+		CavernID:                           "CAVERN-H2-DOMAL-SALT-350K-99",
+		StorageSiteID:                      "SITE-SALT-DOME-GULF-COAST",
+		StoredHydrogenMassTons:             4850.0,
+		CavernPressureBar:                  175.0,
+		PressureRampRateBarPerDay:          14.5,
+		GeothermalTemperatureC:             64.5,
+		HaliteViscoplasticCreepRatePctPerYr: 1.85,
+		AcousticEmissionEventRatePerHour:   42.0,
+		HydrogenSulfideTracePpm:            0.018,
+		CushionGasNitrogenVolumePct:        12.5,
+	})
+	if cavTel.CavernID == "" || cavTel.CavernPressureBar != 175.0 {
+		t.Fatalf("Failed to ingest salt cavern telemetry: %+v", cavTel)
+	}
+
+	cavAssess, err := coresaltcavern.GlobalSaltCavernVault.EvaluateCreepAndSouring("CAVERN-H2-DOMAL-SALT-350K-99")
+	if err != nil || cavAssess.CavernWallStabilityStatus != "CRITICAL_SALT_SPALLING_COLLAPSE_HAZARD" || cavAssess.HydrogenPuritySouringStatus != "CONTAMINATED_SOUR_GAS_LOCKOUT" || !cavAssess.PressureRampThrottlingMandate || !cavAssess.HalophilicBiocideDosingMandate {
+		t.Fatalf("Failed to evaluate salt cavern creep and souring: %+v, err: %v", cavAssess, err)
+	}
+
+	cavAct, err := coresaltcavern.GlobalSaltCavernVault.TriggerPressureThrottlingAndBiocideQuench("CAVERN-H2-DOMAL-SALT-350K-99")
+	if err != nil || cavAct.ModulatedMaxWithdrawalRampBarPerDay > 10.0 || cavAct.HalophilicBacteriostatDoseKg <= 0 || cavAct.CushionGasBufferAdjustmentPct <= 12.5 || cavAct.AvoidedCavernLossUSD <= 0 {
+		t.Fatalf("Failed to trigger salt cavern pressure throttling and biocide quench: %+v, err: %v", cavAct, err)
+	}
+
+	cavDossier, err := coresaltcavern.GlobalSaltCavernVault.GetSaltCavernIntegrityDossier("CAVERN-H2-DOMAL-SALT-350K-99")
+	if err != nil || !cavDossier["iso_27913_compliant"].(bool) || !cavDossier["api_rp1114_certified"].(bool) {
+		t.Fatalf("Failed to compile salt cavern integrity dossier: %+v, err: %v", cavDossier, err)
+	}
+	t.Logf("✓ Geological Salt Cavern Green Hydrogen Storage Sentinel Verified: Cavern='%s' (Site='%s'), H2_Mass=%.0f tons, Pressure=%.1f bar, Ramp=%.1f bar/day, Temp=%.1f°C, Creep=%.2f%%/yr, AE=%.0f events/hr, H2S=%.3f ppm, CushionN2=%.1f%%, DilatancySF=%.2f, CavernStatus='%s', Purity='%s', ThrottledRamp=%.1f bar/day, BiocideDose=%.0f kg, NewCushion=%.1f%%, AvoidedLoss=$%.2fM USD",
+		cavTel.CavernID, cavTel.StorageSiteID, cavTel.StoredHydrogenMassTons, cavTel.CavernPressureBar, cavTel.PressureRampRateBarPerDay, cavTel.GeothermalTemperatureC, cavTel.HaliteViscoplasticCreepRatePctPerYr, cavTel.AcousticEmissionEventRatePerHour, cavTel.HydrogenSulfideTracePpm, cavTel.CushionGasNitrogenVolumePct, cavAssess.DilatancyBoundarySafetyFactor, cavAssess.CavernWallStabilityStatus, cavAssess.HydrogenPuritySouringStatus, cavAct.ModulatedMaxWithdrawalRampBarPerDay, cavAct.HalophilicBacteriostatDoseKg, cavAct.CushionGasBufferAdjustmentPct, cavAct.AvoidedCavernLossUSD/1e6)
+
+	// 90.5 Molten Salt Reactor (MSR) Liquid Fluoride Fuel Redox, Tellurium Embrittlement & Xenon Stripping Sentinel (ASME BPVC Div 5 & IAEA SSR-2/1)
+	msrTel := coremsr.GlobalMSRVault.IngestFuelSaltTelemetry(coremsr.MSRFuelSaltTelemetry{
+		TelemetryID:                        "TEL-MSR-9901",
+		ReactorCoreID:                      "MSR-LFTR-FLUORIDE-500MWTH-99",
+		SaltLoopID:                         "LOOP-PRIMARY-FLIBE-01",
+		FuelSaltTemperatureC:              685.0,
+		FuelSaltFlowRateKgS:                1420.0,
+		U4ToU3RedoxRatio:                   185.0,
+		DissolvedChromiumPpm:               84.5,
+		HeliumSpargingBubblerFlowNm3Hr:     48.0,
+		Xenon135PoisonReactivityPcm:        -1420.0,
+		TelluriumIntergranularCrackDepthUm: 24.5,
+		CoverGasPressureBar:                3.25,
+	})
+	if msrTel.ReactorCoreID == "" || msrTel.FuelSaltTemperatureC != 685.0 {
+		t.Fatalf("Failed to ingest MSR fuel salt telemetry: %+v", msrTel)
+	}
+
+	msrAssess, err := coremsr.GlobalMSRVault.EvaluateRedoxAndPoisoning("MSR-LFTR-FLUORIDE-500MWTH-99")
+	if err != nil || msrAssess.HastelloyGrainCorrosionHazard != "CRITICAL_TELLURIUM_INTERGRANULAR_SCC" || msrAssess.XenonNeutronPoisonStatus != "SPATIAL_FLUX_OSCILLATION_COLLAPSE" || !msrAssess.BerylliumRedoxRodInsertionMandate || !msrAssess.HeliumSpargeFlowBoostMandate {
+		t.Fatalf("Failed to evaluate MSR fuel redox and poisoning: %+v, err: %v", msrAssess, err)
+	}
+
+	msrAct, err := coremsr.GlobalMSRVault.TriggerBerylliumRodAndHeliumSparge("MSR-LFTR-FLUORIDE-500MWTH-99")
+	if err != nil || msrAct.BerylliumRodInsertionDepthMm < 100.0 || msrAct.CommandedHeliumSpargeFlowNm3Hr < 90.0 || msrAct.SecondarySaltCoolantTrimC <= 0 || msrAct.AvoidedReactorLossUSD <= 0 {
+		t.Fatalf("Failed to trigger MSR beryllium rod and helium sparge: %+v, err: %v", msrAct, err)
+	}
+
+	msrDossier, err := coremsr.GlobalMSRVault.GetMSRNuclearSafetyDossier("MSR-LFTR-FLUORIDE-500MWTH-99")
+	if err != nil || !msrDossier["asme_bpvc_div5_compliant"].(bool) || !msrDossier["iaea_ssr2_1_certified"].(bool) {
+		t.Fatalf("Failed to compile MSR nuclear safety dossier: %+v, err: %v", msrDossier, err)
+	}
+	t.Logf("✓ Gen-IV Molten Salt Reactor (MSR) Fuel Redox & Xenon Sentinel Verified: Core='%s' (Loop='%s'), SaltT=%.1f°C, Flow=%.0f kg/s, U4/U3=%.1f:1, DissolvedCr=%.1f ppm, HeSparge=%.0f Nm³/hr, Xe135=%.0f pcm, TeCrack=%.1f µm, E_Fluorine=%.3f V, HastelloyHazard='%s', XenonStatus='%s', BeRodDepth=%.1f mm, BoostedHe=%.0f Nm³/hr, SecCoolant=%.1f°C, AvoidedLoss=$%.2fM USD",
+		msrTel.ReactorCoreID, msrTel.SaltLoopID, msrTel.FuelSaltTemperatureC, msrTel.FuelSaltFlowRateKgS, msrTel.U4ToU3RedoxRatio, msrTel.DissolvedChromiumPpm, msrTel.HeliumSpargingBubblerFlowNm3Hr, msrTel.Xenon135PoisonReactivityPcm, msrTel.TelluriumIntergranularCrackDepthUm, msrAssess.FluorineElectrochemicalPotentialVolts, msrAssess.HastelloyGrainCorrosionHazard, msrAssess.XenonNeutronPoisonStatus, msrAct.BerylliumRodInsertionDepthMm, msrAct.CommandedHeliumSpargeFlowNm3Hr, msrAct.SecondarySaltCoolantTrimC, msrAct.AvoidedReactorLossUSD/1e6)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (90 SECTIONS: 110+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD + CONTRACT LEAKAGE SENTINEL + MICROGRID ISLANDING + CARGO GEOFENCE + SHIFT BIDDING FATIGUE + CIRCULAR PACKAGING RTI + INDUSTRIAL WATER ZLD + VENDOR SANCTIONS GRAPH + BOILER TUBE DESCALING + SAAS DUNNING WATERFALL + TOLL MANUFACTURING RECON + SILO AERATION SENTINEL + EPC PROGRESS BILLING ESCROW + DYNAMIC PORT BERTH DEMURRAGE + TRANSFORMER DGA GUARDIAN + CROSS BORDER CASH REPATRIATION + ORE BLENDING OPTIMIZER + PHARMA CRYOGENIC SENTINEL + KILN REFRACTORY GUARDIAN + IP PATENT ANNUITY + TURBINE EOH CREEP + AVIATION MRO FATIGUE + MARINE LNG RELIQUEFACTION + SEMICONDUCTOR FAB YIELD + WASTEWATER BIOMETHANE + RAILWAY WHEEL RCF + NUCLEAR RADIOPHARM DECAY + UTILITY BESS THERMAL SOH + SATELLITE ORBITAL CONJUNCTION + SUBSEA FLOW ASSURANCE + CONNECTED VEHICLE OTA SUMS + BIOPHARMA BIOREACTOR PAT + FLOATING WIND MOORING + HVDC SUBSEA DTS + CCS CO2 ENVELOPE + MINE ROCKBURST SENTINEL + TOKAMAK FUSION DISRUPTION + CRYO LH2 ORTHO-PARA + HYPERSONIC TPS ABLATION + 3D CHIPLET TSV WARPAGE + SUPERHOT EGS GEOTHERMAL SEISMICITY + QUANTUM QKD PHASE GUARDIAN + SEABED NODULE PLUME + CSP MOLTEN SALT FREEZE + SOLID-STATE BATTERY CRACK + DIRECT AIR CAPTURE OPTIMIZER + EVTOL ACOUSTIC SENTINEL + HYPERLOOP MAGLEV QUENCH + SUBSEA DEEPWATER BOP + CAR-T ACOUSTIC SORTING + PLASTIC PYROLYSIS DIOXIN SENTINEL + GREEN AMMONIA SENTINEL + ROCKET POGO SENTINEL + SMR PASSIVE CONTAINMENT + EUV PELLICLE SENTINEL + UHVDC CONVERTER SENTINEL + SUBSEA CCS CO2 HYDRATE + HYPERSONIC SCRAMJET FUEL CRACKING + MRNA LNP MICROFLUIDIC + SILICON PHOTONICS CPO SKEW + SOEC EFUEL COELECTROLYSIS + SUPERHOT ROCK GEOTHERMAL SHR + SUBSEA AUV DOCKING IPT + ELECTRONIC H2O2 RUNAWAY + BIOPHARMA CONTROLLED ICE FOG LYO + CADMIUM FREE QLED INK PRINTING + HALL EFFECT THRUSTER PROPULSION + SUB 2NM GAAFET NANOSHEET + INDUSTRIAL FERMENTATION FOAM + SALT CAVERN HYDROGEN STORAGE + MOLTEN SALT REACTOR FUEL REDOX) PASSED 100%!")
 }

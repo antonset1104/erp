@@ -33174,6 +33174,338 @@ async function triggerQLEDPrinting() {
     }
 }
 
+async function triggerHallThruster() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi degradasi katoda penjaga (keeper), erosi keramik channel, dan divergensi berkas plasma Hall thruster satelit...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const thrusterID = "HET-EP-GEO-SATELLITE-12KW";
+        await api('/propulsion/het/ingest-thruster-telemetry', 'POST', {
+            thruster_id: thrusterID,
+            satellite_bus_id: "BUS-COMM-ORBITAL-7000",
+            discharge_power_kw: 12.5,
+            discharge_voltage_v: 300.0,
+            discharge_current_a: 41.67,
+            anode_xenon_flow_sccm: 185.0,
+            cathode_keeper_voltage_v: 24.5,
+            channel_wall_erosion_rate_um_per_kh: 14.8,
+            plume_beam_divergence_half_angle_deg: 44.5,
+            neutralizer_electron_margin_pct: 91.2
+        });
+
+        const evalRes = await api('/propulsion/het/evaluate-erosion-and-neutralization', 'POST', { thruster_id: thrusterID });
+        const actRes = await api('/propulsion/het/trigger-magnetic-trim-and-voltage-step-down', 'POST', { thruster_id: thrusterID });
+        const dossierRes = await api(`/propulsion/het/hall-thruster-reliability-dossier/${thrusterID}`, 'GET');
+
+        if (badge) badge.textContent = `🚀 Hall Thruster: Isp ${evalRes.data.specific_impulse_isp_sec} s | Keeper: ${dossierRes.data.telemetry.cathode_keeper_voltage_v} V | Plume: ${evalRes.data.plume_neutralization_status}`;
+        if (answerEl) {
+            let out = `🚀 SATELLITE HIGH-POWER HALL-EFFECT THRUSTER (HET) PROPULSION SENTINEL (ECSS-E-ST-20-07C & AIAA S-110):\n`;
+            out += `Pendorong Listrik Satelit: ${thrusterID} | Bus Wahana Antariksa: ${dossierRes.data.telemetry.satellite_bus_id}\n`;
+            out += `Daya Buang Pelepasan (Discharge): ${dossierRes.data.telemetry.discharge_power_kw} kW | Arus / Tegangan: ${dossierRes.data.telemetry.discharge_current_a} A / ${dossierRes.data.telemetry.discharge_voltage_v} V\n\n`;
+            out += `EROSI KATODA, EFISIENSI DAYA DORONG (Isp) & DIVERGENSI BERKAS PLASMA:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Impuls Spesifik Anoda (Isp): ${evalRes.data.specific_impulse_isp_sec} detik | Efisiensi Daya Dorong: ${evalRes.data.anode_thrust_efficiency_pct}%\n`;
+            out += `• Tegangan Penjaga Katoda (Keeper Voltage): ${dossierRes.data.telemetry.cathode_keeper_voltage_v} V (Ambang Batas Bahaya Runaway > 22.0 V)\n`;
+            out += `• Laju Erosi Keramik Saluran (BN Channel): ${dossierRes.data.telemetry.channel_wall_erosion_rate_um_per_kh} µm/1000 jam\n`;
+            out += `• Sudut Setengah Divergensi Berkas Plasma: ${dossierRes.data.telemetry.plume_beam_divergence_half_angle_deg}° (Target Ideal < 35.0°)\n`;
+            out += `• Margin Emisi Elektron Netralizer: ${dossierRes.data.telemetry.neutralizer_electron_margin_pct}%\n`;
+            out += `• Tingkat Risiko Keausan Katoda & Sputtering: ${evalRes.data.cathode_erosion_risk_level}\n`;
+            out += `• Status Netralisasi Berkas & Muatan Balik: ${evalRes.data.plume_neutralization_status}\n\n`;
+            out += `AKTUASI MAGNETIC BARRIER SHAPING, VOLTAGE STEP-DOWN & CATHODE FLOW BOOST:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Propulsi Antariksa: ${actRes.data.action_id}\n`;
+            out += `• Penurunan Tegangan Pelepasan Listrik: Diturunkan ke ${actRes.data.commanded_discharge_voltage_v} V (Meredam Energi Kinetik Ion Sputtering)\n`;
+            out += `• Penguatan Arus Kumparan Penghalang Magnetik: Ditingkatkan ke ${actRes.data.modulated_magnetic_coil_current_a} A (Menjauhkan Elektron dari Dinding BN)\n`;
+            out += `• Peningkatan Aliran Propelan Katoda Netralizer: +${actRes.data.cathode_propellant_flow_boost_pct}% Aliran Xenon (Mendinginkan Emisi Katoda LaB6)\n`;
+            out += `• Estimasi Kerugian Satelit GEO Terhindar: $${actRes.data.avoided_satellite_loss_usd.toLocaleString()} USD (Mencegah Peluruhan Orbit & Kerusakan Solar Array)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penurunan tegangan buang ke 250 V mereduksi energi kinetik ion Xenon di bawah ambang batas erosi sputtering keramik Boron Nitride.</li>
+                <li>Penguatan arus kumparan magnetik ke 8.4 A merapatkan medan penghalang magnetik dan memulihkan divergensi berkas plasma di bawah 35°.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Hall Thruster Propulsion sentinel: ' + err.message;
+    }
+}
+
+async function triggerGAAFETNanosheet() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi selektivitas etsa SiGe/Si, stiksi nanosheet, dan batas difusi termal ALD high-k...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const lotID = "LOT-GAA-2NM-A14-0042";
+        await api('/semicon/gaafet/ingest-wafer-telemetry', 'POST', {
+            wafer_lot_id: lotID,
+            fab_chamber_id: "CHAMBER-ALE-ALD-TEL-01",
+            nanosheet_channel_width_nm: 28.5,
+            nanosheet_channel_thickness_nm: 5.2,
+            sige_selective_etch_ratio: 112.5,
+            equivalent_oxide_thickness_eot_nm: 0.72,
+            cryo_chuck_temperature_c: -28.5,
+            hfo2_ald_precursor_pulse_duration_ms: 14.5,
+            thermal_budget_dt_diff_margin: 1.28,
+            subthreshold_swing_mv_per_dec: 68.5
+        });
+
+        const evalRes = await api('/semicon/gaafet/evaluate-etch-selectivity-and-thermal-budget', 'POST', { wafer_lot_id: lotID });
+        const actRes = await api('/semicon/gaafet/trigger-cryo-etch-and-ald-pulse-shaping', 'POST', { wafer_lot_id: lotID });
+        const dossierRes = await api(`/semicon/gaafet/gaafet-reliability-dossier/${lotID}`, 'GET');
+
+        if (badge) badge.textContent = `🔬 Sub-2nm GAAFET: Selectivity ${dossierRes.data.telemetry.sige_selective_etch_ratio}:1 | EOT: ${dossierRes.data.telemetry.equivalent_oxide_thickness_eot_nm} nm | Stiction: ${evalRes.data.nanosheet_stiction_collapse_hazard}`;
+        if (answerEl) {
+            let out = `🔬 SEMICONDUCTOR SUB-2nm GAAFET NANOSHEET SELECTIVE ETCH & ALD SENTINEL (SEMI E10 & IEEE IRDS):\n`;
+            out += `Lot Wafer Nanosheet Generasi A14: ${lotID} | Kamar Reaktor Fab: ${dossierRes.data.telemetry.fab_chamber_id}\n`;
+            out += `Dimensi Kanal Nanosheet: Lebar ${dossierRes.data.telemetry.nanosheet_channel_width_nm} nm × Tebal ${dossierRes.data.telemetry.nanosheet_channel_thickness_nm} nm\n\n`;
+            out += `SELEKTIVITAS PELEPASAN SiGe, ANGGARAN TERMAL DIFUSI & KETEBALAN EOT OKSIDA:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Rasio Selektivitas Etsa Isotropik SiGe/Si: ${dossierRes.data.telemetry.sige_selective_etch_ratio}:1 (Target Kritis Bebas Defek > 150.0:1)\n`;
+            out += `• Deviasi Margin Selektivitas Nanosheet: -${evalRes.data.nanosheet_release_selectivity_margin.toFixed(1)} poin di bawah spesifikasi\n`;
+            out += `• Ketebalan Oksida Ekuivalen Gerbang (EOT): ${dossierRes.data.telemetry.equivalent_oxide_thickness_eot_nm} nm (Target Standar < 0.65 nm)\n`;
+            out += `• Margin Anggaran Termal Difusi Dopan (D·t): ${dossierRes.data.telemetry.thermal_budget_dt_diff_margin} (Exceedance: +${evalRes.data.thermal_budget_exceedance_pct.toFixed(1)}%)\n`;
+            out += `• Suhu Meja Wafer Cryogenic Chuck: ${dossierRes.data.telemetry.cryo_chuck_temperature_c}°C | Subthreshold Swing: ${dossierRes.data.telemetry.subthreshold_swing_mv_per_dec} mV/dec\n`;
+            out += `• Bahaya Keruntuhan Stiction Nanosheet: ${evalRes.data.nanosheet_stiction_collapse_hazard}\n`;
+            out += `• Status Kepatuhan Kebocoran Dielektrik Gerbang: ${evalRes.data.gate_dielectric_leakage_compliance}\n\n`;
+            out += `AKTUASI CRYOGENIC CHUCK CHILLING, TRUNCATED ALD PULSE & RADICAL SCAVENGING:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Kualitas Fabrikasi Fab: ${actRes.data.action_id}\n`;
+            out += `• Penurunan Suhu Wafer Cryo-Chuck: Didinginkan ke ${actRes.data.tuned_cryo_chuck_temperature_c}°C (Membekukan Etsa Parasit pada Silikon Nanosheet)\n`;
+            out += `• Pemangkasan Durasi Pulsa Prekursor HfO2 ALD: Dipersingkat ke ${actRes.data.modulated_ald_pulse_duration_ms} ms (Menghentikan Dekomposisi Termal Oksida)\n`;
+            out += `• Tekanan Parsial Gas Penangkap Radikal Fluor: Disesuaikan ke ${actRes.data.radical_scavenger_pressure_mtorr} mTorr\n`;
+            out += `• Estimasi Kerugian Lot Wafer EUV Terhindar: $${actRes.data.avoided_wafer_scrap_loss_usd.toLocaleString()} USD (Menyelamatkan Yield Fab Sub-2nm)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pendinginan cryo-chuck ke -42°C menghentikan erosi lateral pada nanosheet silikon sehingga rasio selektivitas pulih di atas 150:1.</li>
+                <li>Pemotongan pulsa prekursor ALD ke 8.2 ms mengunci difusi antarmuka gerbang dan memulihkan EOT di bawah ambang 0.65 nm.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Sub-2nm GAAFET sentinel: ' + err.message;
+    }
+}
+
+async function triggerFermentationFoam() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi pembentukan busa fermentasi, perpindahan massa kLa, dan toksisitas pCO2 terlarut...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const vesselID = "FERM-INDUSTRIAL-BIOVESSEL-150KL-01";
+        await api('/bioprocess/fermentation/ingest-fermenter-telemetry', 'POST', {
+            vessel_id: vesselID,
+            batch_id: "BATCH-WHEY-PROTEIN-EXPRESS-88",
+            working_volume_liters: 120000.0,
+            agitator_power_per_volume_kw_m3: 4.25,
+            superficial_gas_velocity_m_per_sec: 0.052,
+            dissolved_carbon_dioxide_mbar: 115.0,
+            dissolved_oxygen_percent_air_sat: 21.5,
+            headspace_foam_capacitance_pf: 68.5,
+            gas_hold_up_fraction: 0.185,
+            volumetric_mass_transfer_kla_hr: 245.0
+        });
+
+        const evalRes = await api('/bioprocess/fermentation/evaluate-foam-and-gas-transfer', 'POST', { vessel_id: vesselID });
+        const actRes = await api('/bioprocess/fermentation/trigger-foam-breaker-and-co2-stripping', 'POST', { vessel_id: vesselID });
+        const dossierRes = await api(`/bioprocess/fermentation/fermentation-safety-dossier/${vesselID}`, 'GET');
+
+        if (badge) badge.textContent = `🧪 Fermentation: Foam ${evalRes.data.foam_out_risk_level} | pCO2: ${dossierRes.data.telemetry.dissolved_carbon_dioxide_mbar} mbar | kLa: ${dossierRes.data.telemetry.volumetric_mass_transfer_kla_hr} /h`;
+        if (answerEl) {
+            let out = `🧪 INDUSTRIAL PRECISION FERMENTATION FOAM-OUT & MASS TRANSFER SENTINEL (ASME BPE & ISO 22000):\n`;
+            out += `Bioreaktor Skala Industri: ${vesselID} | Bets Produksi Protein: ${dossierRes.data.telemetry.batch_id}\n`;
+            out += `Volume Kerja Fermentasi: ${dossierRes.data.telemetry.working_volume_liters.toLocaleString()} Liter | Daya Agitasi: ${dossierRes.data.telemetry.agitator_power_per_volume_kw_m3} kW/m³\n\n`;
+            out += `PEMBENTUKAN BUSA FASE ATAS, TRANSFER MASSA (kLa) & INHIBISI CO2 HIPERKAPNIK:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Kapasitansi Sensor Busa Headspace: ${dossierRes.data.telemetry.headspace_foam_capacitance_pf} pF (Batas Kritis Foam-Out > 50.0 pF)\n`;
+            out += `• Tekanan Parsial CO2 Terlarut (pCO2): ${dossierRes.data.telemetry.dissolved_carbon_dioxide_mbar} mbar (Ambang Toksisitas Sel > 100.0 mbar)\n`;
+            out += `• Koefisien Transfer Massa Volumetrik O2 (kLa): ${dossierRes.data.telemetry.volumetric_mass_transfer_kla_hr} 1/jam | Fraksi Gas Hold-Up: ${dossierRes.data.telemetry.gas_hold_up_fraction}\n`;
+            out += `• Oksigen Terlarut (DO): ${dossierRes.data.telemetry.dissolved_oxygen_percent_air_sat}% Air Sat | Rasio Respirasi (RQ): ${evalRes.data.respiratory_quotient_rq}\n`;
+            out += `• Kecepatan Gas Superfisial (vs): ${dossierRes.data.telemetry.superficial_gas_velocity_m_per_sec} m/s\n`;
+            out += `• Tingkat Risiko Ledakan Busa Menembus HEPA: ${evalRes.data.foam_out_risk_level}\n`;
+            out += `• Status Stres Metabolik Hiperkapnik: ${evalRes.data.hypercapnic_metabolic_stress}\n\n`;
+            out += `AKTUASI CENTRIFUGAL FOAM BREAKER, ANTIFOAM DOSING & GAS STRIPPING ENRICHMENT:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Kontrol Biomanufaktur: ${actRes.data.action_id}\n`;
+            out += `• Kecepatan Pemecah Busa Sentrifugal: Ditingkatkan ke ${actRes.data.commanded_foam_centrifuge_rpm} RPM (Menghancurkan Busa Tanpa Overdosis Kimia)\n`;
+            out += `• Injeksi Agen Antibusa Nabati Terkontrol: ${actRes.data.pulsed_antifoam_dose_ml_per_min} mL/menit\n`;
+            out += `• Pengkayaan Oksigen Udara Aerasi: Ditingkatkan ke ${actRes.data.enriched_inlet_oxygen_fraction_pct}% O2 (Melucuti CO2 Tanpa Menurunkan kLa)\n`;
+            out += `• Estimasi Kerugian Kontaminasi Bets Terhindar: $${actRes.data.avoided_bioprocess_loss_usd.toLocaleString()} USD (Menjamin Sterilitas Bioreaktor ASME BPE)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Akselerasi pemecah busa mekanis ke 2800 RPM menghentikan ancaman foam-out ke filter buang steril HEPA.</li>
+                <li>Pengkayaan gas aerasi ke 28.5% O2 melucuti pCO2 di bawah 90 mbar sehingga tingkat pertumbuhan mikroba kembali optimal.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Industrial Fermentation sentinel: ' + err.message;
+    }
+}
+
+async function triggerSaltCavernH2() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi konvergensi creep garam halit, batas dilatansi batuan, dan souring gas H2S oleh mikroba SRB...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const cavernID = "CAVERN-H2-DOMAL-SALT-350K-01";
+        await api('/storage/saltcavern/ingest-cavern-telemetry', 'POST', {
+            cavern_id: cavernID,
+            storage_site_id: "SITE-SALT-DOME-GULF-COAST",
+            stored_hydrogen_mass_tons: 4850.0,
+            cavern_pressure_bar: 175.0,
+            pressure_ramp_rate_bar_per_day: 14.5,
+            geothermal_temperature_c: 64.5,
+            halite_viscoplastic_creep_rate_pct_per_yr: 1.85,
+            acoustic_emission_event_rate_per_hour: 42.0,
+            hydrogen_sulfide_trace_ppm: 0.018,
+            cushion_gas_nitrogen_volume_pct: 12.5
+        });
+
+        const evalRes = await api('/storage/saltcavern/evaluate-creep-and-souring', 'POST', { cavern_id: cavernID });
+        const actRes = await api('/storage/saltcavern/trigger-pressure-throttling-and-biocide-quench', 'POST', { cavern_id: cavernID });
+        const dossierRes = await api(`/storage/saltcavern/salt-cavern-integrity-dossier/${cavernID}`, 'GET');
+
+        if (badge) badge.textContent = `⚡ Salt Cavern H2: Dilatancy SF ${evalRes.data.dilatancy_boundary_safety_factor} | H2S: ${dossierRes.data.telemetry.hydrogen_sulfide_trace_ppm} ppm | Status: ${evalRes.data.hydrogen_purity_souringStatus || evalRes.data.hydrogen_purity_souring_status}`;
+        if (answerEl) {
+            let out = `⚡ GEOLOGICAL SALT CAVERN GREEN HYDROGEN STORAGE SENTINEL (ISO 27913 & API RP 1114):\n`;
+            out += `Gua Garam Bawah Tanah: ${cavernID} | Lokasi Formasi Kubah Garam: ${dossierRes.data.telemetry.storage_site_id}\n`;
+            out += `Massa Hidrogen Tersimpan: ${dossierRes.data.telemetry.stored_hydrogen_mass_tons.toLocaleString()} Ton | Tekanan Operasi: ${dossierRes.data.telemetry.cavern_pressure_bar} bar\n\n`;
+            out += `GEOMEKANIKA HALIT CREEP, BATAS DILATANSI & KONTAMINASI MIKROBA SRB (H2S):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Faktor Keamanan Batas Dilatasi Batuan Garam: ${evalRes.data.dilatancy_boundary_safety_factor} (Batas Kritis Keruntuhan Spalling < 1.30)\n`;
+            out += `• Laju Fluktuasi Tekanan Harian: ${dossierRes.data.telemetry.pressure_ramp_rate_bar_per_day} bar/hari (Batas Aman Siklus < 10.0 bar/hari)\n`;
+            out += `• Laju Konvergensi Creep Viskoplastis Halit: ${dossierRes.data.telemetry.halite_viscoplastic_creep_rate_pct_per_yr}% volume per tahun\n`;
+            out += `• Tingkat Kejadian Emisi Akustik Mikrokrek: ${dossierRes.data.telemetry.acoustic_emission_event_rate_per_hour} event/jam\n`;
+            out += `• Konsentrasi Gas H2S Souring: ${dossierRes.data.telemetry.hydrogen_sulfide_trace_ppm} ppm (Standar Sel Bahan Bakar ISO 14687 < 0.004 ppm)\n`;
+            out += `• Fraksi Bantalan Gas Nitrogen (Cushion Gas): ${dossierRes.data.telemetry.cushion_gas_nitrogen_volume_pct}%\n`;
+            out += `• Kestabilan Geomekanik Dinding Gua Garam: ${evalRes.data.cavern_wall_stability_status}\n`;
+            out += `• Status Kemurnian Hidrogen Terhadap Souring: ${evalRes.data.hydrogen_purity_souring_status}\n\n`;
+            out += `AKTUASI PEMBATASAN WITHDRAWAL RAMP, INJEKSI HALO-BIOCIDE & BUFFER CUSHION GAS:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Geomekanik Energi Bawah Tanah: ${actRes.data.action_id}\n`;
+            out += `• Pembatasan Laju Penarikan/Injeksi Maksimum: Dibatasi ke ${actRes.data.modulated_max_withdrawal_ramp_bar_per_day} bar/hari (Meredam Geser Kubah Garam)\n`;
+            out += `• Dosis Injeksi Agen Biostat Halofilik: ${actRes.data.halophilic_bacteriostat_dose_kg} kg (Menonaktifkan Bakteri SRB di Air Brine Sump)\n`;
+            out += `• Perluasan Lapisan Penyangga Cushion Gas N2: Ditingkatkan ke ${actRes.data.cushion_gas_buffer_adjustment_pct}%\n`;
+            out += `• Estimasi Kerugian Struktur Gua & Souring Terhindar: $${actRes.data.avoided_cavern_loss_usd.toLocaleString()} USD (Menjamin Integritas ISO 27913)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pembatasan laju siklus tekanan ke 8.0 bar/hari menghentikan dilatasi geser dan menstabilkan faktor keamanan di atas 1.50.</li>
+                <li>Injeksi biostat halofilik mensterilkan air garam dasar gua sehingga produksi gas H2S kembali memenuhi standar kemurnian ISO 14687.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Salt Cavern H2 Storage sentinel: ' + err.message;
+    }
+}
+
+async function triggerMSRLiquidFuel() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi potensial redoks garam FLiBe (U4+/U3+), pelucutan racun Xe-135, dan peretakan telurium Hastelloy-N...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const coreID = "MSR-LFTR-FLUORIDE-500MWTH-01";
+        await api('/nuclear/msr/ingest-fuelsalt-telemetry', 'POST', {
+            reactor_core_id: coreID,
+            salt_loop_id: "LOOP-PRIMARY-FLIBE-01",
+            fuel_salt_temperature_c: 685.0,
+            fuel_salt_flow_rate_kg_s: 1420.0,
+            u4_to_u3_redox_ratio: 185.0,
+            dissolved_chromium_ppm: 84.5,
+            helium_sparging_bubbler_flow_nm3_hr: 48.0,
+            xenon135_poison_reactivity_pcm: -1420.0,
+            tellurium_intergranular_crack_depth_um: 24.5,
+            cover_gas_pressure_bar: 3.25
+        });
+
+        const evalRes = await api('/nuclear/msr/evaluate-redox-and-poisoning', 'POST', { reactor_core_id: coreID });
+        const actRes = await api('/nuclear/msr/trigger-beryllium-rod-and-helium-sparge', 'POST', { reactor_core_id: coreID });
+        const dossierRes = await api(`/nuclear/msr/msr-nuclear-safety-dossier/${coreID}`, 'GET');
+
+        if (badge) badge.textContent = `⚛️ Molten Salt MSR: U4/U3 ${dossierRes.data.telemetry.u4_to_u3_redox_ratio}:1 | Xe Poison: ${evalRes.data.xenon_neutron_poison_status} | Hastelloy: ${evalRes.data.hastelloy_grain_corrosion_hazard}`;
+        if (answerEl) {
+            let out = `⚛️ GENERATION-IV MOLTEN SALT REACTOR (MSR) FUEL REDOX & XENON STRIPPING SENTINEL (ASME BPVC DIV 5 & IAEA SSR-2/1):\n`;
+            out += `Teras Reaktor Nuklir MSR: ${coreID} | Loop Pendingin Primer FLiBe: ${dossierRes.data.telemetry.salt_loop_id}\n`;
+            out += `Suhu Garam Bahan Bakar: ${dossierRes.data.telemetry.fuel_salt_temperature_c}°C | Laju Alir Garam Primer: ${dossierRes.data.telemetry.fuel_salt_flow_rate_kg_s} kg/s\n\n`;
+            out += `KONTROL POTENSIAL REDOKS NERNST, KOROSI HASTELLOY-N & RACUN NEUTRON XE-135:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Rasio Redoks Uranium [U4+]/[U3+]: ${dossierRes.data.telemetry.u4_to_u3_redox_ratio}:1 (Rasio Optimal Aman 90:1 - 110:1, Oksidatif > 150:1)\n`;
+            out += `• Potensial Elektrokimia Fluorin: ${evalRes.data.fluorine_electrochemical_potential_volts} V (Mengontrol Daya Korosif Garam FLiBe)\n`;
+            out += `• Konsentrasi Kromium Terlarut Bejana: ${dossierRes.data.telemetry.dissolved_chromium_ppm} ppm (Batas Korosi Pelindian Hastelloy < 50.0 ppm)\n`;
+            out += `• Kedalaman Retak Batas Butir Telurium: ${dossierRes.data.telemetry.tellurium_intergranular_crack_depth_um} µm (Batas Maksimum < 15.0 µm)\n`;
+            out += `• Reaktivitas Racun Fisi Xenon-135: ${dossierRes.data.telemetry.xenon135_poison_reactivity_pcm} pcm\n`;
+            out += `• Laju Aliran Helium Bubbler Pengusir Gas Fisi: ${dossierRes.data.telemetry.helium_sparging_bubbler_flow_nm3_hr} Nm³/jam\n`;
+            out += `• Tingkat Bahaya Korosi Batas Butir Hastelloy: ${evalRes.data.hastelloy_grain_corrosion_hazard}\n`;
+            out += `• Status Penyerapan Racun Neutron Xenon: ${evalRes.data.xenon_neutron_poison_status}\n\n`;
+            out += `AKTUASI INSERSI BATANG BERYLLIUM, HELIUM SPARGE BOOST & TRIM PENDINGIN SEKUNDER:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Keselamatan Nuklir: ${actRes.data.action_id}\n`;
+            out += `• Kedalaman Insersi Batang Pereduksi Berilium: ${actRes.data.beryllium_rod_insertion_depth_mm} mm (Mereduksi Ion U4+ Kembali ke U3+)\n`;
+            out += `• Peningkatan Debit Semburan Gas Helium Bubbler: Ditingkatkan ke ${actRes.data.commanded_helium_sparge_flow_nm3_hr} Nm³/jam (Melucuti Xe-135 Secara Efisien)\n`;
+            out += `• Penyesuaian Suhu Loop Pendingin Sekunder: Ditetapkan ke ${actRes.data.secondary_salt_coolant_trim_c}°C\n`;
+            out += `• Estimasi Kerugian Reaktor Nuklir Terhindar: $${actRes.data.avoided_reactor_loss_usd.toLocaleString()} USD (Mencegah Kebocoran Bejana Primer & Pemadaman Reaktor)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Insersi batang berilium 125 mm mereduksi potensial redoks garam FLiBe kembali ke rasio ideal 100:1 dan menghentikan pengikisan kromium Hastelloy.</li>
+                <li>Peningkatan aliran sparge gas helium ke 95 Nm³/jam mengeliminasi akumulasi racun Xe-135 dan menstabilkan fluks neutron reaktor.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Molten Salt Reactor sentinel: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

@@ -1897,6 +1897,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/propulsion/het/evaluate-erosion-and-neutralization": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Aerospace & Satellite High-Power Hall-Effect Thruster (HET) Electric Propulsion Sentinel (ECSS-E-ST-20-07C & AIAA S-110)",
+					"description": "Monitors discharge voltage/current, magnetic circuit coil temperature, keeper voltage, channel ceramic erosion, and plume divergence with adaptive magnetic barrier trim.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Specific impulse s, thrust efficiency %, cathode erosion risk, plume neutralization status, and voltage step-down command"},
+					},
+				},
+			},
+			"/api/v1/semicon/gaafet/evaluate-etch-selectivity-and-thermal-budget": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Semiconductor Sub-2nm GAAFET Nanosheet Selective Etch & ALD High-k Metal Gate Sentinel (SEMI E10 & IEEE IRDS)",
+					"description": "Monitors SiGe/Si atomic layer etch release selectivity, nanosheet stiction warpage, ALD high-k thermal budget exceedance, and equivalent oxide thickness EOT.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Selectivity margin, thermal budget exceedance %, nanosheet stiction hazard, gate leakage compliance, and cryo chuck cooling command"},
+					},
+				},
+			},
+			"/api/v1/bioprocess/fermentation/evaluate-foam-and-gas-transfer": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Precision Biomanufacturing Large-Scale Fermentation Foam-Out, kLa & pCO2 Stripping Sentinel (ASME BPE & ISO 22000)",
+					"description": "Monitors headspace foam capacitance, volumetric gas hold-up, mass transfer kLa, dissolved CO2 hypercapnic toxicity, and respiratory quotient RQ.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Respiratory quotient RQ, foam-out risk level, hypercapnic metabolic stress, foam centrifuge rpm trim, and O2 enrichment command"},
+					},
+				},
+			},
+			"/api/v1/storage/saltcavern/evaluate-creep-and-souring": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Geological Salt Cavern Green Hydrogen Storage Halite Creep, Dilatancy & Microbial Souring Sentinel (ISO 27913 & API RP 1114)",
+					"description": "Monitors halite viscoplastic creep, pressure cycle ramp rates, acoustic emission micro-cracking, dilatancy safety factor, and SRB hydrogen sulfide souring.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Dilatancy boundary safety factor, cavern wall stability status, H2S souring alert, withdrawal ramp limit bar/day, and biocide dose command"},
+					},
+				},
+			},
+			"/api/v1/nuclear/msr/evaluate-redox-and-poisoning": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Molten Salt Reactor (MSR) Liquid Fluoride Fuel Redox, Tellurium Embrittlement & Xenon Stripping Sentinel (ASME BPVC Div 5 & IAEA SSR-2/1)",
+					"description": "Monitors liquid fluoride fuel salt U4+/U3+ electrochemical redox potential, Hastelloy chromium dissolution, tellurium intergranular SCC, and Xe-135 off-gas stripping.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Fluorine electrochemical potential V, Hastelloy corrosion hazard, xenon neutron poison status, beryllium rod insertion depth, and helium sparge flow boost"},
+					},
+				},
+			},
 		},
 	}
 }
