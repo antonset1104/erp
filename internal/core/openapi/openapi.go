@@ -1947,6 +1947,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/aerospace/gridfin/evaluate-hydraulics-and-flutter": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Aerospace Reusable Rocket Booster Aerogrid Fin Hydraulic & Re-entry Thermal Sentinel (FAA 14 CFR Part 450 & AIAA S-081)",
+					"description": "Monitors servo pressure cavitation, hinge torque margin, oil bulk vaporization, and limit-cycle flutter frequency during hypersonic re-entry.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Hydraulic torque margin %, cavitation risk, aeroelastic stability status, AoA trim bias, and subcooled fluid cooling pulse command"},
+					},
+				},
+			},
+			"/api/v1/semicon/mbmw/evaluate-beam-astigmatism-and-drift": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Semiconductor Multi-Beam Mask Writer (MBMW) Electron Beam Astigmatism, Drift & Field Distortion Sentinel (SEMI P48 & ISO 14644-1)",
+					"description": "Monitors multi-beam astigmatism deflection error, beam trajectory drift rate, electrostatic chuck thermal gradient, and critical dimension uniformity.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "CD error margin nm, beam deflection distortion hazard, chuck thermal uniformity status, stigmator voltage correction, and deflector trim"},
+					},
+				},
+			},
+			"/api/v1/biopharma/aav/evaluate-packaging-and-shear-lysis": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Biopharmaceutical Continuous Gene Therapy AAV Viral Vector Full-to-Empty Capsid Ratio & Shear Sentinel (FDA 21 CFR Part 610 & ICH Q5A)",
+					"description": "Monitors A260/A280 absorbance ratios, full capsid packaging percentage, hollow-fiber membrane shear rate, and transmembrane pressure TMP.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Full capsid deficit %, viral capsid packaging purity, capsid shear lysis risk, AEX conductivity step trim, and TMP dampening command"},
+					},
+				},
+			},
+			"/api/v1/gigafactory/dry-electrode/evaluate-porosity-and-fibrillation": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Gigafactory Solid-State Battery Dry Electrode Continuous Extrusion & Calendering Porosity Sentinel (IEC 62660-3 & USABC)",
+					"description": "Monitors twin-screw melt pressure, extruder shear torque, calender roll nip gap, surface temperature, cross-web thickness variation, and dry web porosity.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Porosity deviation %, coating uniformity, PTFE fibrillation integrity, calender nip servo trim, and thermal induction zone boost"},
+					},
+				},
+			},
+			"/api/v1/space/isru/evaluate-sabatier-and-dust-clogging": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Planetary In-Situ Resource Utilization (ISRU) Methalox Sabatier Synthesis & Regolith Dust Sentinel (NASA SP-8000 & ISO 14300)",
+					"description": "Monitors Martian CO2 intake cryo-freezing, Sabatier catalyst bed exothermic temperatures, H2/CO2 stoichiometry, perchlorate poisoning, and regolith filter delta-P.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Stoichiometric slip ratio, Sabatier runaway hazard, Martian dust filter status, H2/CO2 ratio trim, and electrostatic dust purge command"},
+					},
+				},
+			},
 		},
 	}
 }

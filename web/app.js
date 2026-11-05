@@ -33506,6 +33506,331 @@ async function triggerMSRLiquidFuel() {
     }
 }
 
+async function triggerRocketGridFin() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi kavitasi hidrolik servo, margin torsi engsel fin, dan batas flutter aerogelastik hipersonik...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const boosterID = "BOOSTER-SUPER-HEAVY-B12";
+        await api('/aerospace/gridfin/ingest-fin-telemetry', 'POST', {
+            booster_id: boosterID,
+            flight_mission_id: "MISSION-ORBITAL-STAR-09",
+            mach_number: 5.8,
+            hydraulic_servo_pressure_bar: 295.0,
+            fin_hinge_torque_knm: 142.5,
+            actuator_oil_bulk_temp_c: 215.0,
+            active_coolant_flow_l_min: 18.5,
+            aeroelastic_flutter_frequency_hz: 28.5,
+            reentry_plasma_electron_density_cm3: 1.8e12
+        });
+
+        const evalRes = await api('/aerospace/gridfin/evaluate-hydraulics-and-flutter', 'POST', { booster_id: boosterID });
+        const actRes = await api('/aerospace/gridfin/trigger-aoa-trim-and-subcooled-pulse', 'POST', { booster_id: boosterID });
+        const dossierRes = await api(`/aerospace/gridfin/gridfin-reliability-dossier/${boosterID}`, 'GET');
+
+        if (badge) badge.textContent = `🚀 Grid Fin: Mach ${dossierRes.data.telemetry.mach_number} | Torsi Margin: ${evalRes.data.hydraulic_torque_margin_pct}% | Kavitasi: ${evalRes.data.hydraulic_cavitation_risk}`;
+        if (answerEl) {
+            let out = `🚀 REUSABLE ROCKET BOOSTER AEROGRID FIN HYDRAULICS & FLUTTER SENTINEL (FAA 14 CFR 450 & AIAA S-081):\n`;
+            out += `Booster Roket: ${boosterID} | Misi Peluncuran: ${dossierRes.data.telemetry.flight_mission_id}\n`;
+            out += `Kecepatan Re-entry: Mach ${dossierRes.data.telemetry.mach_number} | Kerapatan Plasma: ${dossierRes.data.telemetry.reentry_plasma_electron_density_cm3} cm⁻³\n\n`;
+            out += `STATUS HIDROLIK SERVO, TEMPERATUR OLI & FLUTTER AEROGELASTIK:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Tekanan Hidrolik Servo: ${dossierRes.data.telemetry.hydraulic_servo_pressure_bar} bar (Batas Kavitasi < 300.0 bar)\n`;
+            out += `• Torsi Engsel Grid Fin: ${dossierRes.data.telemetry.fin_hinge_torque_knm} kNm (Batas Desain 160.0 kNm) | Margin: ${evalRes.data.hydraulic_torque_margin_pct}%\n`;
+            out += `• Suhu Bulk Oli Aktuator: ${dossierRes.data.telemetry.actuator_oil_bulk_temp_c}°C (Batas Penguapan/Vaporisasi > 200.0°C)\n`;
+            out += `• Frekuensi Flutter Aerogelastik: ${dossierRes.data.telemetry.aeroelastic_flutter_frequency_hz} Hz (Batas Limit-Cycle > 25.0 Hz)\n`;
+            out += `• Tingkat Risiko Kavitasi Fluida: ${evalRes.data.hydraulic_cavitation_risk}\n`;
+            out += `• Status Stabilitas Aerogelastik: ${evalRes.data.aeroelastic_stability_status}\n\n`;
+            out += `AKTUASI TEKANAN SERVO, AoA ATTITUDE TRIM & SUBCOOLED PULSE COOLING:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Aviasi Antariksa: ${actRes.data.action_id}\n`;
+            out += `• Modulasi Tekanan Hidrolik Servo: Ditingkatkan ke ${actRes.data.modulated_servo_pressure_setpoint_bar} bar (Mencegah Kavitasi Uap)\n`;
+            out += `• Bias Trim Sudut Serang (AoA): Ditetapkan ${actRes.data.angle_of_attack_trim_bias_deg}° (Melepaskan Beban Aerotermal Re-entry)\n`;
+            out += `• Injeksi Pulsa Pendingin Subcooled: Ditingkatkan ke ${actRes.data.subcooled_coolant_pulse_flow_l_min} L/menit\n`;
+            out += `• Estimasi Kerugian Booster Terhindar: $${actRes.data.avoided_booster_loss_usd.toLocaleString()} USD (Mencegah Kehilangan Booster Super-Heavy)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Peningkatan tekanan servo ke 350 bar dan pulsa pendingin subcooled 45 L/min mencegah kavitasi uap oli hidrolik pada suhu re-entry 215°C.</li>
+                <li>Bias sudut serang (AoA) -2.4° memotong beban kejut aerodinamis dan menekan osilasi flutter limit-cycle di bawah batas kritis struktur fin.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Rocket Grid Fin sentinel: ' + err.message;
+    }
+}
+
+async function triggerMBMWReticle() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi astigmatisma multi-beam EUV reticle, pergeseran trayektori berkas, dan ekspansi termal chuck...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const reticleID = "RETICLE-EUV-2NM-METAL1-009";
+        await api('/semicon/mbmw/ingest-reticle-telemetry', 'POST', {
+            reticle_id: reticleID,
+            writer_tool_id: "MBMW-EUV-512K-BEAM-01",
+            acceleration_voltage_kv: 50.0,
+            total_beam_current_micro_a: 18.5,
+            active_beam_count: 262144,
+            electrostatic_chuck_temp_milli_k: 21450.0,
+            beam_drift_rate_nm_per_hr: 0.45,
+            astigmatism_deflection_error_nm: 0.62,
+            critical_dimension_uniformity_nm: 0.78,
+            blank_mask_surface_charge_volts: -4.8
+        });
+
+        const evalRes = await api('/semicon/mbmw/evaluate-beam-astigmatism-and-drift', 'POST', { reticle_id: reticleID });
+        const actRes = await api('/semicon/mbmw/trigger-stigmator-and-dose-correction', 'POST', { reticle_id: reticleID });
+        const dossierRes = await api(`/semicon/mbmw/mbmw-reliability-dossier/${reticleID}`, 'GET');
+
+        if (badge) badge.textContent = `🔬 MBMW EUV: CD Margin +${evalRes.data.critical_dimension_error_margin_nm} nm | Astigmatism: ${evalRes.data.beam_deflection_distortion_hazard} | Chuck: ${evalRes.data.chuck_thermal_uniformity_status}`;
+        if (answerEl) {
+            let out = `🔬 SEMICONDUCTOR EUV MULTI-BEAM MASK WRITER (MBMW) SENTINEL (SEMI P48 & ISO 14644-1):\n`;
+            out += `Reticle Mask EUV: ${reticleID} | Writer Tool: ${dossierRes.data.telemetry.writer_tool_id}\n`;
+            out += `Kanal Berkas Aktif: ${dossierRes.data.telemetry.active_beam_count.toLocaleString()} Beams | Tegangan Akselerasi: ${dossierRes.data.telemetry.acceleration_voltage_kv} kV | Arus Berkas: ${dossierRes.data.telemetry.total_beam_current_micro_a} µA\n\n`;
+            out += `ASTIGMATISMA ELEKTRON, PERGESERAN TRAYEKTORI (DRIFT) & KESERAGAMAN CD:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Keseragaman Dimensi Kritis (CDU): ${dossierRes.data.telemetry.critical_dimension_uniformity_nm} nm (Target Spec < 0.50 nm) | Ekskursi: +${evalRes.data.critical_dimension_error_margin_nm} nm\n`;
+            out += `• Kesalahan Defleksi Astigmatisma: ${dossierRes.data.telemetry.astigmatism_deflection_error_nm} nm (Batas Toleransi < 0.50 nm)\n`;
+            out += `• Laju Pergeseran Berkas (Beam Drift): ${dossierRes.data.telemetry.beam_drift_rate_nm_per_hr} nm/jam (Target Stabil < 0.20 nm/jam)\n`;
+            out += `• Temperatur Electrostatic Chuck: ${dossierRes.data.telemetry.electrostatic_chuck_temp_milli_k} mK | Muatan Permukaan Mask: ${dossierRes.data.telemetry.blank_mask_surface_charge_volts} V\n`;
+            out += `• Bahaya Distorsi Defleksi Berkas: ${evalRes.data.beam_deflection_distortion_hazard}\n`;
+            out += `• Status Keseragaman Termal Chuck: ${evalRes.data.chuck_thermal_uniformity_status}\n\n`;
+            out += `KOREKSI MULTI-POLE STIGMATOR, TRIM DEFLEKTOR & STABILISASI PELTIER:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Fabrikasi Mask: ${actRes.data.action_id}\n`;
+            out += `• Tegangan Koreksi Stigmator Multi-Pole: ${actRes.data.stigmator_correction_voltage_v} V (Membentuk Profil Berkas Elektron Sirkular Sempurna)\n`;
+            out += `• Penguatan Trim Deflektor Magnetik: ${actRes.data.magnetic_deflector_trim_ppm} ppm (Mengkompensasi Efek Drifting Berkas Sub-Nanometer)\n`;
+            out += `• Daya Pendingin Termoelektrik Peltier Chuck: Ditingkatkan ke ${actRes.data.peltier_chuck_stabilization_power_w} W\n`;
+            out += `• Estimasi Kerugian Reticle Terhindar: $${actRes.data.avoided_reticle_scrap_loss_usd.toLocaleString()} USD (Mencegah Cacat Reticle 2nm Foundry)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pemberian tegangan stigmator 14.8 V dan trim deflektor -38.5 ppm menetralkan blur astigmatisma dan mengembalikan akurasi posisi berkas di bawah 0.20 nm.</li>
+                <li>Daya pendinginan Peltier 85 W menekan gelombang ekspansi termal chuck di bawah gradien 10 mK untuk menjamin keseragaman dimensi kritis (CDU).</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses EUV Multi-Beam Mask Writer sentinel: ' + err.message;
+    }
+}
+
+async function triggerAAVGeneTherapy() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi rasio kapsid penuh/kosong AAV, lisis geser hollow-fiber, dan risiko imunogenisitas klinis...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const batchID = "BATCH-AAV9-SMA-CLINICAL-008";
+        await api('/biopharma/aav/ingest-vector-telemetry', 'POST', {
+            batch_id: batchID,
+            bioreactor_line_id: "LINE-PERFUSION-AAV-02",
+            viral_vector_serotype: "AAV9",
+            uv_absorbance_ratio_a260_a280: 1.08,
+            full_capsid_percentage: 62.5,
+            hollow_fiber_shear_rate_per_sec: 4850.0,
+            transmembrane_pressure_bar: 1.45,
+            elution_conductivity_ms_per_cm: 38.5,
+            dls_mean_particle_diameter_nm: 26.2,
+            capsid_aggregation_index_pct: 3.8
+        });
+
+        const evalRes = await api('/biopharma/aav/evaluate-packaging-and-shear-lysis', 'POST', { batch_id: batchID });
+        const actRes = await api('/biopharma/aav/trigger-conductivity-trim-and-tmp-damping', 'POST', { batch_id: batchID });
+        const dossierRes = await api(`/biopharma/aav/aav-clinical-dossier/${batchID}`, 'GET');
+
+        if (badge) badge.textContent = `🧬 AAV9: Full Capsid ${dossierRes.data.telemetry.full_capsid_percentage}% | Purity: ${evalRes.data.viral_capsid_packaging_purity} | Shear: ${evalRes.data.capsid_shear_lysis_risk}`;
+        if (answerEl) {
+            let out = `🧬 BIOPHARMACEUTICAL AAV GENE THERAPY VIRAL VECTOR PURIFICATION SENTINEL (FDA 21 CFR 610 & ICH Q5A):\n`;
+            out += `Batch Terapi Gen: ${batchID} | Serotipe Vektor: ${dossierRes.data.telemetry.viral_vector_serotype} | Lini Bioreaktor: ${dossierRes.data.telemetry.bioreactor_line_id}\n`;
+            out += `Rasio Absorbansi UV A260/A280: ${dossierRes.data.telemetry.uv_absorbance_ratio_a260_a280} | Diameter Rata-Rata DLS: ${dossierRes.data.telemetry.dls_mean_particle_diameter_nm} nm\n\n`;
+            out += `RASIO KAPSID PENUH (FULL-TO-EMPTY), LISIS GESER HOLLOW-FIBER & AGREGASI:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Persentase Kapsid Penuh (Full Capsid): ${dossierRes.data.telemetry.full_capsid_percentage}% (Spesifikasi Rilis Klinis > 75.0%) | Defisit: -${evalRes.data.full_capsid_deficit_pct}%\n`;
+            out += `• Laju Geser Membran Hollow-Fiber: ${dossierRes.data.telemetry.hollow_fiber_shear_rate_per_sec} s⁻¹ (Ambang Batas Pecah/Lisis > 4000.0 s⁻¹)\n`;
+            out += `• Tekanan Transmembran (TMP): ${dossierRes.data.telemetry.transmembrane_pressure_bar} bar (Batas Aman Laminar < 1.0 bar)\n`;
+            out += `• Indeks Agregasi Partikel Kapsid: ${dossierRes.data.telemetry.capsid_aggregation_index_pct}%\n`;
+            out += `• Kemurnian Pengemasan Kapsid Virus: ${evalRes.data.viral_capsid_packaging_purity}\n`;
+            out += `• Tingkat Risiko Lisis Geser Kapsid: ${evalRes.data.capsid_shear_lysis_risk}\n\n`;
+            out += `AKTUASI KROMATOGRAFI AEX STEP CONDUCTIVITY, THROTTLING TMP & DIVERSI FRAKSI:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Biofarmasi Klinis: ${actRes.data.action_id}\n`;
+            out += `• Konduktivitas Elusi Kromatografi AEX: Disesuaikan ke ${actRes.data.modulated_aex_elution_conductivity_ms_cm} mS/cm (Mendesorb Kapsid Kosong)\n`;
+            out += `• Pembatasan Tekanan Transmembran (TMP): Diturunkan ke ${actRes.data.commanded_tmp_setpoint_bar} bar (Menghilangkan Turbulensi Geser Membran)\n`;
+            out += `• Volume Fraksi Pengotor Kapsid Kosong Didiversi: ${actRes.data.diverted_impurity_volume_liters} Liter\n`;
+            out += `• Estimasi Kerugian Batch Klinis Terhindar: $${actRes.data.avoided_gene_therapy_batch_loss_usd.toLocaleString()} USD (Mencegah Kegagalan Rilis Obat Terapi Gen)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penyesuaian konduktivitas AEX ke 42.0 mS/cm dan diversi fraksi 14.5 L menyingkirkan kapsid kosong pembawa risiko imunogenisitas tinggi.</li>
+                <li>Peredaman TMP ke 0.85 bar memulihkan aliran geser laminar hollow-fiber dan menghentikan kerusakan lisis mekanis kapsid AAV9.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses AAV Gene Therapy Vector sentinel: ' + err.message;
+    }
+}
+
+async function triggerDryElectrode() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi fibrilasi binder PTFE, variasi ketebalan cross-web, dan porositas elektroda all-solid-state...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const lineID = "LINE-GIGAFACTORY-DRY-CATHODE-01";
+        await api('/gigafactory/dry-electrode/ingest-electrode-telemetry', 'POST', {
+            production_line_id: lineID,
+            coating_lot_id: "LOT-DRY-NMC811-ASSB-408",
+            twin_screw_melt_pressure_bar: 185.0,
+            extruder_shear_torque_nm: 340.0,
+            calender_roll_nip_gap_um: 78.5,
+            calender_roll_surface_temp_c: 112.5,
+            electrode_areal_loading_mg_per_cm2: 32.5,
+            calendered_porosity_pct: 18.2,
+            cross_web_thickness_variation_um: 4.8,
+            web_tension_n: 245.0
+        });
+
+        const evalRes = await api('/gigafactory/dry-electrode/evaluate-porosity-and-fibrillation', 'POST', { production_line_id: lineID });
+        const actRes = await api('/gigafactory/dry-electrode/trigger-calender-gap-and-thermal-trim', 'POST', { production_line_id: lineID });
+        const dossierRes = await api(`/gigafactory/dry-electrode/dry-electrode-quality-dossier/${lineID}`, 'GET');
+
+        if (badge) badge.textContent = `🔋 Dry Electrode: Porositas ${dossierRes.data.telemetry.calendered_porosity_pct}% (+${evalRes.data.porosity_deviation_pct}%) | Uniformity: ${evalRes.data.electrode_coating_uniformity} | PTFE: ${evalRes.data.ptfe_fibrillation_integrity}`;
+        if (answerEl) {
+            let out = `🔋 GIGAFACTORY ALL-SOLID-STATE BATTERY DRY ELECTRODE SENTINEL (IEC 62660-3 & USABC):\n`;
+            out += `Lini Produksi Gigafactory: ${lineID} | Lot Pelapisan Katoda Kering: ${dossierRes.data.telemetry.coating_lot_id}\n`;
+            out += `Areal Loading Elektroda: ${dossierRes.data.telemetry.electrode_areal_loading_mg_per_cm2} mg/cm² | Tegangan Tarik Web: ${dossierRes.data.telemetry.web_tension_n} N\n\n`;
+            out += `FIBRILASI BINDER PTFE, POROSITAS ROLL CALENDER & VARIASI TEBAL:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Porositas Lembaran Pasca-Calender: ${dossierRes.data.telemetry.calendered_porosity_pct}% (Target Solid-State 14.0% - 16.0%) | Deviasi: +${evalRes.data.porosity_deviation_pct}%\n`;
+            out += `• Variasi Ketebalan Cross-Web: ${dossierRes.data.telemetry.cross_web_thickness_variation_um} µm (Batas Maksimum < 2.0 µm)\n`;
+            out += `• Celah Nip Calender Roll: ${dossierRes.data.telemetry.calender_roll_nip_gap_um} µm | Suhu Permukaan Roll: ${dossierRes.data.telemetry.calender_roll_surface_temp_c}°C\n`;
+            out += `• Tekanan Leleh Twin-Screw: ${dossierRes.data.telemetry.twin_screw_melt_pressure_bar} bar | Torsi Geser Ekstruder: ${dossierRes.data.telemetry.extruder_shear_torque_nm} Nm\n`;
+            out += `• Keseragaman Lapisan Elektroda Kering: ${evalRes.data.electrode_coating_uniformity}\n`;
+            out += `• Integritas Matriks Fibrilasi PTFE: ${evalRes.data.ptfe_fibrillation_integrity}\n\n`;
+            out += `AKTUASI SERVO NIP GAP, ZONA INDUKSI TERMAL & TRIM KECEPATAN ULIR:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Kualitas Gigafactory: ${actRes.data.action_id}\n`;
+            out += `• Modulasi Celah Servo Roll Calender: Disesuaikan ke ${actRes.data.modulated_calender_roll_nip_gap_um} µm (Memadatkan Lembaran ke Porositas 15.0%)\n`;
+            out += `• Penguatan Pemanasan Induksi Zona Calender: +${actRes.data.zone_thermal_induction_boost_c}°C (Melunakkan Fibril Binder PTFE)\n`;
+            out += `• Penurunan Kecepatan Putar Ulir Ekstruder: ${actRes.data.extruder_screw_speed_rpm_trim} RPM (Meredakan Stres Geser Berlebih)\n`;
+            out += `• Estimasi Kerugian Scrap Baterai Terhindar: $${actRes.data.avoided_battery_scrap_loss_usd.toLocaleString()} USD (Mencegah Korsleting Dendrit ASSB)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penyesuaian celah nip calender roll ke 74.2 µm memadatkan porositas web bebas-pelarut ke kisaran ideal 15.0% untuk mencegah penetrasi dendrit litium.</li>
+                <li>Pemanasan induksi zona roll +3.5°C dan reduksi kecepatan ekstruder -15 RPM menjaga elastisitas matriks PTFE dan mengeliminasi sobekan web.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Solid-State Dry Electrode sentinel: ' + err.message;
+    }
+}
+
+async function triggerISRUMethalox() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi reaksi eksotermik Sabatier Mars, peracunan katalis rutenium, dan penyumbatan filter regolith...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const plantID = "ISRU-MARS-BASE-ALPHA-01";
+        await api('/space/isru/ingest-isru-telemetry', 'POST', {
+            plant_id: plantID,
+            mission_cycle_id: "SOL-MARS-ASCENT-METHALOX-420",
+            martian_ambient_pressure_mbar: 7.5,
+            co2_intake_cryo_freezer_bar: 6.2,
+            sabatier_catalyst_bed_temp_c: 415.0,
+            h2_to_co2_stoichiometric_ratio: 4.28,
+            ruthenium_perchlorate_ppm: 35.0,
+            dust_filter_pressure_drop_mbar: 18.5,
+            water_condenser_separation_pct: 96.2,
+            liquid_methane_production_kg_per_sol: 48.5
+        });
+
+        const evalRes = await api('/space/isru/evaluate-sabatier-and-dust-clogging', 'POST', { plant_id: plantID });
+        const actRes = await api('/space/isru/trigger-ratio-trim-and-dust-purge', 'POST', { plant_id: plantID });
+        const dossierRes = await api(`/space/isru/isru-mission-dossier/${plantID}`, 'GET');
+
+        if (badge) badge.textContent = `🔴 Mars ISRU: Bed ${dossierRes.data.telemetry.sabatier_catalyst_bed_temp_c}°C | Runaway: ${evalRes.data.sabatier_thermal_runaway_hazard} | Filter: ${evalRes.data.martian_dust_filter_status}`;
+        if (answerEl) {
+            let out = `🔴 DEEP-SPACE PLANETARY ISRU METHALOX SABATIER SENTINEL (NASA SP-8000 & ISO 14300):\n`;
+            out += `Fasilitas ISRU Planet Mars: ${plantID} | Siklus Misi Pendaratan: ${dossierRes.data.telemetry.mission_cycle_id}\n`;
+            out += `Tekanan Atmosfer Mars: ${dossierRes.data.telemetry.martian_ambient_pressure_mbar} mbar | Tekanan Pembeku Kriogenik CO2: ${dossierRes.data.telemetry.co2_intake_cryo_freezer_bar} bar\n\n`;
+            out += `KINETIKA REAKSI SABATIER, PERACUNAN PERKLORAT & FILTER DEBU REGOLITH:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Rasio Stoikiometri Umpan Gas H2/CO2: ${dossierRes.data.telemetry.h2_to_co2_stoichiometric_ratio}:1 (Ideal Stoikiometri 4.05:1) | Slip: +${evalRes.data.stoichiometric_slip_ratio}\n`;
+            out += `• Suhu Bed Katalis Rutenium (Ru/Al2O3): ${dossierRes.data.telemetry.sabatier_catalyst_bed_temp_c}°C (Batas Termal Runaway Sintering > 440.0°C)\n`;
+            out += `• Kontaminasi Debu Perklorat Mars: ${dossierRes.data.telemetry.ruthenium_perchlorate_ppm} ppm (Batas Peracunan Katalis > 15.0 ppm)\n`;
+            out += `• Beda Tekanan (Delta-P) Filter Debu: ${dossierRes.data.telemetry.dust_filter_pressure_drop_mbar} mbar (Ambang Batas Clogging > 12.0 mbar)\n`;
+            out += `• Efisiensi Pemisahan Kondensor Air: ${dossierRes.data.telemetry.water_condenser_separation_pct}% | Produksi CH4 Cair: ${dossierRes.data.telemetry.liquid_methane_production_kg_per_sol} kg/sol\n`;
+            out += `• Bahaya Reaksi Termal Runaway Sabatier: ${evalRes.data.sabatier_thermal_runaway_hazard}\n`;
+            out += `• Status Filter Debu Elektrostatik Regolith: ${evalRes.data.martian_dust_filter_status}\n\n`;
+            out += `AKTUASI RATIO TRIM, PULSED DUST BLOWBACK & CHILLER KONDENSOR BOOST:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Misi Antariksa Mars: ${actRes.data.action_id}\n`;
+            out += `• Pengaturan Rasio Umpan H2/CO2: Disesuaikan ke ${actRes.data.commanded_h2_co2_ratio_setpoint}:1 (Menstabilkan Reaksi Eksotermik)\n`;
+            out += `• Durasi Pembersihan Debu Pulsa Elektrostatik: ${actRes.data.electrostatic_dust_purge_duration_sec} Detik (Melontarkan Debu Oksida Besi Mars)\n`;
+            out += `• Peningkatan Daya Pendingin Kondensor: Ditingkatkan ke ${actRes.data.condenser_chiller_boost_watts} W\n`;
+            out += `• Estimasi Nilai Misi Antariksa Terlindungi: $${actRes.data.avoided_mission_loss_usd.toLocaleString()} USD (Menjamin Ketersediaan Bahan Bakar Mars Ascent Vehicle)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Koreksi rasio stoikiometri ke 4.05:1 meredam eksoterm berlebih pada bed katalis Ru/Al2O3 dan mencegah deaktivasi termal permanen.</li>
+                <li>Injeksi pulsa elektrostatik 8 detik membersihkan filter regolith dan mengembalikan delta-P intake CO2 Mars ke kondisi nominal.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Mars ISRU Sabatier Methalox sentinel: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

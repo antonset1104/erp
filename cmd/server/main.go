@@ -78,6 +78,11 @@ import (
 	corerenewables "erp-golang/internal/core/renewables"
 	corescm "erp-golang/internal/core/scm"
 	coresaltcavern "erp-golang/internal/core/saltcavern"
+	corerocketgridfin "erp-golang/internal/core/rocket_gridfin"
+	corembmw "erp-golang/internal/core/mbmw"
+	coreaavgenetherapy "erp-golang/internal/core/aav_genetherapy"
+	coredryelectrode "erp-golang/internal/core/solidstate_dryelectrode"
+	coreisrumethalox "erp-golang/internal/core/isru_methalox"
 	corescramjet "erp-golang/internal/core/scramjet"
 	coreseabed "erp-golang/internal/core/seabed"
 	coresemiconductor "erp-golang/internal/core/semiconductor"
@@ -354,7 +359,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.76.0",
+			"version":    "1.77.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -549,6 +554,11 @@ func main() {
 		corefermentation.RegisterFermentationRoutes(apiV1)
 		coresaltcavern.RegisterSaltCavernRoutes(apiV1)
 		coremsr.RegisterMSRRoutes(apiV1)
+		corerocketgridfin.RegisterGridFinRoutes(apiV1)
+		corembmw.RegisterMBMWRoutes(apiV1)
+		coreaavgenetherapy.RegisterAAVRoutes(apiV1)
+		coredryelectrode.RegisterDryElectrodeRoutes(apiV1)
+		coreisrumethalox.RegisterISRURoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend

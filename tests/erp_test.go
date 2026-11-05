@@ -88,6 +88,11 @@ import (
 	corerenewables "erp-golang/internal/core/renewables"
 	corescm "erp-golang/internal/core/scm"
 	coresaltcavern "erp-golang/internal/core/saltcavern"
+	corerocketgridfin "erp-golang/internal/core/rocket_gridfin"
+	corembmw "erp-golang/internal/core/mbmw"
+	coreaavgenetherapy "erp-golang/internal/core/aav_genetherapy"
+	coredryelectrode "erp-golang/internal/core/solidstate_dryelectrode"
+	coreisrumethalox "erp-golang/internal/core/isru_methalox"
 	corescramjet "erp-golang/internal/core/scramjet"
 	coreseabed "erp-golang/internal/core/seabed"
 	coresemiconductor "erp-golang/internal/core/semiconductor"
@@ -13859,5 +13864,184 @@ IEA*1*000099123~`
 	t.Logf("✓ Gen-IV Molten Salt Reactor (MSR) Fuel Redox & Xenon Sentinel Verified: Core='%s' (Loop='%s'), SaltT=%.1f°C, Flow=%.0f kg/s, U4/U3=%.1f:1, DissolvedCr=%.1f ppm, HeSparge=%.0f Nm³/hr, Xe135=%.0f pcm, TeCrack=%.1f µm, E_Fluorine=%.3f V, HastelloyHazard='%s', XenonStatus='%s', BeRodDepth=%.1f mm, BoostedHe=%.0f Nm³/hr, SecCoolant=%.1f°C, AvoidedLoss=$%.2fM USD",
 		msrTel.ReactorCoreID, msrTel.SaltLoopID, msrTel.FuelSaltTemperatureC, msrTel.FuelSaltFlowRateKgS, msrTel.U4ToU3RedoxRatio, msrTel.DissolvedChromiumPpm, msrTel.HeliumSpargingBubblerFlowNm3Hr, msrTel.Xenon135PoisonReactivityPcm, msrTel.TelluriumIntergranularCrackDepthUm, msrAssess.FluorineElectrochemicalPotentialVolts, msrAssess.HastelloyGrainCorrosionHazard, msrAssess.XenonNeutronPoisonStatus, msrAct.BerylliumRodInsertionDepthMm, msrAct.CommandedHeliumSpargeFlowNm3Hr, msrAct.SecondarySaltCoolantTrimC, msrAct.AvoidedReactorLossUSD/1e6)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (90 SECTIONS: 110+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD + CONTRACT LEAKAGE SENTINEL + MICROGRID ISLANDING + CARGO GEOFENCE + SHIFT BIDDING FATIGUE + CIRCULAR PACKAGING RTI + INDUSTRIAL WATER ZLD + VENDOR SANCTIONS GRAPH + BOILER TUBE DESCALING + SAAS DUNNING WATERFALL + TOLL MANUFACTURING RECON + SILO AERATION SENTINEL + EPC PROGRESS BILLING ESCROW + DYNAMIC PORT BERTH DEMURRAGE + TRANSFORMER DGA GUARDIAN + CROSS BORDER CASH REPATRIATION + ORE BLENDING OPTIMIZER + PHARMA CRYOGENIC SENTINEL + KILN REFRACTORY GUARDIAN + IP PATENT ANNUITY + TURBINE EOH CREEP + AVIATION MRO FATIGUE + MARINE LNG RELIQUEFACTION + SEMICONDUCTOR FAB YIELD + WASTEWATER BIOMETHANE + RAILWAY WHEEL RCF + NUCLEAR RADIOPHARM DECAY + UTILITY BESS THERMAL SOH + SATELLITE ORBITAL CONJUNCTION + SUBSEA FLOW ASSURANCE + CONNECTED VEHICLE OTA SUMS + BIOPHARMA BIOREACTOR PAT + FLOATING WIND MOORING + HVDC SUBSEA DTS + CCS CO2 ENVELOPE + MINE ROCKBURST SENTINEL + TOKAMAK FUSION DISRUPTION + CRYO LH2 ORTHO-PARA + HYPERSONIC TPS ABLATION + 3D CHIPLET TSV WARPAGE + SUPERHOT EGS GEOTHERMAL SEISMICITY + QUANTUM QKD PHASE GUARDIAN + SEABED NODULE PLUME + CSP MOLTEN SALT FREEZE + SOLID-STATE BATTERY CRACK + DIRECT AIR CAPTURE OPTIMIZER + EVTOL ACOUSTIC SENTINEL + HYPERLOOP MAGLEV QUENCH + SUBSEA DEEPWATER BOP + CAR-T ACOUSTIC SORTING + PLASTIC PYROLYSIS DIOXIN SENTINEL + GREEN AMMONIA SENTINEL + ROCKET POGO SENTINEL + SMR PASSIVE CONTAINMENT + EUV PELLICLE SENTINEL + UHVDC CONVERTER SENTINEL + SUBSEA CCS CO2 HYDRATE + HYPERSONIC SCRAMJET FUEL CRACKING + MRNA LNP MICROFLUIDIC + SILICON PHOTONICS CPO SKEW + SOEC EFUEL COELECTROLYSIS + SUPERHOT ROCK GEOTHERMAL SHR + SUBSEA AUV DOCKING IPT + ELECTRONIC H2O2 RUNAWAY + BIOPHARMA CONTROLLED ICE FOG LYO + CADMIUM FREE QLED INK PRINTING + HALL EFFECT THRUSTER PROPULSION + SUB 2NM GAAFET NANOSHEET + INDUSTRIAL FERMENTATION FOAM + SALT CAVERN HYDROGEN STORAGE + MOLTEN SALT REACTOR FUEL REDOX) PASSED 100%!")
+	// -------------------------------------------------------------------------
+	// SECTION 91: FRONTIER ENTERPRISE & DEEP-TECH SENTINELS (ROCKET GRID FIN HYDRAULICS, MBMW EUV RETICLE, AAV GENE THERAPY, SOLID-STATE DRY ELECTRODE & MARS ISRU METHALOX)
+	// -------------------------------------------------------------------------
+	t.Log("\n    --- SECTION 91: FRONTIER ENTERPRISE & DEEP-TECH SENTINELS (ROCKET GRID FIN HYDRAULICS, MBMW EUV RETICLE, AAV GENE THERAPY, SOLID-STATE DRY ELECTRODE & MARS ISRU METHALOX) ---")
+
+	// 91.1 Aerospace Super-Heavy Reusable Rocket Booster Aerogrid Fin Hydraulic & Re-entry Thermal Sentinel (FAA 14 CFR Part 450 & AIAA S-081)
+	finTel := corerocketgridfin.GlobalGridFinVault.IngestFinTelemetry(corerocketgridfin.GridFinTelemetry{
+		TelemetryID:                     "TEL-FIN-9901",
+		BoosterID:                       "BOOSTER-SUPER-HEAVY-B12-99",
+		FlightMissionID:                 "MISSION-ORBITAL-STAR-09",
+		MachNumber:                      5.8,
+		HydraulicServoPressureBar:       295.0,
+		FinHingeTorqueKNm:               142.5,
+		ActuatorOilBulkTempC:            215.0,
+		ActiveCoolantFlowLMin:           18.5,
+		AeroelasticFlutterFrequencyHz:   28.5,
+		ReentryPlasmaElectronDensityCm3: 1.8e12,
+	})
+	if finTel.BoosterID == "" || finTel.HydraulicServoPressureBar != 295.0 {
+		t.Fatalf("Failed to ingest rocket grid fin telemetry: %+v", finTel)
+	}
+
+	finAssess, err := corerocketgridfin.GlobalGridFinVault.EvaluateHydraulicsAndFlutter("BOOSTER-SUPER-HEAVY-B12-99")
+	if err != nil || finAssess.HydraulicCavitationRisk != "CRITICAL_SERVO_PRESSURE_COLLAPSE" || finAssess.AeroelasticStabilityStatus != "CRITICAL_GRID_FIN_TEAR_HAZARD" || !finAssess.AngleOfAttackBiasTrimMandate || !finAssess.SubcooledFluidPulseMandate {
+		t.Fatalf("Failed to evaluate rocket grid fin hydraulics and flutter: %+v, err: %v", finAssess, err)
+	}
+
+	finAct, err := corerocketgridfin.GlobalGridFinVault.TriggerAoATrimAndSubcooledPulse("BOOSTER-SUPER-HEAVY-B12-99")
+	if err != nil || finAct.ModulatedServoPressureSetpointBar < 340.0 || finAct.SubcooledCoolantPulseFlowLMin < 40.0 || finAct.AngleOfAttackTrimBiasDeg >= 0 || finAct.AvoidedBoosterLossUSD <= 0 {
+		t.Fatalf("Failed to trigger AoA trim and subcooled cooling pulse: %+v, err: %v", finAct, err)
+	}
+
+	finDossier, err := corerocketgridfin.GlobalGridFinVault.GetGridFinReliabilityDossier("BOOSTER-SUPER-HEAVY-B12-99")
+	if err != nil || !finDossier["faa_14cfr450_compliant"].(bool) || !finDossier["aiaa_s081_certified"].(bool) {
+		t.Fatalf("Failed to compile rocket grid fin reliability dossier: %+v, err: %v", finDossier, err)
+	}
+	t.Logf("✓ Aerospace Reusable Rocket Booster Aerogrid Fin Sentinel Verified: Booster='%s' (Mission='%s'), Mach=%.1f, ServoP=%.1f bar, Torque=%.1f kNm (Margin=%.1f%%), OilT=%.1f°C, Flutter=%.1f Hz, CavitationRisk='%s', AeroelasticStatus='%s', CommandedP=%.1f bar, AoATrim=%.1f°, SubcooledFlow=%.1f L/min, AvoidedLoss=$%.2fM USD",
+		finTel.BoosterID, finTel.FlightMissionID, finTel.MachNumber, finTel.HydraulicServoPressureBar, finTel.FinHingeTorqueKNm, finAssess.HydraulicTorqueMarginPct, finTel.ActuatorOilBulkTempC, finTel.AeroelasticFlutterFrequencyHz, finAssess.HydraulicCavitationRisk, finAssess.AeroelasticStabilityStatus, finAct.ModulatedServoPressureSetpointBar, finAct.AngleOfAttackTrimBiasDeg, finAct.SubcooledCoolantPulseFlowLMin, finAct.AvoidedBoosterLossUSD/1e6)
+
+	// 91.2 Semiconductor Multi-Beam Mask Writer (MBMW) Electron Beam Astigmatism, Drift & Field Distortion Sentinel (SEMI P48 & ISO 14644-1)
+	mbmwTel := corembmw.GlobalMBMWVault.IngestReticleTelemetry(corembmw.MBMWReticleTelemetry{
+		TelemetryID:                  "TEL-MBMW-9901",
+		ReticleID:                    "RETICLE-EUV-2NM-METAL1-99",
+		WriterToolID:                 "MBMW-EUV-512K-BEAM-01",
+		AccelerationVoltageKv:        50.0,
+		TotalBeamCurrentMicroA:       18.5,
+		ActiveBeamCount:              262144,
+		ElectrostaticChuckTempMilliK: 21450.0,
+		BeamDriftRateNmPerHr:         0.45,
+		AstigmatismDeflectionErrorNm: 0.62,
+		CriticalDimensionUniformityNm: 0.78,
+		BlankMaskSurfaceChargeVolts:  -4.8,
+	})
+	if mbmwTel.ReticleID == "" || mbmwTel.ActiveBeamCount != 262144 {
+		t.Fatalf("Failed to ingest MBMW reticle telemetry: %+v", mbmwTel)
+	}
+
+	mbmwAssess, err := corembmw.GlobalMBMWVault.EvaluateBeamAstigmatismAndDrift("RETICLE-EUV-2NM-METAL1-99")
+	if err != nil || mbmwAssess.BeamDeflectionDistortionHazard != "CRITICAL_EBEAM_DISTORTION_REJECT" || mbmwAssess.ChuckThermalUniformityStatus != "THERMAL_DRIFT_RUNAWAY_ABORT" || !mbmwAssess.StigmatorCorrectionMandate || !mbmwAssess.DoseModulationMatrixMandate {
+		t.Fatalf("Failed to evaluate MBMW beam astigmatism and drift: %+v, err: %v", mbmwAssess, err)
+	}
+
+	mbmwAct, err := corembmw.GlobalMBMWVault.TriggerStigmatorAndDoseCorrection("RETICLE-EUV-2NM-METAL1-99")
+	if err != nil || mbmwAct.StigmatorCorrectionVoltageV <= 0 || mbmwAct.MagneticDeflectorTrimPpm >= 0 || mbmwAct.PeltierChuckStabilizationPowerW < 50.0 || mbmwAct.AvoidedReticleScrapLossUSD <= 0 {
+		t.Fatalf("Failed to trigger MBMW stigmator and dose correction: %+v, err: %v", mbmwAct, err)
+	}
+
+	mbmwDossier, err := corembmw.GlobalMBMWVault.GetMBMWReliabilityDossier("RETICLE-EUV-2NM-METAL1-99")
+	if err != nil || !mbmwDossier["semi_p48_compliant"].(bool) || !mbmwDossier["iso_14644_certified"].(bool) {
+		t.Fatalf("Failed to compile MBMW reliability dossier: %+v, err: %v", mbmwDossier, err)
+	}
+	t.Logf("✓ Semiconductor Multi-Beam Mask Writer Sentinel Verified: Reticle='%s' (Tool='%s'), Beams=%d, Accel=%.1f kV, Current=%.1f µA, CDU=%.2f nm (Margin=+%.2f nm), Astigmatism=%.2f nm, Drift=%.2f nm/hr, Chuck=%.1f mK, DistortionHazard='%s', ThermalStatus='%s', StigmatorVolt=%.1f V, DeflectorTrim=%.1f ppm, PeltierPwr=%.1f W, AvoidedLoss=$%.2fM USD",
+		mbmwTel.ReticleID, mbmwTel.WriterToolID, mbmwTel.ActiveBeamCount, mbmwTel.AccelerationVoltageKv, mbmwTel.TotalBeamCurrentMicroA, mbmwTel.CriticalDimensionUniformityNm, mbmwAssess.CriticalDimensionErrorMarginNm, mbmwTel.AstigmatismDeflectionErrorNm, mbmwTel.BeamDriftRateNmPerHr, mbmwTel.ElectrostaticChuckTempMilliK, mbmwAssess.BeamDeflectionDistortionHazard, mbmwAssess.ChuckThermalUniformityStatus, mbmwAct.StigmatorCorrectionVoltageV, mbmwAct.MagneticDeflectorTrimPpm, mbmwAct.PeltierChuckStabilizationPowerW, mbmwAct.AvoidedReticleScrapLossUSD/1e6)
+
+	// 91.3 Biopharmaceutical Continuous Gene Therapy AAV Viral Vector Full-to-Empty Capsid Ratio & Shear Sentinel (FDA 21 CFR Part 610 & ICH Q5A)
+	aavTel := coreaavgenetherapy.GlobalAAVVault.IngestVectorTelemetry(coreaavgenetherapy.AAVVectorTelemetry{
+		TelemetryID:                "TEL-AAV-9901",
+		BatchID:                    "BATCH-AAV9-SMA-CLINICAL-99",
+		BioreactorLineID:           "LINE-PERFUSION-AAV-02",
+		ViralVectorSerotype:        "AAV9",
+		UvAbsorbanceRatioA260A280:  1.08,
+		FullCapsidPercentage:       62.5,
+		HollowFiberShearRatePerSec: 4850.0,
+		TransmembranePressureBar:   1.45,
+		ElutionConductivityMsPerCm: 38.5,
+		DlsMeanParticleDiameterNm:  26.2,
+		CapsidAggregationIndexPct:  3.8,
+	})
+	if aavTel.BatchID == "" || aavTel.FullCapsidPercentage != 62.5 {
+		t.Fatalf("Failed to ingest AAV vector telemetry: %+v", aavTel)
+	}
+
+	aavAssess, err := coreaavgenetherapy.GlobalAAVVault.EvaluatePackagingAndShearLysis("BATCH-AAV9-SMA-CLINICAL-99")
+	if err != nil || aavAssess.ViralCapsidPackagingPurity != "CRITICAL_EMPTY_CAPSID_IMMUNOGENICITY_HAZARD" || aavAssess.CapsidShearLysisRisk != "IRREVERSIBLE_CAPSID_SHEAR_LYSIS" || !aavAssess.AEXConductivityStepTrimMandate || !aavAssess.MembraneTMPDampeningMandate {
+		t.Fatalf("Failed to evaluate AAV vector packaging and shear lysis: %+v, err: %v", aavAssess, err)
+	}
+
+	aavAct, err := coreaavgenetherapy.GlobalAAVVault.TriggerConductivityTrimAndTMPDamping("BATCH-AAV9-SMA-CLINICAL-99")
+	if err != nil || aavAct.ModulatedAEXElutionConductivityMsCm < 40.0 || aavAct.CommandedTMPSetpointBar > 1.0 || aavAct.DivertedImpurityVolumeLiters <= 0 || aavAct.AvoidedGeneTherapyBatchLossUSD <= 0 {
+		t.Fatalf("Failed to trigger AAV conductivity trim and TMP damping: %+v, err: %v", aavAct, err)
+	}
+
+	aavDossier, err := coreaavgenetherapy.GlobalAAVVault.GetAAVClinicalDossier("BATCH-AAV9-SMA-CLINICAL-99")
+	if err != nil || !aavDossier["fda_21cfr610_compliant"].(bool) || !aavDossier["ich_q5a_certified"].(bool) {
+		t.Fatalf("Failed to compile AAV clinical dossier: %+v, err: %v", aavDossier, err)
+	}
+	t.Logf("✓ Biopharmaceutical AAV Gene Therapy Sentinel Verified: Batch='%s' (Line='%s', Serotype='%s'), A260/A280=%.2f, FullCapsid=%.1f%% (Deficit=-%.1f%%), Shear=%.0f /s, TMP=%.2f bar, DLS=%.1f nm, Aggregation=%.1f%%, Purity='%s', ShearRisk='%s', ModulatedAEX=%.1f mS/cm, NewTMP=%.2f bar, DivertedVol=%.1f L, AvoidedLoss=$%.2fM USD",
+		aavTel.BatchID, aavTel.BioreactorLineID, aavTel.ViralVectorSerotype, aavTel.UvAbsorbanceRatioA260A280, aavTel.FullCapsidPercentage, aavAssess.FullCapsidDeficitPct, aavTel.HollowFiberShearRatePerSec, aavTel.TransmembranePressureBar, aavTel.DlsMeanParticleDiameterNm, aavTel.CapsidAggregationIndexPct, aavAssess.ViralCapsidPackagingPurity, aavAssess.CapsidShearLysisRisk, aavAct.ModulatedAEXElutionConductivityMsCm, aavAct.CommandedTMPSetpointBar, aavAct.DivertedImpurityVolumeLiters, aavAct.AvoidedGeneTherapyBatchLossUSD/1e6)
+
+	// 91.4 Gigafactory All-Solid-State Battery Dry Electrode Continuous Extrusion & Calendering Porosity Sentinel (IEC 62660-3 & USABC)
+	deTel := coredryelectrode.GlobalDryElectrodeVault.IngestElectrodeTelemetry(coredryelectrode.DryElectrodeTelemetry{
+		TelemetryID:                  "TEL-DRY-9901",
+		ProductionLineID:             "LINE-GIGAFACTORY-DRY-CATHODE-99",
+		CoatingLotID:                 "LOT-DRY-NMC811-ASSB-99",
+		TwinScrewMeltPressureBar:     185.0,
+		ExtruderShearTorqueNm:        340.0,
+		CalenderRollNipGapUm:         78.5,
+		CalenderRollSurfaceTempC:     112.5,
+		ElectrodeArealLoadingMgPerCm2: 32.5,
+		CalenderedPorosityPct:        18.2,
+		CrossWebThicknessVariationUm: 4.8,
+		WebTensionN:                  245.0,
+	})
+	if deTel.ProductionLineID == "" || deTel.CalenderedPorosityPct != 18.2 {
+		t.Fatalf("Failed to ingest dry electrode telemetry: %+v", deTel)
+	}
+
+	deAssess, err := coredryelectrode.GlobalDryElectrodeVault.EvaluatePorosityAndFibrillation("LINE-GIGAFACTORY-DRY-CATHODE-99")
+	if err != nil || deAssess.ElectrodeCoatingUniformity != "CRITICAL_DENDRITE_SHORT_HAZARD" || deAssess.PTFEFibrillationIntegrity != "OVER_SHEARED_BRITTLE_TEAR" || !deAssess.CalenderNipServoTrimMandate || !deAssess.ThermalInductionZoneTrimMandate {
+		t.Fatalf("Failed to evaluate dry electrode porosity and fibrillation: %+v, err: %v", deAssess, err)
+	}
+
+	deAct, err := coredryelectrode.GlobalDryElectrodeVault.TriggerCalenderGapAndThermalTrim("LINE-GIGAFACTORY-DRY-CATHODE-99")
+	if err != nil || deAct.ModulatedCalenderRollNipGapUm >= 78.0 || deAct.ZoneThermalInductionBoostC <= 0 || deAct.ExtruderScrewSpeedRpmTrim >= 0 || deAct.AvoidedBatteryScrapLossUSD <= 0 {
+		t.Fatalf("Failed to trigger calender gap and thermal trim: %+v, err: %v", deAct, err)
+	}
+
+	deDossier, err := coredryelectrode.GlobalDryElectrodeVault.GetDryElectrodeQualityDossier("LINE-GIGAFACTORY-DRY-CATHODE-99")
+	if err != nil || !deDossier["iec_62660_compliant"].(bool) || !deDossier["usabc_certified"].(bool) {
+		t.Fatalf("Failed to compile dry electrode quality dossier: %+v, err: %v", deDossier, err)
+	}
+	t.Logf("✓ Gigafactory All-Solid-State Battery Dry Electrode Sentinel Verified: Line='%s' (Lot='%s'), MeltP=%.1f bar, ShearTorque=%.1f Nm, CalenderGap=%.1f µm, RollT=%.1f°C, Loading=%.1f mg/cm², Porosity=%.1f%% (Dev=+%.1f%%), ThickVar=%.1f µm, Uniformity='%s', Fibrillation='%s', ModulatedGap=%.1f µm, InductionBoost=+%.1f°C, ScrewTrim=%.0f RPM, AvoidedLoss=$%.2fM USD",
+		deTel.ProductionLineID, deTel.CoatingLotID, deTel.TwinScrewMeltPressureBar, deTel.ExtruderShearTorqueNm, deTel.CalenderRollNipGapUm, deTel.CalenderRollSurfaceTempC, deTel.ElectrodeArealLoadingMgPerCm2, deTel.CalenderedPorosityPct, deAssess.PorosityDeviationPct, deTel.CrossWebThicknessVariationUm, deAssess.ElectrodeCoatingUniformity, deAssess.PTFEFibrillationIntegrity, deAct.ModulatedCalenderRollNipGapUm, deAct.ZoneThermalInductionBoostC, deAct.ExtruderScrewSpeedRpmTrim, deAct.AvoidedBatteryScrapLossUSD/1e6)
+
+	// 91.5 Deep-Space Planetary In-Situ Resource Utilization (ISRU) Methalox Sabatier Synthesis & Cryo-Liquefaction Sentinel (NASA SP-8000 & ISO 14300)
+	isruTel := coreisrumethalox.GlobalISRUVault.IngestISRUTelemetry(coreisrumethalox.ISRUMethaloxTelemetry{
+		TelemetryID:                      "TEL-ISRU-9901",
+		PlantID:                          "ISRU-MARS-BASE-ALPHA-99",
+		MissionCycleID:                   "SOL-MARS-ASCENT-METHALOX-420",
+		MartianAmbientPressureMbar:       7.5,
+		Co2IntakeCryoFreezerBar:          6.2,
+		SabatierCatalystBedTempC:         415.0,
+		H2ToCo2StoichiometricRatio:       4.28,
+		RutheniumPerchloratePpm:          35.0,
+		DustFilterPressureDropMbar:       18.5,
+		WaterCondenserSeparationPct:      96.2,
+		LiquidMethaneProductionKgPerSol:  48.5,
+	})
+	if isruTel.PlantID == "" || isruTel.SabatierCatalystBedTempC != 415.0 {
+		t.Fatalf("Failed to ingest ISRU telemetry: %+v", isruTel)
+	}
+
+	isruAssess, err := coreisrumethalox.GlobalISRUVault.EvaluateSabatierAndDustClogging("ISRU-MARS-BASE-ALPHA-99")
+	if err != nil || isruAssess.SabatierThermalRunawayHazard != "CRITICAL_CATALYST_SINTERING_COLLAPSE" || isruAssess.MartianDustFilterStatus != "CRITICAL_REGOLITH_FILTER_CLOG" || !isruAssess.StoichiometricRatioTrimMandate || !isruAssess.ElectrostaticPebblePurgeMandate {
+		t.Fatalf("Failed to evaluate ISRU Sabatier and dust clogging: %+v, err: %v", isruAssess, err)
+	}
+
+	isruAct, err := coreisrumethalox.GlobalISRUVault.TriggerRatioTrimAndDustPurge("ISRU-MARS-BASE-ALPHA-99")
+	if err != nil || isruAct.CommandedH2Co2RatioSetpoint > 4.10 || isruAct.ElectrostaticDustPurgeDurationSec <= 0 || isruAct.CondenserChillerBoostWatts < 200.0 || isruAct.AvoidedMissionLossUSD <= 0 {
+		t.Fatalf("Failed to trigger ISRU ratio trim and dust purge: %+v, err: %v", isruAct, err)
+	}
+
+	isruDossier, err := coreisrumethalox.GlobalISRUVault.GetISRUMissionDossier("ISRU-MARS-BASE-ALPHA-99")
+	if err != nil || !isruDossier["nasa_sp8000_compliant"].(bool) || !isruDossier["iso_14300_certified"].(bool) {
+		t.Fatalf("Failed to compile ISRU mission dossier: %+v, err: %v", isruDossier, err)
+	}
+	t.Logf("✓ Deep-Space Planetary ISRU Methalox Sabatier Sentinel Verified: Plant='%s' (Mission='%s'), AmbP=%.1f mbar, CO2FreezerP=%.1f bar, SabatierT=%.1f°C, H2/CO2=%.2f:1 (Slip=+%.2f), Perchlorate=%.1f ppm, FilterDeltaP=%.1f mbar, Condenser=%.1f%%, CH4_Rate=%.1f kg/sol, RunawayHazard='%s', FilterStatus='%s', CommandedRatio=%.2f, PurgeDuration=%.1f s, Chiller=%.0f W, AvoidedLoss=$%.2fM USD",
+		isruTel.PlantID, isruTel.MissionCycleID, isruTel.MartianAmbientPressureMbar, isruTel.Co2IntakeCryoFreezerBar, isruTel.SabatierCatalystBedTempC, isruTel.H2ToCo2StoichiometricRatio, isruAssess.StoichiometricSlipRatio, isruTel.RutheniumPerchloratePpm, isruTel.DustFilterPressureDropMbar, isruTel.WaterCondenserSeparationPct, isruTel.LiquidMethaneProductionKgPerSol, isruAssess.SabatierThermalRunawayHazard, isruAssess.MartianDustFilterStatus, isruAct.CommandedH2Co2RatioSetpoint, isruAct.ElectrostaticDustPurgeDurationSec, isruAct.CondenserChillerBoostWatts, isruAct.AvoidedMissionLossUSD/1e6)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (91 SECTIONS: 115+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD + CONTRACT LEAKAGE SENTINEL + MICROGRID ISLANDING + CARGO GEOFENCE + SHIFT BIDDING FATIGUE + CIRCULAR PACKAGING RTI + INDUSTRIAL WATER ZLD + VENDOR SANCTIONS GRAPH + BOILER TUBE DESCALING + SAAS DUNNING WATERFALL + TOLL MANUFACTURING RECON + SILO AERATION SENTINEL + EPC PROGRESS BILLING ESCROW + DYNAMIC PORT BERTH DEMURRAGE + TRANSFORMER DGA GUARDIAN + CROSS BORDER CASH REPATRIATION + ORE BLENDING OPTIMIZER + PHARMA CRYOGENIC SENTINEL + KILN REFRACTORY GUARDIAN + IP PATENT ANNUITY + TURBINE EOH CREEP + AVIATION MRO FATIGUE + MARINE LNG RELIQUEFACTION + SEMICONDUCTOR FAB YIELD + WASTEWATER BIOMETHANE + RAILWAY WHEEL RCF + NUCLEAR RADIOPHARM DECAY + UTILITY BESS THERMAL SOH + SATELLITE ORBITAL CONJUNCTION + SUBSEA FLOW ASSURANCE + CONNECTED VEHICLE OTA SUMS + BIOPHARMA BIOREACTOR PAT + FLOATING WIND MOORING + HVDC SUBSEA DTS + CCS CO2 ENVELOPE + MINE ROCKBURST SENTINEL + TOKAMAK FUSION DISRUPTION + CRYO LH2 ORTHO-PARA + HYPERSONIC TPS ABLATION + 3D CHIPLET TSV WARPAGE + SUPERHOT EGS GEOTHERMAL SEISMICITY + QUANTUM QKD PHASE GUARDIAN + SEABED NODULE PLUME + CSP MOLTEN SALT FREEZE + SOLID-STATE BATTERY CRACK + DIRECT AIR CAPTURE OPTIMIZER + EVTOL ACOUSTIC SENTINEL + HYPERLOOP MAGLEV QUENCH + SUBSEA DEEPWATER BOP + CAR-T ACOUSTIC SORTING + PLASTIC PYROLYSIS DIOXIN SENTINEL + GREEN AMMONIA SENTINEL + ROCKET POGO SENTINEL + SMR PASSIVE CONTAINMENT + EUV PELLICLE SENTINEL + UHVDC CONVERTER SENTINEL + SUBSEA CCS CO2 HYDRATE + HYPERSONIC SCRAMJET FUEL CRACKING + MRNA LNP MICROFLUIDIC + SILICON PHOTONICS CPO SKEW + SOEC EFUEL COELECTROLYSIS + SUPERHOT ROCK GEOTHERMAL SHR + SUBSEA AUV DOCKING IPT + ELECTRONIC H2O2 RUNAWAY + BIOPHARMA CONTROLLED ICE FOG LYO + CADMIUM FREE QLED INK PRINTING + HALL EFFECT THRUSTER PROPULSION + SUB 2NM GAAFET NANOSHEET + INDUSTRIAL FERMENTATION FOAM + SALT CAVERN HYDROGEN STORAGE + MOLTEN SALT REACTOR FUEL REDOX + REUSABLE ROCKET GRID FIN HYDRAULICS + SEMICONDUCTOR MBMW RETICLE + AAV GENE THERAPY VECTOR + SOLID STATE BATTERY DRY ELECTRODE + MARS ISRU SABATIER METHALOX) PASSED 100%!")
 }
