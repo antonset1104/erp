@@ -136,9 +136,9 @@ func (c *Client) ExecuteVoiceCommand(db *gorm.DB, req *VoiceCommandRequest, comp
 		}, companyID)
 		if err == nil && agentRes != nil {
 			resultData = map[string]interface{}{
-				"final_answer":    agentRes.FinalAnswer,
-				"provider":        agentRes.ProviderUsed,
-				"tools_called":    len(agentRes.ToolCalls),
+				"final_answer": agentRes.FinalAnswer,
+				"provider":     agentRes.ProviderUsed,
+				"tools_called": len(agentRes.ToolCalls),
 			}
 			spokenResp = agentRes.FinalAnswer
 			if len(spokenResp) > 160 {

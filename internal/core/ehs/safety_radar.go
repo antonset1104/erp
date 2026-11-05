@@ -23,17 +23,17 @@ const (
 
 // EHSIncidentRecord represents a logged workplace safety occurrence.
 type EHSIncidentRecord struct {
-	IncidentID        string           `json:"incident_id"`
-	IncidentDate      string           `json:"incident_date"`
-	LocationWorkCenter string          `json:"location_work_center"`
-	Severity          IncidentSeverity `json:"severity"`
-	Title             string           `json:"title"`
-	Description       string           `json:"description"`
-	ReporterName      string           `json:"reporter_name"`
-	LostWorkDays      int              `json:"lost_work_days"`
-	RootCause5Why     []string         `json:"root_cause_5_why"`
-	AssignedCAPA      string           `json:"assigned_capa"`
-	CAPAStatus        string           `json:"capa_status"` // OPEN, IN_PROGRESS, RESOLVED
+	IncidentID         string           `json:"incident_id"`
+	IncidentDate       string           `json:"incident_date"`
+	LocationWorkCenter string           `json:"location_work_center"`
+	Severity           IncidentSeverity `json:"severity"`
+	Title              string           `json:"title"`
+	Description        string           `json:"description"`
+	ReporterName       string           `json:"reporter_name"`
+	LostWorkDays       int              `json:"lost_work_days"`
+	RootCause5Why      []string         `json:"root_cause_5_why"`
+	AssignedCAPA       string           `json:"assigned_capa"`
+	CAPAStatus         string           `json:"capa_status"` // OPEN, IN_PROGRESS, RESOLVED
 }
 
 // SafetyRadarReport encapsulates enterprise workplace health & safety analytics.

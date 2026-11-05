@@ -11,15 +11,15 @@ import (
 
 // SubscriptionAccount represents recurring enterprise contract profile
 type SubscriptionAccount struct {
-	SubscriptionID           string    `json:"subscription_id"`
-	CustomerID               string    `json:"customer_id"`
-	CustomerEmail            string    `json:"customer_email"`
-	MonthlyRecurringRevenueUSD float64 `json:"monthly_recurring_revenue_usd"` // MRR
-	PaymentMethodType        string    `json:"payment_method_type"`          // "CORPORATE_CREDIT_CARD", "SEPA_DIRECT_DEBIT", "VIRTUAL_ACCOUNT"
-	AccountStatus            string    `json:"account_status"`               // "ACTIVE_GOOD_STANDING", "PAST_DUE_DUNNING", "SOFT_SUSPENDED_READONLY", "CHURNED_CANCELLED"
-	FailureCount             int       `json:"failure_count"`
-	LastFailedReason         string    `json:"last_failed_reason,omitempty"`
-	CreatedAt                time.Time `json:"created_at"`
+	SubscriptionID             string    `json:"subscription_id"`
+	CustomerID                 string    `json:"customer_id"`
+	CustomerEmail              string    `json:"customer_email"`
+	MonthlyRecurringRevenueUSD float64   `json:"monthly_recurring_revenue_usd"` // MRR
+	PaymentMethodType          string    `json:"payment_method_type"`           // "CORPORATE_CREDIT_CARD", "SEPA_DIRECT_DEBIT", "VIRTUAL_ACCOUNT"
+	AccountStatus              string    `json:"account_status"`                // "ACTIVE_GOOD_STANDING", "PAST_DUE_DUNNING", "SOFT_SUSPENDED_READONLY", "CHURNED_CANCELLED"
+	FailureCount               int       `json:"failure_count"`
+	LastFailedReason           string    `json:"last_failed_reason,omitempty"`
+	CreatedAt                  time.Time `json:"created_at"`
 }
 
 // PaymentFailureEvent models bank decline codes and dunning triggers
@@ -35,14 +35,14 @@ type PaymentFailureEvent struct {
 
 // SmartRetryExecution models intelligent auto-retry and recovered revenue
 type SmartRetryExecution struct {
-	RetryID                  string    `json:"retry_id"`
-	SubscriptionID           string    `json:"subscription_id"`
-	RetryAttemptNumber       int       `json:"retry_attempt_number"`
-	RecoveredSuccessfully    bool      `json:"recovered_successfully"`
-	RecoveredAmountUSD       float64   `json:"recovered_amount_usd"`
-	NewAccountStatus         string    `json:"new_account_status"` // "ACTIVE_GOOD_STANDING"
-	GLJournalMoveReference   string    `json:"gl_journal_move_reference,omitempty"`
-	ExecutedAt               time.Time `json:"executed_at"`
+	RetryID                string    `json:"retry_id"`
+	SubscriptionID         string    `json:"subscription_id"`
+	RetryAttemptNumber     int       `json:"retry_attempt_number"`
+	RecoveredSuccessfully  bool      `json:"recovered_successfully"`
+	RecoveredAmountUSD     float64   `json:"recovered_amount_usd"`
+	NewAccountStatus       string    `json:"new_account_status"` // "ACTIVE_GOOD_STANDING"
+	GLJournalMoveReference string    `json:"gl_journal_move_reference,omitempty"`
+	ExecutedAt             time.Time `json:"executed_at"`
 }
 
 // DunningWaterfallVault thread-safe store
@@ -209,14 +209,14 @@ func (v *DunningWaterfallVault) GetRevenueRecoveryMetrics(companyID string) gin.
 	}
 
 	return gin.H{
-		"company_id":                companyID,
-		"total_active_mrr_usd":      totalMRR,
-		"cumulative_recovered_mrr":  v.recoveredMRR,
-		"involuntary_churn_rate_pct": 1.8, // Reduced from industry standard 12% to 1.8%
-		"net_revenue_retention_nrr": 114.5, // 114.5% NRR
-		"active_subscriptions":      activeCount,
-		"past_due_in_dunning":       pastDueCount,
-		"accounting_standard":       "IFRS 15 / PSAK 72 Revenue from Contracts with Customers",
+		"company_id":                 companyID,
+		"total_active_mrr_usd":       totalMRR,
+		"cumulative_recovered_mrr":   v.recoveredMRR,
+		"involuntary_churn_rate_pct": 1.8,   // Reduced from industry standard 12% to 1.8%
+		"net_revenue_retention_nrr":  114.5, // 114.5% NRR
+		"active_subscriptions":       activeCount,
+		"past_due_in_dunning":        pastDueCount,
+		"accounting_standard":        "IFRS 15 / PSAK 72 Revenue from Contracts with Customers",
 	}
 }
 

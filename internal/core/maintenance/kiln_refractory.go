@@ -14,31 +14,31 @@ import (
 
 // KilnThermalScan represents infrared continuous line scanner data along rotary kiln shell
 type KilnThermalScan struct {
-	ScanID                    string    `json:"scan_id"`
-	KilnID                    string    `json:"kiln_id"`
-	LongitudinalMeter         float64   `json:"longitudinal_meter"`          // 0 to 80m from discharge to feed end
-	CircumferentialAngleDeg   float64   `json:"circumferential_angle_deg"`    // 0 to 360 degrees
-	ShellSkinTempC            float64   `json:"shell_skin_temp_c"`           // Normal: 220-320°C; Warning > 380°C; Hotspot > 420°C
-	AmbientTempC              float64   `json:"ambient_temp_c"`
-	KilnRPM                   float64   `json:"kiln_rpm"`                    // 2.0 to 5.0 RPM
-	BurningZoneClinkerTempC   float64   `json:"burning_zone_clinker_temp_c"` // ~1450°C
-	SecondaryAirTempC         float64   `json:"secondary_air_temp_c"`
-	ScannedAt                 time.Time `json:"scanned_at"`
+	ScanID                  string    `json:"scan_id"`
+	KilnID                  string    `json:"kiln_id"`
+	LongitudinalMeter       float64   `json:"longitudinal_meter"`        // 0 to 80m from discharge to feed end
+	CircumferentialAngleDeg float64   `json:"circumferential_angle_deg"` // 0 to 360 degrees
+	ShellSkinTempC          float64   `json:"shell_skin_temp_c"`         // Normal: 220-320°C; Warning > 380°C; Hotspot > 420°C
+	AmbientTempC            float64   `json:"ambient_temp_c"`
+	KilnRPM                 float64   `json:"kiln_rpm"`                    // 2.0 to 5.0 RPM
+	BurningZoneClinkerTempC float64   `json:"burning_zone_clinker_temp_c"` // ~1450°C
+	SecondaryAirTempC       float64   `json:"secondary_air_temp_c"`
+	ScannedAt               time.Time `json:"scanned_at"`
 }
 
 // RefractoryAssessment models remaining refractory thickness and shell deformation/burn-through risk
 type RefractoryAssessment struct {
-	AssessmentID              string    `json:"assessment_id"`
-	KilnID                    string    `json:"kiln_id"`
-	LongitudinalMeter         float64   `json:"longitudinal_meter"`
-	EstimatedRemainingBrickMM float64   `json:"estimated_remaining_brick_mm"` // Original 220mm; Critical < 60mm
-	ShellHotspotAlert         bool      `json:"shell_hotspot_alert"`
-	RiskOfOvalityDeformation  bool      `json:"risk_of_ovality_deformation"`
-	RecommendedCoolingFanCount int      `json:"recommended_cooling_fan_count"`
-	MaxAllowedKilnRPM         float64   `json:"max_allowed_kiln_rpm"`
-	ActionStatus              string    `json:"action_status"` // "HEALTHY_COATING", "MODERATE_BRICK_THINNING", "CRITICAL_HOTSPOT_BURN_THROUGH_RISK"
-	ThermodynamicAuditDigest  string    `json:"thermodynamic_audit_digest"`
-	EvaluatedAt               time.Time `json:"evaluated_at"`
+	AssessmentID               string    `json:"assessment_id"`
+	KilnID                     string    `json:"kiln_id"`
+	LongitudinalMeter          float64   `json:"longitudinal_meter"`
+	EstimatedRemainingBrickMM  float64   `json:"estimated_remaining_brick_mm"` // Original 220mm; Critical < 60mm
+	ShellHotspotAlert          bool      `json:"shell_hotspot_alert"`
+	RiskOfOvalityDeformation   bool      `json:"risk_of_ovality_deformation"`
+	RecommendedCoolingFanCount int       `json:"recommended_cooling_fan_count"`
+	MaxAllowedKilnRPM          float64   `json:"max_allowed_kiln_rpm"`
+	ActionStatus               string    `json:"action_status"` // "HEALTHY_COATING", "MODERATE_BRICK_THINNING", "CRITICAL_HOTSPOT_BURN_THROUGH_RISK"
+	ThermodynamicAuditDigest   string    `json:"thermodynamic_audit_digest"`
+	EvaluatedAt                time.Time `json:"evaluated_at"`
 }
 
 // HotspotCoolingAction represents high-velocity auxiliary fan deployment to preserve shell integrity
@@ -221,7 +221,7 @@ func (v *KilnRefractoryVault) GetShellIntegrityDossier(kilnID string) (map[strin
 		"kiln_id":                     kilnID,
 		"scanned_points_count":        len(matchedScans),
 		"has_assessment":              hasAssess,
-		"api_560_compliance_status":  true,
+		"api_560_compliance_status":   true,
 		"iso_50001_energy_efficiency": "MONITORED_AND_OPTIMAL",
 		"compiled_at":                 time.Now(),
 	}

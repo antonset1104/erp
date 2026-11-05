@@ -8,9 +8,9 @@ import (
 // AccountAccount corresponds to standard enterprise account.account (Chart of Accounts)
 type AccountAccount struct {
 	models.ModelBase
-	Code    string `gorm:"size:64;not null;uniqueIndex" json:"code"` // e.g. "1200", "2100", "4100"
-	Name    string `gorm:"size:128;not null" json:"name"`
-	Type    string `gorm:"size:64;not null" json:"type"` // "asset_receivable", "liability_payable", "income", "expense", "asset_cash"
+	Code string `gorm:"size:64;not null;uniqueIndex" json:"code"` // e.g. "1200", "2100", "4100"
+	Name string `gorm:"size:128;not null" json:"name"`
+	Type string `gorm:"size:64;not null" json:"type"` // "asset_receivable", "liability_payable", "income", "expense", "asset_cash"
 }
 
 // AccountJournal corresponds to standard enterprise account.journal
@@ -33,7 +33,7 @@ type AccountMove struct {
 	Partner        base.Partner      `gorm:"foreignKey:PartnerID" json:"partner,omitempty"`
 	InvoiceDate    string            `gorm:"size:32;not null" json:"invoice_date"`
 	InvoiceDueDate string            `gorm:"size:32" json:"invoice_due_date"`
-	State          string            `gorm:"size:32;default:'draft';index" json:"state"` // "draft", "posted", "cancel"
+	State          string            `gorm:"size:32;default:'draft';index" json:"state"`      // "draft", "posted", "cancel"
 	PaymentState   string            `gorm:"size:32;default:'not_paid'" json:"payment_state"` // "not_paid", "paid"
 	AmountUntaxed  float64           `gorm:"default:0" json:"amount_untaxed"`
 	AmountTax      float64           `gorm:"default:0" json:"amount_tax"`
@@ -69,12 +69,12 @@ type AccountMoveLine struct {
 type AccountPayment struct {
 	models.ModelBase
 	Name        string       `gorm:"size:64;not null;uniqueIndex" json:"name"` // e.g. PAY/2026/00001
-	MoveID      uint         `gorm:"index;not null" json:"move_id"`           // Invoice being paid
+	MoveID      uint         `gorm:"index;not null" json:"move_id"`            // Invoice being paid
 	PartnerID   uint         `gorm:"not null" json:"partner_id"`
 	Partner     base.Partner `gorm:"foreignKey:PartnerID" json:"partner,omitempty"`
-	JournalID   uint         `gorm:"not null" json:"journal_id"`              // Bank or Cash Journal
+	JournalID   uint         `gorm:"not null" json:"journal_id"` // Bank or Cash Journal
 	Amount      float64      `gorm:"not null" json:"amount"`
 	PaymentDate string       `gorm:"size:32;not null" json:"payment_date"`
-	PaymentType string       `gorm:"size:32;not null" json:"payment_type"`    // "inbound" (customer), "outbound" (supplier)
+	PaymentType string       `gorm:"size:32;not null" json:"payment_type"` // "inbound" (customer), "outbound" (supplier)
 	Memo        string       `gorm:"size:255" json:"memo"`
 }

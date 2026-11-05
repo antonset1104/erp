@@ -48,7 +48,7 @@ type SweepReport struct {
 	SweepCycleID                 string             `json:"sweep_cycle_id"`
 	Timestamp                    string             `json:"timestamp"`
 	HeaderAccountID              string             `json:"header_account_id"`
-	TotalFundsSweptUpstream       float64            `json:"total_funds_swept_upstream"`
+	TotalFundsSweptUpstream      float64            `json:"total_funds_swept_upstream"`
 	TotalDeficitFundedDownstream float64            `json:"total_deficit_funded_downstream"`
 	NetLiquidityConcentrated     float64            `json:"net_liquidity_concentrated"`
 	TotalDailyInterestYield      float64            `json:"total_daily_interest_yield"`
@@ -75,11 +75,11 @@ type NettingCycleRequest struct {
 
 // NettingParticipantResult captures the net position for a single group company.
 type NettingParticipantResult struct {
-	EntityName         string  `json:"entity_name"`
-	GrossPayablesUSD   float64 `json:"gross_payables_usd"`
+	EntityName          string  `json:"entity_name"`
+	GrossPayablesUSD    float64 `json:"gross_payables_usd"`
 	GrossReceivablesUSD float64 `json:"gross_receivables_usd"`
-	NetPosition        string  `json:"net_position"` // "NET_PAYER", "NET_RECEIVER", "SQUARE"
-	NetAmountUSD       float64 `json:"net_amount_usd"`
+	NetPosition         string  `json:"net_position"` // "NET_PAYER", "NET_RECEIVER", "SQUARE"
+	NetAmountUSD        float64 `json:"net_amount_usd"`
 }
 
 // NettingReport represents the bilateral/multilateral netting settlement outcome.
@@ -98,14 +98,14 @@ type NettingReport struct {
 
 // IHBBalanceOverview summarizes the In-House Bank position.
 type IHBBalanceOverview struct {
-	InHouseBankID                string  `json:"in_house_bank_id"`
-	MasterTreasuryEntity         string  `json:"master_treasury_entity"`
-	TotalDepositsHeldUSD         float64 `json:"total_deposits_held_usd"`
-	TotalCreditLinesDrawnUSD     float64 `json:"total_credit_lines_drawn_usd"`
-	NetLiquiditySurplusUSD       float64 `json:"net_liquidity_surplus_usd"`
-	AverageCostOfCapitalPercent  float64 `json:"average_cost_of_capital_percent"`
-	ActiveSweepingAccounts       int     `json:"active_sweeping_accounts"`
-	NextScheduledSweep           string  `json:"next_scheduled_sweep"`
+	InHouseBankID               string  `json:"in_house_bank_id"`
+	MasterTreasuryEntity        string  `json:"master_treasury_entity"`
+	TotalDepositsHeldUSD        float64 `json:"total_deposits_held_usd"`
+	TotalCreditLinesDrawnUSD    float64 `json:"total_credit_lines_drawn_usd"`
+	NetLiquiditySurplusUSD      float64 `json:"net_liquidity_surplus_usd"`
+	AverageCostOfCapitalPercent float64 `json:"average_cost_of_capital_percent"`
+	ActiveSweepingAccounts      int     `json:"active_sweeping_accounts"`
+	NextScheduledSweep          string  `json:"next_scheduled_sweep"`
 }
 
 // CashPoolStore provides thread-safe state management for Treasury Cash Pooling.
@@ -201,7 +201,7 @@ func ExecuteSweepLogic(req SweepExecutionRequest) (*SweepReport, error) {
 		SweepCycleID:                 sweepID,
 		Timestamp:                    time.Now().Format(time.RFC3339),
 		HeaderAccountID:              req.HeaderAccountID,
-		TotalFundsSweptUpstream:       totalUpstream,
+		TotalFundsSweptUpstream:      totalUpstream,
 		TotalDeficitFundedDownstream: totalDownstream,
 		NetLiquidityConcentrated:     totalUpstream - totalDownstream,
 		TotalDailyInterestYield:      totalInterest,

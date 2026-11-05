@@ -14,44 +14,44 @@ import (
 
 // AUVDockingTelemetry captures subsea resident AUV docking, acoustic USBL, and inductive charging dynamics under DNV-ST-0373 & ISO 13628-8
 type AUVDockingTelemetry struct {
-	TelemetryID                   string    `json:"telemetry_id"`
-	VehicleID                     string    `json:"vehicle_id"`                        // "AUV-SEABED-RESIDENT-04"
-	DockingStationID              string    `json:"docking_station_id"`               // "DOCK-BENTHIC-SUBSEA-3000M-01"
-	OperatingDepthMeters          float64   `json:"operating_depth_meters"`           // e.g. 2850.0 m (deepwater seabed)
-	BenthicCurrentSpeedKnots      float64   `json:"benthic_current_speed_knots"`      // e.g. 2.65 knots (turbulent bottom current)
-	UsblPositionXOffsetMm         float64   `json:"usbl_position_x_offset_mm"`         // e.g. 18.5 mm (latch center offset)
-	UsblPositionYOffsetMm         float64   `json:"usbl_position_y_offset_mm"`         // e.g. 14.2 mm
-	AngularTiltErrorDeg           float64   `json:"angular_tilt_error_deg"`           // e.g. 5.8 deg (pitch/yaw misalignment)
-	InductiveCouplingEfficiencyPct float64  `json:"inductive_coupling_efficiency_pct"`// e.g. 68.5% (nominal > 88% magnetic resonance)
-	TitaniumHullEddyTempC         float64   `json:"titanium_hull_eddy_temp_c"`        // e.g. 48.5°C (eddy current induction heating)
-	OpticalModemSnrDb             float64   `json:"optical_modem_snr_db"`             // e.g. 11.2 dB (target > 18 dB)
-	RecordedAt                    time.Time `json:"recorded_at"`
+	TelemetryID                    string    `json:"telemetry_id"`
+	VehicleID                      string    `json:"vehicle_id"`                        // "AUV-SEABED-RESIDENT-04"
+	DockingStationID               string    `json:"docking_station_id"`                // "DOCK-BENTHIC-SUBSEA-3000M-01"
+	OperatingDepthMeters           float64   `json:"operating_depth_meters"`            // e.g. 2850.0 m (deepwater seabed)
+	BenthicCurrentSpeedKnots       float64   `json:"benthic_current_speed_knots"`       // e.g. 2.65 knots (turbulent bottom current)
+	UsblPositionXOffsetMm          float64   `json:"usbl_position_x_offset_mm"`         // e.g. 18.5 mm (latch center offset)
+	UsblPositionYOffsetMm          float64   `json:"usbl_position_y_offset_mm"`         // e.g. 14.2 mm
+	AngularTiltErrorDeg            float64   `json:"angular_tilt_error_deg"`            // e.g. 5.8 deg (pitch/yaw misalignment)
+	InductiveCouplingEfficiencyPct float64   `json:"inductive_coupling_efficiency_pct"` // e.g. 68.5% (nominal > 88% magnetic resonance)
+	TitaniumHullEddyTempC          float64   `json:"titanium_hull_eddy_temp_c"`         // e.g. 48.5°C (eddy current induction heating)
+	OpticalModemSnrDb              float64   `json:"optical_modem_snr_db"`              // e.g. 11.2 dB (target > 18 dB)
+	RecordedAt                     time.Time `json:"recorded_at"`
 }
 
 // AUVDockingAssessment models benthic disturbance rejection, coil magnetic flux leakage, and hull eddy-current heating
 type AUVDockingAssessment struct {
-	AssessmentID                   string    `json:"assessment_id"`
-	VehicleID                      string    `json:"vehicle_id"`
-	TotalCoilMisalignmentMm        float64   `json:"total_coil_misalignment_mm"`        // sqrt(X^2 + Y^2)
-	MagneticFluxLeakageTesla       float64   `json:"magnetic_flux_leakage_tesla"`       // uncoupled magnetic field
-	DockingAlignmentStatus         string    `json:"docking_alignment_status"`          // "LATCH_ALIGNMENT_OPTIMAL", "MARGINAL_APPROACH_CORRECTION_REQUIRED", "CRITICAL_COLLISION_ABORT_HAZARD"
-	InductiveThermalRisk           string    `json:"inductive_thermal_risk"`            // "IPT_RESONANCE_COOLED", "EDDY_HEATING_ELEVATED_WARNING", "CRITICAL_HULL_THERMAL_OVERHEAT_COLLAPSE"
-	ThrusterVectorTrimMandate      bool      `json:"thruster_vector_trim_mandate"`
-	ResonanceFrequencyShiftRequired bool     `json:"resonance_frequency_shift_required"`
-	AuditDigest                    string    `json:"audit_digest"`
-	EvaluatedAt                    time.Time `json:"evaluated_at"`
+	AssessmentID                    string    `json:"assessment_id"`
+	VehicleID                       string    `json:"vehicle_id"`
+	TotalCoilMisalignmentMm         float64   `json:"total_coil_misalignment_mm"`  // sqrt(X^2 + Y^2)
+	MagneticFluxLeakageTesla        float64   `json:"magnetic_flux_leakage_tesla"` // uncoupled magnetic field
+	DockingAlignmentStatus          string    `json:"docking_alignment_status"`    // "LATCH_ALIGNMENT_OPTIMAL", "MARGINAL_APPROACH_CORRECTION_REQUIRED", "CRITICAL_COLLISION_ABORT_HAZARD"
+	InductiveThermalRisk            string    `json:"inductive_thermal_risk"`      // "IPT_RESONANCE_COOLED", "EDDY_HEATING_ELEVATED_WARNING", "CRITICAL_HULL_THERMAL_OVERHEAT_COLLAPSE"
+	ThrusterVectorTrimMandate       bool      `json:"thruster_vector_trim_mandate"`
+	ResonanceFrequencyShiftRequired bool      `json:"resonance_frequency_shift_required"`
+	AuditDigest                     string    `json:"audit_digest"`
+	EvaluatedAt                     time.Time `json:"evaluated_at"`
 }
 
 // AUVMitigationAction models closed-loop vector station-keeping, IPT resonant frequency trimming, and optical modem boost
 type AUVMitigationAction struct {
-	ActionID                      string    `json:"action_id"`
-	VehicleID                     string    `json:"vehicle_id"`
-	CommandedThrusterSurgeForceN  float64   `json:"commanded_thruster_surge_force_n"` // e.g. 185.0 N
-	CommandedThrusterSwayForceN   float64   `json:"commanded_thruster_sway_force_n"`  // e.g. -142.0 N counter-current thrust
-	IPTResonanceFrequencyKhz      float64   `json:"ipt_resonance_frequency_khz"`      // adjusted to 85.2 kHz
-	OpticalTransmitPowerBoostDb   float64   `json:"optical_transmit_power_boost_db"`  // e.g. +6.0 dB
-	AvoidedDeepSeaLossUSD         float64   `json:"avoided_deep_sea_loss_usd"`        // Avoided $28M USD AUV stranding and subsea wellhead collision
-	ActionTimestamp               time.Time `json:"action_timestamp"`
+	ActionID                     string    `json:"action_id"`
+	VehicleID                    string    `json:"vehicle_id"`
+	CommandedThrusterSurgeForceN float64   `json:"commanded_thruster_surge_force_n"` // e.g. 185.0 N
+	CommandedThrusterSwayForceN  float64   `json:"commanded_thruster_sway_force_n"`  // e.g. -142.0 N counter-current thrust
+	IPTResonanceFrequencyKhz     float64   `json:"ipt_resonance_frequency_khz"`      // adjusted to 85.2 kHz
+	OpticalTransmitPowerBoostDb  float64   `json:"optical_transmit_power_boost_db"`  // e.g. +6.0 dB
+	AvoidedDeepSeaLossUSD        float64   `json:"avoided_deep_sea_loss_usd"`        // Avoided $28M USD AUV stranding and subsea wellhead collision
+	ActionTimestamp              time.Time `json:"action_timestamp"`
 }
 
 // SubseaAUVVault thread-safe in-memory store
@@ -122,16 +122,16 @@ func (v *SubseaAUVVault) EvaluateDockingAndResonance(vehicleID string) (AUVDocki
 	digest := hex.EncodeToString(hash[:])
 
 	assessment := AUVDockingAssessment{
-		AssessmentID:                   fmt.Sprintf("ASM-AUV-%d", time.Now().UnixNano()%1000000),
-		VehicleID:                      vehicleID,
-		TotalCoilMisalignmentMm:        totalMisalignment,
-		MagneticFluxLeakageTesla:       fluxLeakage,
-		DockingAlignmentStatus:         dockStatus,
-		InductiveThermalRisk:           thermalRisk,
-		ThrusterVectorTrimMandate:      thrusterMandate,
+		AssessmentID:                    fmt.Sprintf("ASM-AUV-%d", time.Now().UnixNano()%1000000),
+		VehicleID:                       vehicleID,
+		TotalCoilMisalignmentMm:         totalMisalignment,
+		MagneticFluxLeakageTesla:        fluxLeakage,
+		DockingAlignmentStatus:          dockStatus,
+		InductiveThermalRisk:            thermalRisk,
+		ThrusterVectorTrimMandate:       thrusterMandate,
 		ResonanceFrequencyShiftRequired: freqShiftRequired,
-		AuditDigest:                    digest,
-		EvaluatedAt:                    time.Now(),
+		AuditDigest:                     digest,
+		EvaluatedAt:                     time.Now(),
 	}
 
 	v.assessments[vehicleID] = assessment
@@ -164,14 +164,14 @@ func (v *SubseaAUVVault) TriggerVectorThrusterAndIPTControl(vehicleID string) (A
 	}
 
 	action := AUVMitigationAction{
-		ActionID:                      fmt.Sprintf("ACT-AUV-%d", time.Now().UnixNano()%1000000),
-		VehicleID:                     vehicleID,
-		CommandedThrusterSurgeForceN:  surgeForce,
-		CommandedThrusterSwayForceN:   swayForce,
-		IPTResonanceFrequencyKhz:      freqKhz,
-		OpticalTransmitPowerBoostDb:   optBoost,
-		AvoidedDeepSeaLossUSD:         28000000.0,
-		ActionTimestamp:               time.Now(),
+		ActionID:                     fmt.Sprintf("ACT-AUV-%d", time.Now().UnixNano()%1000000),
+		VehicleID:                    vehicleID,
+		CommandedThrusterSurgeForceN: surgeForce,
+		CommandedThrusterSwayForceN:  swayForce,
+		IPTResonanceFrequencyKhz:     freqKhz,
+		OpticalTransmitPowerBoostDb:  optBoost,
+		AvoidedDeepSeaLossUSD:        28000000.0,
+		ActionTimestamp:              time.Now(),
 	}
 
 	v.actions[vehicleID] = action
@@ -188,13 +188,13 @@ func (v *SubseaAUVVault) GetAUVDockingDossier(vehicleID string) (map[string]inte
 	act, hasAct := v.actions[vehicleID]
 
 	dossier := map[string]interface{}{
-		"vehicle_id":             vehicleID,
-		"dnv_st_0373_compliant":  true,
-		"iso_13628_8_certified":  true,
-		"has_telemetry":          hasTelem,
-		"has_assessment":         hasAsm,
-		"has_action":             hasAct,
-		"dossier_compiled_at":    time.Now(),
+		"vehicle_id":            vehicleID,
+		"dnv_st_0373_compliant": true,
+		"iso_13628_8_certified": true,
+		"has_telemetry":         hasTelem,
+		"has_assessment":        hasAsm,
+		"has_action":            hasAct,
+		"dossier_compiled_at":   time.Now(),
 	}
 	if hasTelem {
 		dossier["telemetry"] = telem

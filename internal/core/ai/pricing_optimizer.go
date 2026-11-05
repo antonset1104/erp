@@ -23,7 +23,7 @@ type PricingRecommendRequest struct {
 	CustomerSegment   string  `json:"customer_segment"` // "retail", "wholesale", "key_account", "ecommerce"
 	CompetitorPrice   float64 `json:"competitor_price"`
 	MinGrossMarginPct float64 `json:"min_gross_margin_pct"` // default 20%
-	Urgency           string  `json:"urgency"`               // "standard", "clear_excess_inventory", "margin_maximize"
+	Urgency           string  `json:"urgency"`              // "standard", "clear_excess_inventory", "margin_maximize"
 }
 
 type PricingOptimizationResponse struct {

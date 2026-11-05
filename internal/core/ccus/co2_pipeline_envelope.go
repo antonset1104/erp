@@ -15,14 +15,14 @@ import (
 // CO2PipelineTelemetry models high-pressure dense phase CO2 transport pipeline readings
 type CO2PipelineTelemetry struct {
 	TelemetryID                string    `json:"telemetry_id"`
-	PipelineSegmentID          string    `json:"pipeline_segment_id"`            // "CCS-PIPE-SUKOWATI-DENSE-01"
-	OperatingPressureBar       float64   `json:"operating_pressure_bar"`         // e.g. 88.5 bar (> 73.8 bar critical)
-	OperatingTempC             float64   `json:"operating_temp_c"`               // e.g. 34.5°C (> 31.1°C critical)
-	CO2PurityMolPct            float64   `json:"co2_purity_mol_pct"`             // e.g. 96.8 mol% CO2
-	N2ImpurityMolPct           float64   `json:"n2_impurity_mol_pct"`            // e.g. 2.1 mol% N2
-	CH4ImpurityMolPct          float64   `json:"ch4_impurity_mol_pct"`           // e.g. 1.1 mol% CH4
-	MassFlowRateTonsHr         float64   `json:"mass_flow_rate_tons_hr"`         // e.g. 420.0 tons/hr
-	DepressurizationRateBarMin float64   `json:"depressurization_rate_bar_min"`  // e.g. 4.8 bar/min during upset
+	PipelineSegmentID          string    `json:"pipeline_segment_id"`           // "CCS-PIPE-SUKOWATI-DENSE-01"
+	OperatingPressureBar       float64   `json:"operating_pressure_bar"`        // e.g. 88.5 bar (> 73.8 bar critical)
+	OperatingTempC             float64   `json:"operating_temp_c"`              // e.g. 34.5°C (> 31.1°C critical)
+	CO2PurityMolPct            float64   `json:"co2_purity_mol_pct"`            // e.g. 96.8 mol% CO2
+	N2ImpurityMolPct           float64   `json:"n2_impurity_mol_pct"`           // e.g. 2.1 mol% N2
+	CH4ImpurityMolPct          float64   `json:"ch4_impurity_mol_pct"`          // e.g. 1.1 mol% CH4
+	MassFlowRateTonsHr         float64   `json:"mass_flow_rate_tons_hr"`        // e.g. 420.0 tons/hr
+	DepressurizationRateBarMin float64   `json:"depressurization_rate_bar_min"` // e.g. 4.8 bar/min during upset
 	RecordedAt                 time.Time `json:"recorded_at"`
 }
 
@@ -34,28 +34,28 @@ type PhaseEnvelopeThermodynamicAssessment struct {
 	SaturationBubblePressureBar float64   `json:"saturation_bubble_pressure_bar"` // Dew/bubble pressure of impure mixture
 	PressureMarginToTwoPhaseBar float64   `json:"pressure_margin_to_two_phase_bar"`
 	JouleThomsonChillingCoeff   float64   `json:"joule_thomson_chilling_coeff_c_bar"` // mu_JT in °C/bar (e.g. 1.45 °C/bar)
-	ProjectedChokedOrificeTempC float64   `json:"projected_choked_orifice_temp_c"`   // Can drop below -40°C DBTT
-	BrittleDuctileFractureRisk  string    `json:"brittle_ductile_fracture_risk"`  // "SAFE_DUCTILE_RANGE", "ELEVATED_SUB_ZERO_CHILLING", "CRITICAL_BRITTLE_FRACTURE_RISK"
+	ProjectedChokedOrificeTempC float64   `json:"projected_choked_orifice_temp_c"`    // Can drop below -40°C DBTT
+	BrittleDuctileFractureRisk  string    `json:"brittle_ductile_fracture_risk"`      // "SAFE_DUCTILE_RANGE", "ELEVATED_SUB_ZERO_CHILLING", "CRITICAL_BRITTLE_FRACTURE_RISK"
 	AuditDigest                 string    `json:"audit_digest"`
 	EvaluatedAt                 time.Time `json:"evaluated_at"`
 }
 
 // PipelineRepressurizationControl models automated line-heater firing and choke valve throttling
 type PipelineRepressurizationControl struct {
-	ControlID                   string    `json:"control_id"`
-	PipelineSegmentID           string    `json:"pipeline_segment_id"`
-	InLineHeaterDutyKW          float64   `json:"in_line_heater_duty_kw"`
-	ChokeValveThrottledPct      float64   `json:"choke_valve_throttled_pct"`
-	AvoidedPipeRuptureLossUSD   float64   `json:"avoided_pipe_rupture_loss_usd"` // Avoided $35M pipeline rupture & toxic gas release
-	ControlledAt                time.Time `json:"controlled_at"`
+	ControlID                 string    `json:"control_id"`
+	PipelineSegmentID         string    `json:"pipeline_segment_id"`
+	InLineHeaterDutyKW        float64   `json:"in_line_heater_duty_kw"`
+	ChokeValveThrottledPct    float64   `json:"choke_valve_throttled_pct"`
+	AvoidedPipeRuptureLossUSD float64   `json:"avoided_pipe_rupture_loss_usd"` // Avoided $35M pipeline rupture & toxic gas release
+	ControlledAt              time.Time `json:"controlled_at"`
 }
 
 // CCUSVault thread-safe in-memory store
 type CCUSVault struct {
-	mu           sync.RWMutex
-	telemetries  map[string]CO2PipelineTelemetry
-	assessments  map[string]PhaseEnvelopeThermodynamicAssessment
-	controls     map[string]PipelineRepressurizationControl
+	mu          sync.RWMutex
+	telemetries map[string]CO2PipelineTelemetry
+	assessments map[string]PhaseEnvelopeThermodynamicAssessment
+	controls    map[string]PipelineRepressurizationControl
 }
 
 // Global instance

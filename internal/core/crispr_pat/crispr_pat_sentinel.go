@@ -13,30 +13,30 @@ import (
 
 // CRISPRPATTelemetry captures clinical in-vivo gene editing bioreactor and nanopore PAT telemetry
 type CRISPRPATTelemetry struct {
-	TelemetryID                      string    `json:"telemetry_id"`
-	BioreactorBatchID                string    `json:"bioreactor_batch_id"`
-	PatientTherapyID                 string    `json:"patient_therapy_id"`
-	OnTargetIndelEfficiencyPct       float64   `json:"on_target_indel_efficiency_pct"`       // target > 85.0%
-	OffTargetCleavageFrequencyPct    float64   `json:"off_target_cleavage_frequency_pct"`    // limit < 0.01%
-	ActiveCasEnzymePersistenceHours  float64   `json:"active_cas_enzyme_persistence_hours"`  // safety threshold < 8.0 hrs
-	GuideRnaMismatchDeltaGKcalMol    float64   `json:"guide_rna_mismatch_delta_g_kcal_mol"`  // target < -14.5 kcal/mol
-	NanoporeCleavageReadDepth        float64   `json:"nanopore_cleavage_read_depth"`         // target > 50,000x
-	InnateCytokineReleasePpm         float64   `json:"innate_cytokine_release_ppm"`          // limit < 25.0 ppm
-	ViableCellFractionPct            float64   `json:"viable_cell_fraction_pct"`             // target > 92.0%
-	Timestamp                        time.Time `json:"timestamp"`
+	TelemetryID                     string    `json:"telemetry_id"`
+	BioreactorBatchID               string    `json:"bioreactor_batch_id"`
+	PatientTherapyID                string    `json:"patient_therapy_id"`
+	OnTargetIndelEfficiencyPct      float64   `json:"on_target_indel_efficiency_pct"`      // target > 85.0%
+	OffTargetCleavageFrequencyPct   float64   `json:"off_target_cleavage_frequency_pct"`   // limit < 0.01%
+	ActiveCasEnzymePersistenceHours float64   `json:"active_cas_enzyme_persistence_hours"` // safety threshold < 8.0 hrs
+	GuideRnaMismatchDeltaGKcalMol   float64   `json:"guide_rna_mismatch_delta_g_kcal_mol"` // target < -14.5 kcal/mol
+	NanoporeCleavageReadDepth       float64   `json:"nanopore_cleavage_read_depth"`        // target > 50,000x
+	InnateCytokineReleasePpm        float64   `json:"innate_cytokine_release_ppm"`         // limit < 25.0 ppm
+	ViableCellFractionPct           float64   `json:"viable_cell_fraction_pct"`            // target > 92.0%
+	Timestamp                       time.Time `json:"timestamp"`
 }
 
 // CRISPRPATAssessment models off-target oncogenesis risk, enzyme kinetics, and FDA CBER gene therapy compliance
 type CRISPRPATAssessment struct {
-	AssessmentID                   string    `json:"assessment_id"`
-	BioreactorBatchID              string    `json:"bioreactor_batch_id"`
-	GeneEditingPrecisionStatus     string    `json:"gene_editing_precision_status"` // MONOSPECIFIC_PRECISION_EDITING, OFF_TARGET_CLEAVAGE_WARNING, ONCOGENIC_TRANSLOCATION_HAZARD
-	OffTargetCleavageHazard        string    `json:"off_target_cleavage_hazard"`    // TOLERABLE_CLEAVAGE_BACKGROUND, CRITICAL_DOUBLE_STRAND_BREAK_SPIKE
-	OffTargetCleavageExcessPct     float64   `json:"off_target_cleavage_excess_pct"`
-	AntiCrisprAcrInfusionMandate   bool      `json:"anti_crispr_acr_infusion_mandate"`
-	ChemicalQuenchRinseMandate     bool      `json:"chemical_quench_rinse_mandate"`
-	AuditDigest                    string    `json:"audit_digest"`
-	EvaluatedAt                    time.Time `json:"evaluated_at"`
+	AssessmentID                 string    `json:"assessment_id"`
+	BioreactorBatchID            string    `json:"bioreactor_batch_id"`
+	GeneEditingPrecisionStatus   string    `json:"gene_editing_precision_status"` // MONOSPECIFIC_PRECISION_EDITING, OFF_TARGET_CLEAVAGE_WARNING, ONCOGENIC_TRANSLOCATION_HAZARD
+	OffTargetCleavageHazard      string    `json:"off_target_cleavage_hazard"`    // TOLERABLE_CLEAVAGE_BACKGROUND, CRITICAL_DOUBLE_STRAND_BREAK_SPIKE
+	OffTargetCleavageExcessPct   float64   `json:"off_target_cleavage_excess_pct"`
+	AntiCrisprAcrInfusionMandate bool      `json:"anti_crispr_acr_infusion_mandate"`
+	ChemicalQuenchRinseMandate   bool      `json:"chemical_quench_rinse_mandate"`
+	AuditDigest                  string    `json:"audit_digest"`
+	EvaluatedAt                  time.Time `json:"evaluated_at"`
 }
 
 // CRISPRPATMitigationAction models anti-CRISPR Acr protein dosing, chemical quenching, and phosphorothioate trim
@@ -182,21 +182,21 @@ func (v *CRISPRPATVault) GetCRISPRSafetyDossier(batchID string) (map[string]inte
 	}
 
 	dossier := map[string]interface{}{
-		"bioreactor_batch_id":         batchID,
-		"patient_therapy_id":          telem.PatientTherapyID,
-		"fda_cber_compliant":          asm.GeneEditingPrecisionStatus != "ONCOGENIC_TRANSLOCATION_HAZARD" || (hasAct && act.AvoidedGeneTherapyFailureUSD > 0),
-		"iso_20387_certified":         true,
-		"on_target_indel_pct":         telem.OnTargetIndelEfficiencyPct,
-		"off_target_cleavage_pct":     telem.OffTargetCleavageFrequencyPct,
-		"active_cas_hours":            telem.ActiveCasEnzymePersistenceHours,
-		"nanopore_read_depth":         telem.NanoporeCleavageReadDepth,
-		"precision_status":            asm.GeneEditingPrecisionStatus,
-		"hazard_status":               asm.OffTargetCleavageHazard,
-		"acr_dosing_mg_l":             0.0,
-		"quench_rinse_sec":            0.0,
-		"avoided_loss_usd":             0.0,
-		"audit_digest":                asm.AuditDigest,
-		"compiled_at":                 time.Now(),
+		"bioreactor_batch_id":     batchID,
+		"patient_therapy_id":      telem.PatientTherapyID,
+		"fda_cber_compliant":      asm.GeneEditingPrecisionStatus != "ONCOGENIC_TRANSLOCATION_HAZARD" || (hasAct && act.AvoidedGeneTherapyFailureUSD > 0),
+		"iso_20387_certified":     true,
+		"on_target_indel_pct":     telem.OnTargetIndelEfficiencyPct,
+		"off_target_cleavage_pct": telem.OffTargetCleavageFrequencyPct,
+		"active_cas_hours":        telem.ActiveCasEnzymePersistenceHours,
+		"nanopore_read_depth":     telem.NanoporeCleavageReadDepth,
+		"precision_status":        asm.GeneEditingPrecisionStatus,
+		"hazard_status":           asm.OffTargetCleavageHazard,
+		"acr_dosing_mg_l":         0.0,
+		"quench_rinse_sec":        0.0,
+		"avoided_loss_usd":        0.0,
+		"audit_digest":            asm.AuditDigest,
+		"compiled_at":             time.Now(),
 	}
 
 	if hasAct {

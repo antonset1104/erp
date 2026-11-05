@@ -102,7 +102,7 @@ func (m *Module) Seed(db *gorm.DB) error {
 	if jrnCount == 0 {
 		journals := []AccountJournal{
 			{Code: "INV", Name: "Customer Invoices", Type: "sale", DefaultAccountID: 7}, // Sales
-			{Code: "BILL", Name: "Vendor Bills", Type: "purchase", DefaultAccountID: 8},  // COGS/Expense
+			{Code: "BILL", Name: "Vendor Bills", Type: "purchase", DefaultAccountID: 8}, // COGS/Expense
 			{Code: "BNK", Name: "Bank BCA", Type: "bank", DefaultAccountID: 2},
 			{Code: "CSH", Name: "Cash", Type: "cash", DefaultAccountID: 1},
 			{Code: "MISC", Name: "Miscellaneous Operations", Type: "general", DefaultAccountID: 1},

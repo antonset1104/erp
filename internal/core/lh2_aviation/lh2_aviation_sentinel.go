@@ -14,18 +14,18 @@ import (
 
 // LH2TankTelemetry captures commercial aircraft liquid hydrogen fuel system dynamics under FAA 14 CFR Part 25 & SAE AS6858
 type LH2TankTelemetry struct {
-	TelemetryID               string    `json:"telemetry_id"`
-	TankID                    string    `json:"tank_id"`                     // "TANK-LH2-AIRCRAFT-A380-01"
-	AircraftTailNumber        string    `json:"aircraft_tail_number"`        // "N701-ZERO-E"
-	FlightPhase               string    `json:"flight_phase"`                 // "CRUISE_FL350"
-	LiquidHydrogenMassKg      float64   `json:"liquid_hydrogen_mass_kg"`      // e.g. 4250.0 kg
-	TankUllagePressureBar     float64   `json:"tank_ullage_pressure_bar"`     // e.g. 3.45 bar (safety relief setpoint 3.20 bar)
-	BulkHydrogenTempKelvin    float64   `json:"bulk_hydrogen_temp_kelvin"`    // e.g. 23.2 K (nominal subcooled 20.4 K)
-	VacuumJacketPressureMbar  float64   `json:"vacuum_jacket_pressure_mbar"`  // e.g. 0.085 mbar (loss-of-vacuum limit > 0.050 mbar)
-	BoilOffGasRateKgPerHr     float64   `json:"boil_off_gas_rate_kg_per_hr"`  // e.g. 18.5 kg/hr (nominal < 8.0 kg/hr)
-	CryoPumpInletNPSHMarginM  float64   `json:"cryo_pump_inlet_npsh_margin_m"` // e.g. 0.35 m (cavitation limit < 0.60 m)
-	OrthoToParaRatio          float64   `json:"ortho_to_para_ratio"`          // e.g. 0.045
-	RecordedAt                time.Time `json:"recorded_at"`
+	TelemetryID              string    `json:"telemetry_id"`
+	TankID                   string    `json:"tank_id"`                       // "TANK-LH2-AIRCRAFT-A380-01"
+	AircraftTailNumber       string    `json:"aircraft_tail_number"`          // "N701-ZERO-E"
+	FlightPhase              string    `json:"flight_phase"`                  // "CRUISE_FL350"
+	LiquidHydrogenMassKg     float64   `json:"liquid_hydrogen_mass_kg"`       // e.g. 4250.0 kg
+	TankUllagePressureBar    float64   `json:"tank_ullage_pressure_bar"`      // e.g. 3.45 bar (safety relief setpoint 3.20 bar)
+	BulkHydrogenTempKelvin   float64   `json:"bulk_hydrogen_temp_kelvin"`     // e.g. 23.2 K (nominal subcooled 20.4 K)
+	VacuumJacketPressureMbar float64   `json:"vacuum_jacket_pressure_mbar"`   // e.g. 0.085 mbar (loss-of-vacuum limit > 0.050 mbar)
+	BoilOffGasRateKgPerHr    float64   `json:"boil_off_gas_rate_kg_per_hr"`   // e.g. 18.5 kg/hr (nominal < 8.0 kg/hr)
+	CryoPumpInletNPSHMarginM float64   `json:"cryo_pump_inlet_npsh_margin_m"` // e.g. 0.35 m (cavitation limit < 0.60 m)
+	OrthoToParaRatio         float64   `json:"ortho_to_para_ratio"`           // e.g. 0.045
+	RecordedAt               time.Time `json:"recorded_at"`
 }
 
 // LH2TankAssessment evaluates vacuum insulation loss, boil-off pressure rise, and cryogenic pump cavitation
@@ -33,8 +33,8 @@ type LH2TankAssessment struct {
 	AssessmentID                    string    `json:"assessment_id"`
 	TankID                          string    `json:"tank_id"`
 	SubcoolingMarginKelvin          float64   `json:"subcooling_margin_kelvin"`
-	VacuumInsulationStatus          string    `json:"vacuum_insulation_status"`           // "HIGH_VACUUM_OPTIMAL", "PERLITE_OUTGASSING_WARNING", "CRITICAL_VACUUM_LOSS_THERMAL_INCURSION"
-	CryoPumpCavitationRisk          string    `json:"cryo_pump_cavitation_risk"`           // "HYDRAULIC_NPSH_SAFE", "ELEVATED_VAPOR_PRESSURE_WARNING", "CRYOPUMP_VAPOR_LOCK_CAVITATION"
+	VacuumInsulationStatus          string    `json:"vacuum_insulation_status"`  // "HIGH_VACUUM_OPTIMAL", "PERLITE_OUTGASSING_WARNING", "CRITICAL_VACUUM_LOSS_THERMAL_INCURSION"
+	CryoPumpCavitationRisk          string    `json:"cryo_pump_cavitation_risk"` // "HYDRAULIC_NPSH_SAFE", "ELEVATED_VAPOR_PRESSURE_WARNING", "CRYOPUMP_VAPOR_LOCK_CAVITATION"
 	BoilOffReliquefactionMandate    bool      `json:"boil_off_reliquefaction_mandate"`
 	AntiCavitationSubcoolingMandate bool      `json:"anti_cavitation_subcooling_mandate"`
 	AuditDigest                     string    `json:"audit_digest"`
@@ -43,13 +43,13 @@ type LH2TankAssessment struct {
 
 // LH2MitigationAction models BOG reliquefaction compressor activation, inerting nitrogen purge, and cryopump speed trim
 type LH2MitigationAction struct {
-	ActionID                         string    `json:"action_id"`
-	TankID                           string    `json:"tank_id"`
-	CommandedReliquefactionFlowKgHr  float64   `json:"commanded_reliquefaction_flow_kg_hr"`
-	NitrogenInertingSweepRateNm3Hr   float64   `json:"nitrogen_inerting_sweep_rate_nm3_hr"`
-	PumpSpeedThrottlingPct           float64   `json:"pump_speed_throttling_pct"`
-	AvoidedAircraftLossUSD           float64   `json:"avoided_aircraft_loss_usd"`
-	ActionTimestamp                  time.Time `json:"action_timestamp"`
+	ActionID                        string    `json:"action_id"`
+	TankID                          string    `json:"tank_id"`
+	CommandedReliquefactionFlowKgHr float64   `json:"commanded_reliquefaction_flow_kg_hr"`
+	NitrogenInertingSweepRateNm3Hr  float64   `json:"nitrogen_inerting_sweep_rate_nm3_hr"`
+	PumpSpeedThrottlingPct          float64   `json:"pump_speed_throttling_pct"`
+	AvoidedAircraftLossUSD          float64   `json:"avoided_aircraft_loss_usd"`
+	ActionTimestamp                 time.Time `json:"action_timestamp"`
 }
 
 // LH2Vault thread-safe in-memory store
@@ -155,7 +155,7 @@ func (v *LH2Vault) TriggerReliquefactionAndAntiCavitation(tankID string) (LH2Mit
 
 	if asm.BoilOffReliquefactionMandate {
 		reliqFlow = 22.5 // command onboard cryogenic BOG reliquefaction compressor at 22.5 kg/hr
-		n2Sweep = 12.0    // 12.0 Nm3/hr nitrogen sweep gas across vent shroud to inert overboard exhaust
+		n2Sweep = 12.0   // 12.0 Nm3/hr nitrogen sweep gas across vent shroud to inert overboard exhaust
 	}
 	if asm.AntiCavitationSubcoolingMandate {
 		pumpThrottle = -15.0 // throttle cryogenic boost pump by 15% to suppress vapor inception at impeller eye

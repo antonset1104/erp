@@ -13,53 +13,53 @@ import (
 
 // DynamicPriceRequest defines parameters to dynamically calculate optimal selling price.
 type DynamicPriceRequest struct {
-	SKU                    string  `json:"sku"`
-	ProductName            string  `json:"product_name"`
-	BasePriceIDR           float64 `json:"base_price_idr"`
-	CurrentCostIDR         float64 `json:"current_cost_idr"`
-	MinMarginPercent       float64 `json:"min_margin_percent"`
-	CompetitorPriceIDR     float64 `json:"competitor_price_idr"`
-	InventoryDaysOfSupply  float64 `json:"inventory_days_of_supply"`
-	ExpiryDaysLeft         float64 `json:"expiry_days_left"`
-	PriceElasticityDemand  float64 `json:"price_elasticity_demand"`
-	SalesVelocityWeekly    float64 `json:"sales_velocity_weekly"`
+	SKU                   string  `json:"sku"`
+	ProductName           string  `json:"product_name"`
+	BasePriceIDR          float64 `json:"base_price_idr"`
+	CurrentCostIDR        float64 `json:"current_cost_idr"`
+	MinMarginPercent      float64 `json:"min_margin_percent"`
+	CompetitorPriceIDR    float64 `json:"competitor_price_idr"`
+	InventoryDaysOfSupply float64 `json:"inventory_days_of_supply"`
+	ExpiryDaysLeft        float64 `json:"expiry_days_left"`
+	PriceElasticityDemand float64 `json:"price_elasticity_demand"`
+	SalesVelocityWeekly   float64 `json:"sales_velocity_weekly"`
 }
 
 // DynamicPriceEvaluation holds the repriced outcome and guard rails.
 type DynamicPriceEvaluation struct {
-	SKU                    string  `json:"sku"`
-	ProductName            string  `json:"product_name"`
-	BasePriceIDR           float64 `json:"base_price_idr"`
-	CurrentCostIDR         float64 `json:"current_cost_idr"`
-	FloorPriceIDR          float64 `json:"floor_price_idr"`
+	SKU                      string  `json:"sku"`
+	ProductName              string  `json:"product_name"`
+	BasePriceIDR             float64 `json:"base_price_idr"`
+	CurrentCostIDR           float64 `json:"current_cost_idr"`
+	FloorPriceIDR            float64 `json:"floor_price_idr"`
 	SuggestedDynamicPriceIDR float64 `json:"suggested_dynamic_price_idr"`
-	AchievedMarginPercent  float64 `json:"achieved_margin_percent"`
-	MarginGuardEnforced    bool    `json:"margin_guard_enforced"`
-	PriceAdjustmentDelta   float64 `json:"price_adjustment_delta"`
-	AdjustmentPercent      float64 `json:"adjustment_percent"`
-	ProjectedVolumeGainPct float64 `json:"projected_volume_gain_pct"`
-	RepriceReason          string  `json:"reprice_reason"`
-	OmnichannelSyncStatus  string  `json:"omnichannel_sync_status"`
-	EvaluatedAt            string  `json:"evaluated_at"`
+	AchievedMarginPercent    float64 `json:"achieved_margin_percent"`
+	MarginGuardEnforced      bool    `json:"margin_guard_enforced"`
+	PriceAdjustmentDelta     float64 `json:"price_adjustment_delta"`
+	AdjustmentPercent        float64 `json:"adjustment_percent"`
+	ProjectedVolumeGainPct   float64 `json:"projected_volume_gain_pct"`
+	RepriceReason            string  `json:"reprice_reason"`
+	OmnichannelSyncStatus    string  `json:"omnichannel_sync_status"`
+	EvaluatedAt              string  `json:"evaluated_at"`
 }
 
 // OrderLineVerification defines a single line on a customer sales order.
 type OrderLineVerification struct {
-	SKU            string  `json:"sku"`
-	ProductName    string  `json:"product_name"`
-	Quantity       float64 `json:"quantity"`
-	OfferedPrice   float64 `json:"offered_price"`
-	UnitCOGS       float64 `json:"unit_cogs"`
+	SKU             string  `json:"sku"`
+	ProductName     string  `json:"product_name"`
+	Quantity        float64 `json:"quantity"`
+	OfferedPrice    float64 `json:"offered_price"`
+	UnitCOGS        float64 `json:"unit_cogs"`
 	DiscountPercent float64 `json:"discount_percent"`
 }
 
 // OrderMarginVerificationRequest defines the sales order payload to audit against margin policy.
 type OrderMarginVerificationRequest struct {
-	OrderID             string                  `json:"order_id"`
-	CustomerName        string                  `json:"customer_name"`
-	CustomerTier        string                  `json:"customer_tier"`
-	MinPolicyMarginPct  float64                 `json:"min_policy_margin_pct"`
-	Items               []OrderLineVerification `json:"items"`
+	OrderID            string                  `json:"order_id"`
+	CustomerName       string                  `json:"customer_name"`
+	CustomerTier       string                  `json:"customer_tier"`
+	MinPolicyMarginPct float64                 `json:"min_policy_margin_pct"`
+	Items              []OrderLineVerification `json:"items"`
 }
 
 // OrderMarginVerificationResult represents the compliance audit outcome.
@@ -147,7 +147,7 @@ func EvaluateDynamicPriceLogic(req DynamicPriceRequest) (*DynamicPriceEvaluation
 	achievedMargin := math.Round(((targetPrice-req.CurrentCostIDR)/targetPrice)*10000) / 100.0
 	delta := targetPrice - req.BasePriceIDR
 	adjPct := math.Round((delta/req.BasePriceIDR)*10000) / 100.0
-	volGainPct := math.Round((-adjPct * math.Abs(req.PriceElasticityDemand))*100) / 100.0
+	volGainPct := math.Round((-adjPct*math.Abs(req.PriceElasticityDemand))*100) / 100.0
 
 	eval := DynamicPriceEvaluation{
 		SKU:                      req.SKU,

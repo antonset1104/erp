@@ -15,41 +15,41 @@ import (
 // EVTOLFlightTelemetry captures urban air mobility electric flight parameters under FAA Part 36 & EASA SC-VTOL-01
 type EVTOLFlightTelemetry struct {
 	TelemetryID               string    `json:"telemetry_id"`
-	FlightID                  string    `json:"flight_id"`                   // "FLIGHT-EVTOL-SKYTAXI-01"
-	AircraftTailID            string    `json:"aircraft_tail_id"`            // "N902VT-ARCHER-MIDNIGHT"
-	CorridorID                string    `json:"corridor_id"`                 // "UAM-CORRIDOR-MANHATTAN-JFK"
-	AltitudeMetersAGL         float64   `json:"altitude_meters_agl"`         // e.g. 420.0 m AGL
-	AirspeedKnots             float64   `json:"airspeed_knots"`              // e.g. 115.0 kts
-	DistributedRotorRPM       float64   `json:"distributed_rotor_rpm"`       // e.g. 1450.0 RPM
-	RotorBladePhaseOffsetDeg  float64   `json:"rotor_blade_phase_offset_deg"`// e.g. 0.0 deg (baseline)
-	MeasuredAcousticNoiseDBA  float64   `json:"measured_acoustic_noise_dba"` // e.g. 68.5 dBA (EPA community limit < 65.0 dBA)
-	BladeVortexInteractionBVI float64   `json:"blade_vortex_interaction_bvi"`// Severity index 0.0 - 1.0 (e.g. 0.82)
-	VertiportWindShearKnots   float64   `json:"vertiport_wind_shear_knots"`  // Microburst / downdraft e.g. 18.5 kts
+	FlightID                  string    `json:"flight_id"`                    // "FLIGHT-EVTOL-SKYTAXI-01"
+	AircraftTailID            string    `json:"aircraft_tail_id"`             // "N902VT-ARCHER-MIDNIGHT"
+	CorridorID                string    `json:"corridor_id"`                  // "UAM-CORRIDOR-MANHATTAN-JFK"
+	AltitudeMetersAGL         float64   `json:"altitude_meters_agl"`          // e.g. 420.0 m AGL
+	AirspeedKnots             float64   `json:"airspeed_knots"`               // e.g. 115.0 kts
+	DistributedRotorRPM       float64   `json:"distributed_rotor_rpm"`        // e.g. 1450.0 RPM
+	RotorBladePhaseOffsetDeg  float64   `json:"rotor_blade_phase_offset_deg"` // e.g. 0.0 deg (baseline)
+	MeasuredAcousticNoiseDBA  float64   `json:"measured_acoustic_noise_dba"`  // e.g. 68.5 dBA (EPA community limit < 65.0 dBA)
+	BladeVortexInteractionBVI float64   `json:"blade_vortex_interaction_bvi"` // Severity index 0.0 - 1.0 (e.g. 0.82)
+	VertiportWindShearKnots   float64   `json:"vertiport_wind_shear_knots"`   // Microburst / downdraft e.g. 18.5 kts
 	RecordedAt                time.Time `json:"recorded_at"`
 }
 
 // UAMAcousticAssessment models acoustic signature pressure and vertiport approach safety
 type UAMAcousticAssessment struct {
-	AssessmentID                     string    `json:"assessment_id"`
-	FlightID                         string    `json:"flight_id"`
-	AeroacousticNoiseMarginDBA       float64   `json:"aeroacoustic_noise_margin_dba"` // Measured - Limit (positive = breach)
-	AcousticExceedanceSeverityLevel  string    `json:"acoustic_exceedance_severity_level"` // "COMMUNITY_COMPLIANT_QUIET", "ELEVATED_BVI_ACOUSTIC_WARNING", "CRITICAL_RESIDENTIAL_NOISE_CURFEW_BREACH"
-	WindShearStallHazardLevel        string    `json:"wind_shear_stall_hazard_level"`       // "NOMINAL_SMOOTH_AIR", "ELEVATED_GUST_WARNING", "CRITICAL_VERTIPORT_MICROBURST_HAZARD"
-	PhaseCancellationRequired        bool      `json:"phase_cancellation_required"`
-	SteepGlideApproachMandate        bool      `json:"steep_glide_approach_mandate"`
-	AuditDigest                      string    `json:"audit_digest"`
-	EvaluatedAt                      time.Time `json:"evaluated_at"`
+	AssessmentID                    string    `json:"assessment_id"`
+	FlightID                        string    `json:"flight_id"`
+	AeroacousticNoiseMarginDBA      float64   `json:"aeroacoustic_noise_margin_dba"`      // Measured - Limit (positive = breach)
+	AcousticExceedanceSeverityLevel string    `json:"acoustic_exceedance_severity_level"` // "COMMUNITY_COMPLIANT_QUIET", "ELEVATED_BVI_ACOUSTIC_WARNING", "CRITICAL_RESIDENTIAL_NOISE_CURFEW_BREACH"
+	WindShearStallHazardLevel       string    `json:"wind_shear_stall_hazard_level"`      // "NOMINAL_SMOOTH_AIR", "ELEVATED_GUST_WARNING", "CRITICAL_VERTIPORT_MICROBURST_HAZARD"
+	PhaseCancellationRequired       bool      `json:"phase_cancellation_required"`
+	SteepGlideApproachMandate       bool      `json:"steep_glide_approach_mandate"`
+	AuditDigest                     string    `json:"audit_digest"`
+	EvaluatedAt                     time.Time `json:"evaluated_at"`
 }
 
 // EVTOLAcousticGlideControlAction models rotor phase offset desynchronization and steep glide slope modulation
 type EVTOLAcousticGlideControlAction struct {
-	ActionID                   string    `json:"action_id"`
-	FlightID                   string    `json:"flight_id"`
-	ModulatedPhaseOffsetDeg    float64   `json:"modulated_phase_offset_deg"`    // e.g. 15.0 deg
-	ModulatedGlideSlopeDeg     float64   `json:"modulated_glide_slope_deg"`     // e.g. 7.5 deg steep descent
-	NoiseAttenuationDBA        float64   `json:"noise_attenuation_dba"`         // e.g. -7.5 dBA
-	AvoidedCurfewFineAndLossUSD float64  `json:"avoided_curfew_fine_and_loss_usd"` // Avoided $22M USD operating ban and vertiport crash
-	ActionTimestamp            time.Time `json:"action_timestamp"`
+	ActionID                    string    `json:"action_id"`
+	FlightID                    string    `json:"flight_id"`
+	ModulatedPhaseOffsetDeg     float64   `json:"modulated_phase_offset_deg"`       // e.g. 15.0 deg
+	ModulatedGlideSlopeDeg      float64   `json:"modulated_glide_slope_deg"`        // e.g. 7.5 deg steep descent
+	NoiseAttenuationDBA         float64   `json:"noise_attenuation_dba"`            // e.g. -7.5 dBA
+	AvoidedCurfewFineAndLossUSD float64   `json:"avoided_curfew_fine_and_loss_usd"` // Avoided $22M USD operating ban and vertiport crash
+	ActionTimestamp             time.Time `json:"action_timestamp"`
 }
 
 // EVTOLVault thread-safe in-memory store

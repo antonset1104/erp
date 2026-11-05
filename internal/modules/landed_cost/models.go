@@ -32,22 +32,22 @@ const (
 
 // StockLandedCost represents standard enterprise stock.landed.cost (Alokasi Biaya Tambahan Pengadaan & Impor)
 type StockLandedCost struct {
-	ID               uint            `gorm:"primaryKey" json:"id"`
-	CreatedAt        time.Time       `json:"created_at"`
-	UpdatedAt        time.Time       `json:"updated_at"`
-	DeletedAt        gorm.DeletedAt  `gorm:"index" json:"-"`
-	Name             string          `gorm:"type:varchar(64);uniqueIndex;not null" json:"name"` // e.g. LC/2026/0001
-	Date             string          `gorm:"type:varchar(32);not null" json:"date"`             // Tanggal alokasi
-	PickingID        uint            `gorm:"index;not null" json:"picking_id"`                  // Penerimaan barang terkait (Incoming Receipt)
-	Picking          *stock.StockPicking `gorm:"foreignKey:PickingID" json:"picking,omitempty"`
-	VendorBillID     *uint           `json:"vendor_bill_id,omitempty"`                          // Tagihan biaya vendor eksternal (optional)
-	AccountMoveID    *uint           `json:"account_move_id,omitempty"`                         // Jurnal penyesuaian nilai persediaan (GL Entry)
+	ID               uint                 `gorm:"primaryKey" json:"id"`
+	CreatedAt        time.Time            `json:"created_at"`
+	UpdatedAt        time.Time            `json:"updated_at"`
+	DeletedAt        gorm.DeletedAt       `gorm:"index" json:"-"`
+	Name             string               `gorm:"type:varchar(64);uniqueIndex;not null" json:"name"` // e.g. LC/2026/0001
+	Date             string               `gorm:"type:varchar(32);not null" json:"date"`             // Tanggal alokasi
+	PickingID        uint                 `gorm:"index;not null" json:"picking_id"`                  // Penerimaan barang terkait (Incoming Receipt)
+	Picking          *stock.StockPicking  `gorm:"foreignKey:PickingID" json:"picking,omitempty"`
+	VendorBillID     *uint                `json:"vendor_bill_id,omitempty"`  // Tagihan biaya vendor eksternal (optional)
+	AccountMoveID    *uint                `json:"account_move_id,omitempty"` // Jurnal penyesuaian nilai persediaan (GL Entry)
 	AccountMove      *account.AccountMove `gorm:"foreignKey:AccountMoveID" json:"account_move,omitempty"`
-	AccountJournalID uint            `gorm:"default:5" json:"account_journal_id"`               // Default Miscellaneous Journal
-	State            LandedCostState `gorm:"type:varchar(32);default:'draft';index" json:"state"`
-	CompanyID        uint            `gorm:"default:1" json:"company_id"`
-	Description      string          `gorm:"type:text" json:"description"`
-	TotalAmount      float64         `gorm:"type:decimal(15,2);default:0" json:"total_amount"` // Total akumulasi biaya landed
+	AccountJournalID uint                 `gorm:"default:5" json:"account_journal_id"` // Default Miscellaneous Journal
+	State            LandedCostState      `gorm:"type:varchar(32);default:'draft';index" json:"state"`
+	CompanyID        uint                 `gorm:"default:1" json:"company_id"`
+	Description      string               `gorm:"type:text" json:"description"`
+	TotalAmount      float64              `gorm:"type:decimal(15,2);default:0" json:"total_amount"` // Total akumulasi biaya landed
 
 	CostLines      []StockLandedCostLine          `gorm:"foreignKey:CostID" json:"cost_lines"`
 	ValuationLines []StockValuationAdjustmentLine `gorm:"foreignKey:CostID" json:"valuation_lines"`
@@ -91,9 +91,9 @@ type StockValuationAdjustmentLine struct {
 
 // DTOs
 type CreateLandedCostRequest struct {
-	Date        string                 `json:"date"`
-	PickingID   uint                   `json:"picking_id"`
-	Description string                 `json:"description"`
+	Date        string                  `json:"date"`
+	PickingID   uint                    `json:"picking_id"`
+	Description string                  `json:"description"`
 	CostLines   []CreateCostLineRequest `json:"cost_lines"`
 }
 
@@ -113,13 +113,13 @@ type LandedCostStats struct {
 }
 
 type AILandedCostReport struct {
-	Summary              string            `json:"summary"`
-	TotalAdditionalCost  float64           `json:"total_additional_cost"`
-	OverallOverheadPct   float64           `json:"overall_overhead_pct"`
-	ProductImpacts       []AIProductImpact `json:"product_impacts"`
-	Recommendations      []string          `json:"recommendations"`
-	RiskLevel            string            `json:"risk_level"`
-	AIProvider           string            `json:"ai_provider"`
+	Summary             string            `json:"summary"`
+	TotalAdditionalCost float64           `json:"total_additional_cost"`
+	OverallOverheadPct  float64           `json:"overall_overhead_pct"`
+	ProductImpacts      []AIProductImpact `json:"product_impacts"`
+	Recommendations     []string          `json:"recommendations"`
+	RiskLevel           string            `json:"risk_level"`
+	AIProvider          string            `json:"ai_provider"`
 }
 
 type AIProductImpact struct {

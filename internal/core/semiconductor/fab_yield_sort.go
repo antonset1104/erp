@@ -14,55 +14,55 @@ import (
 
 // CleanroomMetrology captures continuous environmental cleanliness under ISO 14644-1 Class 1
 type CleanroomMetrology struct {
-	MeasurementID                string    `json:"measurement_id"`
-	CleanroomBayID               string    `json:"cleanroom_bay_id"` // e.g. "BAY-LITHO-EUV-01"
-	FabSiteID                    string    `json:"fab_site_id"`
-	ISOClassLevel                int       `json:"iso_class_level"` // 1 = ISO Class 1 (max 10 particles/m3 >= 0.1um)
-	ParticleCount01MicronPerM3   float64   `json:"particle_count_0_1_micron_per_m3"`
-	ParticleCount05MicronPerM3   float64   `json:"particle_count_0_5_micron_per_m3"`
-	TemperatureC                 float64   `json:"temperature_c"`
-	RelativeHumidityPct          float64   `json:"relative_humidity_pct"`
-	AirVelocityMPS               float64   `json:"air_velocity_mps"` // Laminar flow ~0.45 m/s
-	Timestamp                    time.Time `json:"timestamp"`
+	MeasurementID              string    `json:"measurement_id"`
+	CleanroomBayID             string    `json:"cleanroom_bay_id"` // e.g. "BAY-LITHO-EUV-01"
+	FabSiteID                  string    `json:"fab_site_id"`
+	ISOClassLevel              int       `json:"iso_class_level"` // 1 = ISO Class 1 (max 10 particles/m3 >= 0.1um)
+	ParticleCount01MicronPerM3 float64   `json:"particle_count_0_1_micron_per_m3"`
+	ParticleCount05MicronPerM3 float64   `json:"particle_count_0_5_micron_per_m3"`
+	TemperatureC               float64   `json:"temperature_c"`
+	RelativeHumidityPct        float64   `json:"relative_humidity_pct"`
+	AirVelocityMPS             float64   `json:"air_velocity_mps"` // Laminar flow ~0.45 m/s
+	Timestamp                  time.Time `json:"timestamp"`
 }
 
 // WaferYieldCalculation models Murphy-Seeds microchip yield and defect density D0
 type WaferYieldCalculation struct {
-	YieldID                      string    `json:"yield_id"`
-	WaferLotID                   string    `json:"wafer_lot_id"`
-	ProductFamilySKU             string    `json:"product_family_sku"`
-	WaferDiameterMM              float64   `json:"wafer_diameter_mm"` // 300mm standard
-	GrossDieCountPerWafer        int       `json:"gross_die_count_per_wafer"`
-	DieAreaMM2                   float64   `json:"die_area_mm2"`
-	DefectDensityD0_PerCM2       float64   `json:"defect_density_d0_per_cm2"` // Random defect density D0
-	MurphyYieldPct               float64   `json:"murphy_yield_pct"`          // Modeled yield %
-	ProjectedGoodDieCount        int       `json:"projected_good_die_count"`
-	CleanroomExcursionDetected   bool      `json:"cleanroom_excursion_detected"`
-	WaferQuarantineRecommended   bool      `json:"wafer_quarantine_recommended"`
-	SEMI_ComplianceDigest        string    `json:"semi_compliance_digest"`
-	EvaluatedAt                  time.Time `json:"evaluated_at"`
+	YieldID                    string    `json:"yield_id"`
+	WaferLotID                 string    `json:"wafer_lot_id"`
+	ProductFamilySKU           string    `json:"product_family_sku"`
+	WaferDiameterMM            float64   `json:"wafer_diameter_mm"` // 300mm standard
+	GrossDieCountPerWafer      int       `json:"gross_die_count_per_wafer"`
+	DieAreaMM2                 float64   `json:"die_area_mm2"`
+	DefectDensityD0_PerCM2     float64   `json:"defect_density_d0_per_cm2"` // Random defect density D0
+	MurphyYieldPct             float64   `json:"murphy_yield_pct"`          // Modeled yield %
+	ProjectedGoodDieCount      int       `json:"projected_good_die_count"`
+	CleanroomExcursionDetected bool      `json:"cleanroom_excursion_detected"`
+	WaferQuarantineRecommended bool      `json:"wafer_quarantine_recommended"`
+	SEMI_ComplianceDigest      string    `json:"semi_compliance_digest"`
+	EvaluatedAt                time.Time `json:"evaluated_at"`
 }
 
 // DieSortBinningManifest models parametric tester die categorization and revenue optimization
 type DieSortBinningManifest struct {
-	ManifestID                   string    `json:"manifest_id"`
-	WaferLotID                   string    `json:"wafer_lot_id"`
-	TotalTestedDieCount          int       `json:"total_tested_die_count"`
-	Bin1PrimeCount               int       `json:"bin_1_prime_count"`        // Highest clock speed / peak pricing
-	Bin2LowVoltageCount          int       `json:"bin_2_low_voltage_count"`   // Ultra-low power mobile bin
-	Bin3StandardCount            int       `json:"bin_3_standard_count"`      // Standard mainstream bin
-	Bin7RejectDefectiveCount     int       `json:"bin_7_reject_defective_count"`
-	WaferPackYieldPct            float64   `json:"wafer_pack_yield_pct"`
-	CommercialValuationUSD       float64   `json:"commercial_valuation_usd"`
-	BinningDate                  time.Time `json:"binning_date"`
+	ManifestID               string    `json:"manifest_id"`
+	WaferLotID               string    `json:"wafer_lot_id"`
+	TotalTestedDieCount      int       `json:"total_tested_die_count"`
+	Bin1PrimeCount           int       `json:"bin_1_prime_count"`       // Highest clock speed / peak pricing
+	Bin2LowVoltageCount      int       `json:"bin_2_low_voltage_count"` // Ultra-low power mobile bin
+	Bin3StandardCount        int       `json:"bin_3_standard_count"`    // Standard mainstream bin
+	Bin7RejectDefectiveCount int       `json:"bin_7_reject_defective_count"`
+	WaferPackYieldPct        float64   `json:"wafer_pack_yield_pct"`
+	CommercialValuationUSD   float64   `json:"commercial_valuation_usd"`
+	BinningDate              time.Time `json:"binning_date"`
 }
 
 // SemiconductorFabVault thread-safe in-memory store
 type SemiconductorFabVault struct {
-	mu           sync.RWMutex
-	metrologies  map[string]CleanroomMetrology
-	yields       map[string]WaferYieldCalculation
-	manifests    map[string]DieSortBinningManifest
+	mu          sync.RWMutex
+	metrologies map[string]CleanroomMetrology
+	yields      map[string]WaferYieldCalculation
+	manifests   map[string]DieSortBinningManifest
 }
 
 // Global instance
@@ -277,8 +277,8 @@ func RegisterSemiconductorRoutes(r *gin.RouterGroup) {
 
 		semiGroup.POST("/execute-die-sort-binning", func(c *gin.Context) {
 			var body struct {
-				WaferLotID         string `json:"wafer_lot_id"`
-				TotalTestedDieCount int   `json:"total_tested_die_count"`
+				WaferLotID          string `json:"wafer_lot_id"`
+				TotalTestedDieCount int    `json:"total_tested_die_count"`
 			}
 			if err := c.ShouldBindJSON(&body); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

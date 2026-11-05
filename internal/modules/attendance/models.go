@@ -10,11 +10,11 @@ import (
 // Shift corresponds to standard enterprise resource.calendar / work shift schedule
 type Shift struct {
 	models.ModelBase
-	Name               string  `gorm:"size:128;not null;index" json:"name"` // e.g. "Shift Reguler (08:30 - 17:30)"
-	Code               string  `gorm:"size:32;not null;index" json:"code"`  // e.g. "REGULAR", "NIGHT", "WFH"
-	StartTime          string  `gorm:"size:16;not null" json:"start_time"`  // "08:30"
-	EndTime            string  `gorm:"size:16;not null" json:"end_time"`    // "17:30"
-	StandardHours      float64 `gorm:"default:8.0" json:"standard_hours"`   // Jam kerja standar di luar istirahat
+	Name               string  `gorm:"size:128;not null;index" json:"name"`    // e.g. "Shift Reguler (08:30 - 17:30)"
+	Code               string  `gorm:"size:32;not null;index" json:"code"`     // e.g. "REGULAR", "NIGHT", "WFH"
+	StartTime          string  `gorm:"size:16;not null" json:"start_time"`     // "08:30"
+	EndTime            string  `gorm:"size:16;not null" json:"end_time"`       // "17:30"
+	StandardHours      float64 `gorm:"default:8.0" json:"standard_hours"`      // Jam kerja standar di luar istirahat
 	GracePeriodMinutes int     `gorm:"default:15" json:"grace_period_minutes"` // Toleransi keterlambatan menit
 	IsFlexible         bool    `gorm:"default:false" json:"is_flexible"`
 	Color              string  `gorm:"size:32;default:'#3b82f6'" json:"color"`
@@ -48,15 +48,15 @@ type Attendance struct {
 	OutLatitude  float64 `json:"out_latitude,omitempty"`
 	OutLongitude float64 `json:"out_longitude,omitempty"`
 	OutAddress   string  `gorm:"size:255" json:"out_address,omitempty"`
-	Device       string  `gorm:"size:128" json:"device,omitempty"` // User Agent / Kiosk terminal
+	Device       string  `gorm:"size:128" json:"device,omitempty"`    // User Agent / Kiosk terminal
 	IPAddress    string  `gorm:"size:64" json:"ip_address,omitempty"` // Cloudflare CF-Connecting-IP
-	Country      string  `gorm:"size:32" json:"country,omitempty"` // Cloudflare CF-IPCountry
-	CFRay        string  `gorm:"size:64" json:"cf_ray,omitempty"` // Cloudflare Ray ID
+	Country      string  `gorm:"size:32" json:"country,omitempty"`    // Cloudflare CF-IPCountry
+	CFRay        string  `gorm:"size:64" json:"cf_ray,omitempty"`     // Cloudflare Ray ID
 
-	Note             string `gorm:"type:text" json:"note,omitempty"`
-	AnomalyFlag      bool   `gorm:"default:false;index" json:"anomaly_flag"`
-	AnomalyReason    string `gorm:"size:255" json:"anomaly_reason,omitempty"`
-	SyncedToPayroll  bool   `gorm:"default:false;index" json:"synced_to_payroll"`
+	Note            string `gorm:"type:text" json:"note,omitempty"`
+	AnomalyFlag     bool   `gorm:"default:false;index" json:"anomaly_flag"`
+	AnomalyReason   string `gorm:"size:255" json:"anomaly_reason,omitempty"`
+	SyncedToPayroll bool   `gorm:"default:false;index" json:"synced_to_payroll"`
 }
 
 func (Attendance) TableName() string {
@@ -99,12 +99,12 @@ type AttendanceFilter struct {
 
 // AttendanceStats provides executive analytics for attendance
 type AttendanceStats struct {
-	TotalToday          int64   `json:"total_today"`
-	CurrentlyCheckedIn  int64   `json:"currently_checked_in"`
-	LateToday           int64   `json:"late_today"`
-	TotalOvertimeHours  float64 `json:"total_overtime_hours"`
-	AverageWorkedHours  float64 `json:"average_worked_hours"`
-	AnomalyCount        int64   `json:"anomaly_count"`
+	TotalToday         int64   `json:"total_today"`
+	CurrentlyCheckedIn int64   `json:"currently_checked_in"`
+	LateToday          int64   `json:"late_today"`
+	TotalOvertimeHours float64 `json:"total_overtime_hours"`
+	AverageWorkedHours float64 `json:"average_worked_hours"`
+	AnomalyCount       int64   `json:"anomaly_count"`
 }
 
 // SyncPayrollRequest provides input for syncing attendance overtime & late penalties to employee payslip

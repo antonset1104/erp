@@ -18,7 +18,7 @@ type MoltenSaltStorageTelemetry struct {
 	StorageTankID              string    `json:"storage_tank_id"`                 // "TANK-CSP-SALT-HOT-50KT-01"
 	PlantID                    string    `json:"plant_id"`                        // "CSP-NOOR-ATACAMA-350MW"
 	SaltMassTons               float64   `json:"salt_mass_tons"`                  // e.g. 28500.0 tons
-	SaltBulkTemperatureC      float64   `json:"salt_bulk_temperature_c"`         // e.g. 238.5°C (freezing point ~221°C)
+	SaltBulkTemperatureC       float64   `json:"salt_bulk_temperature_c"`         // e.g. 238.5°C (freezing point ~221°C)
 	BoundaryLayerPipeWallTempC float64   `json:"boundary_layer_pipe_wall_temp_c"` // e.g. 224.0°C (near solidification)
 	NaNO3Fraction              float64   `json:"nano3_fraction"`                  // 0.60
 	KNO3Fraction               float64   `json:"kno3_fraction"`                   // 0.40
@@ -44,12 +44,12 @@ type FreezePluggingAssessment struct {
 
 // SaltTraceHeatingDrainbackAction models automated 450 kW trace-heating and emergency dump-tank drainback
 type SaltTraceHeatingDrainbackAction struct {
-	ActionID                            string    `json:"action_id"`
-	StorageTankID                       string    `json:"storage_tank_id"`
-	ImpedanceHeatingDutyKW              float64   `json:"impedance_heating_duty_kw"`
-	DrainbackValveOpenedPct             float64   `json:"drainback_valve_opened_pct"`
-	AvoidedSolidificationDamageLossUSD  float64   `json:"avoided_solidification_damage_loss_usd"` // Avoided $24M USD crystallized pipe burst and weeks of outage
-	ActionTimestamp                     time.Time `json:"action_timestamp"`
+	ActionID                           string    `json:"action_id"`
+	StorageTankID                      string    `json:"storage_tank_id"`
+	ImpedanceHeatingDutyKW             float64   `json:"impedance_heating_duty_kw"`
+	DrainbackValveOpenedPct            float64   `json:"drainback_valve_opened_pct"`
+	AvoidedSolidificationDamageLossUSD float64   `json:"avoided_solidification_damage_loss_usd"` // Avoided $24M USD crystallized pipe burst and weeks of outage
+	ActionTimestamp                    time.Time `json:"action_timestamp"`
 }
 
 // MoltenSaltVault thread-safe in-memory store
@@ -74,7 +74,7 @@ func init() {
 		StorageTankID:              "TANK-CSP-SALT-HOT-50KT-01",
 		PlantID:                    "CSP-NOOR-ATACAMA-350MW",
 		SaltMassTons:               28500.0,
-		SaltBulkTemperatureC:      236.0,
+		SaltBulkTemperatureC:       236.0,
 		BoundaryLayerPipeWallTempC: 223.5, // Only 2.5°C above eutectic freeze point!
 		NaNO3Fraction:              0.60,
 		KNO3Fraction:               0.40,
@@ -182,13 +182,13 @@ func (v *MoltenSaltVault) GetMoltenSaltSafetyDossier(tankID string) (map[string]
 	act, hasAct := v.actions[tankID]
 
 	dossier := map[string]interface{}{
-		"storage_tank_id":       tankID,
-		"has_salt_telemetry":    hasTel,
-		"has_freeze_assessment": hasAssess,
-		"has_heating_action":    hasAct,
+		"storage_tank_id":        tankID,
+		"has_salt_telemetry":     hasTel,
+		"has_freeze_assessment":  hasAssess,
+		"has_heating_action":     hasAct,
 		"asme_section_viii_div2": true,
-		"astm_d6800_certified":  true,
-		"compiled_at":           time.Now(),
+		"astm_d6800_certified":   true,
+		"compiled_at":            time.Now(),
 	}
 
 	if hasTel {

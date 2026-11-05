@@ -15,7 +15,7 @@ type TravelBookingRequest struct {
 	RequestID                 string  `json:"request_id"`
 	EmployeeID                string  `json:"employee_id"`
 	EmployeeName              string  `json:"employee_name"`
-	JobGrade                  string  `json:"job_grade"` // "EXECUTIVE", "SENIOR_MANAGER", "STAFF"
+	JobGrade                  string  `json:"job_grade"`   // "EXECUTIVE", "SENIOR_MANAGER", "STAFF"
 	TravelType                string  `json:"travel_type"` // "DOMESTIC", "INTERNATIONAL"
 	OriginCity                string  `json:"origin_city"`
 	DestinationCity           string  `json:"destination_city"`
@@ -39,18 +39,18 @@ type PolicyAuditCheck struct {
 
 // TravelPolicyEvaluation represents the comprehensive travel audit and per-diem budget result.
 type TravelPolicyEvaluation struct {
-	RequestID                 string             `json:"request_id"`
-	EmployeeName              string             `json:"employee_name"`
-	JobGrade                  string             `json:"job_grade"`
-	DestinationTier           string             `json:"destination_tier"` // "TIER_1_METRO", "TIER_2_REGIONAL", "INTERNATIONAL_MAJOR"
-	TotalDurationDays         int                `json:"total_duration_days"`
-	DailyPerDiemRateIDR       float64            `json:"daily_per_diem_rate_idr"`
-	TotalPerDiemAllowanceIDR  float64            `json:"total_per_diem_allowance_idr"`
+	RequestID                  string             `json:"request_id"`
+	EmployeeName               string             `json:"employee_name"`
+	JobGrade                   string             `json:"job_grade"`
+	DestinationTier            string             `json:"destination_tier"` // "TIER_1_METRO", "TIER_2_REGIONAL", "INTERNATIONAL_MAJOR"
+	TotalDurationDays          int                `json:"total_duration_days"`
+	DailyPerDiemRateIDR        float64            `json:"daily_per_diem_rate_idr"`
+	TotalPerDiemAllowanceIDR   float64            `json:"total_per_diem_allowance_idr"`
 	MaxAllowedHotelPerNightIDR float64            `json:"max_allowed_hotel_per_night_idr"`
-	OverallComplianceStatus   string             `json:"overall_compliance_status"` // "FULLY_COMPLIANT_AUTO_APPROVED", "POLICY_EXCEPTION_MANAGER_OVERRIDE_REQUIRED"
-	Checks                    []PolicyAuditCheck `json:"checks"`
-	EstimatedTotalTripCostIDR float64            `json:"estimated_total_trip_cost_idr"`
-	EvaluatedAt               string             `json:"evaluated_at"`
+	OverallComplianceStatus    string             `json:"overall_compliance_status"` // "FULLY_COMPLIANT_AUTO_APPROVED", "POLICY_EXCEPTION_MANAGER_OVERRIDE_REQUIRED"
+	Checks                     []PolicyAuditCheck `json:"checks"`
+	EstimatedTotalTripCostIDR  float64            `json:"estimated_total_trip_cost_idr"`
+	EvaluatedAt                string             `json:"evaluated_at"`
 }
 
 // PerDiemSettlementRequest defines the final travel expense reconciliation payload.
@@ -64,14 +64,14 @@ type PerDiemSettlementRequest struct {
 
 // PerDiemSettlementResult represents the finalized cash settlement.
 type PerDiemSettlementResult struct {
-	SettlementID               string  `json:"settlement_id"`
-	RequestID                  string  `json:"request_id"`
-	TotalPerDiemEarnedIDR      float64 `json:"total_per_diem_earned_idr"`
-	TotalAllowedExpenseIDR     float64 `json:"total_allowed_expense_idr"`
-	PrepaidCashAdvanceIDR      float64 `json:"prepaid_cash_advance_idr"`
+	SettlementID                string  `json:"settlement_id"`
+	RequestID                   string  `json:"request_id"`
+	TotalPerDiemEarnedIDR       float64 `json:"total_per_diem_earned_idr"`
+	TotalAllowedExpenseIDR      float64 `json:"total_allowed_expense_idr"`
+	PrepaidCashAdvanceIDR       float64 `json:"prepaid_cash_advance_idr"`
 	NetReimbursementOrRefundIDR float64 `json:"net_reimbursement_or_refund_idr"` // positive: company pays employee; negative: employee refunds company
-	SettlementStatus           string  `json:"settlement_status"`
-	ProcessedAt                string  `json:"processed_at"`
+	SettlementStatus            string  `json:"settlement_status"`
+	ProcessedAt                 string  `json:"processed_at"`
 }
 
 // TravelPolicyStore provides thread-safe storage for travel requests and settlements.
@@ -121,7 +121,7 @@ func EvaluateTravelPolicyLogic(req TravelBookingRequest) (*TravelPolicyEvaluatio
 
 	days := 3 // 3 days trip default
 	destTier := "TIER_1_METRO"
-	dailyPerDiem := 450000.0 // Standard tier 1 per-diem (Jakarta, Surabaya, Bali)
+	dailyPerDiem := 450000.0      // Standard tier 1 per-diem (Jakarta, Surabaya, Bali)
 	maxHotelPerNight := 1000000.0 // Max Rp 1.000.000 for Senior Manager in Tier 1
 
 	if req.JobGrade == "EXECUTIVE" {

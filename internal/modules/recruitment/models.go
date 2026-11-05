@@ -22,18 +22,18 @@ func (RecruitmentStage) TableName() string {
 // JobOpening corresponds to standard enterprise hr.job (open positions for recruitment)
 type JobOpening struct {
 	models.ModelBase
-	Title             string         `gorm:"size:128;not null" json:"title"`
-	DepartmentID      uint           `gorm:"not null;index" json:"department_id"`
-	Department        *hr.Department `gorm:"foreignKey:DepartmentID" json:"department,omitempty"`
-	JobID             *uint          `gorm:"index" json:"job_id,omitempty"` // Linked hr.job position
+	Title             string          `gorm:"size:128;not null" json:"title"`
+	DepartmentID      uint            `gorm:"not null;index" json:"department_id"`
+	Department        *hr.Department  `gorm:"foreignKey:DepartmentID" json:"department,omitempty"`
+	JobID             *uint           `gorm:"index" json:"job_id,omitempty"` // Linked hr.job position
 	JobPosition       *hr.JobPosition `gorm:"foreignKey:JobID" json:"job_position,omitempty"`
-	ExpectedEmployees int            `gorm:"default:1" json:"expected_employees"`
-	CurrentHired      int            `gorm:"default:0" json:"current_hired"`
-	Requirements      string         `gorm:"type:text" json:"requirements"`
-	Description       string         `gorm:"type:text" json:"description"`
-	SalaryMin         float64        `gorm:"default:0" json:"salary_min"`
-	SalaryMax         float64        `gorm:"default:0" json:"salary_max"`
-	State             string         `gorm:"size:32;default:'open';index" json:"state"` // "open", "closed"
+	ExpectedEmployees int             `gorm:"default:1" json:"expected_employees"`
+	CurrentHired      int             `gorm:"default:0" json:"current_hired"`
+	Requirements      string          `gorm:"type:text" json:"requirements"`
+	Description       string          `gorm:"type:text" json:"description"`
+	SalaryMin         float64         `gorm:"default:0" json:"salary_min"`
+	SalaryMax         float64         `gorm:"default:0" json:"salary_max"`
+	State             string          `gorm:"size:32;default:'open';index" json:"state"` // "open", "closed"
 }
 
 func (JobOpening) TableName() string {
@@ -43,34 +43,34 @@ func (JobOpening) TableName() string {
 // Applicant corresponds to standard enterprise hr.applicant
 type Applicant struct {
 	models.ModelBase
-	Name               string            `gorm:"size:128;not null" json:"name"`
-	Email              string            `gorm:"size:128;not null;index" json:"email"`
-	Phone              string            `gorm:"size:64" json:"phone"`
-	JobOpeningID       uint              `gorm:"not null;index" json:"job_opening_id"`
-	JobOpening         *JobOpening       `gorm:"foreignKey:JobOpeningID" json:"job_opening,omitempty"`
-	DepartmentID       uint              `gorm:"not null;index" json:"department_id"`
-	Department         *hr.Department    `gorm:"foreignKey:DepartmentID" json:"department,omitempty"`
-	StageID            uint              `gorm:"not null;index" json:"stage_id"`
-	Stage              *RecruitmentStage `gorm:"foreignKey:StageID" json:"stage,omitempty"`
-	SalaryExpected     float64           `gorm:"default:0" json:"salary_expected"`
-	ResumeText         string            `gorm:"type:text" json:"resume_text"`
-	
+	Name           string            `gorm:"size:128;not null" json:"name"`
+	Email          string            `gorm:"size:128;not null;index" json:"email"`
+	Phone          string            `gorm:"size:64" json:"phone"`
+	JobOpeningID   uint              `gorm:"not null;index" json:"job_opening_id"`
+	JobOpening     *JobOpening       `gorm:"foreignKey:JobOpeningID" json:"job_opening,omitempty"`
+	DepartmentID   uint              `gorm:"not null;index" json:"department_id"`
+	Department     *hr.Department    `gorm:"foreignKey:DepartmentID" json:"department,omitempty"`
+	StageID        uint              `gorm:"not null;index" json:"stage_id"`
+	Stage          *RecruitmentStage `gorm:"foreignKey:StageID" json:"stage,omitempty"`
+	SalaryExpected float64           `gorm:"default:0" json:"salary_expected"`
+	ResumeText     string            `gorm:"type:text" json:"resume_text"`
+
 	// Cloudflare Workers AI Talent Screening Metrics
-	AIScore            float64           `gorm:"default:0" json:"ai_score"` // 0.0 - 100.0%
-	AISummary          string            `gorm:"type:text" json:"ai_summary"`
-	AIRecommendation   string            `gorm:"size:64" json:"ai_recommendation"` // "Strong Hire", "Hire", "Consider / Hold", "Reject"
-	AIFitAnalysis      string            `gorm:"type:text" json:"ai_fit_analysis"`
-	KeyStrengths       string            `gorm:"type:text" json:"key_strengths"`
-	KeyWeaknesses      string            `gorm:"type:text" json:"key_weaknesses"`
-	SuggestedQuestions string            `gorm:"type:text" json:"suggested_questions"`
-	AIScreenedAt       string            `gorm:"size:32" json:"ai_screened_at,omitempty"`
-	AIEngineSource     string            `gorm:"size:64" json:"ai_engine_source,omitempty"`
+	AIScore            float64 `gorm:"default:0" json:"ai_score"` // 0.0 - 100.0%
+	AISummary          string  `gorm:"type:text" json:"ai_summary"`
+	AIRecommendation   string  `gorm:"size:64" json:"ai_recommendation"` // "Strong Hire", "Hire", "Consider / Hold", "Reject"
+	AIFitAnalysis      string  `gorm:"type:text" json:"ai_fit_analysis"`
+	KeyStrengths       string  `gorm:"type:text" json:"key_strengths"`
+	KeyWeaknesses      string  `gorm:"type:text" json:"key_weaknesses"`
+	SuggestedQuestions string  `gorm:"type:text" json:"suggested_questions"`
+	AIScreenedAt       string  `gorm:"size:32" json:"ai_screened_at,omitempty"`
+	AIEngineSource     string  `gorm:"size:64" json:"ai_engine_source,omitempty"`
 
 	// Hired or Refused
-	HiredEmployeeID    *uint             `gorm:"index" json:"hired_employee_id,omitempty"`
-	HiredEmployee      *hr.Employee      `gorm:"foreignKey:HiredEmployeeID" json:"hired_employee,omitempty"`
-	State              string            `gorm:"size:32;default:'new';index" json:"state"` // "new", "in_progress", "hired", "refused"
-	RefusalReason      string            `gorm:"size:255" json:"refusal_reason,omitempty"`
+	HiredEmployeeID *uint        `gorm:"index" json:"hired_employee_id,omitempty"`
+	HiredEmployee   *hr.Employee `gorm:"foreignKey:HiredEmployeeID" json:"hired_employee,omitempty"`
+	State           string       `gorm:"size:32;default:'new';index" json:"state"` // "new", "in_progress", "hired", "refused"
+	RefusalReason   string       `gorm:"size:255" json:"refusal_reason,omitempty"`
 }
 
 func (Applicant) TableName() string {
@@ -138,11 +138,11 @@ type AIScreeningResult struct {
 }
 
 type RecruitmentStats struct {
-	TotalOpenings     int64   `json:"total_openings"`
-	TotalApplicants   int64   `json:"total_applicants"`
-	InProgressCount   int64   `json:"in_progress_count"`
-	HiredCount        int64   `json:"hired_count"`
-	RefusedCount      int64   `json:"refused_count"`
-	AverageAIScore    float64 `json:"average_ai_score"`
-	TopJobOpening     string  `json:"top_job_opening"`
+	TotalOpenings   int64   `json:"total_openings"`
+	TotalApplicants int64   `json:"total_applicants"`
+	InProgressCount int64   `json:"in_progress_count"`
+	HiredCount      int64   `json:"hired_count"`
+	RefusedCount    int64   `json:"refused_count"`
+	AverageAIScore  float64 `json:"average_ai_score"`
+	TopJobOpening   string  `json:"top_job_opening"`
 }

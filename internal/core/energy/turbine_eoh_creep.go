@@ -17,10 +17,10 @@ type TurbineOperatingTelemetry struct {
 	TelemetryID               string    `json:"telemetry_id"`
 	TurbineID                 string    `json:"turbine_id"`
 	OperatingBaseHours        float64   `json:"operating_base_hours"`
-	FastStartsCount           int       `json:"fast_starts_count"`      // 1 Fast start = ~50 EOH equivalent thermal shock
-	NormalStartsCount         int       `json:"normal_starts_count"`    // 1 Normal start = ~20 EOH
-	EmergencyTripsCount       int       `json:"emergency_trips_count"`  // 1 Full-load trip = ~80 EOH
-	TurbineInletTempTIT_C     float64   `json:"turbine_inlet_temp_tit_c"` // Firing temp ~1100 - 1280°C
+	FastStartsCount           int       `json:"fast_starts_count"`             // 1 Fast start = ~50 EOH equivalent thermal shock
+	NormalStartsCount         int       `json:"normal_starts_count"`           // 1 Normal start = ~20 EOH
+	EmergencyTripsCount       int       `json:"emergency_trips_count"`         // 1 Full-load trip = ~80 EOH
+	TurbineInletTempTIT_C     float64   `json:"turbine_inlet_temp_tit_c"`      // Firing temp ~1100 - 1280°C
 	ExhaustGasTempSpreadEGT_C float64   `json:"exhaust_gas_temp_spread_egt_c"` // Combustor flameout/can cross-fire indicator (<25°C normal)
 	VibrationVelocityRMS_MMs  float64   `json:"vibration_velocity_rms_mms"`    // ISO 10816-4 limits (<4.5 mm/s acceptable)
 	FuelGasWobbeIndex         float64   `json:"fuel_gas_wobbe_index"`
@@ -36,21 +36,21 @@ type EOHCreepAssessment struct {
 	BladeCreepLifeConsumedPct float64   `json:"blade_creep_life_consumed_pct"` // % consumed of 48k EOH rotor lifespan
 	HoursUntilNextHGPI        float64   `json:"hours_until_next_hgpi"`         // Hot Gas Path Inspection interval ~24,000 EOH
 	HoursUntilMajorOverhaul   float64   `json:"hours_until_major_overhaul"`    // Major Inspection interval ~48,000 EOH
-	TurbineHealthStatus       string    `json:"turbine_health_status"`        // "HEALTHY_BASE_LOAD", "ACCELERATED_CREEP_THERMAL_FATIGUE", "CRITICAL_HGPI_INSPECTION_OVERDUE"
+	TurbineHealthStatus       string    `json:"turbine_health_status"`         // "HEALTHY_BASE_LOAD", "ACCELERATED_CREEP_THERMAL_FATIGUE", "CRITICAL_HGPI_INSPECTION_OVERDUE"
 	RotordynamicsAuditDigest  string    `json:"rotordynamics_audit_digest"`
 	EvaluatedAt               time.Time `json:"evaluated_at"`
 }
 
 // MajorInspectionSchedule plans OEM-level outage to avoid uncontained rotor disc rupture
 type MajorInspectionSchedule struct {
-	TurnaroundID                        string    `json:"turnaround_id"`
-	TurbineID                           string    `json:"turbine_id"`
-	InspectionType                      string    `json:"inspection_type"` // "HOT_GAS_PATH_INSPECTION_HGPI", "MAJOR_ROTOR_OVERHAUL_MI"
-	EstimatedOutageDays                 int       `json:"estimated_outage_days"`
-	AvoidedCatastrophicBladeRuptureUSD  float64   `json:"avoided_catastrophic_blade_rupture_usd"`
-	ScheduledStartDate                  time.Time `json:"scheduled_start_date"`
-	TurnaroundWorkOrderID               string    `json:"turnaround_work_order_id"`
-	ScheduledAt                         time.Time `json:"scheduled_at"`
+	TurnaroundID                       string    `json:"turnaround_id"`
+	TurbineID                          string    `json:"turbine_id"`
+	InspectionType                     string    `json:"inspection_type"` // "HOT_GAS_PATH_INSPECTION_HGPI", "MAJOR_ROTOR_OVERHAUL_MI"
+	EstimatedOutageDays                int       `json:"estimated_outage_days"`
+	AvoidedCatastrophicBladeRuptureUSD float64   `json:"avoided_catastrophic_blade_rupture_usd"`
+	ScheduledStartDate                 time.Time `json:"scheduled_start_date"`
+	TurnaroundWorkOrderID              string    `json:"turnaround_work_order_id"`
+	ScheduledAt                        time.Time `json:"scheduled_at"`
 }
 
 // TurbineEOHVault thread-safe in-memory store
@@ -214,12 +214,12 @@ func (v *TurbineEOHVault) GetRotordynamicsDossier(turbineID string) (map[string]
 	sched, hasSched := v.schedules[turbineID]
 
 	dossier := map[string]interface{}{
-		"turbine_id":             turbineID,
-		"iso_2314_compliance":   true,
-		"api_616_standards":     "CERTIFIED",
-		"has_assessment":        hasAssess,
-		"has_turnaround_sched":  hasSched,
-		"compiled_at":           time.Now(),
+		"turbine_id":           turbineID,
+		"iso_2314_compliance":  true,
+		"api_616_standards":    "CERTIFIED",
+		"has_assessment":       hasAssess,
+		"has_turnaround_sched": hasSched,
+		"compiled_at":          time.Now(),
 	}
 
 	if hasAssess {

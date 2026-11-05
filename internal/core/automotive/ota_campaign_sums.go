@@ -13,53 +13,53 @@ import (
 
 // OTAFirmwareCampaign models an automotive over-the-air firmware rollout under UNECE R156 & ISO 24089
 type OTAFirmwareCampaign struct {
-	CampaignID                 string    `json:"campaign_id"`
-	VehicleModelSeries         string    `json:"vehicle_model_series"` // "HYUNDAI_IONIQ_EV_2026", "TESLA_MODEL_Y"
-	TargetECU                  string    `json:"target_ecu"`           // "CENTRAL_ADAS_AUTONOMOUS_CONTROLLER", "BATTERY_MANAGEMENT_SYSTEM_BMS"
-	CurrentFirmwareVersion     string    `json:"current_firmware_version"`
-	TargetFirmwareVersion      string    `json:"target_firmware_version"`
-	PayloadSizeMB              float64   `json:"payload_size_mb"`
-	SHA256BinaryHash           string    `json:"sha256_binary_hash"`
-	RXSWIN_TypeApprovalNumber  string    `json:"rxswin_type_approval_number"` // Regulation X Software Identification Number
-	EligibleFleetSize          int       `json:"eligible_fleet_size"`
-	RolloutStrategy            string    `json:"rollout_strategy"` // "CANARY_STAGED_ROLLOUT", "GLOBAL_FLEET_IMMEDIATE"
-	RegisteredAt               time.Time `json:"registered_at"`
+	CampaignID                string    `json:"campaign_id"`
+	VehicleModelSeries        string    `json:"vehicle_model_series"` // "HYUNDAI_IONIQ_EV_2026", "TESLA_MODEL_Y"
+	TargetECU                 string    `json:"target_ecu"`           // "CENTRAL_ADAS_AUTONOMOUS_CONTROLLER", "BATTERY_MANAGEMENT_SYSTEM_BMS"
+	CurrentFirmwareVersion    string    `json:"current_firmware_version"`
+	TargetFirmwareVersion     string    `json:"target_firmware_version"`
+	PayloadSizeMB             float64   `json:"payload_size_mb"`
+	SHA256BinaryHash          string    `json:"sha256_binary_hash"`
+	RXSWIN_TypeApprovalNumber string    `json:"rxswin_type_approval_number"` // Regulation X Software Identification Number
+	EligibleFleetSize         int       `json:"eligible_fleet_size"`
+	RolloutStrategy           string    `json:"rollout_strategy"` // "CANARY_STAGED_ROLLOUT", "GLOBAL_FLEET_IMMEDIATE"
+	RegisteredAt              time.Time `json:"registered_at"`
 }
 
 // VehicleTargetReadiness checks safety pre-conditions before firmware flashing
 type VehicleTargetReadiness struct {
-	ReadinessID                   string    `json:"readiness_id"`
-	VIN                           string    `json:"vin"` // Vehicle Identification Number
-	CampaignID                    string    `json:"campaign_id"`
-	VehicleSpeedKPH               float64   `json:"vehicle_speed_kph"`       // Must be 0.0 kph
-	TransmissionGear              string    `json:"transmission_gear"`       // Must be "PARK"
-	BatterySoCPct                 float64   `json:"battery_soc_pct"`         // Must be >= 50.0% to prevent bricking
-	CellularSignalDbm             float64   `json:"cellular_signal_dbm"`     // Must be >= -95 dBm
-	DriverConsentGranted          bool      `json:"driver_consent_granted"`
-	SafetyPreconditionsSatisfied  bool      `json:"safety_preconditions_satisfied"`
-	AuditDigest                   string    `json:"audit_digest"`
-	EvaluatedAt                   time.Time `json:"evaluated_at"`
+	ReadinessID                  string    `json:"readiness_id"`
+	VIN                          string    `json:"vin"` // Vehicle Identification Number
+	CampaignID                   string    `json:"campaign_id"`
+	VehicleSpeedKPH              float64   `json:"vehicle_speed_kph"`   // Must be 0.0 kph
+	TransmissionGear             string    `json:"transmission_gear"`   // Must be "PARK"
+	BatterySoCPct                float64   `json:"battery_soc_pct"`     // Must be >= 50.0% to prevent bricking
+	CellularSignalDbm            float64   `json:"cellular_signal_dbm"` // Must be >= -95 dBm
+	DriverConsentGranted         bool      `json:"driver_consent_granted"`
+	SafetyPreconditionsSatisfied bool      `json:"safety_preconditions_satisfied"`
+	AuditDigest                  string    `json:"audit_digest"`
+	EvaluatedAt                  time.Time `json:"evaluated_at"`
 }
 
 // OTADispatchExecutionRecord captures secure flashing status and cryptographic signature verification
 type OTADispatchExecutionRecord struct {
-	ExecutionID                   string    `json:"execution_id"`
-	VIN                           string    `json:"vin"`
-	CampaignID                    string    `json:"campaign_id"`
-	TargetECU                     string    `json:"target_ecu"`
-	FlashingStatus                string    `json:"flashing_status"` // "DOWNLOAD_COMPLETED", "FLASHING_SUCCESS_VERIFIED", "ROLLBACK_PRESERVED"
-	FlashingDurationSeconds       int       `json:"flashing_duration_seconds"`
-	ECUValidationCode             string    `json:"ecu_validation_code"`
-	AvoidedBrickLossUSD           float64   `json:"avoided_brick_loss_usd"` // Avoided $3,500 ECU module replacement
-	ExecutedAt                    time.Time `json:"executed_at"`
+	ExecutionID             string    `json:"execution_id"`
+	VIN                     string    `json:"vin"`
+	CampaignID              string    `json:"campaign_id"`
+	TargetECU               string    `json:"target_ecu"`
+	FlashingStatus          string    `json:"flashing_status"` // "DOWNLOAD_COMPLETED", "FLASHING_SUCCESS_VERIFIED", "ROLLBACK_PRESERVED"
+	FlashingDurationSeconds int       `json:"flashing_duration_seconds"`
+	ECUValidationCode       string    `json:"ecu_validation_code"`
+	AvoidedBrickLossUSD     float64   `json:"avoided_brick_loss_usd"` // Avoided $3,500 ECU module replacement
+	ExecutedAt              time.Time `json:"executed_at"`
 }
 
 // AutomotiveVault thread-safe in-memory store
 type AutomotiveVault struct {
-	mu           sync.RWMutex
-	campaigns    map[string]OTAFirmwareCampaign
-	readinesses  map[string]VehicleTargetReadiness
-	executions   map[string]OTADispatchExecutionRecord
+	mu          sync.RWMutex
+	campaigns   map[string]OTAFirmwareCampaign
+	readinesses map[string]VehicleTargetReadiness
+	executions  map[string]OTADispatchExecutionRecord
 }
 
 // Global instance

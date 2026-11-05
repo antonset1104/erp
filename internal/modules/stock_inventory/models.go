@@ -9,24 +9,24 @@ import (
 // StockInventory corresponds to standard enterprise stock.inventory (Physical Stock Opname / Inventory Adjustment)
 type StockInventory struct {
 	models.ModelBase
-	Name                string               `gorm:"size:64;not null;uniqueIndex" json:"name"` // e.g. OPNAME/2026/00001
-	WarehouseID         *uint                `gorm:"index" json:"warehouse_id,omitempty"`
+	Name                string                `gorm:"size:64;not null;uniqueIndex" json:"name"` // e.g. OPNAME/2026/00001
+	WarehouseID         *uint                 `gorm:"index" json:"warehouse_id,omitempty"`
 	Warehouse           *stock.StockWarehouse `gorm:"foreignKey:WarehouseID" json:"warehouse,omitempty"`
-	LocationID          uint                 `gorm:"not null;index" json:"location_id"` // Location being counted, e.g. WH/Stock
-	Location            *stock.StockLocation `gorm:"foreignKey:LocationID" json:"location,omitempty"`
-	AccountingMoveID    *uint                `gorm:"index" json:"accounting_move_id,omitempty"` // Linked GL Journal Entry
-	AccountingMoveName  string               `gorm:"size:64" json:"accounting_move_name,omitempty"`
-	Date                string               `gorm:"size:32;not null" json:"date"`
-	State               string               `gorm:"size:32;default:'draft';index" json:"state"` // "draft", "confirm", "done", "cancel"
-	TotalTheoreticalQty float64              `gorm:"default:0" json:"total_theoretical_qty"`
-	TotalCountedQty     float64              `gorm:"default:0" json:"total_counted_qty"`
-	TotalDifferenceQty  float64              `gorm:"default:0" json:"total_difference_qty"`
-	TotalLossValue      float64              `gorm:"default:0" json:"total_loss_value"` // Rp Kerugian Selisih Kurang
-	TotalGainValue      float64              `gorm:"default:0" json:"total_gain_value"` // Rp Keuntungan Selisih Lebih
-	AIRiskLevel         string               `gorm:"size:32;default:'none'" json:"ai_risk_level"` // "none", "low", "medium", "high"
-	AIAuditSummary      string               `gorm:"type:text" json:"ai_audit_summary,omitempty"`
-	Notes               string               `gorm:"type:text" json:"notes,omitempty"`
-	Lines               []StockInventoryLine `gorm:"foreignKey:InventoryID" json:"lines"`
+	LocationID          uint                  `gorm:"not null;index" json:"location_id"` // Location being counted, e.g. WH/Stock
+	Location            *stock.StockLocation  `gorm:"foreignKey:LocationID" json:"location,omitempty"`
+	AccountingMoveID    *uint                 `gorm:"index" json:"accounting_move_id,omitempty"` // Linked GL Journal Entry
+	AccountingMoveName  string                `gorm:"size:64" json:"accounting_move_name,omitempty"`
+	Date                string                `gorm:"size:32;not null" json:"date"`
+	State               string                `gorm:"size:32;default:'draft';index" json:"state"` // "draft", "confirm", "done", "cancel"
+	TotalTheoreticalQty float64               `gorm:"default:0" json:"total_theoretical_qty"`
+	TotalCountedQty     float64               `gorm:"default:0" json:"total_counted_qty"`
+	TotalDifferenceQty  float64               `gorm:"default:0" json:"total_difference_qty"`
+	TotalLossValue      float64               `gorm:"default:0" json:"total_loss_value"`           // Rp Kerugian Selisih Kurang
+	TotalGainValue      float64               `gorm:"default:0" json:"total_gain_value"`           // Rp Keuntungan Selisih Lebih
+	AIRiskLevel         string                `gorm:"size:32;default:'none'" json:"ai_risk_level"` // "none", "low", "medium", "high"
+	AIAuditSummary      string                `gorm:"type:text" json:"ai_audit_summary,omitempty"`
+	Notes               string                `gorm:"type:text" json:"notes,omitempty"`
+	Lines               []StockInventoryLine  `gorm:"foreignKey:InventoryID" json:"lines"`
 }
 
 // StockInventoryLine corresponds to standard enterprise stock.inventory.line

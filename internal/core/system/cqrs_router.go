@@ -23,27 +23,27 @@ const (
 
 // DBNodeHealth represents live telemetry of a database cluster node.
 type DBNodeHealth struct {
-	NodeID          string     `json:"node_id"`
-	Region          string     `json:"region"`
-	Role            DBNodeRole `json:"role"`
-	Status          string     `json:"status"` // ONLINE, DEGRADED, FAILOVER
-	ActiveConns     int        `json:"active_connections"`
-	MaxConns        int        `json:"max_connections"`
-	ReplicationLagMs int64     `json:"replication_lag_ms"`
-	QueriesPerSec   float64    `json:"queries_per_sec"`
-	LatencyAvgMs    float64    `json:"latency_avg_ms"`
+	NodeID           string     `json:"node_id"`
+	Region           string     `json:"region"`
+	Role             DBNodeRole `json:"role"`
+	Status           string     `json:"status"` // ONLINE, DEGRADED, FAILOVER
+	ActiveConns      int        `json:"active_connections"`
+	MaxConns         int        `json:"max_connections"`
+	ReplicationLagMs int64      `json:"replication_lag_ms"`
+	QueriesPerSec    float64    `json:"queries_per_sec"`
+	LatencyAvgMs     float64    `json:"latency_avg_ms"`
 }
 
 // CQRSClusterStatus represents the health and topology of the multi-node DB cluster.
 type CQRSClusterStatus struct {
-	ClusterID            string         `json:"cluster_id"`
-	EvaluatedAt          string         `json:"evaluated_at"`
-	MasterNodeID         string         `json:"master_node_id"`
-	TotalNodes           int            `json:"total_nodes"`
-	ActiveReadReplicas   int            `json:"active_read_replicas"`
-	HighAvailabilityMode string         `json:"high_availability_mode"`
-	ReadTrafficOffloadPct float64       `json:"read_traffic_offload_pct"` // % of queries served by replicas
-	Nodes                []DBNodeHealth `json:"nodes"`
+	ClusterID             string         `json:"cluster_id"`
+	EvaluatedAt           string         `json:"evaluated_at"`
+	MasterNodeID          string         `json:"master_node_id"`
+	TotalNodes            int            `json:"total_nodes"`
+	ActiveReadReplicas    int            `json:"active_read_replicas"`
+	HighAvailabilityMode  string         `json:"high_availability_mode"`
+	ReadTrafficOffloadPct float64        `json:"read_traffic_offload_pct"` // % of queries served by replicas
+	Nodes                 []DBNodeHealth `json:"nodes"`
 }
 
 // RouteQueryRequest represents an incoming database statement routed by CQRS.
@@ -55,14 +55,14 @@ type RouteQueryRequest struct {
 
 // RouteQueryResponse details which node executed the query and performance metrics.
 type RouteQueryResponse struct {
-	RoutedToNodeID    string  `json:"routed_to_node_id"`
-	NodeRole          string  `json:"node_role"`
-	NodeRegion        string  `json:"node_region"`
-	OperationType     string  `json:"operation_type"` // READ vs WRITE
-	ExecutionTimeMs   float64 `json:"execution_time_ms"`
-	LagAtExecutionMs  int64   `json:"lag_at_execution_ms"`
-	ConsistencyLevel  string  `json:"consistency_level"` // STRONG (Master) vs EVENTUAL (Replica)
-	Message           string  `json:"message"`
+	RoutedToNodeID   string  `json:"routed_to_node_id"`
+	NodeRole         string  `json:"node_role"`
+	NodeRegion       string  `json:"node_region"`
+	OperationType    string  `json:"operation_type"` // READ vs WRITE
+	ExecutionTimeMs  float64 `json:"execution_time_ms"`
+	LagAtExecutionMs int64   `json:"lag_at_execution_ms"`
+	ConsistencyLevel string  `json:"consistency_level"` // STRONG (Master) vs EVENTUAL (Replica)
+	Message          string  `json:"message"`
 }
 
 // CQRSRouterService routes OLTP writes to Master and heavy reads to Read Replicas.

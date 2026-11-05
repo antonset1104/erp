@@ -15,16 +15,16 @@ import (
 // SOECEFuelTelemetry captures high-temperature co-electrolysis & Fischer-Tropsch SAF synthesis dynamics under ASTM D7566 & ISO 50001
 type SOECEFuelTelemetry struct {
 	TelemetryID                string    `json:"telemetry_id"`
-	StackID                    string    `json:"stack_id"`                       // "SOEC-COELECTROLYSIS-MW-05"
-	PlantID                    string    `json:"plant_id"`                       // "PLANT-SAF-PTL-SYNTHESIS-01"
-	StackOperatingTempC        float64   `json:"stack_operating_temp_c"`         // e.g. 815.0°C (SOEC operational window 750-850°C)
-	StackCurrentDensityAcm2    float64   `json:"stack_current_density_acm2"`     // e.g. 1.25 A/cm2
-	SteamInletFlowKgHr         float64   `json:"steam_inlet_flow_kg_hr"`         // e.g. 420.0 kg/hr
-	CarbonDioxideInletFlowKgHr float64   `json:"carbon_dioxide_inlet_flow_kg_hr"`// e.g. 680.0 kg/hr
-	ProducedSyngasH2CORatio    float64   `json:"produced_syngas_h2_co_ratio"`    // e.g. 2.08 (target 2.10:1 for cobalt FT catalyst)
-	FtReactorTempC             float64   `json:"ft_reactor_temp_c"`              // e.g. 225.0°C (fixed-bed Fischer-Tropsch reactor)
-	FtCatalystDeltaPBar        float64   `json:"ft_catalyst_delta_p_bar"`        // e.g. 3.45 bar pressure drop across catalyst bed
-	CarbonActivityAc           float64   `json:"carbon_activity_ac"`             // e.g. 1.15 (Boudouard carbon activity; ac > 1.0 triggers soot/coking)
+	StackID                    string    `json:"stack_id"`                        // "SOEC-COELECTROLYSIS-MW-05"
+	PlantID                    string    `json:"plant_id"`                        // "PLANT-SAF-PTL-SYNTHESIS-01"
+	StackOperatingTempC        float64   `json:"stack_operating_temp_c"`          // e.g. 815.0°C (SOEC operational window 750-850°C)
+	StackCurrentDensityAcm2    float64   `json:"stack_current_density_acm2"`      // e.g. 1.25 A/cm2
+	SteamInletFlowKgHr         float64   `json:"steam_inlet_flow_kg_hr"`          // e.g. 420.0 kg/hr
+	CarbonDioxideInletFlowKgHr float64   `json:"carbon_dioxide_inlet_flow_kg_hr"` // e.g. 680.0 kg/hr
+	ProducedSyngasH2CORatio    float64   `json:"produced_syngas_h2_co_ratio"`     // e.g. 2.08 (target 2.10:1 for cobalt FT catalyst)
+	FtReactorTempC             float64   `json:"ft_reactor_temp_c"`               // e.g. 225.0°C (fixed-bed Fischer-Tropsch reactor)
+	FtCatalystDeltaPBar        float64   `json:"ft_catalyst_delta_p_bar"`         // e.g. 3.45 bar pressure drop across catalyst bed
+	CarbonActivityAc           float64   `json:"carbon_activity_ac"`              // e.g. 1.15 (Boudouard carbon activity; ac > 1.0 triggers soot/coking)
 	RecordedAt                 time.Time `json:"recorded_at"`
 }
 
@@ -33,8 +33,8 @@ type SOECEFuelAssessment struct {
 	AssessmentID                 string    `json:"assessment_id"`
 	StackID                      string    `json:"stack_id"`
 	StoichiometricDeviationPct   float64   `json:"stoichiometric_deviation_pct"`
-	BoudouardCarbonCokingRisk    string    `json:"boudouard_carbon_coking_risk"`     // "CARBON_DEPOSITION_FREE", "ELEVATED_CO_CONCENTRATION_WARNING", "CRITICAL_BOUDOUARD_COKING_DEACTIVATION"
-	SOECElectrodeReoxidationRisk string    `json:"soec_electrode_reoxidation_risk"`  // "NICKEL_CERMET_REDUCED_STABLE", "POTENTIAL_OXIDATION_PINHOLE_WARNING", "CATASTROPHIC_ANODE_DELAMINATION"
+	BoudouardCarbonCokingRisk    string    `json:"boudouard_carbon_coking_risk"`    // "CARBON_DEPOSITION_FREE", "ELEVATED_CO_CONCENTRATION_WARNING", "CRITICAL_BOUDOUARD_COKING_DEACTIVATION"
+	SOECElectrodeReoxidationRisk string    `json:"soec_electrode_reoxidation_risk"` // "NICKEL_CERMET_REDUCED_STABLE", "POTENTIAL_OXIDATION_PINHOLE_WARNING", "CATASTROPHIC_ANODE_DELAMINATION"
 	SteamTrimMandate             bool      `json:"steam_trim_mandate"`
 	CurrentRampLimiterMandate    bool      `json:"current_ramp_limiter_mandate"`
 	AuditDigest                  string    `json:"audit_digest"`
@@ -43,13 +43,13 @@ type SOECEFuelAssessment struct {
 
 // SOECEFuelMitigationAction models steam/CO2 inlet trimming, current ramp limiting, and FT tail gas recycling
 type SOECEFuelMitigationAction struct {
-	ActionID                        string    `json:"action_id"`
-	StackID                         string    `json:"stack_id"`
-	ModulatedSteamInletFlowKgHr     float64   `json:"modulated_steam_inlet_flow_kg_hr"` // trimmed steam rate to restore H2/CO ratio
-	CommandedCurrentDensityLimitAcm2 float64  `json:"commanded_current_density_limit_acm2"`
-	FtTailGasRecycleRatio           float64   `json:"ft_tail_gas_recycle_ratio"`        // e.g. 0.38 recycle fraction to suppress carbon activity
-	AvoidedEfuelPlantLossUSD        float64   `json:"avoided_efuel_plant_loss_usd"`     // Avoided $38M USD ceramic stack delamination & cobalt catalyst bed replacement
-	ActionTimestamp                 time.Time `json:"action_timestamp"`
+	ActionID                         string    `json:"action_id"`
+	StackID                          string    `json:"stack_id"`
+	ModulatedSteamInletFlowKgHr      float64   `json:"modulated_steam_inlet_flow_kg_hr"` // trimmed steam rate to restore H2/CO ratio
+	CommandedCurrentDensityLimitAcm2 float64   `json:"commanded_current_density_limit_acm2"`
+	FtTailGasRecycleRatio            float64   `json:"ft_tail_gas_recycle_ratio"`    // e.g. 0.38 recycle fraction to suppress carbon activity
+	AvoidedEfuelPlantLossUSD         float64   `json:"avoided_efuel_plant_loss_usd"` // Avoided $38M USD ceramic stack delamination & cobalt catalyst bed replacement
+	ActionTimestamp                  time.Time `json:"action_timestamp"`
 }
 
 // SOECVault thread-safe in-memory store
@@ -157,13 +157,13 @@ func (v *SOECVault) TriggerSteamTrimAndRampLimiting(stackID string) (SOECEFuelMi
 	}
 
 	action := SOECEFuelMitigationAction{
-		ActionID:                        fmt.Sprintf("ACT-SOEC-%d", time.Now().UnixNano()%1000000),
-		StackID:                         stackID,
-		ModulatedSteamInletFlowKgHr:     steamFlow,
+		ActionID:                         fmt.Sprintf("ACT-SOEC-%d", time.Now().UnixNano()%1000000),
+		StackID:                          stackID,
+		ModulatedSteamInletFlowKgHr:      steamFlow,
 		CommandedCurrentDensityLimitAcm2: currentLimit,
-		FtTailGasRecycleRatio:           tailGasRatio,
-		AvoidedEfuelPlantLossUSD:        38000000.0,
-		ActionTimestamp:                 time.Now(),
+		FtTailGasRecycleRatio:            tailGasRatio,
+		AvoidedEfuelPlantLossUSD:         38000000.0,
+		ActionTimestamp:                  time.Now(),
 	}
 
 	v.actions[stackID] = action
@@ -180,13 +180,13 @@ func (v *SOECVault) GetSOECEFuelSustainabilityDossier(stackID string) (map[strin
 	act, hasAct := v.actions[stackID]
 
 	dossier := map[string]interface{}{
-		"stack_id":               stackID,
-		"astm_d7566_compliant":   true,
-		"iso_50001_certified":    true,
-		"has_telemetry":          hasTelem,
-		"has_assessment":         hasAsm,
-		"has_action":             hasAct,
-		"dossier_compiled_at":    time.Now(),
+		"stack_id":             stackID,
+		"astm_d7566_compliant": true,
+		"iso_50001_certified":  true,
+		"has_telemetry":        hasTelem,
+		"has_assessment":       hasAsm,
+		"has_action":           hasAct,
+		"dossier_compiled_at":  time.Now(),
 	}
 	if hasTelem {
 		dossier["telemetry"] = telem

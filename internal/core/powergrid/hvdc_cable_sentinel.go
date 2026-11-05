@@ -15,39 +15,39 @@ import (
 // HVDCCableTelemetry models real-time distributed optical fiber DTS and partial discharge sensing
 type HVDCCableTelemetry struct {
 	TelemetryID                string    `json:"telemetry_id"`
-	CableCircuitID             string    `json:"cable_circuit_id"`               // "HVDC-500KV-JAVA-SUMATRA-01"
-	SegmentKMPosition          float64   `json:"segment_km_position"`            // e.g. 48.5 km along subsea route
-	RatedVoltageKV             float64   `json:"rated_voltage_kv"`               // 500.0 kV
-	CurrentLoadAmps            float64   `json:"current_load_amps"`              // Active load (e.g. 2100.0 A)
-	ConductorTempC             float64   `json:"conductor_temp_c"`               // DTS Raman optical reading (e.g. 84.5°C)
-	SeabedSedimentTempC        float64   `json:"seabed_sediment_temp_c"`         // Ambient seabed (e.g. 18.0°C)
-	SedimentThermalResistivity float64   `json:"sediment_thermal_resistivity"`   // K*m/W (e.g. 1.35 K*m/W)
-	PartialDischargePC         float64   `json:"partial_discharge_pc"`           // HFCT sensor (picoCoulombs; normal < 20 pC)
-	InsulationType             string    `json:"insulation_type"`                // "XLPE_CROSSLINKED_POLYETHYLENE"
+	CableCircuitID             string    `json:"cable_circuit_id"`             // "HVDC-500KV-JAVA-SUMATRA-01"
+	SegmentKMPosition          float64   `json:"segment_km_position"`          // e.g. 48.5 km along subsea route
+	RatedVoltageKV             float64   `json:"rated_voltage_kv"`             // 500.0 kV
+	CurrentLoadAmps            float64   `json:"current_load_amps"`            // Active load (e.g. 2100.0 A)
+	ConductorTempC             float64   `json:"conductor_temp_c"`             // DTS Raman optical reading (e.g. 84.5°C)
+	SeabedSedimentTempC        float64   `json:"seabed_sediment_temp_c"`       // Ambient seabed (e.g. 18.0°C)
+	SedimentThermalResistivity float64   `json:"sediment_thermal_resistivity"` // K*m/W (e.g. 1.35 K*m/W)
+	PartialDischargePC         float64   `json:"partial_discharge_pc"`         // HFCT sensor (picoCoulombs; normal < 20 pC)
+	InsulationType             string    `json:"insulation_type"`              // "XLPE_CROSSLINKED_POLYETHYLENE"
 	RecordedAt                 time.Time `json:"recorded_at"`
 }
 
 // HVDCThermalAmpacityAssessment models Neher-McGrath dynamic rating and dielectric breakdown risk
 type HVDCThermalAmpacityAssessment struct {
-	AssessmentID                     string    `json:"assessment_id"`
-	CableCircuitID                   string    `json:"cable_circuit_id"`
-	SegmentKMPosition                float64   `json:"segment_km_position"`
-	NeherMcGrathContinuousAmpacity   float64   `json:"neher_mcgrath_continuous_ampacity_amps"`
-	ThermalMarginCelsius             float64   `json:"thermal_margin_celsius"` // 90°C max XLPE limit - ConductorTemp
-	PartialDischargeRiskLevel        string    `json:"partial_discharge_risk_level"` // "NORMAL_BACKGROUND", "ELEVATED_CAVITY_DISCHARGE", "CRITICAL_DIELECTRIC_BREAKDOWN_IMMINENT"
-	DynamicAmpacityDeratePct         float64   `json:"dynamic_ampacity_derate_pct"`
-	AuditDigest                      string    `json:"audit_digest"`
-	EvaluatedAt                      time.Time `json:"evaluated_at"`
+	AssessmentID                   string    `json:"assessment_id"`
+	CableCircuitID                 string    `json:"cable_circuit_id"`
+	SegmentKMPosition              float64   `json:"segment_km_position"`
+	NeherMcGrathContinuousAmpacity float64   `json:"neher_mcgrath_continuous_ampacity_amps"`
+	ThermalMarginCelsius           float64   `json:"thermal_margin_celsius"`       // 90°C max XLPE limit - ConductorTemp
+	PartialDischargeRiskLevel      string    `json:"partial_discharge_risk_level"` // "NORMAL_BACKGROUND", "ELEVATED_CAVITY_DISCHARGE", "CRITICAL_DIELECTRIC_BREAKDOWN_IMMINENT"
+	DynamicAmpacityDeratePct       float64   `json:"dynamic_ampacity_derate_pct"`
+	AuditDigest                    string    `json:"audit_digest"`
+	EvaluatedAt                    time.Time `json:"evaluated_at"`
 }
 
 // HVDCLoadCurtailmentAction models automated power dispatch re-routing across alternate corridors
 type HVDCLoadCurtailmentAction struct {
-	ActionID                            string    `json:"action_id"`
-	CableCircuitID                      string    `json:"cable_circuit_id"`
-	CurtailedLoadAmps                   float64   `json:"curtailed_load_amps"`
-	ReroutedGridPowerMW                 float64   `json:"rerouted_grid_power_mw"`
-	AvoidedSubseaVesselMobilizationUSD  float64   `json:"avoided_subsea_vessel_mobilization_usd"` // Avoided $22M subsea jointing & cable ship mobilization
-	CurtailmentTimestamp                time.Time `json:"curtailment_timestamp"`
+	ActionID                           string    `json:"action_id"`
+	CableCircuitID                     string    `json:"cable_circuit_id"`
+	CurtailedLoadAmps                  float64   `json:"curtailed_load_amps"`
+	ReroutedGridPowerMW                float64   `json:"rerouted_grid_power_mw"`
+	AvoidedSubseaVesselMobilizationUSD float64   `json:"avoided_subsea_vessel_mobilization_usd"` // Avoided $22M subsea jointing & cable ship mobilization
+	CurtailmentTimestamp               time.Time `json:"curtailment_timestamp"`
 }
 
 // PowerGridVault thread-safe in-memory store
@@ -75,8 +75,8 @@ func init() {
 		CurrentLoadAmps:            2180.0, // High load
 		ConductorTempC:             85.8,   // Approaching 90°C thermal threshold
 		SeabedSedimentTempC:        18.5,
-		SedimentThermalResistivity: 1.42,   // High sediment silt buildup insulating cable
-		PartialDischargePC:         165.0,  // Critical discharge in dielectric cavity
+		SedimentThermalResistivity: 1.42,  // High sediment silt buildup insulating cable
+		PartialDischargePC:         165.0, // Critical discharge in dielectric cavity
 		InsulationType:             "XLPE_CROSSLINKED_POLYETHYLENE",
 		RecordedAt:                 time.Now(),
 	}
@@ -167,7 +167,7 @@ func (v *PowerGridVault) DispatchLoadCurtailment(cableID string) (HVDCLoadCurtai
 		curtailedAmps = 2180.0 * (assess.DynamicAmpacityDeratePct / 100.0)
 	}
 	reroutedMW := (curtailedAmps * 500.0 * math.Sqrt(3.0)) / 1000.0 // approx 190-330 MW
-	avoidedLoss := 22000000.0 // Avoided $22M subsea jointing, cable cutting, and mobilization
+	avoidedLoss := 22000000.0                                       // Avoided $22M subsea jointing, cable cutting, and mobilization
 
 	actionID := fmt.Sprintf("ACT-HVDC-%d", time.Now().UnixNano()%1000000)
 	action := HVDCLoadCurtailmentAction{

@@ -13,62 +13,62 @@ import (
 
 // ApprovedInvoiceFacility represents an approved AP bill made available for early supplier financing
 type ApprovedInvoiceFacility struct {
-	FacilityInvoiceID   string    `json:"facility_invoice_id"` // e.g. "SCF-INV-2026-9901"
-	BuyerID             string    `json:"buyer_id"`
-	BuyerName           string    `json:"buyer_name"`
-	BuyerCreditRating   string    `json:"buyer_credit_rating"` // e.g. "AAA_INVESTMENT_GRADE"
-	SupplierID          string    `json:"supplier_id"`
-	SupplierName        string    `json:"supplier_name"`
-	OriginalInvoiceNo   string    `json:"original_invoice_no"`
-	InvoiceAmountUSD    float64   `json:"invoice_amount_usd"`
-	ApprovalDate        time.Time `json:"approval_date"`
+	FacilityInvoiceID    string    `json:"facility_invoice_id"` // e.g. "SCF-INV-2026-9901"
+	BuyerID              string    `json:"buyer_id"`
+	BuyerName            string    `json:"buyer_name"`
+	BuyerCreditRating    string    `json:"buyer_credit_rating"` // e.g. "AAA_INVESTMENT_GRADE"
+	SupplierID           string    `json:"supplier_id"`
+	SupplierName         string    `json:"supplier_name"`
+	OriginalInvoiceNo    string    `json:"original_invoice_no"`
+	InvoiceAmountUSD     float64   `json:"invoice_amount_usd"`
+	ApprovalDate         time.Time `json:"approval_date"`
 	OriginalMaturityDate time.Time `json:"original_maturity_date"`
-	FunderBankID        string    `json:"funder_bank_id"` // e.g. "BANK-MANDIRI-SCF-DESK"
-	BaseBenchmarkRatePct float64  `json:"base_benchmark_rate_pct"` // e.g. 5.25% SOFR / BI-Rate
-	BuyerMarginSpreadPct float64  `json:"buyer_margin_spread_pct"` // e.g. 1.25%
-	FacilityStatus      string    `json:"facility_status"` // "PUBLISHED_ELIGIBLE", "DRAWN_EARLY", "MATURED_SETTLED"
+	FunderBankID         string    `json:"funder_bank_id"`          // e.g. "BANK-MANDIRI-SCF-DESK"
+	BaseBenchmarkRatePct float64   `json:"base_benchmark_rate_pct"` // e.g. 5.25% SOFR / BI-Rate
+	BuyerMarginSpreadPct float64   `json:"buyer_margin_spread_pct"` // e.g. 1.25%
+	FacilityStatus       string    `json:"facility_status"`         // "PUBLISHED_ELIGIBLE", "DRAWN_EARLY", "MATURED_SETTLED"
 }
 
 // EarlyDrawdownQuote represents the financial terms calculated for early invoice discounting
 type EarlyDrawdownQuote struct {
-	FacilityInvoiceID   string    `json:"facility_invoice_id"`
-	SupplierID          string    `json:"supplier_id"`
-	DrawdownDate        time.Time `json:"drawdown_date"`
-	DaysAccelerated     int       `json:"days_accelerated"` // Days between drawdown and original maturity
-	ApplicableAPRPct    float64   `json:"applicable_apr_pct"` // Base + Margin Spread
-	DiscountChargeUSD   float64   `json:"discount_charge_usd"`
-	NetDisbursedUSD     float64   `json:"net_disbursed_usd"`
-	BuyerWorkingCapDPO  int       `json:"buyer_working_cap_dpo"` // Preserved DPO days for buyer
-	CalculatedAt        time.Time `json:"calculated_at"`
+	FacilityInvoiceID  string    `json:"facility_invoice_id"`
+	SupplierID         string    `json:"supplier_id"`
+	DrawdownDate       time.Time `json:"drawdown_date"`
+	DaysAccelerated    int       `json:"days_accelerated"`   // Days between drawdown and original maturity
+	ApplicableAPRPct   float64   `json:"applicable_apr_pct"` // Base + Margin Spread
+	DiscountChargeUSD  float64   `json:"discount_charge_usd"`
+	NetDisbursedUSD    float64   `json:"net_disbursed_usd"`
+	BuyerWorkingCapDPO int       `json:"buyer_working_cap_dpo"` // Preserved DPO days for buyer
+	CalculatedAt       time.Time `json:"calculated_at"`
 }
 
 // IrrevocablePaymentUndertaking represents the legal bank commitment under IFRS 9 / IFRS 7
 type IrrevocablePaymentUndertaking struct {
-	IPUReferenceNo       string    `json:"ipu_reference_no"` // e.g. "IPU-2026-MANDIRI-88192"
-	FacilityInvoiceID    string    `json:"facility_invoice_id"`
-	BuyerID              string    `json:"buyer_id"`
-	FunderBankID         string    `json:"funder_bank_id"`
-	GuaranteedMaturityDate time.Time `json:"guaranteed_maturity_date"`
-	UnconditionalAmountUSD float64 `json:"unconditional_amount_usd"`
-	AccountingClassification string `json:"accounting_classification"` // "TRADE_PAYABLE_UNCHANGED" (No bank debt reclass)
-	DigitalSignatureHash string    `json:"digital_signature_hash"`
-	IssuedAt             time.Time `json:"issued_at"`
-	Status               string    `json:"status"` // "ISSUED_ACTIVE", "REDEEMED_ON_MATURITY"
+	IPUReferenceNo           string    `json:"ipu_reference_no"` // e.g. "IPU-2026-MANDIRI-88192"
+	FacilityInvoiceID        string    `json:"facility_invoice_id"`
+	BuyerID                  string    `json:"buyer_id"`
+	FunderBankID             string    `json:"funder_bank_id"`
+	GuaranteedMaturityDate   time.Time `json:"guaranteed_maturity_date"`
+	UnconditionalAmountUSD   float64   `json:"unconditional_amount_usd"`
+	AccountingClassification string    `json:"accounting_classification"` // "TRADE_PAYABLE_UNCHANGED" (No bank debt reclass)
+	DigitalSignatureHash     string    `json:"digital_signature_hash"`
+	IssuedAt                 time.Time `json:"issued_at"`
+	Status                   string    `json:"status"` // "ISSUED_ACTIVE", "REDEEMED_ON_MATURITY"
 }
 
 // SCFLiquidityDashboard presents the macro view of buyer-sponsored supplier finance
 type SCFLiquidityDashboard struct {
-	BuyerID                  string                     `json:"buyer_id"`
-	TotalFacilityLimitUSD    float64                    `json:"total_facility_limit_usd"`
-	TotalActiveInvoicesUSD   float64                    `json:"total_active_invoices_usd"`
-	TotalEarlyDrawnUSD       float64                    `json:"total_early_drawn_usd"`
-	AvailableLiquidityUSD    float64                    `json:"available_liquidity_usd"`
-	AverageSuppliersFinanced int                        `json:"average_suppliers_financed"`
-	AverageDaysAccelerated   int                        `json:"average_days_accelerated"`
-	AverageDiscountAPRPct    float64                    `json:"average_discount_apr_pct"`
-	PublishedFacilities      []ApprovedInvoiceFacility  `json:"published_facilities"`
+	BuyerID                  string                          `json:"buyer_id"`
+	TotalFacilityLimitUSD    float64                         `json:"total_facility_limit_usd"`
+	TotalActiveInvoicesUSD   float64                         `json:"total_active_invoices_usd"`
+	TotalEarlyDrawnUSD       float64                         `json:"total_early_drawn_usd"`
+	AvailableLiquidityUSD    float64                         `json:"available_liquidity_usd"`
+	AverageSuppliersFinanced int                             `json:"average_suppliers_financed"`
+	AverageDaysAccelerated   int                             `json:"average_days_accelerated"`
+	AverageDiscountAPRPct    float64                         `json:"average_discount_apr_pct"`
+	PublishedFacilities      []ApprovedInvoiceFacility       `json:"published_facilities"`
 	RecentIPUs               []IrrevocablePaymentUndertaking `json:"recent_ipus"`
-	GeneratedAt              time.Time                  `json:"generated_at"`
+	GeneratedAt              time.Time                       `json:"generated_at"`
 }
 
 // SCFEngine manages reverse factoring and supplier financing
@@ -147,15 +147,15 @@ func (e *SCFEngine) RequestEarlyDrawdown(facilityInvoiceID string, drawdownDate 
 	e.facilities[facilityInvoiceID] = fac
 
 	quote := EarlyDrawdownQuote{
-		FacilityInvoiceID:   facilityInvoiceID,
-		SupplierID:          fac.SupplierID,
-		DrawdownDate:        drawdownDate,
-		DaysAccelerated:     daysRemaining,
-		ApplicableAPRPct:    totalAPR,
-		DiscountChargeUSD:   discountCharge,
-		NetDisbursedUSD:     netDisbursed,
-		BuyerWorkingCapDPO:  90,
-		CalculatedAt:        time.Now(),
+		FacilityInvoiceID:  facilityInvoiceID,
+		SupplierID:         fac.SupplierID,
+		DrawdownDate:       drawdownDate,
+		DaysAccelerated:    daysRemaining,
+		ApplicableAPRPct:   totalAPR,
+		DiscountChargeUSD:  discountCharge,
+		NetDisbursedUSD:    netDisbursed,
+		BuyerWorkingCapDPO: 90,
+		CalculatedAt:       time.Now(),
 	}
 
 	e.drawdowns[facilityInvoiceID] = quote

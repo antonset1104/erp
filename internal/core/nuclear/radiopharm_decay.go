@@ -15,8 +15,8 @@ import (
 // RadioisotopeBatch models therapeutic and diagnostic nuclear medicine batch activity under NRC 10 CFR Part 35
 type RadioisotopeBatch struct {
 	BatchID                         string    `json:"batch_id"`
-	IsotopeName                     string    `json:"isotope_name"` // "LUTETIUM_177", "TECHNETIUM_99M", "IODINE_131"
-	HalfLifeHours                   float64   `json:"half_life_hours"` // Lu-177: 160.8h (6.7d); Tc-99m: 6.0h; I-131: 192.5h (8.02d)
+	IsotopeName                     string    `json:"isotope_name"`         // "LUTETIUM_177", "TECHNETIUM_99M", "IODINE_131"
+	HalfLifeHours                   float64   `json:"half_life_hours"`      // Lu-177: 160.8h (6.7d); Tc-99m: 6.0h; I-131: 192.5h (8.02d)
 	InitialActivityGBq              float64   `json:"initial_activity_gbq"` // Gigabecquerel (1 Ci = 37 GBq)
 	ProductionTimestamp             time.Time `json:"production_timestamp"`
 	CalibrationTargetTimestamp      time.Time `json:"calibration_target_timestamp"`
@@ -28,16 +28,16 @@ type RadioisotopeBatch struct {
 
 // DecayCalibrationCalculation models exponential radioactive decay A(t) = A0 * e^(-lambda * t)
 type DecayCalibrationCalculation struct {
-	CalculationID               string    `json:"calculation_id"`
-	BatchID                     string    `json:"batch_id"`
-	IsotopeName                 string    `json:"isotope_name"`
-	ElapsedHours                float64   `json:"elapsed_hours"`
-	RemainingActivityGBq        float64   `json:"remaining_activity_gbq"`
-	ActivityDecayPct            float64   `json:"activity_decay_pct"`
-	PatientDoseUnitsAvailable   int       `json:"patient_dose_units_available"` // Standard single patient dose ~7.4 GBq (200 mCi)
-	InoculationReadiness        string    `json:"inoculation_readiness"` // "READY_FOR_CLINICAL_INFUSION", "ACTIVITY_BELOW_THERAPEUTIC_THRESHOLD"
-	DecayAuditDigest            string    `json:"decay_audit_digest"`
-	CalculatedAt                time.Time `json:"calculated_at"`
+	CalculationID             string    `json:"calculation_id"`
+	BatchID                   string    `json:"batch_id"`
+	IsotopeName               string    `json:"isotope_name"`
+	ElapsedHours              float64   `json:"elapsed_hours"`
+	RemainingActivityGBq      float64   `json:"remaining_activity_gbq"`
+	ActivityDecayPct          float64   `json:"activity_decay_pct"`
+	PatientDoseUnitsAvailable int       `json:"patient_dose_units_available"` // Standard single patient dose ~7.4 GBq (200 mCi)
+	InoculationReadiness      string    `json:"inoculation_readiness"`        // "READY_FOR_CLINICAL_INFUSION", "ACTIVITY_BELOW_THERAPEUTIC_THRESHOLD"
+	DecayAuditDigest          string    `json:"decay_audit_digest"`
+	CalculatedAt              time.Time `json:"calculated_at"`
 }
 
 // XenonTransientPrediction models reactor core restart lockout from Xenon-135 neutron poisoning (10 CFR Part 50)

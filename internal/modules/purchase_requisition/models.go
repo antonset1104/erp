@@ -15,7 +15,7 @@ type RequisitionType string
 
 const (
 	TypePurchaseTender RequisitionType = "purchase_tender" // Tender pengadaan kompetitif (Call for Bids)
-	TypeBlanketOrder   RequisitionType = "blanket_order"    // Blanket Purchase Order (Kontrak harga & volume jangka panjang)
+	TypeBlanketOrder   RequisitionType = "blanket_order"   // Blanket Purchase Order (Kontrak harga & volume jangka panjang)
 )
 
 // RequisitionState defines the lifecycle of a purchase requisition
@@ -39,17 +39,17 @@ type PurchaseRequisition struct {
 	Origin       string           `gorm:"type:varchar(128)" json:"origin"`                   // Dokumen pemicu / nomor memo
 	Type         RequisitionType  `gorm:"type:varchar(32);default:'purchase_tender'" json:"type"`
 	State        RequisitionState `gorm:"type:varchar(32);default:'draft';index" json:"state"`
-	UserID       uint             `json:"user_id"`                                           // Pembuat permintaan / Buyer
+	UserID       uint             `json:"user_id"` // Pembuat permintaan / Buyer
 	User         *base.User       `gorm:"foreignKey:UserID" json:"user,omitempty"`
-	VendorID     *uint            `json:"vendor_id,omitempty"`                               // Rekanan terpilih / Blanket vendor
+	VendorID     *uint            `json:"vendor_id,omitempty"` // Rekanan terpilih / Blanket vendor
 	Vendor       *base.Partner    `gorm:"foreignKey:VendorID" json:"vendor,omitempty"`
-	OrderingDate string           `gorm:"type:varchar(32)" json:"ordering_date"`             // Tanggal pengajuan
-	DateEnd      string           `gorm:"type:varchar(32)" json:"date_end"`                  // Batas akhir tender (Deadline)
-	ScheduleDate string           `gorm:"type:varchar(32)" json:"schedule_date"`              // Jadwal pengiriman diharapkan
+	OrderingDate string           `gorm:"type:varchar(32)" json:"ordering_date"` // Tanggal pengajuan
+	DateEnd      string           `gorm:"type:varchar(32)" json:"date_end"`      // Batas akhir tender (Deadline)
+	ScheduleDate string           `gorm:"type:varchar(32)" json:"schedule_date"` // Jadwal pengiriman diharapkan
 	CompanyID    uint             `gorm:"default:1" json:"company_id"`
 	Description  string           `gorm:"type:text" json:"description"`
-	TotalAmount  float64          `gorm:"type:decimal(15,2);default:0" json:"total_amount"`  // Total estimasi plafon PR
-	SelectedPOID *uint            `json:"selected_po_id,omitempty"`                          // PO pemenang tender
+	TotalAmount  float64          `gorm:"type:decimal(15,2);default:0" json:"total_amount"` // Total estimasi plafon PR
+	SelectedPOID *uint            `json:"selected_po_id,omitempty"`                         // PO pemenang tender
 
 	Lines          []PurchaseRequisitionLine `gorm:"foreignKey:RequisitionID" json:"lines"`
 	PurchaseOrders []purchase.PurchaseOrder  `gorm:"foreignKey:RequisitionID" json:"purchase_orders,omitempty"`
@@ -65,11 +65,11 @@ type PurchaseRequisitionLine struct {
 	ProductID         uint            `gorm:"not null" json:"product_id"`
 	Product           product.Product `gorm:"foreignKey:ProductID" json:"product"`
 	Description       string          `gorm:"type:varchar(255)" json:"description"`
-	ProductQty        float64         `gorm:"type:decimal(12,2);not null" json:"product_qty"`       // Kuantitas diminta
-	QtyOrdered        float64         `gorm:"type:decimal(12,2);default:0" json:"qty_ordered"`      // Kuantitas terbit ke PO
-	PriceUnit         float64         `gorm:"type:decimal(15,2);default:0" json:"price_unit"`       // Estimasi harga per unit
+	ProductQty        float64         `gorm:"type:decimal(12,2);not null" json:"product_qty"`  // Kuantitas diminta
+	QtyOrdered        float64         `gorm:"type:decimal(12,2);default:0" json:"qty_ordered"` // Kuantitas terbit ke PO
+	PriceUnit         float64         `gorm:"type:decimal(15,2);default:0" json:"price_unit"`  // Estimasi harga per unit
 	Subtotal          float64         `gorm:"type:decimal(15,2);default:0" json:"subtotal"`
-	AccountAnalyticID *uint           `json:"account_analytic_id,omitempty"`                       // Link ke cost center budget
+	AccountAnalyticID *uint           `json:"account_analytic_id,omitempty"` // Link ke cost center budget
 }
 
 // TableName overrides GORM default table name
@@ -104,8 +104,8 @@ type CreateRequisitionRequest struct {
 }
 
 type GenerateRFQRequest struct {
-	VendorID uint    `json:"vendor_id" binding:"required"`
-	Notes    string  `json:"notes"`
+	VendorID uint   `json:"vendor_id" binding:"required"`
+	Notes    string `json:"notes"`
 }
 
 type ReleaseBlanketPORequest struct {

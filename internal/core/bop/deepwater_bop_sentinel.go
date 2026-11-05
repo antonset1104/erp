@@ -15,14 +15,14 @@ import (
 // DeepwaterBOPTelemetry captures subsea wellhead blowout preventer state under API Spec 16D & API Spec 53
 type DeepwaterBOPTelemetry struct {
 	TelemetryID                  string    `json:"telemetry_id"`
-	BOPStackID                   string    `json:"bop_stack_id"`                     // "BOP-STACK-DEEPWATER-3000M-01"
-	WellboreID                   string    `json:"wellbore_id"`                      // "WELL-GULF-OF-MEXICO-BLOCK-252"
-	WaterDepthMeters             float64   `json:"water_depth_meters"`               // e.g. 2850.0 m
-	AccumulatorPressureBar       float64   `json:"accumulator_pressure_bar"`        // e.g. 310.0 bar (nominal 345 bar)
-	WellborePressureBar          float64   `json:"wellbore_pressure_bar"`           // e.g. 890.0 bar
-	AcousticChannelSNRDB         float64   `json:"acoustic_channel_snr_db"`          // e.g. 14.5 dB (threshold > 10 dB)
-	BlindShearRamRequiredForceKN float64   `json:"blind_shear_ram_required_force_kn"`// e.g. 2450.0 kN
-	ShearRamClosingTimeSec       float64   `json:"shear_ram_closing_time_sec"`       // e.g. 12.5 s (API limit < 30 s)
+	BOPStackID                   string    `json:"bop_stack_id"`                      // "BOP-STACK-DEEPWATER-3000M-01"
+	WellboreID                   string    `json:"wellbore_id"`                       // "WELL-GULF-OF-MEXICO-BLOCK-252"
+	WaterDepthMeters             float64   `json:"water_depth_meters"`                // e.g. 2850.0 m
+	AccumulatorPressureBar       float64   `json:"accumulator_pressure_bar"`          // e.g. 310.0 bar (nominal 345 bar)
+	WellborePressureBar          float64   `json:"wellbore_pressure_bar"`             // e.g. 890.0 bar
+	AcousticChannelSNRDB         float64   `json:"acoustic_channel_snr_db"`           // e.g. 14.5 dB (threshold > 10 dB)
+	BlindShearRamRequiredForceKN float64   `json:"blind_shear_ram_required_force_kn"` // e.g. 2450.0 kN
+	ShearRamClosingTimeSec       float64   `json:"shear_ram_closing_time_sec"`        // e.g. 12.5 s (API limit < 30 s)
 	ROVHotStabConnected          bool      `json:"rov_hot_stab_connected"`
 	AutoshearSequenceArmed       bool      `json:"autoshear_sequence_armed"`
 	RecordedAt                   time.Time `json:"recorded_at"`
@@ -30,14 +30,14 @@ type DeepwaterBOPTelemetry struct {
 
 // BOPShearRamAssessment models polytropic nitrogen gas expansion and acoustic hydrophone link integrity
 type BOPShearRamAssessment struct {
-	AssessmentID                        string    `json:"assessment_id"`
-	BOPStackID                          string    `json:"bop_stack_id"`
-	AccumulatorPolytropicEnergyMarginPct float64  `json:"accumulator_polytropic_energy_margin_pct"`
-	AcousticTelemetryReliabilityLevel   string    `json:"acoustic_telemetry_reliability_level"` // "HIGH_ACOUSTIC_FIDELITY", "ATTENUATED_THERMOCLINE_MARGINAL", "CRITICAL_ACOUSTIC_COMM_FAILURE"
-	WellboreKickBlowoutRiskLevel        string    `json:"wellbore_kick_blowout_risk_level"`       // "HYDROSTATIC_EQUILIBRIUM", "ELEVATED_KICK_MUD_WARNING", "CRITICAL_UNCONTROLLED_BLOWOUT_IMMINENT"
-	AutoshearDeadmanTriggerMandate      bool      `json:"autoshear_deadman_trigger_mandate"`
-	AuditDigest                         string    `json:"audit_digest"`
-	EvaluatedAt                         time.Time `json:"evaluated_at"`
+	AssessmentID                         string    `json:"assessment_id"`
+	BOPStackID                           string    `json:"bop_stack_id"`
+	AccumulatorPolytropicEnergyMarginPct float64   `json:"accumulator_polytropic_energy_margin_pct"`
+	AcousticTelemetryReliabilityLevel    string    `json:"acoustic_telemetry_reliability_level"` // "HIGH_ACOUSTIC_FIDELITY", "ATTENUATED_THERMOCLINE_MARGINAL", "CRITICAL_ACOUSTIC_COMM_FAILURE"
+	WellboreKickBlowoutRiskLevel         string    `json:"wellbore_kick_blowout_risk_level"`     // "HYDROSTATIC_EQUILIBRIUM", "ELEVATED_KICK_MUD_WARNING", "CRITICAL_UNCONTROLLED_BLOWOUT_IMMINENT"
+	AutoshearDeadmanTriggerMandate       bool      `json:"autoshear_deadman_trigger_mandate"`
+	AuditDigest                          string    `json:"audit_digest"`
+	EvaluatedAt                          time.Time `json:"evaluated_at"`
 }
 
 // BOPAutoshearAction models automated emergency blind shear ram closure and subsea wellhead sealing
@@ -46,7 +46,7 @@ type BOPAutoshearAction struct {
 	BOPStackID                      string    `json:"bop_stack_id"`
 	BlindShearRamClosingPressureBar float64   `json:"blind_shear_ram_closing_pressure_bar"`
 	PipeSeveredSuccessfully         bool      `json:"pipe_severed_successfully"`
-	AvoidedMacondoBlowoutLossUSD     float64  `json:"avoided_macondo_blowout_loss_usd"` // Avoided $85M USD catastrophic environmental blowout and rig loss
+	AvoidedMacondoBlowoutLossUSD    float64   `json:"avoided_macondo_blowout_loss_usd"` // Avoided $85M USD catastrophic environmental blowout and rig loss
 	ActionTimestamp                 time.Time `json:"action_timestamp"`
 }
 
@@ -130,14 +130,14 @@ func (v *BOPVault) EvaluateShearRamAndAcousticLink(stackID string) (BOPShearRamA
 
 	assessID := fmt.Sprintf("ASSESS-BOP-%d", time.Now().UnixNano()%1000000)
 	assessment := BOPShearRamAssessment{
-		AssessmentID:                        assessID,
-		BOPStackID:                          stackID,
+		AssessmentID:                         assessID,
+		BOPStackID:                           stackID,
 		AccumulatorPolytropicEnergyMarginPct: math.Round(pressureMarginPct*10.0) / 10.0,
-		AcousticTelemetryReliabilityLevel:   acousticReliability,
-		WellboreKickBlowoutRiskLevel:        blowoutRisk,
-		AutoshearDeadmanTriggerMandate:      autoshear,
-		AuditDigest:                         digest,
-		EvaluatedAt:                         time.Now(),
+		AcousticTelemetryReliabilityLevel:    acousticReliability,
+		WellboreKickBlowoutRiskLevel:         blowoutRisk,
+		AutoshearDeadmanTriggerMandate:       autoshear,
+		AuditDigest:                          digest,
+		EvaluatedAt:                          time.Now(),
 	}
 
 	v.assessments[stackID] = assessment
@@ -157,7 +157,7 @@ func (v *BOPVault) TriggerEmergencyAutoshearSequence(stackID string) (BOPAutoshe
 		BOPStackID:                      stackID,
 		BlindShearRamClosingPressureBar: 345.0,
 		PipeSeveredSuccessfully:         true,
-		AvoidedMacondoBlowoutLossUSD:     avoidedLoss,
+		AvoidedMacondoBlowoutLossUSD:    avoidedLoss,
 		ActionTimestamp:                 time.Now(),
 	}
 

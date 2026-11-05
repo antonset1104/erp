@@ -707,10 +707,10 @@ Hasilkan JSON dengan format tepat:
 		)
 
 		recall.ResolutionNotes = fmt.Sprintf(
-			"SOP RESOLUSI & INVESTIGASI AKAR MASALAH:\n"+
-				"1. Karantina fisik pada gudang karantina (Location usage: transit/inventory).\n"+
-				"2. Uji laboratorium sampel pertinggal (retained sample test).\n"+
-				"3. CAPA (Corrective and Preventive Action) pada lini produksi & sertifikasi pemasok.\n"+
+			"SOP RESOLUSI & INVESTIGASI AKAR MASALAH:\n" +
+				"1. Karantina fisik pada gudang karantina (Location usage: transit/inventory).\n" +
+				"2. Uji laboratorium sampel pertinggal (retained sample test).\n" +
+				"3. CAPA (Corrective and Preventive Action) pada lini produksi & sertifikasi pemasok.\n" +
 				"4. Pemusnahan limbah bersertifikat (Certificate of Destruction) setelah verifikasi.",
 		)
 	}

@@ -74,11 +74,11 @@ type EvaluatedBid struct {
 	PaymentTermsDays       int     `json:"payment_terms_days"`
 	WarrantyMonths         int     `json:"warranty_months"`
 	DiscountPct            float64 `json:"discount_pct"`
-	PriceScore             float64 `json:"price_score"`       // Weight 40%
-	LeadTimeScore          float64 `json:"lead_time_score"`   // Weight 25%
-	TermsScore             float64 `json:"terms_score"`       // Weight 20%
-	WarrantyScore          float64 `json:"warranty_score"`    // Weight 15%
-	CompositeScore         float64 `json:"composite_score"`   // 0 - 100
+	PriceScore             float64 `json:"price_score"`     // Weight 40%
+	LeadTimeScore          float64 `json:"lead_time_score"` // Weight 25%
+	TermsScore             float64 `json:"terms_score"`     // Weight 20%
+	WarrantyScore          float64 `json:"warranty_score"`  // Weight 15%
+	CompositeScore         float64 `json:"composite_score"` // 0 - 100
 	Rank                   int     `json:"rank"`
 	AIRationale            string  `json:"ai_rationale"`
 	CounterOfferSuggestion string  `json:"counter_offer_suggestion"`

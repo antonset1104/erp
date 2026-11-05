@@ -11,9 +11,9 @@ import (
 
 // CloudResourceBilling represents an individual cloud infrastructure line item
 type CloudResourceBilling struct {
-	ResourceID          string    `json:"resource_id"` // e.g. "i-09827419fa821" or "gke-cluster-prod-asia"
+	ResourceID          string    `json:"resource_id"`    // e.g. "i-09827419fa821" or "gke-cluster-prod-asia"
 	CloudProvider       string    `json:"cloud_provider"` // "AWS", "GCP", "AZURE"
-	ResourceType        string    `json:"resource_type"` // "COMPUTE_VM", "MANAGED_K8S", "DATABASE_INSTANCE", "UNATTACHED_DISK"
+	ResourceType        string    `json:"resource_type"`  // "COMPUTE_VM", "MANAGED_K8S", "DATABASE_INSTANCE", "UNATTACHED_DISK"
 	GrossMonthlyCostUSD float64   `json:"gross_monthly_cost_usd"`
 	AverageCPUPercent   float64   `json:"average_cpu_percent"`
 	AverageRAMPercent   float64   `json:"average_ram_percent"`
@@ -24,47 +24,47 @@ type CloudResourceBilling struct {
 
 // DepartmentCostAllocation represents distributed cloud cost per business unit
 type DepartmentCostAllocation struct {
-	CostCenterID        string  `json:"cost_center_id"`
-	DepartmentName      string  `json:"department_name"`
-	DirectCostUSD       float64 `json:"direct_cost_usd"`
-	SharedPoolShareUSD  float64 `json:"shared_pool_share_usd"`
-	TotalAllocatedUSD   float64 `json:"total_allocated_usd"`
+	CostCenterID          string  `json:"cost_center_id"`
+	DepartmentName        string  `json:"department_name"`
+	DirectCostUSD         float64 `json:"direct_cost_usd"`
+	SharedPoolShareUSD    float64 `json:"shared_pool_share_usd"`
+	TotalAllocatedUSD     float64 `json:"total_allocated_usd"`
 	UtilizationEfficiency float64 `json:"utilization_efficiency_pct"`
 }
 
 // ReapingAction represents an automated termination, downsizing, or storage tiering event
 type ReapingAction struct {
-	ActionID             string    `json:"action_id"`
-	ResourceID           string    `json:"resource_id"`
-	ResourceType         string    `json:"resource_type"`
-	PriorMonthlyCostUSD  float64   `json:"prior_monthly_cost_usd"`
-	ActionTaken          string    `json:"action_taken"` // "TERMINATED_ZOMBIE", "DOWNSIZED_RIGHTSIZED", "SNAPSHOT_AND_DELETED"
-	AnnualSavingsUSD     float64   `json:"annual_savings_usd"`
-	ReapedByOwner        string    `json:"reaped_by_owner"`
-	ExecutedAt           time.Time `json:"executed_at"`
+	ActionID            string    `json:"action_id"`
+	ResourceID          string    `json:"resource_id"`
+	ResourceType        string    `json:"resource_type"`
+	PriorMonthlyCostUSD float64   `json:"prior_monthly_cost_usd"`
+	ActionTaken         string    `json:"action_taken"` // "TERMINATED_ZOMBIE", "DOWNSIZED_RIGHTSIZED", "SNAPSHOT_AND_DELETED"
+	AnnualSavingsUSD    float64   `json:"annual_savings_usd"`
+	ReapedByOwner       string    `json:"reaped_by_owner"`
+	ExecutedAt          time.Time `json:"executed_at"`
 }
 
 // FinOpsDashboardSummary provides high-level executive view of cloud infrastructure spend
 type FinOpsDashboardSummary struct {
-	OrgID                 string                     `json:"org_id"`
-	ReportingPeriod       string                     `json:"reporting_period"`
-	TotalCloudSpendUSD    float64                    `json:"total_cloud_spend_usd"`
-	DirectAllocatedUSD    float64                    `json:"direct_allocated_usd"`
-	SharedAllocatedUSD    float64                    `json:"shared_allocated_usd"`
-	AllocationCoveragePct float64                    `json:"allocation_coverage_pct"`
-	IdentifiedIdleWasteUSD float64                   `json:"identified_idle_waste_usd"`
-	AnnualReapedSavingsUSD float64                   `json:"annual_reaped_savings_usd"`
-	Allocations           []DepartmentCostAllocation `json:"allocations"`
-	RecentReapingActions  []ReapingAction            `json:"recent_reaping_actions"`
-	LastAuditedAt         time.Time                  `json:"last_audited_at"`
+	OrgID                  string                     `json:"org_id"`
+	ReportingPeriod        string                     `json:"reporting_period"`
+	TotalCloudSpendUSD     float64                    `json:"total_cloud_spend_usd"`
+	DirectAllocatedUSD     float64                    `json:"direct_allocated_usd"`
+	SharedAllocatedUSD     float64                    `json:"shared_allocated_usd"`
+	AllocationCoveragePct  float64                    `json:"allocation_coverage_pct"`
+	IdentifiedIdleWasteUSD float64                    `json:"identified_idle_waste_usd"`
+	AnnualReapedSavingsUSD float64                    `json:"annual_reaped_savings_usd"`
+	Allocations            []DepartmentCostAllocation `json:"allocations"`
+	RecentReapingActions   []ReapingAction            `json:"recent_reaping_actions"`
+	LastAuditedAt          time.Time                  `json:"last_audited_at"`
 }
 
 // FinOpsEngine manages multi-cloud cost allocation and idle resource reaping
 type FinOpsEngine struct {
-	mu           sync.RWMutex
-	resources    map[string]CloudResourceBilling
-	allocations  map[string][]DepartmentCostAllocation
-	reapingLogs  map[string][]ReapingAction
+	mu          sync.RWMutex
+	resources   map[string]CloudResourceBilling
+	allocations map[string][]DepartmentCostAllocation
+	reapingLogs map[string][]ReapingAction
 }
 
 var (

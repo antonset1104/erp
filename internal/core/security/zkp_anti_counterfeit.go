@@ -20,10 +20,10 @@ type SerializedProductProof struct {
 	ManufacturerID       string    `json:"manufacturer_id"`
 	ManufacturingDate    time.Time `json:"manufacturing_date"`
 	ExpiryDate           time.Time `json:"expiry_date"`
-	ZKProofHash          string    `json:"zk_proof_hash"`         // Cryptographic commitment (zk-SNARK proof of authentic origin)
+	ZKProofHash          string    `json:"zk_proof_hash"`          // Cryptographic commitment (zk-SNARK proof of authentic origin)
 	MerkleRootCommitment string    `json:"merkle_root_commitment"` // Proves inclusion in authorized master batch
-	SecretSaltHidden     bool      `json:"secret_salt_hidden"`    // True: BOM cost & private supplier details are zero-knowledge concealed
-	CurrentStatus        string    `json:"current_status"`        // "GENUINE_IN_CIRCULATION", "FLAGGED_SUSPECT", "DISPENSED_RETIRED"
+	SecretSaltHidden     bool      `json:"secret_salt_hidden"`     // True: BOM cost & private supplier details are zero-knowledge concealed
+	CurrentStatus        string    `json:"current_status"`         // "GENUINE_IN_CIRCULATION", "FLAGGED_SUSPECT", "DISPENSED_RETIRED"
 	MintedAt             time.Time `json:"minted_at"`
 }
 
@@ -41,24 +41,24 @@ type CustodyHandshake struct {
 
 // AnomalyFlag represents an alert for counterfeit, cloned, or diverted goods
 type AnomalyFlag struct {
-	AlertID           string    `json:"alert_id"`
-	SerialNumber      string    `json:"serial_no"`
-	AnomalyType       string    `json:"anomaly_type"` // "GEOLOCATION_COLLISION", "DUPLICATE_REDEMPTION", "EXPIRED_BATCH_TAMPER"
-	SeverityLevel     string    `json:"severity_level"` // "CRITICAL", "HIGH", "MEDIUM"
-	ReportedByLocation string   `json:"reported_by_location"`
-	Description       string    `json:"description"`
-	ActionTaken       string    `json:"action_taken"` // "BATCH_LOCKED_IN_WMS", "AUTHORITIES_NOTIFIED"
-	FlaggedAt         time.Time `json:"flagged_at"`
+	AlertID            string    `json:"alert_id"`
+	SerialNumber       string    `json:"serial_no"`
+	AnomalyType        string    `json:"anomaly_type"`   // "GEOLOCATION_COLLISION", "DUPLICATE_REDEMPTION", "EXPIRED_BATCH_TAMPER"
+	SeverityLevel      string    `json:"severity_level"` // "CRITICAL", "HIGH", "MEDIUM"
+	ReportedByLocation string    `json:"reported_by_location"`
+	Description        string    `json:"description"`
+	ActionTaken        string    `json:"action_taken"` // "BATCH_LOCKED_IN_WMS", "AUTHORITIES_NOTIFIED"
+	FlaggedAt          time.Time `json:"flagged_at"`
 }
 
 // ItemLineageSummary presents the end-to-end cryptographic provenance tree
 type ItemLineageSummary struct {
-	SerialNumber     string             `json:"serial_no"`
+	SerialNumber     string                 `json:"serial_no"`
 	ProofDetails     SerializedProductProof `json:"proof_details"`
-	CustodyTrail     []CustodyHandshake `json:"custody_trail"`
-	Anomalies        []AnomalyFlag      `json:"anomalies"`
-	AuthenticityRank string             `json:"authenticity_rank"` // "AUTHENTIC_GENUINE_100", "COMPROMISED_COUNTERFEIT"
-	LastInspectedAt  time.Time          `json:"last_inspected_at"`
+	CustodyTrail     []CustodyHandshake     `json:"custody_trail"`
+	Anomalies        []AnomalyFlag          `json:"anomalies"`
+	AuthenticityRank string                 `json:"authenticity_rank"` // "AUTHENTIC_GENUINE_100", "COMPROMISED_COUNTERFEIT"
+	LastInspectedAt  time.Time              `json:"last_inspected_at"`
 }
 
 // ZKPEngine manages Zero-Knowledge anti-counterfeit serialization

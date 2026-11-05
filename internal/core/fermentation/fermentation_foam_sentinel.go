@@ -14,27 +14,27 @@ import (
 
 // FermenterTelemetry captures industrial 50k-250kL precision fermentation foam, mass transfer, and dissolved gas dynamics under ASME BPE & ISO 22000
 type FermenterTelemetry struct {
-	TelemetryID                  string    `json:"telemetry_id"`
-	VesselID                     string    `json:"vessel_id"`                        // "FERM-INDUSTRIAL-BIOVESSEL-150KL-01"
-	BatchID                      string    `json:"batch_id"`                         // "BATCH-WHEY-PROTEIN-EXPRESS-88"
-	WorkingVolumeLiters          float64   `json:"working_volume_liters"`            // e.g. 120000.0 L
-	AgitatorPowerPerVolumeKwM3   float64   `json:"agitator_power_per_volume_kw_m3"`  // e.g. 4.25 kW/m3
-	SuperficialGasVelocityMPerSec float64  `json:"superficial_gas_velocity_m_per_sec"`// e.g. 0.052 m/s
-	DissolvedCarbonDioxideMbar   float64   `json:"dissolved_carbon_dioxide_mbar"`    // e.g. 115.0 mbar (hypercapnic toxicity > 100 mbar)
-	DissolvedOxygenPercentAirSat float64   `json:"dissolved_oxygen_percent_air_sat"` // e.g. 21.5% air sat (critical > 20%)
-	HeadspaceFoamCapacitancePf   float64   `json:"headspace_foam_capacitance_pf"`    // e.g. 68.5 pF (foam-out threshold > 50 pF)
-	GasHoldUpFraction            float64   `json:"gas_hold_up_fraction"`             // e.g. 0.185
-	VolumetricMassTransferKlaHr  float64   `json:"volumetric_mass_transfer_kla_hr"`  // e.g. 245.0 1/hr
-	RecordedAt                   time.Time `json:"recorded_at"`
+	TelemetryID                   string    `json:"telemetry_id"`
+	VesselID                      string    `json:"vessel_id"`                          // "FERM-INDUSTRIAL-BIOVESSEL-150KL-01"
+	BatchID                       string    `json:"batch_id"`                           // "BATCH-WHEY-PROTEIN-EXPRESS-88"
+	WorkingVolumeLiters           float64   `json:"working_volume_liters"`              // e.g. 120000.0 L
+	AgitatorPowerPerVolumeKwM3    float64   `json:"agitator_power_per_volume_kw_m3"`    // e.g. 4.25 kW/m3
+	SuperficialGasVelocityMPerSec float64   `json:"superficial_gas_velocity_m_per_sec"` // e.g. 0.052 m/s
+	DissolvedCarbonDioxideMbar    float64   `json:"dissolved_carbon_dioxide_mbar"`      // e.g. 115.0 mbar (hypercapnic toxicity > 100 mbar)
+	DissolvedOxygenPercentAirSat  float64   `json:"dissolved_oxygen_percent_air_sat"`   // e.g. 21.5% air sat (critical > 20%)
+	HeadspaceFoamCapacitancePf    float64   `json:"headspace_foam_capacitance_pf"`      // e.g. 68.5 pF (foam-out threshold > 50 pF)
+	GasHoldUpFraction             float64   `json:"gas_hold_up_fraction"`               // e.g. 0.185
+	VolumetricMassTransferKlaHr   float64   `json:"volumetric_mass_transfer_kla_hr"`    // e.g. 245.0 1/hr
+	RecordedAt                    time.Time `json:"recorded_at"`
 }
 
 // FermenterAssessment models headspace foam-out velocity, kLa transfer efficiency, and hypercapnic CO2 inhibition
 type FermenterAssessment struct {
 	AssessmentID                     string    `json:"assessment_id"`
 	VesselID                         string    `json:"vessel_id"`
-	RespiratoryQuotientRQ            float64   `json:"respiratory_quotient_rq"`              // CER / OUR metabolic ratio
-	FoamOutRiskLevel                 string    `json:"foam_out_risk_level"`                  // "STABLE_HEADSPACE_CLEAR", "MODERATE_FOAMING_WARNING", "CRITICAL_HEPA_FOAM_OUT_BLOWOUT_HAZARD"
-	HypercapnicMetabolicStress       string    `json:"hypercapnic_metabolic_stress"`         // "PHYSIOLOGICAL_CO2_OPTIMAL", "HYPERCAPNIC_GROWTH_INHIBITION", "SEVERE_RESPIRATORY_ARREST_COLLAPSE"
+	RespiratoryQuotientRQ            float64   `json:"respiratory_quotient_rq"`      // CER / OUR metabolic ratio
+	FoamOutRiskLevel                 string    `json:"foam_out_risk_level"`          // "STABLE_HEADSPACE_CLEAR", "MODERATE_FOAMING_WARNING", "CRITICAL_HEPA_FOAM_OUT_BLOWOUT_HAZARD"
+	HypercapnicMetabolicStress       string    `json:"hypercapnic_metabolic_stress"` // "PHYSIOLOGICAL_CO2_OPTIMAL", "HYPERCAPNIC_GROWTH_INHIBITION", "SEVERE_RESPIRATORY_ARREST_COLLAPSE"
 	MechanicalFoamBreakerMandate     bool      `json:"mechanical_foam_breaker_mandate"`
 	CO2GasStrippingEnrichmentMandate bool      `json:"co2_gas_stripping_enrichment_mandate"`
 	AuditDigest                      string    `json:"audit_digest"`
@@ -43,13 +43,13 @@ type FermenterAssessment struct {
 
 // FermenterMitigationAction models mechanical foam centrifuge acceleration, pulsed antifoam dosing, and O2-enriched stripping gas
 type FermenterMitigationAction struct {
-	ActionID                      string    `json:"action_id"`
-	VesselID                      string    `json:"vessel_id"`
-	CommandedFoamCentrifugeRpm    float64   `json:"commanded_foam_centrifuge_rpm"`    // accelerated to 2800.0 rpm
-	PulsedAntifoamDoseMlPerMin    float64   `json:"pulsed_antifoam_dose_ml_per_min"`  // 145.0 mL/min food-grade silicone/vegetable emulsion
-	EnrichedInletOxygenFractionPct float64  `json:"enriched_inlet_oxygen_fraction_pct"`// boosted to 28.5% O2
-	AvoidedBioprocessLossUSD      float64   `json:"avoided_bioprocess_loss_usd"`      // Avoided $15M USD precision protein batch scrap and HEPA decontamination
-	ActionTimestamp               time.Time `json:"action_timestamp"`
+	ActionID                       string    `json:"action_id"`
+	VesselID                       string    `json:"vessel_id"`
+	CommandedFoamCentrifugeRpm     float64   `json:"commanded_foam_centrifuge_rpm"`      // accelerated to 2800.0 rpm
+	PulsedAntifoamDoseMlPerMin     float64   `json:"pulsed_antifoam_dose_ml_per_min"`    // 145.0 mL/min food-grade silicone/vegetable emulsion
+	EnrichedInletOxygenFractionPct float64   `json:"enriched_inlet_oxygen_fraction_pct"` // boosted to 28.5% O2
+	AvoidedBioprocessLossUSD       float64   `json:"avoided_bioprocess_loss_usd"`        // Avoided $15M USD precision protein batch scrap and HEPA decontamination
+	ActionTimestamp                time.Time `json:"action_timestamp"`
 }
 
 // FermentationVault thread-safe in-memory store
@@ -160,13 +160,13 @@ func (v *FermentationVault) TriggerFoamBreakerAndCO2Stripping(vesselID string) (
 	}
 
 	action := FermenterMitigationAction{
-		ActionID:                      fmt.Sprintf("ACT-FERM-%d", time.Now().UnixNano()%1000000),
-		VesselID:                      vesselID,
-		CommandedFoamCentrifugeRpm:    centrifugeRpm,
-		PulsedAntifoamDoseMlPerMin:    antifoamDose,
+		ActionID:                       fmt.Sprintf("ACT-FERM-%d", time.Now().UnixNano()%1000000),
+		VesselID:                       vesselID,
+		CommandedFoamCentrifugeRpm:     centrifugeRpm,
+		PulsedAntifoamDoseMlPerMin:     antifoamDose,
 		EnrichedInletOxygenFractionPct: o2Pct,
-		AvoidedBioprocessLossUSD:      15000000.0,
-		ActionTimestamp:               time.Now(),
+		AvoidedBioprocessLossUSD:       15000000.0,
+		ActionTimestamp:                time.Now(),
 	}
 
 	v.actions[vesselID] = action

@@ -14,46 +14,46 @@ import (
 
 // LNGCargoTelemetry models cryogenic membrane tank status under IMO IGC Code
 type LNGCargoTelemetry struct {
-	TelemetryID               string    `json:"telemetry_id"`
-	VesselIMO                 string    `json:"vessel_imo"`  // e.g. "IMO-9781200"
-	VesselName                string    `json:"vessel_name"` // "LNG Nusantara Tangguh"
-	CargoTankNumber           string    `json:"cargo_tank_number"`
-	CargoVolumeM3             float64   `json:"cargo_volume_m3"`
-	CargoTempC                float64   `json:"cargo_temp_c"`                  // Boiling point ~ -162.0°C
-	TankVaporPressureKPa      float64   `json:"tank_vapor_pressure_kpa"`       // Normal: 105 - 115 kPa; Warning > 120 kPa; Relief valve: 125 kPa
-	AmbientAirTempC           float64   `json:"ambient_air_temp_c"`
-	SeaWaterTempC             float64   `json:"sea_water_temp_c"`
-	ShipSpeedKnots            float64   `json:"ship_speed_knots"`
-	DualFuelEngineDemandKGHr  float64   `json:"dual_fuel_engine_demand_kg_hr"` // Propulsion fuel gas demand
-	RecordedAt                time.Time `json:"recorded_at"`
+	TelemetryID              string    `json:"telemetry_id"`
+	VesselIMO                string    `json:"vessel_imo"`  // e.g. "IMO-9781200"
+	VesselName               string    `json:"vessel_name"` // "LNG Nusantara Tangguh"
+	CargoTankNumber          string    `json:"cargo_tank_number"`
+	CargoVolumeM3            float64   `json:"cargo_volume_m3"`
+	CargoTempC               float64   `json:"cargo_temp_c"`            // Boiling point ~ -162.0°C
+	TankVaporPressureKPa     float64   `json:"tank_vapor_pressure_kpa"` // Normal: 105 - 115 kPa; Warning > 120 kPa; Relief valve: 125 kPa
+	AmbientAirTempC          float64   `json:"ambient_air_temp_c"`
+	SeaWaterTempC            float64   `json:"sea_water_temp_c"`
+	ShipSpeedKnots           float64   `json:"ship_speed_knots"`
+	DualFuelEngineDemandKGHr float64   `json:"dual_fuel_engine_demand_kg_hr"` // Propulsion fuel gas demand
+	RecordedAt               time.Time `json:"recorded_at"`
 }
 
 // BOGOptimizationPlan models optimal cargo conservation, propulsion fuel allocation, and reliquefaction
 type BOGOptimizationPlan struct {
-	PlanID                       string    `json:"plan_id"`
-	VesselIMO                    string    `json:"vessel_imo"`
-	NaturalBOGRateKgHr           float64   `json:"natural_bog_rate_kg_hr"`
-	TotalBOGGeneratedKgHr        float64   `json:"total_bog_generated_kg_hr"`
-	AllocatedFuelEngineKgHr      float64   `json:"allocated_fuel_engine_kg_hr"`
-	AllocatedReliquefactionKgHr  float64   `json:"allocated_reliquefaction_kg_hr"`
-	AllocatedGCUKgHr             float64   `json:"allocated_gcu_kg_hr"` // Gas Combustion Unit (flaring)
-	CompressorPowerKW            float64   `json:"compressor_power_kw"`
-	DailyCargoSavedUSD           float64   `json:"daily_cargo_saved_usd"`
-	TankPressureStabilizedKPa    float64   `json:"tank_pressure_stabilized_kpa"`
-	OptimizationAuditDigest      string    `json:"optimization_audit_digest"`
-	EvaluatedAt                  time.Time `json:"evaluated_at"`
+	PlanID                      string    `json:"plan_id"`
+	VesselIMO                   string    `json:"vessel_imo"`
+	NaturalBOGRateKgHr          float64   `json:"natural_bog_rate_kg_hr"`
+	TotalBOGGeneratedKgHr       float64   `json:"total_bog_generated_kg_hr"`
+	AllocatedFuelEngineKgHr     float64   `json:"allocated_fuel_engine_kg_hr"`
+	AllocatedReliquefactionKgHr float64   `json:"allocated_reliquefaction_kg_hr"`
+	AllocatedGCUKgHr            float64   `json:"allocated_gcu_kg_hr"` // Gas Combustion Unit (flaring)
+	CompressorPowerKW           float64   `json:"compressor_power_kw"`
+	DailyCargoSavedUSD          float64   `json:"daily_cargo_saved_usd"`
+	TankPressureStabilizedKPa   float64   `json:"tank_pressure_stabilized_kpa"`
+	OptimizationAuditDigest     string    `json:"optimization_audit_digest"`
+	EvaluatedAt                 time.Time `json:"evaluated_at"`
 }
 
 // TankPressureSafetyAction models emergency safety intervention to prevent tank overpressurization
 type TankPressureSafetyAction struct {
-	ActionID                           string    `json:"action_id"`
-	VesselIMO                          string    `json:"vessel_imo"`
-	TankVaporPressureKPa               float64   `json:"tank_vapor_pressure_kpa"`
-	ReliefValveTriggered               bool      `json:"relief_valve_triggered"`
-	EmergencyGCUActivated              bool      `json:"emergency_gcu_activated"`
-	OverpressureRiskMitigated          bool      `json:"overpressure_risk_mitigated"`
-	AvoidedTankCatastrophicDamageUSD   float64   `json:"avoided_tank_catastrophic_damage_usd"`
-	ActionTimestamp                    time.Time `json:"action_timestamp"`
+	ActionID                         string    `json:"action_id"`
+	VesselIMO                        string    `json:"vessel_imo"`
+	TankVaporPressureKPa             float64   `json:"tank_vapor_pressure_kpa"`
+	ReliefValveTriggered             bool      `json:"relief_valve_triggered"`
+	EmergencyGCUActivated            bool      `json:"emergency_gcu_activated"`
+	OverpressureRiskMitigated        bool      `json:"overpressure_risk_mitigated"`
+	AvoidedTankCatastrophicDamageUSD float64   `json:"avoided_tank_catastrophic_damage_usd"`
+	ActionTimestamp                  time.Time `json:"action_timestamp"`
 }
 
 // MarineLNGVault thread-safe in-memory store

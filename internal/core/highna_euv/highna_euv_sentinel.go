@@ -16,38 +16,38 @@ type HighNAEUVTelemetry struct {
 	TelemetryID                        string    `json:"telemetry_id"`
 	ScannerID                          string    `json:"scanner_id"`
 	FabCleanroomID                     string    `json:"fab_cleanroom_id"`
-	NumericalAperture                  float64   `json:"numerical_aperture"`                      // 0.55 NA
-	ReticleThermalBowingNm             float64   `json:"reticle_thermal_bowing_nm"`               // limit < 1.0 nm
-	ZernikeAstigmatismAberrationLambda float64   `json:"zernike_astigmatism_aberration_lambda"`   // limit < 0.08 λ
-	LineEdgeRoughnessNm                float64   `json:"line_edge_roughness_nm"`                  // target < 0.85 nm
-	StochasticDefectDensityPerCm2      float64   `json:"stochastic_defect_density_per_cm2"`       // limit < 0.05 defects/cm2
-	EuvSourcePowerWatts                float64   `json:"euv_source_power_watts"`                  // e.g. 1000 W
-	PellicleHydrogenPressureMbar       float64   `json:"pellicle_hydrogen_pressure_mbar"`         // nominal ~2.0 mbar
+	NumericalAperture                  float64   `json:"numerical_aperture"`                    // 0.55 NA
+	ReticleThermalBowingNm             float64   `json:"reticle_thermal_bowing_nm"`             // limit < 1.0 nm
+	ZernikeAstigmatismAberrationLambda float64   `json:"zernike_astigmatism_aberration_lambda"` // limit < 0.08 λ
+	LineEdgeRoughnessNm                float64   `json:"line_edge_roughness_nm"`                // target < 0.85 nm
+	StochasticDefectDensityPerCm2      float64   `json:"stochastic_defect_density_per_cm2"`     // limit < 0.05 defects/cm2
+	EuvSourcePowerWatts                float64   `json:"euv_source_power_watts"`                // e.g. 1000 W
+	PellicleHydrogenPressureMbar       float64   `json:"pellicle_hydrogen_pressure_mbar"`       // nominal ~2.0 mbar
 	Timestamp                          time.Time `json:"timestamp"`
 }
 
 // HighNAEUVAssessment models anamorphic wavefront fidelity, reticle distortion, and SEMI P48 compliance
 type HighNAEUVAssessment struct {
-	AssessmentID                   string    `json:"assessment_id"`
-	ScannerID                      string    `json:"scanner_id"`
-	AnamorphicWavefrontIntegrity   string    `json:"anamorphic_wavefront_integrity"` // DIFFRACTION_LIMITED_DIFFUSION, WAVEFRONT_ABERRATION_DRIFT, STOCHASTIC_BRIDGING_REJECT
-	ReticleThermalBowingHazard     string    `json:"reticle_thermal_bowing_hazard"`  // FLAT_EXPANSION_MANAGED, PHOTOTHERMAL_CONVEX_BUCKLING
-	WavefrontAberrationDriftRatio  float64   `json:"wavefront_aberration_drift_ratio"`
-	AdaptiveIrBackCoolingMandate   bool      `json:"adaptive_ir_back_cooling_mandate"`
-	PiezoWavefrontCorrectionMandate bool     `json:"piezo_wavefront_correction_mandate"`
-	AuditDigest                    string    `json:"audit_digest"`
-	EvaluatedAt                    time.Time `json:"evaluated_at"`
+	AssessmentID                    string    `json:"assessment_id"`
+	ScannerID                       string    `json:"scanner_id"`
+	AnamorphicWavefrontIntegrity    string    `json:"anamorphic_wavefront_integrity"` // DIFFRACTION_LIMITED_DIFFUSION, WAVEFRONT_ABERRATION_DRIFT, STOCHASTIC_BRIDGING_REJECT
+	ReticleThermalBowingHazard      string    `json:"reticle_thermal_bowing_hazard"`  // FLAT_EXPANSION_MANAGED, PHOTOTHERMAL_CONVEX_BUCKLING
+	WavefrontAberrationDriftRatio   float64   `json:"wavefront_aberration_drift_ratio"`
+	AdaptiveIrBackCoolingMandate    bool      `json:"adaptive_ir_back_cooling_mandate"`
+	PiezoWavefrontCorrectionMandate bool      `json:"piezo_wavefront_correction_mandate"`
+	AuditDigest                     string    `json:"audit_digest"`
+	EvaluatedAt                     time.Time `json:"evaluated_at"`
 }
 
 // HighNAEUVMitigationAction models adaptive infrared back-cooling, piezo mirror correction, and H2 purge
 type HighNAEUVMitigationAction struct {
-	ActionID                                string    `json:"action_id"`
-	ScannerID                               string    `json:"scanner_id"`
-	CommandedIrLaserBackCoolingPowerWatts   float64   `json:"commanded_ir_laser_back_cooling_power_watts"`
-	PiezoWavefrontCorrectionNm              float64   `json:"piezo_wavefront_correction_nm"`
-	HydrogenPurgeRateSccm                   float64   `json:"hydrogen_purge_rate_sccm"`
-	AvoidedHighNAWaferScrapUSD              float64   `json:"avoided_high_na_wafer_scrap_usd"`
-	ExecutedAt                              time.Time `json:"executed_at"`
+	ActionID                              string    `json:"action_id"`
+	ScannerID                             string    `json:"scanner_id"`
+	CommandedIrLaserBackCoolingPowerWatts float64   `json:"commanded_ir_laser_back_cooling_power_watts"`
+	PiezoWavefrontCorrectionNm            float64   `json:"piezo_wavefront_correction_nm"`
+	HydrogenPurgeRateSccm                 float64   `json:"hydrogen_purge_rate_sccm"`
+	AvoidedHighNAWaferScrapUSD            float64   `json:"avoided_high_na_wafer_scrap_usd"`
+	ExecutedAt                            time.Time `json:"executed_at"`
 }
 
 // HighNAEUVVault manages High-NA EUV lithography tool state and precision wavefront actions
@@ -182,22 +182,22 @@ func (v *HighNAEUVVault) GetHighNAEUVQualityDossier(scannerID string) (map[strin
 	}
 
 	dossier := map[string]interface{}{
-		"scanner_id":                  scannerID,
-		"fab_cleanroom_id":            telem.FabCleanroomID,
-		"semi_p48_compliant":          asm.AnamorphicWavefrontIntegrity != "STOCHASTIC_BRIDGING_REJECT" || (hasAct && act.AvoidedHighNAWaferScrapUSD > 0),
-		"ieee_1855_certified":         true,
-		"numerical_aperture":          telem.NumericalAperture,
-		"reticle_bowing_nm":           telem.ReticleThermalBowingNm,
-		"zernike_astigmatism_lambda":  telem.ZernikeAstigmatismAberrationLambda,
-		"line_edge_roughness_nm":      telem.LineEdgeRoughnessNm,
-		"stochastic_defect_density":   telem.StochasticDefectDensityPerCm2,
-		"wavefront_integrity":         asm.AnamorphicWavefrontIntegrity,
-		"reticle_hazard":              asm.ReticleThermalBowingHazard,
-		"ir_cooling_power_watts":      0.0,
-		"piezo_correction_nm":         0.0,
-		"avoided_loss_usd":             0.0,
-		"audit_digest":                asm.AuditDigest,
-		"compiled_at":                 time.Now(),
+		"scanner_id":                 scannerID,
+		"fab_cleanroom_id":           telem.FabCleanroomID,
+		"semi_p48_compliant":         asm.AnamorphicWavefrontIntegrity != "STOCHASTIC_BRIDGING_REJECT" || (hasAct && act.AvoidedHighNAWaferScrapUSD > 0),
+		"ieee_1855_certified":        true,
+		"numerical_aperture":         telem.NumericalAperture,
+		"reticle_bowing_nm":          telem.ReticleThermalBowingNm,
+		"zernike_astigmatism_lambda": telem.ZernikeAstigmatismAberrationLambda,
+		"line_edge_roughness_nm":     telem.LineEdgeRoughnessNm,
+		"stochastic_defect_density":  telem.StochasticDefectDensityPerCm2,
+		"wavefront_integrity":        asm.AnamorphicWavefrontIntegrity,
+		"reticle_hazard":             asm.ReticleThermalBowingHazard,
+		"ir_cooling_power_watts":     0.0,
+		"piezo_correction_nm":        0.0,
+		"avoided_loss_usd":           0.0,
+		"audit_digest":               asm.AuditDigest,
+		"compiled_at":                time.Now(),
 	}
 
 	if hasAct {

@@ -13,41 +13,41 @@ import (
 
 // SpaceSolarTelemetry captures gigawatt space-based solar power microwave phased-array telemetry
 type SpaceSolarTelemetry struct {
-	TelemetryID                     string    `json:"telemetry_id"`
-	SatelliteArrayID                string    `json:"satellite_array_id"`
-	OrbitalSlotGeo                  string    `json:"orbital_slot_geo"`                       // e.g. "GEO_122.5_WEST"
-	TransmittedRfPowerGigawatts     float64   `json:"transmitted_rf_power_gigawatts"`         // 1.0 - 2.5 GW
-	RetrodirectiveBeamDriftDeg      float64   `json:"retrodirective_beam_drift_deg"`          // limit < 0.0005°
-	RectennaSidelobeFluxMilliwattsPerCm2 float64 `json:"rectenna_sidelobe_flux_milliwatts_per_cm2"` // safety limit < 1.0 mW/cm2
-	IonosphericSelfFocusingIndex    float64   `json:"ionospheric_self_focusing_index"`        // threshold > 0.75
-	SolarMirrorThermalDistortionMm  float64   `json:"solar_mirror_thermal_distortion_mm"`     // limit < 1.5 mm
-	PilotUplinkCarrierToNoiseDb     float64   `json:"pilot_uplink_carrier_to_noise_db"`      // target > 24.0 dB
-	ArrayThermalSkinTempKelvin      float64   `json:"array_thermal_skin_temp_kelvin"`         // limit < 385.0 K
-	Timestamp                       time.Time `json:"timestamp"`
+	TelemetryID                          string    `json:"telemetry_id"`
+	SatelliteArrayID                     string    `json:"satellite_array_id"`
+	OrbitalSlotGeo                       string    `json:"orbital_slot_geo"`                          // e.g. "GEO_122.5_WEST"
+	TransmittedRfPowerGigawatts          float64   `json:"transmitted_rf_power_gigawatts"`            // 1.0 - 2.5 GW
+	RetrodirectiveBeamDriftDeg           float64   `json:"retrodirective_beam_drift_deg"`             // limit < 0.0005°
+	RectennaSidelobeFluxMilliwattsPerCm2 float64   `json:"rectenna_sidelobe_flux_milliwatts_per_cm2"` // safety limit < 1.0 mW/cm2
+	IonosphericSelfFocusingIndex         float64   `json:"ionospheric_self_focusing_index"`           // threshold > 0.75
+	SolarMirrorThermalDistortionMm       float64   `json:"solar_mirror_thermal_distortion_mm"`        // limit < 1.5 mm
+	PilotUplinkCarrierToNoiseDb          float64   `json:"pilot_uplink_carrier_to_noise_db"`          // target > 24.0 dB
+	ArrayThermalSkinTempKelvin           float64   `json:"array_thermal_skin_temp_kelvin"`            // limit < 385.0 K
+	Timestamp                            time.Time `json:"timestamp"`
 }
 
 // SpaceSolarAssessment models beam pointing containment, ionospheric filamentation, and ITU Article 21 compliance
 type SpaceSolarAssessment struct {
-	AssessmentID                   string    `json:"assessment_id"`
-	SatelliteArrayID               string    `json:"satellite_array_id"`
-	BeamPointingContainmentStatus  string    `json:"beam_pointing_containment_status"` // LOCK_ON_RECTENNA_BORESIGHT, MARGINAL_PHASE_JITTER, UNCONTAINED_BEAM_WANDER_HAZARD
-	IonosphericDistortionHazard    string    `json:"ionospheric_distortion_hazard"`    // LINEAR_IONOSPHERE_PROPAGATION, THERMAL_SELF_FOCUSING_FILAMENTATION
-	SidelobePowerExcessMarginPct   float64   `json:"sidelobe_power_excess_margin_pct"`
-	FastPhaseConjugatorCutoffMandate bool    `json:"fast_phase_conjugator_cutoff_mandate"`
-	PowerSteppingAttenuationMandate bool     `json:"power_stepping_attenuation_mandate"`
-	AuditDigest                    string    `json:"audit_digest"`
-	EvaluatedAt                    time.Time `json:"evaluated_at"`
+	AssessmentID                     string    `json:"assessment_id"`
+	SatelliteArrayID                 string    `json:"satellite_array_id"`
+	BeamPointingContainmentStatus    string    `json:"beam_pointing_containment_status"` // LOCK_ON_RECTENNA_BORESIGHT, MARGINAL_PHASE_JITTER, UNCONTAINED_BEAM_WANDER_HAZARD
+	IonosphericDistortionHazard      string    `json:"ionospheric_distortion_hazard"`    // LINEAR_IONOSPHERE_PROPAGATION, THERMAL_SELF_FOCUSING_FILAMENTATION
+	SidelobePowerExcessMarginPct     float64   `json:"sidelobe_power_excess_margin_pct"`
+	FastPhaseConjugatorCutoffMandate bool      `json:"fast_phase_conjugator_cutoff_mandate"`
+	PowerSteppingAttenuationMandate  bool      `json:"power_stepping_attenuation_mandate"`
+	AuditDigest                      string    `json:"audit_digest"`
+	EvaluatedAt                      time.Time `json:"evaluated_at"`
 }
 
 // SpaceSolarMitigationAction models sub-microsecond retrodirective RF cutoff, array power stepping, and gimbal trim
 type SpaceSolarMitigationAction struct {
-	ActionID                              string    `json:"action_id"`
-	SatelliteArrayID                      string    `json:"satellite_array_id"`
-	CommandedFastCutoffResponseMicroSec   float64   `json:"commanded_fast_cutoff_response_micro_sec"`
-	ArrayPowerAttenuationDb               float64   `json:"array_power_attenuation_db"`
-	ReactionControlGimbalCorrectionDeg   float64   `json:"reaction_control_gimbal_correction_deg"`
-	AvoidedOrbitalSPSDisasterUSD          float64   `json:"avoided_orbital_sps_disaster_usd"`
-	ExecutedAt                            time.Time `json:"executed_at"`
+	ActionID                            string    `json:"action_id"`
+	SatelliteArrayID                    string    `json:"satellite_array_id"`
+	CommandedFastCutoffResponseMicroSec float64   `json:"commanded_fast_cutoff_response_micro_sec"`
+	ArrayPowerAttenuationDb             float64   `json:"array_power_attenuation_db"`
+	ReactionControlGimbalCorrectionDeg  float64   `json:"reaction_control_gimbal_correction_deg"`
+	AvoidedOrbitalSPSDisasterUSD        float64   `json:"avoided_orbital_sps_disaster_usd"`
+	ExecutedAt                          time.Time `json:"executed_at"`
 }
 
 // SpaceSolarVault manages gigawatt space solar power satellites and ground rectenna safety
@@ -124,7 +124,7 @@ func (v *SpaceSolarVault) EvaluateBeamContainment(satelliteArrayID string) (Spac
 		IonosphericDistortionHazard:      ionosphericHazard,
 		SidelobePowerExcessMarginPct:     excessMargin,
 		FastPhaseConjugatorCutoffMandate: cutoffMandate,
-		PowerSteppingAttenuationMandate: attenuateMandate,
+		PowerSteppingAttenuationMandate:  attenuateMandate,
 		AuditDigest:                      digest,
 		EvaluatedAt:                      time.Now(),
 	}
@@ -149,7 +149,7 @@ func (v *SpaceSolarVault) TriggerFastCutoffAndGimbalTrim(satelliteArrayID string
 	gimbalCorrection := 0.0
 
 	if asm.FastPhaseConjugatorCutoffMandate {
-		cutoffTime = 0.65 // 0.65 µs sub-microsecond retrodirective RF phase-gate quench
+		cutoffTime = 0.65    // 0.65 µs sub-microsecond retrodirective RF phase-gate quench
 		attenuationDb = 45.0 // immediate 45 dB attenuation of transmitted power
 	}
 	if asm.PowerSteppingAttenuationMandate {
@@ -196,7 +196,7 @@ func (v *SpaceSolarVault) GetSpaceSolarDossier(satelliteArrayID string) (map[str
 		"ionospheric_hazard":          asm.IonosphericDistortionHazard,
 		"cutoff_response_us":          0.0,
 		"power_attenuation_db":        0.0,
-		"avoided_loss_usd":             0.0,
+		"avoided_loss_usd":            0.0,
 		"audit_digest":                asm.AuditDigest,
 		"compiled_at":                 time.Now(),
 	}

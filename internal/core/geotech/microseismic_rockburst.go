@@ -14,17 +14,17 @@ import (
 
 // MicroseismicEventTelemetry models high-precision acoustic geophone array readings in deep mines
 type MicroseismicEventTelemetry struct {
-	EventID                    string    `json:"event_id"`
-	MineLevelID                string    `json:"mine_level_id"`                 // "LEVEL-DEEP-ORE-1650M"
-	ExtractionDriftID          string    `json:"extraction_drift_id"`           // "DRIFT-PANEL-XC-08"
-	LocalMagnitudeML           float64   `json:"local_magnitude_ml"`            // Richter scale (e.g. 1.85 ML)
-	RadiatedSeismicEnergyJoules float64  `json:"radiated_seismic_energy_joules"` // Es in Joules (e.g. 4.8e6 J)
-	SeismicMomentNM            float64   `json:"seismic_moment_nm"`             // M0 in N*m (e.g. 1.2e11 N*m)
-	HypocenterX                float64   `json:"hypocenter_x"`
-	HypocenterY                float64   `json:"hypocenter_y"`
-	HypocenterZ                float64   `json:"hypocenter_z"`                  // Depth below surface (e.g. -1650 m)
-	GeophoneTriggerCount       int       `json:"geophone_trigger_count"`        // Number of array sensors triggered
-	RecordedAt                 time.Time `json:"recorded_at"`
+	EventID                     string    `json:"event_id"`
+	MineLevelID                 string    `json:"mine_level_id"`                  // "LEVEL-DEEP-ORE-1650M"
+	ExtractionDriftID           string    `json:"extraction_drift_id"`            // "DRIFT-PANEL-XC-08"
+	LocalMagnitudeML            float64   `json:"local_magnitude_ml"`             // Richter scale (e.g. 1.85 ML)
+	RadiatedSeismicEnergyJoules float64   `json:"radiated_seismic_energy_joules"` // Es in Joules (e.g. 4.8e6 J)
+	SeismicMomentNM             float64   `json:"seismic_moment_nm"`              // M0 in N*m (e.g. 1.2e11 N*m)
+	HypocenterX                 float64   `json:"hypocenter_x"`
+	HypocenterY                 float64   `json:"hypocenter_y"`
+	HypocenterZ                 float64   `json:"hypocenter_z"`           // Depth below surface (e.g. -1650 m)
+	GeophoneTriggerCount        int       `json:"geophone_trigger_count"` // Number of array sensors triggered
+	RecordedAt                  time.Time `json:"recorded_at"`
 }
 
 // RockburstHazardAssessment models Gutenberg-Richter b-value and apparent stress under ISRM & ISO 22477
@@ -54,10 +54,10 @@ type UndergroundExclusionZoneAction struct {
 
 // GeotechVault thread-safe in-memory store
 type GeotechVault struct {
-	mu           sync.RWMutex
-	telemetries  map[string]MicroseismicEventTelemetry
-	assessments  map[string]RockburstHazardAssessment
-	evacuations  map[string]UndergroundExclusionZoneAction
+	mu          sync.RWMutex
+	telemetries map[string]MicroseismicEventTelemetry
+	assessments map[string]RockburstHazardAssessment
+	evacuations map[string]UndergroundExclusionZoneAction
 }
 
 // Global instance

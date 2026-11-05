@@ -57,17 +57,17 @@ func (s *Service) CreateCategory(cat *ApprovalCategory) error {
 
 // Request Management
 type CreateRequestInput struct {
-	Name           string               `json:"name" binding:"required"`
-	CategoryID     uint                 `json:"category_id" binding:"required"`
-	RequestOwnerID uint                 `json:"request_owner_id"`
-	Reason         string               `json:"reason"`
-	Amount         float64              `json:"amount"`
-	CurrencyID     uint                 `json:"currency_id"`
-	DateStart      *time.Time           `json:"date_start"`
-	DateEnd        *time.Time           `json:"date_end"`
-	Reference      string               `json:"reference"`
-	CompanyID      uint                 `json:"company_id"`
-	Approvers      []ApproverInputItem  `json:"approvers"`
+	Name           string              `json:"name" binding:"required"`
+	CategoryID     uint                `json:"category_id" binding:"required"`
+	RequestOwnerID uint                `json:"request_owner_id"`
+	Reason         string              `json:"reason"`
+	Amount         float64             `json:"amount"`
+	CurrencyID     uint                `json:"currency_id"`
+	DateStart      *time.Time          `json:"date_start"`
+	DateEnd        *time.Time          `json:"date_end"`
+	Reference      string              `json:"reference"`
+	CompanyID      uint                `json:"company_id"`
+	Approvers      []ApproverInputItem `json:"approvers"`
 }
 
 type ApproverInputItem struct {

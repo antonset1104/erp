@@ -13,36 +13,36 @@ import (
 
 // CannibalizationAssessment models the safety, airworthiness, and financial feasibility
 type CannibalizationAssessment struct {
-	AssessmentID             string    `json:"assessment_id"`
-	PartSKU                  string    `json:"part_sku"`
-	PartSerialNumber         string    `json:"part_serial_number"`
-	PartDescription          string    `json:"part_description"`
-	DonorAssetID             string    `json:"donor_asset_id"`
-	DonorAssetStatus         string    `json:"donor_asset_status"` // "SCHEDULED_MAJOR_OVERHAUL", "LONG_TERM_PARKED"
-	RecipientAssetID         string    `json:"recipient_asset_id"`
-	RecipientAssetStatus     string    `json:"recipient_asset_status"` // "AOG_CRITICAL_STOPPAGE", "HAULAGE_HALTED"
-	RemainingLifeHoursTSO    float64   `json:"remaining_life_hours_tso"`
-	ModStatusCompatible      bool      `json:"mod_status_compatible"`
-	FeasibilityScore         float64   `json:"feasibility_score"` // 0 - 100
-	IsFeasible               bool      `json:"is_feasible"`
-	AvoidedDowntimeCostUSD   float64   `json:"avoided_downtime_cost_usd"`
-	ApprovalStatus           string    `json:"approval_status"` // "AUTHORIZED_BY_CHIEF_ENGINEER", "REJECTED_SAFETY_LIMIT"
-	AssessedAt               time.Time `json:"assessed_at"`
+	AssessmentID           string    `json:"assessment_id"`
+	PartSKU                string    `json:"part_sku"`
+	PartSerialNumber       string    `json:"part_serial_number"`
+	PartDescription        string    `json:"part_description"`
+	DonorAssetID           string    `json:"donor_asset_id"`
+	DonorAssetStatus       string    `json:"donor_asset_status"` // "SCHEDULED_MAJOR_OVERHAUL", "LONG_TERM_PARKED"
+	RecipientAssetID       string    `json:"recipient_asset_id"`
+	RecipientAssetStatus   string    `json:"recipient_asset_status"` // "AOG_CRITICAL_STOPPAGE", "HAULAGE_HALTED"
+	RemainingLifeHoursTSO  float64   `json:"remaining_life_hours_tso"`
+	ModStatusCompatible    bool      `json:"mod_status_compatible"`
+	FeasibilityScore       float64   `json:"feasibility_score"` // 0 - 100
+	IsFeasible             bool      `json:"is_feasible"`
+	AvoidedDowntimeCostUSD float64   `json:"avoided_downtime_cost_usd"`
+	ApprovalStatus         string    `json:"approval_status"` // "AUTHORIZED_BY_CHIEF_ENGINEER", "REJECTED_SAFETY_LIMIT"
+	AssessedAt             time.Time `json:"assessed_at"`
 }
 
 // BilateralSwapWorkOrders represents paired removal and installation orders
 type BilateralSwapWorkOrders struct {
-	SwapPackageID            string    `json:"swap_package_id"`
-	AssessmentID             string    `json:"assessment_id"`
-	PartSerialNumber         string    `json:"part_serial_number"`
-	RemovalWorkOrderID       string    `json:"removal_work_order_id"`
-	RemovalTargetAsset       string    `json:"removal_target_asset"`
-	InstallationWorkOrderID   string    `json:"installation_work_order_id"`
-	InstallationTargetAsset  string    `json:"installation_target_asset"`
-	AuthorizedChiefEngineer  string    `json:"authorized_chief_engineer"`
-	MechanicalSignoffDone    bool      `json:"mechanical_signoff_done"`
-	Status                   string    `json:"status"` // "WORK_ORDERS_DISPATCHED", "PARTS_SWAPPED_OPERATIONAL"
-	DispatchedAt             time.Time `json:"dispatched_at"`
+	SwapPackageID           string    `json:"swap_package_id"`
+	AssessmentID            string    `json:"assessment_id"`
+	PartSerialNumber        string    `json:"part_serial_number"`
+	RemovalWorkOrderID      string    `json:"removal_work_order_id"`
+	RemovalTargetAsset      string    `json:"removal_target_asset"`
+	InstallationWorkOrderID string    `json:"installation_work_order_id"`
+	InstallationTargetAsset string    `json:"installation_target_asset"`
+	AuthorizedChiefEngineer string    `json:"authorized_chief_engineer"`
+	MechanicalSignoffDone   bool      `json:"mechanical_signoff_done"`
+	Status                  string    `json:"status"` // "WORK_ORDERS_DISPATCHED", "PARTS_SWAPPED_OPERATIONAL"
+	DispatchedAt            time.Time `json:"dispatched_at"`
 }
 
 // LineageSerialSwapRecord stores immutable serial lineage transfer
@@ -149,7 +149,7 @@ func (v *SparesCannibalizationVault) AuthorizeSwapWorkOrders(
 		PartSerialNumber:        assess.PartSerialNumber,
 		RemovalWorkOrderID:      remWO,
 		RemovalTargetAsset:      assess.DonorAssetID,
-		InstallationWorkOrderID:  insWO,
+		InstallationWorkOrderID: insWO,
 		InstallationTargetAsset: assess.RecipientAssetID,
 		AuthorizedChiefEngineer: chiefEngineer,
 		MechanicalSignoffDone:   true,
@@ -221,7 +221,7 @@ func (v *SparesCannibalizationVault) GetAOGRecoverySummary(recipientID string) (
 		"has_work_orders":          hasOrders,
 		"lineage_record":           lineage,
 		"has_lineage":              hasLineage,
-		"operational_restoration": "ASSET_RETURNED_TO_SERVICE_SAFELY",
+		"operational_restoration":  "ASSET_RETURNED_TO_SERVICE_SAFELY",
 		"aviation_mining_standard": "FAA AC 120-84 / ESDM Ditjen Minerba Parity Compliant",
 	}, nil
 }

@@ -12,47 +12,47 @@ import (
 
 // BoilerThermalTelemetry represents continuous sensor data from steam generators and heat exchangers
 type BoilerThermalTelemetry struct {
-	TelemetryID          string    `json:"telemetry_id"`
-	AssetID              string    `json:"asset_id"`
-	FlueGasTemperatureC  float64   `json:"flue_gas_temperature_c"` // Elevated flue gas indicates heat not transferred to water
-	SteamOutputTPH       float64   `json:"steam_output_tph"`       // Tons per hour
-	HeatTransferAreaM2   float64   `json:"heat_transfer_area_m2"`
-	LogMeanTempDiffLMTD  float64   `json:"log_mean_temp_diff_lmtd"`
-	CleanDesignUCoeff    float64   `json:"clean_design_u_coeff"`   // W/m2.K (Nominal design benchmark)
-	DailyFuelCostUSD     float64   `json:"daily_fuel_cost_usd"`
-	Timestamp            time.Time `json:"timestamp"`
+	TelemetryID         string    `json:"telemetry_id"`
+	AssetID             string    `json:"asset_id"`
+	FlueGasTemperatureC float64   `json:"flue_gas_temperature_c"` // Elevated flue gas indicates heat not transferred to water
+	SteamOutputTPH      float64   `json:"steam_output_tph"`       // Tons per hour
+	HeatTransferAreaM2  float64   `json:"heat_transfer_area_m2"`
+	LogMeanTempDiffLMTD float64   `json:"log_mean_temp_diff_lmtd"`
+	CleanDesignUCoeff   float64   `json:"clean_design_u_coeff"` // W/m2.K (Nominal design benchmark)
+	DailyFuelCostUSD    float64   `json:"daily_fuel_cost_usd"`
+	Timestamp           time.Time `json:"timestamp"`
 }
 
 // FoulingAssessmentResult models thermal degradation, scale thickness, and financial waste
 type FoulingAssessmentResult struct {
-	AssessmentID         string    `json:"assessment_id"`
-	AssetID              string    `json:"asset_id"`
-	ActualUCoeff         float64   `json:"actual_u_coeff"`          // Current heat transfer coefficient
-	FoulingResistanceRf  float64   `json:"fouling_resistance_rf"`   // m2.K/W
-	EstimatedScaleMicrons float64  `json:"estimated_scale_microns"` // Scale thickness in micrometers
-	ThermalEfficiencyPct float64   `json:"thermal_efficiency_pct"`  // e.g. 82.5% vs 94.0% clean
-	DailyFuelWasteUSD    float64   `json:"daily_fuel_waste_usd"`    // Extra fuel burned due to insulating scale
-	AssessedAt           time.Time `json:"assessed_at"`
+	AssessmentID          string    `json:"assessment_id"`
+	AssetID               string    `json:"asset_id"`
+	ActualUCoeff          float64   `json:"actual_u_coeff"`          // Current heat transfer coefficient
+	FoulingResistanceRf   float64   `json:"fouling_resistance_rf"`   // m2.K/W
+	EstimatedScaleMicrons float64   `json:"estimated_scale_microns"` // Scale thickness in micrometers
+	ThermalEfficiencyPct  float64   `json:"thermal_efficiency_pct"`  // e.g. 82.5% vs 94.0% clean
+	DailyFuelWasteUSD     float64   `json:"daily_fuel_waste_usd"`    // Extra fuel burned due to insulating scale
+	AssessedAt            time.Time `json:"assessed_at"`
 }
 
 // DescalingTurnaroundWorkOrder models scheduled chemical/mechanical cleaning
 type DescalingTurnaroundWorkOrder struct {
-	WorkOrderID          string    `json:"work_order_id"`
-	AssetID              string    `json:"asset_id"`
-	RecommendedCleaningMethod string `json:"recommended_cleaning_method"` // "CHEMICAL_CIP_ACID_FLUSH", "HIGH_PRESSURE_HYDROBLASTING"
-	EstimatedCleaningCostUSD float64 `json:"estimated_cleaning_cost_usd"` // e.g. $12,500
-	DaysPaybackPeriod    float64   `json:"days_payback_period"`
-	UrgencyClassification string   `json:"urgency_classification"` // "DESCALING_MANDATORY_NOW", "SCHEDULE_NEXT_TURNAROUND"
-	PreventedRuptureRisk bool      `json:"prevented_rupture_risk"`
-	ScheduledAt          time.Time `json:"scheduled_at"`
+	WorkOrderID               string    `json:"work_order_id"`
+	AssetID                   string    `json:"asset_id"`
+	RecommendedCleaningMethod string    `json:"recommended_cleaning_method"` // "CHEMICAL_CIP_ACID_FLUSH", "HIGH_PRESSURE_HYDROBLASTING"
+	EstimatedCleaningCostUSD  float64   `json:"estimated_cleaning_cost_usd"` // e.g. $12,500
+	DaysPaybackPeriod         float64   `json:"days_payback_period"`
+	UrgencyClassification     string    `json:"urgency_classification"` // "DESCALING_MANDATORY_NOW", "SCHEDULE_NEXT_TURNAROUND"
+	PreventedRuptureRisk      bool      `json:"prevented_rupture_risk"`
+	ScheduledAt               time.Time `json:"scheduled_at"`
 }
 
 // BoilerFoulingVault thread-safe store
 type BoilerFoulingVault struct {
-	mu           sync.RWMutex
-	telemetries  map[string]BoilerThermalTelemetry
-	assessments  map[string]FoulingAssessmentResult
-	workOrders   map[string]DescalingTurnaroundWorkOrder
+	mu          sync.RWMutex
+	telemetries map[string]BoilerThermalTelemetry
+	assessments map[string]FoulingAssessmentResult
+	workOrders  map[string]DescalingTurnaroundWorkOrder
 }
 
 // Global Boiler Fouling instance
@@ -195,14 +195,14 @@ func (v *BoilerFoulingVault) GetThermalDossier(assetID string) (gin.H, error) {
 	}
 
 	return gin.H{
-		"asset_id":                assetID,
-		"latest_telemetry":        tel,
-		"fouling_assessment":      ass,
-		"has_assessment":          hasAss,
-		"descaling_work_order":    wo,
-		"has_work_order":          hasWO,
-		"asme_compliance":         "ASME PTC 4 Fired Steam Generators & Section I Rules for Construction of Power Boilers",
-		"tube_integrity_status":   "OVERHEATING_RUPTURE_PREVENTED",
+		"asset_id":              assetID,
+		"latest_telemetry":      tel,
+		"fouling_assessment":    ass,
+		"has_assessment":        hasAss,
+		"descaling_work_order":  wo,
+		"has_work_order":        hasWO,
+		"asme_compliance":       "ASME PTC 4 Fired Steam Generators & Section I Rules for Construction of Power Boilers",
+		"tube_integrity_status": "OVERHEATING_RUPTURE_PREVENTED",
 	}, nil
 }
 

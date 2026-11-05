@@ -12,35 +12,35 @@ import (
 
 // CrossDockMission represents a zero-putaway direct dock-to-dock transfer
 type CrossDockMission struct {
-	MissionID            string    `json:"mission_id"`
-	FacilityID           string    `json:"facility_id"`
-	PalletBarcode        string    `json:"pallet_barcode"`
-	InboundDockDoor      string    `json:"inbound_dock_door"`  // e.g. "DOCK-IN-03"
-	OutboundDockDoor     string    `json:"outbound_dock_door"` // e.g. "DOCK-OUT-08"
-	InboundReceiptID     string    `json:"inbound_receipt_id"`
-	OutboundDeliveryID   string    `json:"outbound_delivery_id"`
-	WeightKG             float64   `json:"weight_kg"`
-	TransferPriority     string    `json:"transfer_priority"` // "STANDARD", "URGENT_DEPARTURE_SLOT", "EXPEDITE_CRITICAL"
-	AssignedRobotID      string    `json:"assigned_robot_id"`
-	EstimatedDurationSec float64   `json:"estimated_duration_sec"`
-	Status               string    `json:"status"` // "QUEUED", "DISPATCHED", "IN_TRANSIT", "COMPLETED_CROSSDOCK"
-	CreatedAt            time.Time `json:"created_at"`
+	MissionID            string     `json:"mission_id"`
+	FacilityID           string     `json:"facility_id"`
+	PalletBarcode        string     `json:"pallet_barcode"`
+	InboundDockDoor      string     `json:"inbound_dock_door"`  // e.g. "DOCK-IN-03"
+	OutboundDockDoor     string     `json:"outbound_dock_door"` // e.g. "DOCK-OUT-08"
+	InboundReceiptID     string     `json:"inbound_receipt_id"`
+	OutboundDeliveryID   string     `json:"outbound_delivery_id"`
+	WeightKG             float64    `json:"weight_kg"`
+	TransferPriority     string     `json:"transfer_priority"` // "STANDARD", "URGENT_DEPARTURE_SLOT", "EXPEDITE_CRITICAL"
+	AssignedRobotID      string     `json:"assigned_robot_id"`
+	EstimatedDurationSec float64    `json:"estimated_duration_sec"`
+	Status               string     `json:"status"` // "QUEUED", "DISPATCHED", "IN_TRANSIT", "COMPLETED_CROSSDOCK"
+	CreatedAt            time.Time  `json:"created_at"`
 	CompletedAt          *time.Time `json:"completed_at,omitempty"`
 }
 
 // AGFRobotUnit models an autonomous industrial forklift
 type AGFRobotUnit struct {
-	RobotID          string    `json:"robot_id"`
-	FacilityID       string    `json:"facility_id"`
-	RobotModel       string    `json:"robot_model"` // e.g. "RoboFork AGF-2500 Multi-Directional"
-	PayloadCapacityKG float64  `json:"payload_capacity_kg"`
-	BatterySoC       float64   `json:"battery_soc_percent"` // 0.0 - 100.0%
-	OperationalState string    `json:"operational_state"`   // "IDLE", "EN_ROUTE_PICKUP", "CARRYING_LOAD", "OPPORTUNITY_CHARGING", "MAINTENANCE"
-	CoordX           float64   `json:"coord_x_meters"`
-	CoordY           float64   `json:"coord_y_meters"`
-	CruisingSpeedMPS float64   `json:"cruising_speed_mps"`
-	TotalPalletsMoved int      `json:"total_pallets_moved"`
-	LastTelemetryAt  time.Time `json:"last_telemetry_at"`
+	RobotID           string    `json:"robot_id"`
+	FacilityID        string    `json:"facility_id"`
+	RobotModel        string    `json:"robot_model"` // e.g. "RoboFork AGF-2500 Multi-Directional"
+	PayloadCapacityKG float64   `json:"payload_capacity_kg"`
+	BatterySoC        float64   `json:"battery_soc_percent"` // 0.0 - 100.0%
+	OperationalState  string    `json:"operational_state"`   // "IDLE", "EN_ROUTE_PICKUP", "CARRYING_LOAD", "OPPORTUNITY_CHARGING", "MAINTENANCE"
+	CoordX            float64   `json:"coord_x_meters"`
+	CoordY            float64   `json:"coord_y_meters"`
+	CruisingSpeedMPS  float64   `json:"cruising_speed_mps"`
+	TotalPalletsMoved int       `json:"total_pallets_moved"`
+	LastTelemetryAt   time.Time `json:"last_telemetry_at"`
 }
 
 // AGFSwarmDispatcher thread-safe management
@@ -59,30 +59,30 @@ var GlobalAGFSwarmDispatcher = &AGFSwarmDispatcher{
 func init() {
 	// Seed demo fleet robots
 	GlobalAGFSwarmDispatcher.robots["AGF-SWARM-01"] = &AGFRobotUnit{
-		RobotID:          "AGF-SWARM-01",
-		FacilityID:       "DC-CIKARANG-CENTRAL",
-		RobotModel:       "RoboFork AGF-2500 Multi-Directional",
+		RobotID:           "AGF-SWARM-01",
+		FacilityID:        "DC-CIKARANG-CENTRAL",
+		RobotModel:        "RoboFork AGF-2500 Multi-Directional",
 		PayloadCapacityKG: 2500,
-		BatterySoC:       92.5,
-		OperationalState: "IDLE",
-		CoordX:           10.0,
-		CoordY:           15.0,
-		CruisingSpeedMPS: 1.5,
+		BatterySoC:        92.5,
+		OperationalState:  "IDLE",
+		CoordX:            10.0,
+		CoordY:            15.0,
+		CruisingSpeedMPS:  1.5,
 		TotalPalletsMoved: 142,
-		LastTelemetryAt:  time.Now(),
+		LastTelemetryAt:   time.Now(),
 	}
 	GlobalAGFSwarmDispatcher.robots["AGF-SWARM-02"] = &AGFRobotUnit{
-		RobotID:          "AGF-SWARM-02",
-		FacilityID:       "DC-CIKARANG-CENTRAL",
-		RobotModel:       "RoboFork AGF-2500 Multi-Directional",
+		RobotID:           "AGF-SWARM-02",
+		FacilityID:        "DC-CIKARANG-CENTRAL",
+		RobotModel:        "RoboFork AGF-2500 Multi-Directional",
 		PayloadCapacityKG: 2500,
-		BatterySoC:       28.0, // Low battery, candidate for opportunity charging
-		OperationalState: "OPPORTUNITY_CHARGING",
-		CoordX:           5.0,
-		CoordY:           5.0,
-		CruisingSpeedMPS: 1.5,
+		BatterySoC:        28.0, // Low battery, candidate for opportunity charging
+		OperationalState:  "OPPORTUNITY_CHARGING",
+		CoordX:            5.0,
+		CoordY:            5.0,
+		CruisingSpeedMPS:  1.5,
 		TotalPalletsMoved: 189,
-		LastTelemetryAt:  time.Now(),
+		LastTelemetryAt:   time.Now(),
 	}
 }
 

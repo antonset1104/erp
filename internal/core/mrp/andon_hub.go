@@ -16,7 +16,7 @@ type AndonEvent struct {
 	LineID           string  `json:"line_id"`
 	StationID        string  `json:"station_id"`
 	StationName      string  `json:"station_name"`
-	Severity         string  `json:"severity"` // "OPTIMAL_GREEN", "WARNING_YELLOW", "CRITICAL_STOP_RED"
+	Severity         string  `json:"severity"`   // "OPTIMAL_GREEN", "WARNING_YELLOW", "CRITICAL_STOP_RED"
 	IssueType        string  `json:"issue_type"` // "MACHINE_BREAKDOWN", "MATERIAL_STARVATION", "QUALITY_DEFECT", "SAFETY_HAZARD"
 	Description      string  `json:"description"`
 	TriggeredBy      string  `json:"triggered_by"`

@@ -13,41 +13,41 @@ import (
 
 // AsteroidMiningTelemetry captures deep-space asteroid optical mining, concentrated solar desorption, and volatile trapping telemetry
 type AsteroidMiningTelemetry struct {
-	TelemetryID                  string    `json:"telemetry_id"`
-	MiningProbeID                string    `json:"mining_probe_id"`
-	TargetAsteroidName           string    `json:"target_asteroid_name"`             // e.g. "16-Psyche", "101955-Bennu"
-	ConcentratedSolarFluxKwPerM2 float64   `json:"concentrated_solar_flux_kw_per_m2"` // limit < 250.0 kW/m2
-	RegolithDesorptionTempC      float64   `json:"regolith_desorption_temp_c"`       // threshold > 620.0°C
-	InflatableCanopyPressureBar  float64   `json:"inflatable_canopy_pressure_bar"`   // burst limit < 0.85 bar
-	CryoColdTrapTempK            float64   `json:"cryo_cold_trap_temp_k"`           // limit < 125.0 K
-	DustEjectaMicronSize         float64   `json:"dust_ejecta_micron_size"`          // abrasive threshold > 150.0 um
-	VolatileExtractionRateKgPerHr float64  `json:"volatile_extraction_rate_kg_per_hr"` // nominal 25 - 60 kg/hr
-	CanopyTearStressMpa          float64   `json:"canopy_tear_stress_mpa"`           // tensile limit < 180.0 MPa
-	Timestamp                    time.Time `json:"timestamp"`
+	TelemetryID                   string    `json:"telemetry_id"`
+	MiningProbeID                 string    `json:"mining_probe_id"`
+	TargetAsteroidName            string    `json:"target_asteroid_name"`               // e.g. "16-Psyche", "101955-Bennu"
+	ConcentratedSolarFluxKwPerM2  float64   `json:"concentrated_solar_flux_kw_per_m2"`  // limit < 250.0 kW/m2
+	RegolithDesorptionTempC       float64   `json:"regolith_desorption_temp_c"`         // threshold > 620.0°C
+	InflatableCanopyPressureBar   float64   `json:"inflatable_canopy_pressure_bar"`     // burst limit < 0.85 bar
+	CryoColdTrapTempK             float64   `json:"cryo_cold_trap_temp_k"`              // limit < 125.0 K
+	DustEjectaMicronSize          float64   `json:"dust_ejecta_micron_size"`            // abrasive threshold > 150.0 um
+	VolatileExtractionRateKgPerHr float64   `json:"volatile_extraction_rate_kg_per_hr"` // nominal 25 - 60 kg/hr
+	CanopyTearStressMpa           float64   `json:"canopy_tear_stress_mpa"`             // tensile limit < 180.0 MPa
+	Timestamp                     time.Time `json:"timestamp"`
 }
 
 // AsteroidMiningAssessment models canopy containment integrity, solar overflux, and NASA Planetary Protection compliance
 type AsteroidMiningAssessment struct {
-	AssessmentID                   string    `json:"assessment_id"`
-	MiningProbeID                  string    `json:"mining_probe_id"`
-	CanopyIntegrityStatus          string    `json:"canopy_integrity_status"`          // SEALED_INFLATED_STABLE, TENSILE_OVERPRESSURE_WARNING, CATASTROPHIC_CANOPY_RUPTURE_RISK
-	VolatileCondensationEfficiency string    `json:"volatile_condensation_efficiency"` // OPTIMAL_CRYO_TRAPPING, THERMAL_LEAK_INSUFFICIENT
-	CanopyPressureMarginPct        float64   `json:"canopy_pressure_margin_pct"`
-	SolarConcentratorDefocusMandate bool     `json:"solar_concentrator_defocus_mandate"`
-	CryoChillerBoostMandate        bool      `json:"cryo_chiller_boost_mandate"`
-	AuditDigest                    string    `json:"audit_digest"`
-	EvaluatedAt                    time.Time `json:"evaluated_at"`
+	AssessmentID                    string    `json:"assessment_id"`
+	MiningProbeID                   string    `json:"mining_probe_id"`
+	CanopyIntegrityStatus           string    `json:"canopy_integrity_status"`          // SEALED_INFLATED_STABLE, TENSILE_OVERPRESSURE_WARNING, CATASTROPHIC_CANOPY_RUPTURE_RISK
+	VolatileCondensationEfficiency  string    `json:"volatile_condensation_efficiency"` // OPTIMAL_CRYO_TRAPPING, THERMAL_LEAK_INSUFFICIENT
+	CanopyPressureMarginPct         float64   `json:"canopy_pressure_margin_pct"`
+	SolarConcentratorDefocusMandate bool      `json:"solar_concentrator_defocus_mandate"`
+	CryoChillerBoostMandate         bool      `json:"cryo_chiller_boost_mandate"`
+	AuditDigest                     string    `json:"audit_digest"`
+	EvaluatedAt                     time.Time `json:"evaluated_at"`
 }
 
 // AsteroidMiningMitigationAction models parabolic reflector defocusing, cryo cold-trap power boost, and pressure relief venting
 type AsteroidMiningMitigationAction struct {
-	ActionID                        string    `json:"action_id"`
-	MiningProbeID                   string    `json:"mining_probe_id"`
-	CommandedSolarDefocusAngleDeg   float64   `json:"commanded_solar_defocus_angle_deg"`
-	CryoChillerPowerWatts           float64   `json:"cryo_chiller_power_watts"`
-	ReliefValveVentRateKgPerSec     float64   `json:"relief_valve_vent_rate_kg_per_sec"`
-	AvoidedCanopyBlowoutLossUSD     float64   `json:"avoided_canopy_blowout_loss_usd"`
-	ExecutedAt                      time.Time `json:"executed_at"`
+	ActionID                      string    `json:"action_id"`
+	MiningProbeID                 string    `json:"mining_probe_id"`
+	CommandedSolarDefocusAngleDeg float64   `json:"commanded_solar_defocus_angle_deg"`
+	CryoChillerPowerWatts         float64   `json:"cryo_chiller_power_watts"`
+	ReliefValveVentRateKgPerSec   float64   `json:"relief_valve_vent_rate_kg_per_sec"`
+	AvoidedCanopyBlowoutLossUSD   float64   `json:"avoided_canopy_blowout_loss_usd"`
+	ExecutedAt                    time.Time `json:"executed_at"`
 }
 
 // AsteroidMiningVault manages asteroid mining vessel telemetry, optical concentrator state, and volatile capture safety
@@ -120,15 +120,15 @@ func (v *AsteroidMiningVault) EvaluateDesorptionAndCanopyIntegrity(probeID strin
 	digest := hex.EncodeToString(hasher.Sum(nil))
 
 	assessment := AsteroidMiningAssessment{
-		AssessmentID:                   fmt.Sprintf("ASM-ASTEROID-%d", time.Now().UnixNano()%1000000),
-		MiningProbeID:                  probeID,
-		CanopyIntegrityStatus:          canopyStatus,
-		VolatileCondensationEfficiency: trapEfficiency,
-		CanopyPressureMarginPct:        pressureMargin,
+		AssessmentID:                    fmt.Sprintf("ASM-ASTEROID-%d", time.Now().UnixNano()%1000000),
+		MiningProbeID:                   probeID,
+		CanopyIntegrityStatus:           canopyStatus,
+		VolatileCondensationEfficiency:  trapEfficiency,
+		CanopyPressureMarginPct:         pressureMargin,
 		SolarConcentratorDefocusMandate: defocusMandate,
-		CryoChillerBoostMandate:        chillerMandate,
-		AuditDigest:                    digest,
-		EvaluatedAt:                    time.Now(),
+		CryoChillerBoostMandate:         chillerMandate,
+		AuditDigest:                     digest,
+		EvaluatedAt:                     time.Now(),
 	}
 
 	v.assessments[probeID] = assessment
@@ -186,21 +186,21 @@ func (v *AsteroidMiningVault) GetAsteroidMiningDossier(probeID string) (map[stri
 	}
 
 	dossier := map[string]interface{}{
-		"mining_probe_id":             probeID,
-		"target_asteroid":             telem.TargetAsteroidName,
-		"iso_14620_compliant":         asm.CanopyIntegrityStatus != "CATASTROPHIC_CANOPY_RUPTURE_RISK" || (hasAct && act.AvoidedCanopyBlowoutLossUSD > 0),
-		"nasa_planetary_protection":   true,
-		"solar_flux_kw_m2":            telem.ConcentratedSolarFluxKwPerM2,
-		"regolith_temp_c":             telem.RegolithDesorptionTempC,
-		"canopy_pressure_bar":         telem.InflatableCanopyPressureBar,
-		"cold_trap_temp_k":            telem.CryoColdTrapTempK,
-		"canopy_integrity":            asm.CanopyIntegrityStatus,
-		"volatile_condensation":       asm.VolatileCondensationEfficiency,
-		"solar_defocus_angle_deg":     0.0,
-		"chiller_power_watts":         1200.0,
-		"avoided_loss_usd":            0.0,
-		"audit_digest":                asm.AuditDigest,
-		"compiled_at":                 time.Now(),
+		"mining_probe_id":           probeID,
+		"target_asteroid":           telem.TargetAsteroidName,
+		"iso_14620_compliant":       asm.CanopyIntegrityStatus != "CATASTROPHIC_CANOPY_RUPTURE_RISK" || (hasAct && act.AvoidedCanopyBlowoutLossUSD > 0),
+		"nasa_planetary_protection": true,
+		"solar_flux_kw_m2":          telem.ConcentratedSolarFluxKwPerM2,
+		"regolith_temp_c":           telem.RegolithDesorptionTempC,
+		"canopy_pressure_bar":       telem.InflatableCanopyPressureBar,
+		"cold_trap_temp_k":          telem.CryoColdTrapTempK,
+		"canopy_integrity":          asm.CanopyIntegrityStatus,
+		"volatile_condensation":     asm.VolatileCondensationEfficiency,
+		"solar_defocus_angle_deg":   0.0,
+		"chiller_power_watts":       1200.0,
+		"avoided_loss_usd":          0.0,
+		"audit_digest":              asm.AuditDigest,
+		"compiled_at":               time.Now(),
 	}
 
 	if hasAct {

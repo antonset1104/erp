@@ -78,19 +78,19 @@ func (h *Handler) GetStats(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"total_models":           stats.TotalCustomModels,
-		"total_custom_models":    stats.TotalCustomModels,
-		"total_fields":           stats.TotalCustomFields,
-		"total_custom_fields":    stats.TotalCustomFields,
-		"total_records":          stats.TotalCustomRecords,
-		"total_custom_records":   stats.TotalCustomRecords,
-		"active_workflows":       stats.ActiveBusinessSchemas,
+		"total_models":            stats.TotalCustomModels,
+		"total_custom_models":     stats.TotalCustomModels,
+		"total_fields":            stats.TotalCustomFields,
+		"total_custom_fields":     stats.TotalCustomFields,
+		"total_records":           stats.TotalCustomRecords,
+		"total_custom_records":    stats.TotalCustomRecords,
+		"active_workflows":        stats.ActiveBusinessSchemas,
 		"active_business_schemas": stats.ActiveBusinessSchemas,
-		"storage_kb":             128 + stats.TotalCustomRecords*2,
-		"schema_health":          "100% OK",
-		"system_readiness":       stats.SystemReadinessRate,
-		"system_readiness_rate":  stats.SystemReadinessRate,
-		"data":                   stats,
+		"storage_kb":              128 + stats.TotalCustomRecords*2,
+		"schema_health":           "100% OK",
+		"system_readiness":        stats.SystemReadinessRate,
+		"system_readiness_rate":   stats.SystemReadinessRate,
+		"data":                    stats,
 	})
 }
 

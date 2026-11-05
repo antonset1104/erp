@@ -54,7 +54,7 @@ type EDIIngestResponse struct {
 
 type EDIGenerateRequest struct {
 	DocumentType   string        `json:"document_type" binding:"required"` // 810 (Invoice), 850 (PO), 855 (PO Ack), 856 (ASN)
-	Format         string        `json:"format"`                          // ANSI_X12 or EDIFACT (default ANSI_X12)
+	Format         string        `json:"format"`                           // ANSI_X12 or EDIFACT (default ANSI_X12)
 	SenderID       string        `json:"sender_id"`
 	ReceiverID     string        `json:"receiver_id"`
 	DocumentNumber string        `json:"document_number" binding:"required"`

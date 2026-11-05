@@ -288,7 +288,7 @@ func (r *repository) GetStats(warehouseID uint) (*WMSStats, error) {
 	binQuery.Count(&totalBins)
 
 	r.db.Model(&WMSBinLocation{}).Where("is_occupied = ?", true).Count(&occupiedBins)
-	
+
 	wActive := r.db.Model(&WMSWavePicking{}).Where("status = ?", "in_progress")
 	wCompleted := r.db.Model(&WMSWavePicking{}).Where("status = ?", "completed")
 	if warehouseID > 0 {

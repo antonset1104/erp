@@ -17,7 +17,7 @@ type MSRFuelSaltTelemetry struct {
 	TelemetryID                        string    `json:"telemetry_id"`
 	ReactorCoreID                      string    `json:"reactor_core_id"`                        // "MSR-LFTR-FLUORIDE-500MWTH-01"
 	SaltLoopID                         string    `json:"salt_loop_id"`                           // "LOOP-PRIMARY-FLIBE-01"
-	FuelSaltTemperatureC              float64   `json:"fuel_salt_temperature_c"`               // e.g. 685.0°C
+	FuelSaltTemperatureC               float64   `json:"fuel_salt_temperature_c"`                // e.g. 685.0°C
 	FuelSaltFlowRateKgS                float64   `json:"fuel_salt_flow_rate_kg_s"`               // e.g. 1420.0 kg/s
 	U4ToU3RedoxRatio                   float64   `json:"u4_to_u3_redox_ratio"`                   // e.g. 185.0:1 (optimal 90:1 - 110:1, oxidizing > 150:1)
 	DissolvedChromiumPpm               float64   `json:"dissolved_chromium_ppm"`                 // e.g. 84.5 ppm (corrosion limit < 50 ppm)
@@ -30,26 +30,26 @@ type MSRFuelSaltTelemetry struct {
 
 // MSRAssessment models Hastelloy chromium dissolution, tellurium intergranular SCC, and xenon-135 spatial flux oscillations
 type MSRAssessment struct {
-	AssessmentID                         string    `json:"assessment_id"`
-	ReactorCoreID                        string    `json:"reactor_core_id"`
-	FluorineElectrochemicalPotentialVolts float64  `json:"fluorine_electrochemical_potential_volts"` // E_cell via Nernst equation
-	HastelloyGrainCorrosionHazard        string    `json:"hastelloy_grain_corrosion_hazard"`         // "PASSIVE_HASTELLOY_RESISTANT", "CHROMIUM_DISSOLUTION_WARNING", "CRITICAL_TELLURIUM_INTERGRANULAR_SCC"
-	XenonNeutronPoisonStatus             string    `json:"xenon_neutron_poison_status"`              // "XENON_REMOVAL_STABLE", "POISON_ACCUMULATION_WARNING", "SPATIAL_FLUX_OSCILLATION_COLLAPSE"
-	BerylliumRedoxRodInsertionMandate    bool      `json:"beryllium_redox_rod_insertion_mandate"`
-	HeliumSpargeFlowBoostMandate         bool      `json:"helium_sparge_flow_boost_mandate"`
-	AuditDigest                          string    `json:"audit_digest"`
-	EvaluatedAt                          time.Time `json:"evaluated_at"`
+	AssessmentID                          string    `json:"assessment_id"`
+	ReactorCoreID                         string    `json:"reactor_core_id"`
+	FluorineElectrochemicalPotentialVolts float64   `json:"fluorine_electrochemical_potential_volts"` // E_cell via Nernst equation
+	HastelloyGrainCorrosionHazard         string    `json:"hastelloy_grain_corrosion_hazard"`         // "PASSIVE_HASTELLOY_RESISTANT", "CHROMIUM_DISSOLUTION_WARNING", "CRITICAL_TELLURIUM_INTERGRANULAR_SCC"
+	XenonNeutronPoisonStatus              string    `json:"xenon_neutron_poison_status"`              // "XENON_REMOVAL_STABLE", "POISON_ACCUMULATION_WARNING", "SPATIAL_FLUX_OSCILLATION_COLLAPSE"
+	BerylliumRedoxRodInsertionMandate     bool      `json:"beryllium_redox_rod_insertion_mandate"`
+	HeliumSpargeFlowBoostMandate          bool      `json:"helium_sparge_flow_boost_mandate"`
+	AuditDigest                           string    `json:"audit_digest"`
+	EvaluatedAt                           time.Time `json:"evaluated_at"`
 }
 
 // MSRMitigationAction models servo beryllium rod insertion, high-rate helium bubble sparging, and secondary convective cooling
 type MSRMitigationAction struct {
-	ActionID                      string    `json:"action_id"`
-	ReactorCoreID                 string    `json:"reactor_core_id"`
-	BerylliumRodInsertionDepthMm  float64   `json:"beryllium_rod_insertion_depth_mm"`   // inserted 125.0 mm to reduce U4+ back to U3+
-	CommandedHeliumSpargeFlowNm3Hr float64  `json:"commanded_helium_sparge_flow_nm3_hr"`// boosted to 95.0 Nm3/hr to strip Xe-135
-	SecondarySaltCoolantTrimC     float64   `json:"secondary_salt_coolant_trim_c"`      // trimmed to 580.0°C
-	AvoidedReactorLossUSD         float64   `json:"avoided_reactor_loss_usd"`           // Avoided $350M USD core boundary breach and forced shutdown
-	ActionTimestamp               time.Time `json:"action_timestamp"`
+	ActionID                       string    `json:"action_id"`
+	ReactorCoreID                  string    `json:"reactor_core_id"`
+	BerylliumRodInsertionDepthMm   float64   `json:"beryllium_rod_insertion_depth_mm"`    // inserted 125.0 mm to reduce U4+ back to U3+
+	CommandedHeliumSpargeFlowNm3Hr float64   `json:"commanded_helium_sparge_flow_nm3_hr"` // boosted to 95.0 Nm3/hr to strip Xe-135
+	SecondarySaltCoolantTrimC      float64   `json:"secondary_salt_coolant_trim_c"`       // trimmed to 580.0°C
+	AvoidedReactorLossUSD          float64   `json:"avoided_reactor_loss_usd"`            // Avoided $350M USD core boundary breach and forced shutdown
+	ActionTimestamp                time.Time `json:"action_timestamp"`
 }
 
 // MSRVault thread-safe in-memory store
@@ -122,15 +122,15 @@ func (v *MSRVault) EvaluateRedoxAndPoisoning(coreID string) (MSRAssessment, erro
 	digest := hex.EncodeToString(hash[:])
 
 	assessment := MSRAssessment{
-		AssessmentID:                         fmt.Sprintf("ASM-MSR-%d", time.Now().UnixNano()%1000000),
-		ReactorCoreID:                        coreID,
+		AssessmentID:                          fmt.Sprintf("ASM-MSR-%d", time.Now().UnixNano()%1000000),
+		ReactorCoreID:                         coreID,
 		FluorineElectrochemicalPotentialVolts: potential,
-		HastelloyGrainCorrosionHazard:        corrosionHazard,
-		XenonNeutronPoisonStatus:             xeStatus,
-		BerylliumRedoxRodInsertionMandate:    beRodMandate,
-		HeliumSpargeFlowBoostMandate:         heSpargeMandate,
-		AuditDigest:                          digest,
-		EvaluatedAt:                          time.Now(),
+		HastelloyGrainCorrosionHazard:         corrosionHazard,
+		XenonNeutronPoisonStatus:              xeStatus,
+		BerylliumRedoxRodInsertionMandate:     beRodMandate,
+		HeliumSpargeFlowBoostMandate:          heSpargeMandate,
+		AuditDigest:                           digest,
+		EvaluatedAt:                           time.Now(),
 	}
 
 	v.assessments[coreID] = assessment
@@ -161,13 +161,13 @@ func (v *MSRVault) TriggerBerylliumRodAndHeliumSparge(coreID string) (MSRMitigat
 	}
 
 	action := MSRMitigationAction{
-		ActionID:                      fmt.Sprintf("ACT-MSR-%d", time.Now().UnixNano()%1000000),
-		ReactorCoreID:                 coreID,
-		BerylliumRodInsertionDepthMm:  rodDepth,
+		ActionID:                       fmt.Sprintf("ACT-MSR-%d", time.Now().UnixNano()%1000000),
+		ReactorCoreID:                  coreID,
+		BerylliumRodInsertionDepthMm:   rodDepth,
 		CommandedHeliumSpargeFlowNm3Hr: heFlow,
-		SecondarySaltCoolantTrimC:     secTrim,
-		AvoidedReactorLossUSD:         350000000.0,
-		ActionTimestamp:               time.Now(),
+		SecondarySaltCoolantTrimC:      secTrim,
+		AvoidedReactorLossUSD:          350000000.0,
+		ActionTimestamp:                time.Now(),
 	}
 
 	v.actions[coreID] = action
@@ -188,14 +188,14 @@ func (v *MSRVault) GetMSRNuclearSafetyDossier(coreID string) (map[string]interfa
 	}
 
 	return map[string]interface{}{
-		"reactor_core_id":       coreID,
-		"salt_loop_id":          telem.SaltLoopID,
+		"reactor_core_id":          coreID,
+		"salt_loop_id":             telem.SaltLoopID,
 		"asme_bpvc_div5_compliant": true,
-		"iaea_ssr2_1_certified": true,
-		"telemetry":             telem,
-		"assessment":            asm,
-		"latest_action":         act,
-		"compiled_at":           time.Now(),
+		"iaea_ssr2_1_certified":    true,
+		"telemetry":                telem,
+		"assessment":               asm,
+		"latest_action":            act,
+		"compiled_at":              time.Now(),
 	}, nil
 }
 

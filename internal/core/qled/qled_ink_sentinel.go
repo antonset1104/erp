@@ -14,41 +14,41 @@ import (
 
 // QLEDPrintingTelemetry captures cadmium-free InP quantum dot inkjet printing & PLQY dynamics under IEC 62341 & SEMI D73
 type QLEDPrintingTelemetry struct {
-	TelemetryID                  string    `json:"telemetry_id"`
-	PrinterID                    string    `json:"printer_id"`                        // "INKJET-GEN85-QLED-PANEL-01"
-	SubstrateBatchID             string    `json:"substrate_batch_id"`               // "GLASS-MOTHER-SUBSTRATE-G85-0091"
-	DropletVolumePicoLiters      float64   `json:"droplet_volume_pico_liters"`        // e.g. 3.85 pL
-	DropletVelocityMPerSec       float64   `json:"droplet_velocity_m_per_sec"`        // e.g. 7.45 m/s
-	GloveboxOxygenPpm            float64   `json:"glovebox_oxygen_ppm"`               // e.g. 2.15 ppm O2
-	GloveboxMoisturePpm          float64   `json:"glovebox_moisture_ppm"`             // e.g. 1.85 ppm H2O
-	PhotoluminescenceYieldPLQYPct float64  `json:"photoluminescence_yield_plqy_pct"`  // e.g. 74.2% (target > 90%)
-	SubPixelMarangoniRatio       float64   `json:"sub_pixel_marangoni_ratio"`         // e.g. 1.48 (coffee-ring segregation > 1.20)
-	NanocrystalInPCoreDiameterNm float64   `json:"nanocrystal_inp_core_diameter_nm"` // e.g. 3.25 nm (green emitter)
-	VacuumPostBakeTempC          float64   `json:"vacuum_post_bake_temp_c"`           // e.g. 95.0°C
-	RecordedAt                   time.Time `json:"recorded_at"`
+	TelemetryID                   string    `json:"telemetry_id"`
+	PrinterID                     string    `json:"printer_id"`                       // "INKJET-GEN85-QLED-PANEL-01"
+	SubstrateBatchID              string    `json:"substrate_batch_id"`               // "GLASS-MOTHER-SUBSTRATE-G85-0091"
+	DropletVolumePicoLiters       float64   `json:"droplet_volume_pico_liters"`       // e.g. 3.85 pL
+	DropletVelocityMPerSec        float64   `json:"droplet_velocity_m_per_sec"`       // e.g. 7.45 m/s
+	GloveboxOxygenPpm             float64   `json:"glovebox_oxygen_ppm"`              // e.g. 2.15 ppm O2
+	GloveboxMoisturePpm           float64   `json:"glovebox_moisture_ppm"`            // e.g. 1.85 ppm H2O
+	PhotoluminescenceYieldPLQYPct float64   `json:"photoluminescence_yield_plqy_pct"` // e.g. 74.2% (target > 90%)
+	SubPixelMarangoniRatio        float64   `json:"sub_pixel_marangoni_ratio"`        // e.g. 1.48 (coffee-ring segregation > 1.20)
+	NanocrystalInPCoreDiameterNm  float64   `json:"nanocrystal_inp_core_diameter_nm"` // e.g. 3.25 nm (green emitter)
+	VacuumPostBakeTempC           float64   `json:"vacuum_post_bake_temp_c"`          // e.g. 95.0°C
+	RecordedAt                    time.Time `json:"recorded_at"`
 }
 
 // QLEDPrintingAssessment models Marangoni convective ring segregation, Auger non-radiative recombination, and PLQY yield
 type QLEDPrintingAssessment struct {
-	AssessmentID                string    `json:"assessment_id"`
-	PrinterID                   string    `json:"printer_id"`
-	PLQYDegradationMarginPct    float64   `json:"plqy_degradation_margin_pct"`      // target 92.0% - actual PLQY
-	CoffeeRingMuraSeverity      string    `json:"coffee_ring_mura_severity"`        // "UNIFORM_FLAT_PROFILE", "SLIGHT_PERIMETER_RINGING", "CRITICAL_MARANGONI_SEGREGATION_MURA"
-	QuantumEfficiencyCompliance string    `json:"quantum_efficiency_compliance"`    // "PREMIUM_DISPLAY_GRADE", "OFF_COLOR_TINT_WARNING", "DEFECTIVE_DARK_PIXEL_REJECT"
-	PiezoWaveformTrimMandate    bool      `json:"piezo_waveform_trim_mandate"`
-	SolventVaporAnnealingMandate bool     `json:"solvent_vapor_annealing_mandate"`
-	AuditDigest                 string    `json:"audit_digest"`
-	EvaluatedAt                 time.Time `json:"evaluated_at"`
+	AssessmentID                 string    `json:"assessment_id"`
+	PrinterID                    string    `json:"printer_id"`
+	PLQYDegradationMarginPct     float64   `json:"plqy_degradation_margin_pct"`   // target 92.0% - actual PLQY
+	CoffeeRingMuraSeverity       string    `json:"coffee_ring_mura_severity"`     // "UNIFORM_FLAT_PROFILE", "SLIGHT_PERIMETER_RINGING", "CRITICAL_MARANGONI_SEGREGATION_MURA"
+	QuantumEfficiencyCompliance  string    `json:"quantum_efficiency_compliance"` // "PREMIUM_DISPLAY_GRADE", "OFF_COLOR_TINT_WARNING", "DEFECTIVE_DARK_PIXEL_REJECT"
+	PiezoWaveformTrimMandate     bool      `json:"piezo_waveform_trim_mandate"`
+	SolventVaporAnnealingMandate bool      `json:"solvent_vapor_annealing_mandate"`
+	AuditDigest                  string    `json:"audit_digest"`
+	EvaluatedAt                  time.Time `json:"evaluated_at"`
 }
 
 // QLEDMitigationAction models piezoelectric waveform shaping, solvent vapor saturation annealing (SVSA), and UV ligand cure
 type QLEDMitigationAction struct {
 	ActionID                        string    `json:"action_id"`
 	PrinterID                       string    `json:"printer_id"`
-	TunedPiezoAcousticVoltageVolts  float64   `json:"tuned_piezo_acoustic_voltage_volts"`   // adjusted to 24.8 V
-	SVSASolventChamberPressureMbar  float64   `json:"svsa_solvent_chamber_pressure_mbar"`  // saturated vapor at 18.5 mbar
-	InSituUVCureExposureDurationSec float64   `json:"in_situ_uv_cure_exposure_duration_sec"`// 4.2 sec UV crosslinking
-	AvoidedDisplayScrapLossUSD      float64   `json:"avoided_display_scrap_loss_usd"`       // Avoided $36M USD Gen-8.5 display mother glass scrap
+	TunedPiezoAcousticVoltageVolts  float64   `json:"tuned_piezo_acoustic_voltage_volts"`    // adjusted to 24.8 V
+	SVSASolventChamberPressureMbar  float64   `json:"svsa_solvent_chamber_pressure_mbar"`    // saturated vapor at 18.5 mbar
+	InSituUVCureExposureDurationSec float64   `json:"in_situ_uv_cure_exposure_duration_sec"` // 4.2 sec UV crosslinking
+	AvoidedDisplayScrapLossUSD      float64   `json:"avoided_display_scrap_loss_usd"`        // Avoided $36M USD Gen-8.5 display mother glass scrap
 	ActionTimestamp                 time.Time `json:"action_timestamp"`
 }
 
@@ -118,15 +118,15 @@ func (v *QLEDVault) EvaluateMarangoniAndPLQY(printerID string) (QLEDPrintingAsse
 	digest := hex.EncodeToString(hash[:])
 
 	assessment := QLEDPrintingAssessment{
-		AssessmentID:                fmt.Sprintf("ASM-QLED-%d", time.Now().UnixNano()%1000000),
-		PrinterID:                   printerID,
-		PLQYDegradationMarginPct:    plqyMargin,
-		CoffeeRingMuraSeverity:      muraSeverity,
-		QuantumEfficiencyCompliance: compliance,
-		PiezoWaveformTrimMandate:    piezoMandate,
+		AssessmentID:                 fmt.Sprintf("ASM-QLED-%d", time.Now().UnixNano()%1000000),
+		PrinterID:                    printerID,
+		PLQYDegradationMarginPct:     plqyMargin,
+		CoffeeRingMuraSeverity:       muraSeverity,
+		QuantumEfficiencyCompliance:  compliance,
+		PiezoWaveformTrimMandate:     piezoMandate,
 		SolventVaporAnnealingMandate: svsaMandate,
-		AuditDigest:                 digest,
-		EvaluatedAt:                 time.Now(),
+		AuditDigest:                  digest,
+		EvaluatedAt:                  time.Now(),
 	}
 
 	v.assessments[printerID] = assessment

@@ -40,11 +40,11 @@ type ExpertSearchQuery struct {
 
 // ExpertMatchCandidate evaluates an individual expert against the inquiry criteria.
 type ExpertMatchCandidate struct {
-	Expert                           SubjectMatterExpert `json:"expert"`
-	MatchScorePct                    float64             `json:"match_score_pct"` // 0.0 - 100.0%
-	SkillOverlapList                 []string            `json:"skill_overlap_list"`
-	AvailabilityStatus               string              `json:"availability_status"` // "AVAILABLE_IMMEDIATE", "PARTIAL_ALLOCATION", "COMMITTED"
-	EstimatedCostSavingsVsExternalUSD float64            `json:"estimated_cost_savings_vs_external_usd"`
+	Expert                            SubjectMatterExpert `json:"expert"`
+	MatchScorePct                     float64             `json:"match_score_pct"` // 0.0 - 100.0%
+	SkillOverlapList                  []string            `json:"skill_overlap_list"`
+	AvailabilityStatus                string              `json:"availability_status"` // "AVAILABLE_IMMEDIATE", "PARTIAL_ALLOCATION", "COMMITTED"
+	EstimatedCostSavingsVsExternalUSD float64             `json:"estimated_cost_savings_vs_external_usd"`
 }
 
 // ExpertSearchResult returns the ranked internal talent list.
@@ -220,10 +220,10 @@ func SearchExpertsLogic(query ExpertSearchQuery) (*ExpertSearchResult, error) {
 			totalSavings += costSavings
 
 			candidates = append(candidates, ExpertMatchCandidate{
-				Expert:                           *expert,
-				MatchScorePct:                    math.Round(score*10) / 10,
-				SkillOverlapList:                 matchedSkills,
-				AvailabilityStatus:               availStatus,
+				Expert:                            *expert,
+				MatchScorePct:                     math.Round(score*10) / 10,
+				SkillOverlapList:                  matchedSkills,
+				AvailabilityStatus:                availStatus,
 				EstimatedCostSavingsVsExternalUSD: math.Round(costSavings),
 			})
 		}

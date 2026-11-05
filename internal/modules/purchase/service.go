@@ -229,4 +229,3 @@ func (s *Service) RunReorderingRules(companyID uint) ([]PurchaseOrder, error) {
 
 	return createdPOs, nil
 }
-

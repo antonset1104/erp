@@ -12,42 +12,42 @@ import (
 
 // EffluentTelemetry represents continuous in-line industrial wastewater sensor stream
 type EffluentTelemetry struct {
-	TelemetryID          string    `json:"telemetry_id"`
-	FacilityID           string    `json:"facility_id"`
-	OutfallGateID        string    `json:"outfall_gate_id"` // e.g. "OUTFALL-RIVER-EAST-01"
-	PH                   float64   `json:"ph"`              // Statutory limits 6.0 - 9.0
-	COD_mg_per_L         float64   `json:"cod_mg_per_l"`    // Statutory limit <= 100 mg/L
-	BOD_mg_per_L         float64   `json:"bod_mg_per_l"`    // Statutory limit <= 50 mg/L
-	TSS_mg_per_L         float64   `json:"tss_mg_per_l"`    // Statutory limit <= 50 mg/L
-	TDSPPM               float64   `json:"tds_ppm"`
-	FlowRateM3PerHour    float64   `json:"flow_rate_m3_per_hour"`
-	Timestamp            time.Time `json:"timestamp"`
+	TelemetryID       string    `json:"telemetry_id"`
+	FacilityID        string    `json:"facility_id"`
+	OutfallGateID     string    `json:"outfall_gate_id"` // e.g. "OUTFALL-RIVER-EAST-01"
+	PH                float64   `json:"ph"`              // Statutory limits 6.0 - 9.0
+	COD_mg_per_L      float64   `json:"cod_mg_per_l"`    // Statutory limit <= 100 mg/L
+	BOD_mg_per_L      float64   `json:"bod_mg_per_l"`    // Statutory limit <= 50 mg/L
+	TSS_mg_per_L      float64   `json:"tss_mg_per_l"`    // Statutory limit <= 50 mg/L
+	TDSPPM            float64   `json:"tds_ppm"`
+	FlowRateM3PerHour float64   `json:"flow_rate_m3_per_hour"`
+	Timestamp         time.Time `json:"timestamp"`
 }
 
 // EffluentBreachGateAction models automatic emergency gate closure and retention diversion
 type EffluentBreachGateAction struct {
-	ActionID             string    `json:"action_id"`
-	FacilityID           string    `json:"facility_id"`
-	OutfallGateID        string    `json:"outfall_gate_id"`
-	BreachedParameters   []string  `json:"breached_parameters"`
-	FailSafeGateStatus   string    `json:"fail_safe_gate_status"` // "CLOSED_RIVER_DISCHARGE_SEALED"
-	GateClosureLatencySec float64  `json:"gate_closure_latency_sec"` // e.g. 8.5 seconds
-	DivertedRetentionBasin string   `json:"diverted_retention_basin"` // e.g. "BASIN-EMERGENCY-RETENTION-02"
-	SPARINGAlertDispatched bool     `json:"sparing_alert_dispatched"`
-	ActionVerdict        string    `json:"action_verdict"` // "POLLUTION_PREVENTED_SHUTOFF_SUCCESS"
-	TriggeredAt          time.Time `json:"triggered_at"`
+	ActionID               string    `json:"action_id"`
+	FacilityID             string    `json:"facility_id"`
+	OutfallGateID          string    `json:"outfall_gate_id"`
+	BreachedParameters     []string  `json:"breached_parameters"`
+	FailSafeGateStatus     string    `json:"fail_safe_gate_status"`    // "CLOSED_RIVER_DISCHARGE_SEALED"
+	GateClosureLatencySec  float64   `json:"gate_closure_latency_sec"` // e.g. 8.5 seconds
+	DivertedRetentionBasin string    `json:"diverted_retention_basin"` // e.g. "BASIN-EMERGENCY-RETENTION-02"
+	SPARINGAlertDispatched bool      `json:"sparing_alert_dispatched"`
+	ActionVerdict          string    `json:"action_verdict"` // "POLLUTION_PREVENTED_SHUTOFF_SUCCESS"
+	TriggeredAt            time.Time `json:"triggered_at"`
 }
 
 // WaterRecyclingLedger models circular water accounting under ISO 14046
 type WaterRecyclingLedger struct {
-	LedgerID             string    `json:"ledger_id"`
-	FacilityID           string    `json:"facility_id"`
-	TotalWaterIntakeM3   float64   `json:"total_water_intake_m3"`
-	RecycledWaterVolumeM3 float64  `json:"recycled_water_volume_m3"`
-	CoolingTowerReuseM3  float64   `json:"cooling_tower_reuse_m3"`
-	WaterRecyclingRatio  float64   `json:"water_recycling_ratio_pct"`
-	ZLDCertificationTier string    `json:"zld_certification_tier"` // "ZERO_LIQUID_DISCHARGE_PLATINUM"
-	RecordedAt           time.Time `json:"recorded_at"`
+	LedgerID              string    `json:"ledger_id"`
+	FacilityID            string    `json:"facility_id"`
+	TotalWaterIntakeM3    float64   `json:"total_water_intake_m3"`
+	RecycledWaterVolumeM3 float64   `json:"recycled_water_volume_m3"`
+	CoolingTowerReuseM3   float64   `json:"cooling_tower_reuse_m3"`
+	WaterRecyclingRatio   float64   `json:"water_recycling_ratio_pct"`
+	ZLDCertificationTier  string    `json:"zld_certification_tier"` // "ZERO_LIQUID_DISCHARGE_PLATINUM"
+	RecordedAt            time.Time `json:"recorded_at"`
 }
 
 // WaterStewardshipVault thread-safe store
@@ -117,16 +117,16 @@ func (v *WaterStewardshipVault) EvaluateDischargeCompliance(facilityID string) (
 	if len(breaches) > 0 {
 		actionID := fmt.Sprintf("ACT-GATE-%d", time.Now().UnixNano()%1000000)
 		action := EffluentBreachGateAction{
-			ActionID:              actionID,
-			FacilityID:            facilityID,
-			OutfallGateID:         tel.OutfallGateID,
-			BreachedParameters:    breaches,
-			FailSafeGateStatus:    "CLOSED_RIVER_DISCHARGE_SEALED",
-			GateClosureLatencySec: 8.5,
+			ActionID:               actionID,
+			FacilityID:             facilityID,
+			OutfallGateID:          tel.OutfallGateID,
+			BreachedParameters:     breaches,
+			FailSafeGateStatus:     "CLOSED_RIVER_DISCHARGE_SEALED",
+			GateClosureLatencySec:  8.5,
 			DivertedRetentionBasin: "BASIN-EMERGENCY-RETENTION-02",
 			SPARINGAlertDispatched: true,
-			ActionVerdict:         "POLLUTION_PREVENTED_SHUTOFF_SUCCESS",
-			TriggeredAt:           time.Now(),
+			ActionVerdict:          "POLLUTION_PREVENTED_SHUTOFF_SUCCESS",
+			TriggeredAt:            time.Now(),
 		}
 		v.gateActions[facilityID] = action
 		return &action, nil

@@ -16,27 +16,27 @@ type ArcticIcebergScourTelemetry struct {
 	TelemetryID               string    `json:"telemetry_id"`
 	WellheadID                string    `json:"wellhead_id"`
 	SiloSectorID              string    `json:"silo_sector_id"`
-	IcebergKeelDraftMeters    float64   `json:"iceberg_keel_draft_meters"`     // nominal 180.0 - 250.0 m (scour contact > 215.0 m)
-	SeabedScourDepthMeters    float64   `json:"seabed_scour_depth_meters"`     // threshold > 2.50 m trench gouge
-	IcebergDriftVelocityKnots float64   `json:"iceberg_drift_velocity_knots"`  // nominal 0.5 - 2.8 knots
-	DistanceToWellheadMeters  float64   `json:"distance_to_wellhead_meters"`   // collision warning < 1200 m, critical < 350 m
-	SiloBermAxialStressMpa    float64   `json:"silo_berm_axial_stress_mpa"`    // limit < 480.0 MPa
-	DownholePackerPressureBar float64   `json:"downhole_packer_pressure_bar"`  // nominal 280.0 - 450.0 bar
-	SubseaUmbilicalTensionKn  float64   `json:"subsea_umbilical_tension_kn"`   // limit < 350.0 kN
+	IcebergKeelDraftMeters    float64   `json:"iceberg_keel_draft_meters"`    // nominal 180.0 - 250.0 m (scour contact > 215.0 m)
+	SeabedScourDepthMeters    float64   `json:"seabed_scour_depth_meters"`    // threshold > 2.50 m trench gouge
+	IcebergDriftVelocityKnots float64   `json:"iceberg_drift_velocity_knots"` // nominal 0.5 - 2.8 knots
+	DistanceToWellheadMeters  float64   `json:"distance_to_wellhead_meters"`  // collision warning < 1200 m, critical < 350 m
+	SiloBermAxialStressMpa    float64   `json:"silo_berm_axial_stress_mpa"`   // limit < 480.0 MPa
+	DownholePackerPressureBar float64   `json:"downhole_packer_pressure_bar"` // nominal 280.0 - 450.0 bar
+	SubseaUmbilicalTensionKn  float64   `json:"subsea_umbilical_tension_kn"`  // limit < 350.0 kN
 	Timestamp                 time.Time `json:"timestamp"`
 }
 
 // ArcticIcebergScourAssessment models iceberg trajectory encroachment, berm penetration, and DNV-OS-F101 / ISO 19906 compliance
 type ArcticIcebergScourAssessment struct {
-	AssessmentID                          string    `json:"assessment_id"`
-	WellheadID                            string    `json:"wellhead_id"`
-	IcebergEncroachmentStatus             string    `json:"iceberg_encroachment_status"`             // FREE_DRIFT_SAFE, HAZARDOUS_SCOUR_CONVERGENCE_WARNING, TERMINAL_WELLHEAD_SHEAR_IMMINENT
-	SiloContainmentIntegrity              string    `json:"silo_containment_integrity"`              // SUBTERRANEAN_RECESSED_INTACT, BERM_PENETRATION_RUPTURE_RISK
-	WellheadClearanceDistanceMarginPct    float64   `json:"wellhead_clearance_distance_margin_pct"`
-	AcousticDeterrentHazingMandate        bool      `json:"acoustic_deterrent_hazing_mandate"`
-	DownholeStormChokeAndEQDMandate       bool      `json:"downhole_storm_choke_and_eqd_mandate"`
-	AuditDigest                           string    `json:"audit_digest"`
-	EvaluatedAt                           time.Time `json:"evaluated_at"`
+	AssessmentID                       string    `json:"assessment_id"`
+	WellheadID                         string    `json:"wellhead_id"`
+	IcebergEncroachmentStatus          string    `json:"iceberg_encroachment_status"` // FREE_DRIFT_SAFE, HAZARDOUS_SCOUR_CONVERGENCE_WARNING, TERMINAL_WELLHEAD_SHEAR_IMMINENT
+	SiloContainmentIntegrity           string    `json:"silo_containment_integrity"`  // SUBTERRANEAN_RECESSED_INTACT, BERM_PENETRATION_RUPTURE_RISK
+	WellheadClearanceDistanceMarginPct float64   `json:"wellhead_clearance_distance_margin_pct"`
+	AcousticDeterrentHazingMandate     bool      `json:"acoustic_deterrent_hazing_mandate"`
+	DownholeStormChokeAndEQDMandate    bool      `json:"downhole_storm_choke_and_eqd_mandate"`
+	AuditDigest                        string    `json:"audit_digest"`
+	EvaluatedAt                        time.Time `json:"evaluated_at"`
 }
 
 // ArcticIcebergScourMitigationAction models acoustic iceberg deflection, fail-safe storm choke shut-in, and emergency hydraulic disconnect (EQD)
@@ -185,22 +185,22 @@ func (v *ArcticIcebergScourVault) GetArcticWellheadDossier(wellheadID string) (m
 	}
 
 	dossier := map[string]interface{}{
-		"wellhead_id":             wellheadID,
-		"silo_sector_id":          telem.SiloSectorID,
-		"dnv_os_f101_compliant":   asm.IcebergEncroachmentStatus != "TERMINAL_WELLHEAD_SHEAR_IMMINENT" || (hasAct && act.AvoidedSubseaCatastropheLossUSD > 0),
-		"iso_19906_certified":     true,
-		"iceberg_draft_m":         telem.IcebergKeelDraftMeters,
-		"scour_depth_m":           telem.SeabedScourDepthMeters,
-		"distance_to_wellhead_m":  telem.DistanceToWellheadMeters,
-		"silo_stress_mpa":         telem.SiloBermAxialStressMpa,
-		"encroachment_status":     asm.IcebergEncroachmentStatus,
-		"silo_integrity":          asm.SiloContainmentIntegrity,
-		"acoustic_deflector_db":   0.0,
-		"storm_choke_close_sec":   0.0,
-		"eqd_release_sec":         0.0,
-		"avoided_loss_usd":        0.0,
-		"audit_digest":            asm.AuditDigest,
-		"compiled_at":             time.Now(),
+		"wellhead_id":            wellheadID,
+		"silo_sector_id":         telem.SiloSectorID,
+		"dnv_os_f101_compliant":  asm.IcebergEncroachmentStatus != "TERMINAL_WELLHEAD_SHEAR_IMMINENT" || (hasAct && act.AvoidedSubseaCatastropheLossUSD > 0),
+		"iso_19906_certified":    true,
+		"iceberg_draft_m":        telem.IcebergKeelDraftMeters,
+		"scour_depth_m":          telem.SeabedScourDepthMeters,
+		"distance_to_wellhead_m": telem.DistanceToWellheadMeters,
+		"silo_stress_mpa":        telem.SiloBermAxialStressMpa,
+		"encroachment_status":    asm.IcebergEncroachmentStatus,
+		"silo_integrity":         asm.SiloContainmentIntegrity,
+		"acoustic_deflector_db":  0.0,
+		"storm_choke_close_sec":  0.0,
+		"eqd_release_sec":        0.0,
+		"avoided_loss_usd":       0.0,
+		"audit_digest":           asm.AuditDigest,
+		"compiled_at":            time.Now(),
 	}
 
 	if hasAct {

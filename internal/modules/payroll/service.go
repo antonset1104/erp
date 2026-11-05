@@ -515,7 +515,7 @@ func (s *Service) AuditWithAI(id uint, companyID uint) (*AIPayrollAuditResult, e
 			auditFlags = append(auditFlags, fmt.Sprintf("Gaji bersih (Rp %.0f) melonjak >60%% dibanding gaji pokok kontrak (Rp %.0f). Periksa bonus atau klaim lembur.", slip.NetSalary, slip.BasicSalary))
 			riskScore += 25.0
 		} else if ratio < 0.6 {
-			auditFlags = append(auditFlags, fmt.Sprintf("Gaji bersih (Rp %.0f) terpangkas >40%% dari gaji pokok kontrak. Pastikan pemotongan cuti unpaid dan penalti sudah valid.", slip.NetSalary, slip.BasicSalary))
+			auditFlags = append(auditFlags, fmt.Sprintf("Gaji bersih (Rp %.0f) terpangkas >40%% dari gaji pokok kontrak (Rp %.0f). Pastikan pemotongan cuti unpaid dan penalti sudah valid.", slip.NetSalary, slip.BasicSalary))
 			riskScore += 20.0
 		}
 	}

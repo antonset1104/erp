@@ -16,7 +16,7 @@ type CrmLead struct {
 	Email           string        `gorm:"size:128" json:"email"`
 	Phone           string        `gorm:"size:64" json:"phone"`
 	ExpectedRevenue float64       `gorm:"default:0" json:"expected_revenue"`
-	Probability     float64       `gorm:"default:20" json:"probability"` // Probability in % (0 - 100)
+	Probability     float64       `gorm:"default:20" json:"probability"`            // Probability in % (0 - 100)
 	Stage           string        `gorm:"size:32;default:'new';index" json:"stage"` // "new", "qualified", "proposition", "won", "lost"
 	Priority        string        `gorm:"size:16;default:'1'" json:"priority"`      // "0" (Low), "1" (Medium), "2" (High), "3" (Urgent)
 	UserID          *uint         `json:"user_id,omitempty"`                        // Sales Representative

@@ -62,23 +62,23 @@ type RopeReleaseOrder struct {
 
 // PlantBottleneckRadar contains the comprehensive TOC diagnostic view of the plant
 type PlantBottleneckRadar struct {
-	PlantID               string                    `json:"plant_id"`
-	ActiveDrumConstraint  string                    `json:"active_drum_constraint"`
-	DrumThroughputUnitsHr float64                   `json:"drum_throughput_units_hr"`
-	PlantOverallFlowRate  float64                   `json:"plant_overall_flow_rate"`
-	PredictedNextDrum     string                    `json:"predicted_next_drum"`
-	TotalWIPCapitalUSD    float64                   `json:"total_wip_capital_usd"`
-	BufferStatusSummary   BufferPenetrationResult   `json:"buffer_status_summary"`
-	ActiveWorkcenters     []WorkcenterTelemetry     `json:"active_workcenters"`
-	LastRefreshedAt       time.Time                 `json:"last_refreshed_at"`
+	PlantID               string                  `json:"plant_id"`
+	ActiveDrumConstraint  string                  `json:"active_drum_constraint"`
+	DrumThroughputUnitsHr float64                 `json:"drum_throughput_units_hr"`
+	PlantOverallFlowRate  float64                 `json:"plant_overall_flow_rate"`
+	PredictedNextDrum     string                  `json:"predicted_next_drum"`
+	TotalWIPCapitalUSD    float64                 `json:"total_wip_capital_usd"`
+	BufferStatusSummary   BufferPenetrationResult `json:"buffer_status_summary"`
+	ActiveWorkcenters     []WorkcenterTelemetry   `json:"active_workcenters"`
+	LastRefreshedAt       time.Time               `json:"last_refreshed_at"`
 }
 
 // TOCEngine manages the in-memory state of the Theory of Constraints Drum-Buffer-Rope mechanism
 type TOCEngine struct {
 	mu           sync.RWMutex
-	telemetry    map[string][]WorkcenterTelemetry // plantID -> list of workcenter telemetry
+	telemetry    map[string][]WorkcenterTelemetry   // plantID -> list of workcenter telemetry
 	bufferAudits map[string]BufferPenetrationResult // plantID -> latest buffer audit
-	ropeOrders   map[string]RopeReleaseOrder      // plantID -> latest rope release
+	ropeOrders   map[string]RopeReleaseOrder        // plantID -> latest rope release
 }
 
 var (
@@ -303,8 +303,8 @@ func RegisterTOCRoutes(r *gin.RouterGroup) {
 			}
 			result := GetTOCEngine().EvaluateBuffer(req.PlantID, req.DrumWorkcenterID)
 			c.JSON(http.StatusOK, gin.H{
-				"status":  "BUFFER_EVALUATED",
-				"audit":   result,
+				"status": "BUFFER_EVALUATED",
+				"audit":  result,
 			})
 		})
 

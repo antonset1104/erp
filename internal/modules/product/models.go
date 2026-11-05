@@ -14,11 +14,11 @@ type ProductCategory struct {
 // UoM corresponds to standard enterprise uom.uom (Unit of Measure)
 type UoM struct {
 	models.ModelBase
-	Name        string  `gorm:"size:64;not null" json:"name"` // Unit, Pcs, Kg, Liter
-	Category    string  `gorm:"size:64;default:'Unit'" json:"category"`
-	Factor      float64 `gorm:"default:1.0" json:"factor"` // Ratio to reference unit
-	Rounding    float64 `gorm:"default:0.01" json:"rounding"`
-	Active      bool    `gorm:"default:true" json:"active"`
+	Name     string  `gorm:"size:64;not null" json:"name"` // Unit, Pcs, Kg, Liter
+	Category string  `gorm:"size:64;default:'Unit'" json:"category"`
+	Factor   float64 `gorm:"default:1.0" json:"factor"` // Ratio to reference unit
+	Rounding float64 `gorm:"default:0.01" json:"rounding"`
+	Active   bool    `gorm:"default:true" json:"active"`
 }
 
 // Product corresponds to standard enterprise product.template / product.product

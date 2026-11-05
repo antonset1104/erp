@@ -28,26 +28,26 @@ type DOCCOceanTelemetry struct {
 
 // DOCCOceanAssessment models mineral scaling, stack overvoltage, and IMO London Protocol / ISO 14064-2 compliance
 type DOCCOceanAssessment struct {
-	AssessmentID                       string    `json:"assessment_id"`
-	PlantID                            string    `json:"plant_id"`
-	ElectrodialysisStackCondition      string    `json:"electrodialysis_stack_condition"`      // PRISTINE_DESCALED, SCALE_NUCLEATION_WARNING, SEVERE_BRUCITE_MINERAL_FOULING_CRITICAL
-	LondonProtocolDischargeCompliance  string    `json:"london_protocol_discharge_compliance"` // FULLY_COMPLIANT, EFFLUENT_ACIDITY_EXCURSION_RISK
-	CellVoltageExcessMarginPct         float64   `json:"cell_voltage_excess_margin_pct"`
-	PolarityReversalMandate            bool      `json:"polarity_reversal_mandate"`
-	DiluteAcidFlushMandate             bool      `json:"dilute_acid_flush_mandate"`
-	AuditDigest                        string    `json:"audit_digest"`
-	EvaluatedAt                        time.Time `json:"evaluated_at"`
+	AssessmentID                      string    `json:"assessment_id"`
+	PlantID                           string    `json:"plant_id"`
+	ElectrodialysisStackCondition     string    `json:"electrodialysis_stack_condition"`      // PRISTINE_DESCALED, SCALE_NUCLEATION_WARNING, SEVERE_BRUCITE_MINERAL_FOULING_CRITICAL
+	LondonProtocolDischargeCompliance string    `json:"london_protocol_discharge_compliance"` // FULLY_COMPLIANT, EFFLUENT_ACIDITY_EXCURSION_RISK
+	CellVoltageExcessMarginPct        float64   `json:"cell_voltage_excess_margin_pct"`
+	PolarityReversalMandate           bool      `json:"polarity_reversal_mandate"`
+	DiluteAcidFlushMandate            bool      `json:"dilute_acid_flush_mandate"`
+	AuditDigest                       string    `json:"audit_digest"`
+	EvaluatedAt                       time.Time `json:"evaluated_at"`
 }
 
 // DOCCOceanMitigationAction models electrodialysis reversal (EDR), food-grade citric acid wash, and alkaline neutralization
 type DOCCOceanMitigationAction struct {
-	ActionID                            string    `json:"action_id"`
-	PlantID                             string    `json:"plant_id"`
-	ElectrodialysisPolarityReversalSec  float64   `json:"electrodialysis_polarity_reversal_sec"`
-	CitricAcidFlushRateLpm              float64   `json:"citric_acid_flush_rate_lpm"`
-	EffluentCausticNeutralizationPh     float64   `json:"effluent_caustic_neutralization_ph"`
-	AvoidedMembraneStackBurnoutLossUSD  float64   `json:"avoided_membrane_stack_burnout_loss_usd"`
-	ExecutedAt                          time.Time `json:"executed_at"`
+	ActionID                           string    `json:"action_id"`
+	PlantID                            string    `json:"plant_id"`
+	ElectrodialysisPolarityReversalSec float64   `json:"electrodialysis_polarity_reversal_sec"`
+	CitricAcidFlushRateLpm             float64   `json:"citric_acid_flush_rate_lpm"`
+	EffluentCausticNeutralizationPh    float64   `json:"effluent_caustic_neutralization_ph"`
+	AvoidedMembraneStackBurnoutLossUSD float64   `json:"avoided_membrane_stack_burnout_loss_usd"`
+	ExecutedAt                         time.Time `json:"executed_at"`
 }
 
 // DOCCOceanVault manages electrochemical ocean carbon capture stack health, scaling alerts, and marine environmental permits
@@ -185,22 +185,22 @@ func (v *DOCCOceanVault) GetDOCCEnvironmentalDossier(plantID string) (map[string
 	}
 
 	dossier := map[string]interface{}{
-		"plant_id":                     plantID,
-		"ocean_platform":               telem.OceanPlatformID,
-		"imo_london_protocol_cleared":  asm.LondonProtocolDischargeCompliance == "FULLY_COMPLIANT" || (hasAct && act.AvoidedMembraneStackBurnoutLossUSD > 0),
-		"iso_14064_certified":          true,
-		"seawater_flow_m3_hr":          telem.SeawaterFlowRateM3PerHr,
-		"bpmed_cell_voltage_v":         telem.BipolarMembraneCellVoltageV,
-		"scale_thickness_um":           telem.BruciteCalciteScaleThicknessUm,
-		"effluent_ph":                  telem.EffluentDischargePh,
-		"co2_purity_pct":               telem.Co2ProductGasPurityPct,
-		"stack_condition":              asm.ElectrodialysisStackCondition,
-		"discharge_compliance":         asm.LondonProtocolDischargeCompliance,
-		"polarity_reversal_sec":        0.0,
-		"citric_flush_lpm":             0.0,
-		"avoided_loss_usd":             0.0,
-		"audit_digest":                 asm.AuditDigest,
-		"compiled_at":                  time.Now(),
+		"plant_id":                    plantID,
+		"ocean_platform":              telem.OceanPlatformID,
+		"imo_london_protocol_cleared": asm.LondonProtocolDischargeCompliance == "FULLY_COMPLIANT" || (hasAct && act.AvoidedMembraneStackBurnoutLossUSD > 0),
+		"iso_14064_certified":         true,
+		"seawater_flow_m3_hr":         telem.SeawaterFlowRateM3PerHr,
+		"bpmed_cell_voltage_v":        telem.BipolarMembraneCellVoltageV,
+		"scale_thickness_um":          telem.BruciteCalciteScaleThicknessUm,
+		"effluent_ph":                 telem.EffluentDischargePh,
+		"co2_purity_pct":              telem.Co2ProductGasPurityPct,
+		"stack_condition":             asm.ElectrodialysisStackCondition,
+		"discharge_compliance":        asm.LondonProtocolDischargeCompliance,
+		"polarity_reversal_sec":       0.0,
+		"citric_flush_lpm":            0.0,
+		"avoided_loss_usd":            0.0,
+		"audit_digest":                asm.AuditDigest,
+		"compiled_at":                 time.Now(),
 	}
 
 	if hasAct {

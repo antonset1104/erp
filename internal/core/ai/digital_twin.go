@@ -14,7 +14,7 @@ import (
 
 type DigitalTwinSimulateRequest struct {
 	ScenarioName               string  `json:"scenario_name"`
-	SupplierLeadTimeDelayDays  int     `json:"supplier_lead_time_delay_days"`   // e.g. 14 days
+	SupplierLeadTimeDelayDays  int     `json:"supplier_lead_time_delay_days"`  // e.g. 14 days
 	FuelFreightInflationPct    float64 `json:"fuel_freight_inflation_pct"`     // e.g. 18.5%
 	FXRateUSDIDR               float64 `json:"fx_rate_usd_idr"`                // e.g. 16800
 	BaselineFXRateUSDIDR       float64 `json:"baseline_fx_rate_usd_idr"`       // e.g. 15800
@@ -36,14 +36,14 @@ type BOMSimImpact struct {
 }
 
 type StockoutRiskSKU struct {
-	ProductID            uint    `json:"product_id"`
-	ProductName          string  `json:"product_name"`
-	CurrentStock         float64 `json:"current_stock"`
-	DailyDemand          float64 `json:"daily_demand"`
-	DaysOfInventoryLeft  float64 `json:"days_of_inventory_left"`
-	DelayedLeadTimeDays  int     `json:"delayed_lead_time_days"`
-	RiskLevel            string  `json:"risk_level"`
-	EstimatedStockoutDate string `json:"estimated_stockout_date"`
+	ProductID             uint    `json:"product_id"`
+	ProductName           string  `json:"product_name"`
+	CurrentStock          float64 `json:"current_stock"`
+	DailyDemand           float64 `json:"daily_demand"`
+	DaysOfInventoryLeft   float64 `json:"days_of_inventory_left"`
+	DelayedLeadTimeDays   int     `json:"delayed_lead_time_days"`
+	RiskLevel             string  `json:"risk_level"`
+	EstimatedStockoutDate string  `json:"estimated_stockout_date"`
 }
 
 type MitigationStrategy struct {
@@ -204,13 +204,13 @@ func (c *Client) ExecuteDigitalTwinSimulation(db *gorm.DB, req *DigitalTwinSimul
 		if float64(req.SupplierLeadTimeDelayDays) > daysLeft {
 			stockoutDate := now.AddDate(0, 0, int(daysLeft)).Format("2006-01-02")
 			stockoutSKUs = append(stockoutSKUs, StockoutRiskSKU{
-				ProductID:            p.ID,
-				ProductName:          p.Name,
-				CurrentStock:         nominalStock,
-				DailyDemand:          math.Round(dailyVel*100) / 100,
-				DaysOfInventoryLeft:  math.Round(daysLeft*10) / 10,
-				DelayedLeadTimeDays:  req.SupplierLeadTimeDelayDays,
-				RiskLevel:            "CRITICAL_STOCKOUT_PROJECTED",
+				ProductID:             p.ID,
+				ProductName:           p.Name,
+				CurrentStock:          nominalStock,
+				DailyDemand:           math.Round(dailyVel*100) / 100,
+				DaysOfInventoryLeft:   math.Round(daysLeft*10) / 10,
+				DelayedLeadTimeDays:   req.SupplierLeadTimeDelayDays,
+				RiskLevel:             "CRITICAL_STOCKOUT_PROJECTED",
 				EstimatedStockoutDate: stockoutDate,
 			})
 		}

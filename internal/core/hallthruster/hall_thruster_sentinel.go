@@ -15,41 +15,41 @@ import (
 // HallThrusterTelemetry captures high-power Hall-effect thruster electric propulsion dynamics under ECSS-E-ST-20-07C & AIAA S-110-2005
 type HallThrusterTelemetry struct {
 	TelemetryID                     string    `json:"telemetry_id"`
-	ThrusterID                      string    `json:"thruster_id"`                         // "HET-EP-GEO-SATELLITE-12KW"
-	SatelliteBusID                  string    `json:"satellite_bus_id"`                    // "BUS-COMM-ORBITAL-7000"
-	DischargePowerKw                float64   `json:"discharge_power_kw"`                  // e.g. 12.5 kW
-	DischargeVoltageV               float64   `json:"discharge_voltage_v"`                 // e.g. 300.0 V
-	DischargeCurrentA               float64   `json:"discharge_current_a"`                 // e.g. 41.67 A
-	AnodeXenonFlowSccm              float64   `json:"anode_xenon_flow_sccm"`               // e.g. 185.0 sccm
-	CathodeKeeperVoltageV           float64   `json:"cathode_keeper_voltage_v"`            // e.g. 24.5 V (normal 12-18V, runaway > 22V)
-	ChannelWallErosionRateUmPerKh   float64   `json:"channel_wall_erosion_rate_um_per_kh"` // e.g. 14.8 um/1000h BN ceramic erosion
-	PlumeBeamDivergenceHalfAngleDeg float64   `json:"plume_beam_divergence_half_angle_deg"`// e.g. 44.5 deg (target < 35 deg)
-	NeutralizerElectronMarginPct    float64   `json:"neutralizer_electron_margin_pct"`     // e.g. 91.2%
+	ThrusterID                      string    `json:"thruster_id"`                          // "HET-EP-GEO-SATELLITE-12KW"
+	SatelliteBusID                  string    `json:"satellite_bus_id"`                     // "BUS-COMM-ORBITAL-7000"
+	DischargePowerKw                float64   `json:"discharge_power_kw"`                   // e.g. 12.5 kW
+	DischargeVoltageV               float64   `json:"discharge_voltage_v"`                  // e.g. 300.0 V
+	DischargeCurrentA               float64   `json:"discharge_current_a"`                  // e.g. 41.67 A
+	AnodeXenonFlowSccm              float64   `json:"anode_xenon_flow_sccm"`                // e.g. 185.0 sccm
+	CathodeKeeperVoltageV           float64   `json:"cathode_keeper_voltage_v"`             // e.g. 24.5 V (normal 12-18V, runaway > 22V)
+	ChannelWallErosionRateUmPerKh   float64   `json:"channel_wall_erosion_rate_um_per_kh"`  // e.g. 14.8 um/1000h BN ceramic erosion
+	PlumeBeamDivergenceHalfAngleDeg float64   `json:"plume_beam_divergence_half_angle_deg"` // e.g. 44.5 deg (target < 35 deg)
+	NeutralizerElectronMarginPct    float64   `json:"neutralizer_electron_margin_pct"`      // e.g. 91.2%
 	RecordedAt                      time.Time `json:"recorded_at"`
 }
 
 // HallThrusterAssessment models cathode keeper thermal runaway, channel ceramic sputtering, and charge-exchange plume backflow
 type HallThrusterAssessment struct {
-	AssessmentID               string    `json:"assessment_id"`
-	ThrusterID                 string    `json:"thruster_id"`
-	SpecificImpulseIspSec      float64   `json:"specific_impulse_isp_sec"`       // Isp = T / (m_dot * g0)
-	AnodeThrustEfficiencyPct   float64   `json:"anode_thrust_efficiency_pct"`    // eta_T = T^2 / (2 * m_dot * P_d)
-	CathodeErosionRiskLevel    string    `json:"cathode_erosion_risk_level"`     // "NOMINAL_STABLE_PLASMA", "CATHODE_KEEPER_OVERVOLTAGE_WARNING", "CRITICAL_POLE_PIECE_SPUTTER_COLLAPSE"
-	PlumeNeutralizationStatus  string    `json:"plume_neutralization_status"`    // "FULLY_NEUTRALIZED_BEAM", "CHARGE_EXCHANGE_BACKFLOW_WARNING", "SOLAR_ARRAY_SPUTTER_HAZARD"
-	MagneticCoilTrimMandate    bool      `json:"magnetic_coil_trim_mandate"`
-	VoltageStepDownMandate     bool      `json:"voltage_step_down_mandate"`
-	AuditDigest                string    `json:"audit_digest"`
-	EvaluatedAt                time.Time `json:"evaluated_at"`
+	AssessmentID              string    `json:"assessment_id"`
+	ThrusterID                string    `json:"thruster_id"`
+	SpecificImpulseIspSec     float64   `json:"specific_impulse_isp_sec"`    // Isp = T / (m_dot * g0)
+	AnodeThrustEfficiencyPct  float64   `json:"anode_thrust_efficiency_pct"` // eta_T = T^2 / (2 * m_dot * P_d)
+	CathodeErosionRiskLevel   string    `json:"cathode_erosion_risk_level"`  // "NOMINAL_STABLE_PLASMA", "CATHODE_KEEPER_OVERVOLTAGE_WARNING", "CRITICAL_POLE_PIECE_SPUTTER_COLLAPSE"
+	PlumeNeutralizationStatus string    `json:"plume_neutralization_status"` // "FULLY_NEUTRALIZED_BEAM", "CHARGE_EXCHANGE_BACKFLOW_WARNING", "SOLAR_ARRAY_SPUTTER_HAZARD"
+	MagneticCoilTrimMandate   bool      `json:"magnetic_coil_trim_mandate"`
+	VoltageStepDownMandate    bool      `json:"voltage_step_down_mandate"`
+	AuditDigest               string    `json:"audit_digest"`
+	EvaluatedAt               time.Time `json:"evaluated_at"`
 }
 
 // HallThrusterAction models magnetic barrier coil current boost, discharge voltage step-down, and cathode flow enrichment
 type HallThrusterAction struct {
 	ActionID                      string    `json:"action_id"`
 	ThrusterID                    string    `json:"thruster_id"`
-	CommandedDischargeVoltageV    float64   `json:"commanded_discharge_voltage_v"`      // stepped down from 300V to 250V
-	ModulatedMagneticCoilCurrentA float64   `json:"modulated_magnetic_coil_current_a"`  // boosted to 8.4 A to sharpen magnetic barrier
-	CathodePropellantFlowBoostPct float64   `json:"cathode_propellant_flow_boost_pct"`  // +18.5% xenon flow to cool keeper
-	AvoidedSatelliteLossUSD       float64   `json:"avoided_satellite_loss_usd"`         // Avoided $180M USD satellite orbital decay and bus failure
+	CommandedDischargeVoltageV    float64   `json:"commanded_discharge_voltage_v"`     // stepped down from 300V to 250V
+	ModulatedMagneticCoilCurrentA float64   `json:"modulated_magnetic_coil_current_a"` // boosted to 8.4 A to sharpen magnetic barrier
+	CathodePropellantFlowBoostPct float64   `json:"cathode_propellant_flow_boost_pct"` // +18.5% xenon flow to cool keeper
+	AvoidedSatelliteLossUSD       float64   `json:"avoided_satellite_loss_usd"`        // Avoided $180M USD satellite orbital decay and bus failure
 	ActionTimestamp               time.Time `json:"action_timestamp"`
 }
 
@@ -191,14 +191,14 @@ func (v *HallThrusterVault) GetHallThrusterReliabilityDossier(thrusterID string)
 	}
 
 	return map[string]interface{}{
-		"thruster_id":               thrusterID,
-		"satellite_bus_id":          telem.SatelliteBusID,
+		"thruster_id":                thrusterID,
+		"satellite_bus_id":           telem.SatelliteBusID,
 		"ecss_e_st_20_07c_compliant": true,
-		"aiaa_s_110_certified":      true,
-		"telemetry":                 telem,
-		"assessment":                asm,
-		"latest_action":             act,
-		"compiled_at":               time.Now(),
+		"aiaa_s_110_certified":       true,
+		"telemetry":                  telem,
+		"assessment":                 asm,
+		"latest_action":              act,
+		"compiled_at":                time.Now(),
 	}, nil
 }
 

@@ -18,7 +18,7 @@ type ApprovalCategory struct {
 	MinAmount            float64 `gorm:"type:decimal(16,2);default:0" json:"min_amount"` // Threshold to trigger high-level approvals
 	HasDate              bool    `gorm:"default:false" json:"has_date"`
 	MinApprovalsRequired int     `gorm:"default:1" json:"min_approvals_required"` // Number of mandatory approvals
-	IsManagerApprover    bool    `gorm:"default:true" json:"is_manager_approver"`  // Direct manager is mandatory level 1
+	IsManagerApprover    bool    `gorm:"default:true" json:"is_manager_approver"` // Direct manager is mandatory level 1
 	Active               bool    `gorm:"default:true" json:"active"`
 }
 
@@ -40,7 +40,7 @@ type ApprovalRequest struct {
 	CurrencyID     uint               `gorm:"default:1" json:"currency_id"`
 	DateStart      *time.Time         `json:"date_start"`
 	DateEnd        *time.Time         `json:"date_end"`
-	Reference      string             `gorm:"size:128" json:"reference"` // Associated document e.g. PO00001, SO00002, EXP/2026/00001
+	Reference      string             `gorm:"size:128" json:"reference"`          // Associated document e.g. PO00001, SO00002, EXP/2026/00001
 	Stage          string             `gorm:"size:32;default:'new'" json:"stage"` // new, pending, approved, refused, cancelled
 	RefusalReason  string             `gorm:"type:text" json:"refusal_reason"`
 	Approvers      []ApprovalApprover `gorm:"foreignKey:RequestID;constraint:OnDelete:CASCADE" json:"approvers"`

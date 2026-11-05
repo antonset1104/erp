@@ -14,7 +14,7 @@ import (
 // ColdChainTelemetryReading records real-time sensor measurements from maritime reefer containers.
 type ColdChainTelemetryReading struct {
 	ReadingID           string  `json:"reading_id"`
-	ShipmentID          string  `json:"shipment_id"` // e.g. "SHP-REEFER-2026-904"
+	ShipmentID          string  `json:"shipment_id"`  // e.g. "SHP-REEFER-2026-904"
 	ContainerNo         string  `json:"container_no"` // e.g. "MSCU-884210-9"
 	TemperatureCelsius  float64 `json:"temperature_celsius"`
 	RelativeHumidityPct float64 `json:"relative_humidity_pct"`
@@ -27,18 +27,18 @@ type ColdChainTelemetryReading struct {
 
 // ColdChainShipmentPolicy holds cargo insurance parameters and SLA thermal boundaries.
 type ColdChainShipmentPolicy struct {
-	ShipmentID                  string  `json:"shipment_id"`
-	CargoDescription            string  `json:"cargo_description"`
-	DeclaredInsuredValueUSD     float64 `json:"declared_insured_value_usd"`
-	MinTempLimitC               float64 `json:"min_temp_limit_c"`
-	MaxTempLimitC               float64 `json:"max_temp_limit_c"`
-	MaxAllowableExcursionMins   int     `json:"max_allowable_excursion_mins"`
-	UnderwriterName             string  `json:"underwriter_name"`
-	PolicyNumber                string  `json:"policy_number"`
-	CumulativeExcursionMinutes  int     `json:"cumulative_excursion_minutes"`
-	PeakExcursionTempC          float64 `json:"peak_excursion_temp_c"`
-	Status                      string  `json:"status"` // "IN_TRANSIT_COMPLIANT", "EXCURSION_BREACH_ALERT", "CLAIM_PAID"
-	CreatedAt                   string  `json:"created_at"`
+	ShipmentID                 string  `json:"shipment_id"`
+	CargoDescription           string  `json:"cargo_description"`
+	DeclaredInsuredValueUSD    float64 `json:"declared_insured_value_usd"`
+	MinTempLimitC              float64 `json:"min_temp_limit_c"`
+	MaxTempLimitC              float64 `json:"max_temp_limit_c"`
+	MaxAllowableExcursionMins  int     `json:"max_allowable_excursion_mins"`
+	UnderwriterName            string  `json:"underwriter_name"`
+	PolicyNumber               string  `json:"policy_number"`
+	CumulativeExcursionMinutes int     `json:"cumulative_excursion_minutes"`
+	PeakExcursionTempC         float64 `json:"peak_excursion_temp_c"`
+	Status                     string  `json:"status"` // "IN_TRANSIT_COMPLIANT", "EXCURSION_BREACH_ALERT", "CLAIM_PAID"
+	CreatedAt                  string  `json:"created_at"`
 }
 
 // ParametricClaimSettlement models the instant digital payout upon verified sensor excursion.
@@ -64,10 +64,10 @@ type SettleClaimRequest struct {
 
 // ColdChainStore manages thread-safe state for cargo temperature and claims.
 type ColdChainStore struct {
-	mu         sync.RWMutex
-	shipments  map[string]*ColdChainShipmentPolicy
-	readings   map[string][]ColdChainTelemetryReading
-	claims     map[string]*ParametricClaimSettlement
+	mu        sync.RWMutex
+	shipments map[string]*ColdChainShipmentPolicy
+	readings  map[string][]ColdChainTelemetryReading
+	claims    map[string]*ParametricClaimSettlement
 }
 
 var globalColdChainStore = &ColdChainStore{
@@ -87,7 +87,7 @@ func init() {
 		MaxAllowableExcursionMins:  120, // 2 hours max
 		UnderwriterName:            "Munich Re Marine Parametric Syndicate",
 		PolicyNumber:               "POL-PARAMETRIC-REEFER-8819",
-		CumulativeExcursionMinutes: 145, // Breached! 145 mins
+		CumulativeExcursionMinutes: 145,  // Breached! 145 mins
 		PeakExcursionTempC:         14.2, // Rose to 14.2 C
 		Status:                     "EXCURSION_BREACH_ALERT",
 		CreatedAt:                  time.Now().Format(time.RFC3339),

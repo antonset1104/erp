@@ -21,7 +21,7 @@ type QKDLinkTelemetry struct {
 	FiberDistanceKM              float64   `json:"fiber_distance_km"`              // e.g. 78.5 km
 	QuantumBitErrorRateQBER      float64   `json:"quantum_bit_error_rate_qber"`    // e.g. 0.045 (4.5%; abort limit > 11.0%)
 	InterferometerPhaseDriftRad  float64   `json:"interferometer_phase_drift_rad"` // e.g. 0.85 rad (warning > 0.60 rad)
-	SinglePhotonCountPerSec      float64   `json:"single_photon_count_per_sec"`   // e.g. 1.2e5 cps
+	SinglePhotonCountPerSec      float64   `json:"single_photon_count_per_sec"`    // e.g. 1.2e5 cps
 	DarkCountRateHz              float64   `json:"dark_count_rate_hz"`             // SPAD dark count e.g. 25.0 Hz
 	FiberAttenuationDB           float64   `json:"fiber_attenuation_db"`           // e.g. 15.7 dB (0.2 dB/km @ 1550nm)
 	PQCrystalsKyberFallbackArmed bool      `json:"pq_crystals_kyber_fallback_armed"`
@@ -30,24 +30,24 @@ type QKDLinkTelemetry struct {
 
 // QKDSecurityAssessment models Shor-Preskill secret key rate distillation and phase stability
 type QKDSecurityAssessment struct {
-	AssessmentID                string    `json:"assessment_id"`
-	LinkID                      string    `json:"link_id"`
-	SecretKeyDistillationRateBPS float64  `json:"secret_key_distillation_rate_bps"` // R = R_raw * [1 - 2*h(QBER)]
-	PhaseDriftSeverityLevel     string    `json:"phase_drift_severity_level"`       // "STABLE_COHERENT_LINK", "ELEVATED_ACOUSTIC_PHASE_DRIFT", "CRITICAL_EAVESDROPPING_QBER_BREACH"
-	ElectroOpticTuningRequired  bool      `json:"electro_optic_tuning_required"`
-	EmergencyPQCFallbackTrigger bool      `json:"emergency_pqc_fallback_trigger"`  // Triggered when QBER > 11.0%
-	AuditDigest                 string    `json:"audit_digest"`
-	EvaluatedAt                 time.Time `json:"evaluated_at"`
+	AssessmentID                 string    `json:"assessment_id"`
+	LinkID                       string    `json:"link_id"`
+	SecretKeyDistillationRateBPS float64   `json:"secret_key_distillation_rate_bps"` // R = R_raw * [1 - 2*h(QBER)]
+	PhaseDriftSeverityLevel      string    `json:"phase_drift_severity_level"`       // "STABLE_COHERENT_LINK", "ELEVATED_ACOUSTIC_PHASE_DRIFT", "CRITICAL_EAVESDROPPING_QBER_BREACH"
+	ElectroOpticTuningRequired   bool      `json:"electro_optic_tuning_required"`
+	EmergencyPQCFallbackTrigger  bool      `json:"emergency_pqc_fallback_trigger"` // Triggered when QBER > 11.0%
+	AuditDigest                  string    `json:"audit_digest"`
+	EvaluatedAt                  time.Time `json:"evaluated_at"`
 }
 
 // PhaseTuningAndPQCFallbackAction models electro-optic phase compensation and post-quantum cryptography failover
 type PhaseTuningAndPQCFallbackAction struct {
-	ActionID                   string    `json:"action_id"`
-	LinkID                     string    `json:"link_id"`
-	PhaseModulatorCorrectionRad float64  `json:"phase_modulator_correction_rad"`
-	PQCFallbackEngaged         bool      `json:"pqc_fallback_engaged"`
-	AvoidedSettlementLossUSD   float64   `json:"avoided_settlement_loss_usd"` // Avoided $28M USD sovereign interbank interception
-	ExecutedAt                 time.Time `json:"executed_at"`
+	ActionID                    string    `json:"action_id"`
+	LinkID                      string    `json:"link_id"`
+	PhaseModulatorCorrectionRad float64   `json:"phase_modulator_correction_rad"`
+	PQCFallbackEngaged          bool      `json:"pqc_fallback_engaged"`
+	AvoidedSettlementLossUSD    float64   `json:"avoided_settlement_loss_usd"` // Avoided $28M USD sovereign interbank interception
+	ExecutedAt                  time.Time `json:"executed_at"`
 }
 
 // QuantumVault thread-safe in-memory store

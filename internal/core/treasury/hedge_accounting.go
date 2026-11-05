@@ -14,11 +14,11 @@ import (
 type DerivativeHedgeContract struct {
 	ContractID         string  `json:"contract_id"`
 	CounterpartyBank   string  `json:"counterparty_bank"`
-	InstrumentType     string  `json:"instrument_type"` // "FX_FORWARD", "FX_COLLAR", "CURRENCY_OPTION"
-	HedgedItemType     string  `json:"hedged_item_type"` // "FORECASTED_USD_EXPORT_SALES", "IMPORT_AP_PAYABLES"
+	InstrumentType     string  `json:"instrument_type"`   // "FX_FORWARD", "FX_COLLAR", "CURRENCY_OPTION"
+	HedgedItemType     string  `json:"hedged_item_type"`  // "FORECASTED_USD_EXPORT_SALES", "IMPORT_AP_PAYABLES"
 	HedgeDesignation   string  `json:"hedge_designation"` // "CASH_FLOW_HEDGE", "FAIR_VALUE_HEDGE"
 	NotionalAmountFC   float64 `json:"notional_amount_fc"`
-	ForeignCurrency    string  `json:"foreign_currency"` // "USD", "EUR", "JPY"
+	ForeignCurrency    string  `json:"foreign_currency"`     // "USD", "EUR", "JPY"
 	ContractStrikeRate float64 `json:"contract_strike_rate"` // e.g. 16200.0 IDR/USD
 	InceptionDate      string  `json:"inception_date"`
 	MaturityDate       string  `json:"maturity_date"`
@@ -27,10 +27,10 @@ type DerivativeHedgeContract struct {
 
 // MtMRevaluationRequest holds market rates to compute Mark-to-Market fair value and hedge effectiveness.
 type MtMRevaluationRequest struct {
-	ContractID                  string  `json:"contract_id"`
-	CurrentSpotRate             float64 `json:"current_spot_rate"`
-	ForwardPoints               float64 `json:"forward_points"` // differential to maturity
-	AnnualDiscountRate          float64 `json:"annual_discount_rate"` // risk-free discount rate
+	ContractID                   string  `json:"contract_id"`
+	CurrentSpotRate              float64 `json:"current_spot_rate"`
+	ForwardPoints                float64 `json:"forward_points"`       // differential to maturity
+	AnnualDiscountRate           float64 `json:"annual_discount_rate"` // risk-free discount rate
 	HedgedItemFairValueChangeIDR float64 `json:"hedged_item_fair_value_change_idr"`
 }
 
@@ -61,12 +61,12 @@ type MtMRevaluationResult struct {
 
 // HedgePortfolioSummary provides treasury risk officers with active hedge ratios and OCI reserves.
 type HedgePortfolioSummary struct {
-	TotalActiveContracts   int                       `json:"total_active_contracts"`
-	TotalNotionalUSD       float64                   `json:"total_notional_usd"`
-	TotalFairValueGainIDR  float64                   `json:"total_fair_value_gain_idr"`
-	TotalOCIReserveIDR     float64                   `json:"total_oci_reserve_idr"`
-	AverageHedgeRatioPct   float64                   `json:"average_hedge_ratio_pct"`
-	Contracts              []DerivativeHedgeContract `json:"contracts"`
+	TotalActiveContracts  int                       `json:"total_active_contracts"`
+	TotalNotionalUSD      float64                   `json:"total_notional_usd"`
+	TotalFairValueGainIDR float64                   `json:"total_fair_value_gain_idr"`
+	TotalOCIReserveIDR    float64                   `json:"total_oci_reserve_idr"`
+	AverageHedgeRatioPct  float64                   `json:"average_hedge_ratio_pct"`
+	Contracts             []DerivativeHedgeContract `json:"contracts"`
 }
 
 var (

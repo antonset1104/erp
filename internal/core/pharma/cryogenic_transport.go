@@ -14,20 +14,20 @@ import (
 
 // CryogenicTelemetry represents real-time telemetry from validated dry-vapor LN2 smart shippers
 type CryogenicTelemetry struct {
-	TelemetryID                 string    `json:"telemetry_id"`
-	ShipperID                   string    `json:"shipper_id"`
-	BatchID                     string    `json:"batch_id"`
-	PatientID                   string    `json:"patient_id"`
-	TherapyType                 string    `json:"therapy_type"` // "AUTOLOGOUS_CAR_T_CELL", "ALLOGENEIC_MESENCHYMAL_STEM_CELL", "VIRAL_VECTOR_AAV"
-	CoreTempC                   float64   `json:"core_temp_c"`  // Cryogenic threshold <= -150.0°C (Glass Transition Tg of water ~ -135°C)
-	AmbientTempC                float64   `json:"ambient_temp_c"`
-	LN2HoldTimeRemainingHours   float64   `json:"ln2_hold_time_remaining_hours"`
-	GlassTransitionTgMarginC    float64   `json:"glass_transition_tg_margin_c"` // Margin to -135.0°C
-	TiltAngleDegrees            float64   `json:"tilt_angle_degrees"`           // Tilt > 45° risks LN2 liquid sloshing/evaporation acceleration
-	VacuumInsulationIntact      bool      `json:"vacuum_insulation_intact"`
-	GPSLatitude                 float64   `json:"gps_latitude"`
-	GPSLongitude                float64   `json:"gps_longitude"`
-	Timestamp                   time.Time `json:"timestamp"`
+	TelemetryID               string    `json:"telemetry_id"`
+	ShipperID                 string    `json:"shipper_id"`
+	BatchID                   string    `json:"batch_id"`
+	PatientID                 string    `json:"patient_id"`
+	TherapyType               string    `json:"therapy_type"` // "AUTOLOGOUS_CAR_T_CELL", "ALLOGENEIC_MESENCHYMAL_STEM_CELL", "VIRAL_VECTOR_AAV"
+	CoreTempC                 float64   `json:"core_temp_c"`  // Cryogenic threshold <= -150.0°C (Glass Transition Tg of water ~ -135°C)
+	AmbientTempC              float64   `json:"ambient_temp_c"`
+	LN2HoldTimeRemainingHours float64   `json:"ln2_hold_time_remaining_hours"`
+	GlassTransitionTgMarginC  float64   `json:"glass_transition_tg_margin_c"` // Margin to -135.0°C
+	TiltAngleDegrees          float64   `json:"tilt_angle_degrees"`           // Tilt > 45° risks LN2 liquid sloshing/evaporation acceleration
+	VacuumInsulationIntact    bool      `json:"vacuum_insulation_intact"`
+	GPSLatitude               float64   `json:"gps_latitude"`
+	GPSLongitude              float64   `json:"gps_longitude"`
+	Timestamp                 time.Time `json:"timestamp"`
 }
 
 // HoldTimeEvaluation models predictive thermodynamic boil-off and glass transition breach risk
@@ -47,17 +47,17 @@ type HoldTimeEvaluation struct {
 
 // ChainOfIdentityCertificate validates 21 CFR Part 1271 autologous patient matching and chain of custody
 type ChainOfIdentityCertificate struct {
-	CertificateID               string    `json:"certificate_id"`
-	BatchID                     string    `json:"batch_id"`
-	PatientID                   string    `json:"patient_id"`
-	DonorID                     string    `json:"donor_id"`
-	ShipperID                   string    `json:"shipper_id"`
-	ChainOfIdentityVerified     bool      `json:"chain_of_identity_verified"`
-	ChainOfCustodyHandoffCount  int       `json:"chain_of_custody_handoff_count"`
-	DigitalSignatureHash        string    `json:"digital_signature_hash"`
-	ISPE_GAMP5_ComplianceAudit  string    `json:"ispe_gamp5_compliance_audit"`
-	ChainStatus                 string    `json:"chain_status"` // "VERIFIED_AUTHENTIC", "DISCREPANCY_QUARANTINED"
-	IssuedAt                    time.Time `json:"issued_at"`
+	CertificateID              string    `json:"certificate_id"`
+	BatchID                    string    `json:"batch_id"`
+	PatientID                  string    `json:"patient_id"`
+	DonorID                    string    `json:"donor_id"`
+	ShipperID                  string    `json:"shipper_id"`
+	ChainOfIdentityVerified    bool      `json:"chain_of_identity_verified"`
+	ChainOfCustodyHandoffCount int       `json:"chain_of_custody_handoff_count"`
+	DigitalSignatureHash       string    `json:"digital_signature_hash"`
+	ISPE_GAMP5_ComplianceAudit string    `json:"ispe_gamp5_compliance_audit"`
+	ChainStatus                string    `json:"chain_status"` // "VERIFIED_AUTHENTIC", "DISCREPANCY_QUARANTINED"
+	IssuedAt                   time.Time `json:"issued_at"`
 }
 
 // PharmaCryogenicVault thread-safe in-memory store

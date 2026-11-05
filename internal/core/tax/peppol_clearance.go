@@ -14,71 +14,71 @@ import (
 
 // UBLInvoiceData represents data required for PEPPOL BIS Billing 3.0 serialization
 type UBLInvoiceData struct {
-	InvoiceID            string    `json:"invoice_id"` // e.g. "INV-PEPPOL-2026-081"
-	IssueDate            time.Time `json:"issue_date"`
-	DueDate              time.Time `json:"due_date"`
-	SellerEndpointID     string    `json:"seller_endpoint_id"` // e.g. "0088:7300010000001" (GLN)
-	SellerVATRegistration string   `json:"seller_vat_registration"`
-	SellerLegalName      string    `json:"seller_legal_name"`
-	BuyerEndpointID      string    `json:"buyer_endpoint_id"`
-	BuyerVATRegistration  string   `json:"buyer_vat_registration"`
-	BuyerLegalName       string    `json:"buyer_legal_name"`
-	CurrencyCode         string    `json:"currency_code"` // "EUR", "USD", "SAR", "IDR"
-	LineExtensionAmount  float64   `json:"line_extension_amount"`
-	TaxExclusiveAmount   float64   `json:"tax_exclusive_amount"`
-	TaxInclusiveAmount   float64   `json:"tax_inclusive_amount"`
-	VATAmount            float64   `json:"vat_amount"`
-	PrecedingInvoiceHash string    `json:"preceding_invoice_hash"` // Cryptographic chaining for CTC
+	InvoiceID             string    `json:"invoice_id"` // e.g. "INV-PEPPOL-2026-081"
+	IssueDate             time.Time `json:"issue_date"`
+	DueDate               time.Time `json:"due_date"`
+	SellerEndpointID      string    `json:"seller_endpoint_id"` // e.g. "0088:7300010000001" (GLN)
+	SellerVATRegistration string    `json:"seller_vat_registration"`
+	SellerLegalName       string    `json:"seller_legal_name"`
+	BuyerEndpointID       string    `json:"buyer_endpoint_id"`
+	BuyerVATRegistration  string    `json:"buyer_vat_registration"`
+	BuyerLegalName        string    `json:"buyer_legal_name"`
+	CurrencyCode          string    `json:"currency_code"` // "EUR", "USD", "SAR", "IDR"
+	LineExtensionAmount   float64   `json:"line_extension_amount"`
+	TaxExclusiveAmount    float64   `json:"tax_exclusive_amount"`
+	TaxInclusiveAmount    float64   `json:"tax_inclusive_amount"`
+	VATAmount             float64   `json:"vat_amount"`
+	PrecedingInvoiceHash  string    `json:"preceding_invoice_hash"` // Cryptographic chaining for CTC
 }
 
 // UBLSerializedXML represents the compliant PEPPOL BIS 3.0 XML payload
 type UBLSerializedXML struct {
-	InvoiceID            string    `json:"invoice_id"`
-	CustomizationID      string    `json:"customization_id"`
-	ProfileID            string    `json:"profile_id"`
-	UBLXMLString         string    `json:"ubl_xml_string"`
-	CanonicalHashSHA256  string    `json:"canonical_hash_sha256"`
-	SerializedAt         time.Time `json:"serialized_at"`
+	InvoiceID           string    `json:"invoice_id"`
+	CustomizationID     string    `json:"customization_id"`
+	ProfileID           string    `json:"profile_id"`
+	UBLXMLString        string    `json:"ubl_xml_string"`
+	CanonicalHashSHA256 string    `json:"canonical_hash_sha256"`
+	SerializedAt        time.Time `json:"serialized_at"`
 }
 
 // TaxClearanceSignature represents digital signature and cryptographic QR code
 type TaxClearanceSignature struct {
-	InvoiceID            string    `json:"invoice_id"`
-	InvoiceHashSHA256    string    `json:"invoice_hash_sha256"`
-	ECDSASignatureHex    string    `json:"ecdsa_signature_hex"`
-	QRCodeBase64         string    `json:"qr_code_base64"`
-	PublicCertificateSN  string    `json:"public_certificate_sn"`
-	SignedAt             time.Time `json:"signed_at"`
+	InvoiceID           string    `json:"invoice_id"`
+	InvoiceHashSHA256   string    `json:"invoice_hash_sha256"`
+	ECDSASignatureHex   string    `json:"ecdsa_signature_hex"`
+	QRCodeBase64        string    `json:"qr_code_base64"`
+	PublicCertificateSN string    `json:"public_certificate_sn"`
+	SignedAt            time.Time `json:"signed_at"`
 }
 
 // AS4ClearanceReceipt represents the real-time tax authority or PEPPOL Access Point acknowledgment
 type AS4ClearanceReceipt struct {
-	ClearanceUUID        string    `json:"clearance_uuid"`
-	InvoiceID            string    `json:"invoice_id"`
-	AccessPointMessageID string    `json:"access_point_message_id"`
-	ClearanceStatus      string    `json:"clearance_status"` // "CLEARANCE_GRANTED_ACCEPTED", "VALIDATION_FAILED_REJECTED"
-	ResponseCode         string    `json:"response_code"`   // "AP-200-OK"
-	OfficialClearingStamp string   `json:"official_clearing_stamp"`
-	ReceivedAt           time.Time `json:"received_at"`
+	ClearanceUUID         string    `json:"clearance_uuid"`
+	InvoiceID             string    `json:"invoice_id"`
+	AccessPointMessageID  string    `json:"access_point_message_id"`
+	ClearanceStatus       string    `json:"clearance_status"` // "CLEARANCE_GRANTED_ACCEPTED", "VALIDATION_FAILED_REJECTED"
+	ResponseCode          string    `json:"response_code"`    // "AP-200-OK"
+	OfficialClearingStamp string    `json:"official_clearing_stamp"`
+	ReceivedAt            time.Time `json:"received_at"`
 }
 
 // PEPPOLClearanceDossier compiles end-to-end e-invoicing audit trail
 type PEPPOLClearanceDossier struct {
-	InvoiceID            string                `json:"invoice_id"`
-	UBLDetails           UBLSerializedXML      `json:"ubl_details"`
-	SignatureDetails     TaxClearanceSignature `json:"signature_details"`
-	ClearanceReceipt     AS4ClearanceReceipt   `json:"clearance_receipt"`
-	GlobalStandardCited  string                `json:"global_standard_cited"`
-	LastAuditedAt        time.Time             `json:"last_audited_at"`
+	InvoiceID           string                `json:"invoice_id"`
+	UBLDetails          UBLSerializedXML      `json:"ubl_details"`
+	SignatureDetails    TaxClearanceSignature `json:"signature_details"`
+	ClearanceReceipt    AS4ClearanceReceipt   `json:"clearance_receipt"`
+	GlobalStandardCited string                `json:"global_standard_cited"`
+	LastAuditedAt       time.Time             `json:"last_audited_at"`
 }
 
 // PEPPOLEngine manages PEPPOL BIS 3.0 generation and real-time CTC tax clearance
 type PEPPOLEngine struct {
-	mu           sync.RWMutex
-	invoices     map[string]UBLInvoiceData
-	xmls         map[string]UBLSerializedXML
-	signatures   map[string]TaxClearanceSignature
-	receipts     map[string]AS4ClearanceReceipt
+	mu         sync.RWMutex
+	invoices   map[string]UBLInvoiceData
+	xmls       map[string]UBLSerializedXML
+	signatures map[string]TaxClearanceSignature
+	receipts   map[string]AS4ClearanceReceipt
 }
 
 var (

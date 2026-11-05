@@ -13,46 +13,46 @@ import (
 
 // HighValueCorridor represents approved route corridor and cargo parameters
 type HighValueCorridor struct {
-	ShipmentID               string    `json:"shipment_id"`
-	DeliveryOrderID          string    `json:"delivery_order_id"`
-	VehiclePlateNumber       string    `json:"vehicle_plate_number"`
-	DriverName               string    `json:"driver_name"`
-	CargoDescription         string    `json:"cargo_description"`
-	CargoValueUSD            float64   `json:"cargo_value_usd"`
-	OriginFacility           string    `json:"origin_facility"`
-	DestinationFacility      string    `json:"destination_facility"`
-	InitialLoadedWeightKG    float64   `json:"initial_loaded_weight_kg"`
-	CorridorToleranceMeters  float64   `json:"corridor_tolerance_meters"` // e.g. 500 meters
-	SecurityEscortLevel      string    `json:"security_escort_level"`     // "ARMED_ESCORT_LEVEL_3", "TELEMETRY_MONITORED"
-	Status                   string    `json:"status"`                    // "ACTIVE_IN_TRANSIT", "EMERGENCY_LOCKDOWN", "SAFELY_DELIVERED"
-	CreatedAt                time.Time `json:"created_at"`
+	ShipmentID              string    `json:"shipment_id"`
+	DeliveryOrderID         string    `json:"delivery_order_id"`
+	VehiclePlateNumber      string    `json:"vehicle_plate_number"`
+	DriverName              string    `json:"driver_name"`
+	CargoDescription        string    `json:"cargo_description"`
+	CargoValueUSD           float64   `json:"cargo_value_usd"`
+	OriginFacility          string    `json:"origin_facility"`
+	DestinationFacility     string    `json:"destination_facility"`
+	InitialLoadedWeightKG   float64   `json:"initial_loaded_weight_kg"`
+	CorridorToleranceMeters float64   `json:"corridor_tolerance_meters"` // e.g. 500 meters
+	SecurityEscortLevel     string    `json:"security_escort_level"`     // "ARMED_ESCORT_LEVEL_3", "TELEMETRY_MONITORED"
+	Status                  string    `json:"status"`                    // "ACTIVE_IN_TRANSIT", "EMERGENCY_LOCKDOWN", "SAFELY_DELIVERED"
+	CreatedAt               time.Time `json:"created_at"`
 }
 
 // CargoSensorTelemetry represents continuous IoT tracker data
 type CargoSensorTelemetry struct {
-	TelemetryID              string    `json:"telemetry_id"`
-	ShipmentID               string    `json:"shipment_id"`
-	CurrentLatitude          float64   `json:"current_latitude"`
-	CurrentLongitude         float64   `json:"current_longitude"`
-	SpeedKPH                 float64   `json:"speed_kph"`
-	CargoDoorOpen            bool      `json:"cargo_door_open"`
-	CurrentAxleWeightKG      float64   `json:"current_axle_weight_kg"`
-	DistanceFromRouteMeters  float64   `json:"distance_from_route_meters"`
-	AuthorizedStopZone       bool      `json:"authorized_stop_zone"`
-	Timestamp                time.Time `json:"timestamp"`
+	TelemetryID             string    `json:"telemetry_id"`
+	ShipmentID              string    `json:"shipment_id"`
+	CurrentLatitude         float64   `json:"current_latitude"`
+	CurrentLongitude        float64   `json:"current_longitude"`
+	SpeedKPH                float64   `json:"speed_kph"`
+	CargoDoorOpen           bool      `json:"cargo_door_open"`
+	CurrentAxleWeightKG     float64   `json:"current_axle_weight_kg"`
+	DistanceFromRouteMeters float64   `json:"distance_from_route_meters"`
+	AuthorizedStopZone      bool      `json:"authorized_stop_zone"`
+	Timestamp               time.Time `json:"timestamp"`
 }
 
 // ThreatEscalationEvent represents security alarm and engine cutoff
 type ThreatEscalationEvent struct {
-	AlarmID                  string    `json:"alarm_id"`
-	ShipmentID               string    `json:"shipment_id"`
-	ThreatSeverity           string    `json:"threat_severity"` // "CRITICAL_THEFT_BREACH", "ROUTE_DEVIATION_WARNING"
-	IdentifiedAnomalies      []string  `json:"identified_anomalies"`
-	EngineImmobilized        bool      `json:"engine_immobilized"`
-	WMSDeliveryOrderLocked   bool      `json:"wms_delivery_order_locked"`
-	PoliceDispatchBroadcast  bool      `json:"police_dispatch_broadcast"`
+	AlarmID                 string    `json:"alarm_id"`
+	ShipmentID              string    `json:"shipment_id"`
+	ThreatSeverity          string    `json:"threat_severity"` // "CRITICAL_THEFT_BREACH", "ROUTE_DEVIATION_WARNING"
+	IdentifiedAnomalies     []string  `json:"identified_anomalies"`
+	EngineImmobilized       bool      `json:"engine_immobilized"`
+	WMSDeliveryOrderLocked  bool      `json:"wms_delivery_order_locked"`
+	PoliceDispatchBroadcast bool      `json:"police_dispatch_broadcast"`
 	ForensicCertificateHash string    `json:"forensic_certificate_hash"` // SHA-256
-	TriggeredAt              time.Time `json:"triggered_at"`
+	TriggeredAt             time.Time `json:"triggered_at"`
 }
 
 // GeofenceSentinelVault thread-safe store
@@ -134,15 +134,15 @@ func (v *GeofenceSentinelVault) IngestCargoTelemetry(t CargoSensorTelemetry) (*T
 
 		alarmID := fmt.Sprintf("ALM-THEFT-%d", time.Now().UnixNano()%1000000)
 		alarm := ThreatEscalationEvent{
-			AlarmID:                  alarmID,
-			ShipmentID:               t.ShipmentID,
-			ThreatSeverity:           "CRITICAL_THEFT_BREACH",
-			IdentifiedAnomalies:      anomalies,
-			EngineImmobilized:        true,
-			WMSDeliveryOrderLocked:   true,
-			PoliceDispatchBroadcast:  true,
+			AlarmID:                 alarmID,
+			ShipmentID:              t.ShipmentID,
+			ThreatSeverity:          "CRITICAL_THEFT_BREACH",
+			IdentifiedAnomalies:     anomalies,
+			EngineImmobilized:       true,
+			WMSDeliveryOrderLocked:  true,
+			PoliceDispatchBroadcast: true,
 			ForensicCertificateHash: digest,
-			TriggeredAt:              time.Now(),
+			TriggeredAt:             time.Now(),
 		}
 		v.alarms[t.ShipmentID] = alarm
 		return &alarm, nil
@@ -170,15 +170,15 @@ func (v *GeofenceSentinelVault) TriggerEmergencyImmobilizer(shipmentID string) (
 
 	alarmID := fmt.Sprintf("ALM-IMMOB-%d", time.Now().UnixNano()%1000000)
 	alarm := ThreatEscalationEvent{
-		AlarmID:                  alarmID,
-		ShipmentID:               shipmentID,
-		ThreatSeverity:           "MANUAL_SECURITY_INTERVENTION",
-		IdentifiedAnomalies:      []string{"Manual remote engine killswitch command executed by Security Ops"},
-		EngineImmobilized:        true,
-		WMSDeliveryOrderLocked:   true,
-		PoliceDispatchBroadcast:  true,
+		AlarmID:                 alarmID,
+		ShipmentID:              shipmentID,
+		ThreatSeverity:          "MANUAL_SECURITY_INTERVENTION",
+		IdentifiedAnomalies:     []string{"Manual remote engine killswitch command executed by Security Ops"},
+		EngineImmobilized:       true,
+		WMSDeliveryOrderLocked:  true,
+		PoliceDispatchBroadcast: true,
 		ForensicCertificateHash: digest,
-		TriggeredAt:              time.Now(),
+		TriggeredAt:             time.Now(),
 	}
 
 	v.alarms[shipmentID] = alarm

@@ -12,46 +12,46 @@ import (
 
 // OpenShiftOpportunity represents an open shift posted for operator auction
 type OpenShiftOpportunity struct {
-	ShiftID                  string    `json:"shift_id"`
-	WorkcenterID             string    `json:"workcenter_id"`
-	JobRole                  string    `json:"job_role"`                   // e.g. "SMT Production Operator"
-	ShiftType                string    `json:"shift_type"`                 // "NIGHT_SHIFT_GRAVEYARD", "DAY_SHIFT", "WEEKEND_OVERTIME"
-	ShiftDurationHours       float64   `json:"shift_duration_hours"`       // e.g. 8.0 hrs
-	BaseHourlyRateUSD        float64   `json:"base_hourly_rate_usd"`       // e.g. $22.00
-	SurgeDifferentialUSD     float64   `json:"surge_differential_usd"`    // e.g. $8.50 (Weekend/Surge bonus)
-	RequiredSkillCert        string    `json:"required_skill_cert"`        // e.g. "IPC-A-610_CERTIFIED"
-	Status                   string    `json:"status"`                     // "OPEN_FOR_BIDDING", "AWARDED_FILLED"
-	AwardedWorkerID          string    `json:"awarded_worker_id,omitempty"`
-	CreatedAt                time.Time `json:"created_at"`
+	ShiftID              string    `json:"shift_id"`
+	WorkcenterID         string    `json:"workcenter_id"`
+	JobRole              string    `json:"job_role"`               // e.g. "SMT Production Operator"
+	ShiftType            string    `json:"shift_type"`             // "NIGHT_SHIFT_GRAVEYARD", "DAY_SHIFT", "WEEKEND_OVERTIME"
+	ShiftDurationHours   float64   `json:"shift_duration_hours"`   // e.g. 8.0 hrs
+	BaseHourlyRateUSD    float64   `json:"base_hourly_rate_usd"`   // e.g. $22.00
+	SurgeDifferentialUSD float64   `json:"surge_differential_usd"` // e.g. $8.50 (Weekend/Surge bonus)
+	RequiredSkillCert    string    `json:"required_skill_cert"`    // e.g. "IPC-A-610_CERTIFIED"
+	Status               string    `json:"status"`                 // "OPEN_FOR_BIDDING", "AWARDED_FILLED"
+	AwardedWorkerID      string    `json:"awarded_worker_id,omitempty"`
+	CreatedAt            time.Time `json:"created_at"`
 }
 
 // WorkerFatigueProfile tracks rest intervals and circadian rhythm fatigue
 type WorkerFatigueProfile struct {
-	WorkerID                 string    `json:"worker_id"`
-	WorkerName               string    `json:"worker_name"`
-	CertifiedSkill           string    `json:"certified_skill"`
-	Past14DayTotalHours      float64   `json:"past_14day_total_hours"`
-	ConsecutiveNightShifts   int       `json:"consecutive_night_shifts"`   // Maximum 3 without rest
-	RestHoursSinceLastShift  float64   `json:"rest_hours_since_last_shift"` // Must be >= 11.0 hrs under ILO C171
-	CircadianFatigueScore    float64   `json:"circadian_fatigue_score"`    // 0.0 - 100.0 (Samn-Perelli scale)
-	FatigueRiskCategory      string    `json:"fatigue_risk_category"`      // "RESTED_FIT_FOR_DUTY", "MODERATE_CAUTION", "HIGH_RISK_FATIGUED"
-	TotalOvertimeHoursMonth  float64   `json:"total_overtime_hours_month"`
-	LastEvaluatedAt          time.Time `json:"last_evaluated_at"`
+	WorkerID                string    `json:"worker_id"`
+	WorkerName              string    `json:"worker_name"`
+	CertifiedSkill          string    `json:"certified_skill"`
+	Past14DayTotalHours     float64   `json:"past_14day_total_hours"`
+	ConsecutiveNightShifts  int       `json:"consecutive_night_shifts"`    // Maximum 3 without rest
+	RestHoursSinceLastShift float64   `json:"rest_hours_since_last_shift"` // Must be >= 11.0 hrs under ILO C171
+	CircadianFatigueScore   float64   `json:"circadian_fatigue_score"`     // 0.0 - 100.0 (Samn-Perelli scale)
+	FatigueRiskCategory     string    `json:"fatigue_risk_category"`       // "RESTED_FIT_FOR_DUTY", "MODERATE_CAUTION", "HIGH_RISK_FATIGUED"
+	TotalOvertimeHoursMonth float64   `json:"total_overtime_hours_month"`
+	LastEvaluatedAt         time.Time `json:"last_evaluated_at"`
 }
 
 // ShiftBidDecision models the safety and fair-work adjudication
 type ShiftBidDecision struct {
-	DecisionID               string    `json:"decision_id"`
-	ShiftID                  string    `json:"shift_id"`
-	WorkerID                 string    `json:"worker_id"`
-	WorkerName               string    `json:"worker_name"`
-	ILORestRequirementMet    bool      `json:"ilo_rest_requirement_met"`
-	FatigueSafetyScoreOK     bool      `json:"fatigue_safety_score_ok"`
-	SkillCertified           bool      `json:"skill_certified"`
-	BidVerdict               string    `json:"bid_verdict"` // "AWARDED_APPROVED", "REJECTED_ILO_FATIGUE_PREVENTION", "REJECTED_SKILL_MISMATCH"
-	RejectionReason          string    `json:"rejection_reason,omitempty"`
-	TotalShiftEarningsUSD    float64   `json:"total_shift_earnings_usd"`
-	EvaluatedAt              time.Time `json:"evaluated_at"`
+	DecisionID            string    `json:"decision_id"`
+	ShiftID               string    `json:"shift_id"`
+	WorkerID              string    `json:"worker_id"`
+	WorkerName            string    `json:"worker_name"`
+	ILORestRequirementMet bool      `json:"ilo_rest_requirement_met"`
+	FatigueSafetyScoreOK  bool      `json:"fatigue_safety_score_ok"`
+	SkillCertified        bool      `json:"skill_certified"`
+	BidVerdict            string    `json:"bid_verdict"` // "AWARDED_APPROVED", "REJECTED_ILO_FATIGUE_PREVENTION", "REJECTED_SKILL_MISMATCH"
+	RejectionReason       string    `json:"rejection_reason,omitempty"`
+	TotalShiftEarningsUSD float64   `json:"total_shift_earnings_usd"`
+	EvaluatedAt           time.Time `json:"evaluated_at"`
 }
 
 // ShiftBiddingVault thread-safe store

@@ -20,7 +20,7 @@ type GridFinTelemetry struct {
 	MachNumber                      float64   `json:"mach_number"`                         // e.g. 5.8
 	HydraulicServoPressureBar       float64   `json:"hydraulic_servo_pressure_bar"`        // e.g. 295.0 bar (normal 320-350 bar)
 	FinHingeTorqueKNm               float64   `json:"fin_hinge_torque_knm"`                // e.g. 142.5 kNm (design limit 160 kNm)
-	ActuatorOilBulkTempC            float64   `json:"actuator_oil_bulk_temp_c"`             // e.g. 215.0°C (oil vaporization > 200°C)
+	ActuatorOilBulkTempC            float64   `json:"actuator_oil_bulk_temp_c"`            // e.g. 215.0°C (oil vaporization > 200°C)
 	ActiveCoolantFlowLMin           float64   `json:"active_coolant_flow_l_min"`           // e.g. 18.5 L/min
 	AeroelasticFlutterFrequencyHz   float64   `json:"aeroelastic_flutter_frequency_hz"`    // e.g. 28.5 Hz (limit cycle flutter > 25 Hz)
 	ReentryPlasmaElectronDensityCm3 float64   `json:"reentry_plasma_electron_density_cm3"` // e.g. 1.8e12 cm^-3
@@ -29,26 +29,26 @@ type GridFinTelemetry struct {
 
 // GridFinAssessment evaluates hydraulic cavitation, aeroelastic supersonic flutter, and re-entry thermal loads
 type GridFinAssessment struct {
-	AssessmentID                string    `json:"assessment_id"`
-	BoosterID                   string    `json:"booster_id"`
-	HydraulicTorqueMarginPct    float64   `json:"hydraulic_torque_margin_pct"`
-	HydraulicCavitationRisk     string    `json:"hydraulic_cavitation_risk"`      // "HYDRAULIC_PRESSURE_OPTIMAL", "THERMAL_VAPOR_CAVITATION_WARNING", "CRITICAL_SERVO_PRESSURE_COLLAPSE"
-	AeroelasticStabilityStatus  string    `json:"aeroelastic_stability_status"`   // "AEROELASTIC_FLUTTER_DAMPED", "SUPERSONIC_LIMIT_CYCLE_WARNING", "CRITICAL_GRID_FIN_TEAR_HAZARD"
-	AngleOfAttackBiasTrimMandate bool     `json:"angle_of_attack_bias_trim_mandate"`
-	SubcooledFluidPulseMandate  bool      `json:"subcooled_fluid_pulse_mandate"`
-	AuditDigest                 string    `json:"audit_digest"`
-	EvaluatedAt                 time.Time `json:"evaluated_at"`
+	AssessmentID                 string    `json:"assessment_id"`
+	BoosterID                    string    `json:"booster_id"`
+	HydraulicTorqueMarginPct     float64   `json:"hydraulic_torque_margin_pct"`
+	HydraulicCavitationRisk      string    `json:"hydraulic_cavitation_risk"`    // "HYDRAULIC_PRESSURE_OPTIMAL", "THERMAL_VAPOR_CAVITATION_WARNING", "CRITICAL_SERVO_PRESSURE_COLLAPSE"
+	AeroelasticStabilityStatus   string    `json:"aeroelastic_stability_status"` // "AEROELASTIC_FLUTTER_DAMPED", "SUPERSONIC_LIMIT_CYCLE_WARNING", "CRITICAL_GRID_FIN_TEAR_HAZARD"
+	AngleOfAttackBiasTrimMandate bool      `json:"angle_of_attack_bias_trim_mandate"`
+	SubcooledFluidPulseMandate   bool      `json:"subcooled_fluid_pulse_mandate"`
+	AuditDigest                  string    `json:"audit_digest"`
+	EvaluatedAt                  time.Time `json:"evaluated_at"`
 }
 
 // GridFinMitigationAction models hydraulic pressure boost, AoA attitude bias trim, and subcooled fluid cooling pulse
 type GridFinMitigationAction struct {
-	ActionID                           string    `json:"action_id"`
-	BoosterID                          string    `json:"booster_id"`
-	ModulatedServoPressureSetpointBar  float64   `json:"modulated_servo_pressure_setpoint_bar"`
-	AngleOfAttackTrimBiasDeg           float64   `json:"angle_of_attack_trim_bias_deg"`
-	SubcooledCoolantPulseFlowLMin      float64   `json:"subcooled_coolant_pulse_flow_l_min"`
-	AvoidedBoosterLossUSD              float64   `json:"avoided_booster_loss_usd"`
-	ActionTimestamp                    time.Time `json:"action_timestamp"`
+	ActionID                          string    `json:"action_id"`
+	BoosterID                         string    `json:"booster_id"`
+	ModulatedServoPressureSetpointBar float64   `json:"modulated_servo_pressure_setpoint_bar"`
+	AngleOfAttackTrimBiasDeg          float64   `json:"angle_of_attack_trim_bias_deg"`
+	SubcooledCoolantPulseFlowLMin     float64   `json:"subcooled_coolant_pulse_flow_l_min"`
+	AvoidedBoosterLossUSD             float64   `json:"avoided_booster_loss_usd"`
+	ActionTimestamp                   time.Time `json:"action_timestamp"`
 }
 
 // GridFinVault thread-safe in-memory store
@@ -156,7 +156,7 @@ func (v *GridFinVault) TriggerAoATrimAndSubcooledPulse(boosterID string) (GridFi
 		pulseFlow = 45.0    // pulse cryogenic/subcooled thermal fluid across fin hinge bearing
 	}
 	if asm.AngleOfAttackBiasTrimMandate {
-		aoaTrimDeg = -2.4   // bias booster angle of attack to shed re-entry aerothermal shock load
+		aoaTrimDeg = -2.4 // bias booster angle of attack to shed re-entry aerothermal shock load
 	}
 
 	action := GridFinMitigationAction{

@@ -11,20 +11,20 @@ import (
 
 // WarrantyRepairClaim represents a submitted warranty reimbursement claim by a dealer/service center
 type WarrantyRepairClaim struct {
-	ClaimID             string    `json:"claim_id"` // e.g. "CLM-WAR-2026-9901"
-	DealerID            string    `json:"dealer_id"`
-	DealerName          string    `json:"dealer_name"`
-	ProductSerialNumber string    `json:"product_serial_number"`
-	ProductModelSKU     string    `json:"product_model_sku"`
-	CustomerName        string    `json:"customer_name"`
-	ClaimedDefectCode   string    `json:"claimed_defect_code"` // e.g. "MOTOR_ARMATURE_BURN"
-	ReportedOperatingHrs float64  `json:"reported_operating_hrs"`
-	PartsReplacedSKU    string    `json:"parts_replaced_sku"`
-	PartsCostUSD        float64   `json:"parts_cost_usd"`
-	LaborCostUSD        float64   `json:"labor_cost_usd"`
-	TotalClaimAmountUSD float64   `json:"total_claim_amount_usd"`
+	ClaimID                  string    `json:"claim_id"` // e.g. "CLM-WAR-2026-9901"
+	DealerID                 string    `json:"dealer_id"`
+	DealerName               string    `json:"dealer_name"`
+	ProductSerialNumber      string    `json:"product_serial_number"`
+	ProductModelSKU          string    `json:"product_model_sku"`
+	CustomerName             string    `json:"customer_name"`
+	ClaimedDefectCode        string    `json:"claimed_defect_code"` // e.g. "MOTOR_ARMATURE_BURN"
+	ReportedOperatingHrs     float64   `json:"reported_operating_hrs"`
+	PartsReplacedSKU         string    `json:"parts_replaced_sku"`
+	PartsCostUSD             float64   `json:"parts_cost_usd"`
+	LaborCostUSD             float64   `json:"labor_cost_usd"`
+	TotalClaimAmountUSD      float64   `json:"total_claim_amount_usd"`
 	WarrantyRegistrationDate time.Time `json:"warranty_registration_date"`
-	SubmittedAt         time.Time `json:"submitted_at"`
+	SubmittedAt              time.Time `json:"submitted_at"`
 }
 
 // TelemetryFraudAudit represents the comparison between dealer claim and actual IoT machine sensor logs
@@ -58,22 +58,22 @@ type ClaimAdjudicationResult struct {
 
 // DealerFraudRadar compiles risk metrics for an authorized dealership network
 type DealerFraudRadar struct {
-	DealerID                string  `json:"dealer_id"`
-	DealerName              string  `json:"dealer_name"`
-	TotalClaimsFiled        int     `json:"total_claims_filed"`
-	TotalClaimsApprovedUSD  float64 `json:"total_claims_approved_usd"`
-	TotalClaimsRejectedUSD  float64 `json:"total_claims_rejected_usd"`
-	FraudRejectionRatePct   float64 `json:"fraud_rejection_rate_pct"`
-	DealerTrustRating       string  `json:"dealer_trust_rating"` // "TIER_A_HONORARY", "TIER_B_NORMAL", "TIER_C_AUDIT_WATCHLIST"
-	InterceptedLossesUSD    float64 `json:"intercepted_losses_usd"`
-	LastAuditedAt           time.Time `json:"last_audited_at"`
+	DealerID               string    `json:"dealer_id"`
+	DealerName             string    `json:"dealer_name"`
+	TotalClaimsFiled       int       `json:"total_claims_filed"`
+	TotalClaimsApprovedUSD float64   `json:"total_claims_approved_usd"`
+	TotalClaimsRejectedUSD float64   `json:"total_claims_rejected_usd"`
+	FraudRejectionRatePct  float64   `json:"fraud_rejection_rate_pct"`
+	DealerTrustRating      string    `json:"dealer_trust_rating"` // "TIER_A_HONORARY", "TIER_B_NORMAL", "TIER_C_AUDIT_WATCHLIST"
+	InterceptedLossesUSD   float64   `json:"intercepted_losses_usd"`
+	LastAuditedAt          time.Time `json:"last_audited_at"`
 }
 
 // WarrantySentinelEngine manages warranty fraud detection and telemetric validation
 type WarrantySentinelEngine struct {
-	mu           sync.RWMutex
-	claims       map[string]WarrantyRepairClaim
-	audits       map[string]TelemetryFraudAudit
+	mu            sync.RWMutex
+	claims        map[string]WarrantyRepairClaim
+	audits        map[string]TelemetryFraudAudit
 	adjudications map[string]ClaimAdjudicationResult
 }
 

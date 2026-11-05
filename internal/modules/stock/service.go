@@ -334,4 +334,3 @@ func (s *Service) CreateOrderpoint(op *StockOrderpoint) error {
 	}
 	return s.db.Create(op).Error
 }
-

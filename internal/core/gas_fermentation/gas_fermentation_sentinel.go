@@ -16,13 +16,13 @@ type GasFermentationTelemetry struct {
 	TelemetryID                  string    `json:"telemetry_id"`
 	BioreactorID                 string    `json:"bioreactor_id"`
 	BatchRunID                   string    `json:"batch_run_id"`
-	DissolvedHydrogenTensionMpa  float64   `json:"dissolved_hydrogen_tension_mpa"`  // limit > 0.05 MPa
-	SyngasH2ToCoFeedRatio        float64   `json:"syngas_h2_to_co_feed_ratio"`      // nominal 1.80 - 2.40 (imbalance < 1.40 or > 3.20)
+	DissolvedHydrogenTensionMpa  float64   `json:"dissolved_hydrogen_tension_mpa"`    // limit > 0.05 MPa
+	SyngasH2ToCoFeedRatio        float64   `json:"syngas_h2_to_co_feed_ratio"`        // nominal 1.80 - 2.40 (imbalance < 1.40 or > 3.20)
 	UndissociatedAceticAcidGPerL float64   `json:"undissociated_acetic_acid_g_per_l"` // limit < 15.0 g/L (lysis > 15.0 g/L)
-	BrothPh                      float64   `json:"broth_ph"`                        // limit > 4.40
-	MicrobialCellViabilityPct    float64   `json:"microbial_cell_viability_pct"`    // limit > 85.0%
-	GasHoldupFractionPct         float64   `json:"gas_holdup_fraction_pct"`         // nominal 18.0 - 28.0%
-	EthanolToAcetateProductRatio float64   `json:"ethanol_to_acetate_product_ratio"` // solventogenic target > 3.50
+	BrothPh                      float64   `json:"broth_ph"`                          // limit > 4.40
+	MicrobialCellViabilityPct    float64   `json:"microbial_cell_viability_pct"`      // limit > 85.0%
+	GasHoldupFractionPct         float64   `json:"gas_holdup_fraction_pct"`           // nominal 18.0 - 28.0%
+	EthanolToAcetateProductRatio float64   `json:"ethanol_to_acetate_product_ratio"`  // solventogenic target > 3.50
 	Timestamp                    time.Time `json:"timestamp"`
 }
 
@@ -30,9 +30,9 @@ type GasFermentationTelemetry struct {
 type GasFermentationAssessment struct {
 	AssessmentID                          string    `json:"assessment_id"`
 	BioreactorID                          string    `json:"bioreactor_id"`
-	MetabolicPathwayState                 string    `json:"metabolic_pathway_state"`                   // SOLVENTOGENIC_ETHANOL_ACTIVE, ACIDOGENIC_ACETATE_SHIFT_WARNING, AUTO_TOXIFICATION_CELL_LYSIS_CRITICAL
-	MassTransferEfficiency                string    `json:"mass_transfer_efficiency"`                  // HIGH_KLA_OPTIMAL, MASS_TRANSFER_STARVATION
-	AceticAcidExcessMarginPct              float64   `json:"acetic_acid_excess_margin_pct"`
+	MetabolicPathwayState                 string    `json:"metabolic_pathway_state"`  // SOLVENTOGENIC_ETHANOL_ACTIVE, ACIDOGENIC_ACETATE_SHIFT_WARNING, AUTO_TOXIFICATION_CELL_LYSIS_CRITICAL
+	MassTransferEfficiency                string    `json:"mass_transfer_efficiency"` // HIGH_KLA_OPTIMAL, MASS_TRANSFER_STARVATION
+	AceticAcidExcessMarginPct             float64   `json:"acetic_acid_excess_margin_pct"`
 	SyngasFeedRatioTrimMandate            bool      `json:"syngas_feed_ratio_trim_mandate"`
 	MicrobubbleShearAndCausticDoseMandate bool      `json:"microbubble_shear_and_caustic_dose_mandate"`
 	AuditDigest                           string    `json:"audit_digest"`
@@ -124,7 +124,7 @@ func (v *GasFermentationVault) EvaluateMetabolicPathwayAndToxification(bioreacto
 		BioreactorID:                          bioreactorID,
 		MetabolicPathwayState:                 pathwayState,
 		MassTransferEfficiency:                massTransfer,
-		AceticAcidExcessMarginPct:              excessAcid,
+		AceticAcidExcessMarginPct:             excessAcid,
 		SyngasFeedRatioTrimMandate:            syngasMandate,
 		MicrobubbleShearAndCausticDoseMandate: causticMandate,
 		AuditDigest:                           digest,
@@ -186,22 +186,22 @@ func (v *GasFermentationVault) GetGasFermentationDossier(bioreactorID string) (m
 	}
 
 	dossier := map[string]interface{}{
-		"bioreactor_id":               bioreactorID,
-		"batch_run_id":                telem.BatchRunID,
-		"astm_d7566_compliant":        asm.MetabolicPathwayState != "AUTO_TOXIFICATION_CELL_LYSIS_CRITICAL" || (hasAct && act.AvoidedBioreactorCrashLossUSD > 0),
-		"iso_22716_certified":         true,
-		"dissolved_h2_mpa":            telem.DissolvedHydrogenTensionMpa,
-		"syngas_h2_co_ratio":          telem.SyngasH2ToCoFeedRatio,
-		"acetic_acid_g_l":             telem.UndissociatedAceticAcidGPerL,
-		"broth_ph":                    telem.BrothPh,
-		"viability_pct":               telem.MicrobialCellViabilityPct,
-		"pathway_state":               asm.MetabolicPathwayState,
-		"mass_transfer":               asm.MassTransferEfficiency,
-		"commanded_h2_co":             2.10,
-		"caustic_buffer_lpm":          0.0,
-		"avoided_loss_usd":            0.0,
-		"audit_digest":                asm.AuditDigest,
-		"compiled_at":                 time.Now(),
+		"bioreactor_id":        bioreactorID,
+		"batch_run_id":         telem.BatchRunID,
+		"astm_d7566_compliant": asm.MetabolicPathwayState != "AUTO_TOXIFICATION_CELL_LYSIS_CRITICAL" || (hasAct && act.AvoidedBioreactorCrashLossUSD > 0),
+		"iso_22716_certified":  true,
+		"dissolved_h2_mpa":     telem.DissolvedHydrogenTensionMpa,
+		"syngas_h2_co_ratio":   telem.SyngasH2ToCoFeedRatio,
+		"acetic_acid_g_l":      telem.UndissociatedAceticAcidGPerL,
+		"broth_ph":             telem.BrothPh,
+		"viability_pct":        telem.MicrobialCellViabilityPct,
+		"pathway_state":        asm.MetabolicPathwayState,
+		"mass_transfer":        asm.MassTransferEfficiency,
+		"commanded_h2_co":      2.10,
+		"caustic_buffer_lpm":   0.0,
+		"avoided_loss_usd":     0.0,
+		"audit_digest":         asm.AuditDigest,
+		"compiled_at":          time.Now(),
 	}
 
 	if hasAct {

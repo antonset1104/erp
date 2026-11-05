@@ -24,8 +24,8 @@ type BESSRackTelemetry struct {
 	CellVoltageDeltaMV      float64   `json:"cell_voltage_delta_mv"` // (Max - Min) in mV (warning > 35 mV, critical > 60 mV)
 	MaxCellTempC            float64   `json:"max_cell_temp_c"`       // Warning > 48.0°C; runaway imminent > 60.0°C
 	AmbientTempC            float64   `json:"ambient_temp_c"`
-	OffGasCO_PPM            float64   `json:"off_gas_co_ppm"`        // Carbon monoxide early venting indicator (>50 ppm)
-	OffGasH2_PPM            float64   `json:"off_gas_h2_ppm"`        // Hydrogen gas thermal runaway indicator (>40 ppm)
+	OffGasCO_PPM            float64   `json:"off_gas_co_ppm"` // Carbon monoxide early venting indicator (>50 ppm)
+	OffGasH2_PPM            float64   `json:"off_gas_h2_ppm"` // Hydrogen gas thermal runaway indicator (>40 ppm)
 	StateOfChargePct        float64   `json:"state_of_charge_pct"`
 	CumulativeThroughputMWh float64   `json:"cumulative_throughput_mwh"`
 	RecordedAt              time.Time `json:"recorded_at"`
@@ -33,35 +33,35 @@ type BESSRackTelemetry struct {
 
 // BESSHealthAgingAssessment models Arrhenius-SEI capacity fade and warranty degradation compliance
 type BESSHealthAgingAssessment struct {
-	AssessmentID                   string    `json:"assessment_id"`
-	RackID                         string    `json:"rack_id"`
-	StateOfHealthPct               float64   `json:"state_of_health_pct"` // % capacity remaining (End-of-life ~70-80%)
-	CapacityFadeLossPct            float64   `json:"capacity_fade_loss_pct"`
-	ArrheniusAgingRateFactor       float64   `json:"arrhenius_aging_rate_factor"`
-	RemainingEquivalentFullCycles  int       `json:"remaining_equivalent_full_cycles"`
-	WarrantySLAComplianceStatus    string    `json:"warranty_sla_compliance_status"` // "WITHIN_WARRANTY_ALLOWABLE_DEGRADATION", "WARRANTY_DEGRADATION_CLAIM_TRIGGERED"
-	ThermalRunawayRiskLevel        string    `json:"thermal_runaway_risk_level"`     // "SAFE_NOMINAL", "ELEVATED_VOLTAGE_IMBALANCE", "CRITICAL_OFFGAS_VENTING_HAZARD"
-	SafetyAuditDigest              string    `json:"safety_audit_digest"`
-	EvaluatedAt                    time.Time `json:"evaluated_at"`
+	AssessmentID                  string    `json:"assessment_id"`
+	RackID                        string    `json:"rack_id"`
+	StateOfHealthPct              float64   `json:"state_of_health_pct"` // % capacity remaining (End-of-life ~70-80%)
+	CapacityFadeLossPct           float64   `json:"capacity_fade_loss_pct"`
+	ArrheniusAgingRateFactor      float64   `json:"arrhenius_aging_rate_factor"`
+	RemainingEquivalentFullCycles int       `json:"remaining_equivalent_full_cycles"`
+	WarrantySLAComplianceStatus   string    `json:"warranty_sla_compliance_status"` // "WITHIN_WARRANTY_ALLOWABLE_DEGRADATION", "WARRANTY_DEGRADATION_CLAIM_TRIGGERED"
+	ThermalRunawayRiskLevel       string    `json:"thermal_runaway_risk_level"`     // "SAFE_NOMINAL", "ELEVATED_VOLTAGE_IMBALANCE", "CRITICAL_OFFGAS_VENTING_HAZARD"
+	SafetyAuditDigest             string    `json:"safety_audit_digest"`
+	EvaluatedAt                   time.Time `json:"evaluated_at"`
 }
 
 // ThermalRunawayQuarantineAction models automated battery rack contactor trip and fire suppression arming
 type ThermalRunawayQuarantineAction struct {
-	ActionID                       string    `json:"action_id"`
-	RackID                         string    `json:"rack_id"`
-	StringContactorTripped         bool      `json:"string_contactor_tripped"`
-	AerosolFireSuppressionArmed    bool      `json:"aerosol_fire_suppression_armed"`
-	DefectiveModuleIsolated        bool      `json:"defective_module_isolated"`
-	AvoidedFacilityDestructionUSD  float64   `json:"avoided_facility_destruction_usd"`
-	ActionTimestamp                time.Time `json:"action_timestamp"`
+	ActionID                      string    `json:"action_id"`
+	RackID                        string    `json:"rack_id"`
+	StringContactorTripped        bool      `json:"string_contactor_tripped"`
+	AerosolFireSuppressionArmed   bool      `json:"aerosol_fire_suppression_armed"`
+	DefectiveModuleIsolated       bool      `json:"defective_module_isolated"`
+	AvoidedFacilityDestructionUSD float64   `json:"avoided_facility_destruction_usd"`
+	ActionTimestamp               time.Time `json:"action_timestamp"`
 }
 
 // BESSVault thread-safe in-memory store
 type BESSVault struct {
-	mu           sync.RWMutex
-	telemetries  map[string]BESSRackTelemetry
-	assessments  map[string]BESSHealthAgingAssessment
-	quarantines  map[string]ThermalRunawayQuarantineAction
+	mu          sync.RWMutex
+	telemetries map[string]BESSRackTelemetry
+	assessments map[string]BESSHealthAgingAssessment
+	quarantines map[string]ThermalRunawayQuarantineAction
 }
 
 // Global instance

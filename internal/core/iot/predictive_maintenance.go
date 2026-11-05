@@ -16,7 +16,7 @@ import (
 type TelemetryPacket struct {
 	MachineID        string  `json:"machine_id" binding:"required"`
 	MachineName      string  `json:"machine_name"`
-	VibrationRMS     float64 `json:"vibration_rms" binding:"required"` // ISO 10816: normal < 4.5 mm/s, critical > 7.1 mm/s
+	VibrationRMS     float64 `json:"vibration_rms" binding:"required"`    // ISO 10816: normal < 4.5 mm/s, critical > 7.1 mm/s
 	OperatingTempC   float64 `json:"operating_temp_c" binding:"required"` // normal < 65 C, critical > 85 C
 	MotorCurrentAmps float64 `json:"motor_current_amps"`
 	SpindleRPM       float64 `json:"spindle_rpm"`
@@ -32,7 +32,7 @@ type HealthEvaluation struct {
 	Status                   string   `json:"status"`       // "OPTIMAL", "WARNING_DEGRADED", "CRITICAL_ANOMALY"
 	RemainingUsefulLifeHours float64  `json:"remaining_useful_life_hours"`
 	AnomalyIndicators        []string `json:"anomaly_indicators"`
-	TriggeredMaintenanceReq string   `json:"triggered_maintenance_req,omitempty"`
+	TriggeredMaintenanceReq  string   `json:"triggered_maintenance_req,omitempty"`
 	SuggestedAction          string   `json:"suggested_action"`
 	EvaluatedAt              string   `json:"evaluated_at"`
 }
@@ -156,7 +156,7 @@ func EvaluateMachineHealth(db *gorm.DB, p *TelemetryPacket, companyID uint) *Hea
 		Status:                   status,
 		RemainingUsefulLifeHours: rulHours,
 		AnomalyIndicators:        anomalies,
-		TriggeredMaintenanceReq: reqNumber,
+		TriggeredMaintenanceReq:  reqNumber,
 		SuggestedAction:          action,
 		EvaluatedAt:              time.Now().Format("2006-01-02 15:04:05"),
 	}

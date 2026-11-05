@@ -14,43 +14,43 @@ import (
 
 // SMRContainmentTelemetry captures passive safety and reactor physics metrics under IAEA SSR-2/1 & 10 CFR 50
 type SMRContainmentTelemetry struct {
-	TelemetryID                        string    `json:"telemetry_id"`
-	ModuleUnitID                       string    `json:"module_unit_id"`                         // "SMR-NUSCALE-VOYGR-UNIT-04"
-	PlantSiteID                        string    `json:"plant_site_id"`                          // "PLANT-IDAHO-NATIONAL-LAB-CFPP"
-	ReactorThermalPowerMWth            float64   `json:"reactor_thermal_power_mwth"`             // e.g. 250.0 MWth
-	NaturalCirculationFlowKgPerSec     float64   `json:"natural_circulation_flow_kg_per_sec"`    // e.g. 520.0 kg/s
-	RCSHotLegTemperatureC             float64   `json:"rcs_hot_leg_temperature_c"`              // e.g. 312.0°C
-	RCSColdLegTemperatureC            float64   `json:"rcs_cold_leg_temperature_c"`             // e.g. 260.0°C
-	PrimaryCoolantBoronPPM             float64   `json:"primary_coolant_boron_ppm"`              // e.g. 980.0 ppm (nominal 1200 ppm)
-	ReactivityInsertionRatePcmPerSec   float64   `json:"reactivity_insertion_rate_pcm_per_sec"`  // e.g. +3.8 pcm/s (safe limit < 2.0 pcm/s)
-	ContainmentPoolWaterLevelMeter     float64   `json:"containment_pool_water_level_meter"`      // e.g. 14.8 m
-	ContainmentPressureBar             float64   `json:"containment_pressure_bar"`              // e.g. 1.05 bar
-	RecordedAt                         time.Time `json:"recorded_at"`
+	TelemetryID                      string    `json:"telemetry_id"`
+	ModuleUnitID                     string    `json:"module_unit_id"`                        // "SMR-NUSCALE-VOYGR-UNIT-04"
+	PlantSiteID                      string    `json:"plant_site_id"`                         // "PLANT-IDAHO-NATIONAL-LAB-CFPP"
+	ReactorThermalPowerMWth          float64   `json:"reactor_thermal_power_mwth"`            // e.g. 250.0 MWth
+	NaturalCirculationFlowKgPerSec   float64   `json:"natural_circulation_flow_kg_per_sec"`   // e.g. 520.0 kg/s
+	RCSHotLegTemperatureC            float64   `json:"rcs_hot_leg_temperature_c"`             // e.g. 312.0°C
+	RCSColdLegTemperatureC           float64   `json:"rcs_cold_leg_temperature_c"`            // e.g. 260.0°C
+	PrimaryCoolantBoronPPM           float64   `json:"primary_coolant_boron_ppm"`             // e.g. 980.0 ppm (nominal 1200 ppm)
+	ReactivityInsertionRatePcmPerSec float64   `json:"reactivity_insertion_rate_pcm_per_sec"` // e.g. +3.8 pcm/s (safe limit < 2.0 pcm/s)
+	ContainmentPoolWaterLevelMeter   float64   `json:"containment_pool_water_level_meter"`    // e.g. 14.8 m
+	ContainmentPressureBar           float64   `json:"containment_pressure_bar"`              // e.g. 1.05 bar
+	RecordedAt                       time.Time `json:"recorded_at"`
 }
 
 // SMRPassiveSafetyAssessment models natural convection buoyancy flow and boron dilution criticality kinetics
 type SMRPassiveSafetyAssessment struct {
-	AssessmentID                       string    `json:"assessment_id"`
-	ModuleUnitID                       string    `json:"module_unit_id"`
-	CoreSubcriticalityMarginPcm        float64   `json:"core_subcriticality_margin_pcm"`
-	NaturalConvectionBuoyancyRatio     float64   `json:"natural_convection_buoyancy_ratio"`
-	BoronDilutionReactivityHazardLevel string    `json:"boron_dilution_reactivity_hazard_level"` // "CRITICALITY_SAFE_STABLE", "ELEVATED_BORON_DILUTION_WARNING", "CRITICAL_UNPLANNED_PROMPT_CRITICALITY_RISK"
-	PassiveDecayHeatRemovalStatus      string    `json:"passive_decay_heat_removal_status"`       // "BUOYANCY_LAMINAR_CIRCULATION", "DEGRADED_THERMAL_STRATIFICATION", "CRITICAL_NATURAL_CIRCULATION_FLOW_STALL"
-	EmergencyBoronInjectionMandate     bool      `json:"emergency_boron_injection_mandate"`
-	PassiveContainmentDepressurizationActive bool `json:"passive_containment_depressurization_active"`
-	AuditDigest                        string    `json:"audit_digest"`
-	EvaluatedAt                        time.Time `json:"evaluated_at"`
+	AssessmentID                             string    `json:"assessment_id"`
+	ModuleUnitID                             string    `json:"module_unit_id"`
+	CoreSubcriticalityMarginPcm              float64   `json:"core_subcriticality_margin_pcm"`
+	NaturalConvectionBuoyancyRatio           float64   `json:"natural_convection_buoyancy_ratio"`
+	BoronDilutionReactivityHazardLevel       string    `json:"boron_dilution_reactivity_hazard_level"` // "CRITICALITY_SAFE_STABLE", "ELEVATED_BORON_DILUTION_WARNING", "CRITICAL_UNPLANNED_PROMPT_CRITICALITY_RISK"
+	PassiveDecayHeatRemovalStatus            string    `json:"passive_decay_heat_removal_status"`      // "BUOYANCY_LAMINAR_CIRCULATION", "DEGRADED_THERMAL_STRATIFICATION", "CRITICAL_NATURAL_CIRCULATION_FLOW_STALL"
+	EmergencyBoronInjectionMandate           bool      `json:"emergency_boron_injection_mandate"`
+	PassiveContainmentDepressurizationActive bool      `json:"passive_containment_depressurization_active"`
+	AuditDigest                              string    `json:"audit_digest"`
+	EvaluatedAt                              time.Time `json:"evaluated_at"`
 }
 
 // SMRPassiveSafetyAction models emergency gravity boron injection and passive decay heat valve depressurization
 type SMRPassiveSafetyAction struct {
-	ActionID                           string    `json:"action_id"`
-	ModuleUnitID                       string    `json:"module_unit_id"`
-	InjectedBoronSolutionVolumeLiters  float64   `json:"injected_boron_solution_volume_liters"`
-	PassiveIsolationValveActuationMS   float64   `json:"passive_isolation_valve_actuation_ms"`
-	DecayHeatRejectionRateMWth         float64   `json:"decay_heat_rejection_rate_mwth"`
-	AvoidedCoreMeltRadiationLossUSD    float64   `json:"avoided_core_melt_radiation_loss_usd"` // Avoided $90M USD nuclear regulatory shutdown, core reload, and containment contamination
-	ActionTimestamp                    time.Time `json:"action_timestamp"`
+	ActionID                          string    `json:"action_id"`
+	ModuleUnitID                      string    `json:"module_unit_id"`
+	InjectedBoronSolutionVolumeLiters float64   `json:"injected_boron_solution_volume_liters"`
+	PassiveIsolationValveActuationMS  float64   `json:"passive_isolation_valve_actuation_ms"`
+	DecayHeatRejectionRateMWth        float64   `json:"decay_heat_rejection_rate_mwth"`
+	AvoidedCoreMeltRadiationLossUSD   float64   `json:"avoided_core_melt_radiation_loss_usd"` // Avoided $90M USD nuclear regulatory shutdown, core reload, and containment contamination
+	ActionTimestamp                   time.Time `json:"action_timestamp"`
 }
 
 // SMRVault thread-safe in-memory store
@@ -76,8 +76,8 @@ func init() {
 		PlantSiteID:                      "PLANT-IDAHO-NATIONAL-LAB-CFPP",
 		ReactorThermalPowerMWth:          250.0,
 		NaturalCirculationFlowKgPerSec:   480.0,
-		RCSHotLegTemperatureC:           315.0,
-		RCSColdLegTemperatureC:          255.0,
+		RCSHotLegTemperatureC:            315.0,
+		RCSColdLegTemperatureC:           255.0,
 		PrimaryCoolantBoronPPM:           940.0, // Substantial dilution from nominal 1200 ppm
 		ReactivityInsertionRatePcmPerSec: 4.2,   // High reactivity insertion rate
 		ContainmentPoolWaterLevelMeter:   14.6,
@@ -188,13 +188,13 @@ func (v *SMRVault) GetSMRPassiveSafetyDossier(unitID string) (map[string]interfa
 	act, hasAct := v.actions[unitID]
 
 	dossier := map[string]interface{}{
-		"module_unit_id":         unitID,
-		"has_containment_tele":   hasTel,
-		"has_safety_assessment":  hasAssess,
-		"has_mitigation_action":  hasAct,
-		"iaea_ssr2_1_compliant":  true,
-		"nrc_10cfr50_certified":  true,
-		"compiled_at":            time.Now(),
+		"module_unit_id":        unitID,
+		"has_containment_tele":  hasTel,
+		"has_safety_assessment": hasAssess,
+		"has_mitigation_action": hasAct,
+		"iaea_ssr2_1_compliant": true,
+		"nrc_10cfr50_certified": true,
+		"compiled_at":           time.Now(),
 	}
 
 	if hasTel {

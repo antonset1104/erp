@@ -718,19 +718,19 @@ func (s *Service) GetExpenseStats(companyID uint) (map[string]interface{}, error
 	s.db.Model(&Expense{}).Where("company_id = ? AND project_id IS NOT NULL", companyID).Select("COALESCE(SUM(total_amount), 0)").Scan(&projectTotalAmount)
 
 	return map[string]interface{}{
-		"total_items":            totalItems,
-		"total_item_amount":      totalItemAmount,
-		"total_sheets":           totalSheets,
-		"pending_count":          pendingCount,
-		"pending_amount":         pendingAmount,
-		"approved_count":         approvedCount,
-		"approved_amount":        approvedAmount,
-		"paid_count":             paidCount,
-		"paid_amount":            paidAmount,
-		"categories":             catStats,
-		"fleet_expense_count":    fleetExpenseCount,
-		"fleet_total_amount":     fleetTotalAmount,
-		"project_expense_count":  projectExpenseCount,
-		"project_total_amount":   projectTotalAmount,
+		"total_items":           totalItems,
+		"total_item_amount":     totalItemAmount,
+		"total_sheets":          totalSheets,
+		"pending_count":         pendingCount,
+		"pending_amount":        pendingAmount,
+		"approved_count":        approvedCount,
+		"approved_amount":       approvedAmount,
+		"paid_count":            paidCount,
+		"paid_amount":           paidAmount,
+		"categories":            catStats,
+		"fleet_expense_count":   fleetExpenseCount,
+		"fleet_total_amount":    fleetTotalAmount,
+		"project_expense_count": projectExpenseCount,
+		"project_total_amount":  projectTotalAmount,
 	}, nil
 }

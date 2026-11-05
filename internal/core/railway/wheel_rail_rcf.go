@@ -14,13 +14,13 @@ import (
 // WheelWaysideTelemetry captures wayside WILD (Wheel Impact Load Detector) and optical profile sensor data
 type WheelWaysideTelemetry struct {
 	TelemetryID                        string    `json:"telemetry_id"`
-	BogieID                            string    `json:"bogie_id"`         // e.g. "BOGIE-KA-ARGO-BROMO-01"
-	TrainConsistID                     string    `json:"train_consist_id"` // "KA-10-JAKARTA-SURABAYA"
-	WheelPositionID                    string    `json:"wheel_position_id"` // "AXLE-1-WHEEL-LEFT"
+	BogieID                            string    `json:"bogie_id"`                    // e.g. "BOGIE-KA-ARGO-BROMO-01"
+	TrainConsistID                     string    `json:"train_consist_id"`            // "KA-10-JAKARTA-SURABAYA"
+	WheelPositionID                    string    `json:"wheel_position_id"`           // "AXLE-1-WHEEL-LEFT"
 	DynamicPeakImpactLoadKN            float64   `json:"dynamic_peak_impact_load_kn"` // Normal < 140 kN; Alert > 200 kN; Flat > 260 kN
-	FlangeHeightMM                     float64   `json:"flange_height_mm"` // 28.0 - 36.0 mm
-	FlangeThicknessMM                  float64   `json:"flange_thickness_mm"` // Limit < 22.0 mm
-	FlangeAngleQR_MM                   float64   `json:"flange_angle_qr_mm"` // qR factor: UIC mandatory >= 6.5 mm (derailment limit)
+	FlangeHeightMM                     float64   `json:"flange_height_mm"`            // 28.0 - 36.0 mm
+	FlangeThicknessMM                  float64   `json:"flange_thickness_mm"`         // Limit < 22.0 mm
+	FlangeAngleQR_MM                   float64   `json:"flange_angle_qr_mm"`          // qR factor: UIC mandatory >= 6.5 mm (derailment limit)
 	UltrasonicSubsurfaceDefectDetected bool      `json:"ultrasonic_subsurface_defect_detected"`
 	AxleMileageKM                      float64   `json:"axle_mileage_km"`
 	RecordedAt                         time.Time `json:"recorded_at"`
@@ -28,28 +28,28 @@ type WheelWaysideTelemetry struct {
 
 // WheelSafetyRCF_Assessment models Rolling Contact Fatigue (RCF) and flange wheel-climb derailment hazard
 type WheelSafetyRCF_Assessment struct {
-	AssessmentID                   string    `json:"assessment_id"`
-	BogieID                        string    `json:"bogie_id"`
-	WheelPositionID                string    `json:"wheel_position_id"`
-	FlangeWearDerailmentRisk       string    `json:"flange_wear_derailment_risk"` // "SAFE_UIC_GEOMETRY", "ELEVATED_FLANGE_WEAR_WARNING", "CRITICAL_WHEEL_CLIMB_DERAILMENT_RISK"
-	RollingContactFatigueSeverity  string    `json:"rolling_contact_fatigue_severity"` // "NEGLIGIBLE_MICRO_CRACKING", "SPALLING_SUBSURFACE_FATIGUE", "MANDATORY_WHEEL_LATHE_REPROFILE"
-	SpeedRestrictionCommandKPH     int       `json:"speed_restriction_command_kph"` // 0 = Grounded; 60 kph = Restricted; 160 kph = Normal
-	CNC_LatheReprofilingMandate    bool      `json:"cnc_lathe_reprofiling_mandate"`
-	WheelSafetyAuditDigest         string    `json:"wheel_safety_audit_digest"`
-	EvaluatedAt                    time.Time `json:"evaluated_at"`
+	AssessmentID                  string    `json:"assessment_id"`
+	BogieID                       string    `json:"bogie_id"`
+	WheelPositionID               string    `json:"wheel_position_id"`
+	FlangeWearDerailmentRisk      string    `json:"flange_wear_derailment_risk"`      // "SAFE_UIC_GEOMETRY", "ELEVATED_FLANGE_WEAR_WARNING", "CRITICAL_WHEEL_CLIMB_DERAILMENT_RISK"
+	RollingContactFatigueSeverity string    `json:"rolling_contact_fatigue_severity"` // "NEGLIGIBLE_MICRO_CRACKING", "SPALLING_SUBSURFACE_FATIGUE", "MANDATORY_WHEEL_LATHE_REPROFILE"
+	SpeedRestrictionCommandKPH    int       `json:"speed_restriction_command_kph"`    // 0 = Grounded; 60 kph = Restricted; 160 kph = Normal
+	CNC_LatheReprofilingMandate   bool      `json:"cnc_lathe_reprofiling_mandate"`
+	WheelSafetyAuditDigest        string    `json:"wheel_safety_audit_digest"`
+	EvaluatedAt                   time.Time `json:"evaluated_at"`
 }
 
 // WheelsetReprofilingWorkOrder schedules underfloor CNC wheel lathe turning to restore UIC profile
 type WheelsetReprofilingWorkOrder struct {
-	WorkOrderID                    string    `json:"work_order_id"`
-	BogieID                        string    `json:"bogie_id"`
-	WheelPositionID                string    `json:"wheel_position_id"`
-	WheelLatheType                 string    `json:"wheel_lathe_type"` // "UNDERFLOOR_CNC_WHEEL_LATHE"
-	TargetTreadCutDepthMM          float64   `json:"target_tread_cut_depth_mm"`
-	PostCutQR_MM                   float64   `json:"post_cut_qr_mm"`
-	AvoidedDerailmentLossUSD       float64   `json:"avoided_derailment_loss_usd"`
-	ScheduledMaintenanceDate       time.Time `json:"scheduled_maintenance_date"`
-	IssuedAt                       time.Time `json:"issued_at"`
+	WorkOrderID              string    `json:"work_order_id"`
+	BogieID                  string    `json:"bogie_id"`
+	WheelPositionID          string    `json:"wheel_position_id"`
+	WheelLatheType           string    `json:"wheel_lathe_type"` // "UNDERFLOOR_CNC_WHEEL_LATHE"
+	TargetTreadCutDepthMM    float64   `json:"target_tread_cut_depth_mm"`
+	PostCutQR_MM             float64   `json:"post_cut_qr_mm"`
+	AvoidedDerailmentLossUSD float64   `json:"avoided_derailment_loss_usd"`
+	ScheduledMaintenanceDate time.Time `json:"scheduled_maintenance_date"`
+	IssuedAt                 time.Time `json:"issued_at"`
 }
 
 // RailwayWheelVault thread-safe in-memory store

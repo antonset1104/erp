@@ -252,9 +252,9 @@ func (h *Handler) PublishEvent(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"event":                req.EventName,
+		"event":                 req.EventName,
 		"deliveries_dispatched": len(deliveries),
-		"deliveries":           deliveries,
+		"deliveries":            deliveries,
 	})
 }
 

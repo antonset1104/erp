@@ -13,7 +13,7 @@ type StockProductionLot struct {
 	ProductID      uint                 `gorm:"not null;index" json:"product_id"`
 	Product        *product.Product     `gorm:"foreignKey:ProductID" json:"product,omitempty"`
 	Barcode        string               `gorm:"size:64;index" json:"barcode,omitempty"`
-	Ref            string               `gorm:"size:128" json:"ref,omitempty"` // Internal reference / batch vendor
+	Ref            string               `gorm:"size:128" json:"ref,omitempty"`            // Internal reference / batch vendor
 	ExpirationDate string               `gorm:"size:32" json:"expiration_date,omitempty"` // Best Before / Kadaluwarsa
 	AlertDate      string               `gorm:"size:32" json:"alert_date,omitempty"`
 	RemovalDate    string               `gorm:"size:32" json:"removal_date,omitempty"`
@@ -50,16 +50,16 @@ type BarcodeScanRequest struct {
 }
 
 type BarcodeScanResult struct {
-	Found          bool                `json:"found"`
-	Barcode        string              `json:"barcode"`
-	Type           string              `json:"type"` // "product", "location", "lot", "picking", "unknown"
-	ActionTaken    string              `json:"action_taken,omitempty"`
-	Message        string              `json:"message"`
-	Product        *product.Product    `json:"product,omitempty"`
-	Location       *stock.StockLocation `json:"location,omitempty"`
-	Lot            *StockProductionLot `json:"lot,omitempty"`
-	Picking        *stock.StockPicking `json:"picking,omitempty"`
-	Data           interface{}         `json:"data,omitempty"`
+	Found       bool                 `json:"found"`
+	Barcode     string               `json:"barcode"`
+	Type        string               `json:"type"` // "product", "location", "lot", "picking", "unknown"
+	ActionTaken string               `json:"action_taken,omitempty"`
+	Message     string               `json:"message"`
+	Product     *product.Product     `json:"product,omitempty"`
+	Location    *stock.StockLocation `json:"location,omitempty"`
+	Lot         *StockProductionLot  `json:"lot,omitempty"`
+	Picking     *stock.StockPicking  `json:"picking,omitempty"`
+	Data        interface{}          `json:"data,omitempty"`
 }
 
 type BarcodeStats struct {

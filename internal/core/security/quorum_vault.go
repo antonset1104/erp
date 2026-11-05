@@ -20,19 +20,19 @@ var primeMod, _ = new(big.Int).SetString("17014118346046923173168730371588410572
 
 // OfficerKeyShard represents a distributed secret share assigned to an executive officer.
 type OfficerKeyShard struct {
-	Index        int64  `json:"index"` // X-coordinate (1, 2, ... n)
-	ShareHex     string `json:"share_hex"` // Y-coordinate hex
-	OfficerRole  string `json:"officer_role"`
-	OfficerName  string `json:"officer_name"`
-	OfficerEmail string `json:"officer_email"`
+	Index         int64  `json:"index"`     // X-coordinate (1, 2, ... n)
+	ShareHex      string `json:"share_hex"` // Y-coordinate hex
+	OfficerRole   string `json:"officer_role"`
+	OfficerName   string `json:"officer_name"`
+	OfficerEmail  string `json:"officer_email"`
 	DistributedAt string `json:"distributed_at"`
 }
 
 // VaultPolicy defines quorum requirements for sensitive operations.
 type VaultPolicy struct {
 	PolicyName       string   `json:"policy_name"`
-	RequiredQuorum   int      `json:"required_quorum"`   // k
-	TotalOfficers    int      `json:"total_officers"`    // n
+	RequiredQuorum   int      `json:"required_quorum"` // k
+	TotalOfficers    int      `json:"total_officers"`  // n
 	PermittedActions []string `json:"permitted_actions"`
 }
 
@@ -71,16 +71,16 @@ type ExecuteQuorumActionRequest struct {
 
 // ExecuteQuorumActionResponse confirms execution of the quorum-protected action.
 type ExecuteQuorumActionResponse struct {
-	Success            bool     `json:"success"`
-	ActionExecuted     string   `json:"action_executed"`
-	TargetReference    string   `json:"target_reference"`
-	QuorumSatisfied    bool     `json:"quorum_satisfied"`
-	ValidShardsCount   int      `json:"valid_shards_count"`
-	RequiredQuorum     int      `json:"required_quorum"`
-	AuditExecutionCode string   `json:"audit_execution_code"`
-	CryptographicSeal  string   `json:"cryptographic_seal"`
-	ExecutionTimestamp string   `json:"execution_timestamp"`
-	Message            string   `json:"message"`
+	Success            bool   `json:"success"`
+	ActionExecuted     string `json:"action_executed"`
+	TargetReference    string `json:"target_reference"`
+	QuorumSatisfied    bool   `json:"quorum_satisfied"`
+	ValidShardsCount   int    `json:"valid_shards_count"`
+	RequiredQuorum     int    `json:"required_quorum"`
+	AuditExecutionCode string `json:"audit_execution_code"`
+	CryptographicSeal  string `json:"cryptographic_seal"`
+	ExecutionTimestamp string `json:"execution_timestamp"`
+	Message            string `json:"message"`
 }
 
 // QuorumVaultService implements zero-trust Shamir secret sharing and quorum execution.
@@ -90,11 +90,11 @@ type QuorumVaultService struct {
 }
 
 type vaultSession struct {
-	SessionID     string
-	Quorum        int
-	SecretHash    string
-	SecretInt     *big.Int
-	IssuedShards  []OfficerKeyShard
+	SessionID    string
+	Quorum       int
+	SecretHash   string
+	SecretInt    *big.Int
+	IssuedShards []OfficerKeyShard
 }
 
 // NewQuorumVaultService creates a new QuorumVaultService.

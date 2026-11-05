@@ -29,16 +29,16 @@ type EUVPellicleTelemetry struct {
 
 // EUVPellicleDegradationAssessment models carbon nanotube / polysilicon radical etching and rupture probability
 type EUVPellicleDegradationAssessment struct {
-	AssessmentID                   string    `json:"assessment_id"`
-	ScannerID                      string    `json:"scanner_id"`
-	EtchThinningRateNmPerMillionDose float64 `json:"etch_thinning_rate_nm_per_million_dose"`
-	TransmissionLossMarginPct      float64   `json:"transmission_loss_margin_pct"`
-	PellicleRuptureRiskLevel       string    `json:"pellicle_rupture_risk_level"`       // "NANOMEMBRANE_INTEGRITY_PRISTINE", "ELEVATED_THINNING_RADICAL_WARNING", "CRITICAL_PELLICLE_RUPTURE_MASK_CONTAMINATION"
-	PinholeDefectStatus            string    `json:"pinhole_defect_status"`            // "SPECIFICATION_CLEAN", "MARGINAL_DEFECT_YIELD_RISK", "CRITICAL_UNREPAIRABLE_RETICLE_DEFECT"
-	PelliclePodSwapMandate         bool      `json:"pellicle_pod_swap_mandate"`
-	LaserDoseAttenuationRequired   bool      `json:"laser_dose_attenuation_required"`
-	AuditDigest                    string    `json:"audit_digest"`
-	EvaluatedAt                    time.Time `json:"evaluated_at"`
+	AssessmentID                     string    `json:"assessment_id"`
+	ScannerID                        string    `json:"scanner_id"`
+	EtchThinningRateNmPerMillionDose float64   `json:"etch_thinning_rate_nm_per_million_dose"`
+	TransmissionLossMarginPct        float64   `json:"transmission_loss_margin_pct"`
+	PellicleRuptureRiskLevel         string    `json:"pellicle_rupture_risk_level"` // "NANOMEMBRANE_INTEGRITY_PRISTINE", "ELEVATED_THINNING_RADICAL_WARNING", "CRITICAL_PELLICLE_RUPTURE_MASK_CONTAMINATION"
+	PinholeDefectStatus              string    `json:"pinhole_defect_status"`       // "SPECIFICATION_CLEAN", "MARGINAL_DEFECT_YIELD_RISK", "CRITICAL_UNREPAIRABLE_RETICLE_DEFECT"
+	PelliclePodSwapMandate           bool      `json:"pellicle_pod_swap_mandate"`
+	LaserDoseAttenuationRequired     bool      `json:"laser_dose_attenuation_required"`
+	AuditDigest                      string    `json:"audit_digest"`
+	EvaluatedAt                      time.Time `json:"evaluated_at"`
 }
 
 // EUVPellicleMitigationAction models source power attenuation, radical flow trimming, and robotic pod exchange

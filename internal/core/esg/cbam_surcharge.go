@@ -54,17 +54,17 @@ type GreenSurchargeAssessment struct {
 
 // CBAMDeclarationXML represents the official quarterly registry filing summary
 type CBAMDeclarationXML struct {
-	DeclarationID      string    `json:"declaration_id"`
-	ExportShipmentID   string    `json:"export_shipment_id"`
-	DeclarantEORINumber string   `json:"declarant_eori_number"` // European Operator EORI
-	InstallationID     string    `json:"installation_id"`      // Manufacturer UN/LOCODE + Plant ID
-	InstallationGeo    string    `json:"installation_geo"`     // Lat/Long
-	CountryOfOrigin    string    `json:"country_of_origin"`    // "ID"
-	ReportingQuarter   string    `json:"reporting_quarter"`    // "2026-Q4"
-	XMLPayloadDigest   string    `json:"xml_payload_digest"`   // SHA-256
-	XMLPayloadContent  string    `json:"xml_payload_content"`
-	VerificationStatus string    `json:"verification_status"`  // "ACCREDITED_VERIFIER_STAMPED"
-	GeneratedAt        time.Time `json:"generated_at"`
+	DeclarationID       string    `json:"declaration_id"`
+	ExportShipmentID    string    `json:"export_shipment_id"`
+	DeclarantEORINumber string    `json:"declarant_eori_number"` // European Operator EORI
+	InstallationID      string    `json:"installation_id"`       // Manufacturer UN/LOCODE + Plant ID
+	InstallationGeo     string    `json:"installation_geo"`      // Lat/Long
+	CountryOfOrigin     string    `json:"country_of_origin"`     // "ID"
+	ReportingQuarter    string    `json:"reporting_quarter"`     // "2026-Q4"
+	XMLPayloadDigest    string    `json:"xml_payload_digest"`    // SHA-256
+	XMLPayloadContent   string    `json:"xml_payload_content"`
+	VerificationStatus  string    `json:"verification_status"` // "ACCREDITED_VERIFIER_STAMPED"
+	GeneratedAt         time.Time `json:"generated_at"`
 }
 
 // CBAMSurchargeVault thread-safe store

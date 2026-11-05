@@ -36,7 +36,7 @@ type SorptionCompetitionAssessment struct {
 	CompetitiveMoistureRatio                float64   `json:"competitive_moisture_ratio"` // H2O / CO2 ratio
 	LangmuirSorbentSelectivity              float64   `json:"langmuir_sorbent_selectivity"`
 	SpecificDesorptionThermalEnergyGJPerTon float64   `json:"specific_desorption_thermal_energy_gj_per_ton"` // GJ / ton CO2
-	SorptionEfficiencyStatus                string    `json:"sorption_efficiency_status"` // "OPTIMAL_SELECTIVE_ADSORPTION", "ELEVATED_MOISTURE_COMPETITION", "CRITICAL_SORBENT_FLOODING_THERMAL_PENALTY"
+	SorptionEfficiencyStatus                string    `json:"sorption_efficiency_status"`                    // "OPTIMAL_SELECTIVE_ADSORPTION", "ELEVATED_MOISTURE_COMPETITION", "CRITICAL_SORBENT_FLOODING_THERMAL_PENALTY"
 	PreDryingCycleRequired                  bool      `json:"pre_drying_cycle_required"`
 	AuditDigest                             string    `json:"audit_digest"`
 	EvaluatedAt                             time.Time `json:"evaluated_at"`
@@ -44,12 +44,12 @@ type SorptionCompetitionAssessment struct {
 
 // TVSDOptimizationAction models temperature-vacuum swing desorption steam duty reduction and recuperation
 type TVSDOptimizationAction struct {
-	ActionID                     string    `json:"action_id"`
-	ContactorUnitID              string    `json:"contactor_unit_id"`
-	SteamDutyReductionPct        float64   `json:"steam_duty_reduction_pct"`
-	ProducedCO2PurityPct         float64   `json:"produced_co2_purity_pct"`
-	AvoidedParasiticEnergyLossUSD float64  `json:"avoided_parasitic_energy_loss_usd"` // Avoided $16.5M USD parasitic thermal steam energy and carbon credit audit loss
-	ActionTimestamp              time.Time `json:"action_timestamp"`
+	ActionID                      string    `json:"action_id"`
+	ContactorUnitID               string    `json:"contactor_unit_id"`
+	SteamDutyReductionPct         float64   `json:"steam_duty_reduction_pct"`
+	ProducedCO2PurityPct          float64   `json:"produced_co2_purity_pct"`
+	AvoidedParasiticEnergyLossUSD float64   `json:"avoided_parasitic_energy_loss_usd"` // Avoided $16.5M USD parasitic thermal steam energy and carbon credit audit loss
+	ActionTimestamp               time.Time `json:"action_timestamp"`
 }
 
 // DACVault thread-safe in-memory store

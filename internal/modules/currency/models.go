@@ -9,12 +9,12 @@ import (
 // Currency represents standard enterprise res.currency
 type Currency struct {
 	models.ModelBase
-	Name          string         `gorm:"size:16;not null;uniqueIndex" json:"name"` // e.g. "USD", "EUR", "IDR"
-	Symbol        string         `gorm:"size:8;not null" json:"symbol"`            // e.g. "$", "€", "Rp"
-	FullName      string         `gorm:"size:64;not null" json:"full_name"`        // e.g. "US Dollar", "Indonesian Rupiah"
-	DecimalPlaces int            `gorm:"default:2" json:"decimal_places"`
-	Rounding      float64        `gorm:"default:0.01" json:"rounding"`
-	Active        bool           `gorm:"default:true;index" json:"active"`
+	Name           string         `gorm:"size:16;not null;uniqueIndex" json:"name"` // e.g. "USD", "EUR", "IDR"
+	Symbol         string         `gorm:"size:8;not null" json:"symbol"`            // e.g. "$", "€", "Rp"
+	FullName       string         `gorm:"size:64;not null" json:"full_name"`        // e.g. "US Dollar", "Indonesian Rupiah"
+	DecimalPlaces  int            `gorm:"default:2" json:"decimal_places"`
+	Rounding       float64        `gorm:"default:0.01" json:"rounding"`
+	Active         bool           `gorm:"default:true;index" json:"active"`
 	IsBase         bool           `gorm:"default:false;index" json:"is_base"` // True for IDR (Company base currency)
 	Rates          []CurrencyRate `gorm:"foreignKey:CurrencyID" json:"rates,omitempty"`
 	LatestSpotRate float64        `gorm:"-" json:"latest_spot_rate"`
@@ -48,7 +48,7 @@ type ForexRevaluation struct {
 	RevaluationDate string                 `gorm:"size:32;not null;index" json:"revaluation_date"`
 	CurrencyID      uint                   `gorm:"not null;index" json:"currency_id"`
 	Currency        *Currency              `gorm:"foreignKey:CurrencyID" json:"currency,omitempty"`
-	ClosingRate     float64                `gorm:"not null" json:"closing_rate"`             // Spot rate at closing date (e.g. 16,300 IDR/USD)
+	ClosingRate     float64                `gorm:"not null" json:"closing_rate"`               // Spot rate at closing date (e.g. 16,300 IDR/USD)
 	State           string                 `gorm:"size:32;default:'draft';index" json:"state"` // "draft", "posted", "cancel"
 	TotalGain       float64                `gorm:"default:0" json:"total_gain"`
 	TotalLoss       float64                `gorm:"default:0" json:"total_loss"`
@@ -79,13 +79,13 @@ type ForexRevaluationLine struct {
 	AccountID        uint          `gorm:"not null" json:"account_id"`
 	AccountCode      string        `gorm:"size:32" json:"account_code"`
 	AccountName      string        `gorm:"size:128" json:"account_name"`
-	AccountType      string        `gorm:"size:64;not null" json:"account_type"` // "asset_receivable", "liability_payable"
-	AmountCurrency   float64       `gorm:"not null" json:"amount_currency"`      // Open amount in foreign currency (e.g. $1,000)
-	HistoricalRate   float64       `gorm:"not null" json:"historical_rate"`      // Rate at invoice date (e.g. 16,000)
-	HistoricalAmount float64       `gorm:"not null" json:"historical_amount"`    // IDR historical book balance (e.g. 16,000,000)
-	ClosingRate      float64       `gorm:"not null" json:"closing_rate"`         // Balance sheet revaluation rate (e.g. 16,300)
-	RevaluedAmount   float64       `gorm:"not null" json:"revalued_amount"`      // IDR revalued balance (e.g. 16,300,000)
-	GainLoss         float64       `gorm:"not null" json:"gain_loss"`            // Difference in IDR
+	AccountType      string        `gorm:"size:64;not null" json:"account_type"`   // "asset_receivable", "liability_payable"
+	AmountCurrency   float64       `gorm:"not null" json:"amount_currency"`        // Open amount in foreign currency (e.g. $1,000)
+	HistoricalRate   float64       `gorm:"not null" json:"historical_rate"`        // Rate at invoice date (e.g. 16,000)
+	HistoricalAmount float64       `gorm:"not null" json:"historical_amount"`      // IDR historical book balance (e.g. 16,000,000)
+	ClosingRate      float64       `gorm:"not null" json:"closing_rate"`           // Balance sheet revaluation rate (e.g. 16,300)
+	RevaluedAmount   float64       `gorm:"not null" json:"revalued_amount"`        // IDR revalued balance (e.g. 16,300,000)
+	GainLoss         float64       `gorm:"not null" json:"gain_loss"`              // Difference in IDR
 	GainLossType     string        `gorm:"size:16;not null" json:"gain_loss_type"` // "gain", "loss"
 }
 
@@ -119,12 +119,12 @@ type CurrencyConversionRequest struct {
 }
 
 type CurrencyConversionResponse struct {
-	OriginalAmount float64 `json:"original_amount"`
-	FromCurrency   string  `json:"from_currency"`
-	ToCurrency     string  `json:"to_currency"`
+	OriginalAmount  float64 `json:"original_amount"`
+	FromCurrency    string  `json:"from_currency"`
+	ToCurrency      string  `json:"to_currency"`
 	ConvertedAmount float64 `json:"converted_amount"`
-	AppliedRate    float64 `json:"applied_rate"`
-	RateDate       string  `json:"rate_date"`
+	AppliedRate     float64 `json:"applied_rate"`
+	RateDate        string  `json:"rate_date"`
 }
 
 type ComputeRevaluationRequest struct {

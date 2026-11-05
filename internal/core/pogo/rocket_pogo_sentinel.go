@@ -14,31 +14,31 @@ import (
 
 // MethaloxPogoTelemetry captures launch vehicle feedline structural-acoustic dynamics under NASA SP-8007 & ISO 14620
 type MethaloxPogoTelemetry struct {
-	TelemetryID                       string    `json:"telemetry_id"`
-	EngineClusterID                   string    `json:"engine_cluster_id"`                     // "ENGINE-RAPTOR-V3-STAGE1-CLUSTER-09"
-	LaunchVehicleTailID               string    `json:"launch_vehicle_tail_id"`                // "VEHICLE-METHALOX-STARSHIP-SN33"
-	FlightTimeSeconds                 float64   `json:"flight_time_seconds"`                   // e.g. 142.5 s (near Max-Q / MECO)
-	SuctionLineResonanceFreqHz        float64   `json:"suction_line_resonance_freq_hz"`        // e.g. 18.2 Hz (approaching 18.0 Hz structural mode)
-	PropellantAccelerationG           float64   `json:"propellant_acceleration_g"`             // e.g. 4.85 G
-	LiquidMethaneNPSHActualMeter      float64   `json:"liquid_methane_npsh_actual_meter"`      // e.g. 4.5 m (margin safe)
-	LiquidOxygenNPSHActualMeter       float64   `json:"liquid_oxygen_npsh_actual_meter"`       // e.g. 3.2 m (required 3.6 m -> cavitation hazard)
-	TurbopumpInducerVibrationG        float64   `json:"turbopump_inducer_vibration_g"`         // e.g. 72.5 G (limit < 50.0 G)
+	TelemetryID                      string    `json:"telemetry_id"`
+	EngineClusterID                  string    `json:"engine_cluster_id"`                    // "ENGINE-RAPTOR-V3-STAGE1-CLUSTER-09"
+	LaunchVehicleTailID              string    `json:"launch_vehicle_tail_id"`               // "VEHICLE-METHALOX-STARSHIP-SN33"
+	FlightTimeSeconds                float64   `json:"flight_time_seconds"`                  // e.g. 142.5 s (near Max-Q / MECO)
+	SuctionLineResonanceFreqHz       float64   `json:"suction_line_resonance_freq_hz"`       // e.g. 18.2 Hz (approaching 18.0 Hz structural mode)
+	PropellantAccelerationG          float64   `json:"propellant_acceleration_g"`            // e.g. 4.85 G
+	LiquidMethaneNPSHActualMeter     float64   `json:"liquid_methane_npsh_actual_meter"`     // e.g. 4.5 m (margin safe)
+	LiquidOxygenNPSHActualMeter      float64   `json:"liquid_oxygen_npsh_actual_meter"`      // e.g. 3.2 m (required 3.6 m -> cavitation hazard)
+	TurbopumpInducerVibrationG       float64   `json:"turbopump_inducer_vibration_g"`        // e.g. 72.5 G (limit < 50.0 G)
 	PogoAccumulatorHeliumPressureBar float64   `json:"pogo_accumulator_helium_pressure_bar"` // e.g. 42.0 bar
-	ChamberPressureBar                float64   `json:"chamber_pressure_bar"`                  // e.g. 295.0 bar
-	RecordedAt                        time.Time `json:"recorded_at"`
+	ChamberPressureBar               float64   `json:"chamber_pressure_bar"`                 // e.g. 295.0 bar
+	RecordedAt                       time.Time `json:"recorded_at"`
 }
 
 // PogoCavitationAssessment models acoustic standing wave coupling, NPSH cavitation, and structural vibration
 type PogoCavitationAssessment struct {
-	AssessmentID                      string    `json:"assessment_id"`
-	EngineClusterID                   string    `json:"engine_cluster_id"`
-	NPSHMarginOxygenMeters            float64   `json:"npsh_margin_oxygen_meters"`
-	PogoResonanceCouplingStatus       string    `json:"pogo_resonance_coupling_status"`       // "UNCOUPLED_SAFE_PROPULSION", "ELEVATED_PRESSURE_SURGE_WARNING", "CRITICAL_POGO_TURBOPUMP_CAVITATION_HAZARD"
-	AcousticCombustionFeedbackLevel   string    `json:"acoustic_combustion_feedback_level"`   // "ATTENUATED_LAMINAR", "MODERATE_OSCILLATION", "DESTRUCTIVE_ACOUSTIC_RESONANCE"
-	ActivePogoSuppressionMandate      bool      `json:"active_pogo_suppression_mandate"`
-	InducerVaporLockDetected          bool      `json:"inducer_vapor_lock_detected"`
-	AuditDigest                       string    `json:"audit_digest"`
-	EvaluatedAt                       time.Time `json:"evaluated_at"`
+	AssessmentID                    string    `json:"assessment_id"`
+	EngineClusterID                 string    `json:"engine_cluster_id"`
+	NPSHMarginOxygenMeters          float64   `json:"npsh_margin_oxygen_meters"`
+	PogoResonanceCouplingStatus     string    `json:"pogo_resonance_coupling_status"`     // "UNCOUPLED_SAFE_PROPULSION", "ELEVATED_PRESSURE_SURGE_WARNING", "CRITICAL_POGO_TURBOPUMP_CAVITATION_HAZARD"
+	AcousticCombustionFeedbackLevel string    `json:"acoustic_combustion_feedback_level"` // "ATTENUATED_LAMINAR", "MODERATE_OSCILLATION", "DESTRUCTIVE_ACOUSTIC_RESONANCE"
+	ActivePogoSuppressionMandate    bool      `json:"active_pogo_suppression_mandate"`
+	InducerVaporLockDetected        bool      `json:"inducer_vapor_lock_detected"`
+	AuditDigest                     string    `json:"audit_digest"`
+	EvaluatedAt                     time.Time `json:"evaluated_at"`
 }
 
 // PogoMitigationAction models helium accumulator pressurization, thrust throttling, and oxidizer trim bias
@@ -70,18 +70,18 @@ var GlobalPogoVault = &PogoVault{
 func init() {
 	// Seed demo orbital rocket ascending through high dynamic pressure with severe Pogo instability precursor
 	GlobalPogoVault.telemetries["ENGINE-RAPTOR-V3-STAGE1-CLUSTER-09"] = MethaloxPogoTelemetry{
-		TelemetryID:                       "TEL-POGO-001",
-		EngineClusterID:                   "ENGINE-RAPTOR-V3-STAGE1-CLUSTER-09",
-		LaunchVehicleTailID:               "VEHICLE-METHALOX-STARSHIP-SN33",
-		FlightTimeSeconds:                 142.5,
-		SuctionLineResonanceFreqHz:        18.1, // Directly matching structural 18.0 Hz natural frequency
-		PropellantAccelerationG:           4.92,
-		LiquidMethaneNPSHActualMeter:      4.6,
-		LiquidOxygenNPSHActualMeter:       3.1,  // Below 3.6m minimum cavitation limit
-		TurbopumpInducerVibrationG:        76.0, // High-frequency blade pass vibration
+		TelemetryID:                      "TEL-POGO-001",
+		EngineClusterID:                  "ENGINE-RAPTOR-V3-STAGE1-CLUSTER-09",
+		LaunchVehicleTailID:              "VEHICLE-METHALOX-STARSHIP-SN33",
+		FlightTimeSeconds:                142.5,
+		SuctionLineResonanceFreqHz:       18.1, // Directly matching structural 18.0 Hz natural frequency
+		PropellantAccelerationG:          4.92,
+		LiquidMethaneNPSHActualMeter:     4.6,
+		LiquidOxygenNPSHActualMeter:      3.1,  // Below 3.6m minimum cavitation limit
+		TurbopumpInducerVibrationG:       76.0, // High-frequency blade pass vibration
 		PogoAccumulatorHeliumPressureBar: 40.5,
-		ChamberPressureBar:                298.0,
-		RecordedAt:                        time.Now(),
+		ChamberPressureBar:               298.0,
+		RecordedAt:                       time.Now(),
 	}
 }
 
@@ -159,9 +159,9 @@ func (v *PogoVault) TriggerPogoSuppressionAndTrim(clusterID string) (PogoMitigat
 	action := PogoMitigationAction{
 		ActionID:                      actionID,
 		EngineClusterID:               clusterID,
-		HeliumDampenerChargeBoostBar:  12.5,  // Boost pogo accumulator bladder pressure by +12.5 bar
-		ThrustThrottlingModulationPct: -8.0,  // Throttle by -8% to detune acoustic standing wave frequency
-		OxidizerTrimBiasPct:           1.5,   // Shift O/F ratio by +1.5% to suppress oxygen inducer cavitation
+		HeliumDampenerChargeBoostBar:  12.5, // Boost pogo accumulator bladder pressure by +12.5 bar
+		ThrustThrottlingModulationPct: -8.0, // Throttle by -8% to detune acoustic standing wave frequency
+		OxidizerTrimBiasPct:           1.5,  // Shift O/F ratio by +1.5% to suppress oxygen inducer cavitation
 		AvoidedLaunchVehicleLossUSD:   avoidedLoss,
 		ActionTimestamp:               time.Now(),
 	}
@@ -180,13 +180,13 @@ func (v *PogoVault) GetRocketPogoSafetyDossier(clusterID string) (map[string]int
 	act, hasAct := v.actions[clusterID]
 
 	dossier := map[string]interface{}{
-		"engine_cluster_id":       clusterID,
-		"has_pogo_telemetry":      hasTel,
-		"has_cavitation_assess":   hasAssess,
-		"has_mitigation_action":   hasAct,
-		"nasa_sp8007_compliant":   true,
-		"iso_14620_certified":     true,
-		"compiled_at":             time.Now(),
+		"engine_cluster_id":     clusterID,
+		"has_pogo_telemetry":    hasTel,
+		"has_cavitation_assess": hasAssess,
+		"has_mitigation_action": hasAct,
+		"nasa_sp8007_compliant": true,
+		"iso_14620_certified":   true,
+		"compiled_at":           time.Now(),
 	}
 
 	if hasTel {

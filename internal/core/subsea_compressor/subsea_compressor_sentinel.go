@@ -14,18 +14,18 @@ import (
 
 // SubseaCompressorTelemetry captures ultra-deepwater seabed multiphase wet gas compressor dynamics under API 17D & ISO 13628-4
 type SubseaCompressorTelemetry struct {
-	TelemetryID                     string    `json:"telemetry_id"`
-	CompressorID                    string    `json:"compressor_id"`                       // "COMPRESSOR-SUBSEA-3000M-01"
-	SeabedStationID                 string    `json:"seabed_station_id"`                   // "STATION-PRE-SALT-SANTOS-B02"
-	WaterDepthMeters                float64   `json:"water_depth_meters"`                  // e.g. 2950.0 m
-	SuctionLiquidVolumeFractionPct  float64   `json:"suction_liquid_volume_fraction_pct"`  // e.g. 28.5% (slug threshold > 15.0%)
-	CompressorRpm                   float64   `json:"compressor_rpm"`                      // e.g. 10850.0 RPM
-	PressureRatio                   float64   `json:"pressure_ratio"`                      // e.g. 2.65
-	SurgeMarginPct                  float64   `json:"surge_margin_pct"`                    // e.g. 6.8% (safety threshold > 12.0%)
-	AmbRadialBearingOrbitUm         float64   `json:"amb_radial_bearing_orbit_um"`         // e.g. 138.5 um (touchdown bearing clearance 120.0 um)
-	ImpellerDropletErosionRateMmYr  float64   `json:"impeller_droplet_erosion_rate_mm_yr"` // e.g. 1.85 mm/yr
-	CannedMotorWindingTempC         float64   `json:"canned_motor_winding_temp_c"`         // e.g. 142.5°C
-	RecordedAt                      time.Time `json:"recorded_at"`
+	TelemetryID                    string    `json:"telemetry_id"`
+	CompressorID                   string    `json:"compressor_id"`                       // "COMPRESSOR-SUBSEA-3000M-01"
+	SeabedStationID                string    `json:"seabed_station_id"`                   // "STATION-PRE-SALT-SANTOS-B02"
+	WaterDepthMeters               float64   `json:"water_depth_meters"`                  // e.g. 2950.0 m
+	SuctionLiquidVolumeFractionPct float64   `json:"suction_liquid_volume_fraction_pct"`  // e.g. 28.5% (slug threshold > 15.0%)
+	CompressorRpm                  float64   `json:"compressor_rpm"`                      // e.g. 10850.0 RPM
+	PressureRatio                  float64   `json:"pressure_ratio"`                      // e.g. 2.65
+	SurgeMarginPct                 float64   `json:"surge_margin_pct"`                    // e.g. 6.8% (safety threshold > 12.0%)
+	AmbRadialBearingOrbitUm        float64   `json:"amb_radial_bearing_orbit_um"`         // e.g. 138.5 um (touchdown bearing clearance 120.0 um)
+	ImpellerDropletErosionRateMmYr float64   `json:"impeller_droplet_erosion_rate_mm_yr"` // e.g. 1.85 mm/yr
+	CannedMotorWindingTempC        float64   `json:"canned_motor_winding_temp_c"`         // e.g. 142.5°C
+	RecordedAt                     time.Time `json:"recorded_at"`
 }
 
 // SubseaCompressorAssessment evaluates liquid slug surge, active magnetic bearing (AMB) levitation stability, and droplet erosion
@@ -33,8 +33,8 @@ type SubseaCompressorAssessment struct {
 	AssessmentID                 string    `json:"assessment_id"`
 	CompressorID                 string    `json:"compressor_id"`
 	EffectiveSurgeDeficitPct     float64   `json:"effective_surge_deficit_pct"`
-	CompressorSurgeHazard        string    `json:"compressor_surge_hazard"`       // "AERODYNAMIC_HEAD_STABLE", "SLUG_LIQUID_SURGE_WARNING", "SUBSEA_COMPRESSOR_SLUG_SURGE_COLLAPSE"
-	MagneticBearingStability     string    `json:"magnetic_bearing_stability"`    // "AMB_LEVITATION_STABLE", "RADIAL_ORBIT_OSCILLATION_WARNING", "AMB_MAGNETIC_BEARING_DELEVITATION"
+	CompressorSurgeHazard        string    `json:"compressor_surge_hazard"`    // "AERODYNAMIC_HEAD_STABLE", "SLUG_LIQUID_SURGE_WARNING", "SUBSEA_COMPRESSOR_SLUG_SURGE_COLLAPSE"
+	MagneticBearingStability     string    `json:"magnetic_bearing_stability"` // "AMB_LEVITATION_STABLE", "RADIAL_ORBIT_OSCILLATION_WARNING", "AMB_MAGNETIC_BEARING_DELEVITATION"
 	AntiSurgeRecycleValveMandate bool      `json:"anti_surge_recycle_valve_mandate"`
 	AmbCoilCurrentBoostMandate   bool      `json:"amb_coil_current_boost_mandate"`
 	AuditDigest                  string    `json:"audit_digest"`
@@ -43,13 +43,13 @@ type SubseaCompressorAssessment struct {
 
 // SubseaCompressorMitigationAction models ultra-fast 25ms anti-surge recycle valve opening, AMB bias current boost, and VFD speed setback
 type SubseaCompressorMitigationAction struct {
-	ActionID                            string    `json:"action_id"`
-	CompressorID                        string    `json:"compressor_id"`
-	CommandedAntiSurgeValveOpeningPct   float64   `json:"commanded_anti_surge_valve_opening_pct"`
-	AmbBiasCurrentBoostAmps             float64   `json:"amb_bias_current_boost_amps"`
-	VfdSpeedSetbackRpm                  float64   `json:"vfd_speed_setback_rpm"`
-	AvoidedSubseaFailureLossUSD         float64   `json:"avoided_subsea_failure_loss_usd"`
-	ActionTimestamp                     time.Time `json:"action_timestamp"`
+	ActionID                          string    `json:"action_id"`
+	CompressorID                      string    `json:"compressor_id"`
+	CommandedAntiSurgeValveOpeningPct float64   `json:"commanded_anti_surge_valve_opening_pct"`
+	AmbBiasCurrentBoostAmps           float64   `json:"amb_bias_current_boost_amps"`
+	VfdSpeedSetbackRpm                float64   `json:"vfd_speed_setback_rpm"`
+	AvoidedSubseaFailureLossUSD       float64   `json:"avoided_subsea_failure_loss_usd"`
+	ActionTimestamp                   time.Time `json:"action_timestamp"`
 }
 
 // SubseaCompressorVault thread-safe in-memory store
@@ -157,7 +157,7 @@ func (v *SubseaCompressorVault) TriggerAntiSurgeAndAMBBiasBoost(compressorID str
 	vfdSetback := 0.0
 
 	if asm.AntiSurgeRecycleValveMandate {
-		valveOpening = 65.0 // fast-open subsea anti-surge recycle valve to 65% in 25ms to bypass liquid slug
+		valveOpening = 65.0  // fast-open subsea anti-surge recycle valve to 65% in 25ms to bypass liquid slug
 		vfdSetback = -1200.0 // trim VFD speed by 1200 RPM to drop head below surge boundary
 	}
 	if asm.AmbCoilCurrentBoostMandate {

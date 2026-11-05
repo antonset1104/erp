@@ -14,35 +14,43 @@ import (
 	"time"
 
 	"erp-golang/internal/config"
-	"erp-golang/internal/core/ai"
-	"erp-golang/internal/core/commandcenter"
-	"erp-golang/internal/core/events"
-	"erp-golang/internal/core/multitenancy"
-	"erp-golang/internal/core/openapi"
-	"erp-golang/internal/core/audit"
-	"erp-golang/internal/core/bi"
+	coreaavgenetherapy "erp-golang/internal/core/aav_genetherapy"
 	coreaccount "erp-golang/internal/core/account"
 	coreaerospace "erp-golang/internal/core/aerospace"
 	coreagriculture "erp-golang/internal/core/agriculture"
+	"erp-golang/internal/core/ai"
+	coreairbornehts "erp-golang/internal/core/airborne_hts"
 	coreammonia "erp-golang/internal/core/ammonia"
+	coreammoniamarine "erp-golang/internal/core/ammonia_marine"
+	coreicebergscour "erp-golang/internal/core/arctic_iceberg_scour"
 	coreasset "erp-golang/internal/core/asset"
+	coreasteroidmining "erp-golang/internal/core/asteroid_mining"
+	"erp-golang/internal/core/audit"
 	coreautomotive "erp-golang/internal/core/automotive"
 	coreaviation "erp-golang/internal/core/aviation"
 	corebess "erp-golang/internal/core/bess"
+	"erp-golang/internal/core/bi"
 	corebiopharma "erp-golang/internal/core/biopharma"
 	corebop "erp-golang/internal/core/bop"
 	corecart "erp-golang/internal/core/cart"
 	coreccus "erp-golang/internal/core/ccus"
+	"erp-golang/internal/core/commandcenter"
 	corecosting "erp-golang/internal/core/costing"
 	corecpo "erp-golang/internal/core/cpo"
 	corecpq "erp-golang/internal/core/cpq"
+	corecrisprpat "erp-golang/internal/core/crispr_pat"
 	corecrm "erp-golang/internal/core/crm"
 	corecryo "erp-golang/internal/core/cryo"
+	corecryoquantum "erp-golang/internal/core/cryo_quantum"
 	corecustoms "erp-golang/internal/core/customs"
 	coredac "erp-golang/internal/core/dac"
+	coredgrcanister "erp-golang/internal/core/dgr_canister"
+	coredoccocean "erp-golang/internal/core/docc_ocean"
 	coreedi "erp-golang/internal/core/edi"
 	coreehs "erp-golang/internal/core/ehs"
 	coreenergy "erp-golang/internal/core/energy"
+	"erp-golang/internal/core/esg"
+	"erp-golang/internal/core/events"
 	coreevtol "erp-golang/internal/core/evtol"
 	coreexpense "erp-golang/internal/core/expense"
 	corefermentation "erp-golang/internal/core/fermentation"
@@ -50,28 +58,45 @@ import (
 	corefinance "erp-golang/internal/core/finance"
 	corefleet "erp-golang/internal/core/fleet"
 	corefusion "erp-golang/internal/core/fusion"
+	corefusionblanket "erp-golang/internal/core/fusion_blanket"
 	coregaafet "erp-golang/internal/core/gaafet"
+	coregasfermentation "erp-golang/internal/core/gas_fermentation"
 	coregeotech "erp-golang/internal/core/geotech"
 	coregeothermal "erp-golang/internal/core/geothermal"
 	coregeothermalshr "erp-golang/internal/core/geothermal_shr"
+	coreglasstgv "erp-golang/internal/core/glass_tgv"
 	coregraphql "erp-golang/internal/core/graphql"
 	coregrc "erp-golang/internal/core/grc"
 	corehallthruster "erp-golang/internal/core/hallthruster"
+	corehbm4bonding "erp-golang/internal/core/hbm4_bonding"
+	corehdristeel "erp-golang/internal/core/hdri_steel"
+	corehighnaeuv "erp-golang/internal/core/highna_euv"
 	corehr "erp-golang/internal/core/hr"
 	corehyperloop "erp-golang/internal/core/hyperloop"
 	corehypersonic "erp-golang/internal/core/hypersonic"
+	coreimmersionchf "erp-golang/internal/core/immersion_chf"
+	"erp-golang/internal/core/iot"
+	coreisrumethalox "erp-golang/internal/core/isru_methalox"
 	coreitops "erp-golang/internal/core/itops"
 	corelegal "erp-golang/internal/core/legal"
+	corelh2aviation "erp-golang/internal/core/lh2_aviation"
 	corelnp "erp-golang/internal/core/lnp"
 	corelogistics "erp-golang/internal/core/logistics"
+	corelunarsintering "erp-golang/internal/core/lunar_sintering"
 	corelyo "erp-golang/internal/core/lyophilization"
+	coremagmageothermal "erp-golang/internal/core/magma_geothermal"
 	coremaintenance "erp-golang/internal/core/maintenance"
 	coremarine "erp-golang/internal/core/marine"
+	corembmw "erp-golang/internal/core/mbmw"
+	coremicroreactor "erp-golang/internal/core/microreactor_heatpipe"
 	coremining "erp-golang/internal/core/mining"
 	coremoltensalt "erp-golang/internal/core/moltensalt"
+	coremrnacapping "erp-golang/internal/core/mrna_capping"
 	coremrp "erp-golang/internal/core/mrp"
 	coremsr "erp-golang/internal/core/msr"
+	"erp-golang/internal/core/multitenancy"
 	corenuclear "erp-golang/internal/core/nuclear"
+	"erp-golang/internal/core/openapi"
 	corepackaging "erp-golang/internal/core/packaging"
 	corepellicle "erp-golang/internal/core/pellicle"
 	corepharma "erp-golang/internal/core/pharma"
@@ -81,72 +106,48 @@ import (
 	coreprocurement "erp-golang/internal/core/procurement"
 	coreproject "erp-golang/internal/core/project"
 	corepyrolysis "erp-golang/internal/core/pyrolysis"
-	corequality "erp-golang/internal/core/quality"
 	coreqled "erp-golang/internal/core/qled"
+	corequality "erp-golang/internal/core/quality"
 	corequantum "erp-golang/internal/core/quantum"
 	corerailway "erp-golang/internal/core/railway"
 	corerenewables "erp-golang/internal/core/renewables"
-	corescm "erp-golang/internal/core/scm"
-	coresaltcavern "erp-golang/internal/core/saltcavern"
 	corerocketgridfin "erp-golang/internal/core/rocket_gridfin"
-	corembmw "erp-golang/internal/core/mbmw"
-	coreaavgenetherapy "erp-golang/internal/core/aav_genetherapy"
-	coredryelectrode "erp-golang/internal/core/solidstate_dryelectrode"
-	coreisrumethalox "erp-golang/internal/core/isru_methalox"
-	corelh2aviation "erp-golang/internal/core/lh2_aviation"
-	corehbm4bonding "erp-golang/internal/core/hbm4_bonding"
-	coremicroreactor "erp-golang/internal/core/microreactor_heatpipe"
-	coremrnacapping "erp-golang/internal/core/mrna_capping"
-	coresubseacompressor "erp-golang/internal/core/subsea_compressor"
-	coreairbornehts "erp-golang/internal/core/airborne_hts"
-	corehdristeel "erp-golang/internal/core/hdri_steel"
-	corecryoquantum "erp-golang/internal/core/cryo_quantum"
-	coreammoniamarine "erp-golang/internal/core/ammonia_marine"
-	corelunarsintering "erp-golang/internal/core/lunar_sintering"
-	coredgrcanister "erp-golang/internal/core/dgr_canister"
-	corefusionblanket "erp-golang/internal/core/fusion_blanket"
-	corespacesolar "erp-golang/internal/core/space_solar"
-	corehighnaeuv "erp-golang/internal/core/highna_euv"
-	corecrisprpat "erp-golang/internal/core/crispr_pat"
-	coreuhtchypersonic "erp-golang/internal/core/uhtc_hypersonic"
-	coremagmageothermal "erp-golang/internal/core/magma_geothermal"
-	coreimmersionchf "erp-golang/internal/core/immersion_chf"
-	coreasteroidmining "erp-golang/internal/core/asteroid_mining"
-	coredoccocean "erp-golang/internal/core/docc_ocean"
+	coresaltcavern "erp-golang/internal/core/saltcavern"
 	coresatellitelaserpat "erp-golang/internal/core/satellite_laser_pat"
-	coreglasstgv "erp-golang/internal/core/glass_tgv"
-	corethoriumlftr "erp-golang/internal/core/thorium_lftr"
-	coregasfermentation "erp-golang/internal/core/gas_fermentation"
-	coreicebergscour "erp-golang/internal/core/arctic_iceberg_scour"
+	corescm "erp-golang/internal/core/scm"
 	corescramjet "erp-golang/internal/core/scramjet"
 	coreseabed "erp-golang/internal/core/seabed"
+	"erp-golang/internal/core/security"
 	coresemiconductor "erp-golang/internal/core/semiconductor"
+	coreservice "erp-golang/internal/core/service"
 	coresmr "erp-golang/internal/core/smr"
 	coresoec "erp-golang/internal/core/soec"
 	coresolidstate "erp-golang/internal/core/solidstate"
-	coreservice "erp-golang/internal/core/service"
-	coresubsea "erp-golang/internal/core/subsea"
-	coresubseaccs "erp-golang/internal/core/subsea_ccs"
-	coresubseaauv "erp-golang/internal/core/subsea_auv"
+	coredryelectrode "erp-golang/internal/core/solidstate_dryelectrode"
+	corespacesolar "erp-golang/internal/core/space_solar"
+	"erp-golang/internal/core/storage"
 	coresubscription "erp-golang/internal/core/subscription"
+	coresubsea "erp-golang/internal/core/subsea"
+	coresubseaauv "erp-golang/internal/core/subsea_auv"
+	coresubseaccs "erp-golang/internal/core/subsea_ccs"
+	coresubseacompressor "erp-golang/internal/core/subsea_compressor"
 	coresystem "erp-golang/internal/core/system"
 	coretax "erp-golang/internal/core/tax"
+	corethoriumlftr "erp-golang/internal/core/thorium_lftr"
 	coretradefinance "erp-golang/internal/core/tradefinance"
 	coretreasury "erp-golang/internal/core/treasury"
+	coreuhtchypersonic "erp-golang/internal/core/uhtc_hypersonic"
 	coreuhvdc "erp-golang/internal/core/uhvdc"
 	coreutilities "erp-golang/internal/core/utilities"
 	corevmi "erp-golang/internal/core/vmi"
-	corewms "erp-golang/internal/core/wms"
 	corewetchem "erp-golang/internal/core/wetchem"
-	"erp-golang/internal/core/esg"
-	"erp-golang/internal/core/iot"
-	"erp-golang/internal/core/security"
-	"erp-golang/internal/core/storage"
+	corewms "erp-golang/internal/core/wms"
 	"erp-golang/internal/modules/account"
 	"erp-golang/internal/modules/approval"
 	"erp-golang/internal/modules/asset"
 	"erp-golang/internal/modules/attachment"
 	"erp-golang/internal/modules/attendance"
+	"erp-golang/internal/modules/audit_trail"
 	"erp-golang/internal/modules/bank_reconciliation"
 	"erp-golang/internal/modules/barcode"
 	"erp-golang/internal/modules/base"
@@ -154,44 +155,43 @@ import (
 	"erp-golang/internal/modules/chatter"
 	"erp-golang/internal/modules/crm"
 	"erp-golang/internal/modules/currency"
+	"erp-golang/internal/modules/customer_portal"
+	"erp-golang/internal/modules/customs_bonded"
+	"erp-golang/internal/modules/esignature"
 	"erp-golang/internal/modules/expense"
 	"erp-golang/internal/modules/fleet"
 	"erp-golang/internal/modules/helpdesk"
 	"erp-golang/internal/modules/hr"
+	"erp-golang/internal/modules/inbound_webhook"
+	"erp-golang/internal/modules/integration_hub"
+	"erp-golang/internal/modules/intercompany"
 	"erp-golang/internal/modules/landed_cost"
 	"erp-golang/internal/modules/leave"
+	"erp-golang/internal/modules/lowcode_studio"
 	"erp-golang/internal/modules/maintenance"
 	"erp-golang/internal/modules/mrp"
-	"erp-golang/internal/modules/pos"
+	"erp-golang/internal/modules/mrp_advanced"
 	"erp-golang/internal/modules/payroll"
+	"erp-golang/internal/modules/pos"
 	"erp-golang/internal/modules/product"
 	"erp-golang/internal/modules/project"
 	"erp-golang/internal/modules/purchase"
 	"erp-golang/internal/modules/purchase_requisition"
 	"erp-golang/internal/modules/quality"
 	"erp-golang/internal/modules/recruitment"
+	"erp-golang/internal/modules/reports"
 	"erp-golang/internal/modules/sale"
 	"erp-golang/internal/modules/stock"
 	"erp-golang/internal/modules/stock_inventory"
+	"erp-golang/internal/modules/subscription"
+	"erp-golang/internal/modules/tax_ebupot"
 	"erp-golang/internal/modules/tax_efaktur"
 	"erp-golang/internal/modules/traceability"
-	"erp-golang/internal/modules/subscription"
-	"erp-golang/internal/modules/audit_trail"
-	"erp-golang/internal/modules/webhook"
-	"erp-golang/internal/modules/inbound_webhook"
-	"erp-golang/internal/modules/intercompany"
 	"erp-golang/internal/modules/treasury"
-	"erp-golang/internal/modules/mrp_advanced"
-	"erp-golang/internal/modules/tax_ebupot"
-	"erp-golang/internal/modules/esignature"
-	"erp-golang/internal/modules/wms"
 	"erp-golang/internal/modules/vendor_portal"
-	"erp-golang/internal/modules/customer_portal"
-	"erp-golang/internal/modules/customs_bonded"
-	"erp-golang/internal/modules/lowcode_studio"
-	"erp-golang/internal/modules/reports"
+	"erp-golang/internal/modules/webhook"
+	"erp-golang/internal/modules/wms"
 	"erp-golang/internal/modules/workflow_engine"
-	"erp-golang/internal/modules/integration_hub"
 
 	"github.com/gin-gonic/gin"
 	"github.com/glebarez/sqlite"
@@ -2668,11 +2668,11 @@ Lead Engineer - Cloud Tech Nusantara (2020 - 2026)
 				CreditAccountCode: "210200",
 			},
 			{
-				Name:              "Potongan Cuti Tanpa Gaji (Unpaid Leave)",
-				Code:              "DED_UNPAID",
-				Category:          "DED",
-				Sequence:          50,
-				AmountType:        "dynamic",
+				Name:       "Potongan Cuti Tanpa Gaji (Unpaid Leave)",
+				Code:       "DED_UNPAID",
+				Category:   "DED",
+				Sequence:   50,
+				AmountType: "dynamic",
 			},
 			{
 				Name:              "Iuran BPJS Ketenagakerjaan (3%)",
@@ -3187,10 +3187,10 @@ Lead Engineer - Cloud Tech Nusantara (2020 - 2026)
 	// 7. Test Physical Stock Opname Barcode Scanner Integration
 	// Create a dedicated stock opname for testing barcode counting
 	testInv, err := stockInvSvc.CreateInventory(&stock_inventory.CreateInventoryRequest{
-		Name:        "OPNAME/2026/BARCODE-TEST",
-		LocationID:  whStock.ID,
-		Date:        "2026-10-08",
-		Notes:       "Uji coba pemindaian barcode fisik barang di gudang",
+		Name:       "OPNAME/2026/BARCODE-TEST",
+		LocationID: whStock.ID,
+		Date:       "2026-10-08",
+		Notes:      "Uji coba pemindaian barcode fisik barang di gudang",
 	}, company.ID, user.ID)
 	if err != nil {
 		t.Fatalf("Create test inventory failed: %v", err)
@@ -3947,12 +3947,12 @@ Lead Engineer - Cloud Tech Nusantara (2020 - 2026)
 	}
 
 	inTaxInv, err := taxEFakturSvc.RecordInTaxInvoiceFromMove(tax_efaktur.GenerateTaxInvoiceRequest{
-		MoveID:         taxVendBill.ID,
-		CustomNSFP:     "010.002-26.99887766",
-		TaxPeriod:      10,
-		TaxYear:        2026,
-		TaxRatePPN:     11.0,
-		Notes:          "Pajak Masukan dapat dikreditkan",
+		MoveID:     taxVendBill.ID,
+		CustomNSFP: "010.002-26.99887766",
+		TaxPeriod:  10,
+		TaxYear:    2026,
+		TaxRatePPN: 11.0,
+		Notes:      "Pajak Masukan dapat dikreditkan",
 	}, company.ID, 1)
 	if err != nil {
 		t.Fatalf("RecordInTaxInvoiceFromMove failed: %v", err)
@@ -4507,7 +4507,7 @@ Lead Engineer - Cloud Tech Nusantara (2020 - 2026)
 
 	now := time.Now()
 	dateFresh := now.AddDate(2, 0, 0).Format("2006-01-02")
-	dateNearExp := now.AddDate(0, 0, 14).Format("2006-01-02") // 14 days left
+	dateNearExp := now.AddDate(0, 0, 14).Format("2006-01-02")  // 14 days left
 	dateExpired := now.AddDate(0, -1, -5).Format("2006-01-02") // Expired 35 days ago
 
 	// Create 3 Lots for raw material to test FEFO
@@ -7667,10 +7667,10 @@ Lead Engineer - Cloud Tech Nusantara (2020 - 2026)
 
 	// 2. Create Custom Enterprise CAPEX Workflow Definition
 	capexReq := workflow_engine.CreateWorkflowDefinitionRequest{
-		Code:        "WF-CAPEX-ACQUISITION",
-		Name:        "Alur Persetujuan Belanja Modal (CAPEX) & Akuisisi Aset",
-		Description: "Multi-tier approval matrix dengan evaluasi gateway otomatis untuk belanja modal operasional",
-		TargetModel: "account.asset",
+		Code:           "WF-CAPEX-ACQUISITION",
+		Name:           "Alur Persetujuan Belanja Modal (CAPEX) & Akuisisi Aset",
+		Description:    "Multi-tier approval matrix dengan evaluasi gateway otomatis untuk belanja modal operasional",
+		TargetModel:    "account.asset",
 		InitialNodeKey: "start",
 		Nodes: []workflow_engine.CreateWorkflowNodeRequest{
 			{NodeKey: "start", Name: "Pengajuan CAPEX", NodeType: workflow_engine.NodeTypeStartEvent, ApproverRole: "initiator", PosX: 100, PosY: 200},
@@ -8679,7 +8679,7 @@ Lead Engineer - Cloud Tech Nusantara (2020 - 2026)
 	iotEval := iot.EvaluateMachineHealth(db, &iot.TelemetryPacket{
 		MachineID:        "SMT-AUTO-01",
 		MachineName:      "Mesin Solder & Perakitan SMT Otomatis",
-		VibrationRMS:     7.8, // Exceeds ISO critical limit 7.1 mm/s
+		VibrationRMS:     7.8,  // Exceeds ISO critical limit 7.1 mm/s
 		OperatingTempC:   89.0, // Exceeds thermal limit 85 C
 		MotorCurrentAmps: 18.2,
 		SpindleRPM:       12400,
@@ -8998,14 +8998,14 @@ IEA*1*000099123~`
 
 	// 61.5 AI Reverse Logistics & RMA Warranty Diagnostic Engine
 	rmaDiagRes := corewms.DiagnoseRMACase(&corewms.RMADiagnosisRequest{
-		SerialNumber:        "SN-MON-2026-88912",
-		ProductID:           1,
-		ProductName:         "Gaming Monitor 27 Inch Ultra-IPS",
-		CustomerName:        "PT Mitra Retail Mandiri",
-		PurchaseDate:        "2026-06-15",
-		OriginalPriceIDR:    3500000,
-		ReportedSymptom:     "Layar panel mati total bergaris hitam setelah 5 bulan pemakaian",
-		PhysicalInspection:  "NO_DAMAGE",
+		SerialNumber:       "SN-MON-2026-88912",
+		ProductID:          1,
+		ProductName:        "Gaming Monitor 27 Inch Ultra-IPS",
+		CustomerName:       "PT Mitra Retail Mandiri",
+		PurchaseDate:       "2026-06-15",
+		OriginalPriceIDR:   3500000,
+		ReportedSymptom:    "Layar panel mati total bergaris hitam setelah 5 bulan pemakaian",
+		PhysicalInspection: "NO_DAMAGE",
 	})
 	if rmaDiagRes == nil || rmaDiagRes.WarrantyStatus != "ACTIVE_WARRANTY" || rmaDiagRes.EconomicDisposition != "REPLACE_AND_SCRAP" {
 		t.Fatalf("RMA warranty diagnostic failed: %+v", rmaDiagRes)
@@ -9716,13 +9716,13 @@ IEA*1*000099123~`
 
 	// 67.1 Cross-Border Transfer Pricing & OECD BEPS Action 13 Hub
 	tpCompliant, err := coretax.AuditTransferPricingMarginsLogic(coretax.IntercompanyTxRequest{
-		TxID:                         "TP-TX-2026-COMPLIANT",
-		SourceEntity:                 "PT GoERP Manufaktur Indonesia",
-		TargetEntity:                 "GoERP Technologies Pte Ltd",
-		TransactionVolumeIDR:         10000000000.0,
-		TestedPartyCostIDR:           9000000000.0,
+		TxID:                          "TP-TX-2026-COMPLIANT",
+		SourceEntity:                  "PT GoERP Manufaktur Indonesia",
+		TargetEntity:                  "GoERP Technologies Pte Ltd",
+		TransactionVolumeIDR:          10000000000.0,
+		TestedPartyCostIDR:            9000000000.0,
 		TestedPartyOperatingProfitIDR: 765000000.0, // 8.5% margin (inside Q1 6.50% - Q3 11.20%)
-		MethodUsed:                   "TNMM",
+		MethodUsed:                    "TNMM",
 	})
 	if err != nil || tpCompliant == nil {
 		t.Fatalf("Failed to audit compliant transfer pricing: %v, resp: %+v", err, tpCompliant)
@@ -9732,13 +9732,13 @@ IEA*1*000099123~`
 	}
 
 	tpDeficit, err := coretax.AuditTransferPricingMarginsLogic(coretax.IntercompanyTxRequest{
-		TxID:                         "TP-TX-2026-LOW-MARGIN",
-		SourceEntity:                 "PT GoERP Manufaktur Indonesia",
-		TargetEntity:                 "GoERP Europe BV",
-		TransactionVolumeIDR:         12000000000.0,
-		TestedPartyCostIDR:           11000000000.0,
+		TxID:                          "TP-TX-2026-LOW-MARGIN",
+		SourceEntity:                  "PT GoERP Manufaktur Indonesia",
+		TargetEntity:                  "GoERP Europe BV",
+		TransactionVolumeIDR:          12000000000.0,
+		TestedPartyCostIDR:            11000000000.0,
 		TestedPartyOperatingProfitIDR: 330000000.0, // 3.0% margin (below Q1 6.50%)
-		MethodUsed:                   "TNMM",
+		MethodUsed:                    "TNMM",
 	})
 	if err != nil || tpDeficit == nil {
 		t.Fatalf("Failed to audit non-compliant transfer pricing: %v, resp: %+v", err, tpDeficit)
@@ -9951,7 +9951,7 @@ IEA*1*000099123~`
 		HedgeDesignation:   "CASH_FLOW_HEDGE",
 		NotionalAmountFC:   350000.0, // EUR 350,000
 		ForeignCurrency:    "EUR",
-		ContractStrikeRate: 17200.0,  // IDR / EUR
+		ContractStrikeRate: 17200.0, // IDR / EUR
 		InceptionDate:      "2026-11-01",
 		MaturityDate:       "2027-02-01",
 	})
@@ -11039,27 +11039,27 @@ IEA*1*000099123~`
 	// 75.2 Autonomous HAZMAT Transport Compliance & UN Dangerous Goods Sentinel
 	hazmatItems := corelogistics.GetHazmatEngine().ClassifyConsignment("SHP-HAZMAT-8819", []corelogistics.HazmatItem{
 		{
-			ItemSKU:                 "BAT-LITHIUM-CELL-48V",
-			UNNumber:                "UN 3480",
-			ProperShippingName:      "LITHIUM ION BATTERIES",
-			PrimaryHazardClass:      "CLASS_9",
-			PackingGroup:            "PG_II",
-			QuantityPackages:        120,
-			PackageTypeDescription:  "FIBREBOARD_BOX_4G",
-			NetMassPerPackageKG:     18.5,
-			IsMarinePollutant:       false,
+			ItemSKU:                "BAT-LITHIUM-CELL-48V",
+			UNNumber:               "UN 3480",
+			ProperShippingName:     "LITHIUM ION BATTERIES",
+			PrimaryHazardClass:     "CLASS_9",
+			PackingGroup:           "PG_II",
+			QuantityPackages:       120,
+			PackageTypeDescription: "FIBREBOARD_BOX_4G",
+			NetMassPerPackageKG:    18.5,
+			IsMarinePollutant:      false,
 		},
 		{
-			ItemSKU:                 "SOLV-ETHYL-ACETATE-IND",
-			UNNumber:                "UN 1173",
-			ProperShippingName:      "ETHYL ACETATE",
-			PrimaryHazardClass:      "CLASS_3",
-			PackingGroup:            "PG_II",
-			QuantityPackages:        20,
-			PackageTypeDescription:  "STEEL_DRUM_1A1",
-			NetMassPerPackageKG:     200.0,
-			FlashPointCelsius:       -4.0,
-			IsMarinePollutant:       false,
+			ItemSKU:                "SOLV-ETHYL-ACETATE-IND",
+			UNNumber:               "UN 1173",
+			ProperShippingName:     "ETHYL ACETATE",
+			PrimaryHazardClass:     "CLASS_3",
+			PackingGroup:           "PG_II",
+			QuantityPackages:       20,
+			PackageTypeDescription: "STEEL_DRUM_1A1",
+			NetMassPerPackageKG:    200.0,
+			FlashPointCelsius:      -4.0,
+			IsMarinePollutant:      false,
 		},
 	})
 	if len(hazmatItems) != 2 || hazmatItems[0].UNNumber != "UN 3480" {
@@ -11095,17 +11095,17 @@ IEA*1*000099123~`
 
 	// 75.3 Predictive Warranty Claim Fraud Sentinel & Telemetric Anomaly Interceptor
 	warrantyClaim := coreservice.GetWarrantySentinelEngine().SubmitRepairClaim(coreservice.WarrantyRepairClaim{
-		ClaimID:                  "CLM-WAR-2026-9901",
-		DealerID:                 "DLR-SURABAYA-TECH-04",
-		DealerName:               "PT Nusantara Heavy Equipment Service Hub Surabaya",
-		ProductSerialNumber:      "SN-EXCAV-HYD-882109",
-		ProductModelSKU:          "EXCAV-200HP-DIESEL",
-		CustomerName:             "PT Tambang Makmur Sejahtera",
-		ClaimedDefectCode:        "MOTOR_ARMATURE_BURN",
-		ReportedOperatingHrs:     45.0,
-		PartsReplacedSKU:         "SP-HYD-MOTOR-PUMP-GEN2",
-		PartsCostUSD:             6800.0,
-		LaborCostUSD:             1200.0,
+		ClaimID:              "CLM-WAR-2026-9901",
+		DealerID:             "DLR-SURABAYA-TECH-04",
+		DealerName:           "PT Nusantara Heavy Equipment Service Hub Surabaya",
+		ProductSerialNumber:  "SN-EXCAV-HYD-882109",
+		ProductModelSKU:      "EXCAV-200HP-DIESEL",
+		CustomerName:         "PT Tambang Makmur Sejahtera",
+		ClaimedDefectCode:    "MOTOR_ARMATURE_BURN",
+		ReportedOperatingHrs: 45.0,
+		PartsReplacedSKU:     "SP-HYD-MOTOR-PUMP-GEN2",
+		PartsCostUSD:         6800.0,
+		LaborCostUSD:         1200.0,
 	})
 	if warrantyClaim.TotalClaimAmountUSD != 8000.0 {
 		t.Fatalf("Failed to register warranty repair claim: %+v", warrantyClaim)
@@ -12751,16 +12751,16 @@ IEA*1*000099123~`
 
 	// 84.4 Semiconductor 3D Heterogeneous Packaging & Through-Silicon Via (TSV) Warpage Sentinel (JEDEC J-STD-020 & IEEE 1581)
 	pkgTel := corepackaging.GlobalPackagingVault.IngestWarpageTelemetry(corepackaging.PackageWarpageTelemetry{
-		TelemetryID:                     "TEL-PKG-9901",
-		WaferLotID:                      "LOT-HBM4-AI-CHIPLET-9902",
-		PackageID:                       "PKG-2.5D-COWOS-72X72-02",
-		PeakReflowTempC:                 260.0,
-		SubstrateDimensionXMM:           72.0,
-		SubstrateDimensionYMM:           72.0,
-		SiliconDieThicknessMicron:       50.0,
-		TSVCopperProtrusionNanometer:    188.0,
+		TelemetryID:                      "TEL-PKG-9901",
+		WaferLotID:                       "LOT-HBM4-AI-CHIPLET-9902",
+		PackageID:                        "PKG-2.5D-COWOS-72X72-02",
+		PeakReflowTempC:                  260.0,
+		SubstrateDimensionXMM:            72.0,
+		SubstrateDimensionYMM:            72.0,
+		SiliconDieThicknessMicron:        50.0,
+		TSVCopperProtrusionNanometer:     188.0,
 		MeasuredShadowMoireWarpageMicron: 172.0,
-		MicroBumpPitchMicron:            25.0,
+		MicroBumpPitchMicron:             25.0,
 	})
 	if pkgTel.PackageID == "" || pkgTel.PeakReflowTempC != 260.0 {
 		t.Fatalf("Failed to ingest packaging warpage telemetry: %+v", pkgTel)
@@ -12896,7 +12896,7 @@ IEA*1*000099123~`
 		StorageTankID:              "TANK-CSP-SALT-HOT-50KT-99",
 		PlantID:                    "CSP-NOOR-ATACAMA-350MW",
 		SaltMassTons:               28500.0,
-		SaltBulkTemperatureC:      235.0,
+		SaltBulkTemperatureC:       235.0,
 		BoundaryLayerPipeWallTempC: 223.0,
 		NaNO3Fraction:              0.60,
 		KNO3Fraction:               0.40,
@@ -13042,7 +13042,7 @@ IEA*1*000099123~`
 		TubeTrackID:               "TUBE-ROUTE-CHICAGO-PITTSBURGH",
 		PodSpeedKPH:               980.0,
 		TubeAmbientPressurePa:     125.0,
-		HTSCoilTemperatureKelvin:   90.2,
+		HTSCoilTemperatureKelvin:  90.2,
 		CoilOperatingCurrentAmps:  510.0,
 		KantrowitzChokeRatio:      0.47,
 		TubeExpansionDeflectionMM: 38.0,
@@ -13140,16 +13140,16 @@ IEA*1*000099123~`
 
 	// 86.5 Industrial Waste Plastic Pyrolysis Depolymerization & Chlorinated Dioxin Sentinel (ASTM D8338 & EPA Method 23)
 	pyroTel := corepyrolysis.GlobalPyrolysisVault.IngestReactorTelemetry(corepyrolysis.PyrolysisReactorTelemetry{
-		TelemetryID:                 "TEL-PYRO-9901",
-		ReactorID:                   "PYRO-CIRCULAR-PLASTIC-50TPD-99",
-		FacilityLocation:            "ANTWERP-CIRCULAR-POLYMER-HUB",
-		PyrolysisBedTempC:           490.0,
-		FeedstockFeedRateKgHr:       2150.0,
-		GasRecycleLoopTempC:         320.0,
-		ChlorineContentPPM:          52.0,
-		HClAcidGasPPM:               195.0,
+		TelemetryID:                  "TEL-PYRO-9901",
+		ReactorID:                    "PYRO-CIRCULAR-PLASTIC-50TPD-99",
+		FacilityLocation:             "ANTWERP-CIRCULAR-POLYMER-HUB",
+		PyrolysisBedTempC:            490.0,
+		FeedstockFeedRateKgHr:        2150.0,
+		GasRecycleLoopTempC:          320.0,
+		ChlorineContentPPM:           52.0,
+		HClAcidGasPPM:                195.0,
 		CalciumSorbentDosingRateKgHr: 22.0,
-		PyrolysisOilYieldPct:        79.0,
+		PyrolysisOilYieldPct:         79.0,
 	})
 	if pyroTel.ReactorID == "" || pyroTel.PyrolysisBedTempC != 490.0 {
 		t.Fatalf("Failed to ingest plastic pyrolysis telemetry: %+v", pyroTel)
@@ -13214,17 +13214,17 @@ IEA*1*000099123~`
 
 	// 87.2 Orbital Launch Vehicle Cryogenic Methalox Pogo Oscillation & Cavitation Sentinel (NASA SP-8007 & ISO 14620)
 	pogoTel := corepogo.GlobalPogoVault.IngestPogoTelemetry(corepogo.MethaloxPogoTelemetry{
-		TelemetryID:                       "TEL-POGO-9901",
-		EngineClusterID:                   "ENGINE-RAPTOR-V3-STAGE1-CLUSTER-99",
-		LaunchVehicleTailID:               "VEHICLE-METHALOX-STARSHIP-SN33",
-		FlightTimeSeconds:                 142.5,
-		SuctionLineResonanceFreqHz:        18.1,
-		PropellantAccelerationG:           4.92,
-		LiquidMethaneNPSHActualMeter:      4.6,
-		LiquidOxygenNPSHActualMeter:       3.1,
-		TurbopumpInducerVibrationG:        76.0,
+		TelemetryID:                      "TEL-POGO-9901",
+		EngineClusterID:                  "ENGINE-RAPTOR-V3-STAGE1-CLUSTER-99",
+		LaunchVehicleTailID:              "VEHICLE-METHALOX-STARSHIP-SN33",
+		FlightTimeSeconds:                142.5,
+		SuctionLineResonanceFreqHz:       18.1,
+		PropellantAccelerationG:          4.92,
+		LiquidMethaneNPSHActualMeter:     4.6,
+		LiquidOxygenNPSHActualMeter:      3.1,
+		TurbopumpInducerVibrationG:       76.0,
 		PogoAccumulatorHeliumPressureBar: 40.5,
-		ChamberPressureBar:                298.0,
+		ChamberPressureBar:               298.0,
 	})
 	if pogoTel.EngineClusterID == "" || pogoTel.FlightTimeSeconds != 142.5 {
 		t.Fatalf("Failed to ingest rocket pogo telemetry: %+v", pogoTel)
@@ -13254,8 +13254,8 @@ IEA*1*000099123~`
 		PlantSiteID:                      "PLANT-IDAHO-NATIONAL-LAB-CFPP",
 		ReactorThermalPowerMWth:          250.0,
 		NaturalCirculationFlowKgPerSec:   480.0,
-		RCSHotLegTemperatureC:           315.0,
-		RCSColdLegTemperatureC:          255.0,
+		RCSHotLegTemperatureC:            315.0,
+		RCSColdLegTemperatureC:           255.0,
 		PrimaryCoolantBoronPPM:           940.0,
 		ReactivityInsertionRatePcmPerSec: 4.2,
 		ContainmentPoolWaterLevelMeter:   14.6,
@@ -13318,16 +13318,16 @@ IEA*1*000099123~`
 
 	// 87.5 Ultra-High Voltage Direct Current (UHVDC ±1100 kV) Converter Valve & Commutation Sentinel (IEC 60700-1 & IEEE 857)
 	uhvdcTel := coreuhvdc.GlobalUHVDVault.IngestValveTelemetry(coreuhvdc.UHVDCValveTelemetry{
-		TelemetryID:                        "TEL-UHVDC-9901",
-		ConverterStationID:                 "STATION-CHANGJI-GUQUAN-1100KV-99",
-		ThyristorValveHallID:               "VALVE-HALL-POLE1-INVERTER-12PULSE",
-		TransmissionVoltageKV:              1100.0,
-		TransmissionCurrentAmps:            5600.0,
-		FiringAngleAlphaDeg:                144.0,
-		ExtinctionAngleGammaDeg:            13.2,
-		ThyristorJunctionTempC:             121.5,
-		DeionizedCoolingWaterLPM:           2350.0,
-		ACGridVoltageHarmonicTHDPct:        5.2,
+		TelemetryID:                       "TEL-UHVDC-9901",
+		ConverterStationID:                "STATION-CHANGJI-GUQUAN-1100KV-99",
+		ThyristorValveHallID:              "VALVE-HALL-POLE1-INVERTER-12PULSE",
+		TransmissionVoltageKV:             1100.0,
+		TransmissionCurrentAmps:           5600.0,
+		FiringAngleAlphaDeg:               144.0,
+		ExtinctionAngleGammaDeg:           13.2,
+		ThyristorJunctionTempC:            121.5,
+		DeionizedCoolingWaterLPM:          2350.0,
+		ACGridVoltageHarmonicTHDPct:       5.2,
 		CommutationFailureCountLastMinute: 3,
 	})
 	if uhvdcTel.ConverterStationID == "" || uhvdcTel.TransmissionVoltageKV != 1100.0 {
@@ -13361,17 +13361,17 @@ IEA*1*000099123~`
 
 	// 88.1 Subsea Carbon Dioxide Injection & Wellhead Hydrate/Supercritical Phase Inversion Sentinel (ISO 27914 & DNV-RP-J202)
 	subseaCCSTel := coresubseaccs.GlobalSubseaCCSVault.IngestWellheadTelemetry(coresubseaccs.SubseaCCSTelemetry{
-		TelemetryID:                 "TEL-CCS-9901",
-		WellheadID:                  "WELL-NORTHERN-LIGHTS-CO2-99",
-		ReservoirField:              "FIELD-AURORA-SALINE-AQUIFER",
-		SeabedWaterDepthM:           1250.0,
-		WellheadPressureBar:         92.5,
-		WellheadTemperatureC:        7.5,
-		ChokePressureDropBar:        36.0,
+		TelemetryID:                  "TEL-CCS-9901",
+		WellheadID:                   "WELL-NORTHERN-LIGHTS-CO2-99",
+		ReservoirField:               "FIELD-AURORA-SALINE-AQUIFER",
+		SeabedWaterDepthM:            1250.0,
+		WellheadPressureBar:          92.5,
+		WellheadTemperatureC:         7.5,
+		ChokePressureDropBar:         36.0,
 		DownholeReservoirPressureBar: 182.0,
-		CO2MassFlowKgS:              85.0,
-		CaprockFractureMarginBar:    12.0,
-		WaterMoistureContentPpm:     125.0,
+		CO2MassFlowKgS:               85.0,
+		CaprockFractureMarginBar:     12.0,
+		WaterMoistureContentPpm:      125.0,
 	})
 	if subseaCCSTel.WellheadID == "" || subseaCCSTel.WellheadPressureBar != 92.5 {
 		t.Fatalf("Failed to ingest subsea CCS telemetry: %+v", subseaCCSTel)
@@ -13573,17 +13573,17 @@ IEA*1*000099123~`
 
 	// 89.2 Deep-Sea Autonomous Underwater Vehicle (AUV) Docking, Acoustic USBL & Inductive Power Transfer Sentinel (DNV-ST-0373 & ISO 13628-8)
 	auvTel := coresubseaauv.GlobalSubseaAUVVault.IngestDockingTelemetry(coresubseaauv.AUVDockingTelemetry{
-		TelemetryID:                   "TEL-AUV-9901",
-		VehicleID:                     "AUV-SEABED-RESIDENT-99",
-		DockingStationID:              "DOCK-BENTHIC-SUBSEA-3000M-01",
-		OperatingDepthMeters:          2850.0,
-		BenthicCurrentSpeedKnots:      2.65,
-		UsblPositionXOffsetMm:         18.5,
-		UsblPositionYOffsetMm:         14.2,
-		AngularTiltErrorDeg:           5.8,
+		TelemetryID:                    "TEL-AUV-9901",
+		VehicleID:                      "AUV-SEABED-RESIDENT-99",
+		DockingStationID:               "DOCK-BENTHIC-SUBSEA-3000M-01",
+		OperatingDepthMeters:           2850.0,
+		BenthicCurrentSpeedKnots:       2.65,
+		UsblPositionXOffsetMm:          18.5,
+		UsblPositionYOffsetMm:          14.2,
+		AngularTiltErrorDeg:            5.8,
 		InductiveCouplingEfficiencyPct: 68.5,
-		TitaniumHullEddyTempC:         48.5,
-		OpticalModemSnrDb:             11.2,
+		TitaniumHullEddyTempC:          48.5,
+		OpticalModemSnrDb:              11.2,
 	})
 	if auvTel.VehicleID == "" || auvTel.OperatingDepthMeters != 2850.0 {
 		t.Fatalf("Failed to ingest AUV docking telemetry: %+v", auvTel)
@@ -13608,16 +13608,16 @@ IEA*1*000099123~`
 
 	// 89.3 Semiconductor Electronic-Grade Hydrogen Peroxide (e-H2O2) Auto-Oxidation Runaway De-Oxygenation Sentinel (SEMI C30 & NFPA 432)
 	wetchemTel := corewetchem.GlobalWetChemVault.IngestChemicalTelemetry(corewetchem.H2O2ReactorTelemetry{
-		TelemetryID:                 "TEL-H2O2-9901",
-		ReactorID:                   "REACTOR-AUTOX-H2O2-UP-SSS-99",
-		ChemicalPlantID:             "PLANT-SEMICHEM-TAICHUNG-01",
-		H2O2ConcentrationWtPct:      33.5,
-		WorkingSolutionTempC:        48.5,
-		RedoxPotentialMv:            415.0,
-		VentOffgasOxygenVolPct:      14.8,
-		DissolvedIronPpt:            85.0,
+		TelemetryID:                  "TEL-H2O2-9901",
+		ReactorID:                    "REACTOR-AUTOX-H2O2-UP-SSS-99",
+		ChemicalPlantID:              "PLANT-SEMICHEM-TAICHUNG-01",
+		H2O2ConcentrationWtPct:       33.5,
+		WorkingSolutionTempC:         48.5,
+		RedoxPotentialMv:             415.0,
+		VentOffgasOxygenVolPct:       14.8,
+		DissolvedIronPpt:             85.0,
 		DistillationVaporPressureBar: 3.85,
-		PressureRiseRateBarPerSec:   0.85,
+		PressureRiseRateBarPerSec:    0.85,
 	})
 	if wetchemTel.ReactorID == "" || wetchemTel.WorkingSolutionTempC != 48.5 {
 		t.Fatalf("Failed to ingest electronic H2O2 telemetry: %+v", wetchemTel)
@@ -13642,17 +13642,17 @@ IEA*1*000099123~`
 
 	// 89.4 Biopharmaceutical Continuous Controlled Ice Nucleation & Cake Collapse Lyophilization Sentinel (ISPE GAMP 5 & FDA 21 CFR Part 211)
 	lyoTel := corelyo.GlobalLyophilizationVault.IngestFreezeDryerTelemetry(corelyo.LyophilizerTelemetry{
-		TelemetryID:                    "TEL-LYO-9901",
-		DryerID:                        "LYO-COMMERCIAL-BIOLOGICS-50K-99",
-		BatchID:                        "BATCH-MAB-LYO-STERILE-9999",
-		TotalVialCount:                 50000,
-		ShelfTemperatureC:              -28.5,
-		ProductCollapseThresholdC:      -32.0,
-		ChamberPiraniPressureMicrobar:  145.0,
-		CapacitanceManometerMicrobar:   98.0,
-		TdlasSublimationRateGPerSec:    84.5,
+		TelemetryID:                     "TEL-LYO-9901",
+		DryerID:                         "LYO-COMMERCIAL-BIOLOGICS-50K-99",
+		BatchID:                         "BATCH-MAB-LYO-STERILE-9999",
+		TotalVialCount:                  50000,
+		ShelfTemperatureC:               -28.5,
+		ProductCollapseThresholdC:       -32.0,
+		ChamberPiraniPressureMicrobar:   145.0,
+		CapacitanceManometerMicrobar:    98.0,
+		TdlasSublimationRateGPerSec:     84.5,
 		AcousticNucleationUniformityPct: 64.2,
-		IceCrystalMeanPoreDiameterUm:   18.5,
+		IceCrystalMeanPoreDiameterUm:    18.5,
 	})
 	if lyoTel.DryerID == "" || lyoTel.TotalVialCount != 50000 {
 		t.Fatalf("Failed to ingest lyophilizer telemetry: %+v", lyoTel)
@@ -13758,7 +13758,7 @@ IEA*1*000099123~`
 		NanosheetChannelThicknessNm:     5.2,
 		SiGeSelectiveEtchRatio:          112.5,
 		EquivalentOxideThicknessEotNm:   0.72,
-		CryoChuckTemperatureC:          -28.5,
+		CryoChuckTemperatureC:           -28.5,
 		HfO2ALDPrecursorPulseDurationMs: 14.5,
 		ThermalBudgetDtDiffMargin:       1.28,
 		SubthresholdSwingMvPerDec:       68.5,
@@ -13786,17 +13786,17 @@ IEA*1*000099123~`
 
 	// 90.3 Precision Biomanufacturing Large-Scale Fermentation Foam-Out, kLa & pCO2 Stripping Sentinel (ASME BPE & ISO 22000)
 	fermTel := corefermentation.GlobalFermentationVault.IngestFermenterTelemetry(corefermentation.FermenterTelemetry{
-		TelemetryID:                  "TEL-FERM-9901",
-		VesselID:                     "FERM-INDUSTRIAL-BIOVESSEL-150KL-99",
-		BatchID:                      "BATCH-WHEY-PROTEIN-EXPRESS-99",
-		WorkingVolumeLiters:          120000.0,
-		AgitatorPowerPerVolumeKwM3:   4.25,
+		TelemetryID:                   "TEL-FERM-9901",
+		VesselID:                      "FERM-INDUSTRIAL-BIOVESSEL-150KL-99",
+		BatchID:                       "BATCH-WHEY-PROTEIN-EXPRESS-99",
+		WorkingVolumeLiters:           120000.0,
+		AgitatorPowerPerVolumeKwM3:    4.25,
 		SuperficialGasVelocityMPerSec: 0.052,
-		DissolvedCarbonDioxideMbar:   115.0,
-		DissolvedOxygenPercentAirSat: 21.5,
-		HeadspaceFoamCapacitancePf:   68.5,
-		GasHoldUpFraction:            0.185,
-		VolumetricMassTransferKlaHr:  245.0,
+		DissolvedCarbonDioxideMbar:    115.0,
+		DissolvedOxygenPercentAirSat:  21.5,
+		HeadspaceFoamCapacitancePf:    68.5,
+		GasHoldUpFraction:             0.185,
+		VolumetricMassTransferKlaHr:   245.0,
 	})
 	if fermTel.VesselID == "" || fermTel.WorkingVolumeLiters != 120000.0 {
 		t.Fatalf("Failed to ingest fermenter telemetry: %+v", fermTel)
@@ -13821,17 +13821,17 @@ IEA*1*000099123~`
 
 	// 90.4 Geological Salt Cavern Green Hydrogen Storage Halite Creep, Dilatancy & Microbial Souring Sentinel (ISO 27913 & API RP 1114)
 	cavTel := coresaltcavern.GlobalSaltCavernVault.IngestCavernTelemetry(coresaltcavern.SaltCavernTelemetry{
-		TelemetryID:                        "TEL-CAV-9901",
-		CavernID:                           "CAVERN-H2-DOMAL-SALT-350K-99",
-		StorageSiteID:                      "SITE-SALT-DOME-GULF-COAST",
-		StoredHydrogenMassTons:             4850.0,
-		CavernPressureBar:                  175.0,
-		PressureRampRateBarPerDay:          14.5,
-		GeothermalTemperatureC:             64.5,
+		TelemetryID:                         "TEL-CAV-9901",
+		CavernID:                            "CAVERN-H2-DOMAL-SALT-350K-99",
+		StorageSiteID:                       "SITE-SALT-DOME-GULF-COAST",
+		StoredHydrogenMassTons:              4850.0,
+		CavernPressureBar:                   175.0,
+		PressureRampRateBarPerDay:           14.5,
+		GeothermalTemperatureC:              64.5,
 		HaliteViscoplasticCreepRatePctPerYr: 1.85,
-		AcousticEmissionEventRatePerHour:   42.0,
-		HydrogenSulfideTracePpm:            0.018,
-		CushionGasNitrogenVolumePct:        12.5,
+		AcousticEmissionEventRatePerHour:    42.0,
+		HydrogenSulfideTracePpm:             0.018,
+		CushionGasNitrogenVolumePct:         12.5,
 	})
 	if cavTel.CavernID == "" || cavTel.CavernPressureBar != 175.0 {
 		t.Fatalf("Failed to ingest salt cavern telemetry: %+v", cavTel)
@@ -13859,7 +13859,7 @@ IEA*1*000099123~`
 		TelemetryID:                        "TEL-MSR-9901",
 		ReactorCoreID:                      "MSR-LFTR-FLUORIDE-500MWTH-99",
 		SaltLoopID:                         "LOOP-PRIMARY-FLIBE-01",
-		FuelSaltTemperatureC:              685.0,
+		FuelSaltTemperatureC:               685.0,
 		FuelSaltFlowRateKgS:                1420.0,
 		U4ToU3RedoxRatio:                   185.0,
 		DissolvedChromiumPpm:               84.5,
@@ -13930,17 +13930,17 @@ IEA*1*000099123~`
 
 	// 91.2 Semiconductor Multi-Beam Mask Writer (MBMW) Electron Beam Astigmatism, Drift & Field Distortion Sentinel (SEMI P48 & ISO 14644-1)
 	mbmwTel := corembmw.GlobalMBMWVault.IngestReticleTelemetry(corembmw.MBMWReticleTelemetry{
-		TelemetryID:                  "TEL-MBMW-9901",
-		ReticleID:                    "RETICLE-EUV-2NM-METAL1-99",
-		WriterToolID:                 "MBMW-EUV-512K-BEAM-01",
-		AccelerationVoltageKv:        50.0,
-		TotalBeamCurrentMicroA:       18.5,
-		ActiveBeamCount:              262144,
-		ElectrostaticChuckTempMilliK: 21450.0,
-		BeamDriftRateNmPerHr:         0.45,
-		AstigmatismDeflectionErrorNm: 0.62,
+		TelemetryID:                   "TEL-MBMW-9901",
+		ReticleID:                     "RETICLE-EUV-2NM-METAL1-99",
+		WriterToolID:                  "MBMW-EUV-512K-BEAM-01",
+		AccelerationVoltageKv:         50.0,
+		TotalBeamCurrentMicroA:        18.5,
+		ActiveBeamCount:               262144,
+		ElectrostaticChuckTempMilliK:  21450.0,
+		BeamDriftRateNmPerHr:          0.45,
+		AstigmatismDeflectionErrorNm:  0.62,
 		CriticalDimensionUniformityNm: 0.78,
-		BlankMaskSurfaceChargeVolts:  -4.8,
+		BlankMaskSurfaceChargeVolts:   -4.8,
 	})
 	if mbmwTel.ReticleID == "" || mbmwTel.ActiveBeamCount != 262144 {
 		t.Fatalf("Failed to ingest MBMW reticle telemetry: %+v", mbmwTel)
@@ -14000,17 +14000,17 @@ IEA*1*000099123~`
 
 	// 91.4 Gigafactory All-Solid-State Battery Dry Electrode Continuous Extrusion & Calendering Porosity Sentinel (IEC 62660-3 & USABC)
 	deTel := coredryelectrode.GlobalDryElectrodeVault.IngestElectrodeTelemetry(coredryelectrode.DryElectrodeTelemetry{
-		TelemetryID:                  "TEL-DRY-9901",
-		ProductionLineID:             "LINE-GIGAFACTORY-DRY-CATHODE-99",
-		CoatingLotID:                 "LOT-DRY-NMC811-ASSB-99",
-		TwinScrewMeltPressureBar:     185.0,
-		ExtruderShearTorqueNm:        340.0,
-		CalenderRollNipGapUm:         78.5,
-		CalenderRollSurfaceTempC:     112.5,
+		TelemetryID:                   "TEL-DRY-9901",
+		ProductionLineID:              "LINE-GIGAFACTORY-DRY-CATHODE-99",
+		CoatingLotID:                  "LOT-DRY-NMC811-ASSB-99",
+		TwinScrewMeltPressureBar:      185.0,
+		ExtruderShearTorqueNm:         340.0,
+		CalenderRollNipGapUm:          78.5,
+		CalenderRollSurfaceTempC:      112.5,
 		ElectrodeArealLoadingMgPerCm2: 32.5,
-		CalenderedPorosityPct:        18.2,
-		CrossWebThicknessVariationUm: 4.8,
-		WebTensionN:                  245.0,
+		CalenderedPorosityPct:         18.2,
+		CrossWebThicknessVariationUm:  4.8,
+		WebTensionN:                   245.0,
 	})
 	if deTel.ProductionLineID == "" || deTel.CalenderedPorosityPct != 18.2 {
 		t.Fatalf("Failed to ingest dry electrode telemetry: %+v", deTel)
@@ -14035,17 +14035,17 @@ IEA*1*000099123~`
 
 	// 91.5 Deep-Space Planetary In-Situ Resource Utilization (ISRU) Methalox Sabatier Synthesis & Cryo-Liquefaction Sentinel (NASA SP-8000 & ISO 14300)
 	isruTel := coreisrumethalox.GlobalISRUVault.IngestISRUTelemetry(coreisrumethalox.ISRUMethaloxTelemetry{
-		TelemetryID:                      "TEL-ISRU-9901",
-		PlantID:                          "ISRU-MARS-BASE-ALPHA-99",
-		MissionCycleID:                   "SOL-MARS-ASCENT-METHALOX-420",
-		MartianAmbientPressureMbar:       7.5,
-		Co2IntakeCryoFreezerBar:          6.2,
-		SabatierCatalystBedTempC:         415.0,
-		H2ToCo2StoichiometricRatio:       4.28,
-		RutheniumPerchloratePpm:          35.0,
-		DustFilterPressureDropMbar:       18.5,
-		WaterCondenserSeparationPct:      96.2,
-		LiquidMethaneProductionKgPerSol:  48.5,
+		TelemetryID:                     "TEL-ISRU-9901",
+		PlantID:                         "ISRU-MARS-BASE-ALPHA-99",
+		MissionCycleID:                  "SOL-MARS-ASCENT-METHALOX-420",
+		MartianAmbientPressureMbar:      7.5,
+		Co2IntakeCryoFreezerBar:         6.2,
+		SabatierCatalystBedTempC:        415.0,
+		H2ToCo2StoichiometricRatio:      4.28,
+		RutheniumPerchloratePpm:         35.0,
+		DustFilterPressureDropMbar:      18.5,
+		WaterCondenserSeparationPct:     96.2,
+		LiquidMethaneProductionKgPerSol: 48.5,
 	})
 	if isruTel.PlantID == "" || isruTel.SabatierCatalystBedTempC != 415.0 {
 		t.Fatalf("Failed to ingest ISRU telemetry: %+v", isruTel)
@@ -14146,16 +14146,16 @@ IEA*1*000099123~`
 	// 92.3 Nuclear Microreactor Liquid Metal (NaK/Sodium) Heat Pipe Dryout & Sonic Choking Sentinel (ASME BPVC Div 5 & ANS 54.1)
 	hpTel := coremicroreactor.GlobalHeatPipeVault.IngestHeatPipeTelemetry(coremicroreactor.HeatPipeTelemetry{
 		TelemetryID:                  "TEL-HP-9901",
-		ReactorID:                   "MICRO-REACTOR-NAK-5MWE-99",
-		HeatPipeClusterID:           "CLUSTER-CORE-EVAP-A12",
-		CoreThermalPowerKw:          5200.0,
-		EvaporatorWallTempC:         745.0,
-		CondenserExitTempC:          620.0,
-		SodiumVaporMachNumber:       0.94,
+		ReactorID:                    "MICRO-REACTOR-NAK-5MWE-99",
+		HeatPipeClusterID:            "CLUSTER-CORE-EVAP-A12",
+		CoreThermalPowerKw:           5200.0,
+		EvaporatorWallTempC:          745.0,
+		CondenserExitTempC:           620.0,
+		SodiumVaporMachNumber:        0.94,
 		WickCapillaryPressureDropBar: 0.48,
-		RadialHeatFluxWPerCm2:       88.5,
-		FastNeutronFluenceNPerCm2:   4.8e21,
-		InertHeliumLeakTracePpm:     1.25,
+		RadialHeatFluxWPerCm2:        88.5,
+		FastNeutronFluenceNPerCm2:    4.8e21,
+		InertHeliumLeakTracePpm:      1.25,
 	})
 	if hpTel.ReactorID == "" || hpTel.CoreThermalPowerKw != 5200.0 {
 		t.Fatalf("Failed to ingest microreactor heat pipe telemetry: %+v", hpTel)
@@ -14430,16 +14430,16 @@ IEA*1*000099123~`
 
 	// 94.1 Deep Geological Repository (DGR) Spent Nuclear Fuel KBS-3 Copper Canister Sentinel (IAEA SSG-14 & ISO 12749)
 	dgrTel := coredgrcanister.GlobalDGRCanisterVault.IngestCanisterTelemetry(coredgrcanister.DGRCanisterTelemetry{
-		TelemetryID:                 "TEL-DGR-9901",
-		CanisterID:                  "CANISTER-KBS3-COPPER-99",
-		RepositoryTunnelID:          "TUNNEL-ONKALO-EAST-DEEP-04",
-		HostRockDepthMeters:         505.0,
-		CopperCanisterSurfaceTempC:  96.2,
+		TelemetryID:                  "TEL-DGR-9901",
+		CanisterID:                   "CANISTER-KBS3-COPPER-99",
+		RepositoryTunnelID:           "TUNNEL-ONKALO-EAST-DEEP-04",
+		HostRockDepthMeters:          505.0,
+		CopperCanisterSurfaceTempC:   96.2,
 		BentoniteSwellingPressureMpa: 4.65,
-		MicrobialSulfidePpm:         1.25,
-		BedrockShearDisplacementMm:  52.5,
+		MicrobialSulfidePpm:          1.25,
+		BedrockShearDisplacementMm:   52.5,
 		ElectronBeamWeldIntegrityPct: 99.8,
-		GammaDoseRateGyPerHr:        0.38,
+		GammaDoseRateGyPerHr:         0.38,
 	})
 	if dgrTel.CanisterID == "" || dgrTel.HostRockDepthMeters != 505.0 {
 		t.Fatalf("Failed to ingest DGR canister telemetry: %+v", dgrTel)
@@ -14498,16 +14498,16 @@ IEA*1*000099123~`
 
 	// 94.3 Space Solar Power (SBSP) Gigawatt Microwave Phased-Array Retrodirective Beam Sentinel (ITU Article 21 & NASA SP-8000)
 	spsTel := corespacesolar.GlobalSpaceSolarVault.IngestSolarTelemetry(corespacesolar.SpaceSolarTelemetry{
-		TelemetryID:                         "TEL-SPS-9901",
-		SatelliteArrayID:                    "SATELLITE-SBSP-GW-ARRAY-99",
-		OrbitalSlotGeo:                      "GEO_122.5_WEST",
-		TransmittedRfPowerGigawatts:         1.45,
-		RetrodirectiveBeamDriftDeg:          0.00062,
+		TelemetryID:                          "TEL-SPS-9901",
+		SatelliteArrayID:                     "SATELLITE-SBSP-GW-ARRAY-99",
+		OrbitalSlotGeo:                       "GEO_122.5_WEST",
+		TransmittedRfPowerGigawatts:          1.45,
+		RetrodirectiveBeamDriftDeg:           0.00062,
 		RectennaSidelobeFluxMilliwattsPerCm2: 1.35,
-		IonosphericSelfFocusingIndex:        0.82,
-		SolarMirrorThermalDistortionMm:      1.85,
-		PilotUplinkCarrierToNoiseDb:         21.5,
-		ArrayThermalSkinTempKelvin:          392.0,
+		IonosphericSelfFocusingIndex:         0.82,
+		SolarMirrorThermalDistortionMm:       1.85,
+		PilotUplinkCarrierToNoiseDb:          21.5,
+		ArrayThermalSkinTempKelvin:           392.0,
 	})
 	if spsTel.SatelliteArrayID == "" || spsTel.TransmittedRfPowerGigawatts != 1.45 {
 		t.Fatalf("Failed to ingest space solar telemetry: %+v", spsTel)
@@ -14814,16 +14814,16 @@ IEA*1*000099123~`
 
 	// 96.2 Semiconductor Wafer-Scale Glass Substrate Through-Glass Via (TGV) Micro-Cracking Sentinel (SEMI 3D10 & IEEE 1500)
 	tgvTel := coreglasstgv.GlobalGlassTGVVault.IngestGlassTelemetry(coreglasstgv.GlassTGVTelemetry{
-		TelemetryID:                          "TEL-TGV-9901",
-		PanelID:                              "PANEL-GLASS-TGV-AI-99",
-		WaferBatchID:                         "BATCH-GLASS-700MM-99",
-		TgvViaPitchUm:                        40.0,
-		AcousticEmissionMicroCracks:          16.2,
-		ReflowOvenPeakTempC:                  266.0,
+		TelemetryID:                         "TEL-TGV-9901",
+		PanelID:                             "PANEL-GLASS-TGV-AI-99",
+		WaferBatchID:                        "BATCH-GLASS-700MM-99",
+		TgvViaPitchUm:                       40.0,
+		AcousticEmissionMicroCracks:         16.2,
+		ReflowOvenPeakTempC:                 266.0,
 		GlassSurfaceStressIntensityMpaSqrtM: 0.84,
-		KelvinContactResistanceMohm:          49.5,
-		DielectricBreakdownCurrentNa:         19.2,
-		WarpageBowDeflectionUm:               35.5,
+		KelvinContactResistanceMohm:         49.5,
+		DielectricBreakdownCurrentNa:        19.2,
+		WarpageBowDeflectionUm:              35.5,
 	})
 	if tgvTel.PanelID == "" || tgvTel.GlassSurfaceStressIntensityMpaSqrtM != 0.84 {
 		t.Fatalf("Failed to ingest glass TGV telemetry: %+v", tgvTel)

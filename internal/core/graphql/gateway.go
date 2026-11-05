@@ -34,13 +34,13 @@ type GraphQLError struct {
 }
 
 type WebhookSubscription struct {
-	SubscriptionID string   `json:"subscription_id"`
-	TargetURL      string   `json:"target_url" binding:"required"`
+	SubscriptionID   string   `json:"subscription_id"`
+	TargetURL        string   `json:"target_url" binding:"required"`
 	SubscribedEvents []string `json:"subscribed_events" binding:"required"` // e.g. sale.order.confirmed, stock.picking.done
-	SecretKey      string   `json:"secret_key"`
-	IsActive       bool     `json:"is_active"`
-	CompanyID      uint     `json:"company_id"`
-	CreatedAt      string   `json:"created_at"`
+	SecretKey        string   `json:"secret_key"`
+	IsActive         bool     `json:"is_active"`
+	CompanyID        uint     `json:"company_id"`
+	CreatedAt        string   `json:"created_at"`
 }
 
 var webhookStore = struct {
@@ -90,10 +90,10 @@ func ExecuteGraphQLQuery(db *gorm.DB, query string, companyID uint) *GraphQLResp
 	if strings.Contains(trimmed, "salesOrder") {
 		// Mock/resolve nested sale order structure
 		orderData := map[string]interface{}{
-			"id":         1,
-			"name":       "SO00001",
-			"date_order": time.Now().Format("2006-01-02"),
-			"state":      "sale",
+			"id":           1,
+			"name":         "SO00001",
+			"date_order":   time.Now().Format("2006-01-02"),
+			"state":        "sale",
 			"amount_total": 11655000.0,
 			"partner": map[string]interface{}{
 				"id":    1,
@@ -155,11 +155,11 @@ func ExecuteGraphQLQuery(db *gorm.DB, query string, companyID uint) *GraphQLResp
 	// 4. Resolve financialMetrics query
 	if strings.Contains(trimmed, "financialMetrics") {
 		data["financialMetrics"] = map[string]interface{}{
-			"currency":          "IDR",
-			"net_revenue":       45000000000.0,
-			"gross_profit":      27000000000.0,
-			"ebitda":            18500000000.0,
-			"net_profit_margin": 33.3,
+			"currency":           "IDR",
+			"net_revenue":        45000000000.0,
+			"gross_profit":       27000000000.0,
+			"ebitda":             18500000000.0,
+			"net_profit_margin":  33.3,
 			"active_fiscal_year": "2026",
 		}
 	}
@@ -226,13 +226,13 @@ func RegisterGraphQLRoutes(router *gin.RouterGroup, authMiddleware gin.HandlerFu
 			webhookStore.Unlock()
 
 			c.JSON(http.StatusOK, gin.H{
-				"status":              "SUCCESS_SUBSCRIBED",
-				"subscription_id":     sub.SubscriptionID,
-				"target_url":          sub.TargetURL,
-				"subscribed_events":   sub.SubscribedEvents,
-				"hmac_sha256_secret":  sub.SecretKey,
-				"created_at":          sub.CreatedAt,
-				"signature_header":    "X-GoERP-Signature: sha256=<hmac_hex>",
+				"status":             "SUCCESS_SUBSCRIBED",
+				"subscription_id":    sub.SubscriptionID,
+				"target_url":         sub.TargetURL,
+				"subscribed_events":  sub.SubscribedEvents,
+				"hmac_sha256_secret": sub.SecretKey,
+				"created_at":         sub.CreatedAt,
+				"signature_header":   "X-GoERP-Signature: sha256=<hmac_hex>",
 			})
 		})
 

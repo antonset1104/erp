@@ -16,17 +16,17 @@ type ReportAccountLine struct {
 }
 
 type ProfitAndLossReport struct {
-	CompanyID          uint                `json:"company_id"`
-	DateFrom           string              `json:"date_from"`
-	DateTo             string              `json:"date_to"`
-	RevenueLines       []ReportAccountLine `json:"revenue_lines"`
-	TotalRevenue       float64             `json:"total_revenue"`
-	CogsLines          []ReportAccountLine `json:"cogs_lines"`
-	TotalCogs          float64             `json:"total_cogs"`
-	GrossProfit        float64             `json:"gross_profit"`
-	OperatingExpenses  []ReportAccountLine `json:"operating_expenses"`
-	TotalOperatingExp  float64             `json:"total_operating_expenses"`
-	NetProfit          float64             `json:"net_profit"`
+	CompanyID         uint                `json:"company_id"`
+	DateFrom          string              `json:"date_from"`
+	DateTo            string              `json:"date_to"`
+	RevenueLines      []ReportAccountLine `json:"revenue_lines"`
+	TotalRevenue      float64             `json:"total_revenue"`
+	CogsLines         []ReportAccountLine `json:"cogs_lines"`
+	TotalCogs         float64             `json:"total_cogs"`
+	GrossProfit       float64             `json:"gross_profit"`
+	OperatingExpenses []ReportAccountLine `json:"operating_expenses"`
+	TotalOperatingExp float64             `json:"total_operating_expenses"`
+	NetProfit         float64             `json:"net_profit"`
 }
 
 type BalanceSheetReport struct {

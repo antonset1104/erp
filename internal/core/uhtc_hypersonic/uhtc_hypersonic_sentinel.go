@@ -13,41 +13,41 @@ import (
 
 // UHTCHypersonicTelemetry captures Mach 7-10 hypersonic leading edge and transpiration cooling telemetry
 type UHTCHypersonicTelemetry struct {
-	TelemetryID                     string    `json:"telemetry_id"`
-	VehicleID                       string    `json:"vehicle_id"`
-	MachNumber                      float64   `json:"mach_number"`                          // Mach 7.0 - 10.0
-	AltitudeKm                      float64   `json:"altitude_km"`                          // 25.0 - 45.0 km
-	StagnationHeatFluxMwPerM2       float64   `json:"stagnation_heat_flux_mw_per_m2"`       // limit < 8.5 MW/m2
-	UhtcSurfaceTempC                float64   `json:"uhtc_surface_temp_c"`                  // limit < 2200.0°C
-	PorousMatrixPressureDropBar     float64   `json:"porous_matrix_pressure_drop_bar"`      // nominal 4.0 - 8.0 bar
-	ShockImpingementPressureBar     float64   `json:"shock_impingement_pressure_bar"`       // threshold > 45.0 bar
-	BoundaryLayerTransitionRms      float64   `json:"boundary_layer_transition_rms"`        // acoustic sensor threshold > 0.65
-	TranspirationCoolantFlowKgPerSec float64  `json:"transpiration_coolant_flow_kg_per_sec"` // nominal 1.2 - 2.5 kg/s
-	Timestamp                       time.Time `json:"timestamp"`
+	TelemetryID                      string    `json:"telemetry_id"`
+	VehicleID                        string    `json:"vehicle_id"`
+	MachNumber                       float64   `json:"mach_number"`                           // Mach 7.0 - 10.0
+	AltitudeKm                       float64   `json:"altitude_km"`                           // 25.0 - 45.0 km
+	StagnationHeatFluxMwPerM2        float64   `json:"stagnation_heat_flux_mw_per_m2"`        // limit < 8.5 MW/m2
+	UhtcSurfaceTempC                 float64   `json:"uhtc_surface_temp_c"`                   // limit < 2200.0°C
+	PorousMatrixPressureDropBar      float64   `json:"porous_matrix_pressure_drop_bar"`       // nominal 4.0 - 8.0 bar
+	ShockImpingementPressureBar      float64   `json:"shock_impingement_pressure_bar"`        // threshold > 45.0 bar
+	BoundaryLayerTransitionRms       float64   `json:"boundary_layer_transition_rms"`         // acoustic sensor threshold > 0.65
+	TranspirationCoolantFlowKgPerSec float64   `json:"transpiration_coolant_flow_kg_per_sec"` // nominal 1.2 - 2.5 kg/s
+	Timestamp                        time.Time `json:"timestamp"`
 }
 
 // UHTCHypersonicAssessment models UHTC oxidation/spallation, shock-shock interference, and AIAA S-102.2 compliance
 type UHTCHypersonicAssessment struct {
-	AssessmentID                   string    `json:"assessment_id"`
-	VehicleID                      string    `json:"vehicle_id"`
-	ThermalProtectionIntegrity     string    `json:"thermal_protection_integrity"` // LAMINAR_TRANSPIRATION_COOLED, MATRIX_MICRO_FISSURING_WARNING, DIBORIDE_ABLATION_BREACH_HAZARD
-	ShockInterferenceHazard        string    `json:"shock_interference_hazard"`    // QUASI_STEADY_BOW_SHOCK, EDNEY_TYPE_IV_SHOCK_IMPINGEMENT
-	HeatFluxExcessMarginPct        float64   `json:"heat_flux_excess_margin_pct"`
-	TranspirationCoolantSurgeMandate bool    `json:"transpiration_coolant_surge_mandate"`
-	PlasmaTripActuatorMandate      bool      `json:"plasma_trip_actuator_mandate"`
-	AuditDigest                    string    `json:"audit_digest"`
-	EvaluatedAt                    time.Time `json:"evaluated_at"`
+	AssessmentID                     string    `json:"assessment_id"`
+	VehicleID                        string    `json:"vehicle_id"`
+	ThermalProtectionIntegrity       string    `json:"thermal_protection_integrity"` // LAMINAR_TRANSPIRATION_COOLED, MATRIX_MICRO_FISSURING_WARNING, DIBORIDE_ABLATION_BREACH_HAZARD
+	ShockInterferenceHazard          string    `json:"shock_interference_hazard"`    // QUASI_STEADY_BOW_SHOCK, EDNEY_TYPE_IV_SHOCK_IMPINGEMENT
+	HeatFluxExcessMarginPct          float64   `json:"heat_flux_excess_margin_pct"`
+	TranspirationCoolantSurgeMandate bool      `json:"transpiration_coolant_surge_mandate"`
+	PlasmaTripActuatorMandate        bool      `json:"plasma_trip_actuator_mandate"`
+	AuditDigest                      string    `json:"audit_digest"`
+	EvaluatedAt                      time.Time `json:"evaluated_at"`
 }
 
 // UHTCHypersonicMitigationAction models gas transpiration flow surge, plasma actuator triggering, and AoA trim
 type UHTCHypersonicMitigationAction struct {
-	ActionID                            string    `json:"action_id"`
-	VehicleID                           string    `json:"vehicle_id"`
-	CommandedCoolantSurgeFlowKgPerSec   float64   `json:"commanded_coolant_surge_flow_kg_per_sec"`
-	PlasmaActuatorVoltageKv             float64   `json:"plasma_actuator_voltage_kv"`
-	AngleOfAttackTrimDeg                float64   `json:"angle_of_attack_trim_deg"`
-	AvoidedHypersonicBreakupLossUSD     float64   `json:"avoided_hypersonic_breakup_loss_usd"`
-	ExecutedAt                          time.Time `json:"executed_at"`
+	ActionID                          string    `json:"action_id"`
+	VehicleID                         string    `json:"vehicle_id"`
+	CommandedCoolantSurgeFlowKgPerSec float64   `json:"commanded_coolant_surge_flow_kg_per_sec"`
+	PlasmaActuatorVoltageKv           float64   `json:"plasma_actuator_voltage_kv"`
+	AngleOfAttackTrimDeg              float64   `json:"angle_of_attack_trim_deg"`
+	AvoidedHypersonicBreakupLossUSD   float64   `json:"avoided_hypersonic_breakup_loss_usd"`
+	ExecutedAt                        time.Time `json:"executed_at"`
 }
 
 // UHTCHypersonicVault manages hypersonic vehicle leading-edge thermal protection state and emergency mitigations

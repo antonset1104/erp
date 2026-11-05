@@ -731,7 +731,7 @@ func (s *Service) AnalyzeConsolidationWithAI(runID uint, companyID uint) (*AICon
 	// Build Audit Context
 	var variances []string
 	var recElim map[string]float64 = make(map[string]float64)
-	
+
 	recElim["Eliminasi Pendapatan & Beban Resiprokal"] = run.EliminatedRevenue
 	recElim["Eliminasi Piutang & Hutang Antar-Entitas"] = run.EliminatedReceivables
 	recElim["Eliminasi Laba Persediaan Belum Terealisasi"] = run.EliminatedUnrealizedProfit
@@ -755,11 +755,11 @@ func (s *Service) AnalyzeConsolidationWithAI(runID uint, companyID uint) (*AICon
 	}
 
 	checklist := map[string]bool{
-		"Semua Entitas Anak Terkonsolidasi (IFRS 10.B86)": true,
-		"Kebijakan Akuntansi Seragam Diterapkan (IFRS 10.B87)": true,
+		"Semua Entitas Anak Terkonsolidasi (IFRS 10.B86)":            true,
+		"Kebijakan Akuntansi Seragam Diterapkan (IFRS 10.B87)":       true,
 		"Eliminasi 100% Saldo & Transaksi Intra-Grup (IFRS 10.B86b)": true,
-		"Penyajian Hak Non-Pengendali Terpisah (IFRS 10.22)": true,
-		"Eliminasi Laba Belum Terealisasi (PSAK 65.B86c)": run.EliminatedUnrealizedProfit > 0,
+		"Penyajian Hak Non-Pengendali Terpisah (IFRS 10.22)":         true,
+		"Eliminasi Laba Belum Terealisasi (PSAK 65.B86c)":            run.EliminatedUnrealizedProfit > 0,
 	}
 
 	execSummary := fmt.Sprintf("Audit konsolidasi finansial '%s' untuk grup %s memenuhi standar IFRS 10 / PSAK 65 dengan skor kepatuhan %d/100 (%s). Total eliminasi transaksi intra-grup sebesar Rp %.2f menghasilkan Laba Bersih Konsolidasian Rp %.2f.",

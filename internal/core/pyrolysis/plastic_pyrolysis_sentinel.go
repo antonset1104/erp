@@ -14,17 +14,17 @@ import (
 
 // PyrolysisReactorTelemetry captures mixed plastic chemical recycling metrics under ASTM D8338 & EPA Method 23
 type PyrolysisReactorTelemetry struct {
-	TelemetryID                 string    `json:"telemetry_id"`
-	ReactorID                   string    `json:"reactor_id"`                     // "PYRO-CIRCULAR-PLASTIC-50TPD-01"
-	FacilityLocation            string    `json:"facility_location"`              // "ANTWERP-CIRCULAR-POLYMER-HUB"
-	PyrolysisBedTempC           float64   `json:"pyrolysis_bed_temp_c"`           // e.g. 485.0°C (cracking 450-520°C)
-	FeedstockFeedRateKgHr       float64   `json:"feedstock_feed_rate_kg_hr"`      // e.g. 2100.0 kg/hr
-	GasRecycleLoopTempC         float64   `json:"gas_recycle_loop_temp_c"`        // e.g. 310.0°C (dioxin window 250-400°C)
-	ChlorineContentPPM          float64   `json:"chlorine_content_ppm"`           // e.g. 48.0 ppm in pyoil (spec < 10 ppm)
-	HClAcidGasPPM               float64   `json:"hcl_acid_gas_ppm"`               // e.g. 185.0 ppm
-	CalciumSorbentDosingRateKgHr float64  `json:"calcium_sorbent_dosing_rate_kg_hr"` // e.g. 22.0 kg/hr
-	PyrolysisOilYieldPct        float64   `json:"pyrolysis_oil_yield_pct"`        // e.g. 78.5%
-	RecordedAt                  time.Time `json:"recorded_at"`
+	TelemetryID                  string    `json:"telemetry_id"`
+	ReactorID                    string    `json:"reactor_id"`                        // "PYRO-CIRCULAR-PLASTIC-50TPD-01"
+	FacilityLocation             string    `json:"facility_location"`                 // "ANTWERP-CIRCULAR-POLYMER-HUB"
+	PyrolysisBedTempC            float64   `json:"pyrolysis_bed_temp_c"`              // e.g. 485.0°C (cracking 450-520°C)
+	FeedstockFeedRateKgHr        float64   `json:"feedstock_feed_rate_kg_hr"`         // e.g. 2100.0 kg/hr
+	GasRecycleLoopTempC          float64   `json:"gas_recycle_loop_temp_c"`           // e.g. 310.0°C (dioxin window 250-400°C)
+	ChlorineContentPPM           float64   `json:"chlorine_content_ppm"`              // e.g. 48.0 ppm in pyoil (spec < 10 ppm)
+	HClAcidGasPPM                float64   `json:"hcl_acid_gas_ppm"`                  // e.g. 185.0 ppm
+	CalciumSorbentDosingRateKgHr float64   `json:"calcium_sorbent_dosing_rate_kg_hr"` // e.g. 22.0 kg/hr
+	PyrolysisOilYieldPct         float64   `json:"pyrolysis_oil_yield_pct"`           // e.g. 78.5%
+	RecordedAt                   time.Time `json:"recorded_at"`
 }
 
 // DepolymerizationDioxinAssessment models random scission depolymerization kinetics and dioxin de novo synthesis risk
@@ -32,7 +32,7 @@ type DepolymerizationDioxinAssessment struct {
 	AssessmentID                          string    `json:"assessment_id"`
 	ReactorID                             string    `json:"reactor_id"`
 	DepolymerizationConversionPct         float64   `json:"depolymerization_conversion_pct"`
-	DioxinDeNovoSynthesisRiskLevel        string    `json:"dioxin_de_novo_synthesis_risk_level"`        // "SAFE_THERMAL_DECOMPOSITION", "ELEVATED_CHLORINATED_GAS_WARNING", "CRITICAL_DIOXIN_SYNTHESIS_AND_CATALYST_POISON_HAZARD"
+	DioxinDeNovoSynthesisRiskLevel        string    `json:"dioxin_de_novo_synthesis_risk_level"`       // "SAFE_THERMAL_DECOMPOSITION", "ELEVATED_CHLORINATED_GAS_WARNING", "CRITICAL_DIOXIN_SYNTHESIS_AND_CATALYST_POISON_HAZARD"
 	SteamCrackerFeedstockComplianceStatus string    `json:"steam_cracker_feedstock_compliance_status"` // "REFINERY_ISCC_PLUS_CERTIFIED", "OFF_SPEC_CHLORINE_CORROSION_RISK"
 	RapidGasQuenchRequired                bool      `json:"rapid_gas_quench_required"`
 	RecommendedSorbentBoostKgHr           float64   `json:"recommended_sorbent_boost_kg_hr"`
@@ -42,12 +42,12 @@ type DepolymerizationDioxinAssessment struct {
 
 // PyrolysisQuenchDechlorinationAction models rapid vapor quenching below 200°C and calcium guard bed sorbent boost
 type PyrolysisQuenchDechlorinationAction struct {
-	ActionID                      string    `json:"action_id"`
-	ReactorID                     string    `json:"reactor_id"`
-	QuenchTemperatureDropC        float64   `json:"quench_temperature_drop_c"`
-	TunedSorbentInjectionKgHr     float64   `json:"tuned_sorbent_injection_kg_hr"`
-	AvoidedRefineryCatalystLossUSD float64  `json:"avoided_refinery_catalyst_loss_usd"` // Avoided $21M USD refinery hydrotreater catalyst poisoning and EPA hazardous air fines
-	ActionTimestamp               time.Time `json:"action_timestamp"`
+	ActionID                       string    `json:"action_id"`
+	ReactorID                      string    `json:"reactor_id"`
+	QuenchTemperatureDropC         float64   `json:"quench_temperature_drop_c"`
+	TunedSorbentInjectionKgHr      float64   `json:"tuned_sorbent_injection_kg_hr"`
+	AvoidedRefineryCatalystLossUSD float64   `json:"avoided_refinery_catalyst_loss_usd"` // Avoided $21M USD refinery hydrotreater catalyst poisoning and EPA hazardous air fines
+	ActionTimestamp                time.Time `json:"action_timestamp"`
 }
 
 // PyrolysisVault thread-safe in-memory store
@@ -68,17 +68,17 @@ var GlobalPyrolysisVault = &PyrolysisVault{
 func init() {
 	// Seed demo plastic circular recycling reactor with elevated chlorine precursor
 	GlobalPyrolysisVault.telemetries["PYRO-CIRCULAR-PLASTIC-50TPD-01"] = PyrolysisReactorTelemetry{
-		TelemetryID:                 "TEL-PYRO-001",
-		ReactorID:                   "PYRO-CIRCULAR-PLASTIC-50TPD-01",
-		FacilityLocation:            "ANTWERP-CIRCULAR-POLYMER-HUB",
-		PyrolysisBedTempC:           490.0,
-		FeedstockFeedRateKgHr:       2150.0,
-		GasRecycleLoopTempC:         320.0, // Inside PCDD/F formation window (250 - 400°C)
-		ChlorineContentPPM:          52.0,  // Exceeds 10 ppm refinery cracker limit
-		HClAcidGasPPM:               195.0,
+		TelemetryID:                  "TEL-PYRO-001",
+		ReactorID:                    "PYRO-CIRCULAR-PLASTIC-50TPD-01",
+		FacilityLocation:             "ANTWERP-CIRCULAR-POLYMER-HUB",
+		PyrolysisBedTempC:            490.0,
+		FeedstockFeedRateKgHr:        2150.0,
+		GasRecycleLoopTempC:          320.0, // Inside PCDD/F formation window (250 - 400°C)
+		ChlorineContentPPM:           52.0,  // Exceeds 10 ppm refinery cracker limit
+		HClAcidGasPPM:                195.0,
 		CalciumSorbentDosingRateKgHr: 22.0,
-		PyrolysisOilYieldPct:        79.0,
-		RecordedAt:                  time.Now(),
+		PyrolysisOilYieldPct:         79.0,
+		RecordedAt:                   time.Now(),
 	}
 }
 
@@ -153,12 +153,12 @@ func (v *PyrolysisVault) TriggerQuenchAndDechlorination(reactorID string) (Pyrol
 
 	actionID := fmt.Sprintf("ACT-PYRO-%d", time.Now().UnixNano()%1000000)
 	action := PyrolysisQuenchDechlorinationAction{
-		ActionID:                      actionID,
-		ReactorID:                     reactorID,
-		QuenchTemperatureDropC:        135.0, // Rapid plunge from 320°C to 185°C in 0.6 seconds
-		TunedSorbentInjectionKgHr:     52.0,
+		ActionID:                       actionID,
+		ReactorID:                      reactorID,
+		QuenchTemperatureDropC:         135.0, // Rapid plunge from 320°C to 185°C in 0.6 seconds
+		TunedSorbentInjectionKgHr:      52.0,
 		AvoidedRefineryCatalystLossUSD: avoidedLoss,
-		ActionTimestamp:               time.Now(),
+		ActionTimestamp:                time.Now(),
 	}
 
 	v.actions[reactorID] = action

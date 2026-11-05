@@ -24,30 +24,30 @@ const (
 
 // CustomerCLVProfile represents predictive CLV and churn metrics for a business partner.
 type CustomerCLVProfile struct {
-	PartnerID           uint         `json:"partner_id"`
-	PartnerName         string       `json:"partner_name"`
-	IndustrySector      string       `json:"industry_sector"`
-	RecencyDays         int          `json:"recency_days"` // Days since last purchase
-	OrderFrequency      int          `json:"order_frequency"` // Orders in last 365 days
-	AverageOrderValIDR  float64      `json:"average_order_val_idr"`
-	HistoricalRevenueIDR float64     `json:"historical_revenue_idr"`
-	ProbabilityAlive    float64      `json:"probability_alive"` // 0.0 - 1.0 (BG/NBD)
-	ChurnRiskScore      float64      `json:"churn_risk_score"` // 0 - 100
-	Predicted90dRevIDR  float64      `json:"predicted_90d_rev_idr"`
-	CustomerLifetimeVal float64      `json:"customer_lifetime_val_idr"`
-	Tier                CustomerTier `json:"tier"`
-	RecommendedAction   string       `json:"recommended_action"`
+	PartnerID            uint         `json:"partner_id"`
+	PartnerName          string       `json:"partner_name"`
+	IndustrySector       string       `json:"industry_sector"`
+	RecencyDays          int          `json:"recency_days"`    // Days since last purchase
+	OrderFrequency       int          `json:"order_frequency"` // Orders in last 365 days
+	AverageOrderValIDR   float64      `json:"average_order_val_idr"`
+	HistoricalRevenueIDR float64      `json:"historical_revenue_idr"`
+	ProbabilityAlive     float64      `json:"probability_alive"` // 0.0 - 1.0 (BG/NBD)
+	ChurnRiskScore       float64      `json:"churn_risk_score"`  // 0 - 100
+	Predicted90dRevIDR   float64      `json:"predicted_90d_rev_idr"`
+	CustomerLifetimeVal  float64      `json:"customer_lifetime_val_idr"`
+	Tier                 CustomerTier `json:"tier"`
+	RecommendedAction    string       `json:"recommended_action"`
 }
 
 // CLVMatrixReport encapsulates enterprise-wide customer equity analytics.
 type CLVMatrixReport struct {
-	AuditTimestamp          string               `json:"audit_timestamp"`
-	TotalCustomersAnalyzed  int                  `json:"total_customers_analyzed"`
-	TotalHistoricalEquityIDR float64             `json:"total_historical_equity_idr"`
-	Projected90dPipelineIDR float64              `json:"projected_90d_pipeline_idr"`
-	AtRiskCustomersCount    int                  `json:"at_risk_customers_count"`
-	AtRiskRevenueIDR        float64              `json:"at_risk_revenue_idr"`
-	Profiles                []CustomerCLVProfile `json:"profiles"`
+	AuditTimestamp           string               `json:"audit_timestamp"`
+	TotalCustomersAnalyzed   int                  `json:"total_customers_analyzed"`
+	TotalHistoricalEquityIDR float64              `json:"total_historical_equity_idr"`
+	Projected90dPipelineIDR  float64              `json:"projected_90d_pipeline_idr"`
+	AtRiskCustomersCount     int                  `json:"at_risk_customers_count"`
+	AtRiskRevenueIDR         float64              `json:"at_risk_revenue_idr"`
+	Profiles                 []CustomerCLVProfile `json:"profiles"`
 }
 
 // TriggerCampaignRequest initiates a proactive retention campaign.
@@ -60,15 +60,15 @@ type TriggerCampaignRequest struct {
 
 // TriggerCampaignResponse details the retention intervention outcome.
 type TriggerCampaignResponse struct {
-	CampaignID           string  `json:"campaign_id"`
-	PartnerID            uint    `json:"partner_id"`
-	PartnerName          string  `json:"partner_name"`
-	InterventionStatus   string  `json:"intervention_status"`
-	AssignedKeyAccountRep string  `json:"assigned_key_account_rep"`
-	ExpectedRetentionUplift string `json:"expected_retention_uplift"`
-	ProtectedPipelineIDR float64 `json:"protected_pipeline_idr"`
-	ScheduledFollowUp    string  `json:"scheduled_follow_up"`
-	Message              string  `json:"message"`
+	CampaignID              string  `json:"campaign_id"`
+	PartnerID               uint    `json:"partner_id"`
+	PartnerName             string  `json:"partner_name"`
+	InterventionStatus      string  `json:"intervention_status"`
+	AssignedKeyAccountRep   string  `json:"assigned_key_account_rep"`
+	ExpectedRetentionUplift string  `json:"expected_retention_uplift"`
+	ProtectedPipelineIDR    float64 `json:"protected_pipeline_idr"`
+	ScheduledFollowUp       string  `json:"scheduled_follow_up"`
+	Message                 string  `json:"message"`
 }
 
 // CLVService manages predictive customer lifetime value and churn prevention.

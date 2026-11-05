@@ -44,19 +44,19 @@ type RMADiagnosisResponse struct {
 }
 
 type RMAResolutionRequest struct {
-	RMANumber            string  `json:"rma_number" binding:"required"`
-	ChosenDisposition    string  `json:"chosen_disposition" binding:"required"` // REPLACE, CREDIT_NOTE, REPAIR, REJECT
-	CompensationAmount   float64 `json:"compensation_amount"`
-	ApprovalNote         string  `json:"approval_note"`
+	RMANumber          string  `json:"rma_number" binding:"required"`
+	ChosenDisposition  string  `json:"chosen_disposition" binding:"required"` // REPLACE, CREDIT_NOTE, REPAIR, REJECT
+	CompensationAmount float64 `json:"compensation_amount"`
+	ApprovalNote       string  `json:"approval_note"`
 }
 
 type RMAResolutionResponse struct {
-	RMANumber               string `json:"rma_number"`
-	ResolutionStatus        string `json:"resolution_status"`
-	GeneratedDocRef         string `json:"generated_doc_ref"` // e.g. WH/OUT/RMA-001 or CN/2026/001
+	RMANumber                 string `json:"rma_number"`
+	ResolutionStatus          string `json:"resolution_status"`
+	GeneratedDocRef           string `json:"generated_doc_ref"` // e.g. WH/OUT/RMA-001 or CN/2026/001
 	InventoryAdjustedLocation string `json:"inventory_adjusted_location"`
-	Message                 string `json:"message"`
-	ResolvedAt              string `json:"resolved_at"`
+	Message                   string `json:"message"`
+	ResolvedAt                string `json:"resolved_at"`
 }
 
 // DiagnoseRMACase assesses warranty entitlement and economic disposition

@@ -11,15 +11,15 @@ import (
 
 // LoyaltyMember tracks a customer's rewards tier, points balance, and IFRS 15 deferred revenue liability.
 type LoyaltyMember struct {
-	MemberID                           string    `json:"member_id"`
-	CustomerName                       string    `json:"customer_name"`
-	TierLevel                          string    `json:"tier_level"` // "BRONZE", "SILVER", "GOLD", "PLATINUM", "VIP_ENTERPRISE"
-	TotalPointsBalance                 int       `json:"total_points_balance"`
-	LifetimePointsEarned               int       `json:"lifetime_points_earned"`
-	TotalSpentIDR                      float64   `json:"total_spent_idr"`
-	ContractLiabilityDeferredRevIDR    float64   `json:"contract_liability_deferred_rev_idr"` // IFRS 15 / PSAK 72
-	LastTransactionDate                string    `json:"last_transaction_date"`
-	CreatedAt                          time.Time `json:"created_at"`
+	MemberID                        string    `json:"member_id"`
+	CustomerName                    string    `json:"customer_name"`
+	TierLevel                       string    `json:"tier_level"` // "BRONZE", "SILVER", "GOLD", "PLATINUM", "VIP_ENTERPRISE"
+	TotalPointsBalance              int       `json:"total_points_balance"`
+	LifetimePointsEarned            int       `json:"lifetime_points_earned"`
+	TotalSpentIDR                   float64   `json:"total_spent_idr"`
+	ContractLiabilityDeferredRevIDR float64   `json:"contract_liability_deferred_rev_idr"` // IFRS 15 / PSAK 72
+	LastTransactionDate             string    `json:"last_transaction_date"`
+	CreatedAt                       time.Time `json:"created_at"`
 }
 
 // EarnPointsRequest represents an omnichannel sale yielding rewards points.
@@ -33,15 +33,15 @@ type EarnPointsRequest struct {
 
 // EarnPointsResult provides the points calculation, tier progression, and IFRS 15 accounting impact.
 type EarnPointsResult struct {
-	MemberID                string  `json:"member_id"`
-	CustomerName            string  `json:"customer_name"`
-	TierLevel               string  `json:"tier_level"`
-	PointsEarned            int     `json:"points_earned"`
-	NewTotalPointsBalance   int     `json:"new_total_points_balance"`
-	TierUpgraded            bool    `json:"tier_upgraded"`
-	PreviousTier            string  `json:"previous_tier,omitempty"`
+	MemberID                 string  `json:"member_id"`
+	CustomerName             string  `json:"customer_name"`
+	TierLevel                string  `json:"tier_level"`
+	PointsEarned             int     `json:"points_earned"`
+	NewTotalPointsBalance    int     `json:"new_total_points_balance"`
+	TierUpgraded             bool    `json:"tier_upgraded"`
+	PreviousTier             string  `json:"previous_tier,omitempty"`
 	IFRS15DeferredRevenueIDR float64 `json:"ifrs15_deferred_revenue_idr"` // Deferred from sales invoice
-	Message                 string  `json:"message"`
+	Message                  string  `json:"message"`
 }
 
 // RedeemRewardRequest defines points burn for vouchers or merchandise.
@@ -53,14 +53,14 @@ type RedeemRewardRequest struct {
 
 // RedemptionResult details the redeemed voucher and released IFRS 15 contract liability.
 type RedemptionResult struct {
-	RedemptionCode            string  `json:"redemption_code"`
-	MemberID                  string  `json:"member_id"`
-	RewardCatalogItem         string  `json:"reward_catalog_item"`
-	PointsDeducted            int     `json:"points_deducted"`
-	RemainingPointsBalance    int     `json:"remaining_points_balance"`
-	ReleasedIFRS15RevenueIDR  float64 `json:"released_ifrs15_revenue_idr"` // Reclassified from Liability to Earned Revenue
-	RedemptionStatus          string  `json:"redemption_status"`
-	RedeemedAt                string  `json:"redeemed_at"`
+	RedemptionCode           string  `json:"redemption_code"`
+	MemberID                 string  `json:"member_id"`
+	RewardCatalogItem        string  `json:"reward_catalog_item"`
+	PointsDeducted           int     `json:"points_deducted"`
+	RemainingPointsBalance   int     `json:"remaining_points_balance"`
+	ReleasedIFRS15RevenueIDR float64 `json:"released_ifrs15_revenue_idr"` // Reclassified from Liability to Earned Revenue
+	RedemptionStatus         string  `json:"redemption_status"`
+	RedeemedAt               string  `json:"redeemed_at"`
 }
 
 var (

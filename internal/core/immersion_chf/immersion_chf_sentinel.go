@@ -16,13 +16,13 @@ type ImmersionCHFTelemetry struct {
 	TelemetryID                  string    `json:"telemetry_id"`
 	GpuNodeID                    string    `json:"gpu_node_id"`
 	ClusterRackID                string    `json:"cluster_rack_id"`
-	GpuHeatFluxWPerCm2           float64   `json:"gpu_heat_flux_w_per_cm2"`             // limit < 120.0 W/cm2
-	SiliconJunctionTempC         float64   `json:"silicon_junction_temp_c"`             // limit < 95.0°C (thermal runaway > 105°C)
-	DielectricFluidTempC         float64   `json:"dielectric_fluid_temp_c"`             // nominal 50.0 - 65.0°C
-	BubbleDepartureFrequencyHz   float64   `json:"bubble_departure_frequency_hz"`       // threshold > 850 Hz (vapor blanket coalescence)
-	DielectricBreakdownVoltageKv float64   `json:"dielectric_breakdown_voltage_kv"`     // limit > 35.0 kV
-	VaporChamberPressureBar      float64   `json:"vapor_chamber_pressure_bar"`          // nominal 1.05 - 1.45 bar
-	CondenserSubcoolingDeltaC    float64   `json:"condenser_subcooling_delta_c"`        // nominal 8.0 - 15.0°C
+	GpuHeatFluxWPerCm2           float64   `json:"gpu_heat_flux_w_per_cm2"`         // limit < 120.0 W/cm2
+	SiliconJunctionTempC         float64   `json:"silicon_junction_temp_c"`         // limit < 95.0°C (thermal runaway > 105°C)
+	DielectricFluidTempC         float64   `json:"dielectric_fluid_temp_c"`         // nominal 50.0 - 65.0°C
+	BubbleDepartureFrequencyHz   float64   `json:"bubble_departure_frequency_hz"`   // threshold > 850 Hz (vapor blanket coalescence)
+	DielectricBreakdownVoltageKv float64   `json:"dielectric_breakdown_voltage_kv"` // limit > 35.0 kV
+	VaporChamberPressureBar      float64   `json:"vapor_chamber_pressure_bar"`      // nominal 1.05 - 1.45 bar
+	CondenserSubcoolingDeltaC    float64   `json:"condenser_subcooling_delta_c"`    // nominal 8.0 - 15.0°C
 	Timestamp                    time.Time `json:"timestamp"`
 }
 
@@ -30,8 +30,8 @@ type ImmersionCHFTelemetry struct {
 type ImmersionCHFAssessment struct {
 	AssessmentID              string    `json:"assessment_id"`
 	GpuNodeID                 string    `json:"gpu_node_id"`
-	BoilingRegimeState        string    `json:"boiling_regime_state"`         // NUCLEATE_BOILING_OPTIMAL, TRANSITION_BOILING_WARNING, FILM_BOILING_CHF_DEPARTURE_CRITICAL
-	DielectricFluidCondition  string    `json:"dielectric_fluid_condition"`    // HIGH_PURITY_ISOLATED, MOISTURE_CONTAMINATION_DEGRADED
+	BoilingRegimeState        string    `json:"boiling_regime_state"`       // NUCLEATE_BOILING_OPTIMAL, TRANSITION_BOILING_WARNING, FILM_BOILING_CHF_DEPARTURE_CRITICAL
+	DielectricFluidCondition  string    `json:"dielectric_fluid_condition"` // HIGH_PURITY_ISOLATED, MOISTURE_CONTAMINATION_DEGRADED
 	HeatFluxExcessMarginPct   float64   `json:"heat_flux_excess_margin_pct"`
 	MicrojetPumpingMandate    bool      `json:"microjet_pumping_mandate"`
 	GpuClockThrottlingMandate bool      `json:"gpu_clock_throttling_mandate"`
@@ -185,21 +185,21 @@ func (v *ImmersionCHFVault) GetImmersionCoolingDossier(gpuNodeID string) (map[st
 	}
 
 	dossier := map[string]interface{}{
-		"gpu_node_id":                 gpuNodeID,
-		"cluster_rack_id":             telem.ClusterRackID,
-		"ashrae_tc99_compliant":       asm.BoilingRegimeState != "FILM_BOILING_CHF_DEPARTURE_CRITICAL" || (hasAct && act.AvoidedSiliconMeltdownLossUSD > 0),
-		"ocp_advanced_cooling_pass":   true,
-		"gpu_heat_flux_w_cm2":         telem.GpuHeatFluxWPerCm2,
-		"silicon_junction_temp_c":     telem.SiliconJunctionTempC,
-		"bubble_frequency_hz":         telem.BubbleDepartureFrequencyHz,
-		"breakdown_voltage_kv":        telem.DielectricBreakdownVoltageKv,
-		"boiling_state":               asm.BoilingRegimeState,
-		"fluid_condition":             asm.DielectricFluidCondition,
-		"microjet_velocity_m_s":       0.0,
-		"power_cap_watts":             1000.0,
-		"avoided_loss_usd":            0.0,
-		"audit_digest":                asm.AuditDigest,
-		"compiled_at":                 time.Now(),
+		"gpu_node_id":               gpuNodeID,
+		"cluster_rack_id":           telem.ClusterRackID,
+		"ashrae_tc99_compliant":     asm.BoilingRegimeState != "FILM_BOILING_CHF_DEPARTURE_CRITICAL" || (hasAct && act.AvoidedSiliconMeltdownLossUSD > 0),
+		"ocp_advanced_cooling_pass": true,
+		"gpu_heat_flux_w_cm2":       telem.GpuHeatFluxWPerCm2,
+		"silicon_junction_temp_c":   telem.SiliconJunctionTempC,
+		"bubble_frequency_hz":       telem.BubbleDepartureFrequencyHz,
+		"breakdown_voltage_kv":      telem.DielectricBreakdownVoltageKv,
+		"boiling_state":             asm.BoilingRegimeState,
+		"fluid_condition":           asm.DielectricFluidCondition,
+		"microjet_velocity_m_s":     0.0,
+		"power_cap_watts":           1000.0,
+		"avoided_loss_usd":          0.0,
+		"audit_digest":              asm.AuditDigest,
+		"compiled_at":               time.Now(),
 	}
 
 	if hasAct {

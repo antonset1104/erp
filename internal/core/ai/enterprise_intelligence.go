@@ -15,19 +15,19 @@ import (
 // ============================================================================
 
 type DocumentIntelligenceRequest struct {
-	DocumentType      string                   `json:"document_type"` // "vendor_bill", "tax_efaktur", "delivery_note", "expense_receipt"
-	VendorName        string                   `json:"vendor_name"`
-	InvoiceNumber     string                   `json:"invoice_number"`
-	PurchaseOrderRef  string                   `json:"purchase_order_ref"`
-	DocumentText      string                   `json:"document_text"`
-	ImageBase64       string                   `json:"image_base64"`
-	SubTotal          float64                  `json:"subtotal"`
-	TaxAmount         float64                  `json:"tax_amount"`
-	WithholdingTax    float64                  `json:"withholding_tax"`
-	TotalAmount       float64                  `json:"total_amount"`
-	Currency          string                   `json:"currency"`
-	LineItems         []map[string]interface{} `json:"line_items"`
-	AutoCreateBill    bool                     `json:"auto_create_bill"`
+	DocumentType     string                   `json:"document_type"` // "vendor_bill", "tax_efaktur", "delivery_note", "expense_receipt"
+	VendorName       string                   `json:"vendor_name"`
+	InvoiceNumber    string                   `json:"invoice_number"`
+	PurchaseOrderRef string                   `json:"purchase_order_ref"`
+	DocumentText     string                   `json:"document_text"`
+	ImageBase64      string                   `json:"image_base64"`
+	SubTotal         float64                  `json:"subtotal"`
+	TaxAmount        float64                  `json:"tax_amount"`
+	WithholdingTax   float64                  `json:"withholding_tax"`
+	TotalAmount      float64                  `json:"total_amount"`
+	Currency         string                   `json:"currency"`
+	LineItems        []map[string]interface{} `json:"line_items"`
+	AutoCreateBill   bool                     `json:"auto_create_bill"`
 }
 
 func (c *Client) ExecuteDocumentIntelligence(db *gorm.DB, req *DocumentIntelligenceRequest, companyID uint) map[string]interface{} {
@@ -145,10 +145,10 @@ func (c *Client) ExecuteDocumentIntelligence(db *gorm.DB, req *DocumentIntellige
 	}
 
 	return map[string]interface{}{
-		"success":           true,
-		"document_type":     docType,
-		"engine":            c.ActiveProviderName(),
-		"confidence_score":  0.97,
+		"success":          true,
+		"document_type":    docType,
+		"engine":           c.ActiveProviderName(),
+		"confidence_score": 0.97,
 		"extracted_fields": map[string]interface{}{
 			"vendor_name":       vendorName,
 			"vendor_npwp":       extractedNPWP,
@@ -188,8 +188,8 @@ func (c *Client) ExecuteDocumentIntelligence(db *gorm.DB, req *DocumentIntellige
 // ============================================================================
 
 type FraudRadarRequest struct {
-	Sensitivity   string  `json:"sensitivity"`    // "standard", "high", "forensic"
-	ThresholdIDR  float64 `json:"threshold_idr"`  // default 50,000,000
+	Sensitivity  string  `json:"sensitivity"`   // "standard", "high", "forensic"
+	ThresholdIDR float64 `json:"threshold_idr"` // default 50,000,000
 }
 
 func (c *Client) RunFraudRadar(db *gorm.DB, req *FraudRadarRequest, companyID uint) map[string]interface{} {
@@ -354,10 +354,10 @@ func (c *Client) GetCashflowForecast(db *gorm.DB, req *CashflowForecastRequest, 
 	}
 
 	return map[string]interface{}{
-		"success":               true,
-		"currency":              "IDR",
-		"generated_at":          time.Now().UTC().Format(time.RFC3339),
-		"opening_cash_balance":  openingCash,
+		"success":              true,
+		"currency":             "IDR",
+		"generated_at":         time.Now().UTC().Format(time.RFC3339),
+		"opening_cash_balance": openingCash,
 		"historical_inputs": map[string]float64{
 			"confirmed_sales_ar":     confirmedSales,
 			"pipeline_quotations":    draftSales,

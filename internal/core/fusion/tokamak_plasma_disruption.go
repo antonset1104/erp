@@ -14,17 +14,17 @@ import (
 
 // TokamakPlasmaTelemetry models magnetic confinement plasma parameters under IAEA & ITER guidelines
 type TokamakPlasmaTelemetry struct {
-	ShotNumberID           string    `json:"shot_number_id"`             // "SHOT-FUSION-ITER-2026-8801"
-	ReactorID              string    `json:"reactor_id"`                // "TOKAMAK-DEMO-1000MW"
-	PlasmaCurrentMA        float64   `json:"plasma_current_ma"`          // e.g. 15.0 MA
-	MinorRadiusMeters      float64   `json:"minor_radius_meters"`        // a e.g. 2.0 m
-	ToroidalFieldTesla     float64   `json:"toroidal_field_tesla"`       // e.g. 5.3 T
-	ElectronDensity_10e19  float64   `json:"electron_density_10e19_m3"`  // ne (e.g. 11.2 x 10^19 m^-3)
-	SafetyFactorQ95        float64   `json:"safety_factor_q95"`          // Edge q95 (e.g. 2.85; warning < 3.0)
-	MHD_TearingModeAmp     float64   `json:"mhd_tearing_mode_amplitude"` // Mirnov coil deltaB/B (critical > 0.040)
-	CoreElectronTempKeV    float64   `json:"core_electron_temp_kev"`     // Te (e.g. 18.5 keV)
-	RadiatedPowerFraction  float64   `json:"radiated_power_fraction"`    // Prad / Pheat (e.g. 0.88)
-	RecordedAt             time.Time `json:"recorded_at"`
+	ShotNumberID          string    `json:"shot_number_id"`             // "SHOT-FUSION-ITER-2026-8801"
+	ReactorID             string    `json:"reactor_id"`                 // "TOKAMAK-DEMO-1000MW"
+	PlasmaCurrentMA       float64   `json:"plasma_current_ma"`          // e.g. 15.0 MA
+	MinorRadiusMeters     float64   `json:"minor_radius_meters"`        // a e.g. 2.0 m
+	ToroidalFieldTesla    float64   `json:"toroidal_field_tesla"`       // e.g. 5.3 T
+	ElectronDensity_10e19 float64   `json:"electron_density_10e19_m3"`  // ne (e.g. 11.2 x 10^19 m^-3)
+	SafetyFactorQ95       float64   `json:"safety_factor_q95"`          // Edge q95 (e.g. 2.85; warning < 3.0)
+	MHD_TearingModeAmp    float64   `json:"mhd_tearing_mode_amplitude"` // Mirnov coil deltaB/B (critical > 0.040)
+	CoreElectronTempKeV   float64   `json:"core_electron_temp_kev"`     // Te (e.g. 18.5 keV)
+	RadiatedPowerFraction float64   `json:"radiated_power_fraction"`    // Prad / Pheat (e.g. 0.88)
+	RecordedAt            time.Time `json:"recorded_at"`
 }
 
 // PlasmaDisruptionRiskAssessment evaluates Greenwald density limits and tearing mode instabilities
@@ -35,7 +35,7 @@ type PlasmaDisruptionRiskAssessment struct {
 	GreenwaldDensityFraction       float64   `json:"greenwald_density_fraction"`    // ne / n_G
 	DisruptionHazardLevel          string    `json:"disruption_hazard_level"`       // "CONFINED_STABLE_PLASMA", "ELEVATED_MHD_TEARING_WARNING", "IMMINENT_THERMAL_QUENCH_DISRUPTION"
 	MGI_SPI_PelletInjectionMandate bool      `json:"mgi_spi_pellet_injection_mandate"`
-	ResponseWindowMillisec         float64   `json:"response_window_millisec"`      // typically 10 - 20 ms
+	ResponseWindowMillisec         float64   `json:"response_window_millisec"` // typically 10 - 20 ms
 	AuditDigest                    string    `json:"audit_digest"`
 	EvaluatedAt                    time.Time `json:"evaluated_at"`
 }
@@ -53,10 +53,10 @@ type ShatteredPelletMitigationAction struct {
 
 // FusionVault thread-safe in-memory store
 type FusionVault struct {
-	mu           sync.RWMutex
-	telemetries  map[string]TokamakPlasmaTelemetry
-	assessments  map[string]PlasmaDisruptionRiskAssessment
-	mitigations  map[string]ShatteredPelletMitigationAction
+	mu          sync.RWMutex
+	telemetries map[string]TokamakPlasmaTelemetry
+	assessments map[string]PlasmaDisruptionRiskAssessment
+	mitigations map[string]ShatteredPelletMitigationAction
 }
 
 // Global instance
@@ -74,8 +74,8 @@ func init() {
 		PlasmaCurrentMA:       15.0,
 		MinorRadiusMeters:     2.0,
 		ToroidalFieldTesla:    5.3,
-		ElectronDensity_10e19: 11.4, // Near Greenwald limit
-		SafetyFactorQ95:       2.82, // Low safety factor
+		ElectronDensity_10e19: 11.4,  // Near Greenwald limit
+		SafetyFactorQ95:       2.82,  // Low safety factor
 		MHD_TearingModeAmp:    0.046, // High tearing mode amplitude precursor
 		CoreElectronTempKeV:   18.5,
 		RadiatedPowerFraction: 0.91,

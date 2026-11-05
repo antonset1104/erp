@@ -552,15 +552,15 @@ func (s *Service) GetQualityStats(companyID uint) (map[string]interface{}, error
 	s.db.Model(&QualityAlert{}).Where("company_id = ? AND stage IN ('resolved', 'closed')", companyID).Count(&closedAlerts)
 
 	return map[string]interface{}{
-		"total_points":     totalPoints,
-		"total_checks":     totalChecks,
-		"pending_checks":   pendingChecks,
-		"passed_checks":    passedChecks,
-		"failed_checks":    failedChecks,
-		"pass_rate_pct":    passRate,
-		"total_alerts":     totalAlerts,
-		"active_alerts":    activeAlerts,
-		"critical_alerts":  criticalAlerts,
-		"closed_alerts":    closedAlerts,
+		"total_points":    totalPoints,
+		"total_checks":    totalChecks,
+		"pending_checks":  pendingChecks,
+		"passed_checks":   passedChecks,
+		"failed_checks":   failedChecks,
+		"pass_rate_pct":   passRate,
+		"total_alerts":    totalAlerts,
+		"active_alerts":   activeAlerts,
+		"critical_alerts": criticalAlerts,
+		"closed_alerts":   closedAlerts,
 	}, nil
 }

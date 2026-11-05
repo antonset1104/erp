@@ -14,54 +14,54 @@ import (
 
 // OrbitalConjunctionTelemetry captures CCSDS Conjunction Data Message (CDM) parameters
 type OrbitalConjunctionTelemetry struct {
-	TelemetryID                string    `json:"telemetry_id"`
-	TargetSatelliteNORAD_ID    string    `json:"target_satellite_norad_id"` // "SAT-LEO-GOERP-042"
-	TargetSatelliteName        string    `json:"target_satellite_name"`     // "NUSANTARA-LEO-SAT-42"
-	DebrisCatalogID            string    `json:"debris_catalog_id"`         // "DEBRIS-COSMOS-2251-FRAG-9120"
-	TimeOfClosestApproachTCA   time.Time `json:"time_of_closest_approach_tca"`
-	MissDistanceMeters         float64   `json:"miss_distance_meters"`           // Critical warning < 150m
-	RadialMissDistanceMeters   float64   `json:"radial_miss_distance_meters"`
-	RelativeVelocityKMpS       float64   `json:"relative_velocity_km_p_s"`       // Hypersonic orbital speed ~7.8 - 14.0 km/s
-	HardBodyRadiusMeters       float64   `json:"hard_body_radius_meters"`       // Target + Debris combined envelope
-	CombinedCovarianceTraceM2  float64   `json:"combined_covariance_trace_m2"`   // Position uncertainty matrix trace
-	RemainingDeltaVBudgetMPS   float64   `json:"remaining_delta_v_budget_mps"`   // SMR/Ion thruster fuel budget in m/s
-	RecordedAt                 time.Time `json:"recorded_at"`
+	TelemetryID               string    `json:"telemetry_id"`
+	TargetSatelliteNORAD_ID   string    `json:"target_satellite_norad_id"` // "SAT-LEO-GOERP-042"
+	TargetSatelliteName       string    `json:"target_satellite_name"`     // "NUSANTARA-LEO-SAT-42"
+	DebrisCatalogID           string    `json:"debris_catalog_id"`         // "DEBRIS-COSMOS-2251-FRAG-9120"
+	TimeOfClosestApproachTCA  time.Time `json:"time_of_closest_approach_tca"`
+	MissDistanceMeters        float64   `json:"miss_distance_meters"` // Critical warning < 150m
+	RadialMissDistanceMeters  float64   `json:"radial_miss_distance_meters"`
+	RelativeVelocityKMpS      float64   `json:"relative_velocity_km_p_s"`     // Hypersonic orbital speed ~7.8 - 14.0 km/s
+	HardBodyRadiusMeters      float64   `json:"hard_body_radius_meters"`      // Target + Debris combined envelope
+	CombinedCovarianceTraceM2 float64   `json:"combined_covariance_trace_m2"` // Position uncertainty matrix trace
+	RemainingDeltaVBudgetMPS  float64   `json:"remaining_delta_v_budget_mps"` // SMR/Ion thruster fuel budget in m/s
+	RecordedAt                time.Time `json:"recorded_at"`
 }
 
 // CollisionRiskAssessment models Foster 2D encounter plane probability of collision (Pc)
 type CollisionRiskAssessment struct {
-	AssessmentID               string    `json:"assessment_id"`
-	TargetSatelliteNORAD_ID    string    `json:"target_satellite_norad_id"`
-	DebrisCatalogID            string    `json:"debris_catalog_id"`
-	ProbabilityOfCollisionPc   float64   `json:"probability_of_collision_pc"` // NASA/ESA red threshold > 1.0e-4 (0.0001)
-	MissDistanceMeters         float64   `json:"miss_distance_meters"`
-	CollisionManeuverMandated  bool      `json:"collision_maneuver_mandated"`
-	ConjunctionSeverityLevel   string    `json:"conjunction_severity_level"` // "NORMAL_CLEARANCE", "ELEVATED_CONJUNCTION_WATCH", "CRITICAL_COLLISION_AVOIDANCE_MANDATED"
-	Iso24113DeorbitCompliant   bool      `json:"iso_24113_deorbit_compliant"` // 25-year post-mission disposal reserve
-	AuditDigest                string    `json:"audit_digest"`
-	EvaluatedAt                time.Time `json:"evaluated_at"`
+	AssessmentID              string    `json:"assessment_id"`
+	TargetSatelliteNORAD_ID   string    `json:"target_satellite_norad_id"`
+	DebrisCatalogID           string    `json:"debris_catalog_id"`
+	ProbabilityOfCollisionPc  float64   `json:"probability_of_collision_pc"` // NASA/ESA red threshold > 1.0e-4 (0.0001)
+	MissDistanceMeters        float64   `json:"miss_distance_meters"`
+	CollisionManeuverMandated bool      `json:"collision_maneuver_mandated"`
+	ConjunctionSeverityLevel  string    `json:"conjunction_severity_level"`  // "NORMAL_CLEARANCE", "ELEVATED_CONJUNCTION_WATCH", "CRITICAL_COLLISION_AVOIDANCE_MANDATED"
+	Iso24113DeorbitCompliant  bool      `json:"iso_24113_deorbit_compliant"` // 25-year post-mission disposal reserve
+	AuditDigest               string    `json:"audit_digest"`
+	EvaluatedAt               time.Time `json:"evaluated_at"`
 }
 
 // AvoidanceManeuverPlan models optimized Collision Avoidance Maneuver (CAM) burn
 type AvoidanceManeuverPlan struct {
-	PlanID                            string    `json:"plan_id"`
-	TargetSatelliteNORAD_ID           string    `json:"target_satellite_norad_id"`
-	RequiredDeltaVMPS                 float64   `json:"required_delta_v_mps"` // Impulsive delta-v burn in m/s
-	BurnDurationSeconds               float64   `json:"burn_duration_seconds"`
-	PostManeuverMissDistanceMeters    float64   `json:"post_maneuver_miss_distance_meters"`
-	ThrusterType                      string    `json:"thruster_type"` // "XENON_HALL_EFFECT_ION_PROPULSION", "HYDRAZINE_MONOPROPELLANT"
-	AvoidedSpacecraftDestructionUSD   float64   `json:"avoided_spacecraft_destruction_usd"`
-	ApprovedByFlightDirector          string    `json:"approved_by_flight_director"`
-	ScheduledBurnTime                 time.Time `json:"scheduled_burn_time"`
-	PlannedAt                         time.Time `json:"planned_at"`
+	PlanID                          string    `json:"plan_id"`
+	TargetSatelliteNORAD_ID         string    `json:"target_satellite_norad_id"`
+	RequiredDeltaVMPS               float64   `json:"required_delta_v_mps"` // Impulsive delta-v burn in m/s
+	BurnDurationSeconds             float64   `json:"burn_duration_seconds"`
+	PostManeuverMissDistanceMeters  float64   `json:"post_maneuver_miss_distance_meters"`
+	ThrusterType                    string    `json:"thruster_type"` // "XENON_HALL_EFFECT_ION_PROPULSION", "HYDRAZINE_MONOPROPELLANT"
+	AvoidedSpacecraftDestructionUSD float64   `json:"avoided_spacecraft_destruction_usd"`
+	ApprovedByFlightDirector        string    `json:"approved_by_flight_director"`
+	ScheduledBurnTime               time.Time `json:"scheduled_burn_time"`
+	PlannedAt                       time.Time `json:"planned_at"`
 }
 
 // AerospaceVault thread-safe in-memory store
 type AerospaceVault struct {
-	mu           sync.RWMutex
-	telemetries  map[string]OrbitalConjunctionTelemetry
-	assessments  map[string]CollisionRiskAssessment
-	plans        map[string]AvoidanceManeuverPlan
+	mu          sync.RWMutex
+	telemetries map[string]OrbitalConjunctionTelemetry
+	assessments map[string]CollisionRiskAssessment
+	plans       map[string]AvoidanceManeuverPlan
 }
 
 // Global instance
@@ -210,13 +210,13 @@ func (v *AerospaceVault) GetSatelliteConstellationDossier(noradID string) (map[s
 	plan, hasPlan := v.plans[noradID]
 
 	dossier := map[string]interface{}{
-		"norad_id":              noradID,
-		"has_conjunction_cdm":   hasTel,
-		"has_risk_assessment":   hasAssess,
-		"has_avoidance_plan":    hasPlan,
-		"nasa_cara_standards":   "CERTIFIED",
-		"iso_24113_compliance":  true,
-		"compiled_at":           time.Now(),
+		"norad_id":             noradID,
+		"has_conjunction_cdm":  hasTel,
+		"has_risk_assessment":  hasAssess,
+		"has_avoidance_plan":   hasPlan,
+		"nasa_cara_standards":  "CERTIFIED",
+		"iso_24113_compliance": true,
+		"compiled_at":          time.Now(),
 	}
 
 	if hasTel {

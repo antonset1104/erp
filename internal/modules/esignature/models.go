@@ -17,7 +17,7 @@ type DocumentSignRequest struct {
 	RequestNumber string `gorm:"type:varchar(64);uniqueIndex;not null" json:"request_number"` // e.g. ESIGN/2026/00001
 	CompanyID     uint   `gorm:"default:1;index" json:"company_id"`
 
-	DocumentType   string `gorm:"type:varchar(32);not null;index" json:"document_type"`   // sale_order, purchase_order, invoice, delivery_order, payslip, etc.
+	DocumentType   string `gorm:"type:varchar(32);not null;index" json:"document_type"` // sale_order, purchase_order, invoice, delivery_order, payslip, etc.
 	DocumentID     uint   `gorm:"not null;index" json:"document_id"`
 	DocumentNumber string `gorm:"type:varchar(64);not null" json:"document_number"` // e.g. SO/2026/00001, INV/2026/00001
 	Title          string `gorm:"type:varchar(255);not null" json:"title"`
@@ -29,10 +29,10 @@ type DocumentSignRequest struct {
 	SignerRole  string `gorm:"type:varchar(64);not null" json:"signer_role"` // Direktur Utama, Finance Manager, Vendor, etc.
 
 	// Workflow State
-	Status       string     `gorm:"type:varchar(32);default:'pending';index" json:"status"` // pending, signed, rejected, expired
-	SecurityToken string    `gorm:"type:varchar(128);uniqueIndex;not null" json:"security_token"` // crypto random hex for public signing link
-	PasscodeHash string     `gorm:"type:varchar(128)" json:"-"`                             // Optional 6-digit PIN protection
-	ExpiryDate   *time.Time `json:"expiry_date"`
+	Status        string     `gorm:"type:varchar(32);default:'pending';index" json:"status"`       // pending, signed, rejected, expired
+	SecurityToken string     `gorm:"type:varchar(128);uniqueIndex;not null" json:"security_token"` // crypto random hex for public signing link
+	PasscodeHash  string     `gorm:"type:varchar(128)" json:"-"`                                   // Optional 6-digit PIN protection
+	ExpiryDate    *time.Time `json:"expiry_date"`
 
 	// Signature Artifacts
 	SignatureType           string     `gorm:"type:varchar(32);default:'draw'" json:"signature_type"` // draw, typed, upload, certificate_pkcs12
@@ -101,7 +101,7 @@ type SignatureStats struct {
 
 // AIDigitalSignatureAuditReport represents UU ITE compliance evaluation
 type AIDigitalSignatureAuditReport struct {
-	AuditStatus         string   `json:"audit_status"` // VERIFIED_LEGAL, CAUTION, INVALID
+	AuditStatus         string   `json:"audit_status"`    // VERIFIED_LEGAL, CAUTION, INVALID
 	IntegrityScore      int      `json:"integrity_score"` // 0 - 100
 	RequestNumber       string   `json:"request_number"`
 	SignerIdentityMatch bool     `json:"signer_identity_match"`

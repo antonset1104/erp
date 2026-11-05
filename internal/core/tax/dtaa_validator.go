@@ -13,24 +13,24 @@ import (
 
 // VendorTaxResidency holds international vendor tax residency credentials
 type VendorTaxResidency struct {
-	VendorID             string    `json:"vendor_id"`
-	VendorName           string    `json:"vendor_name"`
-	CountryOfResidence   string    `json:"country_of_residence"`
-	ForeignTIN           string    `json:"foreign_tin"`
-	CoRDocNumber         string    `json:"cor_doc_number"` // Certificate of Residence / Form DGT
-	CoRExpiryDate        time.Time `json:"cor_expiry_date"`
-	IsBeneficialOwner    bool      `json:"is_beneficial_owner"`
-	HasNoAgentIntermediary bool    `json:"has_no_agent_intermediary"`
-	HasPermanentEstablishment bool `json:"has_permanent_establishment"`
-	ConsultantDaysInCountry int    `json:"consultant_days_in_country"`
-	VerifiedStatus       string    `json:"verified_status"` // "VALID_TREATY_ELIGIBLE", "EXPIRED", "NON_TREATY_DOMESTIC"
-	LastValidatedAt      time.Time `json:"last_validated_at"`
+	VendorID                  string    `json:"vendor_id"`
+	VendorName                string    `json:"vendor_name"`
+	CountryOfResidence        string    `json:"country_of_residence"`
+	ForeignTIN                string    `json:"foreign_tin"`
+	CoRDocNumber              string    `json:"cor_doc_number"` // Certificate of Residence / Form DGT
+	CoRExpiryDate             time.Time `json:"cor_expiry_date"`
+	IsBeneficialOwner         bool      `json:"is_beneficial_owner"`
+	HasNoAgentIntermediary    bool      `json:"has_no_agent_intermediary"`
+	HasPermanentEstablishment bool      `json:"has_permanent_establishment"`
+	ConsultantDaysInCountry   int       `json:"consultant_days_in_country"`
+	VerifiedStatus            string    `json:"verified_status"` // "VALID_TREATY_ELIGIBLE", "EXPIRED", "NON_TREATY_DOMESTIC"
+	LastValidatedAt           time.Time `json:"last_validated_at"`
 }
 
 // TreatyRateResult represents the calculated withholding tax rate based on DTAA
 type TreatyRateResult struct {
 	VendorID              string    `json:"vendor_id"`
-	IncomeCategory        string    `json:"income_category"` // "ROYALTY_SOFTWARE", "TECHNICAL_SERVICES", "DIVIDENDS", "INTEREST"
+	IncomeCategory        string    `json:"income_category"`        // "ROYALTY_SOFTWARE", "TECHNICAL_SERVICES", "DIVIDENDS", "INTEREST"
 	StatutoryRatePercent  float64   `json:"statutory_rate_percent"` // Standard default non-treaty rate (e.g. 20.0%)
 	TreatyRatePercent     float64   `json:"treaty_rate_percent"`    // Reduced treaty rate (e.g. 0%, 5%, 10%)
 	GrossInvoiceAmountUSD float64   `json:"gross_invoice_amount_usd"`
@@ -44,31 +44,31 @@ type TreatyRateResult struct {
 
 // TaxWithholdingCertificate represents the official tax deduction slip (e-Bupot equivalent)
 type TaxWithholdingCertificate struct {
-	CertificateNumber     string    `json:"certificate_number"`
-	VendorID              string    `json:"vendor_id"`
-	VendorName            string    `json:"vendor_name"`
-	ResidenceCountry      string    `json:"residence_country"`
-	IncomeCategory        string    `json:"income_category"`
-	GrossAmountUSD        float64   `json:"gross_amount_usd"`
-	WithholdingRate       float64   `json:"withholding_rate"`
-	TaxWithheldUSD        float64   `json:"tax_withheld_usd"`
-	NetRemittedUSD        float64   `json:"net_remitted_usd"`
-	AccountingEntryRef    string    `json:"accounting_entry_ref"`
-	DigitalCertificateHash string   `json:"digital_certificate_hash"`
-	IssuedAt              time.Time `json:"issued_at"`
-	Status                string    `json:"status"` // "ISSUED", "REMITTED", "CANCELLED"
+	CertificateNumber      string    `json:"certificate_number"`
+	VendorID               string    `json:"vendor_id"`
+	VendorName             string    `json:"vendor_name"`
+	ResidenceCountry       string    `json:"residence_country"`
+	IncomeCategory         string    `json:"income_category"`
+	GrossAmountUSD         float64   `json:"gross_amount_usd"`
+	WithholdingRate        float64   `json:"withholding_rate"`
+	TaxWithheldUSD         float64   `json:"tax_withheld_usd"`
+	NetRemittedUSD         float64   `json:"net_remitted_usd"`
+	AccountingEntryRef     string    `json:"accounting_entry_ref"`
+	DigitalCertificateHash string    `json:"digital_certificate_hash"`
+	IssuedAt               time.Time `json:"issued_at"`
+	Status                 string    `json:"status"` // "ISSUED", "REMITTED", "CANCELLED"
 }
 
 // TreatyAuditSummary provides audit trail for cross-border tax compliance
 type TreatyAuditSummary struct {
-	VendorID             string                      `json:"vendor_id"`
-	Residency            VendorTaxResidency          `json:"residency"`
-	TotalGrossInvoicedUSD float64                    `json:"total_gross_invoiced_usd"`
-	TotalTaxWithheldUSD  float64                     `json:"total_tax_withheld_usd"`
-	TotalTreatySavingsUSD float64                    `json:"total_treaty_savings_usd"`
-	Certificates         []TaxWithholdingCertificate `json:"certificates"`
-	AuditVerdict         string                      `json:"audit_verdict"`
-	AuditedAt            time.Time                   `json:"audited_at"`
+	VendorID              string                      `json:"vendor_id"`
+	Residency             VendorTaxResidency          `json:"residency"`
+	TotalGrossInvoicedUSD float64                     `json:"total_gross_invoiced_usd"`
+	TotalTaxWithheldUSD   float64                     `json:"total_tax_withheld_usd"`
+	TotalTreatySavingsUSD float64                     `json:"total_treaty_savings_usd"`
+	Certificates          []TaxWithholdingCertificate `json:"certificates"`
+	AuditVerdict          string                      `json:"audit_verdict"`
+	AuditedAt             time.Time                   `json:"audited_at"`
 }
 
 // DTAAEngine manages Double Tax Treaty validation and withholding calculations
@@ -212,19 +212,19 @@ func (e *DTAAEngine) GenerateCertificate(vendorID string, category string, gross
 	digitalHash := hex.EncodeToString(hashBytes[:])
 
 	cert := TaxWithholdingCertificate{
-		CertificateNumber:     certNo,
-		VendorID:              vendorID,
-		VendorName:            vendorName,
-		ResidenceCountry:      resCountry,
-		IncomeCategory:        category,
-		GrossAmountUSD:        grossAmount,
-		WithholdingRate:       rateRes.TreatyRatePercent,
-		TaxWithheldUSD:        rateRes.TaxWithheldAmountUSD,
-		NetRemittedUSD:        rateRes.NetPayableAmountUSD,
-		AccountingEntryRef:    fmt.Sprintf("GL-AP-WHT26-%d", time.Now().Unix()%10000),
+		CertificateNumber:      certNo,
+		VendorID:               vendorID,
+		VendorName:             vendorName,
+		ResidenceCountry:       resCountry,
+		IncomeCategory:         category,
+		GrossAmountUSD:         grossAmount,
+		WithholdingRate:        rateRes.TreatyRatePercent,
+		TaxWithheldUSD:         rateRes.TaxWithheldAmountUSD,
+		NetRemittedUSD:         rateRes.NetPayableAmountUSD,
+		AccountingEntryRef:     fmt.Sprintf("GL-AP-WHT26-%d", time.Now().Unix()%10000),
 		DigitalCertificateHash: digitalHash,
-		IssuedAt:              time.Now(),
-		Status:                "ISSUED",
+		IssuedAt:               time.Now(),
+		Status:                 "ISSUED",
 	}
 
 	e.certificates[vendorID] = append(e.certificates[vendorID], cert)

@@ -19,30 +19,30 @@ type SupplyChainEchelon struct {
 }
 
 type BullwhipIndexResponse struct {
-	OverallBullwhipIndex   float64              `json:"overall_bullwhip_index"`
-	RiskClassification     string               `json:"risk_classification"` // STABLE, MODERATE_DISTORTION, SEVERE_BULLWHIP
-	Echelons               []SupplyChainEchelon `json:"echelons"`
-	PeakDistortionEchelon  string               `json:"peak_distortion_echelon"`
-	RootCauseAnalysis      []string             `json:"root_cause_analysis"`
-	MitigationPlaybook     []string             `json:"mitigation_playbook"`
-	ProjectedSavingsIDR    float64              `json:"projected_savings_idr"`
-	InventoryBufferAdvice  string               `json:"inventory_buffer_advice"`
-	ComputedAt             string               `json:"computed_at"`
+	OverallBullwhipIndex  float64              `json:"overall_bullwhip_index"`
+	RiskClassification    string               `json:"risk_classification"` // STABLE, MODERATE_DISTORTION, SEVERE_BULLWHIP
+	Echelons              []SupplyChainEchelon `json:"echelons"`
+	PeakDistortionEchelon string               `json:"peak_distortion_echelon"`
+	RootCauseAnalysis     []string             `json:"root_cause_analysis"`
+	MitigationPlaybook    []string             `json:"mitigation_playbook"`
+	ProjectedSavingsIDR   float64              `json:"projected_savings_idr"`
+	InventoryBufferAdvice string               `json:"inventory_buffer_advice"`
+	ComputedAt            string               `json:"computed_at"`
 }
 
 type SupplierLeadTimeAnomaly struct {
-	SupplierID           uint    `json:"supplier_id"`
-	SupplierName         string  `json:"supplier_name"`
-	ComponentSKU         string  `json:"component_sku"`
-	ComponentName        string  `json:"component_name"`
-	StandardLeadTimeDays float64 `json:"standard_lead_time_days"`
-	ActualLeadTimeDays   float64 `json:"actual_lead_time_days"`
-	LeadTimeVarianceDays float64 `json:"lead_time_variance_days"`
-	DelayPercentage      float64 `json:"delay_percentage"`
-	AnomalyZScore        float64 `json:"anomaly_z_score"`
-	CriticalityTier      string  `json:"criticality_tier"` // CRITICAL_BOTTLENECK, HIGH_RISK, MONITOR
-	PredictedStockoutDate string `json:"predicted_stockout_date"`
-	RecommendedAction    string  `json:"recommended_action"`
+	SupplierID            uint    `json:"supplier_id"`
+	SupplierName          string  `json:"supplier_name"`
+	ComponentSKU          string  `json:"component_sku"`
+	ComponentName         string  `json:"component_name"`
+	StandardLeadTimeDays  float64 `json:"standard_lead_time_days"`
+	ActualLeadTimeDays    float64 `json:"actual_lead_time_days"`
+	LeadTimeVarianceDays  float64 `json:"lead_time_variance_days"`
+	DelayPercentage       float64 `json:"delay_percentage"`
+	AnomalyZScore         float64 `json:"anomaly_z_score"`
+	CriticalityTier       string  `json:"criticality_tier"` // CRITICAL_BOTTLENECK, HIGH_RISK, MONITOR
+	PredictedStockoutDate string  `json:"predicted_stockout_date"`
+	RecommendedAction     string  `json:"recommended_action"`
 }
 
 type LeadTimeAnomalyRequest struct {
@@ -111,9 +111,9 @@ func (c *Client) ComputeBullwhipIndex(db *gorm.DB, companyID uint) *BullwhipInde
 	}
 
 	return &BullwhipIndexResponse{
-		OverallBullwhipIndex: overallRatio,
-		RiskClassification:   risk,
-		Echelons:             echelons,
+		OverallBullwhipIndex:  overallRatio,
+		RiskClassification:    risk,
+		Echelons:              echelons,
 		PeakDistortionEchelon: "TIER_3_RAW_MATERIALS_SUPPLIERS",
 		RootCauseAnalysis: []string{
 			"Order batching mingguan menciptakan lonjakan pemesanan tiruan (artificial demand spikes).",

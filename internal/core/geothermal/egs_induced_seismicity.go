@@ -15,15 +15,15 @@ import (
 // EGSHydraulicTelemetry models superhot rock Enhanced Geothermal System stimulation readings
 type EGSHydraulicTelemetry struct {
 	TelemetryID                string    `json:"telemetry_id"`
-	WellboreID                 string    `json:"wellbore_id"`                   // "WELL-EGS-SUPERHOT-5500M-01"
-	GeothermalFieldID          string    `json:"geothermal_field_id"`           // "FIELD-NEWBERRY-VOLCANO-EGS"
-	WellDepthMeters            float64   `json:"well_depth_meters"`             // e.g. 5200.0 m
-	BottomholeTempC            float64   `json:"bottomhole_temp_c"`             // Superhot rock e.g. 365.0°C
-	InjectionFlowRateLPM       float64   `json:"injection_flow_rate_lpm"`       // e.g. 3800.0 L/min
-	WellheadPressureBar        float64   `json:"wellhead_pressure_bar"`         // High pressure e.g. 320.0 bar
-	CumulativeInjectedVolumeM3 float64   `json:"cumulative_injected_volume_m3"` // Injected volume e.g. 18500.0 m^3
-	MaxInducedMagnitudeML      float64   `json:"max_induced_magnitude_ml"`      // Microseismic magnitude e.g. 2.15 ML
-	DistanceToKnownFaultMeters float64   `json:"distance_to_known_fault_meters"`// Distance to mapped fault e.g. 420.0 m
+	WellboreID                 string    `json:"wellbore_id"`                    // "WELL-EGS-SUPERHOT-5500M-01"
+	GeothermalFieldID          string    `json:"geothermal_field_id"`            // "FIELD-NEWBERRY-VOLCANO-EGS"
+	WellDepthMeters            float64   `json:"well_depth_meters"`              // e.g. 5200.0 m
+	BottomholeTempC            float64   `json:"bottomhole_temp_c"`              // Superhot rock e.g. 365.0°C
+	InjectionFlowRateLPM       float64   `json:"injection_flow_rate_lpm"`        // e.g. 3800.0 L/min
+	WellheadPressureBar        float64   `json:"wellhead_pressure_bar"`          // High pressure e.g. 320.0 bar
+	CumulativeInjectedVolumeM3 float64   `json:"cumulative_injected_volume_m3"`  // Injected volume e.g. 18500.0 m^3
+	MaxInducedMagnitudeML      float64   `json:"max_induced_magnitude_ml"`       // Microseismic magnitude e.g. 2.15 ML
+	DistanceToKnownFaultMeters float64   `json:"distance_to_known_fault_meters"` // Distance to mapped fault e.g. 420.0 m
 	RecordedAt                 time.Time `json:"recorded_at"`
 }
 
@@ -31,10 +31,10 @@ type EGSHydraulicTelemetry struct {
 type InducedSeismicityAssessment struct {
 	AssessmentID                 string    `json:"assessment_id"`
 	WellboreID                   string    `json:"wellbore_id"`
-	TrafficLightProtocolColor    string    `json:"traffic_light_protocol_color"`    // "GREEN_NORMAL_PUMPING", "AMBER_THROTTLE_INJECTION_50PCT", "RED_IMMEDIATE_SHUTIN_BLEEDOFF"
+	TrafficLightProtocolColor    string    `json:"traffic_light_protocol_color"`      // "GREEN_NORMAL_PUMPING", "AMBER_THROTTLE_INJECTION_50PCT", "RED_IMMEDIATE_SHUTIN_BLEEDOFF"
 	CoulombFailureStressChange   float64   `json:"coulomb_failure_stress_change_kpa"` // Delta CFS = Delta Tau - mu * (Delta Sigma_n - Delta P)
-	ShapiroDiffusionRadiusMeters float64   `json:"shapiro_diffusion_radius_meters"` // r(t) = sqrt(4 * pi * D * t)
-	FaultReactivationHazardLevel string    `json:"fault_reactivation_hazard_level"` // "STABLE_ASEISMIC_SHEAR", "TRIGGERED_MICROSEISMIC_SWARM", "CRITICAL_FELT_EARTHQUAKE_EXCEEDANCE"
+	ShapiroDiffusionRadiusMeters float64   `json:"shapiro_diffusion_radius_meters"`   // r(t) = sqrt(4 * pi * D * t)
+	FaultReactivationHazardLevel string    `json:"fault_reactivation_hazard_level"`   // "STABLE_ASEISMIC_SHEAR", "TRIGGERED_MICROSEISMIC_SWARM", "CRITICAL_FELT_EARTHQUAKE_EXCEEDANCE"
 	MandatoryBleedOffActive      bool      `json:"mandatory_bleed_off_active"`
 	AuditDigest                  string    `json:"audit_digest"`
 	EvaluatedAt                  time.Time `json:"evaluated_at"`
@@ -42,20 +42,20 @@ type InducedSeismicityAssessment struct {
 
 // WellheadEmergencyBleedAction models automated injection shut-in and backpressure bleeding
 type WellheadEmergencyBleedAction struct {
-	ActionID                               string    `json:"action_id"`
-	WellboreID                             string    `json:"wellbore_id"`
-	FlowbackRateLPM                        float64   `json:"flowback_rate_lpm"`
-	PressureDropBar                        float64   `json:"pressure_drop_bar"`
-	AvoidedSurfaceInfrastructureDamageUSD  float64   `json:"avoided_surface_infrastructure_damage_usd"` // Avoided $42M structural damage, lawsuits, and project cancellation
-	ActionTimestamp                        time.Time `json:"action_timestamp"`
+	ActionID                              string    `json:"action_id"`
+	WellboreID                            string    `json:"wellbore_id"`
+	FlowbackRateLPM                       float64   `json:"flowback_rate_lpm"`
+	PressureDropBar                       float64   `json:"pressure_drop_bar"`
+	AvoidedSurfaceInfrastructureDamageUSD float64   `json:"avoided_surface_infrastructure_damage_usd"` // Avoided $42M structural damage, lawsuits, and project cancellation
+	ActionTimestamp                       time.Time `json:"action_timestamp"`
 }
 
 // GeothermalVault thread-safe in-memory store
 type GeothermalVault struct {
-	mu           sync.RWMutex
-	telemetries  map[string]EGSHydraulicTelemetry
-	assessments  map[string]InducedSeismicityAssessment
-	bleeds       map[string]WellheadEmergencyBleedAction
+	mu          sync.RWMutex
+	telemetries map[string]EGSHydraulicTelemetry
+	assessments map[string]InducedSeismicityAssessment
+	bleeds      map[string]WellheadEmergencyBleedAction
 }
 
 // Global instance

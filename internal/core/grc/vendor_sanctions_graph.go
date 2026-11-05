@@ -14,60 +14,60 @@ import (
 
 // PartnerCandidate represents vendor/customer profile for deduplication and AML screening
 type PartnerCandidate struct {
-	PartnerID            string    `json:"partner_id"`
-	CompanyName          string    `json:"company_name"`
-	TaxID                string    `json:"tax_id"`                  // NPWP / TIN
-	BankAccountNumber    string    `json:"bank_account_number"`
-	BankName             string    `json:"bank_name"`
-	AddressCity          string    `json:"address_city"`
-	UltimateBeneficialOwner string `json:"ultimate_beneficial_owner"`
-	UBOSanctionSharePct  float64   `json:"ubo_sanction_share_pct"`  // Equity share owned by sanctioned party
-	CreatedAt            time.Time `json:"created_at"`
+	PartnerID               string    `json:"partner_id"`
+	CompanyName             string    `json:"company_name"`
+	TaxID                   string    `json:"tax_id"` // NPWP / TIN
+	BankAccountNumber       string    `json:"bank_account_number"`
+	BankName                string    `json:"bank_name"`
+	AddressCity             string    `json:"address_city"`
+	UltimateBeneficialOwner string    `json:"ultimate_beneficial_owner"`
+	UBOSanctionSharePct     float64   `json:"ubo_sanction_share_pct"` // Equity share owned by sanctioned party
+	CreatedAt               time.Time `json:"created_at"`
 }
 
 // DeduplicationCheckResult models entity resolution across conglomerates
 type DeduplicationCheckResult struct {
-	CheckID              string    `json:"check_id"`
-	NewPartnerID         string    `json:"new_partner_id"`
-	ExistingPartnerID    string    `json:"existing_partner_id,omitempty"`
-	IsDuplicate          bool      `json:"is_duplicate"`
-	MatchConfidencePct   float64   `json:"match_confidence_pct"`
-	MatchingAttributes   []string  `json:"matching_attributes"`
-	Recommendation       string    `json:"recommendation"` // "MERGE_PARTNER_ENTITIES", "DISTINCT_RECORD_PROCEED"
-	CheckedAt            time.Time `json:"checked_at"`
+	CheckID            string    `json:"check_id"`
+	NewPartnerID       string    `json:"new_partner_id"`
+	ExistingPartnerID  string    `json:"existing_partner_id,omitempty"`
+	IsDuplicate        bool      `json:"is_duplicate"`
+	MatchConfidencePct float64   `json:"match_confidence_pct"`
+	MatchingAttributes []string  `json:"matching_attributes"`
+	Recommendation     string    `json:"recommendation"` // "MERGE_PARTNER_ENTITIES", "DISTINCT_RECORD_PROCEED"
+	CheckedAt          time.Time `json:"checked_at"`
 }
 
 // SanctionsScreeningResult models OFAC / EU / UN watchlist and SDN 50% rule enforcement
 type SanctionsScreeningResult struct {
-	ScreeningID          string    `json:"screening_id"`
-	PartnerID            string    `json:"partner_id"`
-	CompanyName          string    `json:"company_name"`
-	WatchlistHit         bool      `json:"watchlist_hit"`
-	MatchedWatchlist     string    `json:"matched_watchlist,omitempty"` // "US_OFAC_SDN", "EU_CONSOLIDATED", "UN_SECURITY_COUNCIL"
-	SDN50PercentRuleTriggered bool `json:"sdn_50_percent_rule_triggered"`
-	RiskCategory         string    `json:"risk_category"` // "BLOCKED_SANCTIONED_PROPERTY", "LOW_RISK_CLEAN"
-	ComplianceAction     string    `json:"compliance_action"` // "IMMEDIATE_TRANSACTION_FREEZE", "APPROVED_FOR_PAYMENT"
-	ScreenedAt           time.Time `json:"screened_at"`
+	ScreeningID               string    `json:"screening_id"`
+	PartnerID                 string    `json:"partner_id"`
+	CompanyName               string    `json:"company_name"`
+	WatchlistHit              bool      `json:"watchlist_hit"`
+	MatchedWatchlist          string    `json:"matched_watchlist,omitempty"` // "US_OFAC_SDN", "EU_CONSOLIDATED", "UN_SECURITY_COUNCIL"
+	SDN50PercentRuleTriggered bool      `json:"sdn_50_percent_rule_triggered"`
+	RiskCategory              string    `json:"risk_category"`     // "BLOCKED_SANCTIONED_PROPERTY", "LOW_RISK_CLEAN"
+	ComplianceAction          string    `json:"compliance_action"` // "IMMEDIATE_TRANSACTION_FREEZE", "APPROVED_FOR_PAYMENT"
+	ScreenedAt                time.Time `json:"screened_at"`
 }
 
 // PaymentFreezeRecord captures formal AML/OFAC payment interception
 type PaymentFreezeRecord struct {
-	FreezeID             string    `json:"freeze_id"`
-	PartnerID            string    `json:"partner_id"`
-	FrozenPayableAmountUSD float64 `json:"frozen_payable_amount_usd"`
-	SARReportReference   string    `json:"sar_report_reference"` // Suspicious Activity Report
-	RegulatoryHash       string    `json:"regulatory_hash"`
-	Status               string    `json:"status"` // "PAYMENT_BLOCKED_AML_FREEZE"
-	FrozenAt             time.Time `json:"frozen_at"`
+	FreezeID               string    `json:"freeze_id"`
+	PartnerID              string    `json:"partner_id"`
+	FrozenPayableAmountUSD float64   `json:"frozen_payable_amount_usd"`
+	SARReportReference     string    `json:"sar_report_reference"` // Suspicious Activity Report
+	RegulatoryHash         string    `json:"regulatory_hash"`
+	Status                 string    `json:"status"` // "PAYMENT_BLOCKED_AML_FREEZE"
+	FrozenAt               time.Time `json:"frozen_at"`
 }
 
 // VendorSanctionsVault thread-safe store
 type VendorSanctionsVault struct {
-	mu          sync.RWMutex
-	partners    map[string]PartnerCandidate
-	dedupLogs   map[string]DeduplicationCheckResult
-	screenLogs  map[string]SanctionsScreeningResult
-	freezeLogs  map[string]PaymentFreezeRecord
+	mu         sync.RWMutex
+	partners   map[string]PartnerCandidate
+	dedupLogs  map[string]DeduplicationCheckResult
+	screenLogs map[string]SanctionsScreeningResult
+	freezeLogs map[string]PaymentFreezeRecord
 }
 
 // Global Vendor Sanctions instance
@@ -260,16 +260,16 @@ func (v *VendorSanctionsVault) GetComplianceDossier(partnerID string) (gin.H, er
 	}
 
 	return gin.H{
-		"partner_id":               partnerID,
-		"profile":                  p,
-		"deduplication_audit":      dedup,
-		"has_deduplication":        hasDedup,
-		"sanctions_screening":      scr,
-		"has_screening":            hasScr,
-		"payment_freeze_record":    frz,
-		"has_freeze":               hasFrz,
-		"compliance_framework":     "US OFAC Sanctions / EU Consolidated List / AML-CFT PPATK",
-		"sdn_50_rule_compliance":   "AUTOMATED_BENEFICIAL_OWNER_GRAPH_VERIFIED",
+		"partner_id":             partnerID,
+		"profile":                p,
+		"deduplication_audit":    dedup,
+		"has_deduplication":      hasDedup,
+		"sanctions_screening":    scr,
+		"has_screening":          hasScr,
+		"payment_freeze_record":  frz,
+		"has_freeze":             hasFrz,
+		"compliance_framework":   "US OFAC Sanctions / EU Consolidated List / AML-CFT PPATK",
+		"sdn_50_rule_compliance": "AUTOMATED_BENEFICIAL_OWNER_GRAPH_VERIFIED",
 	}, nil
 }
 

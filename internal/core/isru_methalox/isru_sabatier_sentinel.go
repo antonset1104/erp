@@ -14,18 +14,18 @@ import (
 
 // ISRUMethaloxTelemetry captures planetary in-situ resource utilization (ISRU) Sabatier methalox synthesis under NASA SP-8000 & ISO 14300
 type ISRUMethaloxTelemetry struct {
-	TelemetryID                      string    `json:"telemetry_id"`
-	PlantID                          string    `json:"plant_id"`                                 // "ISRU-MARS-BASE-ALPHA-01"
-	MissionCycleID                   string    `json:"mission_cycle_id"`                         // "SOL-MARS-ASCENT-METHALOX-420"
-	MartianAmbientPressureMbar       float64   `json:"martian_ambient_pressure_mbar"`            // e.g. 7.5 mbar
-	Co2IntakeCryoFreezerBar          float64   `json:"co2_intake_cryo_freezer_bar"`              // e.g. 6.2 bar
-	SabatierCatalystBedTempC         float64   `json:"sabatier_catalyst_bed_temp_c"`             // e.g. 415.0°C (runaway sintering > 440°C)
-	H2ToCo2StoichiometricRatio       float64   `json:"h2_to_co2_stoichiometric_ratio"`           // e.g. 4.28:1 (ideal stoichiometric 4.05:1)
-	RutheniumPerchloratePpm          float64   `json:"ruthenium_perchlorate_ppm"`                // e.g. 35.0 ppm (catalyst poisoning limit > 15 ppm)
-	DustFilterPressureDropMbar       float64   `json:"dust_filter_pressure_drop_mbar"`           // e.g. 18.5 mbar (severe regolith clogging > 12 mbar)
-	WaterCondenserSeparationPct      float64   `json:"water_condenser_separation_pct"`           // e.g. 96.2%
-	LiquidMethaneProductionKgPerSol  float64   `json:"liquid_methane_production_kg_per_sol"`      // e.g. 48.5 kg/sol
-	RecordedAt                       time.Time `json:"recorded_at"`
+	TelemetryID                     string    `json:"telemetry_id"`
+	PlantID                         string    `json:"plant_id"`                             // "ISRU-MARS-BASE-ALPHA-01"
+	MissionCycleID                  string    `json:"mission_cycle_id"`                     // "SOL-MARS-ASCENT-METHALOX-420"
+	MartianAmbientPressureMbar      float64   `json:"martian_ambient_pressure_mbar"`        // e.g. 7.5 mbar
+	Co2IntakeCryoFreezerBar         float64   `json:"co2_intake_cryo_freezer_bar"`          // e.g. 6.2 bar
+	SabatierCatalystBedTempC        float64   `json:"sabatier_catalyst_bed_temp_c"`         // e.g. 415.0°C (runaway sintering > 440°C)
+	H2ToCo2StoichiometricRatio      float64   `json:"h2_to_co2_stoichiometric_ratio"`       // e.g. 4.28:1 (ideal stoichiometric 4.05:1)
+	RutheniumPerchloratePpm         float64   `json:"ruthenium_perchlorate_ppm"`            // e.g. 35.0 ppm (catalyst poisoning limit > 15 ppm)
+	DustFilterPressureDropMbar      float64   `json:"dust_filter_pressure_drop_mbar"`       // e.g. 18.5 mbar (severe regolith clogging > 12 mbar)
+	WaterCondenserSeparationPct     float64   `json:"water_condenser_separation_pct"`       // e.g. 96.2%
+	LiquidMethaneProductionKgPerSol float64   `json:"liquid_methane_production_kg_per_sol"` // e.g. 48.5 kg/sol
+	RecordedAt                      time.Time `json:"recorded_at"`
 }
 
 // ISRUAssessment evaluates Sabatier exothermic runaway, Ru/Al2O3 catalyst poisoning, and electrostatic regolith filter clogging
@@ -43,13 +43,13 @@ type ISRUAssessment struct {
 
 // ISRUMitigationAction models feed gas stoichiometry trim, electrostatic pulsed reverse purge, and condenser cooling boost
 type ISRUMitigationAction struct {
-	ActionID                           string    `json:"action_id"`
-	PlantID                            string    `json:"plant_id"`
-	CommandedH2Co2RatioSetpoint        float64   `json:"commanded_h2_co2_ratio_setpoint"`
-	ElectrostaticDustPurgeDurationSec  float64   `json:"electrostatic_dust_purge_duration_sec"`
-	CondenserChillerBoostWatts         float64   `json:"condenser_chiller_boost_watts"`
-	AvoidedMissionLossUSD              float64   `json:"avoided_mission_loss_usd"`
-	ActionTimestamp                    time.Time `json:"action_timestamp"`
+	ActionID                          string    `json:"action_id"`
+	PlantID                           string    `json:"plant_id"`
+	CommandedH2Co2RatioSetpoint       float64   `json:"commanded_h2_co2_ratio_setpoint"`
+	ElectrostaticDustPurgeDurationSec float64   `json:"electrostatic_dust_purge_duration_sec"`
+	CondenserChillerBoostWatts        float64   `json:"condenser_chiller_boost_watts"`
+	AvoidedMissionLossUSD             float64   `json:"avoided_mission_loss_usd"`
+	ActionTimestamp                   time.Time `json:"action_timestamp"`
 }
 
 // ISRUVault thread-safe in-memory store

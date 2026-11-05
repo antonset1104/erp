@@ -10,18 +10,18 @@ import (
 )
 
 type SubsidiarySummary struct {
-	CompanyID     uint    `json:"company_id"`
-	CompanyName   string  `json:"company_name"`
-	EntityType    string  `json:"entity_type"` // PARENT_HOLDING, MANUFACTURING_SUB, DISTRIBUTION_SUB
-	Currency      string  `json:"currency"`
-	Revenue       float64 `json:"revenue"`
-	COGS          float64 `json:"cogs"`
-	GrossProfit   float64 `json:"gross_profit"`
-	OperatingExp  float64 `json:"operating_expenses"`
-	NetIncome     float64 `json:"net_income"`
-	TotalAssets   float64 `json:"total_assets"`
-	Liabilities   float64 `json:"liabilities"`
-	Equity        float64 `json:"equity"`
+	CompanyID    uint    `json:"company_id"`
+	CompanyName  string  `json:"company_name"`
+	EntityType   string  `json:"entity_type"` // PARENT_HOLDING, MANUFACTURING_SUB, DISTRIBUTION_SUB
+	Currency     string  `json:"currency"`
+	Revenue      float64 `json:"revenue"`
+	COGS         float64 `json:"cogs"`
+	GrossProfit  float64 `json:"gross_profit"`
+	OperatingExp float64 `json:"operating_expenses"`
+	NetIncome    float64 `json:"net_income"`
+	TotalAssets  float64 `json:"total_assets"`
+	Liabilities  float64 `json:"liabilities"`
+	Equity       float64 `json:"equity"`
 }
 
 type IntercompanyEliminationLine struct {
@@ -178,9 +178,9 @@ func ComputeConsolidatedFinancials(db *gorm.DB, holdingID uint, fiscalYear strin
 	}
 
 	elimRev := 8500000000.0 + 11200000000.0 + 1500000000.0 // 21.2B
-	elimCOGS := 8500000000.0 + 11200000000.0              // 19.7B
-	elimOpex := 1500000000.0                              // 1.5B
-	elimARAP := 4200000000.0                              // 4.2B
+	elimCOGS := 8500000000.0 + 11200000000.0               // 19.7B
+	elimOpex := 1500000000.0                               // 1.5B
+	elimARAP := 4200000000.0                               // 4.2B
 
 	consRev := preRev - elimRev
 	consCOGS := preCOGS - elimCOGS

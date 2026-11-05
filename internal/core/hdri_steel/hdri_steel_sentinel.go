@@ -13,41 +13,41 @@ import (
 
 // HDRIShaftTelemetry captures green steelmaking 100% hydrogen shaft reduction metrics
 type HDRIShaftTelemetry struct {
-	TelemetryID                string    `json:"telemetry_id"`
-	FurnaceID                  string    `json:"furnace_id"`
-	SteelMillID                string    `json:"steel_mill_id"`
-	BustleHydrogenFlowNm3Hr    float64   `json:"bustle_hydrogen_flow_nm3_hr"` // e.g. 120,000 Nm3/hr
-	BedReductionTempC          float64   `json:"bed_reduction_temp_c"`        // nominal 850 - 950°C
-	TopGasH2UtilizationPct     float64   `json:"top_gas_h2_utilization_pct"`  // target > 32%
-	BedDifferentialPressureMbar float64  `json:"bed_differential_pressure_mbar"` // limit < 380 mbar
-	PelletStickingIndex        float64   `json:"pellet_sticking_index"`       // critical threshold > 0.45
-	MetDegreeMetallizationPct  float64   `json:"met_degree_metallization_pct"` // target > 94.0%
-	DustCarryoverGPerNm3       float64   `json:"dust_carryover_g_per_nm3"`    // limit < 15.0 g/Nm3
-	Timestamp                  time.Time `json:"timestamp"`
+	TelemetryID                 string    `json:"telemetry_id"`
+	FurnaceID                   string    `json:"furnace_id"`
+	SteelMillID                 string    `json:"steel_mill_id"`
+	BustleHydrogenFlowNm3Hr     float64   `json:"bustle_hydrogen_flow_nm3_hr"`    // e.g. 120,000 Nm3/hr
+	BedReductionTempC           float64   `json:"bed_reduction_temp_c"`           // nominal 850 - 950°C
+	TopGasH2UtilizationPct      float64   `json:"top_gas_h2_utilization_pct"`     // target > 32%
+	BedDifferentialPressureMbar float64   `json:"bed_differential_pressure_mbar"` // limit < 380 mbar
+	PelletStickingIndex         float64   `json:"pellet_sticking_index"`          // critical threshold > 0.45
+	MetDegreeMetallizationPct   float64   `json:"met_degree_metallization_pct"`   // target > 94.0%
+	DustCarryoverGPerNm3        float64   `json:"dust_carryover_g_per_nm3"`       // limit < 15.0 g/Nm3
+	Timestamp                   time.Time `json:"timestamp"`
 }
 
 // HDRIShaftAssessment models bed fluidization integrity, sticking/clustering hazards, and DIN EN 746-2 compliance
 type HDRIShaftAssessment struct {
-	AssessmentID                   string    `json:"assessment_id"`
-	FurnaceID                      string    `json:"furnace_id"`
-	ShaftBedFluidizationStatus     string    `json:"shaft_bed_fluidization_status"` // OPTIMAL_FREE_DESCENT, INCIPIENT_CHANNELLING, BED_CHOKING_STICKING_COLLAPSE
-	PelletClusteringHazard         string    `json:"pellet_clustering_hazard"`      // PASSIVE_DISPERSED, LOCALIZED_SINTERING_CLUSTERS, MASSIVE_SHAFT_FREEZE_HAZARD
-	StickingExcessMarginPct        float64   `json:"sticking_excess_margin_pct"`
-	AntiStickingDopeInjectionMandate bool    `json:"anti_sticking_dope_injection_mandate"`
-	BedPulsationTrimmingMandate    bool      `json:"bed_pulsation_trimming_mandate"`
-	AuditDigest                    string    `json:"audit_digest"`
-	EvaluatedAt                    time.Time `json:"evaluated_at"`
+	AssessmentID                     string    `json:"assessment_id"`
+	FurnaceID                        string    `json:"furnace_id"`
+	ShaftBedFluidizationStatus       string    `json:"shaft_bed_fluidization_status"` // OPTIMAL_FREE_DESCENT, INCIPIENT_CHANNELLING, BED_CHOKING_STICKING_COLLAPSE
+	PelletClusteringHazard           string    `json:"pellet_clustering_hazard"`      // PASSIVE_DISPERSED, LOCALIZED_SINTERING_CLUSTERS, MASSIVE_SHAFT_FREEZE_HAZARD
+	StickingExcessMarginPct          float64   `json:"sticking_excess_margin_pct"`
+	AntiStickingDopeInjectionMandate bool      `json:"anti_sticking_dope_injection_mandate"`
+	BedPulsationTrimmingMandate      bool      `json:"bed_pulsation_trimming_mandate"`
+	AuditDigest                      string    `json:"audit_digest"`
+	EvaluatedAt                      time.Time `json:"evaluated_at"`
 }
 
 // HDRIShaftMitigationAction models anti-sticking MgO dope injection, bustle gas trim, and pneumatic pulsation
 type HDRIShaftMitigationAction struct {
-	ActionID                        string    `json:"action_id"`
-	FurnaceID                        string    `json:"furnace_id"`
-	CommandedMgoDopeInjectionRateKgHr float64 `json:"commanded_mgo_dope_injection_rate_kg_hr"`
-	HydrogenBustleTrimPct           float64   `json:"hydrogen_bustle_trim_pct"`
-	PneumaticBedPulsationHz         float64   `json:"pneumatic_bed_pulsation_hz"`
-	AvoidedFurnaceFreezeLossUSD     float64   `json:"avoided_furnace_freeze_loss_usd"`
-	ExecutedAt                      time.Time `json:"executed_at"`
+	ActionID                          string    `json:"action_id"`
+	FurnaceID                         string    `json:"furnace_id"`
+	CommandedMgoDopeInjectionRateKgHr float64   `json:"commanded_mgo_dope_injection_rate_kg_hr"`
+	HydrogenBustleTrimPct             float64   `json:"hydrogen_bustle_trim_pct"`
+	PneumaticBedPulsationHz           float64   `json:"pneumatic_bed_pulsation_hz"`
+	AvoidedFurnaceFreezeLossUSD       float64   `json:"avoided_furnace_freeze_loss_usd"`
+	ExecutedAt                        time.Time `json:"executed_at"`
 }
 
 // HDRIShaftVault manages hydrogen direct reduction shaft furnace state and mitigation
@@ -117,15 +117,15 @@ func (v *HDRIShaftVault) EvaluateStickingAndFluidization(furnaceID string) (HDRI
 	digest := hex.EncodeToString(hasher.Sum(nil))
 
 	assessment := HDRIShaftAssessment{
-		AssessmentID:                   fmt.Sprintf("ASM-HDRI-%d", time.Now().UnixNano()%1000000),
-		FurnaceID:                      furnaceID,
-		ShaftBedFluidizationStatus:     fluidizationStatus,
-		PelletClusteringHazard:         clusteringHazard,
-		StickingExcessMarginPct:        stickingExcess,
+		AssessmentID:                     fmt.Sprintf("ASM-HDRI-%d", time.Now().UnixNano()%1000000),
+		FurnaceID:                        furnaceID,
+		ShaftBedFluidizationStatus:       fluidizationStatus,
+		PelletClusteringHazard:           clusteringHazard,
+		StickingExcessMarginPct:          stickingExcess,
 		AntiStickingDopeInjectionMandate: dopeMandate,
-		BedPulsationTrimmingMandate:    pulsationMandate,
-		AuditDigest:                    digest,
-		EvaluatedAt:                    time.Now(),
+		BedPulsationTrimmingMandate:      pulsationMandate,
+		AuditDigest:                      digest,
+		EvaluatedAt:                      time.Now(),
 	}
 
 	v.assessments[furnaceID] = assessment
@@ -148,7 +148,7 @@ func (v *HDRIShaftVault) TriggerDopeInjectionAndBedPulsation(furnaceID string) (
 	pulseFreq := 0.0
 
 	if asm.AntiStickingDopeInjectionMandate {
-		dopeRate = 185.0 // inject 185 kg/hr micronized MgO anti-sticking barrier coating at tuyere inlet
+		dopeRate = 185.0  // inject 185 kg/hr micronized MgO anti-sticking barrier coating at tuyere inlet
 		bustleTrim = -8.5 // trim hydrogen gas velocity by -8.5% to stabilize bed thermal gradient
 	}
 	if asm.BedPulsationTrimmingMandate {
@@ -156,13 +156,13 @@ func (v *HDRIShaftVault) TriggerDopeInjectionAndBedPulsation(furnaceID string) (
 	}
 
 	action := HDRIShaftMitigationAction{
-		ActionID:                        fmt.Sprintf("ACT-HDRI-%d", time.Now().UnixNano()%1000000),
-		FurnaceID:                        furnaceID,
+		ActionID:                          fmt.Sprintf("ACT-HDRI-%d", time.Now().UnixNano()%1000000),
+		FurnaceID:                         furnaceID,
 		CommandedMgoDopeInjectionRateKgHr: dopeRate,
-		HydrogenBustleTrimPct:           bustleTrim,
-		PneumaticBedPulsationHz:         pulseFreq,
-		AvoidedFurnaceFreezeLossUSD:     120000000.0, // $120M USD avoided furnace freeze, refractory reline, and production outage
-		ExecutedAt:                      time.Now(),
+		HydrogenBustleTrimPct:             bustleTrim,
+		PneumaticBedPulsationHz:           pulseFreq,
+		AvoidedFurnaceFreezeLossUSD:       120000000.0, // $120M USD avoided furnace freeze, refractory reline, and production outage
+		ExecutedAt:                        time.Now(),
 	}
 
 	v.actions[furnaceID] = action
@@ -183,23 +183,23 @@ func (v *HDRIShaftVault) GetHDRIFurnaceDossier(furnaceID string) (map[string]int
 	}
 
 	dossier := map[string]interface{}{
-		"furnace_id":                  furnaceID,
-		"steel_mill_id":               telem.SteelMillID,
-		"iso_14044_compliant":         true,
-		"din_en746_2_certified":       asm.ShaftBedFluidizationStatus != "BED_CHOKING_STICKING_COLLAPSE" || hasAct,
-		"osha_1910_psm_cleared":       true,
-		"bed_reduction_temp_c":        telem.BedReductionTempC,
-		"top_gas_h2_utilization_pct":  telem.TopGasH2UtilizationPct,
+		"furnace_id":                     furnaceID,
+		"steel_mill_id":                  telem.SteelMillID,
+		"iso_14044_compliant":            true,
+		"din_en746_2_certified":          asm.ShaftBedFluidizationStatus != "BED_CHOKING_STICKING_COLLAPSE" || hasAct,
+		"osha_1910_psm_cleared":          true,
+		"bed_reduction_temp_c":           telem.BedReductionTempC,
+		"top_gas_h2_utilization_pct":     telem.TopGasH2UtilizationPct,
 		"bed_differential_pressure_mbar": telem.BedDifferentialPressureMbar,
-		"pellet_sticking_index":       telem.PelletStickingIndex,
-		"metallization_degree_pct":    telem.MetDegreeMetallizationPct,
-		"fluidization_status":         asm.ShaftBedFluidizationStatus,
-		"clustering_hazard":           asm.PelletClusteringHazard,
-		"dope_injection_active":       hasAct && act.CommandedMgoDopeInjectionRateKgHr > 0,
-		"pneumatic_pulsation_hz":      0.0,
-		"avoided_loss_usd":            0.0,
-		"audit_digest":                asm.AuditDigest,
-		"compiled_at":                 time.Now(),
+		"pellet_sticking_index":          telem.PelletStickingIndex,
+		"metallization_degree_pct":       telem.MetDegreeMetallizationPct,
+		"fluidization_status":            asm.ShaftBedFluidizationStatus,
+		"clustering_hazard":              asm.PelletClusteringHazard,
+		"dope_injection_active":          hasAct && act.CommandedMgoDopeInjectionRateKgHr > 0,
+		"pneumatic_pulsation_hz":         0.0,
+		"avoided_loss_usd":               0.0,
+		"audit_digest":                   asm.AuditDigest,
+		"compiled_at":                    time.Now(),
 	}
 
 	if hasAct {

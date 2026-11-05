@@ -22,10 +22,10 @@ type AuditLogRule struct {
 	LogWrite      bool   `gorm:"default:true" json:"log_write"`
 	LogUnlink     bool   `gorm:"default:true" json:"log_unlink"`
 	LogRead       bool   `gorm:"default:false" json:"log_read"`
-	TrackFields   string `gorm:"type:text" json:"track_fields"`            // Comma separated list of fields or "*" for all
-	CaptureDiff   bool   `gorm:"default:true" json:"capture_diff"`         // Capture before vs after JSON diff
+	TrackFields   string `gorm:"type:text" json:"track_fields"`    // Comma separated list of fields or "*" for all
+	CaptureDiff   bool   `gorm:"default:true" json:"capture_diff"` // Capture before vs after JSON diff
 	Active        bool   `gorm:"default:true" json:"active"`
-	RetentionDays int    `gorm:"default:365" json:"retention_days"`        // SOX / ISO 27001 retention period in days (0=forever)
+	RetentionDays int    `gorm:"default:365" json:"retention_days"` // SOX / ISO 27001 retention period in days (0=forever)
 	Description   string `gorm:"type:text" json:"description"`
 }
 
@@ -49,7 +49,7 @@ type AuditLogEntry struct {
 	Diffs         []AuditLogFieldDiff `gorm:"foreignKey:AuditLogID" json:"diffs"`
 	IsSuspicious  bool                `gorm:"default:false;index" json:"is_suspicious"` // Flagged by anomaly detection
 	AnomalyReason string              `gorm:"type:text" json:"anomaly_reason"`
-	RiskScore     int                 `gorm:"default:0" json:"risk_score"`              // 0 to 100
+	RiskScore     int                 `gorm:"default:0" json:"risk_score"` // 0 to 100
 }
 
 // AuditLogFieldDiff contains granular field-level modification details

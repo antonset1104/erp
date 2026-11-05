@@ -13,16 +13,16 @@ import (
 
 // SKUVelocityMetric captures picking frequency, ergonomic tier, and product pairing affinities.
 type SKUVelocityMetric struct {
-	SKUID                  string   `json:"sku_id"`
-	Name                   string   `json:"name"`
-	DailyPickFrequency     float64  `json:"daily_pick_frequency"` // picks per day
-	MonthlyVolumeUnits     float64  `json:"monthly_volume_units"`
-	CurrentBinLocation     string   `json:"current_bin_location"`
-	RecommendedBinLocation string   `json:"recommended_bin_location"`
-	VelocityClass          string   `json:"velocity_class"` // "CLASS_A_FAST", "CLASS_B_MEDIUM", "CLASS_C_SLOW"
-	AffinitySKUs           []string `json:"affinity_skus"`  // items frequently ordered together
-	GoldenZoneQualified    bool     `json:"golden_zone_qualified"`
-	DistanceToPackingMeters float64 `json:"distance_to_packing_meters"`
+	SKUID                   string   `json:"sku_id"`
+	Name                    string   `json:"name"`
+	DailyPickFrequency      float64  `json:"daily_pick_frequency"` // picks per day
+	MonthlyVolumeUnits      float64  `json:"monthly_volume_units"`
+	CurrentBinLocation      string   `json:"current_bin_location"`
+	RecommendedBinLocation  string   `json:"recommended_bin_location"`
+	VelocityClass           string   `json:"velocity_class"` // "CLASS_A_FAST", "CLASS_B_MEDIUM", "CLASS_C_SLOW"
+	AffinitySKUs            []string `json:"affinity_skus"`  // items frequently ordered together
+	GoldenZoneQualified     bool     `json:"golden_zone_qualified"`
+	DistanceToPackingMeters float64  `json:"distance_to_packing_meters"`
 }
 
 // ReshuffleWorkOrder directs warehouse staff or AMRs to move inventory between bins off-shift.
@@ -34,9 +34,9 @@ type ReshuffleWorkOrder struct {
 	ToBinLocation        string  `json:"to_bin_location"`
 	UnitQuantity         int     `json:"unit_quantity"`
 	EstimatedTimeMinutes float64 `json:"estimated_time_minutes"`
-	Priority             string  `json:"priority"` // "HIGH_VELOCITY_SHIFT", "AFFINITY_CLUSTER", "ERGONOMIC_OPT"
+	Priority             string  `json:"priority"`       // "HIGH_VELOCITY_SHIFT", "AFFINITY_CLUSTER", "ERGONOMIC_OPT"
 	ShiftSchedule        string  `json:"shift_schedule"` // "NIGHT_SHIFT_0200_0500"
-	Status               string  `json:"status"` // "PENDING_WMS_EXECUTION", "COMPLETED"
+	Status               string  `json:"status"`         // "PENDING_WMS_EXECUTION", "COMPLETED"
 }
 
 // WarehouseSlottingHeatmap consolidates warehouse spatial efficiency and travel reduction projections.
@@ -56,16 +56,16 @@ type WarehouseSlottingHeatmap struct {
 
 // SlottingAnalysisRequest holds inputs to profile warehouse picking velocity.
 type SlottingAnalysisRequest struct {
-	WarehouseID         string              `json:"warehouse_id"`
-	LookbackPeriodDays  int                 `json:"lookback_period_days"`
-	Items               []SKUVelocityMetric `json:"items"`
+	WarehouseID        string              `json:"warehouse_id"`
+	LookbackPeriodDays int                 `json:"lookback_period_days"`
+	Items              []SKUVelocityMetric `json:"items"`
 }
 
 // DynamicSlottingStore provides thread-safe storage for slotting recommendations.
 type DynamicSlottingStore struct {
-	mu        sync.RWMutex
-	heatmaps  map[string]*WarehouseSlottingHeatmap
-	skus      map[string]*SKUVelocityMetric
+	mu       sync.RWMutex
+	heatmaps map[string]*WarehouseSlottingHeatmap
+	skus     map[string]*SKUVelocityMetric
 }
 
 var globalSlottingStore = &DynamicSlottingStore{

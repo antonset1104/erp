@@ -13,20 +13,20 @@ import (
 
 // Tenant represents an isolated corporate tenant in the GoERP SaaS ecosystem
 type Tenant struct {
-	ID          uint      `json:"id" gorm:"primaryKey"`
-	TenantID    string    `json:"tenant_id" gorm:"uniqueIndex;size:64;not null"`
-	Name        string    `json:"name" gorm:"size:128;not null"`
-	Domain      string    `json:"domain" gorm:"size:128"`
-	Plan        string    `json:"plan" gorm:"size:32;default:'professional'"` // "starter", "professional", "enterprise"
-	Status      string    `json:"status" gorm:"size:32;default:'active'"`    // "active", "trial", "suspended"
-	StorageQuotaMB int64  `json:"storage_quota_mb" gorm:"default:10240"`
-	UserLimit   int       `json:"user_limit" gorm:"default:50"`
-	DBType      string    `json:"db_type" gorm:"size:32;default:'sqlite'"`
-	DBSchema    string    `json:"db_schema" gorm:"size:64"`
-	DBPath      string    `json:"db_path" gorm:"size:255"`
-	AdminEmail  string    `json:"admin_email" gorm:"size:128"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID             uint      `json:"id" gorm:"primaryKey"`
+	TenantID       string    `json:"tenant_id" gorm:"uniqueIndex;size:64;not null"`
+	Name           string    `json:"name" gorm:"size:128;not null"`
+	Domain         string    `json:"domain" gorm:"size:128"`
+	Plan           string    `json:"plan" gorm:"size:32;default:'professional'"` // "starter", "professional", "enterprise"
+	Status         string    `json:"status" gorm:"size:32;default:'active'"`     // "active", "trial", "suspended"
+	StorageQuotaMB int64     `json:"storage_quota_mb" gorm:"default:10240"`
+	UserLimit      int       `json:"user_limit" gorm:"default:50"`
+	DBType         string    `json:"db_type" gorm:"size:32;default:'sqlite'"`
+	DBSchema       string    `json:"db_schema" gorm:"size:64"`
+	DBPath         string    `json:"db_path" gorm:"size:255"`
+	AdminEmail     string    `json:"admin_email" gorm:"size:128"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
 }
 
 // TenantRegisterRequest is the payload for POST /api/v1/saas/tenants/register
@@ -41,9 +41,9 @@ type TenantRegisterRequest struct {
 
 // TenantManager handles multi-tenancy resolution, tenant isolation, and provisioning
 type TenantManager struct {
-	db       *gorm.DB
-	mu       sync.RWMutex
-	cache    map[string]*Tenant
+	db    *gorm.DB
+	mu    sync.RWMutex
+	cache map[string]*Tenant
 }
 
 var globalManager *TenantManager

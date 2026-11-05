@@ -14,31 +14,31 @@ import (
 
 // DigesterBiochemicalTelemetry captures anaerobic digestion process parameters
 type DigesterBiochemicalTelemetry struct {
-	TelemetryID                  string    `json:"telemetry_id"`
-	DigesterID                   string    `json:"digester_id"` // "DIGESTER-WWTP-THERMOPHILIC-01"
-	SludgeFeedRateM3Day          float64   `json:"sludge_feed_rate_m3_day"`
-	DigesterOperatingTempC       float64   `json:"digester_operating_temp_c"` // Thermophilic ~55.0°C; Mesophilic ~37.0°C
-	VolatileFattyAcidsFOS_mgL    float64   `json:"volatile_fatty_acids_fos_mgl"` // Volatile Organic Acids (FOS) mg/L CH3COOH
-	TotalInorganicCarbonTAC_mgL  float64   `json:"total_inorganic_carbon_tac_mgl"` // Alkalinity Buffer (TAC) mg/L CaCO3
-	BiogasProductionM3Day        float64   `json:"biogas_production_m3_day"`
-	BiogasMethaneCH4Pct          float64   `json:"biogas_methane_ch4_pct"` // Normal: 60 - 65% CH4
-	BiogasH2S_PPM                float64   `json:"biogas_h2s_ppm"`         // Hydrogen Sulfide contaminant
-	DigesterSludgePH             float64   `json:"digester_sludge_ph"`     // Optimal: 7.2 - 7.6
-	RecordedAt                   time.Time `json:"recorded_at"`
+	TelemetryID                 string    `json:"telemetry_id"`
+	DigesterID                  string    `json:"digester_id"` // "DIGESTER-WWTP-THERMOPHILIC-01"
+	SludgeFeedRateM3Day         float64   `json:"sludge_feed_rate_m3_day"`
+	DigesterOperatingTempC      float64   `json:"digester_operating_temp_c"`      // Thermophilic ~55.0°C; Mesophilic ~37.0°C
+	VolatileFattyAcidsFOS_mgL   float64   `json:"volatile_fatty_acids_fos_mgl"`   // Volatile Organic Acids (FOS) mg/L CH3COOH
+	TotalInorganicCarbonTAC_mgL float64   `json:"total_inorganic_carbon_tac_mgl"` // Alkalinity Buffer (TAC) mg/L CaCO3
+	BiogasProductionM3Day       float64   `json:"biogas_production_m3_day"`
+	BiogasMethaneCH4Pct         float64   `json:"biogas_methane_ch4_pct"` // Normal: 60 - 65% CH4
+	BiogasH2S_PPM               float64   `json:"biogas_h2s_ppm"`         // Hydrogen Sulfide contaminant
+	DigesterSludgePH            float64   `json:"digester_sludge_ph"`     // Optimal: 7.2 - 7.6
+	RecordedAt                  time.Time `json:"recorded_at"`
 }
 
 // AcidificationStabilityAssessment models FOS/TAC ratio and volatile fatty acid sour digester prevention
 type AcidificationStabilityAssessment struct {
-	AssessmentID                   string    `json:"assessment_id"`
-	DigesterID                     string    `json:"digester_id"`
-	FOS_TAC_Ratio                  float64   `json:"fos_tac_ratio"` // FOS / TAC. Optimal < 0.30; Warning 0.30 - 0.40; Sour > 0.40
-	DigesterHealthStatus           string    `json:"digester_health_status"` // "OPTIMAL_METHANOGENESIS", "ELEVATED_ACIDIFICATION_WARNING", "SOUR_DIGESTER_ACID_COLLAPSE"
-	RecommendedSludgeFeedThrottlePct float64 `json:"recommended_sludge_feed_throttle_pct"`
-	SodiumBicarbonateDosingKg      float64   `json:"sodium_bicarbonate_dosing_kg"` // Buffer addition for acid neutralization
-	BiomethaneNetM3Day             float64   `json:"biomethane_net_m3_day"`        // Pure upgraded CH4
-	BiomethaneDailyRevenueUSD      float64   `json:"biomethane_daily_revenue_usd"` // Injected RNG tariff ~$0.75/m3
-	BiochemicalAuditDigest         string    `json:"biochemical_audit_digest"`
-	EvaluatedAt                    time.Time `json:"evaluated_at"`
+	AssessmentID                     string    `json:"assessment_id"`
+	DigesterID                       string    `json:"digester_id"`
+	FOS_TAC_Ratio                    float64   `json:"fos_tac_ratio"`          // FOS / TAC. Optimal < 0.30; Warning 0.30 - 0.40; Sour > 0.40
+	DigesterHealthStatus             string    `json:"digester_health_status"` // "OPTIMAL_METHANOGENESIS", "ELEVATED_ACIDIFICATION_WARNING", "SOUR_DIGESTER_ACID_COLLAPSE"
+	RecommendedSludgeFeedThrottlePct float64   `json:"recommended_sludge_feed_throttle_pct"`
+	SodiumBicarbonateDosingKg        float64   `json:"sodium_bicarbonate_dosing_kg"` // Buffer addition for acid neutralization
+	BiomethaneNetM3Day               float64   `json:"biomethane_net_m3_day"`        // Pure upgraded CH4
+	BiomethaneDailyRevenueUSD        float64   `json:"biomethane_daily_revenue_usd"` // Injected RNG tariff ~$0.75/m3
+	BiochemicalAuditDigest           string    `json:"biochemical_audit_digest"`
+	EvaluatedAt                      time.Time `json:"evaluated_at"`
 }
 
 // ClassABiosolidsPasteurizationCertificate certifies EPA 40 CFR Part 503 pathogen thermal destruction
@@ -50,7 +50,7 @@ type ClassABiosolidsPasteurizationCertificate struct {
 	ContinuousHoldDurationDays   float64   `json:"continuous_hold_duration_days"`
 	EPA_Part503_RequiredDays     float64   `json:"epa_part503_required_days"`
 	PathogenFecalColiformMPNGram float64   `json:"pathogen_fecal_coliform_mpn_gram"` // Must be < 1,000 MPN/g
-	CertificationStatus          string    `json:"certification_status"` // "CLASS_A_EXCEPTIONAL_QUALITY_APPROVED", "UNRESTRICTED_AGRICULTURAL_LAND_APPLICATION"
+	CertificationStatus          string    `json:"certification_status"`             // "CLASS_A_EXCEPTIONAL_QUALITY_APPROVED", "UNRESTRICTED_AGRICULTURAL_LAND_APPLICATION"
 	AuditSignatureHash           string    `json:"audit_signature_hash"`
 	IssuedAt                     time.Time `json:"issued_at"`
 }
@@ -220,14 +220,14 @@ func (v *WastewaterDigesterVault) GetBiomethaneCoGenDossier(plantID string) (map
 	}
 
 	dossier := map[string]interface{}{
-		"wastewater_plant_id":      plantID,
-		"active_digesters_count":   len(v.telemetries),
-		"evaluated_assessments":    digesterCount,
-		"total_biomethane_m3_day":  math.Round(totalBiomethane*10.0) / 10.0,
-		"daily_rng_revenue_usd":    math.Round(totalRevenue*100.0) / 100.0,
-		"en_16723_grid_compliant":  true,
-		"epa_part503_certified":    len(v.certificates) > 0,
-		"compiled_at":              time.Now(),
+		"wastewater_plant_id":     plantID,
+		"active_digesters_count":  len(v.telemetries),
+		"evaluated_assessments":   digesterCount,
+		"total_biomethane_m3_day": math.Round(totalBiomethane*10.0) / 10.0,
+		"daily_rng_revenue_usd":   math.Round(totalRevenue*100.0) / 100.0,
+		"en_16723_grid_compliant": true,
+		"epa_part503_certified":   len(v.certificates) > 0,
+		"compiled_at":             time.Now(),
 	}
 
 	return dossier, nil

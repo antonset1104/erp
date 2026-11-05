@@ -16,46 +16,46 @@ type AirborneHTSTelemetry struct {
 	TelemetryID                 string    `json:"telemetry_id"`
 	GeneratorID                 string    `json:"generator_id"`
 	AircraftTailNumber          string    `json:"aircraft_tail_number"`
-	FlightPhase                 string    `json:"flight_phase"` // TAXI, TAKEOFF_CLIMB, CRUISE, DESCENT
-	RebcoStatorTempKelvin       float64   `json:"rebco_stator_temp_kelvin"` // critical threshold < 77.0 K
-	StatorVoltageTapMicrovolts  float64   `json:"stator_voltage_tap_microvolts"` // quench threshold > 25.0 µV
+	FlightPhase                 string    `json:"flight_phase"`                      // TAXI, TAKEOFF_CLIMB, CRUISE, DESCENT
+	RebcoStatorTempKelvin       float64   `json:"rebco_stator_temp_kelvin"`          // critical threshold < 77.0 K
+	StatorVoltageTapMicrovolts  float64   `json:"stator_voltage_tap_microvolts"`     // quench threshold > 25.0 µV
 	CryoCoolantFlowRateKgPerSec float64   `json:"cryo_coolant_flow_rate_kg_per_sec"` // supercritical helium flow
-	LorentzMechanicalStrainPct  float64   `json:"lorentz_mechanical_strain_pct"` // limit < 0.35%
-	OutputPowerMegawatts        float64   `json:"output_power_megawatts"` // 1.0 - 10.0 MW
-	QuenchRiskIndex             float64   `json:"quench_risk_index"` // normalized 0.0 - 1.0
+	LorentzMechanicalStrainPct  float64   `json:"lorentz_mechanical_strain_pct"`     // limit < 0.35%
+	OutputPowerMegawatts        float64   `json:"output_power_megawatts"`            // 1.0 - 10.0 MW
+	QuenchRiskIndex             float64   `json:"quench_risk_index"`                 // normalized 0.0 - 1.0
 	Timestamp                   time.Time `json:"timestamp"`
 }
 
 // AirborneHTSAssessment models superconductivity health, quench hazard, and flight airworthiness
 type AirborneHTSAssessment struct {
-	AssessmentID                        string    `json:"assessment_id"`
-	GeneratorID                         string    `json:"generator_id"`
-	SuperconductingState                string    `json:"superconducting_state"` // STABLE_ZERO_RESISTANCE, MARGINAL_FLUX_CREEP, RESISTIVE_TRANSITION_QUENCH
-	LocalizedQuenchHazard               string    `json:"localized_quench_hazard"` // NOMINAL_SUPERCONDUCTING, VOLTAGE_RUNAWAY_QUENCH_DETECTED
-	CryoCoolingMarginKelvin             float64   `json:"cryo_cooling_margin_kelvin"`
-	FastEnergyExtractionMandate         bool      `json:"fast_energy_extraction_mandate"`
-	EmergencyBatteryBusTransferMandate   bool      `json:"emergency_battery_bus_transfer_mandate"`
-	AuditDigest                         string    `json:"audit_digest"`
-	EvaluatedAt                         time.Time `json:"evaluated_at"`
+	AssessmentID                       string    `json:"assessment_id"`
+	GeneratorID                        string    `json:"generator_id"`
+	SuperconductingState               string    `json:"superconducting_state"`   // STABLE_ZERO_RESISTANCE, MARGINAL_FLUX_CREEP, RESISTIVE_TRANSITION_QUENCH
+	LocalizedQuenchHazard              string    `json:"localized_quench_hazard"` // NOMINAL_SUPERCONDUCTING, VOLTAGE_RUNAWAY_QUENCH_DETECTED
+	CryoCoolingMarginKelvin            float64   `json:"cryo_cooling_margin_kelvin"`
+	FastEnergyExtractionMandate        bool      `json:"fast_energy_extraction_mandate"`
+	EmergencyBatteryBusTransferMandate bool      `json:"emergency_battery_bus_transfer_mandate"`
+	AuditDigest                        string    `json:"audit_digest"`
+	EvaluatedAt                        time.Time `json:"evaluated_at"`
 }
 
 // AirborneHTSMitigationAction models fast energy extraction, secondary bus failover, and cryo purge
 type AirborneHTSMitigationAction struct {
-	ActionID                              string    `json:"action_id"`
-	GeneratorID                           string    `json:"generator_id"`
-	CommandedDumpResistorExtractionWatts  float64   `json:"commanded_dump_resistor_extraction_watts"`
-	SecondaryBatteryBusTransferPct        float64   `json:"secondary_battery_bus_transfer_pct"`
-	CryoHeliumPurgeRateKgPerSec           float64   `json:"cryo_helium_purge_rate_kg_per_sec"`
-	AvoidedAircraftLossUSD                float64   `json:"avoided_aircraft_loss_usd"`
-	ExecutedAt                            time.Time `json:"executed_at"`
+	ActionID                             string    `json:"action_id"`
+	GeneratorID                          string    `json:"generator_id"`
+	CommandedDumpResistorExtractionWatts float64   `json:"commanded_dump_resistor_extraction_watts"`
+	SecondaryBatteryBusTransferPct       float64   `json:"secondary_battery_bus_transfer_pct"`
+	CryoHeliumPurgeRateKgPerSec          float64   `json:"cryo_helium_purge_rate_kg_per_sec"`
+	AvoidedAircraftLossUSD               float64   `json:"avoided_aircraft_loss_usd"`
+	ExecutedAt                           time.Time `json:"executed_at"`
 }
 
 // AirborneHTSVault manages megawatt superconducting telemetry, evaluations, and failover actions
 type AirborneHTSVault struct {
-	mu           sync.RWMutex
-	telemetries  map[string]AirborneHTSTelemetry
-	assessments  map[string]AirborneHTSAssessment
-	actions      map[string]AirborneHTSMitigationAction
+	mu          sync.RWMutex
+	telemetries map[string]AirborneHTSTelemetry
+	assessments map[string]AirborneHTSAssessment
+	actions     map[string]AirborneHTSMitigationAction
 }
 
 // GlobalAirborneHTSVault is the singleton instance for aviation superconducting stator sentinel
@@ -117,15 +117,15 @@ func (v *AirborneHTSVault) EvaluateQuenchAndThermalRunaway(generatorID string) (
 	digest := hex.EncodeToString(hasher.Sum(nil))
 
 	assessment := AirborneHTSAssessment{
-		AssessmentID:                        fmt.Sprintf("ASM-HTS-%d", time.Now().UnixNano()%1000000),
-		GeneratorID:                         generatorID,
-		SuperconductingState:                superState,
-		LocalizedQuenchHazard:               quenchHazard,
-		CryoCoolingMarginKelvin:             coolingMargin,
-		FastEnergyExtractionMandate:         fastExtractMandate,
-		EmergencyBatteryBusTransferMandate:   busTransferMandate,
-		AuditDigest:                         digest,
-		EvaluatedAt:                         time.Now(),
+		AssessmentID:                       fmt.Sprintf("ASM-HTS-%d", time.Now().UnixNano()%1000000),
+		GeneratorID:                        generatorID,
+		SuperconductingState:               superState,
+		LocalizedQuenchHazard:              quenchHazard,
+		CryoCoolingMarginKelvin:            coolingMargin,
+		FastEnergyExtractionMandate:        fastExtractMandate,
+		EmergencyBatteryBusTransferMandate: busTransferMandate,
+		AuditDigest:                        digest,
+		EvaluatedAt:                        time.Now(),
 	}
 
 	v.assessments[generatorID] = assessment

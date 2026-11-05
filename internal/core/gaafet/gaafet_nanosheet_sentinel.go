@@ -21,7 +21,7 @@ type GAAFETWaferTelemetry struct {
 	NanosheetChannelThicknessNm     float64   `json:"nanosheet_channel_thickness_nm"`       // e.g. 5.2 nm
 	SiGeSelectiveEtchRatio          float64   `json:"sige_selective_etch_ratio"`            // e.g. 112.5:1 (target > 150:1)
 	EquivalentOxideThicknessEotNm   float64   `json:"equivalent_oxide_thickness_eot_nm"`    // e.g. 0.72 nm (target < 0.65 nm)
-	CryoChuckTemperatureC          float64   `json:"cryo_chuck_temperature_c"`             // e.g. -28.5°C (target -40.0°C)
+	CryoChuckTemperatureC           float64   `json:"cryo_chuck_temperature_c"`             // e.g. -28.5°C (target -40.0°C)
 	HfO2ALDPrecursorPulseDurationMs float64   `json:"hfo2_ald_precursor_pulse_duration_ms"` // e.g. 14.5 ms (rapid atomic dosing)
 	ThermalBudgetDtDiffMargin       float64   `json:"thermal_budget_dt_diff_margin"`        // e.g. 1.28 (limit 1.0 D*t diffusion margin)
 	SubthresholdSwingMvPerDec       float64   `json:"subthreshold_swing_mv_per_dec"`        // e.g. 68.5 mV/dec (ideal ~60-65)
@@ -30,27 +30,27 @@ type GAAFETWaferTelemetry struct {
 
 // GAAFETAssessment models SiGe release selectivity, nanosheet stiction warpage, and ALD high-k thermal budget exceedance
 type GAAFETAssessment struct {
-	AssessmentID                     string    `json:"assessment_id"`
-	WaferLotID                       string    `json:"wafer_lot_id"`
-	NanosheetReleaseSelectivityMargin float64  `json:"nanosheet_release_selectivity_margin"` // target 150.0 - actual
-	ThermalBudgetExceedancePct       float64   `json:"thermal_budget_exceedance_pct"`        // (DtMargin - 1.0) * 100
-	NanosheetStictionCollapseHazard  string    `json:"nanosheet_stiction_collapse_hazard"`   // "SHEET_SUSPENSION_STABLE", "MARGINAL_STRETCH_WARPAGE_WARNING", "CRITICAL_STICTION_COLLAPSE_SHORT"
-	GateDielectricLeakageCompliance  string    `json:"gate_dielectric_leakage_compliance"`   // "PREMIUM_IRDS_A14_COMPLIANT", "SUB_OPTIMAL_OXIDE_DOPANT_SMEAR", "OFF_SPEC_GATE_LEAKAGE_REJECT"
-	CryoChuckCoolingMandate          bool      `json:"cryo_chuck_cooling_mandate"`
-	ALDPulseShapingMandate           bool      `json:"ald_pulse_shaping_mandate"`
-	AuditDigest                      string    `json:"audit_digest"`
-	EvaluatedAt                      time.Time `json:"evaluated_at"`
+	AssessmentID                      string    `json:"assessment_id"`
+	WaferLotID                        string    `json:"wafer_lot_id"`
+	NanosheetReleaseSelectivityMargin float64   `json:"nanosheet_release_selectivity_margin"` // target 150.0 - actual
+	ThermalBudgetExceedancePct        float64   `json:"thermal_budget_exceedance_pct"`        // (DtMargin - 1.0) * 100
+	NanosheetStictionCollapseHazard   string    `json:"nanosheet_stiction_collapse_hazard"`   // "SHEET_SUSPENSION_STABLE", "MARGINAL_STRETCH_WARPAGE_WARNING", "CRITICAL_STICTION_COLLAPSE_SHORT"
+	GateDielectricLeakageCompliance   string    `json:"gate_dielectric_leakage_compliance"`   // "PREMIUM_IRDS_A14_COMPLIANT", "SUB_OPTIMAL_OXIDE_DOPANT_SMEAR", "OFF_SPEC_GATE_LEAKAGE_REJECT"
+	CryoChuckCoolingMandate           bool      `json:"cryo_chuck_cooling_mandate"`
+	ALDPulseShapingMandate            bool      `json:"ald_pulse_shaping_mandate"`
+	AuditDigest                       string    `json:"audit_digest"`
+	EvaluatedAt                       time.Time `json:"evaluated_at"`
 }
 
 // GAAFETMitigationAction models cryogenic wafer chuck chilling, ALD precursor pulse truncation, and radical scavenger tuning
 type GAAFETMitigationAction struct {
-	ActionID                     string    `json:"action_id"`
-	WaferLotID                   string    `json:"wafer_lot_id"`
-	TunedCryoChuckTemperatureC   float64   `json:"tuned_cryo_chuck_temperature_c"`   // chilled to -42.0°C
-	ModulatedALDPulseDurationMs  float64   `json:"modulated_ald_pulse_duration_ms"`  // truncated to 8.2 ms
-	RadicalScavengerPressureMtorr float64  `json:"radical_scavenger_pressure_mtorr"` // modulated to 12.5 mTorr
-	AvoidedWaferScrapLossUSD     float64   `json:"avoided_wafer_scrap_loss_usd"`     // Avoided $85M USD in scrapped EUV 300mm GAAFET wafer lots
-	ActionTimestamp              time.Time `json:"action_timestamp"`
+	ActionID                      string    `json:"action_id"`
+	WaferLotID                    string    `json:"wafer_lot_id"`
+	TunedCryoChuckTemperatureC    float64   `json:"tuned_cryo_chuck_temperature_c"`   // chilled to -42.0°C
+	ModulatedALDPulseDurationMs   float64   `json:"modulated_ald_pulse_duration_ms"`  // truncated to 8.2 ms
+	RadicalScavengerPressureMtorr float64   `json:"radical_scavenger_pressure_mtorr"` // modulated to 12.5 mTorr
+	AvoidedWaferScrapLossUSD      float64   `json:"avoided_wafer_scrap_loss_usd"`     // Avoided $85M USD in scrapped EUV 300mm GAAFET wafer lots
+	ActionTimestamp               time.Time `json:"action_timestamp"`
 }
 
 // GAAFETVault thread-safe in-memory store
@@ -157,7 +157,7 @@ func (v *GAAFETVault) TriggerCryoEtchAndALDPulseShaping(lotID string) (GAAFETMit
 	scavengerPress := 5.0
 
 	if asm.CryoChuckCoolingMandate {
-		cryoTemp = -42.0 // freeze out isotropic lateral attack on Si nanosheet core
+		cryoTemp = -42.0      // freeze out isotropic lateral attack on Si nanosheet core
 		scavengerPress = 12.5 // quench excess fluorine radicals
 	}
 	if asm.ALDPulseShapingMandate {
@@ -165,13 +165,13 @@ func (v *GAAFETVault) TriggerCryoEtchAndALDPulseShaping(lotID string) (GAAFETMit
 	}
 
 	action := GAAFETMitigationAction{
-		ActionID:                     fmt.Sprintf("ACT-GAA-%d", time.Now().UnixNano()%1000000),
-		WaferLotID:                   lotID,
-		TunedCryoChuckTemperatureC:   cryoTemp,
-		ModulatedALDPulseDurationMs:  aldPulse,
+		ActionID:                      fmt.Sprintf("ACT-GAA-%d", time.Now().UnixNano()%1000000),
+		WaferLotID:                    lotID,
+		TunedCryoChuckTemperatureC:    cryoTemp,
+		ModulatedALDPulseDurationMs:   aldPulse,
 		RadicalScavengerPressureMtorr: scavengerPress,
-		AvoidedWaferScrapLossUSD:     85000000.0,
-		ActionTimestamp:              time.Now(),
+		AvoidedWaferScrapLossUSD:      85000000.0,
+		ActionTimestamp:               time.Now(),
 	}
 
 	v.actions[lotID] = action

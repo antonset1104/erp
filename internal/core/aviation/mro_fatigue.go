@@ -14,22 +14,22 @@ import (
 
 // FlightTelemetryRecord captures flight recorder / QAR touchdown and airframe cyclic metrics
 type FlightTelemetryRecord struct {
-	TelemetryID             string    `json:"telemetry_id"`
-	TailNumber              string    `json:"tail_number"`    // e.g. "PK-GIA-777"
-	AircraftModel           string    `json:"aircraft_model"` // "BOEING_777_300ER", "AIRBUS_A350_900"
-	FlightNumber            string    `json:"flight_number"`  // e.g. "GA-882"
-	OriginICAO              string    `json:"origin_icao"`
-	DestinationICAO         string    `json:"destination_icao"`
-	TotalFlightHours        float64   `json:"total_flight_hours"`
-	TotalFlightCycles       int       `json:"total_flight_cycles"`
-	TouchdownSinkRateFPS    float64   `json:"touchdown_sink_rate_fps"`    // Feet per second (normal < 6.0 fps, hard > 10.0 fps)
-	VerticalAccelerationG   float64   `json:"vertical_acceleration_g"`    // Peak vertical G (normal < 1.8G, hard > 2.6G, severe > 3.2G)
-	LateralAccelerationG    float64   `json:"lateral_acceleration_g"`
-	PitchAngleDeg           float64   `json:"pitch_angle_deg"`
-	RollAngleDeg            float64   `json:"roll_angle_deg"`
-	GrossLandingWeightKG    float64   `json:"gross_landing_weight_kg"`
-	MaxDesignLandingWeightKG float64  `json:"max_design_landing_weight_kg"`
-	RecordedAt              time.Time `json:"recorded_at"`
+	TelemetryID              string    `json:"telemetry_id"`
+	TailNumber               string    `json:"tail_number"`    // e.g. "PK-GIA-777"
+	AircraftModel            string    `json:"aircraft_model"` // "BOEING_777_300ER", "AIRBUS_A350_900"
+	FlightNumber             string    `json:"flight_number"`  // e.g. "GA-882"
+	OriginICAO               string    `json:"origin_icao"`
+	DestinationICAO          string    `json:"destination_icao"`
+	TotalFlightHours         float64   `json:"total_flight_hours"`
+	TotalFlightCycles        int       `json:"total_flight_cycles"`
+	TouchdownSinkRateFPS     float64   `json:"touchdown_sink_rate_fps"` // Feet per second (normal < 6.0 fps, hard > 10.0 fps)
+	VerticalAccelerationG    float64   `json:"vertical_acceleration_g"` // Peak vertical G (normal < 1.8G, hard > 2.6G, severe > 3.2G)
+	LateralAccelerationG     float64   `json:"lateral_acceleration_g"`
+	PitchAngleDeg            float64   `json:"pitch_angle_deg"`
+	RollAngleDeg             float64   `json:"roll_angle_deg"`
+	GrossLandingWeightKG     float64   `json:"gross_landing_weight_kg"`
+	MaxDesignLandingWeightKG float64   `json:"max_design_landing_weight_kg"`
+	RecordedAt               time.Time `json:"recorded_at"`
 }
 
 // HardLandingAssessment models structural stress severity and Palmgren-Miner cumulative fatigue

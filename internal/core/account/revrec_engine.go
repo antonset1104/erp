@@ -12,22 +12,22 @@ import (
 
 // PerformanceObligation represents a distinct good or service in an IFRS 15 bundled contract.
 type PerformanceObligation struct {
-	POBID                       string  `json:"pob_id"`
-	Description                 string  `json:"description"`
-	StandaloneSellingPriceIDR   float64 `json:"standalone_selling_price_idr"` // SSP
+	POBID                        string  `json:"pob_id"`
+	Description                  string  `json:"description"`
+	StandaloneSellingPriceIDR    float64 `json:"standalone_selling_price_idr"` // SSP
 	AllocatedTransactionPriceIDR float64 `json:"allocated_transaction_price_idr"`
-	DiscountAllocatedIDR        float64 `json:"discount_allocated_idr"`
-	RecognitionPattern          string  `json:"recognition_pattern"` // "POINT_IN_TIME", "OVER_TIME_MONTHLY"
-	DurationMonths              int     `json:"duration_months"`
-	MonthlyAmortizationIDR      float64 `json:"monthly_amortization_idr"`
+	DiscountAllocatedIDR         float64 `json:"discount_allocated_idr"`
+	RecognitionPattern           string  `json:"recognition_pattern"` // "POINT_IN_TIME", "OVER_TIME_MONTHLY"
+	DurationMonths               int     `json:"duration_months"`
+	MonthlyAmortizationIDR       float64 `json:"monthly_amortization_idr"`
 }
 
 // SSPAllocationRequest holds bundled contracts to allocate transaction price according to relative SSP.
 type SSPAllocationRequest struct {
-	ContractID            string                  `json:"contract_id"`
-	CustomerName          string                  `json:"customer_name"`
-	TotalTransactionPriceIDR float64              `json:"total_transaction_price_idr"` // Discounted bundle price
-	Obligations           []PerformanceObligation `json:"obligations"`
+	ContractID               string                  `json:"contract_id"`
+	CustomerName             string                  `json:"customer_name"`
+	TotalTransactionPriceIDR float64                 `json:"total_transaction_price_idr"` // Discounted bundle price
+	Obligations              []PerformanceObligation `json:"obligations"`
 }
 
 // SSPAllocationResult summarizes relative standalone price allocations and monthly revenue schedule.
@@ -44,11 +44,11 @@ type SSPAllocationResult struct {
 
 // ContractModificationRequest represents an addendum altering scope, price, or seats mid-contract.
 type ContractModificationRequest struct {
-	ContractID                 string  `json:"contract_id"`
-	ModificationType           string  `json:"modification_type"` // "CUMULATIVE_CATCH_UP", "PROSPECTIVE_ADJUSTMENT"
-	AdditionalPriceIDR         float64 `json:"additional_price_idr"`
-	RemainingMonthsToAmortize  int     `json:"remaining_months_to_amortize"`
-	Reason                     string  `json:"reason"`
+	ContractID                string  `json:"contract_id"`
+	ModificationType          string  `json:"modification_type"` // "CUMULATIVE_CATCH_UP", "PROSPECTIVE_ADJUSTMENT"
+	AdditionalPriceIDR        float64 `json:"additional_price_idr"`
+	RemainingMonthsToAmortize int     `json:"remaining_months_to_amortize"`
+	Reason                    string  `json:"reason"`
 }
 
 // ContractModificationResult details the catch-up adjustment or prospective monthly rate revision.

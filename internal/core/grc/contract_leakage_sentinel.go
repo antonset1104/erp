@@ -19,25 +19,25 @@ type ContractObligation struct {
 	ContractType             string    `json:"contract_type"` // "SUPPLIER_PROCUREMENT", "CUSTOMER_SLA_SALES"
 	EffectiveDate            time.Time `json:"effective_date"`
 	ExpirationDate           time.Time `json:"expiration_date"`
-	AutoRenewalNoticeDays    int       `json:"auto_renewal_notice_days"` // e.g. 60 days prior to expiry
+	AutoRenewalNoticeDays    int       `json:"auto_renewal_notice_days"`    // e.g. 60 days prior to expiry
 	SLAAvailabilityPctTarget float64   `json:"sla_availability_pct_target"` // e.g. 99.5%
 	SLAPenaltyRateHourlyUSD  float64   `json:"sla_penalty_rate_hourly_usd"` // e.g. $500/hr
-	RebateThresholdSpendUSD  float64   `json:"rebate_threshold_spend_usd"` // e.g. $1,000,000
-	RebateRatePercent        float64   `json:"rebate_rate_percent"` // e.g. 5.0%
-	Status                   string    `json:"status"` // "ACTIVE_MONITORED", "TERMINATION_PENDING", "RENEWED"
+	RebateThresholdSpendUSD  float64   `json:"rebate_threshold_spend_usd"`  // e.g. $1,000,000
+	RebateRatePercent        float64   `json:"rebate_rate_percent"`         // e.g. 5.0%
+	Status                   string    `json:"status"`                      // "ACTIVE_MONITORED", "TERMINATION_PENDING", "RENEWED"
 	CreatedAt                time.Time `json:"created_at"`
 }
 
 // OperationalPerformanceLog captures real-time operational delivery and uptime data
 type OperationalPerformanceLog struct {
-	LogID                    string    `json:"log_id"`
-	ContractID               string    `json:"contract_id"`
-	ReportingPeriod          string    `json:"reporting_period"` // e.g. "2026-Q4"
-	ActualAvailabilityPct    float64   `json:"actual_availability_pct"` // e.g. 98.2%
-	ActualOutageHours        float64   `json:"actual_outage_hours"` // e.g. 14.5 hrs
-	CumulativeSpendUSD       float64   `json:"cumulative_spend_usd"` // e.g. $1,250,000 USD
-	ActualDeliveryOTIFPct    float64   `json:"actual_delivery_otif_pct"`
-	LoggedAt                 time.Time `json:"logged_at"`
+	LogID                 string    `json:"log_id"`
+	ContractID            string    `json:"contract_id"`
+	ReportingPeriod       string    `json:"reporting_period"`        // e.g. "2026-Q4"
+	ActualAvailabilityPct float64   `json:"actual_availability_pct"` // e.g. 98.2%
+	ActualOutageHours     float64   `json:"actual_outage_hours"`     // e.g. 14.5 hrs
+	CumulativeSpendUSD    float64   `json:"cumulative_spend_usd"`    // e.g. $1,250,000 USD
+	ActualDeliveryOTIFPct float64   `json:"actual_delivery_otif_pct"`
+	LoggedAt              time.Time `json:"logged_at"`
 }
 
 // LeakageAuditResult captures financial recovery and evergreen renewal warnings
@@ -208,14 +208,14 @@ func (v *ContractLeakageVault) IssuePenaltyDebitNote(contractID string) (gin.H, 
 	}
 
 	return gin.H{
-		"contract_id":             contractID,
-		"debit_note_number":       audit.DebitNoteReference,
-		"total_recovered_amount":  audit.TotalValueRecoveredUSD,
-		"currency":                "USD",
-		"gl_posting_debit":        "110200 - Accounts Payable Contra / Debit Note Receivable",
-		"gl_posting_credit":       "510900 - SLA Penalties & Rebate Income",
-		"status":                  "POSTED_AND_APPLIED_TO_NEXT_BILLING",
-		"issued_at":               time.Now(),
+		"contract_id":            contractID,
+		"debit_note_number":      audit.DebitNoteReference,
+		"total_recovered_amount": audit.TotalValueRecoveredUSD,
+		"currency":               "USD",
+		"gl_posting_debit":       "110200 - Accounts Payable Contra / Debit Note Receivable",
+		"gl_posting_credit":      "510900 - SLA Penalties & Rebate Income",
+		"status":                 "POSTED_AND_APPLIED_TO_NEXT_BILLING",
+		"issued_at":              time.Now(),
 	}, nil
 }
 
@@ -233,12 +233,12 @@ func (v *ContractLeakageVault) GetContractDossier(contractID string) (gin.H, err
 	}
 
 	return gin.H{
-		"contract_id":          contractID,
-		"obligation":           ob,
-		"audit_result":         audit,
-		"has_audit":            hasAudit,
-		"performance_telemetry": perf,
-		"has_telemetry":        hasPerf,
+		"contract_id":                 contractID,
+		"obligation":                  ob,
+		"audit_result":                audit,
+		"has_audit":                   hasAudit,
+		"performance_telemetry":       perf,
+		"has_telemetry":               hasPerf,
 		"contract_leakage_mitigation": "PROTECTED_AGAINST_VALUE_DRAIN",
 	}, nil
 }

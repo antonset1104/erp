@@ -17,8 +17,8 @@ type WorkstationMetrics struct {
 	StandardCycleTimeSec float64 `json:"standard_cycle_time_sec"`
 	ActualCycleTimeSec   float64 `json:"actual_cycle_time_sec"`
 	WIPQueueCount        int     `json:"wip_queue_count"`
-	AvailabilityPct      float64 `json:"availability_pct"` // 0 - 100
-	PerformancePct       float64 `json:"performance_pct"`  // 0 - 100
+	AvailabilityPct      float64 `json:"availability_pct"`  // 0 - 100
+	PerformancePct       float64 `json:"performance_pct"`   // 0 - 100
 	QualityYieldPct      float64 `json:"quality_yield_pct"` // 0 - 100
 	OEE                  float64 `json:"oee"`               // Availability * Performance * Quality / 10000
 	Status               string  `json:"status"`            // BOTTLENECK, STARVED, BALANCED, OVERBURDENED
@@ -200,7 +200,7 @@ func AnalyzeLineBalancing(req *LineBalancingAnalysisRequest) *LineBalancingAnaly
 
 	throughputPerHour := 0.0
 	if maxCycleTime > 0 {
-		throughputPerHour = math.Round((3600.0 / maxCycleTime) * 10) / 10
+		throughputPerHour = math.Round((3600.0/maxCycleTime)*10) / 10
 	}
 	maxShiftOutput := math.Round(throughputPerHour * shiftHours)
 

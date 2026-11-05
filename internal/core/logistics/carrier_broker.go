@@ -12,42 +12,42 @@ import (
 
 // ParcelSpec defines dimensional and physical properties of a shipment parcel
 type ParcelSpec struct {
-	PackageID      string  `json:"package_id"`
-	LengthCM       float64 `json:"length_cm"`
-	WidthCM        float64 `json:"width_cm"`
-	HeightCM       float64 `json:"height_cm"`
-	ActualWeightKG float64 `json:"actual_weight_kg"`
-	IsFragile      bool    `json:"is_fragile"`
+	PackageID        string  `json:"package_id"`
+	LengthCM         float64 `json:"length_cm"`
+	WidthCM          float64 `json:"width_cm"`
+	HeightCM         float64 `json:"height_cm"`
+	ActualWeightKG   float64 `json:"actual_weight_kg"`
+	IsFragile        bool    `json:"is_fragile"`
 	DeclaredValueIDR float64 `json:"declared_value_idr"`
 }
 
 // CarrierQuoteOption represents one rate and SLA quote from a 3PL carrier
 type CarrierQuoteOption struct {
-	CarrierCode        string  `json:"carrier_code"` // "JNE", "SICEPAT", "JNT", "DHL"
-	ServiceLevel       string  `json:"service_level"` // "EXPRESS_NEXT_DAY", "STANDARD_REGULAR", "CARGO_ECONOMY"
-	ChargeableWeightKG float64 `json:"chargeable_weight_kg"`
-	BaseFreightCostIDR float64 `json:"base_freight_cost_idr"`
-	InsuranceFeeIDR    float64 `json:"insurance_fee_idr"`
-	TotalEstimatedIDR  float64 `json:"total_estimated_idr"`
-	EstimatedTransitHrs int    `json:"estimated_transit_hrs"`
+	CarrierCode         string  `json:"carrier_code"`  // "JNE", "SICEPAT", "JNT", "DHL"
+	ServiceLevel        string  `json:"service_level"` // "EXPRESS_NEXT_DAY", "STANDARD_REGULAR", "CARGO_ECONOMY"
+	ChargeableWeightKG  float64 `json:"chargeable_weight_kg"`
+	BaseFreightCostIDR  float64 `json:"base_freight_cost_idr"`
+	InsuranceFeeIDR     float64 `json:"insurance_fee_idr"`
+	TotalEstimatedIDR   float64 `json:"total_estimated_idr"`
+	EstimatedTransitHrs int     `json:"estimated_transit_hrs"`
 	OnTimeSLAHistoryPct float64 `json:"on_time_sla_history_pct"`
-	IsRecommendedBest  bool    `json:"is_recommended_best"`
+	IsRecommendedBest   bool    `json:"is_recommended_best"`
 }
 
 // CarrierConsignment represents a confirmed carrier pickup order
 type CarrierConsignment struct {
-	ConsignmentID       string    `json:"consignment_id"`
-	CarrierCode         string    `json:"carrier_code"`
-	ServiceLevel        string    `json:"service_level"`
-	TrackingAWBNumber   string    `json:"tracking_awb_number"`
-	OriginHub           string    `json:"origin_hub"`
-	DestinationAddress  string    `json:"destination_address"`
-	BookedWeightKG      float64   `json:"booked_weight_kg"`
-	AgreedFreightCostIDR float64  `json:"agreed_freight_cost_idr"`
-	PickupWindowStart   time.Time `json:"pickup_window_start"`
-	PickupWindowEnd     time.Time `json:"pickup_window_end"`
-	ShipmentStatus      string    `json:"shipment_status"` // "PICKUP_SCHEDULED", "IN_TRANSIT", "DELIVERED"
-	BookedAt            time.Time `json:"booked_at"`
+	ConsignmentID        string    `json:"consignment_id"`
+	CarrierCode          string    `json:"carrier_code"`
+	ServiceLevel         string    `json:"service_level"`
+	TrackingAWBNumber    string    `json:"tracking_awb_number"`
+	OriginHub            string    `json:"origin_hub"`
+	DestinationAddress   string    `json:"destination_address"`
+	BookedWeightKG       float64   `json:"booked_weight_kg"`
+	AgreedFreightCostIDR float64   `json:"agreed_freight_cost_idr"`
+	PickupWindowStart    time.Time `json:"pickup_window_start"`
+	PickupWindowEnd      time.Time `json:"pickup_window_end"`
+	ShipmentStatus       string    `json:"shipment_status"` // "PICKUP_SCHEDULED", "IN_TRANSIT", "DELIVERED"
+	BookedAt             time.Time `json:"booked_at"`
 }
 
 // BillingReconciliationItem represents a freight invoice audit line
@@ -161,7 +161,7 @@ func (e *CarrierBrokerEngine) BookPickupConsignment(carrier string, service stri
 		OriginHub:            origin,
 		DestinationAddress:   dest,
 		BookedWeightKG:       weight,
-		AgreedFreightCostIDR:  cost,
+		AgreedFreightCostIDR: cost,
 		PickupWindowStart:    time.Now().Add(2 * time.Hour),
 		PickupWindowEnd:      time.Now().Add(5 * time.Hour),
 		ShipmentStatus:       "PICKUP_SCHEDULED",
@@ -272,11 +272,11 @@ func RegisterCarrierRoutes(r *gin.RouterGroup) {
 
 		group.POST("/book-pickup-consignment", func(c *gin.Context) {
 			var req struct {
-				CarrierCode         string  `json:"carrier_code" binding:"required"`
-				ServiceLevel        string  `json:"service_level" binding:"required"`
-				OriginHub           string  `json:"origin_hub" binding:"required"`
-				DestinationAddress  string  `json:"destination_address" binding:"required"`
-				BookedWeightKG      float64 `json:"booked_weight_kg"`
+				CarrierCode          string  `json:"carrier_code" binding:"required"`
+				ServiceLevel         string  `json:"service_level" binding:"required"`
+				OriginHub            string  `json:"origin_hub" binding:"required"`
+				DestinationAddress   string  `json:"destination_address" binding:"required"`
+				BookedWeightKG       float64 `json:"booked_weight_kg"`
 				AgreedFreightCostIDR float64 `json:"agreed_freight_cost_idr" binding:"required"`
 			}
 			if err := c.ShouldBindJSON(&req); err != nil {

@@ -25,26 +25,26 @@ type PeakShavingRequest struct {
 	FacilityID            string  `json:"facility_id"`
 	ContractDemandLimitKW float64 `json:"contract_demand_limit_kw"`
 	CurrentTotalDemandKW  float64 `json:"current_total_demand_kw"`
-	GridTariffPeriod      string  `json:"grid_tariff_period"` // "ON_PEAK_WBP", "OFF_PEAK_LWBP"
+	GridTariffPeriod      string  `json:"grid_tariff_period"`     // "ON_PEAK_WBP", "OFF_PEAK_LWBP"
 	BatteryBESSStatePct   float64 `json:"battery_bess_state_pct"` // 0-100%
 }
 
 // PeakShavingDispatchOrder captures automated energy dispatch decisions to avoid penalty demand charges.
 type PeakShavingDispatchOrder struct {
-	DispatchID              string   `json:"dispatch_id"`
-	FacilityID              string   `json:"facility_id"`
-	GridTariffPeriod        string   `json:"grid_tariff_period"`
-	CurrentDemandKW         float64  `json:"current_demand_kw"`
-	ContractDemandLimitKW   float64  `json:"contract_demand_limit_kw"`
-	OverLimitExcessKW       float64  `json:"over_limit_excess_kw"`
-	ShavingTargetKW         float64  `json:"shaving_target_kw"`
-	ActionsExecuted         []string `json:"actions_executed"`
-	BESSDischargeKW         float64  `json:"bess_discharge_kw"`
-	DeferredBatchProcesses  []string `json:"deferred_batch_processes"`
-	AvoidedPeakDemandCostIDR float64 `json:"avoided_peak_demand_cost_idr"`
-	NetEnergySavedKWh       float64  `json:"net_energy_saved_kwh"`
-	Status                  string   `json:"status"` // "EXECUTED_LOAD_SHED", "NORMAL_BASELINE"
-	ExecutedAt              string   `json:"executed_at"`
+	DispatchID               string   `json:"dispatch_id"`
+	FacilityID               string   `json:"facility_id"`
+	GridTariffPeriod         string   `json:"grid_tariff_period"`
+	CurrentDemandKW          float64  `json:"current_demand_kw"`
+	ContractDemandLimitKW    float64  `json:"contract_demand_limit_kw"`
+	OverLimitExcessKW        float64  `json:"over_limit_excess_kw"`
+	ShavingTargetKW          float64  `json:"shaving_target_kw"`
+	ActionsExecuted          []string `json:"actions_executed"`
+	BESSDischargeKW          float64  `json:"bess_discharge_kw"`
+	DeferredBatchProcesses   []string `json:"deferred_batch_processes"`
+	AvoidedPeakDemandCostIDR float64  `json:"avoided_peak_demand_cost_idr"`
+	NetEnergySavedKWh        float64  `json:"net_energy_saved_kwh"`
+	Status                   string   `json:"status"` // "EXECUTED_LOAD_SHED", "NORMAL_BASELINE"
+	ExecutedAt               string   `json:"executed_at"`
 }
 
 // ISO50001AuditReport delivers statutory energy management system compliance metrics.

@@ -15,42 +15,42 @@ import (
 // AmmoniaLoopTelemetry captures Haber-Bosch green synthesis loop dynamics under ISO 22734 & ASME VIII-1
 type AmmoniaLoopTelemetry struct {
 	TelemetryID                  string    `json:"telemetry_id"`
-	SynthesisLoopID              string    `json:"synthesis_loop_id"`                // "LOOP-HABER-BOSCH-GREEN-01"
-	PlantID                      string    `json:"plant_id"`                          // "PLANT-NEOM-OXAGON-GREEN-NH3"
-	ReactorBedTemperatureC       float64   `json:"reactor_bed_temperature_c"`        // e.g. 475.0°C (equilibrium 400-500°C)
-	LoopPressureBar              float64   `json:"loop_pressure_bar"`                 // e.g. 195.0 bar
-	RenewablePowerAvailabilityMW float64   `json:"renewable_power_availability_mw"`  // e.g. 35.0 MW (fluctuating renewable input)
-	HydrogenFeedFlowNm3Hr        float64   `json:"hydrogen_feed_flow_nm3_hr"`         // e.g. 14200.0 Nm3/hr
-	NitrogenFeedFlowNm3Hr        float64   `json:"nitrogen_feed_flow_nm3_hr"`         // e.g. 4800.0 Nm3/hr
-	StoichiometricH2N2Ratio      float64   `json:"stoichiometric_h2_n2_ratio"`       // e.g. 2.96 (optimal 3.0:1)
-	AmmoniaConversionPct         float64   `json:"ammonia_conversion_pct"`            // e.g. 16.5% per pass
-	NitridingDepthMicrons        float64   `json:"nitriding_depth_microns"`           // e.g. 46.8 µm (case depth limit < 50 µm)
+	SynthesisLoopID              string    `json:"synthesis_loop_id"`               // "LOOP-HABER-BOSCH-GREEN-01"
+	PlantID                      string    `json:"plant_id"`                        // "PLANT-NEOM-OXAGON-GREEN-NH3"
+	ReactorBedTemperatureC       float64   `json:"reactor_bed_temperature_c"`       // e.g. 475.0°C (equilibrium 400-500°C)
+	LoopPressureBar              float64   `json:"loop_pressure_bar"`               // e.g. 195.0 bar
+	RenewablePowerAvailabilityMW float64   `json:"renewable_power_availability_mw"` // e.g. 35.0 MW (fluctuating renewable input)
+	HydrogenFeedFlowNm3Hr        float64   `json:"hydrogen_feed_flow_nm3_hr"`       // e.g. 14200.0 Nm3/hr
+	NitrogenFeedFlowNm3Hr        float64   `json:"nitrogen_feed_flow_nm3_hr"`       // e.g. 4800.0 Nm3/hr
+	StoichiometricH2N2Ratio      float64   `json:"stoichiometric_h2_n2_ratio"`      // e.g. 2.96 (optimal 3.0:1)
+	AmmoniaConversionPct         float64   `json:"ammonia_conversion_pct"`          // e.g. 16.5% per pass
+	NitridingDepthMicrons        float64   `json:"nitriding_depth_microns"`         // e.g. 46.8 µm (case depth limit < 50 µm)
 	RecordedAt                   time.Time `json:"recorded_at"`
 }
 
 // AmmoniaKineticsAssessment models Haber-Bosch equilibrium conversion, ramp rate, and vessel nitriding
 type AmmoniaKineticsAssessment struct {
-	AssessmentID                 string    `json:"assessment_id"`
-	SynthesisLoopID              string    `json:"synthesis_loop_id"`
-	EquilibriumDeviationKelvin   float64   `json:"equilibrium_deviation_kelvin"`
-	LoadRampingRatePctPerMin     float64   `json:"load_ramping_rate_pct_per_min"`
-	ThermalShockHazardLevel      string    `json:"thermal_shock_hazard_level"`       // "STEADY_STATE_OPTIMAL", "ELEVATED_RAMP_CYCLING_WARNING", "CRITICAL_THERMAL_SHOCK_AND_NITRIDING_BREACH"
-	NitridingEmbrittlementRisk   string    `json:"nitriding_embrittlement_risk"`     // "PASSIVE_LAYER_STABLE", "NITRIDE_SCALE_GROWTH_WARNING", "CRITICAL_VESSEL_HYDROGEN_NITRIDING_FAIL"
-	LoopBypassTripMandate        bool      `json:"loop_bypass_trip_mandate"`
-	QuenchGasInjectionRequired   bool      `json:"quench_gas_injection_required"`
-	AuditDigest                  string    `json:"audit_digest"`
-	EvaluatedAt                  time.Time `json:"evaluated_at"`
+	AssessmentID               string    `json:"assessment_id"`
+	SynthesisLoopID            string    `json:"synthesis_loop_id"`
+	EquilibriumDeviationKelvin float64   `json:"equilibrium_deviation_kelvin"`
+	LoadRampingRatePctPerMin   float64   `json:"load_ramping_rate_pct_per_min"`
+	ThermalShockHazardLevel    string    `json:"thermal_shock_hazard_level"`   // "STEADY_STATE_OPTIMAL", "ELEVATED_RAMP_CYCLING_WARNING", "CRITICAL_THERMAL_SHOCK_AND_NITRIDING_BREACH"
+	NitridingEmbrittlementRisk string    `json:"nitriding_embrittlement_risk"` // "PASSIVE_LAYER_STABLE", "NITRIDE_SCALE_GROWTH_WARNING", "CRITICAL_VESSEL_HYDROGEN_NITRIDING_FAIL"
+	LoopBypassTripMandate      bool      `json:"loop_bypass_trip_mandate"`
+	QuenchGasInjectionRequired bool      `json:"quench_gas_injection_required"`
+	AuditDigest                string    `json:"audit_digest"`
+	EvaluatedAt                time.Time `json:"evaluated_at"`
 }
 
 // AmmoniaMitigationAction models automated bypass looping, recycle ratio trimming, and nitrogen purge
 type AmmoniaMitigationAction struct {
-	ActionID                      string    `json:"action_id"`
-	SynthesisLoopID              string    `json:"synthesis_loop_id"`
-	CommandedBypassRatioPct       float64   `json:"commanded_bypass_ratio_pct"`
-	ModulatedSyngasRecycleRatio   float64   `json:"modulated_syngas_recycle_ratio"`
-	NitrogenPurgeFlowNm3Hr        float64   `json:"nitrogen_purge_flow_nm3_hr"`
-	AvoidedReactorExplosionLossUSD float64  `json:"avoided_reactor_explosion_loss_usd"` // Avoided $32M USD reactor vessel nitriding rupture & catalyst thermal sintering
-	ActionTimestamp               time.Time `json:"action_timestamp"`
+	ActionID                       string    `json:"action_id"`
+	SynthesisLoopID                string    `json:"synthesis_loop_id"`
+	CommandedBypassRatioPct        float64   `json:"commanded_bypass_ratio_pct"`
+	ModulatedSyngasRecycleRatio    float64   `json:"modulated_syngas_recycle_ratio"`
+	NitrogenPurgeFlowNm3Hr         float64   `json:"nitrogen_purge_flow_nm3_hr"`
+	AvoidedReactorExplosionLossUSD float64   `json:"avoided_reactor_explosion_loss_usd"` // Avoided $32M USD reactor vessel nitriding rupture & catalyst thermal sintering
+	ActionTimestamp                time.Time `json:"action_timestamp"`
 }
 
 // AmmoniaVault thread-safe in-memory store
@@ -76,12 +76,12 @@ func init() {
 		PlantID:                      "PLANT-NEOM-OXAGON-GREEN-NH3",
 		ReactorBedTemperatureC:       485.0, // High bed temperature accelerating Fe4N formation
 		LoopPressureBar:              198.0,
-		RenewablePowerAvailabilityMW: 24.5,  // Sharp drop from 50 MW wind power
+		RenewablePowerAvailabilityMW: 24.5, // Sharp drop from 50 MW wind power
 		HydrogenFeedFlowNm3Hr:        11500.0,
 		NitrogenFeedFlowNm3Hr:        4200.0,
-		StoichiometricH2N2Ratio:      2.74,  // Sub-stoichiometric ratio
+		StoichiometricH2N2Ratio:      2.74, // Sub-stoichiometric ratio
 		AmmoniaConversionPct:         14.2,
-		NitridingDepthMicrons:        48.5,  // Critical nitriding depth near threshold
+		NitridingDepthMicrons:        48.5, // Critical nitriding depth near threshold
 		RecordedAt:                   time.Now(),
 	}
 }
@@ -159,13 +159,13 @@ func (v *AmmoniaVault) TriggerLoopBypassAndQuenchControl(loopID string) (Ammonia
 
 	actionID := fmt.Sprintf("ACT-NH3-%d", time.Now().UnixNano()%1000000)
 	action := AmmoniaMitigationAction{
-		ActionID:                      actionID,
-		SynthesisLoopID:              loopID,
-		CommandedBypassRatioPct:       28.5,  // Divert 28.5% syngas past the catalyst bed
-		ModulatedSyngasRecycleRatio:   4.8,   // Increase recycle ratio to 4.8:1
-		NitrogenPurgeFlowNm3Hr:        850.0, // Cold N2 quench to suppress thermal peak
+		ActionID:                       actionID,
+		SynthesisLoopID:                loopID,
+		CommandedBypassRatioPct:        28.5,  // Divert 28.5% syngas past the catalyst bed
+		ModulatedSyngasRecycleRatio:    4.8,   // Increase recycle ratio to 4.8:1
+		NitrogenPurgeFlowNm3Hr:         850.0, // Cold N2 quench to suppress thermal peak
 		AvoidedReactorExplosionLossUSD: avoidedLoss,
-		ActionTimestamp:               time.Now(),
+		ActionTimestamp:                time.Now(),
 	}
 
 	v.actions[loopID] = action

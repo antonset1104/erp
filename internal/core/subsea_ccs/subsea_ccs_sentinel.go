@@ -14,45 +14,45 @@ import (
 
 // SubseaCCSTelemetry captures offshore subsea CO2 deep injection wellhead and downhole conditions under ISO 27914 & DNV-RP-J202
 type SubseaCCSTelemetry struct {
-	TelemetryID                 string    `json:"telemetry_id"`
-	WellheadID                  string    `json:"wellhead_id"`                    // "WELL-NORTHERN-LIGHTS-CO2-01"
-	ReservoirField              string    `json:"reservoir_field"`                // "FIELD-AURORA-SALINE-AQUIFER"
-	SeabedWaterDepthM           float64   `json:"seabed_water_depth_m"`           // e.g. 1250.0 m (deepwater seabed)
-	WellheadPressureBar         float64   `json:"wellhead_pressure_bar"`          // e.g. 92.5 bar (dense-phase > 73.8 bar)
-	WellheadTemperatureC        float64   `json:"wellhead_temperature_c"`         // e.g. 7.5°C
-	ChokePressureDropBar        float64   `json:"choke_pressure_drop_bar"`        // e.g. 36.0 bar delta-P across subsea choke
-	DownholeReservoirPressureBar float64  `json:"downhole_reservoir_pressure_bar"`// e.g. 182.0 bar
-	CO2MassFlowKgS              float64   `json:"co2_mass_flow_kg_s"`             // e.g. 85.0 kg/s (megaton/year scale injection)
-	CaprockFractureMarginBar    float64   `json:"caprock_fracture_margin_bar"`   // e.g. 12.0 bar margin to hydraulic fracture
-	WaterMoistureContentPpm     float64   `json:"water_moisture_content_ppm"`     // e.g. 125.0 ppm
-	RecordedAt                  time.Time `json:"recorded_at"`
+	TelemetryID                  string    `json:"telemetry_id"`
+	WellheadID                   string    `json:"wellhead_id"`                     // "WELL-NORTHERN-LIGHTS-CO2-01"
+	ReservoirField               string    `json:"reservoir_field"`                 // "FIELD-AURORA-SALINE-AQUIFER"
+	SeabedWaterDepthM            float64   `json:"seabed_water_depth_m"`            // e.g. 1250.0 m (deepwater seabed)
+	WellheadPressureBar          float64   `json:"wellhead_pressure_bar"`           // e.g. 92.5 bar (dense-phase > 73.8 bar)
+	WellheadTemperatureC         float64   `json:"wellhead_temperature_c"`          // e.g. 7.5°C
+	ChokePressureDropBar         float64   `json:"choke_pressure_drop_bar"`         // e.g. 36.0 bar delta-P across subsea choke
+	DownholeReservoirPressureBar float64   `json:"downhole_reservoir_pressure_bar"` // e.g. 182.0 bar
+	CO2MassFlowKgS               float64   `json:"co2_mass_flow_kg_s"`              // e.g. 85.0 kg/s (megaton/year scale injection)
+	CaprockFractureMarginBar     float64   `json:"caprock_fracture_margin_bar"`     // e.g. 12.0 bar margin to hydraulic fracture
+	WaterMoistureContentPpm      float64   `json:"water_moisture_content_ppm"`      // e.g. 125.0 ppm
+	RecordedAt                   time.Time `json:"recorded_at"`
 }
 
 // SubseaCCSHydrateAssessment models Joule-Thomson cooling, CO2 hydrate equilibrium, and caprock geomechanical stability
 type SubseaCCSHydrateAssessment struct {
-	AssessmentID                   string    `json:"assessment_id"`
-	WellheadID                     string    `json:"wellhead_id"`
-	JouleThomsonCoolingDeltaT      float64   `json:"joule_thomson_cooling_delta_t"` // dT = mu_JT * dP (~0.65 °C/bar for supercritical CO2)
-	PostChokeTemperatureC          float64   `json:"post_choke_temperature_c"`
-	HydrateEquilibriumTempC        float64   `json:"hydrate_equilibrium_temp_c"`   // CO2 hydrate equilibrium temperature (~10.8°C at 60-90 bar)
-	HydrateFormationRisk           string    `json:"hydrate_formation_risk"`       // "HYDRATE_FREE_DENSE_PHASE", "BORDERLINE_HYDRATE_MARGIN_WARNING", "CRITICAL_CO2_HYDRATE_PLUGGING_AND_SLUG_HAZARD"
-	PhaseInversionRisk             string    `json:"phase_inversion_risk"`         // "STABLE_SUPERCRITICAL_PHASE", "TWO_PHASE_SLUGGING_WARNING", "CATASTROPHIC_DEEPWATER_CHOKE_FLASHING"
-	CaprockBreachRisk              string    `json:"caprock_breach_risk"`          // "CAPROCK_INTEGRITY_VERIFIED", "HYDRAULIC_MICROFRACTURE_WARNING", "CRITICAL_SEISMIC_CAPROCK_RUPTURE"
-	AutomatedInhibitorDosingMandate bool     `json:"automated_inhibitor_dosing_mandate"`
-	SubseaHeatingBoostRequired     bool      `json:"subsea_heating_boost_required"`
-	AuditDigest                    string    `json:"audit_digest"`
-	EvaluatedAt                    time.Time `json:"evaluated_at"`
+	AssessmentID                    string    `json:"assessment_id"`
+	WellheadID                      string    `json:"wellhead_id"`
+	JouleThomsonCoolingDeltaT       float64   `json:"joule_thomson_cooling_delta_t"` // dT = mu_JT * dP (~0.65 °C/bar for supercritical CO2)
+	PostChokeTemperatureC           float64   `json:"post_choke_temperature_c"`
+	HydrateEquilibriumTempC         float64   `json:"hydrate_equilibrium_temp_c"` // CO2 hydrate equilibrium temperature (~10.8°C at 60-90 bar)
+	HydrateFormationRisk            string    `json:"hydrate_formation_risk"`     // "HYDRATE_FREE_DENSE_PHASE", "BORDERLINE_HYDRATE_MARGIN_WARNING", "CRITICAL_CO2_HYDRATE_PLUGGING_AND_SLUG_HAZARD"
+	PhaseInversionRisk              string    `json:"phase_inversion_risk"`       // "STABLE_SUPERCRITICAL_PHASE", "TWO_PHASE_SLUGGING_WARNING", "CATASTROPHIC_DEEPWATER_CHOKE_FLASHING"
+	CaprockBreachRisk               string    `json:"caprock_breach_risk"`        // "CAPROCK_INTEGRITY_VERIFIED", "HYDRAULIC_MICROFRACTURE_WARNING", "CRITICAL_SEISMIC_CAPROCK_RUPTURE"
+	AutomatedInhibitorDosingMandate bool      `json:"automated_inhibitor_dosing_mandate"`
+	SubseaHeatingBoostRequired      bool      `json:"subsea_heating_boost_required"`
+	AuditDigest                     string    `json:"audit_digest"`
+	EvaluatedAt                     time.Time `json:"evaluated_at"`
 }
 
 // SubseaCCSMitigationAction models thermodynamic hydrate inhibitor (THI) dosing, trace heating, and choke modulation
 type SubseaCCSMitigationAction struct {
-	ActionID                      string    `json:"action_id"`
-	WellheadID                    string    `json:"wellhead_id"`
-	CommandedMethanolDosingRateLHr float64  `json:"commanded_methanol_dosing_rate_l_hr"` // e.g. 58.5 L/hr thermodynamic inhibitor
-	TraceHeatingPowerKw           float64   `json:"trace_heating_power_kw"`              // e.g. 155.0 kW subsea electric trace heating
-	ModulatedChokeOpeningPct      float64   `json:"modulated_choke_opening_pct"`         // e.g. 74.0% to minimize Joule-Thomson expansion
-	AvoidedSubseaInterventionUSD  float64   `json:"avoided_subsea_intervention_usd"`     // Avoided $95M USD subsea coiled tubing hydrate milling & caprock fracturing
-	ActionTimestamp               time.Time `json:"action_timestamp"`
+	ActionID                       string    `json:"action_id"`
+	WellheadID                     string    `json:"wellhead_id"`
+	CommandedMethanolDosingRateLHr float64   `json:"commanded_methanol_dosing_rate_l_hr"` // e.g. 58.5 L/hr thermodynamic inhibitor
+	TraceHeatingPowerKw            float64   `json:"trace_heating_power_kw"`              // e.g. 155.0 kW subsea electric trace heating
+	ModulatedChokeOpeningPct       float64   `json:"modulated_choke_opening_pct"`         // e.g. 74.0% to minimize Joule-Thomson expansion
+	AvoidedSubseaInterventionUSD   float64   `json:"avoided_subsea_intervention_usd"`     // Avoided $95M USD subsea coiled tubing hydrate milling & caprock fracturing
+	ActionTimestamp                time.Time `json:"action_timestamp"`
 }
 
 // SubseaCCSVault thread-safe in-memory repository
@@ -129,18 +129,18 @@ func (v *SubseaCCSVault) EvaluateHydrateAndPhaseRisk(wellID string) (SubseaCCSHy
 	digest := hex.EncodeToString(hash[:])
 
 	assessment := SubseaCCSHydrateAssessment{
-		AssessmentID:                   fmt.Sprintf("ASM-CCS-%d", time.Now().UnixNano()%1000000),
-		WellheadID:                     wellID,
-		JouleThomsonCoolingDeltaT:      jtDeltaT,
-		PostChokeTemperatureC:          postChokeTemp,
-		HydrateEquilibriumTempC:        hydrateEqTemp,
-		HydrateFormationRisk:           hydrateRisk,
-		PhaseInversionRisk:             phaseRisk,
-		CaprockBreachRisk:              caprockRisk,
+		AssessmentID:                    fmt.Sprintf("ASM-CCS-%d", time.Now().UnixNano()%1000000),
+		WellheadID:                      wellID,
+		JouleThomsonCoolingDeltaT:       jtDeltaT,
+		PostChokeTemperatureC:           postChokeTemp,
+		HydrateEquilibriumTempC:         hydrateEqTemp,
+		HydrateFormationRisk:            hydrateRisk,
+		PhaseInversionRisk:              phaseRisk,
+		CaprockBreachRisk:               caprockRisk,
 		AutomatedInhibitorDosingMandate: inhibitorMandate,
-		SubseaHeatingBoostRequired:     heatingRequired,
-		AuditDigest:                    digest,
-		EvaluatedAt:                    time.Now(),
+		SubseaHeatingBoostRequired:      heatingRequired,
+		AuditDigest:                     digest,
+		EvaluatedAt:                     time.Now(),
 	}
 
 	v.assessments[wellID] = assessment
@@ -173,13 +173,13 @@ func (v *SubseaCCSVault) TriggerHydrateMitigationAndChokeControl(wellID string) 
 	}
 
 	action := SubseaCCSMitigationAction{
-		ActionID:                      fmt.Sprintf("ACT-CCS-%d", time.Now().UnixNano()%1000000),
-		WellheadID:                    wellID,
+		ActionID:                       fmt.Sprintf("ACT-CCS-%d", time.Now().UnixNano()%1000000),
+		WellheadID:                     wellID,
 		CommandedMethanolDosingRateLHr: methanolRate,
-		TraceHeatingPowerKw:           heatingPower,
-		ModulatedChokeOpeningPct:      chokeOpening,
-		AvoidedSubseaInterventionUSD:  95000000.0,
-		ActionTimestamp:               time.Now(),
+		TraceHeatingPowerKw:            heatingPower,
+		ModulatedChokeOpeningPct:       chokeOpening,
+		AvoidedSubseaInterventionUSD:   95000000.0,
+		ActionTimestamp:                time.Now(),
 	}
 
 	v.actions[wellID] = action
@@ -196,13 +196,13 @@ func (v *SubseaCCSVault) GetSubseaCCSSafetyDossier(wellID string) (map[string]in
 	act, hasAct := v.actions[wellID]
 
 	dossier := map[string]interface{}{
-		"wellhead_id":            wellID,
-		"iso_27914_compliant":    true,
-		"dnv_rp_j202_certified":  true,
-		"has_telemetry":          hasTelem,
-		"has_assessment":         hasAsm,
-		"has_action":             hasAct,
-		"dossier_compiled_at":    time.Now(),
+		"wellhead_id":           wellID,
+		"iso_27914_compliant":   true,
+		"dnv_rp_j202_certified": true,
+		"has_telemetry":         hasTelem,
+		"has_assessment":        hasAsm,
+		"has_action":            hasAct,
+		"dossier_compiled_at":   time.Now(),
 	}
 	if hasTelem {
 		dossier["telemetry"] = telem

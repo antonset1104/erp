@@ -171,20 +171,20 @@ func (m *Module) Seed(db *gorm.DB) error {
 			if idx == 0 {
 				todayIn := time.Date(now.Year(), now.Month(), now.Day(), 8, 28, 0, 0, time.Local)
 				attToday := Attendance{
-					EmployeeID:    emp.ID,
-					ShiftID:       &shiftID,
-					Date:          now.Format("2006-01-02"),
-					CheckIn:       todayIn,
-					LateMinutes:   0,
-					Status:        "checked_in",
-					InLatitude:    -6.200050,
-					InLongitude:   106.816680,
-					InAddress:     "Lobi Utama Gedung Kantor Pusat",
-					Device:        "PWA Edge Client / iOS 17.5",
-					IPAddress:     "114.124.200.80",
-					Country:       "ID",
-					CFRay:         "8c8965f90a9821a0",
-					Note:          "Check-in pagi hari tepat waktu",
+					EmployeeID:  emp.ID,
+					ShiftID:     &shiftID,
+					Date:        now.Format("2006-01-02"),
+					CheckIn:     todayIn,
+					LateMinutes: 0,
+					Status:      "checked_in",
+					InLatitude:  -6.200050,
+					InLongitude: 106.816680,
+					InAddress:   "Lobi Utama Gedung Kantor Pusat",
+					Device:      "PWA Edge Client / iOS 17.5",
+					IPAddress:   "114.124.200.80",
+					Country:     "ID",
+					CFRay:       "8c8965f90a9821a0",
+					Note:        "Check-in pagi hari tepat waktu",
 				}
 				attToday.CompanyID = 1
 				attToday.CreateUID = 1
@@ -193,20 +193,20 @@ func (m *Module) Seed(db *gorm.DB) error {
 			} else if idx == 1 {
 				todayLateIn := time.Date(now.Year(), now.Month(), now.Day(), 9, 25, 0, 0, time.Local)
 				attTodayLate := Attendance{
-					EmployeeID:    emp.ID,
-					ShiftID:       &shiftID,
-					Date:          now.Format("2006-01-02"),
-					CheckIn:       todayLateIn,
-					LateMinutes:   40,
-					Status:        "late",
-					InLatitude:    -6.200150,
-					InLongitude:   106.816720,
-					InAddress:     "Area Parkir Timur Gedung Kantor",
-					Device:        "Mobile Safari / iOS",
-					IPAddress:     "180.252.88.19",
-					Country:       "ID",
-					CFRay:         "8c8971f11c7710bc",
-					Note:          "Terlambat karena kendala kemacetan jalan tol",
+					EmployeeID:  emp.ID,
+					ShiftID:     &shiftID,
+					Date:        now.Format("2006-01-02"),
+					CheckIn:     todayLateIn,
+					LateMinutes: 40,
+					Status:      "late",
+					InLatitude:  -6.200150,
+					InLongitude: 106.816720,
+					InAddress:   "Area Parkir Timur Gedung Kantor",
+					Device:      "Mobile Safari / iOS",
+					IPAddress:   "180.252.88.19",
+					Country:     "ID",
+					CFRay:       "8c8971f11c7710bc",
+					Note:        "Terlambat karena kendala kemacetan jalan tol",
 				}
 				attTodayLate.CompanyID = 1
 				attTodayLate.CreateUID = 1

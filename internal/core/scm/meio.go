@@ -32,15 +32,15 @@ type MEIOOptimizationRequest struct {
 
 // NodeInventoryRecommendation holds optimized stocking parameters for a single node.
 type NodeInventoryRecommendation struct {
-	NodeID                     string  `json:"node_id"`
-	NodeName                   string  `json:"node_name"`
-	TierLevel                  int     `json:"tier_level"`
-	SingleEchelonSafetyStock   float64 `json:"single_echelon_safety_stock"`
-	MultiEchelonSafetyStock    float64 `json:"multi_echelon_safety_stock"`
-	RecommendedReorderPoint    float64 `json:"recommended_reorder_point"`
-	WorkingCapitalSavedIDR     float64 `json:"working_capital_saved_idr"`
-	AnnualHoldingCostSavedIDR  float64 `json:"annual_holding_cost_saved_idr"`
-	InventoryReductionPct      float64 `json:"inventory_reduction_pct"`
+	NodeID                    string  `json:"node_id"`
+	NodeName                  string  `json:"node_name"`
+	TierLevel                 int     `json:"tier_level"`
+	SingleEchelonSafetyStock  float64 `json:"single_echelon_safety_stock"`
+	MultiEchelonSafetyStock   float64 `json:"multi_echelon_safety_stock"`
+	RecommendedReorderPoint   float64 `json:"recommended_reorder_point"`
+	WorkingCapitalSavedIDR    float64 `json:"working_capital_saved_idr"`
+	AnnualHoldingCostSavedIDR float64 `json:"annual_holding_cost_saved_idr"`
+	InventoryReductionPct     float64 `json:"inventory_reduction_pct"`
 }
 
 // MEIOOptimizationResult summarizes total network inventory reduction and working capital unlocked.

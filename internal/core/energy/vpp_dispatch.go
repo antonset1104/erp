@@ -11,21 +11,21 @@ import (
 
 // TariffInterval represents an hourly or sub-hourly electricity tariff bracket
 type TariffInterval struct {
-	HourOfDay         int     `json:"hour_of_day"` // 0 - 23
+	HourOfDay          int     `json:"hour_of_day"`           // 0 - 23
 	ImportTariffPerKWh float64 `json:"import_tariff_per_kwh"` // in USD or local currency
 	ExportTariffPerKWh float64 `json:"export_tariff_per_kwh"` // Feed-in tariff credit
-	TariffTier        string  `json:"tariff_tier"` // "OFF_PEAK", "MID_PEAK", "CRITICAL_PEAK"
+	TariffTier         string  `json:"tariff_tier"`           // "OFF_PEAK", "MID_PEAK", "CRITICAL_PEAK"
 }
 
 // BESSAsset represents the industrial battery energy storage system
 type BESSAsset struct {
-	BatteryID          string  `json:"battery_id"`
-	TotalCapacityKWh   float64 `json:"total_capacity_kwh"`
-	CurrentSoCPercent  float64 `json:"current_soc_percent"`
-	MaxChargeRateKW    float64 `json:"max_charge_rate_kw"`
-	MaxDischargeRateKW float64 `json:"max_discharge_rate_kw"`
+	BatteryID           string  `json:"battery_id"`
+	TotalCapacityKWh    float64 `json:"total_capacity_kwh"`
+	CurrentSoCPercent   float64 `json:"current_soc_percent"`
+	MaxChargeRateKW     float64 `json:"max_charge_rate_kw"`
+	MaxDischargeRateKW  float64 `json:"max_discharge_rate_kw"`
 	RoundTripEfficiency float64 `json:"round_trip_efficiency"` // e.g., 0.92 (92%)
-	DegradationCostKWh float64 `json:"degradation_cost_kwh"`  // battery wear amortization $/kWh
+	DegradationCostKWh  float64 `json:"degradation_cost_kwh"`  // battery wear amortization $/kWh
 }
 
 // DispatchScheduleStep represents one hourly action in the 24h dispatch plan
@@ -40,27 +40,27 @@ type DispatchScheduleStep struct {
 
 // DispatchOptimizationPlan represents the comprehensive 24h VPP dispatch schedule
 type DispatchOptimizationPlan struct {
-	PlanID               string                 `json:"plan_id"`
-	SiteID               string                 `json:"site_id"`
-	TotalProjectedSavings float64               `json:"total_projected_savings"`
-	TotalDischargedKWh   float64                `json:"total_discharged_kwh"`
-	TotalChargedKWh      float64                `json:"total_charged_kwh"`
-	PeakDemandReductionKW float64               `json:"peak_demand_reduction_kw"`
-	TotalCO2AvoidedKg    float64                `json:"total_co2_avoided_kg"`
-	HourlySchedule       []DispatchScheduleStep `json:"hourly_schedule"`
-	GeneratedAt          time.Time              `json:"generated_at"`
+	PlanID                string                 `json:"plan_id"`
+	SiteID                string                 `json:"site_id"`
+	TotalProjectedSavings float64                `json:"total_projected_savings"`
+	TotalDischargedKWh    float64                `json:"total_discharged_kwh"`
+	TotalChargedKWh       float64                `json:"total_charged_kwh"`
+	PeakDemandReductionKW float64                `json:"peak_demand_reduction_kw"`
+	TotalCO2AvoidedKg     float64                `json:"total_co2_avoided_kg"`
+	HourlySchedule        []DispatchScheduleStep `json:"hourly_schedule"`
+	GeneratedAt           time.Time              `json:"generated_at"`
 }
 
 // CurtailmentEvent represents an emergency or scheduled load-shedding instruction
 type CurtailmentEvent struct {
-	EventID              string    `json:"event_id"`
-	SiteID               string    `json:"site_id"`
-	TargetLoadReductionKW float64  `json:"target_load_reduction_kw"`
-	DurationMinutes      int       `json:"duration_minutes"`
-	AffectedSystems      []string  `json:"affected_systems"`
-	IncentiveCreditUSD   float64   `json:"incentive_credit_usd"`
-	ExecutionStatus      string    `json:"execution_status"` // "TRIGGERED", "SHEDDING_ACTIVE", "COMPLETED"
-	TriggeredAt          time.Time `json:"triggered_at"`
+	EventID               string    `json:"event_id"`
+	SiteID                string    `json:"site_id"`
+	TargetLoadReductionKW float64   `json:"target_load_reduction_kw"`
+	DurationMinutes       int       `json:"duration_minutes"`
+	AffectedSystems       []string  `json:"affected_systems"`
+	IncentiveCreditUSD    float64   `json:"incentive_credit_usd"`
+	ExecutionStatus       string    `json:"execution_status"` // "TRIGGERED", "SHEDDING_ACTIVE", "COMPLETED"
+	TriggeredAt           time.Time `json:"triggered_at"`
 }
 
 // ArbitragePnLSummary summarizes financial gains from VPP energy arbitrage
@@ -78,11 +78,11 @@ type ArbitragePnLSummary struct {
 
 // VPPEngine manages VPP dispatch and energy arbitrage
 type VPPEngine struct {
-	mu            sync.RWMutex
-	tariffs       map[string][]TariffInterval        // siteID -> 24h tariff intervals
-	bessAssets    map[string]BESSAsset               // siteID -> BESS asset specs
-	plans         map[string]DispatchOptimizationPlan // siteID -> latest plan
-	curtailments  map[string][]CurtailmentEvent      // siteID -> list of curtailments
+	mu           sync.RWMutex
+	tariffs      map[string][]TariffInterval         // siteID -> 24h tariff intervals
+	bessAssets   map[string]BESSAsset                // siteID -> BESS asset specs
+	plans        map[string]DispatchOptimizationPlan // siteID -> latest plan
+	curtailments map[string][]CurtailmentEvent       // siteID -> list of curtailments
 }
 
 var (

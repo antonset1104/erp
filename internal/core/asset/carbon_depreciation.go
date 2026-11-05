@@ -30,17 +30,17 @@ type AssetCarbonLedgerItem struct {
 }
 
 type CarbonDepreciationMatrixResponse struct {
-	TotalAssetsTracked             int                     `json:"total_assets_tracked"`
-	TotalNetBookValueIDR           float64                 `json:"total_net_book_value_idr"`
-	TotalAnnualDepreciationIDR     float64                 `json:"total_annual_depreciation_idr"`
-	TotalAnnualEmissionsTCO2e      float64                 `json:"total_annual_emissions_tco2e"`
-	TotalCarbonCapTCO2e            float64                 `json:"total_carbon_cap_tco2e"`
-	NetGroupCarbonTaxLiabilityIDR  float64                 `json:"net_group_carbon_tax_liability_idr"`
-	TradableCarbonSurplusValueIDR  float64                 `json:"tradable_carbon_surplus_value_idr"`
-	ComplianceStatus               string                  `json:"compliance_status"` // COMPLIANT_SURPLUS, DEFICIT_TAX_DUE
-	Assets                         []AssetCarbonLedgerItem `json:"assets"`
-	TaxPolicySummary               string                  `json:"tax_policy_summary"`
-	GeneratedAt                    string                  `json:"generated_at"`
+	TotalAssetsTracked            int                     `json:"total_assets_tracked"`
+	TotalNetBookValueIDR          float64                 `json:"total_net_book_value_idr"`
+	TotalAnnualDepreciationIDR    float64                 `json:"total_annual_depreciation_idr"`
+	TotalAnnualEmissionsTCO2e     float64                 `json:"total_annual_emissions_tco2e"`
+	TotalCarbonCapTCO2e           float64                 `json:"total_carbon_cap_tco2e"`
+	NetGroupCarbonTaxLiabilityIDR float64                 `json:"net_group_carbon_tax_liability_idr"`
+	TradableCarbonSurplusValueIDR float64                 `json:"tradable_carbon_surplus_value_idr"`
+	ComplianceStatus              string                  `json:"compliance_status"` // COMPLIANT_SURPLUS, DEFICIT_TAX_DUE
+	Assets                        []AssetCarbonLedgerItem `json:"assets"`
+	TaxPolicySummary              string                  `json:"tax_policy_summary"`
+	GeneratedAt                   string                  `json:"generated_at"`
 }
 
 type SettleAllowanceRequest struct {
@@ -63,7 +63,7 @@ type SettleAllowanceResponse struct {
 
 // ComputeCarbonDepreciationMatrix calculates dual asset depreciation and carbon tax / cap balances
 func ComputeCarbonDepreciationMatrix(db *gorm.DB, companyID uint) *CarbonDepreciationMatrixResponse {
-	taxRatePerTon := 30000.0 // Indonesian Carbon Tax rate Rp 30,000 / tCO2e (UU Harmonisasi Peraturan Perpajakan)
+	taxRatePerTon := 30000.0     // Indonesian Carbon Tax rate Rp 30,000 / tCO2e (UU Harmonisasi Peraturan Perpajakan)
 	marketCarbonPrice := 65000.0 // Voluntary Carbon Market price Rp 65,000 / tCO2e (IDXCarbon)
 
 	items := []AssetCarbonLedgerItem{
@@ -97,7 +97,7 @@ func ComputeCarbonDepreciationMatrix(db *gorm.DB, companyID uint) *CarbonDepreci
 			DepreciationMethod:         "STRAIGHT_LINE",
 			AnnualEnergyConsumptionKWh: 42000,
 			AnnualEmissionsTCO2e:       45.80,
-			AllocatedCapTCO2e:          50.0,  // Cap is 50 -> 4.2 tCO2e surplus!
+			AllocatedCapTCO2e:          50.0, // Cap is 50 -> 4.2 tCO2e surplus!
 			NetVarianceTCO2e:           -4.20,
 			CarbonTaxRatePerTonIDR:     taxRatePerTon,
 			NetCarbonTaxLiabilityIDR:   0.0,
@@ -115,7 +115,7 @@ func ComputeCarbonDepreciationMatrix(db *gorm.DB, companyID uint) *CarbonDepreci
 			DepreciationMethod:         "DECLINING_BALANCE",
 			AnnualEnergyConsumptionKWh: 32000,
 			AnnualEmissionsTCO2e:       27.20,
-			AllocatedCapTCO2e:          35.0,  // 7.8 tCO2e surplus!
+			AllocatedCapTCO2e:          35.0, // 7.8 tCO2e surplus!
 			NetVarianceTCO2e:           -7.80,
 			CarbonTaxRatePerTonIDR:     taxRatePerTon,
 			NetCarbonTaxLiabilityIDR:   0.0,

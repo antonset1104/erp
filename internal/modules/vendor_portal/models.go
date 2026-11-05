@@ -26,22 +26,22 @@ type VendorPortalAccount struct {
 
 // VendorQuotationBid represents a price quotation bid submitted by a vendor for an RFQ
 type VendorQuotationBid struct {
-	ID                   uint                    `gorm:"primaryKey" json:"id"`
-	BidNumber            string                  `gorm:"size:64;uniqueIndex;not null" json:"bid_number"` // BID/2026/00001
-	RFQReference         string                  `gorm:"size:64;index" json:"rfq_reference"`             // PO00001 (RFQ) or PR/2026/00001
-	PurchaseOrderID      *uint                   `gorm:"index" json:"purchase_order_id"`
-	PartnerID            uint                    `gorm:"not null;index" json:"partner_id"`
-	VendorName           string                  `gorm:"size:255" json:"vendor_name"`
-	TotalBidAmount       float64                 `gorm:"type:decimal(16,2);not null" json:"total_bid_amount"`
-	DeliveryLeadTimeDays int                     `gorm:"default:7" json:"delivery_lead_time_days"`
-	PaymentTerms         string                  `gorm:"size:100;default:'NET 30'" json:"payment_terms"`
-	Status               string                  `gorm:"size:32;default:'submitted'" json:"status"` // submitted, accepted, rejected
-	Notes                string                  `gorm:"type:text" json:"notes"`
-	SubmittedAt          time.Time               `json:"submitted_at"`
+	ID                   uint                     `gorm:"primaryKey" json:"id"`
+	BidNumber            string                   `gorm:"size:64;uniqueIndex;not null" json:"bid_number"` // BID/2026/00001
+	RFQReference         string                   `gorm:"size:64;index" json:"rfq_reference"`             // PO00001 (RFQ) or PR/2026/00001
+	PurchaseOrderID      *uint                    `gorm:"index" json:"purchase_order_id"`
+	PartnerID            uint                     `gorm:"not null;index" json:"partner_id"`
+	VendorName           string                   `gorm:"size:255" json:"vendor_name"`
+	TotalBidAmount       float64                  `gorm:"type:decimal(16,2);not null" json:"total_bid_amount"`
+	DeliveryLeadTimeDays int                      `gorm:"default:7" json:"delivery_lead_time_days"`
+	PaymentTerms         string                   `gorm:"size:100;default:'NET 30'" json:"payment_terms"`
+	Status               string                   `gorm:"size:32;default:'submitted'" json:"status"` // submitted, accepted, rejected
+	Notes                string                   `gorm:"type:text" json:"notes"`
+	SubmittedAt          time.Time                `json:"submitted_at"`
 	Lines                []VendorQuotationBidLine `gorm:"foreignKey:BidID" json:"lines,omitempty"`
-	CreatedAt            time.Time               `json:"created_at"`
-	UpdatedAt            time.Time               `json:"updated_at"`
-	DeletedAt            gorm.DeletedAt          `gorm:"index" json:"-"`
+	CreatedAt            time.Time                `json:"created_at"`
+	UpdatedAt            time.Time                `json:"updated_at"`
+	DeletedAt            gorm.DeletedAt           `gorm:"index" json:"-"`
 }
 
 // VendorQuotationBidLine represents individual item bids
@@ -62,24 +62,24 @@ type VendorQuotationBidLine struct {
 
 // VendorASN represents Advance Shipping Notice / Surat Jalan Pemasok
 type VendorASN struct {
-	ID                   uint           `gorm:"primaryKey" json:"id"`
-	ASNNumber            string         `gorm:"size:64;uniqueIndex;not null" json:"asn_number"` // ASN/2026/00001
-	PurchaseOrderID      uint           `gorm:"not null;index" json:"purchase_order_id"`
-	PurchaseOrderRef     string         `gorm:"size:64;index" json:"purchase_order_ref"`
-	PartnerID            uint           `gorm:"not null;index" json:"partner_id"`
-	VendorName           string         `gorm:"size:255" json:"vendor_name"`
-	CarrierName          string         `gorm:"size:100" json:"carrier_name"`      // e.g. JNE Trucking, Internal Armada
-	TrackingRef          string         `gorm:"size:100" json:"tracking_ref"`      // No. Resi / Surat Jalan Supplier
-	DriverName           string         `gorm:"size:100" json:"driver_name"`
-	VehicleNumber        string         `gorm:"size:50" json:"vehicle_number"`     // e.g. B 9812 XYZ
-	EstimatedArrivalDate time.Time      `json:"estimated_arrival_date"`
-	ActualArrivalDate    *time.Time     `json:"actual_arrival_date"`
-	Status               string         `gorm:"size:32;default:'in_transit'" json:"status"` // in_transit, received, cancelled
-	Notes                string         `gorm:"type:text" json:"notes"`
+	ID                   uint            `gorm:"primaryKey" json:"id"`
+	ASNNumber            string          `gorm:"size:64;uniqueIndex;not null" json:"asn_number"` // ASN/2026/00001
+	PurchaseOrderID      uint            `gorm:"not null;index" json:"purchase_order_id"`
+	PurchaseOrderRef     string          `gorm:"size:64;index" json:"purchase_order_ref"`
+	PartnerID            uint            `gorm:"not null;index" json:"partner_id"`
+	VendorName           string          `gorm:"size:255" json:"vendor_name"`
+	CarrierName          string          `gorm:"size:100" json:"carrier_name"` // e.g. JNE Trucking, Internal Armada
+	TrackingRef          string          `gorm:"size:100" json:"tracking_ref"` // No. Resi / Surat Jalan Supplier
+	DriverName           string          `gorm:"size:100" json:"driver_name"`
+	VehicleNumber        string          `gorm:"size:50" json:"vehicle_number"` // e.g. B 9812 XYZ
+	EstimatedArrivalDate time.Time       `json:"estimated_arrival_date"`
+	ActualArrivalDate    *time.Time      `json:"actual_arrival_date"`
+	Status               string          `gorm:"size:32;default:'in_transit'" json:"status"` // in_transit, received, cancelled
+	Notes                string          `gorm:"type:text" json:"notes"`
 	Lines                []VendorASNLine `gorm:"foreignKey:ASNID" json:"lines,omitempty"`
-	CreatedAt            time.Time      `json:"created_at"`
-	UpdatedAt            time.Time      `json:"updated_at"`
-	DeletedAt            gorm.DeletedAt `gorm:"index" json:"-"`
+	CreatedAt            time.Time       `json:"created_at"`
+	UpdatedAt            time.Time       `json:"updated_at"`
+	DeletedAt            gorm.DeletedAt  `gorm:"index" json:"-"`
 }
 
 // VendorASNLine represents individual goods within the shipping notice
@@ -99,44 +99,44 @@ type VendorASNLine struct {
 
 // VendorInvoiceSubmission represents electronic bill submitted by vendor for 3-way matching
 type VendorInvoiceSubmission struct {
-	ID                     uint           `gorm:"primaryKey" json:"id"`
-	SubmissionNumber       string         `gorm:"size:64;uniqueIndex;not null" json:"submission_number"` // VINV/2026/00001
-	PurchaseOrderID        uint           `gorm:"not null;index" json:"purchase_order_id"`
-	PurchaseOrderRef       string         `gorm:"size:64;index" json:"purchase_order_ref"`
-	PartnerID              uint           `gorm:"not null;index" json:"partner_id"`
-	VendorName             string         `gorm:"size:255" json:"vendor_name"`
-	InvoiceNumberSupplier  string         `gorm:"size:100;not null" json:"invoice_number_supplier"`
-	InvoiceDate            time.Time      `json:"invoice_date"`
-	DueDate                time.Time      `json:"due_date"`
-	Subtotal               float64        `gorm:"type:decimal(16,2);not null" json:"subtotal"`
-	TaxAmount              float64        `gorm:"type:decimal(16,2);default:0" json:"tax_amount"`
-	TotalAmount            float64        `gorm:"type:decimal(16,2);not null" json:"total_amount"`
-	TaxInvoiceNumber       string         `gorm:"size:100" json:"tax_invoice_number"` // No Faktur Pajak e-Faktur
-	FileAttachmentURL      string         `gorm:"size:512" json:"file_attachment_url"`
-	MatchingStatus         string         `gorm:"size:32;default:'pending_match'" json:"matching_status"` // pending_match, matched_3way, discrepancy_price, discrepancy_qty, rejected
-	DiscrepancyNotes       string         `gorm:"type:text" json:"discrepancy_notes"`
-	AccountMoveID          *uint          `gorm:"index" json:"account_move_id"`                           // Linked ERP Vendor Bill
-	Status                 string         `gorm:"size:32;default:'submitted'" json:"status"`              // submitted, verified, approved, rejected
-	Notes                  string         `gorm:"type:text" json:"notes"`
-	CreatedAt              time.Time      `json:"created_at"`
-	UpdatedAt              time.Time      `json:"updated_at"`
-	DeletedAt              gorm.DeletedAt `gorm:"index" json:"-"`
+	ID                    uint           `gorm:"primaryKey" json:"id"`
+	SubmissionNumber      string         `gorm:"size:64;uniqueIndex;not null" json:"submission_number"` // VINV/2026/00001
+	PurchaseOrderID       uint           `gorm:"not null;index" json:"purchase_order_id"`
+	PurchaseOrderRef      string         `gorm:"size:64;index" json:"purchase_order_ref"`
+	PartnerID             uint           `gorm:"not null;index" json:"partner_id"`
+	VendorName            string         `gorm:"size:255" json:"vendor_name"`
+	InvoiceNumberSupplier string         `gorm:"size:100;not null" json:"invoice_number_supplier"`
+	InvoiceDate           time.Time      `json:"invoice_date"`
+	DueDate               time.Time      `json:"due_date"`
+	Subtotal              float64        `gorm:"type:decimal(16,2);not null" json:"subtotal"`
+	TaxAmount             float64        `gorm:"type:decimal(16,2);default:0" json:"tax_amount"`
+	TotalAmount           float64        `gorm:"type:decimal(16,2);not null" json:"total_amount"`
+	TaxInvoiceNumber      string         `gorm:"size:100" json:"tax_invoice_number"` // No Faktur Pajak e-Faktur
+	FileAttachmentURL     string         `gorm:"size:512" json:"file_attachment_url"`
+	MatchingStatus        string         `gorm:"size:32;default:'pending_match'" json:"matching_status"` // pending_match, matched_3way, discrepancy_price, discrepancy_qty, rejected
+	DiscrepancyNotes      string         `gorm:"type:text" json:"discrepancy_notes"`
+	AccountMoveID         *uint          `gorm:"index" json:"account_move_id"`              // Linked ERP Vendor Bill
+	Status                string         `gorm:"size:32;default:'submitted'" json:"status"` // submitted, verified, approved, rejected
+	Notes                 string         `gorm:"type:text" json:"notes"`
+	CreatedAt             time.Time      `json:"created_at"`
+	UpdatedAt             time.Time      `json:"updated_at"`
+	DeletedAt             gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 // AIVendorPerformanceRating represents AI evaluation of vendor reliability
 type AIVendorPerformanceRating struct {
-	PartnerID                  uint      `json:"partner_id"`
-	VendorName                 string    `json:"vendor_name"`
-	TotalOrders                int       `json:"total_orders"`
-	OnTimeDeliveryRate         float64   `json:"on_time_delivery_rate"`         // e.g. 96.5%
-	PriceCompetitivenessScore  float64   `json:"price_competitiveness_score"`   // 0 - 100
-	QualityAcceptanceRate      float64   `json:"quality_acceptance_rate"`       // e.g. 99.1%
-	OverallRatingScore         float64   `json:"overall_rating_score"`          // 0 - 100
-	TierBadge                  string    `json:"tier_badge"`                    // platinum, gold, silver, bronze
-	ExecutiveSummary           string    `json:"executive_summary"`
-	ActionableRecommendations  []string  `json:"actionable_recommendations"`
-	AIProvider                 string    `json:"ai_provider"`
-	EvaluatedAt                time.Time `json:"evaluated_at"`
+	PartnerID                 uint      `json:"partner_id"`
+	VendorName                string    `json:"vendor_name"`
+	TotalOrders               int       `json:"total_orders"`
+	OnTimeDeliveryRate        float64   `json:"on_time_delivery_rate"`       // e.g. 96.5%
+	PriceCompetitivenessScore float64   `json:"price_competitiveness_score"` // 0 - 100
+	QualityAcceptanceRate     float64   `json:"quality_acceptance_rate"`     // e.g. 99.1%
+	OverallRatingScore        float64   `json:"overall_rating_score"`        // 0 - 100
+	TierBadge                 string    `json:"tier_badge"`                  // platinum, gold, silver, bronze
+	ExecutiveSummary          string    `json:"executive_summary"`
+	ActionableRecommendations []string  `json:"actionable_recommendations"`
+	AIProvider                string    `json:"ai_provider"`
+	EvaluatedAt               time.Time `json:"evaluated_at"`
 }
 
 // Request and Response DTOs

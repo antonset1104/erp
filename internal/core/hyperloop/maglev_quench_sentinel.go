@@ -15,38 +15,38 @@ import (
 // HyperloopPodTelemetry captures maglev levitation and vacuum tube dynamics under CEN/CLC/JTC 20 & IEEE 1475
 type HyperloopPodTelemetry struct {
 	TelemetryID               string    `json:"telemetry_id"`
-	PodID                     string    `json:"pod_id"`                      // "POD-HYPERLOOP-MACH08-01"
-	TubeTrackID               string    `json:"tube_track_id"`               // "TUBE-ROUTE-CHICAGO-PITTSBURGH"
-	PodSpeedKPH               float64   `json:"pod_speed_kph"`               // e.g. 960.0 km/h
-	TubeAmbientPressurePa     float64   `json:"tube_ambient_pressure_pa"`    // e.g. 110.0 Pa
-	HTSCoilTemperatureKelvin   float64   `json:"hts_coil_temperature_kelvin"` // e.g. 88.5 K (critical limit 92.0 K)
-	CoilOperatingCurrentAmps  float64   `json:"coil_operating_current_amps"` // e.g. 480.0 A
-	KantrowitzChokeRatio      float64   `json:"kantrowitz_choke_ratio"`      // A_pod / A_tube e.g. 0.44
-	TubeExpansionDeflectionMM float64   `json:"tube_expansion_deflection_mm"`// e.g. 34.5 mm
+	PodID                     string    `json:"pod_id"`                       // "POD-HYPERLOOP-MACH08-01"
+	TubeTrackID               string    `json:"tube_track_id"`                // "TUBE-ROUTE-CHICAGO-PITTSBURGH"
+	PodSpeedKPH               float64   `json:"pod_speed_kph"`                // e.g. 960.0 km/h
+	TubeAmbientPressurePa     float64   `json:"tube_ambient_pressure_pa"`     // e.g. 110.0 Pa
+	HTSCoilTemperatureKelvin  float64   `json:"hts_coil_temperature_kelvin"`  // e.g. 88.5 K (critical limit 92.0 K)
+	CoilOperatingCurrentAmps  float64   `json:"coil_operating_current_amps"`  // e.g. 480.0 A
+	KantrowitzChokeRatio      float64   `json:"kantrowitz_choke_ratio"`       // A_pod / A_tube e.g. 0.44
+	TubeExpansionDeflectionMM float64   `json:"tube_expansion_deflection_mm"` // e.g. 34.5 mm
 	RecordedAt                time.Time `json:"recorded_at"`
 }
 
 // MaglevQuenchAndTubeAssessment models HTS coil quench margins and Kantrowitz aerodynamic shock choke
 type MaglevQuenchAndTubeAssessment struct {
-	AssessmentID                string    `json:"assessment_id"`
-	PodID                       string    `json:"pod_id"`
-	SuperconductingMarginKelvin float64   `json:"superconducting_margin_kelvin"` // Tc - T (limit > 3.0 K)
-	KantrowitzShockwaveRiskLevel string   `json:"kantrowitz_shockwave_risk_level"` // "SUBCRITICAL_LAMINAR_PASSAGE", "ELEVATED_SHOCKWAVE_CHOKE_WARNING", "CRITICAL_KANTROWITZ_BLOWBY_CHOKING"
-	HTSMagnetQuenchHazardLevel  string    `json:"hts_magnet_quench_hazard_level"`  // "SUPERCONDUCTING_STABLE", "ELEVATED_COIL_HEATING", "CRITICAL_THERMAL_QUENCH_IMMINENT"
-	QuenchDumpDischargeMandate  bool      `json:"quench_dump_discharge_mandate"`
-	LN2SubcoolingBoostActive    bool      `json:"ln2_subcooling_boost_active"`
-	AuditDigest                 string    `json:"audit_digest"`
-	EvaluatedAt                 time.Time `json:"evaluated_at"`
+	AssessmentID                 string    `json:"assessment_id"`
+	PodID                        string    `json:"pod_id"`
+	SuperconductingMarginKelvin  float64   `json:"superconducting_margin_kelvin"`   // Tc - T (limit > 3.0 K)
+	KantrowitzShockwaveRiskLevel string    `json:"kantrowitz_shockwave_risk_level"` // "SUBCRITICAL_LAMINAR_PASSAGE", "ELEVATED_SHOCKWAVE_CHOKE_WARNING", "CRITICAL_KANTROWITZ_BLOWBY_CHOKING"
+	HTSMagnetQuenchHazardLevel   string    `json:"hts_magnet_quench_hazard_level"`  // "SUPERCONDUCTING_STABLE", "ELEVATED_COIL_HEATING", "CRITICAL_THERMAL_QUENCH_IMMINENT"
+	QuenchDumpDischargeMandate   bool      `json:"quench_dump_discharge_mandate"`
+	LN2SubcoolingBoostActive     bool      `json:"ln2_subcooling_boost_active"`
+	AuditDigest                  string    `json:"audit_digest"`
+	EvaluatedAt                  time.Time `json:"evaluated_at"`
 }
 
 // HyperloopMitigationAction models automated quench dump resistor discharge and eddy-current brake deployment
 type HyperloopMitigationAction struct {
-	ActionID                    string    `json:"action_id"`
-	PodID                       string    `json:"pod_id"`
-	QuenchDumpDischargeTimeMS   float64   `json:"quench_dump_discharge_time_ms"`
-	EddyCurrentBrakingForceKN   float64   `json:"eddy_current_braking_force_kn"`
-	AvoidedLevitationCrashLossUSD float64 `json:"avoided_levitation_crash_loss_usd"` // Avoided $48M USD catastrophic de-levitation and vacuum tube breach
-	ActionTimestamp             time.Time `json:"action_timestamp"`
+	ActionID                      string    `json:"action_id"`
+	PodID                         string    `json:"pod_id"`
+	QuenchDumpDischargeTimeMS     float64   `json:"quench_dump_discharge_time_ms"`
+	EddyCurrentBrakingForceKN     float64   `json:"eddy_current_braking_force_kn"`
+	AvoidedLevitationCrashLossUSD float64   `json:"avoided_levitation_crash_loss_usd"` // Avoided $48M USD catastrophic de-levitation and vacuum tube breach
+	ActionTimestamp               time.Time `json:"action_timestamp"`
 }
 
 // HyperloopVault thread-safe in-memory store
@@ -72,7 +72,7 @@ func init() {
 		TubeTrackID:               "TUBE-ROUTE-CHICAGO-PITTSBURGH",
 		PodSpeedKPH:               980.0,
 		TubeAmbientPressurePa:     125.0,
-		HTSCoilTemperatureKelvin:   90.2, // Only 1.8 K from critical Tc = 92.0 K!
+		HTSCoilTemperatureKelvin:  90.2, // Only 1.8 K from critical Tc = 92.0 K!
 		CoilOperatingCurrentAmps:  510.0,
 		KantrowitzChokeRatio:      0.47,
 		TubeExpansionDeflectionMM: 38.0,
@@ -132,15 +132,15 @@ func (v *HyperloopVault) EvaluateMagnetQuenchAndVacuum(podID string) (MaglevQuen
 
 	assessID := fmt.Sprintf("ASSESS-HYPERLOOP-%d", time.Now().UnixNano()%1000000)
 	assessment := MaglevQuenchAndTubeAssessment{
-		AssessmentID:                assessID,
-		PodID:                       podID,
-		SuperconductingMarginKelvin: math.Round(margin*100.0) / 100.0,
+		AssessmentID:                 assessID,
+		PodID:                        podID,
+		SuperconductingMarginKelvin:  math.Round(margin*100.0) / 100.0,
 		KantrowitzShockwaveRiskLevel: kantrowitzRisk,
-		HTSMagnetQuenchHazardLevel:  quenchHazard,
-		QuenchDumpDischargeMandate:  quenchMandate,
-		LN2SubcoolingBoostActive:    ln2Boost,
-		AuditDigest:                 digest,
-		EvaluatedAt:                 time.Now(),
+		HTSMagnetQuenchHazardLevel:   quenchHazard,
+		QuenchDumpDischargeMandate:   quenchMandate,
+		LN2SubcoolingBoostActive:     ln2Boost,
+		AuditDigest:                  digest,
+		EvaluatedAt:                  time.Now(),
 	}
 
 	v.assessments[podID] = assessment
@@ -156,12 +156,12 @@ func (v *HyperloopVault) TriggerQuenchDumpAndExpansionControl(podID string) (Hyp
 
 	actionID := fmt.Sprintf("ACT-HYPERLOOP-%d", time.Now().UnixNano()%1000000)
 	action := HyperloopMitigationAction{
-		ActionID:                    actionID,
-		PodID:                       podID,
-		QuenchDumpDischargeTimeMS:   4.2,
-		EddyCurrentBrakingForceKN:   185.0,
+		ActionID:                      actionID,
+		PodID:                         podID,
+		QuenchDumpDischargeTimeMS:     4.2,
+		EddyCurrentBrakingForceKN:     185.0,
 		AvoidedLevitationCrashLossUSD: avoidedLoss,
-		ActionTimestamp:             time.Now(),
+		ActionTimestamp:               time.Now(),
 	}
 
 	v.actions[podID] = action

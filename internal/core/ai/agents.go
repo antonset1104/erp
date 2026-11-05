@@ -176,7 +176,7 @@ func (c *Client) GetAgentToolsManifest() map[string]interface{} {
 			Description: "Query real-time warehouse stock levels, product pricing, and low-stock reorder alerts from GoERP inventory.",
 			Category:    "inventory",
 			Parameters: map[string]AgentToolParameter{
-				"keyword":       {Type: "string", Description: "Optional product name or SKU filter"},
+				"keyword":        {Type: "string", Description: "Optional product name or SKU filter"},
 				"low_stock_only": {Type: "boolean", Description: "Filter only products with low stock (< 10 units)"},
 			},
 			Required: []string{},
@@ -232,11 +232,11 @@ func (c *Client) GetAgentToolsManifest() map[string]interface{} {
 	}
 
 	return map[string]interface{}{
-		"mcp_version":      "2025-03-26",
-		"server_name":      "goerp-enterprise-mcp-server",
-		"supported_specs":  []string{"mcp", "openai_tools", "gemini_function_declarations", "anthropic_tools"},
-		"total_tools":      len(tools),
-		"tools":            tools,
+		"mcp_version":     "2025-03-26",
+		"server_name":     "goerp-enterprise-mcp-server",
+		"supported_specs": []string{"mcp", "openai_tools", "gemini_function_declarations", "anthropic_tools"},
+		"total_tools":     len(tools),
+		"tools":           tools,
 	}
 }
 

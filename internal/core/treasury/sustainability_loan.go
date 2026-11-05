@@ -27,8 +27,8 @@ type SustainabilityLinkedFacility struct {
 	FacilityName            string                    `json:"facility_name"`
 	LenderSyndicateLead     string                    `json:"lender_syndicate_lead"`
 	PrincipalAmountUSD      float64                   `json:"principal_amount_usd"`
-	BenchmarkRateName       string                    `json:"benchmark_rate_name"` // "SOFR_3M"
-	BaseMarginBps           float64                   `json:"base_margin_bps"`     // 175 bps
+	BenchmarkRateName       string                    `json:"benchmark_rate_name"`    // "SOFR_3M"
+	BaseMarginBps           float64                   `json:"base_margin_bps"`        // 175 bps
 	StepDownDiscountBps     float64                   `json:"step_down_discount_bps"` // 25 bps
 	StepUpPenaltyBps        float64                   `json:"step_up_penalty_bps"`    // 25 bps
 	ActiveInterestRatePct   float64                   `json:"active_interest_rate_pct"`
@@ -40,39 +40,39 @@ type SustainabilityLinkedFacility struct {
 
 // EvaluateSLLCouponRequest holds ESG actuals verified by accredited independent auditors.
 type EvaluateSLLCouponRequest struct {
-	FacilityID               string  `json:"facility_id"`
-	EvaluationPeriod         string  `json:"evaluation_period"` // e.g. "2026-Q1"
-	CurrentSOFRRatePct       float64 `json:"current_sofr_rate_pct"`
-	AchievedGHGReductionPct  float64 `json:"achieved_ghg_reduction_pct"`
+	FacilityID                string  `json:"facility_id"`
+	EvaluationPeriod          string  `json:"evaluation_period"` // e.g. "2026-Q1"
+	CurrentSOFRRatePct        float64 `json:"current_sofr_rate_pct"`
+	AchievedGHGReductionPct   float64 `json:"achieved_ghg_reduction_pct"`
 	AchievedRenewableSharePct float64 `json:"achieved_renewable_share_pct"`
-	AchievedLTIFR            float64 `json:"achieved_ltifr"`
+	AchievedLTIFR             float64 `json:"achieved_ltifr"`
 }
 
 // SLLCouponAdjustmentResult reflects interest recalculation and General Ledger journal entry.
 type SLLCouponAdjustmentResult struct {
-	FacilityID               string  `json:"facility_id"`
-	EvaluationPeriod         string  `json:"evaluation_period"`
-	PrincipalAmountUSD       float64 `json:"principal_amount_usd"`
-	TotalTargetsCount        int     `json:"total_targets_count"`
-	TargetsMetCount          int     `json:"targets_met_count"`
-	PriorCouponRatePct       float64 `json:"prior_coupon_rate_pct"`
-	RevisedCouponRatePct     float64 `json:"revised_coupon_rate_pct"`
-	MarginAdjustmentBps      float64 `json:"margin_adjustment_bps"` // -25.0, 0.0, or +25.0
+	FacilityID                string  `json:"facility_id"`
+	EvaluationPeriod          string  `json:"evaluation_period"`
+	PrincipalAmountUSD        float64 `json:"principal_amount_usd"`
+	TotalTargetsCount         int     `json:"total_targets_count"`
+	TargetsMetCount           int     `json:"targets_met_count"`
+	PriorCouponRatePct        float64 `json:"prior_coupon_rate_pct"`
+	RevisedCouponRatePct      float64 `json:"revised_coupon_rate_pct"`
+	MarginAdjustmentBps       float64 `json:"margin_adjustment_bps"` // -25.0, 0.0, or +25.0
 	NetAnnualInterestDeltaUSD float64 `json:"net_annual_interest_delta_usd"`
-	LedgerJournalEntryNo     string  `json:"ledger_journal_entry_no"`
-	ESGPerformanceVerdict    string  `json:"esg_performance_verdict"`
-	AuditCertificateRef      string  `json:"audit_certificate_ref"`
-	AdjustedAt               string  `json:"adjusted_at"`
+	LedgerJournalEntryNo      string  `json:"ledger_journal_entry_no"`
+	ESGPerformanceVerdict     string  `json:"esg_performance_verdict"`
+	AuditCertificateRef       string  `json:"audit_certificate_ref"`
+	AdjustedAt                string  `json:"adjusted_at"`
 }
 
 // SLLPortfolioSummary returns consolidated financing metrics for corporate treasury.
 type SLLPortfolioSummary struct {
-	TotalFacilitiesCount     int     `json:"total_facilities_count"`
-	TotalPrincipalFinancedUSD float64 `json:"total_principal_financed_usd"`
-	WeightedAverageCouponPct float64 `json:"weighted_average_coupon_pct"`
-	TotalCumulativeSavingsUSD float64 `json:"total_cumulative_savings_usd"`
-	Facilities               []*SustainabilityLinkedFacility `json:"facilities"`
-	LastValuationDate        string  `json:"last_valuation_date"`
+	TotalFacilitiesCount      int                             `json:"total_facilities_count"`
+	TotalPrincipalFinancedUSD float64                         `json:"total_principal_financed_usd"`
+	WeightedAverageCouponPct  float64                         `json:"weighted_average_coupon_pct"`
+	TotalCumulativeSavingsUSD float64                         `json:"total_cumulative_savings_usd"`
+	Facilities                []*SustainabilityLinkedFacility `json:"facilities"`
+	LastValuationDate         string                          `json:"last_valuation_date"`
 }
 
 // SLLFacilityStore manages thread-safe storage for SLL instruments.

@@ -20,26 +20,26 @@ type VesselNoticeOfReadinessNOR struct {
 	ArrivalDraftMeters                float64   `json:"arrival_draft_meters"` // e.g. 13.8m
 	CargoTons                         float64   `json:"cargo_tons"`
 	NORReceivedAt                     time.Time `json:"nor_received_at"`
-	AllowedLaytimeHours               float64   `json:"allowed_laytime_hours"` // e.g. 72.0 hours (3 days)
+	AllowedLaytimeHours               float64   `json:"allowed_laytime_hours"`                  // e.g. 72.0 hours (3 days)
 	ContractualDemurrageRatePerDayUSD float64   `json:"contractual_demurrage_rate_per_day_usd"` // e.g. $35,000/day
 	ContractualDespatchRatePerDayUSD  float64   `json:"contractual_despatch_rate_per_day_usd"`  // e.g. $17,500/day
 }
 
 // BerthAllocationPlan models dynamic spatial-temporal quay allocation and crane deployment
 type BerthAllocationPlan struct {
-	AllocationID                  string    `json:"allocation_id"`
-	TerminalID                    string    `json:"terminal_id"`
-	VesselIMO                     string    `json:"vessel_imo"`
-	AssignedBerthID               string    `json:"assigned_berth_id"`
-	QuayMeterStart                float64   `json:"quay_meter_start"`
-	QuayMeterEnd                  float64   `json:"quay_meter_end"`
-	WaterDepthMeters              float64   `json:"water_depth_meters"`
-	AllocatedCranesCount          int       `json:"allocated_cranes_count"`
-	EstimatedDischargeHours       float64   `json:"estimated_discharge_hours"`
-	TidalWindowVerified           bool      `json:"tidal_window_verified"`
-	BerthStatus                   string    `json:"berth_status"` // "BERTH_ASSIGNED_TIDAL_WINDOW_CONFIRMED", "CONGESTION_ANCHORAGE_WAITING"
-	ExpectedCompletionAt          time.Time `json:"expected_completion_at"`
-	AllocatedAt                   time.Time `json:"allocated_at"`
+	AllocationID            string    `json:"allocation_id"`
+	TerminalID              string    `json:"terminal_id"`
+	VesselIMO               string    `json:"vessel_imo"`
+	AssignedBerthID         string    `json:"assigned_berth_id"`
+	QuayMeterStart          float64   `json:"quay_meter_start"`
+	QuayMeterEnd            float64   `json:"quay_meter_end"`
+	WaterDepthMeters        float64   `json:"water_depth_meters"`
+	AllocatedCranesCount    int       `json:"allocated_cranes_count"`
+	EstimatedDischargeHours float64   `json:"estimated_discharge_hours"`
+	TidalWindowVerified     bool      `json:"tidal_window_verified"`
+	BerthStatus             string    `json:"berth_status"` // "BERTH_ASSIGNED_TIDAL_WINDOW_CONFIRMED", "CONGESTION_ANCHORAGE_WAITING"
+	ExpectedCompletionAt    time.Time `json:"expected_completion_at"`
+	AllocatedAt             time.Time `json:"allocated_at"`
 }
 
 // LaytimeDemurrageSettlement models financial calculation of demurrage liability or despatch earnings
@@ -58,10 +58,10 @@ type LaytimeDemurrageSettlement struct {
 
 // BerthAllocationVault thread-safe store
 type BerthAllocationVault struct {
-	mu           sync.RWMutex
-	vessels      map[string]VesselNoticeOfReadinessNOR
-	allocations  map[string]BerthAllocationPlan
-	settlements  map[string]LaytimeDemurrageSettlement
+	mu          sync.RWMutex
+	vessels     map[string]VesselNoticeOfReadinessNOR
+	allocations map[string]BerthAllocationPlan
+	settlements map[string]LaytimeDemurrageSettlement
 }
 
 // Global Berth Allocation instance
@@ -204,12 +204,12 @@ func (v *BerthAllocationVault) GetTerminalEfficiencyDossier(terminalID string) (
 	defer v.mu.RUnlock()
 
 	return gin.H{
-		"terminal_id":               terminalID,
-		"active_berth_occupancy":    "82.4%",
-		"average_waiting_time_hrs":  4.2,
-		"demurrage_reduction_rate":  "68.5% Avoided Demurrage Losses",
-		"charterparty_standard":     "BIMCO Standard Laytime Definitions (2013) / Gencon 1994",
-		"operational_framework":     "UNCLOS Article 18 Maritime Port Access & Automated Demurrage Adjudication",
+		"terminal_id":              terminalID,
+		"active_berth_occupancy":   "82.4%",
+		"average_waiting_time_hrs": 4.2,
+		"demurrage_reduction_rate": "68.5% Avoided Demurrage Losses",
+		"charterparty_standard":    "BIMCO Standard Laytime Definitions (2013) / Gencon 1994",
+		"operational_framework":    "UNCLOS Article 18 Maritime Port Access & Automated Demurrage Adjudication",
 	}, nil
 }
 

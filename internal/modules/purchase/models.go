@@ -19,8 +19,8 @@ type PurchaseOrder struct {
 	AmountTotal   float64             `gorm:"default:0" json:"amount_total"`
 	TaxRate       float64             `gorm:"default:11.0" json:"tax_rate"` // PPN 11%
 	OrderLines    []PurchaseOrderLine `gorm:"foreignKey:OrderID" json:"order_lines"`
-	ReceiptID     *uint               `json:"receipt_id,omitempty"` // Related StockPicking ID (Incoming)
-	BillID        *uint               `json:"bill_id,omitempty"`    // Related AccountMove ID (Vendor Bill)
+	ReceiptID     *uint               `json:"receipt_id,omitempty"`                  // Related StockPicking ID (Incoming)
+	BillID        *uint               `json:"bill_id,omitempty"`                     // Related AccountMove ID (Vendor Bill)
 	RequisitionID *uint               `gorm:"index" json:"requisition_id,omitempty"` // Related PurchaseRequisition ID (Tender / Blanket)
 	Note          string              `gorm:"type:text" json:"note"`
 }

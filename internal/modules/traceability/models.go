@@ -8,13 +8,13 @@ import (
 
 // TraceEvent types represent physical movements and transformations of lots
 const (
-	EventReceipt    = "receipt"     // Incoming vendor receipt (WH/IN/...)
-	EventMOConsume  = "mo_consume"  // Raw material consumed in manufacturing (MO/...)
-	EventMOProduce  = "mo_produce"  // Finished goods produced in manufacturing (MO/...)
-	EventDelivery   = "delivery"    // Outgoing customer delivery (WH/OUT/...)
-	EventTransfer   = "transfer"    // Internal warehouse transfer (WH/INT/...)
-	EventAdjustment = "adjustment"  // Stock opname / physical adjustment
-	EventScrap      = "scrap"       // Damaged / discarded / quarantine scrap
+	EventReceipt    = "receipt"    // Incoming vendor receipt (WH/IN/...)
+	EventMOConsume  = "mo_consume" // Raw material consumed in manufacturing (MO/...)
+	EventMOProduce  = "mo_produce" // Finished goods produced in manufacturing (MO/...)
+	EventDelivery   = "delivery"   // Outgoing customer delivery (WH/OUT/...)
+	EventTransfer   = "transfer"   // Internal warehouse transfer (WH/INT/...)
+	EventAdjustment = "adjustment" // Stock opname / physical adjustment
+	EventScrap      = "scrap"      // Damaged / discarded / quarantine scrap
 )
 
 // Recall states
@@ -30,26 +30,26 @@ const (
 // Corresponds to standard enterprise stock.move.line & stock.traceability.report.
 type LotTraceRecord struct {
 	models.ModelBase
-	LotID          uint                       `gorm:"not null;index" json:"lot_id"`
+	LotID          uint                        `gorm:"not null;index" json:"lot_id"`
 	Lot            *barcode.StockProductionLot `gorm:"foreignKey:LotID" json:"lot,omitempty"`
-	LotName        string                     `gorm:"size:64;not null;index" json:"lot_name"`
-	ProductID      uint                       `gorm:"not null;index" json:"product_id"`
-	Product        *product.Product           `gorm:"foreignKey:ProductID" json:"product,omitempty"`
-	ProductName    string                     `gorm:"size:255;not null" json:"product_name"`
-	EventType      string                     `gorm:"size:32;not null;index" json:"event_type"` // receipt, mo_consume, mo_produce, delivery, transfer, scrap
-	Reference      string                     `gorm:"size:64;not null;index" json:"reference"`  // WH/IN/0001, MO/2026/0001, WH/OUT/0001
-	SourceDocument string                     `gorm:"size:64" json:"source_document,omitempty"` // PO0001, SO0001
-	PartnerID      *uint                      `gorm:"index" json:"partner_id,omitempty"`
-	PartnerName    string                     `gorm:"size:255" json:"partner_name,omitempty"`    // Supplier or Customer
-	PickingID      *uint                      `gorm:"index" json:"picking_id,omitempty"`
-	ProductionID   *uint                      `gorm:"index" json:"production_id,omitempty"`
+	LotName        string                      `gorm:"size:64;not null;index" json:"lot_name"`
+	ProductID      uint                        `gorm:"not null;index" json:"product_id"`
+	Product        *product.Product            `gorm:"foreignKey:ProductID" json:"product,omitempty"`
+	ProductName    string                      `gorm:"size:255;not null" json:"product_name"`
+	EventType      string                      `gorm:"size:32;not null;index" json:"event_type"` // receipt, mo_consume, mo_produce, delivery, transfer, scrap
+	Reference      string                      `gorm:"size:64;not null;index" json:"reference"`  // WH/IN/0001, MO/2026/0001, WH/OUT/0001
+	SourceDocument string                      `gorm:"size:64" json:"source_document,omitempty"` // PO0001, SO0001
+	PartnerID      *uint                       `gorm:"index" json:"partner_id,omitempty"`
+	PartnerName    string                      `gorm:"size:255" json:"partner_name,omitempty"` // Supplier or Customer
+	PickingID      *uint                       `gorm:"index" json:"picking_id,omitempty"`
+	ProductionID   *uint                       `gorm:"index" json:"production_id,omitempty"`
 
 	// Genealogical links for bi-directional upstream/downstream tracing
-	ParentLotID     *uint `gorm:"index" json:"parent_lot_id,omitempty"` // Raw lot that went into this finished lot
+	ParentLotID     *uint  `gorm:"index" json:"parent_lot_id,omitempty"` // Raw lot that went into this finished lot
 	ParentLotName   string `gorm:"size:64" json:"parent_lot_name,omitempty"`
-	ProducedLotID   *uint `gorm:"index" json:"produced_lot_id,omitempty"` // Finished lot produced if this was consumed in MO
+	ProducedLotID   *uint  `gorm:"index" json:"produced_lot_id,omitempty"` // Finished lot produced if this was consumed in MO
 	ProducedLotName string `gorm:"size:64" json:"produced_lot_name,omitempty"`
-	ConsumedLotID   *uint `gorm:"index" json:"consumed_lot_id,omitempty"` // Raw lot consumed if this was produced in MO
+	ConsumedLotID   *uint  `gorm:"index" json:"consumed_lot_id,omitempty"` // Raw lot consumed if this was produced in MO
 	ConsumedLotName string `gorm:"size:64" json:"consumed_lot_name,omitempty"`
 
 	Quantity         float64 `gorm:"not null" json:"quantity"`
@@ -71,22 +71,22 @@ func (LotTraceRecord) TableName() string {
 // Captures official recall campaigns for contaminated or defective lots.
 type ProductRecall struct {
 	models.ModelBase
-	RecallCode                string  `gorm:"size:64;not null;uniqueIndex" json:"recall_code"` // e.g. RCL/2026/00001
-	TargetLotID               uint    `gorm:"not null;index" json:"target_lot_id"`
-	TargetLotName             string  `gorm:"size:64;not null" json:"target_lot_name"`
-	ProductID                 uint    `gorm:"not null;index" json:"product_id"`
-	ProductName               string  `gorm:"size:255;not null" json:"product_name"`
-	Reason                    string  `gorm:"type:text;not null" json:"reason"`
-	Severity                  string  `gorm:"size:32;default:'critical'" json:"severity"` // critical, high, medium, low
-	State                     string  `gorm:"size:32;default:'draft';index" json:"state"` // draft, active, quarantined, completed, cancelled
-	AffectedStockQuarantined  float64 `gorm:"default:0" json:"affected_stock_quarantined"`
-	AffectedDeliveriesCount   int     `gorm:"default:0" json:"affected_deliveries_count"`
-	AffectedCustomersCount    int     `gorm:"default:0" json:"affected_customers_count"`
-	FinancialRisk             float64 `gorm:"default:0" json:"financial_risk"`
-	CustomerNoticeText        string  `gorm:"type:text" json:"customer_notice_text"`
-	RegulatoryNoticeText      string  `gorm:"type:text" json:"regulatory_notice_text"`
-	ResolutionNotes           string  `gorm:"type:text" json:"resolution_notes"`
-	AIProvider                string  `gorm:"size:64" json:"ai_provider,omitempty"`
+	RecallCode               string  `gorm:"size:64;not null;uniqueIndex" json:"recall_code"` // e.g. RCL/2026/00001
+	TargetLotID              uint    `gorm:"not null;index" json:"target_lot_id"`
+	TargetLotName            string  `gorm:"size:64;not null" json:"target_lot_name"`
+	ProductID                uint    `gorm:"not null;index" json:"product_id"`
+	ProductName              string  `gorm:"size:255;not null" json:"product_name"`
+	Reason                   string  `gorm:"type:text;not null" json:"reason"`
+	Severity                 string  `gorm:"size:32;default:'critical'" json:"severity"` // critical, high, medium, low
+	State                    string  `gorm:"size:32;default:'draft';index" json:"state"` // draft, active, quarantined, completed, cancelled
+	AffectedStockQuarantined float64 `gorm:"default:0" json:"affected_stock_quarantined"`
+	AffectedDeliveriesCount  int     `gorm:"default:0" json:"affected_deliveries_count"`
+	AffectedCustomersCount   int     `gorm:"default:0" json:"affected_customers_count"`
+	FinancialRisk            float64 `gorm:"default:0" json:"financial_risk"`
+	CustomerNoticeText       string  `gorm:"type:text" json:"customer_notice_text"`
+	RegulatoryNoticeText     string  `gorm:"type:text" json:"regulatory_notice_text"`
+	ResolutionNotes          string  `gorm:"type:text" json:"resolution_notes"`
+	AIProvider               string  `gorm:"size:64" json:"ai_provider,omitempty"`
 }
 
 func (ProductRecall) TableName() string {
@@ -123,22 +123,22 @@ type FEFOAllocationRequest struct {
 	ProductID        uint    `json:"product_id" binding:"required"`
 	RequestedQty     float64 `json:"requested_qty" binding:"required"`
 	LocationID       *uint   `json:"location_id"`
-	AllowNearExpiry  bool    `json:"allow_near_expiry"` // Allow allocation of lots expiring within warning window
+	AllowNearExpiry  bool    `json:"allow_near_expiry"`  // Allow allocation of lots expiring within warning window
 	ExpiryCutoffDays int     `json:"expiry_cutoff_days"` // Default 30 days
 }
 
 type FEFOAllocationItem struct {
-	LotID            uint    `json:"lot_id"`
-	LotName          string  `json:"lot_name"`
-	Barcode          string  `json:"barcode"`
-	ExpirationDate   string  `json:"expiration_date"`
-	RemovalDate      string  `json:"removal_date"`
-	AvailableQty     float64 `json:"available_qty"`
-	AllocatedQty     float64 `json:"allocated_qty"`
-	DaysUntilExpiry  int     `json:"days_until_expiry"`
-	Status           string  `json:"status"` // fresh, warning_near_expiry, expired
-	LocationID       *uint   `json:"location_id,omitempty"`
-	LocationName     string  `json:"location_name,omitempty"`
+	LotID           uint    `json:"lot_id"`
+	LotName         string  `json:"lot_name"`
+	Barcode         string  `json:"barcode"`
+	ExpirationDate  string  `json:"expiration_date"`
+	RemovalDate     string  `json:"removal_date"`
+	AvailableQty    float64 `json:"available_qty"`
+	AllocatedQty    float64 `json:"allocated_qty"`
+	DaysUntilExpiry int     `json:"days_until_expiry"`
+	Status          string  `json:"status"` // fresh, warning_near_expiry, expired
+	LocationID      *uint   `json:"location_id,omitempty"`
+	LocationName    string  `json:"location_name,omitempty"`
 }
 
 type FEFOAllocationResult struct {
@@ -226,11 +226,11 @@ type ExpiryRiskReport struct {
 
 // Traceability Dashboard Stats
 type TraceabilityStats struct {
-	TotalLots            int64   `json:"total_lots"`
-	ActiveLotsWithStock  int64   `json:"active_lots_with_stock"`
-	ExpiredLots          int64   `json:"expired_lots"`
-	NearExpiryLots       int64   `json:"near_expiry_lots"`
-	TotalTraceRecords    int64   `json:"total_trace_records"`
-	ActiveRecalls        int64   `json:"active_recalls"`
+	TotalLots             int64   `json:"total_lots"`
+	ActiveLotsWithStock   int64   `json:"active_lots_with_stock"`
+	ExpiredLots           int64   `json:"expired_lots"`
+	NearExpiryLots        int64   `json:"near_expiry_lots"`
+	TotalTraceRecords     int64   `json:"total_trace_records"`
+	ActiveRecalls         int64   `json:"active_recalls"`
 	TotalQuarantinedStock float64 `json:"total_quarantined_stock"`
 }

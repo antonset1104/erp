@@ -12,29 +12,29 @@ import (
 
 // ReusablePackagingAsset represents serialized RTI container
 type ReusablePackagingAsset struct {
-	AssetID                  string    `json:"asset_id"`
-	GRAISerialNumber         string    `json:"grai_serial_number"` // GS1 Global Returnable Asset Identifier
-	AssetType                string    `json:"asset_type"`         // "IBC_TOTE_1000L", "HEAVY_DUTY_PLASTIC_PALLET", "MODULAR_COLLAPSIBLE_CRATE"
-	DepositValueUSD          float64   `json:"deposit_value_usd"`  // e.g. $150.00 for IBC Tote
-	TareWeightKG             float64   `json:"tare_weight_kg"`
-	CurrentHolderType        string    `json:"current_holder_type"` // "INTERNAL_WAREHOUSE", "CUSTOMER_B2B", "TRANSIT_LOGISTICS"
-	CurrentHolderID          string    `json:"current_holder_id"`
-	TotalTripsCompleted      int       `json:"total_trips_completed"`
-	PhysicalConditionRating  string    `json:"physical_condition_rating"` // "PRISTINE", "SERVICEABLE", "MAINTENANCE_DUE"
-	CreatedAt                time.Time `json:"created_at"`
+	AssetID                 string    `json:"asset_id"`
+	GRAISerialNumber        string    `json:"grai_serial_number"` // GS1 Global Returnable Asset Identifier
+	AssetType               string    `json:"asset_type"`         // "IBC_TOTE_1000L", "HEAVY_DUTY_PLASTIC_PALLET", "MODULAR_COLLAPSIBLE_CRATE"
+	DepositValueUSD         float64   `json:"deposit_value_usd"`  // e.g. $150.00 for IBC Tote
+	TareWeightKG            float64   `json:"tare_weight_kg"`
+	CurrentHolderType       string    `json:"current_holder_type"` // "INTERNAL_WAREHOUSE", "CUSTOMER_B2B", "TRANSIT_LOGISTICS"
+	CurrentHolderID         string    `json:"current_holder_id"`
+	TotalTripsCompleted     int       `json:"total_trips_completed"`
+	PhysicalConditionRating string    `json:"physical_condition_rating"` // "PRISTINE", "SERVICEABLE", "MAINTENANCE_DUE"
+	CreatedAt               time.Time `json:"created_at"`
 }
 
 // PackagingDispatchRecord tracks outbound deposit billing to customer
 type PackagingDispatchRecord struct {
-	DispatchID               string    `json:"dispatch_id"`
-	AssetID                  string    `json:"asset_id"`
-	GRAISerialNumber         string    `json:"grai_serial_number"`
-	CustomerID               string    `json:"customer_id"`
-	CustomerName             string    `json:"customer_name"`
-	SalesOrderID             string    `json:"sales_order_id"`
-	DeliveryOrderID          string    `json:"delivery_order_id"`
-	DepositChargedUSD        float64   `json:"deposit_charged_usd"`
-	DispatchedAt             time.Time `json:"dispatched_at"`
+	DispatchID        string    `json:"dispatch_id"`
+	AssetID           string    `json:"asset_id"`
+	GRAISerialNumber  string    `json:"grai_serial_number"`
+	CustomerID        string    `json:"customer_id"`
+	CustomerName      string    `json:"customer_name"`
+	SalesOrderID      string    `json:"sales_order_id"`
+	DeliveryOrderID   string    `json:"delivery_order_id"`
+	DepositChargedUSD float64   `json:"deposit_charged_usd"`
+	DispatchedAt      time.Time `json:"dispatched_at"`
 }
 
 // PackagingReturnInspectionRecord tracks inbound inspection and credit note refund
@@ -54,10 +54,10 @@ type PackagingReturnInspectionRecord struct {
 
 // CircularPackagingVault thread-safe store
 type CircularPackagingVault struct {
-	mu          sync.RWMutex
-	assets      map[string]*ReusablePackagingAsset
-	dispatches  map[string]PackagingDispatchRecord
-	returns     map[string]PackagingReturnInspectionRecord
+	mu         sync.RWMutex
+	assets     map[string]*ReusablePackagingAsset
+	dispatches map[string]PackagingDispatchRecord
+	returns    map[string]PackagingReturnInspectionRecord
 }
 
 // Global Circular Packaging instance
@@ -221,15 +221,15 @@ func (v *CircularPackagingVault) GetEPRSustainabilityLedger(companyID string) gi
 	avoidedCO2Tons := avoidedPlasticTons * 2.8 // ~2.8 tCO2e avoided per ton of HDPE recycled
 
 	return gin.H{
-		"company_id":               companyID,
-		"active_packaging_assets":  len(assetList),
-		"total_circular_trips":     totalTrips,
-		"active_deposit_held_usd":  totalDepositHeld,
-		"avoided_plastic_tons":     math.Round(avoidedPlasticTons*100) / 100,
-		"avoided_scope3_co2e_tons": math.Round(avoidedCO2Tons*100) / 100,
+		"company_id":                companyID,
+		"active_packaging_assets":   len(assetList),
+		"total_circular_trips":      totalTrips,
+		"active_deposit_held_usd":   totalDepositHeld,
+		"avoided_plastic_tons":      math.Round(avoidedPlasticTons*100) / 100,
+		"avoided_scope3_co2e_tons":  math.Round(avoidedCO2Tons*100) / 100,
 		"packaging_circularity_pct": 96.8, // 96.8% of shipments use reusable RTI containers
-		"regulatory_compliance":    "EU Packaging & Packaging Waste Regulation (PPWR) & Extended Producer Responsibility (EPR)",
-		"assets":                   assetList,
+		"regulatory_compliance":     "EU Packaging & Packaging Waste Regulation (PPWR) & Extended Producer Responsibility (EPR)",
+		"assets":                    assetList,
 	}
 }
 

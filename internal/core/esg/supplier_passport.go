@@ -18,16 +18,16 @@ type VendorSustainabilityScorecard struct {
 	VendorName              string  `json:"vendor_name"`
 	Country                 string  `json:"country"`
 	CarbonEmissionIntensity float64 `json:"carbon_emission_intensity"` // kg CO2e / unit
-	BenchmarkIntensity      float64 `json:"benchmark_intensity"`      // Industry avg
+	BenchmarkIntensity      float64 `json:"benchmark_intensity"`       // Industry avg
 	ISO14001Certified       bool    `json:"iso14001_certified"`
 	ISO50001Certified       bool    `json:"iso50001_certified"`
 	RecycledPackagingPct    float64 `json:"recycled_packaging_pct"`
 	RenewableEnergySharePct float64 `json:"renewable_energy_share_pct"`
 	LogisticsGreenMode      string  `json:"logistics_green_mode"`
-	CompositeGreenScore     float64 `json:"composite_green_score"` // 0 - 100
-	SustainabilityTier      string  `json:"sustainability_tier"`   // "PLATINUM_LEADER", "GOLD_ADVANCED", "SILVER_COMPLIANT", "BRONZE_BASIC", "NON_COMPLIANT"
+	CompositeGreenScore     float64 `json:"composite_green_score"`   // 0 - 100
+	SustainabilityTier      string  `json:"sustainability_tier"`     // "PLATINUM_LEADER", "GOLD_ADVANCED", "SILVER_COMPLIANT", "BRONZE_BASIC", "NON_COMPLIANT"
 	ProcurementBonusScore   float64 `json:"procurement_bonus_score"` // 0 - 10 points in RFQ bidding
-	Scope3Factor            float64 `json:"scope3_factor"`          // Multiplier for corporate Scope 3 GHG
+	Scope3Factor            float64 `json:"scope3_factor"`           // Multiplier for corporate Scope 3 GHG
 	AssessmentDate          string  `json:"assessment_date"`
 	AuditedBy               string  `json:"audited_by"`
 }

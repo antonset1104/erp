@@ -14,12 +14,12 @@ import (
 type APIKey struct {
 	models.ModelBase
 	CompanyID     uint       `json:"company_id" gorm:"index;not null"`
-	Name          string     `json:"name" gorm:"size:128;not null"`          // e.g. "Shopify Store Connector", "Zapier Integration", "WMS Scanner App"
-	KeyPrefix     string     `json:"key_prefix" gorm:"size:16;index"`        // e.g. "ak_live_a1b2" for identification
-	KeyHash       string     `json:"-" gorm:"size:64;uniqueIndex;not null"`  // SHA-256 hash of the secret key
-	Scopes        string     `json:"scopes" gorm:"size:512;default:'*'"`     // Comma-separated: "read:products,write:sales,read:inventory,*"
+	Name          string     `json:"name" gorm:"size:128;not null"`           // e.g. "Shopify Store Connector", "Zapier Integration", "WMS Scanner App"
+	KeyPrefix     string     `json:"key_prefix" gorm:"size:16;index"`         // e.g. "ak_live_a1b2" for identification
+	KeyHash       string     `json:"-" gorm:"size:64;uniqueIndex;not null"`   // SHA-256 hash of the secret key
+	Scopes        string     `json:"scopes" gorm:"size:512;default:'*'"`      // Comma-separated: "read:products,write:sales,read:inventory,*"
 	AllowedIPs    string     `json:"allowed_ips" gorm:"size:256;default:'*'"` // Comma-separated IPs or "*"
-	RateLimitRPM  int        `json:"rate_limit_rpm" gorm:"default:120"`      // Requests per minute limit
+	RateLimitRPM  int        `json:"rate_limit_rpm" gorm:"default:120"`       // Requests per minute limit
 	TotalRequests int64      `json:"total_requests" gorm:"default:0"`
 	LastUsedAt    *time.Time `json:"last_used_at"`
 	ExpiresAt     *time.Time `json:"expires_at"`
@@ -72,13 +72,13 @@ func (k *APIKey) HasScope(requiredScope string) bool {
 type IntegrationConnector struct {
 	models.ModelBase
 	CompanyID   uint       `json:"company_id" gorm:"index;not null"`
-	Code        string     `json:"code" gorm:"size:64;index;not null"`    // e.g. "shopee_ecommerce", "midtrans_pg", "jne_logistics", "waba_whatsapp", "bca_h2h"
+	Code        string     `json:"code" gorm:"size:64;index;not null"` // e.g. "shopee_ecommerce", "midtrans_pg", "jne_logistics", "waba_whatsapp", "bca_h2h"
 	Name        string     `json:"name" gorm:"size:128;not null"`
-	Category    string     `json:"category" gorm:"size:32;not null"`      // "ecommerce", "payment_gateway", "logistics_3pl", "messaging", "banking", "custom"
-	Status      string     `json:"status" gorm:"size:32;default:'idle'"`  // "connected", "disconnected", "error", "idle"
+	Category    string     `json:"category" gorm:"size:32;not null"`           // "ecommerce", "payment_gateway", "logistics_3pl", "messaging", "banking", "custom"
+	Status      string     `json:"status" gorm:"size:32;default:'idle'"`       // "connected", "disconnected", "error", "idle"
 	AuthType    string     `json:"auth_type" gorm:"size:32;default:'api_key'"` // "api_key", "bearer_token", "oauth2", "webhook_secret"
 	BaseURL     string     `json:"base_url" gorm:"size:256"`
-	ConfigJSON  string     `json:"config_json" gorm:"type:text"`          // Stores JSON configuration (credentials, merchant_id, headers)
+	ConfigJSON  string     `json:"config_json" gorm:"type:text"` // Stores JSON configuration (credentials, merchant_id, headers)
 	WebhookURL  string     `json:"webhook_url" gorm:"size:256"`
 	LastSyncAt  *time.Time `json:"last_sync_at"`
 	SyncStatus  string     `json:"sync_status" gorm:"size:32;default:'idle'"` // "success", "failed", "in_progress", "idle"
@@ -119,9 +119,9 @@ type IntegrationDataJob struct {
 	models.ModelBase
 	CompanyID        uint   `json:"company_id" gorm:"index;not null"`
 	JobCode          string `json:"job_code" gorm:"size:32;uniqueIndex;not null"`
-	JobType          string `json:"job_type" gorm:"size:16;not null"` // "import", "export"
-	TargetModel      string `json:"target_model" gorm:"size:64;not null"` // "res.partner", "product.product", "sale.order", etc.
-	FileFormat       string `json:"file_format" gorm:"size:16;not null"` // "csv", "json", "xml"
+	JobType          string `json:"job_type" gorm:"size:16;not null"`        // "import", "export"
+	TargetModel      string `json:"target_model" gorm:"size:64;not null"`    // "res.partner", "product.product", "sale.order", etc.
+	FileFormat       string `json:"file_format" gorm:"size:16;not null"`     // "csv", "json", "xml"
 	Status           string `json:"status" gorm:"size:32;default:'pending'"` // "pending", "processing", "completed", "failed"
 	FieldMappingJSON string `json:"field_mapping_json" gorm:"type:text"`
 	TotalRecords     int    `json:"total_records" gorm:"default:0"`
@@ -214,17 +214,17 @@ type ExecuteConnectorActionResponse struct {
 }
 
 type RunBatchDataJobRequest struct {
-	TargetModel      string                 `json:"target_model" binding:"required"`
-	JobType          string                 `json:"job_type" binding:"required"` // "import", "export"
-	FileFormat       string                 `json:"file_format" binding:"required"` // "json", "csv"
-	FieldMapping     map[string]string      `json:"field_mapping"`
-	DataRows         []map[string]interface{}`json:"data_rows,omitempty"` // For import
+	TargetModel  string                   `json:"target_model" binding:"required"`
+	JobType      string                   `json:"job_type" binding:"required"`    // "import", "export"
+	FileFormat   string                   `json:"file_format" binding:"required"` // "json", "csv"
+	FieldMapping map[string]string        `json:"field_mapping"`
+	DataRows     []map[string]interface{} `json:"data_rows,omitempty"` // For import
 }
 
 type AIIntegrationArchitectRequest struct {
 	Requirement string `json:"requirement" binding:"required"` // e.g. "Sinkronisasi pesanan dari Tokopedia ke GoERP", "Integrasi POS Kasir Cabang", "Automasi Zapier lead CRM"
-	TargetApp   string `json:"target_app"`   // e.g. "Shopify", "Tokopedia", "Zapier", "Custom Mobile App"
-	Language    string `json:"language"`     // "curl", "python", "javascript", "go", "all"
+	TargetApp   string `json:"target_app"`                     // e.g. "Shopify", "Tokopedia", "Zapier", "Custom Mobile App"
+	Language    string `json:"language"`                       // "curl", "python", "javascript", "go", "all"
 }
 
 type AIIntegrationArchitectReport struct {
@@ -243,16 +243,16 @@ type AIIntegrationArchitectReport struct {
 }
 
 type IntegrationHubStats struct {
-	TotalAPIKeys         int64   `json:"total_api_keys"`
-	ActiveAPIKeys        int64   `json:"active_api_keys"`
-	TotalConnectors      int64   `json:"total_connectors"`
-	ConnectedConnectors  int64   `json:"connected_connectors"`
-	TotalCalls24h        int64   `json:"total_calls_24h"`
-	SuccessCalls24h      int64   `json:"success_calls_24h"`
-	FailedCalls24h       int64   `json:"failed_calls_24h"`
-	SuccessRatePercent   float64 `json:"success_rate_percent"`
-	AvgLatencyMs         float64 `json:"avg_latency_ms"`
-	TotalDataJobs        int64   `json:"total_data_jobs"`
+	TotalAPIKeys        int64   `json:"total_api_keys"`
+	ActiveAPIKeys       int64   `json:"active_api_keys"`
+	TotalConnectors     int64   `json:"total_connectors"`
+	ConnectedConnectors int64   `json:"connected_connectors"`
+	TotalCalls24h       int64   `json:"total_calls_24h"`
+	SuccessCalls24h     int64   `json:"success_calls_24h"`
+	FailedCalls24h      int64   `json:"failed_calls_24h"`
+	SuccessRatePercent  float64 `json:"success_rate_percent"`
+	AvgLatencyMs        float64 `json:"avg_latency_ms"`
+	TotalDataJobs       int64   `json:"total_data_jobs"`
 }
 
 type ModelMetadata struct {

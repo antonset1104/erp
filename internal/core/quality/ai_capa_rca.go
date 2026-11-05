@@ -11,75 +11,75 @@ import (
 
 // NonConformanceReport represents an operational or quality defect incident
 type NonConformanceReport struct {
-	NCRID            string    `json:"ncr_id"` // e.g. "NCR-2026-MFG-0912"
-	PlantID          string    `json:"plant_id"`
-	LineID           string    `json:"line_id"`
-	PartNumber       string    `json:"part_number"`
-	DefectCode       string    `json:"defect_code"` // e.g. "SOLDER_BRIDGING_SHORT"
-	DefectQuantity   int       `json:"defect_quantity"`
-	LotNumber        string    `json:"lot_number"`
-	Severity         string    `json:"severity"` // "CRITICAL", "MAJOR", "MINOR"
-	ImmediateAction  string    `json:"immediate_action"`
-	ReportedBy       string    `json:"reported_by"`
-	ReportedAt       time.Time `json:"reported_at"`
+	NCRID           string    `json:"ncr_id"` // e.g. "NCR-2026-MFG-0912"
+	PlantID         string    `json:"plant_id"`
+	LineID          string    `json:"line_id"`
+	PartNumber      string    `json:"part_number"`
+	DefectCode      string    `json:"defect_code"` // e.g. "SOLDER_BRIDGING_SHORT"
+	DefectQuantity  int       `json:"defect_quantity"`
+	LotNumber       string    `json:"lot_number"`
+	Severity        string    `json:"severity"` // "CRITICAL", "MAJOR", "MINOR"
+	ImmediateAction string    `json:"immediate_action"`
+	ReportedBy      string    `json:"reported_by"`
+	ReportedAt      time.Time `json:"reported_at"`
 }
 
 // IshikawaBranch represents one 6M cause-and-effect category in the fishbone diagram
 type IshikawaBranch struct {
-	Category       string   `json:"category"` // "MAN", "MACHINE", "MATERIAL", "METHOD", "MEASUREMENT", "MILIEU_ENVIRONMENT"
+	Category         string   `json:"category"` // "MAN", "MACHINE", "MATERIAL", "METHOD", "MEASUREMENT", "MILIEU_ENVIRONMENT"
 	IdentifiedCauses []string `json:"identified_causes"`
 	ProbabilityScore float64  `json:"probability_score"` // 0.0 - 1.0
 }
 
 // IshikawaDiagram represents the comprehensive fishbone root cause structure
 type IshikawaDiagram struct {
-	NCRID               string           `json:"ncr_id"`
-	PrimaryProblem      string           `json:"primary_problem"`
-	Branches            []IshikawaBranch `json:"branches"`
-	MostProbableCategory string          `json:"most_probable_category"`
-	AnalyzedAt          time.Time        `json:"analyzed_at"`
+	NCRID                string           `json:"ncr_id"`
+	PrimaryProblem       string           `json:"primary_problem"`
+	Branches             []IshikawaBranch `json:"branches"`
+	MostProbableCategory string           `json:"most_probable_category"`
+	AnalyzedAt           time.Time        `json:"analyzed_at"`
 }
 
 // FiveWhyStep represents one iterative level in the 5-Why analysis chain
 type FiveWhyStep struct {
-	Level             int    `json:"level"`
-	Question          string `json:"question"`
-	Answer            string `json:"answer"`
-	EvidenceArtifact  string `json:"evidence_artifact"`
+	Level            int    `json:"level"`
+	Question         string `json:"question"`
+	Answer           string `json:"answer"`
+	EvidenceArtifact string `json:"evidence_artifact"`
 }
 
 // FiveWhyChain represents the complete iterative root cause chain leading to systemic failure
 type FiveWhyChain struct {
-	NCRID           string        `json:"ncr_id"`
-	ProblemStatement string       `json:"problem_statement"`
-	Steps           []FiveWhyStep `json:"steps"`
-	RootCauseSummary string       `json:"root_cause_summary"`
-	RootCauseType   string        `json:"root_cause_type"` // "PROCESS_DESIGN", "EQUIPMENT_WEAR", "TRAINING_DEFICIT"
-	SolvedAt        time.Time     `json:"solved_at"`
+	NCRID            string        `json:"ncr_id"`
+	ProblemStatement string        `json:"problem_statement"`
+	Steps            []FiveWhyStep `json:"steps"`
+	RootCauseSummary string        `json:"root_cause_summary"`
+	RootCauseType    string        `json:"root_cause_type"` // "PROCESS_DESIGN", "EQUIPMENT_WEAR", "TRAINING_DEFICIT"
+	SolvedAt         time.Time     `json:"solved_at"`
 }
 
 // CAPAAction represents an assigned Corrective or Preventive Action
 type CAPAAction struct {
-	ActionID            string    `json:"action_id"`
-	ActionType          string    `json:"action_type"` // "CORRECTIVE", "PREVENTIVE"
-	Description         string    `json:"description"`
-	AssignedOwner       string    `json:"assigned_owner"`
-	AssignedDepartment  string    `json:"assigned_department"`
-	TargetDueDate       time.Time `json:"target_due_date"`
-	ImplementationStatus string   `json:"implementation_status"` // "OPEN", "IN_PROGRESS", "VERIFIED_EFFECTIVE"
-	VerificationMethod  string    `json:"verification_method"`
+	ActionID             string    `json:"action_id"`
+	ActionType           string    `json:"action_type"` // "CORRECTIVE", "PREVENTIVE"
+	Description          string    `json:"description"`
+	AssignedOwner        string    `json:"assigned_owner"`
+	AssignedDepartment   string    `json:"assigned_department"`
+	TargetDueDate        time.Time `json:"target_due_date"`
+	ImplementationStatus string    `json:"implementation_status"` // "OPEN", "IN_PROGRESS", "VERIFIED_EFFECTIVE"
+	VerificationMethod   string    `json:"verification_method"`
 }
 
 // CAPAPackage represents the formal 8D corrective action plan
 type CAPAPackage struct {
-	CAPAID               string       `json:"capa_id"`
-	NCRID                string       `json:"ncr_id"`
+	CAPAID               string          `json:"capa_id"`
+	NCRID                string          `json:"ncr_id"`
 	FishboneAnalysis     IshikawaDiagram `json:"fishbone_analysis"`
-	FiveWhyResolution    FiveWhyChain `json:"five_why_resolution"`
-	Actions              []CAPAAction `json:"actions"`
-	EffectivenessAuditor string       `json:"effectiveness_auditor"`
-	OverallStatus        string       `json:"overall_status"` // "APPROVED_IN_EXECUTION", "CLOSED_VERIFIED"
-	IssuedAt             time.Time    `json:"issued_at"`
+	FiveWhyResolution    FiveWhyChain    `json:"five_why_resolution"`
+	Actions              []CAPAAction    `json:"actions"`
+	EffectivenessAuditor string          `json:"effectiveness_auditor"`
+	OverallStatus        string          `json:"overall_status"` // "APPROVED_IN_EXECUTION", "CLOSED_VERIFIED"
+	IssuedAt             time.Time       `json:"issued_at"`
 }
 
 // RCAEngine manages root cause analysis and automated CAPA generation
@@ -291,7 +291,7 @@ func RegisterRCARoutes(r *gin.RouterGroup) {
 			}
 			diagram := GetRCAEngine().GenerateFishbone(req)
 			c.JSON(http.StatusOK, gin.H{
-				"status":   "FISHBONE_GENERATED",
+				"status":  "FISHBONE_GENERATED",
 				"diagram": diagram,
 			})
 		})

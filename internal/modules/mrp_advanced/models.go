@@ -10,15 +10,15 @@ import (
 // WorkCenter represents standard enterprise mrp.workcenter (Pusat Kerja / Stasiun Mesin Produksi)
 type WorkCenter struct {
 	models.ModelBase
-	Code               string  `gorm:"size:32;not null;uniqueIndex" json:"code"`       // e.g. WC/2026/001
-	Name               string  `gorm:"size:128;not null" json:"name"`                  // e.g. "Mesin CNC Milling 5-Axis"
+	Code               string  `gorm:"size:32;not null;uniqueIndex" json:"code"`                  // e.g. WC/2026/001
+	Name               string  `gorm:"size:128;not null" json:"name"`                             // e.g. "Mesin CNC Milling 5-Axis"
 	WorkCenterType     string  `gorm:"size:64;default:'machining';index" json:"work_center_type"` // machining, assembly, welding, packaging, qc
-	CapacityPerHour    float64 `gorm:"default:10.0" json:"capacity_per_hour"`          // Output kapasitas unit per jam
-	WorkingHoursPerDay float64 `gorm:"default:8.0" json:"working_hours_per_day"`       // Jam kerja efektif per hari (shift standar)
-	TotalOEEPercentage float64 `gorm:"default:85.0" json:"total_oee_percentage"`      // Overall Equipment Effectiveness (%)
-	CostPerHour        float64 `gorm:"default:150000.0" json:"cost_per_hour"`         // Biaya operasional mesin + teknisi per jam (IDR)
-	MachinePowerKW     float64 `gorm:"default:15.0" json:"machine_power_kw"`          // Konsumsi daya listrik kW
-	Status             string  `gorm:"size:32;default:'available';index" json:"status"` // available, busy, maintenance, breakdown
+	CapacityPerHour    float64 `gorm:"default:10.0" json:"capacity_per_hour"`                     // Output kapasitas unit per jam
+	WorkingHoursPerDay float64 `gorm:"default:8.0" json:"working_hours_per_day"`                  // Jam kerja efektif per hari (shift standar)
+	TotalOEEPercentage float64 `gorm:"default:85.0" json:"total_oee_percentage"`                  // Overall Equipment Effectiveness (%)
+	CostPerHour        float64 `gorm:"default:150000.0" json:"cost_per_hour"`                     // Biaya operasional mesin + teknisi per jam (IDR)
+	MachinePowerKW     float64 `gorm:"default:15.0" json:"machine_power_kw"`                      // Konsumsi daya listrik kW
+	Status             string  `gorm:"size:32;default:'available';index" json:"status"`           // available, busy, maintenance, breakdown
 	Notes              string  `gorm:"type:text" json:"notes,omitempty"`
 }
 
@@ -26,7 +26,7 @@ type WorkCenter struct {
 type Routing struct {
 	models.ModelBase
 	RoutingCode string             `gorm:"size:64;not null;uniqueIndex" json:"routing_code"` // e.g. ROUT/2026/00001
-	Name        string             `gorm:"size:128;not null" json:"name"`                   // e.g. "Rute Perakitan Chassis & Dinamo"
+	Name        string             `gorm:"size:128;not null" json:"name"`                    // e.g. "Rute Perakitan Chassis & Dinamo"
 	ProductID   uint               `gorm:"index;not null" json:"product_id"`
 	Product     product.Product    `gorm:"foreignKey:ProductID" json:"product,omitempty"`
 	BomID       uint               `gorm:"index" json:"bom_id,omitempty"`
@@ -39,40 +39,40 @@ type RoutingOperation struct {
 	models.ModelBase
 	RoutingID               uint       `gorm:"index;not null" json:"routing_id"`
 	Sequence                int        `gorm:"default:10;index" json:"sequence"` // 10, 20, 30...
-	Name                    string     `gorm:"size:128;not null" json:"name"`   // e.g. "Pemotongan & Bubut Presisi"
+	Name                    string     `gorm:"size:128;not null" json:"name"`    // e.g. "Pemotongan & Bubut Presisi"
 	WorkCenterID            uint       `gorm:"index;not null" json:"work_center_id"`
 	WorkCenter              WorkCenter `gorm:"foreignKey:WorkCenterID" json:"work_center,omitempty"`
-	SetupTimeMinutes        float64    `gorm:"default:15.0" json:"setup_time_minutes"`       // Waktu persiapan mesin/mold
+	SetupTimeMinutes        float64    `gorm:"default:15.0" json:"setup_time_minutes"`         // Waktu persiapan mesin/mold
 	CycleTimePerUnitMinutes float64    `gorm:"default:5.0" json:"cycle_time_per_unit_minutes"` // Durasi proses per 1 unit barang
-	TeardownTimeMinutes     float64    `gorm:"default:10.0" json:"teardown_time_minutes"`    // Waktu pembersihan & pendinginan
-	BatchSize               float64    `gorm:"default:50.0" json:"batch_size"`               // Ukuran batch rekomendasi
+	TeardownTimeMinutes     float64    `gorm:"default:10.0" json:"teardown_time_minutes"`      // Waktu pembersihan & pendinginan
+	BatchSize               float64    `gorm:"default:50.0" json:"batch_size"`                 // Ukuran batch rekomendasi
 	Description             string     `gorm:"type:text" json:"description,omitempty"`
 }
 
 // WorkOrder represents standard enterprise mrp.workorder (Perintah Kerja Operasi Aktual per SPK)
 type WorkOrder struct {
 	models.ModelBase
-	WorkOrderCode          string           `gorm:"size:64;not null;uniqueIndex" json:"work_order_code"` // e.g. WO/2026/00001
-	ProductionOrderID      uint             `gorm:"index;not null" json:"production_order_id"`          // Link ke mrp.production (MO)
-	ProductionOrderName    string           `gorm:"size:64;index" json:"production_order_name"`         // e.g. MO/2026/00001
-	RoutingOperationID     uint             `gorm:"index" json:"routing_operation_id,omitempty"`
-	WorkCenterID           uint             `gorm:"index;not null" json:"work_center_id"`
-	WorkCenter             WorkCenter       `gorm:"foreignKey:WorkCenterID" json:"work_center,omitempty"`
-	Sequence               int              `gorm:"default:10" json:"sequence"`
-	OperationName          string           `gorm:"size:128;not null" json:"operation_name"`
-	PlannedStartTime       *time.Time       `json:"planned_start_time,omitempty"`
-	PlannedEndTime         *time.Time       `json:"planned_end_time,omitempty"`
-	ActualStartTime        *time.Time       `json:"actual_start_time,omitempty"`
-	ActualEndTime          *time.Time       `json:"actual_end_time,omitempty"`
-	PlannedDurationMinutes float64          `gorm:"default:0" json:"planned_duration_minutes"`
-	ActualDurationMinutes  float64          `gorm:"default:0" json:"actual_duration_minutes"`
-	QtyPlanned             float64          `gorm:"default:1.0" json:"qty_planned"`
-	QtyProduced            float64          `gorm:"default:0.0" json:"qty_produced"`
-	QtyScrap               float64          `gorm:"default:0.0" json:"qty_scrap"`
-	MachineHours           float64          `gorm:"default:0.0" json:"machine_hours"`      // Jam mesin terpakai
-	TotalMachineCost       float64          `gorm:"default:0.0" json:"total_machine_cost"` // IDR machine cost
-	State                  string           `gorm:"size:32;default:'pending';index" json:"state"` // pending, ready, in_progress, done, paused, cancelled
-	Notes                  string           `gorm:"type:text" json:"notes,omitempty"`
+	WorkOrderCode          string     `gorm:"size:64;not null;uniqueIndex" json:"work_order_code"` // e.g. WO/2026/00001
+	ProductionOrderID      uint       `gorm:"index;not null" json:"production_order_id"`           // Link ke mrp.production (MO)
+	ProductionOrderName    string     `gorm:"size:64;index" json:"production_order_name"`          // e.g. MO/2026/00001
+	RoutingOperationID     uint       `gorm:"index" json:"routing_operation_id,omitempty"`
+	WorkCenterID           uint       `gorm:"index;not null" json:"work_center_id"`
+	WorkCenter             WorkCenter `gorm:"foreignKey:WorkCenterID" json:"work_center,omitempty"`
+	Sequence               int        `gorm:"default:10" json:"sequence"`
+	OperationName          string     `gorm:"size:128;not null" json:"operation_name"`
+	PlannedStartTime       *time.Time `json:"planned_start_time,omitempty"`
+	PlannedEndTime         *time.Time `json:"planned_end_time,omitempty"`
+	ActualStartTime        *time.Time `json:"actual_start_time,omitempty"`
+	ActualEndTime          *time.Time `json:"actual_end_time,omitempty"`
+	PlannedDurationMinutes float64    `gorm:"default:0" json:"planned_duration_minutes"`
+	ActualDurationMinutes  float64    `gorm:"default:0" json:"actual_duration_minutes"`
+	QtyPlanned             float64    `gorm:"default:1.0" json:"qty_planned"`
+	QtyProduced            float64    `gorm:"default:0.0" json:"qty_produced"`
+	QtyScrap               float64    `gorm:"default:0.0" json:"qty_scrap"`
+	MachineHours           float64    `gorm:"default:0.0" json:"machine_hours"`             // Jam mesin terpakai
+	TotalMachineCost       float64    `gorm:"default:0.0" json:"total_machine_cost"`        // IDR machine cost
+	State                  string     `gorm:"size:32;default:'pending';index" json:"state"` // pending, ready, in_progress, done, paused, cancelled
+	Notes                  string     `gorm:"type:text" json:"notes,omitempty"`
 }
 
 // DTOs for API requests & responses
@@ -99,11 +99,11 @@ type CreateRoutingOperationDTO struct {
 }
 
 type CreateRoutingRequest struct {
-	Name        string                      `json:"name" binding:"required"`
-	ProductID   uint                        `json:"product_id" binding:"required"`
-	BomID       uint                        `json:"bom_id"`
-	Operations  []CreateRoutingOperationDTO `json:"operations"`
-	Notes       string                      `json:"notes"`
+	Name       string                      `json:"name" binding:"required"`
+	ProductID  uint                        `json:"product_id" binding:"required"`
+	BomID      uint                        `json:"bom_id"`
+	Operations []CreateRoutingOperationDTO `json:"operations"`
+	Notes      string                      `json:"notes"`
 }
 
 type GenerateWorkOrdersRequest struct {
@@ -112,10 +112,10 @@ type GenerateWorkOrdersRequest struct {
 }
 
 type CompleteWorkOrderRequest struct {
-	QtyProduced            float64 `json:"qty_produced"`
-	QtyScrap               float64 `json:"qty_scrap"`
-	ActualDurationMinutes  float64 `json:"actual_duration_minutes"`
-	Notes                  string  `json:"notes"`
+	QtyProduced           float64 `json:"qty_produced"`
+	QtyScrap              float64 `json:"qty_scrap"`
+	ActualDurationMinutes float64 `json:"actual_duration_minutes"`
+	Notes                 string  `json:"notes"`
 }
 
 // GanttCapacitySlot represents a visualized task in the Gantt Chart capacity timeline
@@ -145,11 +145,11 @@ type WorkCenterCapacitySummary struct {
 }
 
 type GanttCapacityResponse struct {
-	Slots             []GanttCapacitySlot          `json:"slots"`
+	Slots             []GanttCapacitySlot         `json:"slots"`
 	CapacitySummaries []WorkCenterCapacitySummary `json:"capacity_summaries"`
-	HorizonDays       int                          `json:"horizon_days"`
-	StartDate         string                       `json:"start_date"`
-	EndDate           string                       `json:"end_date"`
+	HorizonDays       int                         `json:"horizon_days"`
+	StartDate         string                      `json:"start_date"`
+	EndDate           string                      `json:"end_date"`
 }
 
 type MRPAdvancedStats struct {
@@ -169,12 +169,12 @@ type MRPAdvancedStats struct {
 // AIMRPCapacityReport represents Cloudflare Workers AI + Local Heuristic Analysis
 type AIMRPCapacityReport struct {
 	ScheduleEfficiencyScore int      `json:"schedule_efficiency_score"` // 0-100
-	OverallStatus            string   `json:"overall_status"`            // BALANCED, BOTTLENECK_DETECTED, OVERLOADED
-	BottleneckWorkCenter     string   `json:"bottleneck_work_center"`
-	BottleneckUtilization    float64  `json:"bottleneck_utilization"`
-	RecommendedLeadTimeDays  int      `json:"recommended_lead_time_days"`
-	ExecutiveSummary         string   `json:"executive_summary"`
-	LineBalancingAdvice      []string `json:"line_balancing_advice"`
-	CriticalPathOperations   []string `json:"critical_path_operations"`
-	AIProvider               string   `json:"ai_provider"`
+	OverallStatus           string   `json:"overall_status"`            // BALANCED, BOTTLENECK_DETECTED, OVERLOADED
+	BottleneckWorkCenter    string   `json:"bottleneck_work_center"`
+	BottleneckUtilization   float64  `json:"bottleneck_utilization"`
+	RecommendedLeadTimeDays int      `json:"recommended_lead_time_days"`
+	ExecutiveSummary        string   `json:"executive_summary"`
+	LineBalancingAdvice     []string `json:"line_balancing_advice"`
+	CriticalPathOperations  []string `json:"critical_path_operations"`
+	AIProvider              string   `json:"ai_provider"`
 }

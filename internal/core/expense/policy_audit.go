@@ -35,16 +35,16 @@ type FraudViolation struct {
 }
 
 type ExpenseAuditResult struct {
-	ClaimID           string           `json:"claim_id"`
-	EmployeeName      string           `json:"employee_name"`
-	MerchantName      string           `json:"merchant_name"`
-	Amount            float64          `json:"amount"`
-	OverallRiskScore  float64          `json:"overall_risk_score"` // 0 - 100
-	AuditStatus       string           `json:"audit_status"`       // APPROVED_CLEAN, SUSPICIOUS_REVIEW, FRAUD_HOLD
-	ViolationsCount   int              `json:"violations_count"`
-	Violations        []FraudViolation `json:"violations"`
-	PolicyAction      string           `json:"policy_action"`
-	AuditedAt         string           `json:"audited_at"`
+	ClaimID          string           `json:"claim_id"`
+	EmployeeName     string           `json:"employee_name"`
+	MerchantName     string           `json:"merchant_name"`
+	Amount           float64          `json:"amount"`
+	OverallRiskScore float64          `json:"overall_risk_score"` // 0 - 100
+	AuditStatus      string           `json:"audit_status"`       // APPROVED_CLEAN, SUSPICIOUS_REVIEW, FRAUD_HOLD
+	ViolationsCount  int              `json:"violations_count"`
+	Violations       []FraudViolation `json:"violations"`
+	PolicyAction     string           `json:"policy_action"`
+	AuditedAt        string           `json:"audited_at"`
 }
 
 type ExpenseAuditBatchResponse struct {
@@ -145,7 +145,7 @@ func EvaluateExpenseClaims(claims []ExpenseClaimItem) *ExpenseAuditBatchResponse
 	flaggedTotal := 0.0
 
 	// Check duplicates by receipt hash and merchant/amount pairs
-	hashMap := make(map[string][]string) // hash -> claimIDs
+	hashMap := make(map[string][]string)           // hash -> claimIDs
 	employeeDayAmounts := make(map[string]float64) // empID:date -> total amount
 	employeeDayCounts := make(map[string]int)
 

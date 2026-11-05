@@ -209,7 +209,7 @@ func RecommendDispatchLogic(req WorkOrderRequest) (*DispatchRecommendationResult
 		cand := tech
 		dist := haversineKM(req.SiteLatitude, req.SiteLongitude, tech.CurrentLatitude, tech.CurrentLongitude)
 		cand.DistanceKM = dist
-		cand.EstArrivalMinutes = math.Round((dist / 30.0 * 60.0) * 10) / 10
+		cand.EstArrivalMinutes = math.Round((dist/30.0*60.0)*10) / 10
 
 		matchedSkills := 0
 		for _, reqSkill := range req.RequiredSkills {

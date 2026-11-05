@@ -15,16 +15,16 @@ import (
 // CARTCultureTelemetry captures label-free microfluidic acoustic sorting & CAR transduction under FDA 21 CFR 1271 & ISCT
 type CARTCultureTelemetry struct {
 	TelemetryID                string    `json:"telemetry_id"`
-	BatchID                    string    `json:"batch_id"`                      // "BATCH-CART-CD19-2026-001"
-	PatientDonorID             string    `json:"patient_donor_id"`              // "DONOR-AUTOLOGOUS-PT-9801"
-	PiezoRFTransducerFreqMHz   float64   `json:"piezo_rf_transducer_freq_mhz"`  // e.g. 2.15 MHz
-	AcousticRadiationForcePN   float64   `json:"acoustic_radiation_force_pn"`   // e.g. 18.5 pN
-	AcousticContrastFactorPhi  float64   `json:"acoustic_contrast_factor_phi"`  // e.g. 0.28
-	ViableLymphocyteCountPerML float64   `json:"viable_lymphocyte_count_per_ml"`// e.g. 4.8e7 cells/mL
-	TargetCellViabilityPct     float64   `json:"target_cell_viability_pct"`     // e.g. 94.2%
-	LentiviralMOIRatio         float64   `json:"lentiviral_moi_ratio"`          // e.g. 5.2 MOI (target 5.0 - 10.0)
-	CARExpressionEfficiencyPct float64   `json:"car_expression_efficiency_pct"` // e.g. 72.5% (target > 65.0%)
-	EndotoxinLevelEUPerML      float64   `json:"endotoxin_level_eu_per_ml"`     // e.g. 0.04 EU/mL (limit < 0.20 EU/mL)
+	BatchID                    string    `json:"batch_id"`                       // "BATCH-CART-CD19-2026-001"
+	PatientDonorID             string    `json:"patient_donor_id"`               // "DONOR-AUTOLOGOUS-PT-9801"
+	PiezoRFTransducerFreqMHz   float64   `json:"piezo_rf_transducer_freq_mhz"`   // e.g. 2.15 MHz
+	AcousticRadiationForcePN   float64   `json:"acoustic_radiation_force_pn"`    // e.g. 18.5 pN
+	AcousticContrastFactorPhi  float64   `json:"acoustic_contrast_factor_phi"`   // e.g. 0.28
+	ViableLymphocyteCountPerML float64   `json:"viable_lymphocyte_count_per_ml"` // e.g. 4.8e7 cells/mL
+	TargetCellViabilityPct     float64   `json:"target_cell_viability_pct"`      // e.g. 94.2%
+	LentiviralMOIRatio         float64   `json:"lentiviral_moi_ratio"`           // e.g. 5.2 MOI (target 5.0 - 10.0)
+	CARExpressionEfficiencyPct float64   `json:"car_expression_efficiency_pct"`  // e.g. 72.5% (target > 65.0%)
+	EndotoxinLevelEUPerML      float64   `json:"endotoxin_level_eu_per_ml"`      // e.g. 0.04 EU/mL (limit < 0.20 EU/mL)
 	RecordedAt                 time.Time `json:"recorded_at"`
 }
 
@@ -42,12 +42,12 @@ type CARTSortingTransductionAssessment struct {
 
 // CARTBioprocessOptimizationAction models acoustic node tuning and viral transduction enhancement
 type CARTBioprocessOptimizationAction struct {
-	ActionID                        string    `json:"action_id"`
-	BatchID                         string    `json:"batch_id"`
-	TunedPiezoFrequencyMHz          float64   `json:"tuned_piezo_frequency_mhz"`
-	InjectedAdjuvantVolumeMicroliter float64  `json:"injected_adjuvant_volume_microliter"`
-	AvoidedCellBatchLossUSD         float64   `json:"avoided_cell_batch_loss_usd"` // Avoided $17.5M USD autologous CAR-T patient batch failure and contamination
-	ActionTimestamp                 time.Time `json:"action_timestamp"`
+	ActionID                         string    `json:"action_id"`
+	BatchID                          string    `json:"batch_id"`
+	TunedPiezoFrequencyMHz           float64   `json:"tuned_piezo_frequency_mhz"`
+	InjectedAdjuvantVolumeMicroliter float64   `json:"injected_adjuvant_volume_microliter"`
+	AvoidedCellBatchLossUSD          float64   `json:"avoided_cell_batch_loss_usd"` // Avoided $17.5M USD autologous CAR-T patient batch failure and contamination
+	ActionTimestamp                  time.Time `json:"action_timestamp"`
 }
 
 // CARTVault thread-safe in-memory store
@@ -76,7 +76,7 @@ func init() {
 		AcousticContrastFactorPhi:  0.28,
 		ViableLymphocyteCountPerML: 4.8e7,
 		TargetCellViabilityPct:     93.5,
-		LentiviralMOIRatio:         4.6, // Slightly below optimal MOI 5.0
+		LentiviralMOIRatio:         4.6,  // Slightly below optimal MOI 5.0
 		CARExpressionEfficiencyPct: 62.0, // Below target 65%
 		EndotoxinLevelEUPerML:      0.03,
 		RecordedAt:                 time.Now(),
@@ -173,13 +173,13 @@ func (v *CARTVault) GetCARTCGMPDossier(batchID string) (map[string]interface{}, 
 	act, hasAct := v.actions[batchID]
 
 	dossier := map[string]interface{}{
-		"batch_id":               batchID,
-		"has_culture_telemetry":  hasTel,
-		"has_sorting_assessment": hasAssess,
-		"has_bioprocess_action":  hasAct,
+		"batch_id":                batchID,
+		"has_culture_telemetry":   hasTel,
+		"has_sorting_assessment":  hasAssess,
+		"has_bioprocess_action":   hasAct,
 		"fda_21cfr1271_compliant": true,
 		"isct_standards_approved": true,
-		"compiled_at":            time.Now(),
+		"compiled_at":             time.Now(),
 	}
 
 	if hasTel {

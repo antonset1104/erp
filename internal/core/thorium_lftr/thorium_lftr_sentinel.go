@@ -13,41 +13,41 @@ import (
 
 // ThoriumLFTRTelemetry captures Liquid Fluoride Thorium Reactor (LFTR) molten salt fission gas stripping and reactivity telemetry
 type ThoriumLFTRTelemetry struct {
-	TelemetryID                     string    `json:"telemetry_id"`
-	ReactorCoreID                   string    `json:"reactor_core_id"`
-	MoltenSaltBulkTempC             float64   `json:"molten_salt_bulk_temp_c"`               // nominal 650.0 - 750.0°C
-	HeliumSpargerFlowLpm            float64   `json:"helium_sparger_flow_lpm"`               // limit > 380.0 L/min
-	Xenon135PoisonConcentrationPpm  float64   `json:"xenon135_poison_concentration_ppm"`     // limit < 0.85 ppm
-	Krypton85OffGasActivityBq       float64   `json:"krypton85_off_gas_activity_bq"`         // nominal 1e9 - 5e11 Bq
-	CryoCarbonTrapTempK             float64   `json:"cryo_carbon_trap_temp_k"`               // limit < 85.0 K (desorption > 105.0 K)
-	CoreReactivitySwingPcm          float64   `json:"core_reactivity_swing_pcm"`             // limit < 75.0 pcm
-	OffGasDecayTankPressureBar      float64   `json:"off_gas_decay_tank_pressure_bar"`       // limit < 8.5 bar
-	MoltenFluorideRedoxPotentialMv  float64   `json:"molten_fluoride_redox_potential_mv"`    // nominal -450 to -350 mV
-	Timestamp                       time.Time `json:"timestamp"`
+	TelemetryID                    string    `json:"telemetry_id"`
+	ReactorCoreID                  string    `json:"reactor_core_id"`
+	MoltenSaltBulkTempC            float64   `json:"molten_salt_bulk_temp_c"`            // nominal 650.0 - 750.0°C
+	HeliumSpargerFlowLpm           float64   `json:"helium_sparger_flow_lpm"`            // limit > 380.0 L/min
+	Xenon135PoisonConcentrationPpm float64   `json:"xenon135_poison_concentration_ppm"`  // limit < 0.85 ppm
+	Krypton85OffGasActivityBq      float64   `json:"krypton85_off_gas_activity_bq"`      // nominal 1e9 - 5e11 Bq
+	CryoCarbonTrapTempK            float64   `json:"cryo_carbon_trap_temp_k"`            // limit < 85.0 K (desorption > 105.0 K)
+	CoreReactivitySwingPcm         float64   `json:"core_reactivity_swing_pcm"`          // limit < 75.0 pcm
+	OffGasDecayTankPressureBar     float64   `json:"off_gas_decay_tank_pressure_bar"`    // limit < 8.5 bar
+	MoltenFluorideRedoxPotentialMv float64   `json:"molten_fluoride_redox_potential_mv"` // nominal -450 to -350 mV
+	Timestamp                      time.Time `json:"timestamp"`
 }
 
 // ThoriumLFTRAssessment models Xe-135 neutron poison accumulation, cryogenic adsorption, and ASME Sec III Div 5 compliance
 type ThoriumLFTRAssessment struct {
-	AssessmentID                              string    `json:"assessment_id"`
-	ReactorCoreID                             string    `json:"reactor_core_id"`
-	FissionGasContainmentStatus               string    `json:"fission_gas_containment_status"`               // VOLATILE_STRIPPED_STABLE, SPARGING_DEFICIT_WARNING, XENON_POISON_CORE_SHUTDOWN_CRITICAL
-	CryoOffGasAdsorptionStatus                string    `json:"cryo_off_gas_adsorption_status"`               // CRYOGENIC_TRAPPING_OPTIMAL, THERMAL_DESORPTION_HAZARD
-	ReactivityExcursionMarginPcm              float64   `json:"reactivity_excursion_margin_pcm"`
-	HeliumSpargerSurgeMandate                 bool      `json:"helium_sparger_surge_mandate"`
+	AssessmentID                             string    `json:"assessment_id"`
+	ReactorCoreID                            string    `json:"reactor_core_id"`
+	FissionGasContainmentStatus              string    `json:"fission_gas_containment_status"` // VOLATILE_STRIPPED_STABLE, SPARGING_DEFICIT_WARNING, XENON_POISON_CORE_SHUTDOWN_CRITICAL
+	CryoOffGasAdsorptionStatus               string    `json:"cryo_off_gas_adsorption_status"` // CRYOGENIC_TRAPPING_OPTIMAL, THERMAL_DESORPTION_HAZARD
+	ReactivityExcursionMarginPcm             float64   `json:"reactivity_excursion_margin_pcm"`
+	HeliumSpargerSurgeMandate                bool      `json:"helium_sparger_surge_mandate"`
 	CryoChillerBoostAndDecayDiversionMandate bool      `json:"cryo_chiller_boost_and_decay_diversion_mandate"`
-	AuditDigest                               string    `json:"audit_digest"`
-	EvaluatedAt                               time.Time `json:"evaluated_at"`
+	AuditDigest                              string    `json:"audit_digest"`
+	EvaluatedAt                              time.Time `json:"evaluated_at"`
 }
 
 // ThoriumLFTRMitigationAction models quad-redundant helium bubbling sparge surge, cryo trap Stirling cooling, and decay tank diversion
 type ThoriumLFTRMitigationAction struct {
-	ActionID                        string    `json:"action_id"`
-	ReactorCoreID                   string    `json:"reactor_core_id"`
-	CommandedHeliumSpargerFlowLpm   float64   `json:"commanded_helium_sparger_flow_lpm"`
-	CryoStirlingChillerPowerWatts   float64   `json:"cryo_stirling_chiller_power_watts"`
-	EmergencyDecayTankValveOpenPct  float64   `json:"emergency_decay_tank_valve_open_pct"`
-	AvoidedNuclearEventLossUSD      float64   `json:"avoided_nuclear_event_loss_usd"`
-	ExecutedAt                      time.Time `json:"executed_at"`
+	ActionID                       string    `json:"action_id"`
+	ReactorCoreID                  string    `json:"reactor_core_id"`
+	CommandedHeliumSpargerFlowLpm  float64   `json:"commanded_helium_sparger_flow_lpm"`
+	CryoStirlingChillerPowerWatts  float64   `json:"cryo_stirling_chiller_power_watts"`
+	EmergencyDecayTankValveOpenPct float64   `json:"emergency_decay_tank_valve_open_pct"`
+	AvoidedNuclearEventLossUSD     float64   `json:"avoided_nuclear_event_loss_usd"`
+	ExecutedAt                     time.Time `json:"executed_at"`
 }
 
 // ThoriumLFTRVault manages thorium molten salt reactor core volatile monitoring and nuclear safety enforcement
@@ -120,15 +120,15 @@ func (v *ThoriumLFTRVault) EvaluateFissionGasAndReactivity(reactorCoreID string)
 	digest := hex.EncodeToString(hasher.Sum(nil))
 
 	assessment := ThoriumLFTRAssessment{
-		AssessmentID:                              fmt.Sprintf("ASM-LFTR-%d", time.Now().UnixNano()%1000000),
-		ReactorCoreID:                             reactorCoreID,
-		FissionGasContainmentStatus:               containmentStatus,
-		CryoOffGasAdsorptionStatus:                cryoStatus,
-		ReactivityExcursionMarginPcm:              excessReactivity,
-		HeliumSpargerSurgeMandate:                 spargerMandate,
+		AssessmentID:                             fmt.Sprintf("ASM-LFTR-%d", time.Now().UnixNano()%1000000),
+		ReactorCoreID:                            reactorCoreID,
+		FissionGasContainmentStatus:              containmentStatus,
+		CryoOffGasAdsorptionStatus:               cryoStatus,
+		ReactivityExcursionMarginPcm:             excessReactivity,
+		HeliumSpargerSurgeMandate:                spargerMandate,
 		CryoChillerBoostAndDecayDiversionMandate: chillerMandate,
-		AuditDigest:                               digest,
-		EvaluatedAt:                               time.Now(),
+		AuditDigest:                              digest,
+		EvaluatedAt:                              time.Now(),
 	}
 
 	v.assessments[reactorCoreID] = assessment

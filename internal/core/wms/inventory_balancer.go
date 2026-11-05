@@ -53,27 +53,27 @@ type TransferRecommendation struct {
 
 // InventoryBalancingReport represents the complete multi-warehouse analysis.
 type InventoryBalancingReport struct {
-	EvaluationID            string                   `json:"evaluation_id"`
-	EvaluatedAt             string                   `json:"evaluated_at"`
-	TotalWarehousesAudited  int                      `json:"total_warehouses_audited"`
-	TotalSKUsAudited        int                      `json:"total_skus_audited"`
-	DeficitNodesCount       int                      `json:"deficit_nodes_count"`
-	SurplusNodesCount       int                      `json:"surplus_nodes_count"`
-	TotalTransfersProposed  int                      `json:"total_transfers_proposed"`
-	TotalUnitsToRedistribute float64                 `json:"total_units_to_redistribute"`
-	TotalFreightCostIDR     float64                  `json:"total_freight_cost_idr"`
-	NetWorkingCapitalSavedIDR float64                `json:"net_working_capital_saved_idr"`
-	WarehouseProfiles       []WarehouseStockProfile  `json:"warehouse_profiles"`
-	Recommendations         []TransferRecommendation `json:"recommendations"`
+	EvaluationID              string                   `json:"evaluation_id"`
+	EvaluatedAt               string                   `json:"evaluated_at"`
+	TotalWarehousesAudited    int                      `json:"total_warehouses_audited"`
+	TotalSKUsAudited          int                      `json:"total_skus_audited"`
+	DeficitNodesCount         int                      `json:"deficit_nodes_count"`
+	SurplusNodesCount         int                      `json:"surplus_nodes_count"`
+	TotalTransfersProposed    int                      `json:"total_transfers_proposed"`
+	TotalUnitsToRedistribute  float64                  `json:"total_units_to_redistribute"`
+	TotalFreightCostIDR       float64                  `json:"total_freight_cost_idr"`
+	NetWorkingCapitalSavedIDR float64                  `json:"net_working_capital_saved_idr"`
+	WarehouseProfiles         []WarehouseStockProfile  `json:"warehouse_profiles"`
+	Recommendations           []TransferRecommendation `json:"recommendations"`
 }
 
 // EvaluateBalancingRequest represents the input payload for stock evaluation.
 type EvaluateBalancingRequest struct {
-	SKU          string                  `json:"sku"`
-	ProductName  string                  `json:"product_name"`
-	UnitCostIDR  float64                 `json:"unit_cost_idr"`
-	TargetDays   float64                 `json:"target_days"` // e.g. 21 days
-	Profiles     []WarehouseStockProfile `json:"profiles"`
+	SKU         string                  `json:"sku"`
+	ProductName string                  `json:"product_name"`
+	UnitCostIDR float64                 `json:"unit_cost_idr"`
+	TargetDays  float64                 `json:"target_days"` // e.g. 21 days
+	Profiles    []WarehouseStockProfile `json:"profiles"`
 }
 
 // ExecuteTransfersRequest triggers execution of approved transfer recommendations.
@@ -143,9 +143,9 @@ func (s *InventoryBalancerService) EvaluateBalancing(req EvaluateBalancingReques
 	if len(req.Profiles) == 0 {
 		req.Profiles = []WarehouseStockProfile{
 			{WarehouseCode: "WH-JKT", WarehouseName: "Gudang Utama Cakung Jakarta", City: "Jakarta", OnHandUnits: 15, DailyVelocity: 4.5},     // DoS: 3.3d (Critical Deficit)
-			{WarehouseCode: "WH-SBY", WarehouseName: "Regional Hub Rungkut Surabaya", City: "Surabaya", OnHandUnits: 140, DailyVelocity: 2.0},  // DoS: 70.0d (Excess Surplus)
-			{WarehouseCode: "WH-MDN", WarehouseName: "Distribution Center Medan", City: "Medan", OnHandUnits: 8, DailyVelocity: 1.8},           // DoS: 4.4d (Critical Deficit)
-			{WarehouseCode: "WH-MKS", WarehouseName: "Hub Timur Daya Makassar", City: "Makassar", OnHandUnits: 35, DailyVelocity: 1.5},         // DoS: 23.3d (Balanced)
+			{WarehouseCode: "WH-SBY", WarehouseName: "Regional Hub Rungkut Surabaya", City: "Surabaya", OnHandUnits: 140, DailyVelocity: 2.0}, // DoS: 70.0d (Excess Surplus)
+			{WarehouseCode: "WH-MDN", WarehouseName: "Distribution Center Medan", City: "Medan", OnHandUnits: 8, DailyVelocity: 1.8},          // DoS: 4.4d (Critical Deficit)
+			{WarehouseCode: "WH-MKS", WarehouseName: "Hub Timur Daya Makassar", City: "Makassar", OnHandUnits: 35, DailyVelocity: 1.5},        // DoS: 23.3d (Balanced)
 		}
 	}
 
@@ -257,18 +257,18 @@ func (s *InventoryBalancerService) EvaluateBalancing(req EvaluateBalancingReques
 	evalID := fmt.Sprintf("EVAL/BAL/%s/%s", time.Now().Format("20060102"), time.Now().Format("150405"))
 
 	report := &InventoryBalancingReport{
-		EvaluationID:             evalID,
-		EvaluatedAt:              time.Now().Format(time.RFC3339),
-		TotalWarehousesAudited:   len(req.Profiles),
-		TotalSKUsAudited:         1,
-		DeficitNodesCount:        len(deficits),
-		SurplusNodesCount:        len(surpluses),
-		TotalTransfersProposed:   len(recommendations),
-		TotalUnitsToRedistribute: totalUnitsToTransfer,
-		TotalFreightCostIDR:      totalFreightCost,
+		EvaluationID:              evalID,
+		EvaluatedAt:               time.Now().Format(time.RFC3339),
+		TotalWarehousesAudited:    len(req.Profiles),
+		TotalSKUsAudited:          1,
+		DeficitNodesCount:         len(deficits),
+		SurplusNodesCount:         len(surpluses),
+		TotalTransfersProposed:    len(recommendations),
+		TotalUnitsToRedistribute:  totalUnitsToTransfer,
+		TotalFreightCostIDR:       totalFreightCost,
 		NetWorkingCapitalSavedIDR: totalCapitalSaved,
-		WarehouseProfiles:        evaluatedProfiles,
-		Recommendations:          recommendations,
+		WarehouseProfiles:         evaluatedProfiles,
+		Recommendations:           recommendations,
 	}
 
 	s.mu.Lock()
@@ -282,9 +282,9 @@ func (s *InventoryBalancerService) EvaluateBalancing(req EvaluateBalancingReques
 func (s *InventoryBalancerService) ExecuteTransfers(req ExecuteTransfersRequest) (*ExecuteTransfersResponse, error) {
 	if len(req.Recommendations) == 0 {
 		return &ExecuteTransfersResponse{
-			Success:                false,
-			Message:                "Tidak ada rekomendasi transfer yang diproses.",
-			ExecutionTimestamp:     time.Now().Format(time.RFC3339),
+			Success:            false,
+			Message:            "Tidak ada rekomendasi transfer yang diproses.",
+			ExecutionTimestamp: time.Now().Format(time.RFC3339),
 		}, nil
 	}
 

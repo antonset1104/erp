@@ -196,14 +196,14 @@ type AIPayrollAuditResult struct {
 }
 
 type PayrollStats struct {
-	TotalRuns              int64   `json:"total_runs"`
-	TotalPayslips          int64   `json:"total_payslips"`
-	TotalPaidSlips         int64   `json:"total_paid_slips"`
-	TotalDraftSlips        int64   `json:"total_draft_slips"`
-	TotalConfirmedSlips    int64   `json:"total_confirmed_slips"`
-	TotalGrossExpenditure  float64 `json:"total_gross_expenditure"`
+	TotalRuns               int64   `json:"total_runs"`
+	TotalPayslips           int64   `json:"total_payslips"`
+	TotalPaidSlips          int64   `json:"total_paid_slips"`
+	TotalDraftSlips         int64   `json:"total_draft_slips"`
+	TotalConfirmedSlips     int64   `json:"total_confirmed_slips"`
+	TotalGrossExpenditure   float64 `json:"total_gross_expenditure"`
 	TotalDeductionsWithheld float64 `json:"total_deductions_withheld"`
-	TotalNetPaid           float64 `json:"total_net_paid"`
-	TotalOvertimeHours     float64 `json:"total_overtime_hours"`
-	PendingAuditCount      int64   `json:"pending_audit_count"`
+	TotalNetPaid            float64 `json:"total_net_paid"`
+	TotalOvertimeHours      float64 `json:"total_overtime_hours"`
+	PendingAuditCount       int64   `json:"pending_audit_count"`
 }

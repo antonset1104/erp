@@ -226,12 +226,12 @@ func (s *Service) GenerateCashFlowForecast(req GenerateForecastRequest, userID, 
 	// C. Recurring Subscriptions (MRR)
 	if req.IncludeMRRRenewal {
 		var activeSubs []struct {
-			ID              uint
+			ID               uint
 			SubscriptionCode string
-			Name            string
-			PartnerID       uint
-			RecurringAmount float64
-			NextInvoiceDate time.Time
+			Name             string
+			PartnerID        uint
+			RecurringAmount  float64
+			NextInvoiceDate  time.Time
 		}
 		s.db.Table("subscriptions").
 			Select("id, subscription_code, name, partner_id, recurring_amount, next_invoice_date").
@@ -563,16 +563,16 @@ func (s *Service) ExecuteInterBankTransfer(req CreateInterBankTransferRequest, u
 					CreateUID: userID,
 					Active:    true,
 				},
-				Name:           moveName,
-				MoveType:       "entry",
-				JournalID:      journalID,
-				PartnerID:      0,
-				InvoiceDate:    txDate.Format("2006-01-02"),
-				State:          "posted",
-				PaymentState:   "not_paid",
-				AmountTotal:    req.Amount,
-				Ref:            txCode,
-				Note:           fmt.Sprintf("Transfer Likuiditas Kas Antar-Bank: %s ➔ %s", transfer.FromAccountName, transfer.ToAccountName),
+				Name:         moveName,
+				MoveType:     "entry",
+				JournalID:    journalID,
+				PartnerID:    0,
+				InvoiceDate:  txDate.Format("2006-01-02"),
+				State:        "posted",
+				PaymentState: "not_paid",
+				AmountTotal:  req.Amount,
+				Ref:          txCode,
+				Note:         fmt.Sprintf("Transfer Likuiditas Kas Antar-Bank: %s ➔ %s", transfer.FromAccountName, transfer.ToAccountName),
 			}
 			if err := s.db.Create(&glMove).Error; err == nil {
 				// Debit receiving bank
@@ -697,7 +697,7 @@ func (s *Service) AnalyzeTreasuryWithAI(forecastID uint, companyID uint) (*AITre
 		},
 		{
 			MetricName:  "Cash Buffer Coverage",
-			CurrentVal:  math.Round((forecast.OpeningCashBalance/math.Max(forecast.MinimumSafetyBuffer, 1.0))*100),
+			CurrentVal:  math.Round((forecast.OpeningCashBalance / math.Max(forecast.MinimumSafetyBuffer, 1.0)) * 100),
 			Benchmark:   100.0,
 			Status:      "OPTIMAL",
 			Description: "Persentase kecukupan kas terhadap batas pengaman darurat.",

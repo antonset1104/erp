@@ -13,17 +13,17 @@ import (
 
 // CarrierBid represents a binding proposal submitted by a logistics freight forwarder.
 type CarrierBid struct {
-	BidID                 string  `json:"bid_id"`
-	AuctionID             string  `json:"auction_id"`
-	CarrierID             string  `json:"carrier_id"`
-	CarrierName           string  `json:"carrier_name"`
-	ProposedRateUSD       float64 `json:"proposed_rate_usd"`
-	EstimatedTransitDays  float64 `json:"estimated_transit_days"`
-	CarbonEmissionKgCO2e  float64 `json:"carbon_emission_kg_co2e"`
-	HistoricalOnTimeRate  float64 `json:"historical_on_time_rate"` // e.g. 0.96 for 96%
-	VesselOrFlightRef     string  `json:"vessel_or_flight_ref"`
-	CompositeScore        float64 `json:"composite_score"` // 0.0 to 100.0
-	SubmittedAt           string  `json:"submitted_at"`
+	BidID                string  `json:"bid_id"`
+	AuctionID            string  `json:"auction_id"`
+	CarrierID            string  `json:"carrier_id"`
+	CarrierName          string  `json:"carrier_name"`
+	ProposedRateUSD      float64 `json:"proposed_rate_usd"`
+	EstimatedTransitDays float64 `json:"estimated_transit_days"`
+	CarbonEmissionKgCO2e float64 `json:"carbon_emission_kg_co2e"`
+	HistoricalOnTimeRate float64 `json:"historical_on_time_rate"` // e.g. 0.96 for 96%
+	VesselOrFlightRef    string  `json:"vessel_or_flight_ref"`
+	CompositeScore       float64 `json:"composite_score"` // 0.0 to 100.0
+	SubmittedAt          string  `json:"submitted_at"`
 }
 
 // FreightAuction defines a spot freight multimodal reverse bidding requirement.

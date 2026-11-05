@@ -21,17 +21,17 @@ type LandedCostExpense struct {
 
 // LandedCostItemLine represents a receipt line item receiving allocated landed costs.
 type LandedCostItemLine struct {
-	ProductID                string  `json:"product_id"`
-	ProductName              string  `json:"product_name"`
-	QuantityReceived         float64 `json:"quantity_received"`
-	OriginalUnitCost         float64 `json:"original_unit_cost"`
-	GrossWeightKg            float64 `json:"gross_weight_kg"`
-	VolumeCBM                float64 `json:"volume_cbm"`
-	OriginalSubtotal         float64 `json:"original_subtotal"`
-	AllocatedLandedCost      float64 `json:"allocated_landed_cost"`
-	NewLandedUnitCost        float64 `json:"new_landed_unit_cost"`
-	CostIncreasePercent      float64 `json:"cost_increase_percent"`
-	StockValuationLayerID    string  `json:"stock_valuation_layer_id"`
+	ProductID                 string  `json:"product_id"`
+	ProductName               string  `json:"product_name"`
+	QuantityReceived          float64 `json:"quantity_received"`
+	OriginalUnitCost          float64 `json:"original_unit_cost"`
+	GrossWeightKg             float64 `json:"gross_weight_kg"`
+	VolumeCBM                 float64 `json:"volume_cbm"`
+	OriginalSubtotal          float64 `json:"original_subtotal"`
+	AllocatedLandedCost       float64 `json:"allocated_landed_cost"`
+	NewLandedUnitCost         float64 `json:"new_landed_unit_cost"`
+	CostIncreasePercent       float64 `json:"cost_increase_percent"`
+	StockValuationLayerID     string  `json:"stock_valuation_layer_id"`
 	RetroactiveCOGSAdjustment float64 `json:"retroactive_cogs_adjustment"`
 }
 
@@ -46,29 +46,29 @@ type AllocateLandedCostRequest struct {
 
 // LandedCostAllocationResult holds the final capitalized inventory valuation result.
 type LandedCostAllocationResult struct {
-	AllocationID             string               `json:"allocation_id"`
-	ReceiptID                string               `json:"receipt_id"`
-	ReceiptNumber            string               `json:"receipt_number"`
-	AllocationMethod         string               `json:"allocation_method"`
-	TotalLandedExpenses      float64              `json:"total_landed_expenses"`
-	TotalInventoryPreValue   float64              `json:"total_inventory_pre_value"`
-	TotalInventoryPostValue  float64              `json:"total_inventory_post_value"`
-	TotalRetroactiveCOGS     float64              `json:"total_retroactive_cogs"`
-	AllocatedLines           []LandedCostItemLine `json:"allocated_lines"`
-	GeneralLedgerMoveRef     string               `json:"general_ledger_move_ref"`
-	Status                   string               `json:"status"`
-	CreatedAt                string               `json:"created_at"`
+	AllocationID            string               `json:"allocation_id"`
+	ReceiptID               string               `json:"receipt_id"`
+	ReceiptNumber           string               `json:"receipt_number"`
+	AllocationMethod        string               `json:"allocation_method"`
+	TotalLandedExpenses     float64              `json:"total_landed_expenses"`
+	TotalInventoryPreValue  float64              `json:"total_inventory_pre_value"`
+	TotalInventoryPostValue float64              `json:"total_inventory_post_value"`
+	TotalRetroactiveCOGS    float64              `json:"total_retroactive_cogs"`
+	AllocatedLines          []LandedCostItemLine `json:"allocated_lines"`
+	GeneralLedgerMoveRef    string               `json:"general_ledger_move_ref"`
+	Status                  string               `json:"status"`
+	CreatedAt               string               `json:"created_at"`
 }
 
 // LandedCostAuditLayer represents the multi-tier audit trail for unit cost build-up.
 type LandedCostAuditLayer struct {
-	ReceiptID             string               `json:"receipt_id"`
-	ReceiptNumber         string               `json:"receipt_number"`
-	ProductCostLayers     []LandedCostItemLine `json:"product_cost_layers"`
-	TotalCapitalizedCost  float64              `json:"total_capitalized_cost"`
-	ValuationMethod       string               `json:"valuation_method"`
-	AuditStatus           string               `json:"audit_status"`
-	LastAuditedAt         string               `json:"last_audited_at"`
+	ReceiptID            string               `json:"receipt_id"`
+	ReceiptNumber        string               `json:"receipt_number"`
+	ProductCostLayers    []LandedCostItemLine `json:"product_cost_layers"`
+	TotalCapitalizedCost float64              `json:"total_capitalized_cost"`
+	ValuationMethod      string               `json:"valuation_method"`
+	AuditStatus          string               `json:"audit_status"`
+	LastAuditedAt        string               `json:"last_audited_at"`
 }
 
 // LandedCostStore provides safe in-memory persistence for landed cost records.
@@ -182,17 +182,17 @@ func AllocateLandedCostLogic(req AllocateLandedCostRequest) (*LandedCostAllocati
 		postVal += (newUnitCost * line.QuantityReceived)
 
 		allocatedLines = append(allocatedLines, LandedCostItemLine{
-			ProductID:                line.ProductID,
-			ProductName:              line.ProductName,
-			QuantityReceived:         line.QuantityReceived,
-			OriginalUnitCost:         line.OriginalUnitCost,
-			GrossWeightKg:            line.GrossWeightKg,
-			VolumeCBM:                line.VolumeCBM,
-			OriginalSubtotal:         subtotal,
-			AllocatedLandedCost:      lineAllocated,
-			NewLandedUnitCost:        newUnitCost,
-			CostIncreasePercent:      increasePct,
-			StockValuationLayerID:    fmt.Sprintf("SVL-%s-%03d", req.ReceiptNumber, idx+1),
+			ProductID:                 line.ProductID,
+			ProductName:               line.ProductName,
+			QuantityReceived:          line.QuantityReceived,
+			OriginalUnitCost:          line.OriginalUnitCost,
+			GrossWeightKg:             line.GrossWeightKg,
+			VolumeCBM:                 line.VolumeCBM,
+			OriginalSubtotal:          subtotal,
+			AllocatedLandedCost:       lineAllocated,
+			NewLandedUnitCost:         newUnitCost,
+			CostIncreasePercent:       increasePct,
+			StockValuationLayerID:     fmt.Sprintf("SVL-%s-%03d", req.ReceiptNumber, idx+1),
 			RetroactiveCOGSAdjustment: lineRetro,
 		})
 	}

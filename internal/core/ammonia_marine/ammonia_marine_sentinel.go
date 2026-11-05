@@ -16,38 +16,38 @@ type AmmoniaMarineTelemetry struct {
 	TelemetryID                     string    `json:"telemetry_id"`
 	EngineID                        string    `json:"engine_id"`
 	VesselImoNumber                 string    `json:"vessel_imo_number"`
-	MachinerySpaceAmmoniaVaporPpm   float64   `json:"machinery_space_ammonia_vapor_ppm"` // alarm > 25 ppm; critical > 100 ppm
-	FuelRailInjectionPressureBar    float64   `json:"fuel_rail_injection_pressure_bar"`  // nominal 280 - 320 bar
-	RailPressureRippleBar           float64   `json:"rail_pressure_ripple_bar"`          // cavitation index > 35 bar
-	ExhaustN2oSlipPpm               float64   `json:"exhaust_n2o_slip_ppm"`              // limit < 45 ppm
-	DoubleWallAnnulusPressureBar    float64   `json:"double_wall_annulus_pressure_bar"`  // inert N2 barrier nominal 5.0 bar
+	MachinerySpaceAmmoniaVaporPpm   float64   `json:"machinery_space_ammonia_vapor_ppm"`   // alarm > 25 ppm; critical > 100 ppm
+	FuelRailInjectionPressureBar    float64   `json:"fuel_rail_injection_pressure_bar"`    // nominal 280 - 320 bar
+	RailPressureRippleBar           float64   `json:"rail_pressure_ripple_bar"`            // cavitation index > 35 bar
+	ExhaustN2oSlipPpm               float64   `json:"exhaust_n2o_slip_ppm"`                // limit < 45 ppm
+	DoubleWallAnnulusPressureBar    float64   `json:"double_wall_annulus_pressure_bar"`    // inert N2 barrier nominal 5.0 bar
 	CopperAlloyCorrosionPotentialMv float64   `json:"copper_alloy_corrosion_potential_mv"` // corrosion threshold > -450 mV
-	EngineOutputKw                  float64   `json:"engine_output_kw"`                  // e.g. 45,000 kW (60,000 HP)
+	EngineOutputKw                  float64   `json:"engine_output_kw"`                    // e.g. 45,000 kW (60,000 HP)
 	Timestamp                       time.Time `json:"timestamp"`
 }
 
 // AmmoniaMarineAssessment models crew toxicity envelope, injector cavitation, and IMO IGF compliance
 type AmmoniaMarineAssessment struct {
-	AssessmentID                   string    `json:"assessment_id"`
-	EngineID                       string    `json:"engine_id"`
-	ToxicVaporEnvelopeStatus       string    `json:"toxic_vapor_envelope_status"` // CONTAINED_CLEAN_ATMOSPHERE, TOXIC_VAPOR_LEAK_WARNING, CRITICAL_CREW_TOXICITY_DELUGE
-	FuelInjectorCavitationRisk     string    `json:"fuel_injector_cavitation_risk"` // SMOOTH_HYDRAULIC_INJECTION, VAPOR_MICRO_BUBBLE_CAVITATION
-	N2oGreenhouseSlipHazard        string    `json:"n2o_greenhouse_slip_hazard"`    // COMPLIANT_LOW_EMISSION, EXCESSIVE_N2O_GREENHOUSE_SLIP
-	DoubleBlockBleedMandate        bool      `json:"double_block_bleed_mandate"`
-	WaterWashScrubbingMandate      bool      `json:"water_wash_scrubbing_mandate"`
-	AuditDigest                    string    `json:"audit_digest"`
-	EvaluatedAt                    time.Time `json:"evaluated_at"`
+	AssessmentID               string    `json:"assessment_id"`
+	EngineID                   string    `json:"engine_id"`
+	ToxicVaporEnvelopeStatus   string    `json:"toxic_vapor_envelope_status"`   // CONTAINED_CLEAN_ATMOSPHERE, TOXIC_VAPOR_LEAK_WARNING, CRITICAL_CREW_TOXICITY_DELUGE
+	FuelInjectorCavitationRisk string    `json:"fuel_injector_cavitation_risk"` // SMOOTH_HYDRAULIC_INJECTION, VAPOR_MICRO_BUBBLE_CAVITATION
+	N2oGreenhouseSlipHazard    string    `json:"n2o_greenhouse_slip_hazard"`    // COMPLIANT_LOW_EMISSION, EXCESSIVE_N2O_GREENHOUSE_SLIP
+	DoubleBlockBleedMandate    bool      `json:"double_block_bleed_mandate"`
+	WaterWashScrubbingMandate  bool      `json:"water_wash_scrubbing_mandate"`
+	AuditDigest                string    `json:"audit_digest"`
+	EvaluatedAt                time.Time `json:"evaluated_at"`
 }
 
 // AmmoniaMarineMitigationAction models fast double-block and bleed, water-wash deluge, and urea SCR trim
 type AmmoniaMarineMitigationAction struct {
-	ActionID                              string    `json:"action_id"`
-	EngineID                              string    `json:"engine_id"`
-	CommandedDoubleBlockBleedResponseMs   float64   `json:"commanded_double_block_bleed_response_ms"`
-	WaterWashDelugeFlowRateLitersPerMin   float64   `json:"water_wash_deluge_flow_rate_liters_per_min"`
-	UreaScrDosingRateGramsPerKwh          float64   `json:"urea_scr_dosing_rate_grams_per_kwh"`
-	AvoidedMarineDisasterLossUSD          float64   `json:"avoided_marine_disaster_loss_usd"`
-	ExecutedAt                            time.Time `json:"executed_at"`
+	ActionID                            string    `json:"action_id"`
+	EngineID                            string    `json:"engine_id"`
+	CommandedDoubleBlockBleedResponseMs float64   `json:"commanded_double_block_bleed_response_ms"`
+	WaterWashDelugeFlowRateLitersPerMin float64   `json:"water_wash_deluge_flow_rate_liters_per_min"`
+	UreaScrDosingRateGramsPerKwh        float64   `json:"urea_scr_dosing_rate_grams_per_kwh"`
+	AvoidedMarineDisasterLossUSD        float64   `json:"avoided_marine_disaster_loss_usd"`
+	ExecutedAt                          time.Time `json:"executed_at"`
 }
 
 // AmmoniaMarineVault manages dual-fuel ammonia engine state and emergency actions
@@ -120,15 +120,15 @@ func (v *AmmoniaMarineVault) EvaluateToxicityAndCavitation(engineID string) (Amm
 	digest := hex.EncodeToString(hasher.Sum(nil))
 
 	assessment := AmmoniaMarineAssessment{
-		AssessmentID:                   fmt.Sprintf("ASM-AMMAR-%d", time.Now().UnixNano()%1000000),
-		EngineID:                       engineID,
-		ToxicVaporEnvelopeStatus:       toxicStatus,
-		FuelInjectorCavitationRisk:     cavitRisk,
-		N2oGreenhouseSlipHazard:        n2oHazard,
-		DoubleBlockBleedMandate:        dbbMandate,
-		WaterWashScrubbingMandate:      waterWashMandate,
-		AuditDigest:                    digest,
-		EvaluatedAt:                    time.Now(),
+		AssessmentID:               fmt.Sprintf("ASM-AMMAR-%d", time.Now().UnixNano()%1000000),
+		EngineID:                   engineID,
+		ToxicVaporEnvelopeStatus:   toxicStatus,
+		FuelInjectorCavitationRisk: cavitRisk,
+		N2oGreenhouseSlipHazard:    n2oHazard,
+		DoubleBlockBleedMandate:    dbbMandate,
+		WaterWashScrubbingMandate:  waterWashMandate,
+		AuditDigest:                digest,
+		EvaluatedAt:                time.Now(),
 	}
 
 	v.assessments[engineID] = assessment

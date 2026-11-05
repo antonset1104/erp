@@ -12,41 +12,41 @@ import (
 
 // CapexCarbonEvaluationRequest holds investment proposal data for internal shadow carbon pricing.
 type CapexCarbonEvaluationRequest struct {
-	ProposalID                      string  `json:"proposal_id"`
-	ProjectName                     string  `json:"project_name"`
-	BusinessUnit                    string  `json:"business_unit"`
-	BaselineCapexIDR                float64 `json:"baseline_capex_idr"`
-	AnnualOpexIDR                   float64 `json:"annual_opex_idr"`
-	ProjectLifeYears                int     `json:"project_life_years"`
-	ProjectedEmissionsTonsCO2eYear  float64 `json:"projected_emissions_tons_co2e_year"`
-	ShadowCarbonPriceUSDPerTon      float64 `json:"shadow_carbon_price_usd_per_ton"` // e.g. $75/ton CO2e
-	FXRateUSDToIDR                  float64 `json:"fx_rate_usd_to_idr"`              // e.g. 16300 IDR/USD
-	IsGreenInitiative               bool    `json:"is_green_initiative"`
+	ProposalID                     string  `json:"proposal_id"`
+	ProjectName                    string  `json:"project_name"`
+	BusinessUnit                   string  `json:"business_unit"`
+	BaselineCapexIDR               float64 `json:"baseline_capex_idr"`
+	AnnualOpexIDR                  float64 `json:"annual_opex_idr"`
+	ProjectLifeYears               int     `json:"project_life_years"`
+	ProjectedEmissionsTonsCO2eYear float64 `json:"projected_emissions_tons_co2e_year"`
+	ShadowCarbonPriceUSDPerTon     float64 `json:"shadow_carbon_price_usd_per_ton"` // e.g. $75/ton CO2e
+	FXRateUSDToIDR                 float64 `json:"fx_rate_usd_to_idr"`              // e.g. 16300 IDR/USD
+	IsGreenInitiative              bool    `json:"is_green_initiative"`
 }
 
 // CapexCarbonEvaluationResult provides the carbon-adjusted TCO and green fund allocation.
 type CapexCarbonEvaluationResult struct {
-	ProposalID                  string  `json:"proposal_id"`
-	ProjectName                 string  `json:"project_name"`
-	BusinessUnit                string  `json:"business_unit"`
-	BaselineCapexIDR            float64 `json:"baseline_capex_idr"`
-	AnnualShadowCarbonFeeIDR    float64 `json:"annual_shadow_carbon_fee_idr"`
-	LifetimeCarbonFeeIDR        float64 `json:"lifetime_carbon_fee_idr"`
-	CarbonAdjustedTCOIDR        float64 `json:"carbon_adjusted_tco_idr"`
-	GreenFundSubsidyGrantedIDR  float64 `json:"green_fund_subsidy_granted_idr"`
-	NetApprovedInvestmentIDR    float64 `json:"net_approved_investment_idr"`
-	ApprovalStatus              string  `json:"approval_status"` // "APPROVED_WITH_CARBON_LEVY", "APPROVED_WITH_GREEN_SUBSIDY", "REJECTED_CARBON_EXCESSIVE"
-	CarbonIntensityVerdict      string  `json:"carbon_intensity_verdict"`
-	EvaluatedAt                 string  `json:"evaluated_at"`
+	ProposalID                 string  `json:"proposal_id"`
+	ProjectName                string  `json:"project_name"`
+	BusinessUnit               string  `json:"business_unit"`
+	BaselineCapexIDR           float64 `json:"baseline_capex_idr"`
+	AnnualShadowCarbonFeeIDR   float64 `json:"annual_shadow_carbon_fee_idr"`
+	LifetimeCarbonFeeIDR       float64 `json:"lifetime_carbon_fee_idr"`
+	CarbonAdjustedTCOIDR       float64 `json:"carbon_adjusted_tco_idr"`
+	GreenFundSubsidyGrantedIDR float64 `json:"green_fund_subsidy_granted_idr"`
+	NetApprovedInvestmentIDR   float64 `json:"net_approved_investment_idr"`
+	ApprovalStatus             string  `json:"approval_status"` // "APPROVED_WITH_CARBON_LEVY", "APPROVED_WITH_GREEN_SUBSIDY", "REJECTED_CARBON_EXCESSIVE"
+	CarbonIntensityVerdict     string  `json:"carbon_intensity_verdict"`
+	EvaluatedAt                string  `json:"evaluated_at"`
 }
 
 // GreenTaxPoolSummary manages internal carbon levies collected for corporate sustainability reinvestment.
 type GreenTaxPoolSummary struct {
-	TotalCarbonLeviesCollectedIDR float64                       `json:"total_carbon_levies_collected_idr"`
-	TotalGreenSubsidiesDisbursedIDR float64                     `json:"total_green_subsidies_disbursed_idr"`
-	AvailableGreenFundBalanceIDR  float64                       `json:"available_green_fund_balance_idr"`
-	ShadowPriceAppliedUSD         float64                       `json:"shadow_price_applied_usd"`
-	EvaluatedProposals            []CapexCarbonEvaluationResult `json:"evaluated_proposals"`
+	TotalCarbonLeviesCollectedIDR   float64                       `json:"total_carbon_levies_collected_idr"`
+	TotalGreenSubsidiesDisbursedIDR float64                       `json:"total_green_subsidies_disbursed_idr"`
+	AvailableGreenFundBalanceIDR    float64                       `json:"available_green_fund_balance_idr"`
+	ShadowPriceAppliedUSD           float64                       `json:"shadow_price_applied_usd"`
+	EvaluatedProposals              []CapexCarbonEvaluationResult `json:"evaluated_proposals"`
 }
 
 var (

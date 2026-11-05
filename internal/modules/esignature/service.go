@@ -74,7 +74,7 @@ func (s *service) CreateSignRequest(req *CreateSignRequest, companyID uint) (*Do
 
 	watermarkText := req.WatermarkText
 	if watermarkText == "" {
-		watermarkText = fmt.Sprintf("DIGITALLY SIGNED & VERIFIED - %s - TGL %s", req.DocumentNumber, time.Now().Format("2006-02-01"))
+		watermarkText = fmt.Sprintf("DIGITALLY SIGNED & VERIFIED - %s - TGL %s", req.DocumentNumber, time.Now().Format("2006-01-02"))
 	}
 
 	token := generateSecureToken()

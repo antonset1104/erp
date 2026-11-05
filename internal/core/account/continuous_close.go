@@ -22,13 +22,13 @@ type SubledgerAuditStatus struct {
 
 // SmartAccrualEntry represents an automated adjusting accrual entry proposed or posted by the engine.
 type SmartAccrualEntry struct {
-	AccrualID       string  `json:"accrual_id"`
-	AccrualType     string  `json:"accrual_type"` // GRNI_EXPENSE, UNBILLED_REVENUE, PREPAID_AMORTIZATION
-	SourceDocument  string  `json:"source_document"`
-	DebitAccount    string  `json:"debit_account"`
-	CreditAccount   string  `json:"credit_account"`
-	AmountIDR       float64 `json:"amount_idr"`
-	PartnerName     string  `json:"partner_name"`
+	AccrualID        string  `json:"accrual_id"`
+	AccrualType      string  `json:"accrual_type"` // GRNI_EXPENSE, UNBILLED_REVENUE, PREPAID_AMORTIZATION
+	SourceDocument   string  `json:"source_document"`
+	DebitAccount     string  `json:"debit_account"`
+	CreditAccount    string  `json:"credit_account"`
+	AmountIDR        float64 `json:"amount_idr"`
+	PartnerName      string  `json:"partner_name"`
 	AutoReversalDate string  `json:"auto_reversal_date"`
 }
 
@@ -36,8 +36,8 @@ type SmartAccrualEntry struct {
 type ContinuousCloseReport struct {
 	CloseRunID              string                 `json:"close_run_id"`
 	RunTimestamp            string                 `json:"run_timestamp"`
-	FiscalPeriod            string                 `json:"fiscal_period"` // e.g. 2026-10
-	CloseStatus             string                 `json:"close_status"` // VIRTUAL_CLOSED_AUDIT_READY
+	FiscalPeriod            string                 `json:"fiscal_period"`              // e.g. 2026-10
+	CloseStatus             string                 `json:"close_status"`               // VIRTUAL_CLOSED_AUDIT_READY
 	FastCloseReadinessScore float64                `json:"fast_close_readiness_score"` // 0-100
 	DaysSavedVsManualClose  float64                `json:"days_saved_vs_manual_close"`
 	TotalAccruedExpensesIDR float64                `json:"total_accrued_expenses_idr"`
@@ -50,9 +50,9 @@ type ContinuousCloseReport struct {
 
 // RunContinuousCloseRequest represents the trigger payload.
 type RunContinuousCloseRequest struct {
-	CompanyID                uint   `json:"company_id"`
-	FiscalPeriod             string `json:"fiscal_period"` // YYYY-MM
-	AutoPostSmartAccruals    bool   `json:"auto_post_smart_accruals"`
+	CompanyID             uint   `json:"company_id"`
+	FiscalPeriod          string `json:"fiscal_period"` // YYYY-MM
+	AutoPostSmartAccruals bool   `json:"auto_post_smart_accruals"`
 }
 
 // ContinuousCloseService handles automated continuous virtual closing and accrual modeling.

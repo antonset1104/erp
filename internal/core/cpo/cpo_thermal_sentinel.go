@@ -14,41 +14,41 @@ import (
 
 // CPOOpticalTelemetry captures 1.6T/3.2T co-packaged optics silicon photonics laser & SerDes dynamics under OIF-CPO & IEEE 802.3df
 type CPOOpticalTelemetry struct {
-	TelemetryID               string    `json:"telemetry_id"`
-	ModuleID                  string    `json:"module_id"`                     // "CPO-SWITCH-3.2T-AI-RACK-08"
-	LaserArrayID              string    `json:"laser_array_id"`               // "LASER-DFB-CW-WDM-16CH"
-	LaserJunctionTempC        float64   `json:"laser_junction_temp_c"`        // e.g. 58.5°C (adjacent to 1200W TPU/GPU package)
-	MicroTecCurrentMa         float64   `json:"micro_tec_current_ma"`          // e.g. 385.0 mA (active thermoelectric cooling)
-	LaserOpticalPowerDbm      float64   `json:"laser_optical_power_dbm"`       // e.g. 13.8 dBm (CW DFB light source)
-	MicroRingResonatorVoltMv  float64   `json:"micro_ring_resonator_volt_mv"`  // e.g. 840.0 mV (thermal tuning heater voltage)
-	CarrierWavelengthDriftPm  float64   `json:"carrier_wavelength_drift_pm"`   // e.g. 85.0 pm picometer optical drift (0.1 nm/K)
-	LaneToLaneSkewPs          float64   `json:"lane_to_lane_skew_ps"`          // e.g. 18.5 ps differential delay across 200G SerDes
-	PreFecBitErrorRate        float64   `json:"pre_fec_bit_error_rate"`        // e.g. 4.2e-4 (IEEE 802.3df threshold < 1.0e-4)
-	RecordedAt                time.Time `json:"recorded_at"`
+	TelemetryID              string    `json:"telemetry_id"`
+	ModuleID                 string    `json:"module_id"`                    // "CPO-SWITCH-3.2T-AI-RACK-08"
+	LaserArrayID             string    `json:"laser_array_id"`               // "LASER-DFB-CW-WDM-16CH"
+	LaserJunctionTempC       float64   `json:"laser_junction_temp_c"`        // e.g. 58.5°C (adjacent to 1200W TPU/GPU package)
+	MicroTecCurrentMa        float64   `json:"micro_tec_current_ma"`         // e.g. 385.0 mA (active thermoelectric cooling)
+	LaserOpticalPowerDbm     float64   `json:"laser_optical_power_dbm"`      // e.g. 13.8 dBm (CW DFB light source)
+	MicroRingResonatorVoltMv float64   `json:"micro_ring_resonator_volt_mv"` // e.g. 840.0 mV (thermal tuning heater voltage)
+	CarrierWavelengthDriftPm float64   `json:"carrier_wavelength_drift_pm"`  // e.g. 85.0 pm picometer optical drift (0.1 nm/K)
+	LaneToLaneSkewPs         float64   `json:"lane_to_lane_skew_ps"`         // e.g. 18.5 ps differential delay across 200G SerDes
+	PreFecBitErrorRate       float64   `json:"pre_fec_bit_error_rate"`       // e.g. 4.2e-4 (IEEE 802.3df threshold < 1.0e-4)
+	RecordedAt               time.Time `json:"recorded_at"`
 }
 
 // CPOOpticalAssessment models thermo-optic phase shifts, DFB laser mode hopping, and SerDes eye-diagram collapse
 type CPOOpticalAssessment struct {
-	AssessmentID             string    `json:"assessment_id"`
-	ModuleID                 string    `json:"module_id"`
-	WavelengthShiftGhz       float64   `json:"wavelength_shift_ghz"`        // frequency drift in GHz (c / lambda^2 * dlambda)
-	LaserModeHopRisk         string    `json:"laser_mode_hop_risk"`         // "SINGLE_LONGITUDINAL_MODE_STABLE", "MODE_PARTITION_NOISE_WARNING", "CRITICAL_MODE_HOPPING_EYE_COLLAPSE"
-	SerDesSkewHazard         string    `json:"serdes_skew_hazard"`          // "SKEW_ALIGNED_SUB_PICOSECOND", "INTER_LANE_JITTER_WARNING", "CRITICAL_SERDES_DESYNCHRONIZATION_DROP"
-	MicroTecPidTrimMandate   bool      `json:"micro_tec_pid_trim_mandate"`
-	DigitalDeskewMandate     bool      `json:"digital_deskew_mandate"`
-	AuditDigest              string    `json:"audit_digest"`
-	EvaluatedAt              time.Time `json:"evaluated_at"`
+	AssessmentID           string    `json:"assessment_id"`
+	ModuleID               string    `json:"module_id"`
+	WavelengthShiftGhz     float64   `json:"wavelength_shift_ghz"` // frequency drift in GHz (c / lambda^2 * dlambda)
+	LaserModeHopRisk       string    `json:"laser_mode_hop_risk"`  // "SINGLE_LONGITUDINAL_MODE_STABLE", "MODE_PARTITION_NOISE_WARNING", "CRITICAL_MODE_HOPPING_EYE_COLLAPSE"
+	SerDesSkewHazard       string    `json:"serdes_skew_hazard"`   // "SKEW_ALIGNED_SUB_PICOSECOND", "INTER_LANE_JITTER_WARNING", "CRITICAL_SERDES_DESYNCHRONIZATION_DROP"
+	MicroTecPidTrimMandate bool      `json:"micro_tec_pid_trim_mandate"`
+	DigitalDeskewMandate   bool      `json:"digital_deskew_mandate"`
+	AuditDigest            string    `json:"audit_digest"`
+	EvaluatedAt            time.Time `json:"evaluated_at"`
 }
 
 // CPOMitigationAction models sub-millisecond micro-TEC PID tuning, micro-ring thermal bias trim, and SerDes DLL deskewing
 type CPOMitigationAction struct {
-	ActionID                  string    `json:"action_id"`
-	ModuleID                  string    `json:"module_id"`
-	CommandedMicroTecCurrentMa float64  `json:"commanded_micro_tec_current_ma"` // adjusted micro-TEC cooling current
-	MicroRingTuningVoltMv     float64   `json:"micro_ring_tuning_volt_mv"`      // modulated thermal phase tuner voltage
-	SerDesDllDeskewDelayPs    float64   `json:"serdes_dll_deskew_delay_ps"`     // digital delay line compensation
-	AvoidedHyperscaleOutageUSD float64  `json:"avoided_hyperscale_outage_usd"`  // Avoided $45M USD AI cluster all-reduce stalls & optical module RMA
-	ActionTimestamp           time.Time `json:"action_timestamp"`
+	ActionID                   string    `json:"action_id"`
+	ModuleID                   string    `json:"module_id"`
+	CommandedMicroTecCurrentMa float64   `json:"commanded_micro_tec_current_ma"` // adjusted micro-TEC cooling current
+	MicroRingTuningVoltMv      float64   `json:"micro_ring_tuning_volt_mv"`      // modulated thermal phase tuner voltage
+	SerDesDllDeskewDelayPs     float64   `json:"serdes_dll_deskew_delay_ps"`     // digital delay line compensation
+	AvoidedHyperscaleOutageUSD float64   `json:"avoided_hyperscale_outage_usd"`  // Avoided $45M USD AI cluster all-reduce stalls & optical module RMA
+	ActionTimestamp            time.Time `json:"action_timestamp"`
 }
 
 // CPOVault thread-safe in-memory repository
@@ -155,13 +155,13 @@ func (v *CPOVault) TriggerTecPidAndDeskewControl(moduleID string) (CPOMitigation
 	}
 
 	action := CPOMitigationAction{
-		ActionID:                  fmt.Sprintf("ACT-CPO-%d", time.Now().UnixNano()%1000000),
-		ModuleID:                  moduleID,
+		ActionID:                   fmt.Sprintf("ACT-CPO-%d", time.Now().UnixNano()%1000000),
+		ModuleID:                   moduleID,
 		CommandedMicroTecCurrentMa: tecCurrent,
-		MicroRingTuningVoltMv:     ringVoltage,
-		SerDesDllDeskewDelayPs:    deskewDelay,
+		MicroRingTuningVoltMv:      ringVoltage,
+		SerDesDllDeskewDelayPs:     deskewDelay,
 		AvoidedHyperscaleOutageUSD: 45000000.0,
-		ActionTimestamp:           time.Now(),
+		ActionTimestamp:            time.Now(),
 	}
 
 	v.actions[moduleID] = action

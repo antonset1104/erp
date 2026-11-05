@@ -45,22 +45,22 @@ type AerationDecision struct {
 
 // GrainQuarantineRecord models quarantine of compromised grain batches to prevent downstream food contamination
 type GrainQuarantineRecord struct {
-	QuarantineID                   string    `json:"quarantine_id"`
-	SiloID                         string    `json:"silo_id"`
-	BatchLotNumber                 string    `json:"batch_lot_number"`
-	QuarantineReason               string    `json:"quarantine_reason"`
-	DownstreamDischargeGateLocked  bool      `json:"downstream_discharge_gate_locked"`
-	LabSamplingWorkOrderID         string    `json:"lab_sampling_work_order_id"`
-	AuditRegulatoryDigest          string    `json:"audit_regulatory_digest"`
-	QuarantinedAt                  time.Time `json:"quarantined_at"`
+	QuarantineID                  string    `json:"quarantine_id"`
+	SiloID                        string    `json:"silo_id"`
+	BatchLotNumber                string    `json:"batch_lot_number"`
+	QuarantineReason              string    `json:"quarantine_reason"`
+	DownstreamDischargeGateLocked bool      `json:"downstream_discharge_gate_locked"`
+	LabSamplingWorkOrderID        string    `json:"lab_sampling_work_order_id"`
+	AuditRegulatoryDigest         string    `json:"audit_regulatory_digest"`
+	QuarantinedAt                 time.Time `json:"quarantined_at"`
 }
 
 // SiloAerationVault thread-safe store
 type SiloAerationVault struct {
-	mu           sync.RWMutex
-	telemetries  map[string]SiloTelemetry
-	decisions    map[string]AerationDecision
-	quarantines  map[string]GrainQuarantineRecord
+	mu          sync.RWMutex
+	telemetries map[string]SiloTelemetry
+	decisions   map[string]AerationDecision
+	quarantines map[string]GrainQuarantineRecord
 }
 
 // Global Silo Aeration instance
@@ -239,15 +239,15 @@ func (v *SiloAerationVault) GetGrainHealthDossier(siloID string) (gin.H, error) 
 	}
 
 	return gin.H{
-		"silo_id":                 siloID,
-		"latest_telemetry":        tel,
-		"has_telemetry":           hasTel,
-		"aeration_decision":       dec,
-		"has_decision":            hasDec,
-		"quarantine_record":       quar,
-		"has_quarantine":          hasQuar,
-		"statutory_standards":     "ISO 6322 Storage of Cereals & Pulses / FAO Post-Harvest / USDA GIPSA",
-		"food_safety_cert":        "HACCP Codex Alimentarius Cereals Critical Control Point #3",
+		"silo_id":             siloID,
+		"latest_telemetry":    tel,
+		"has_telemetry":       hasTel,
+		"aeration_decision":   dec,
+		"has_decision":        hasDec,
+		"quarantine_record":   quar,
+		"has_quarantine":      hasQuar,
+		"statutory_standards": "ISO 6322 Storage of Cereals & Pulses / FAO Post-Harvest / USDA GIPSA",
+		"food_safety_cert":    "HACCP Codex Alimentarius Cereals Critical Control Point #3",
 	}, nil
 }
 

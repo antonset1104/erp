@@ -24,17 +24,17 @@ type EscrowMilestone struct {
 
 // EscrowContract holds the escrow fund balance and milestone schedule.
 type EscrowContract struct {
-	ContractID               string            `json:"contract_id"`
-	VendorID                 string            `json:"vendor_id"`
-	VendorName               string            `json:"vendor_name"`
-	ProjectName              string            `json:"project_name"`
-	TotalContractValueIDR    float64           `json:"total_contract_value_idr"`
-	TotalEscrowFundedIDR     float64           `json:"total_escrow_funded_idr"`
-	TotalDisbursedIDR        float64           `json:"total_disbursed_idr"`
+	ContractID                string            `json:"contract_id"`
+	VendorID                  string            `json:"vendor_id"`
+	VendorName                string            `json:"vendor_name"`
+	ProjectName               string            `json:"project_name"`
+	TotalContractValueIDR     float64           `json:"total_contract_value_idr"`
+	TotalEscrowFundedIDR      float64           `json:"total_escrow_funded_idr"`
+	TotalDisbursedIDR         float64           `json:"total_disbursed_idr"`
 	RemainingEscrowBalanceIDR float64           `json:"remaining_escrow_balance_idr"`
-	Milestones               []EscrowMilestone `json:"milestones"`
-	EscrowStatus             string            `json:"escrow_status"` // "ACTIVE_ESCROW_FUNDED", "PARTIALLY_RELEASED", "COMPLETED_CLOSED"
-	CreatedAt                string            `json:"created_at"`
+	Milestones                []EscrowMilestone `json:"milestones"`
+	EscrowStatus              string            `json:"escrow_status"` // "ACTIVE_ESCROW_FUNDED", "PARTIALLY_RELEASED", "COMPLETED_CLOSED"
+	CreatedAt                 string            `json:"created_at"`
 }
 
 // CreateMilestoneEscrowRequest initiates a condition-governed escrow contract.
@@ -58,24 +58,24 @@ type VerifyMilestoneReleaseRequest struct {
 
 // VerifyMilestoneReleaseResult delivers the payment release verdict.
 type VerifyMilestoneReleaseResult struct {
-	ContractID               string  `json:"contract_id"`
-	MilestoneID              string  `json:"milestone_id"`
-	ConditionVerified        string  `json:"condition_verified"`
-	AllConditionsMet         bool    `json:"all_conditions_met"`
-	AmountDisbursedIDR       float64 `json:"amount_disbursed_idr"`
+	ContractID                string  `json:"contract_id"`
+	MilestoneID               string  `json:"milestone_id"`
+	ConditionVerified         string  `json:"condition_verified"`
+	AllConditionsMet          bool    `json:"all_conditions_met"`
+	AmountDisbursedIDR        float64 `json:"amount_disbursed_idr"`
 	RemainingEscrowBalanceIDR float64 `json:"remaining_escrow_balance_idr"`
-	DisbursementTxID         string  `json:"disbursement_tx_id,omitempty"`
-	Status                   string  `json:"status"`
-	Message                  string  `json:"message"`
+	DisbursementTxID          string  `json:"disbursement_tx_id,omitempty"`
+	Status                    string  `json:"status"`
+	Message                   string  `json:"message"`
 }
 
 // EscrowVaultSummary provides an executive overview across active escrow accounts.
 type EscrowVaultSummary struct {
-	TotalActiveContracts        int              `json:"total_active_contracts"`
-	TotalEscrowUnderCustodyIDR  float64          `json:"total_escrow_under_custody_idr"`
-	TotalDisbursedToDateIDR     float64          `json:"total_disbursed_to_date_idr"`
-	TotalRemainingLockedIDR     float64          `json:"total_remaining_locked_idr"`
-	Contracts                   []EscrowContract `json:"contracts"`
+	TotalActiveContracts       int              `json:"total_active_contracts"`
+	TotalEscrowUnderCustodyIDR float64          `json:"total_escrow_under_custody_idr"`
+	TotalDisbursedToDateIDR    float64          `json:"total_disbursed_to_date_idr"`
+	TotalRemainingLockedIDR    float64          `json:"total_remaining_locked_idr"`
+	Contracts                  []EscrowContract `json:"contracts"`
 }
 
 var (
@@ -85,13 +85,13 @@ var (
 
 func init() {
 	demoContract := &EscrowContract{
-		ContractID:               "ESCROW-2026-EPC-001",
-		VendorID:                 "VEND-SIEMENS-ID",
-		VendorName:               "PT Siemens Industrial Automation",
-		ProjectName:              "Turnkey SMT Assembly Line 4 EPC Installation",
-		TotalContractValueIDR:    12000000000.0, // Rp 12 Miliar
-		TotalEscrowFundedIDR:     12000000000.0,
-		TotalDisbursedIDR:        3600000000.0,
+		ContractID:                "ESCROW-2026-EPC-001",
+		VendorID:                  "VEND-SIEMENS-ID",
+		VendorName:                "PT Siemens Industrial Automation",
+		ProjectName:               "Turnkey SMT Assembly Line 4 EPC Installation",
+		TotalContractValueIDR:     12000000000.0, // Rp 12 Miliar
+		TotalEscrowFundedIDR:      12000000000.0,
+		TotalDisbursedIDR:         3600000000.0,
 		RemainingEscrowBalanceIDR: 8400000000.0,
 		Milestones: []EscrowMilestone{
 			{
@@ -181,17 +181,17 @@ func CreateEscrowContractLogic(req CreateMilestoneEscrowRequest) EscrowContract 
 	}
 
 	contract := EscrowContract{
-		ContractID:               req.ContractID,
-		VendorID:                 req.VendorID,
-		VendorName:               req.VendorName,
-		ProjectName:              req.ProjectName,
-		TotalContractValueIDR:    req.TotalContractValueIDR,
-		TotalEscrowFundedIDR:     req.TotalContractValueIDR,
-		TotalDisbursedIDR:        0.0,
+		ContractID:                req.ContractID,
+		VendorID:                  req.VendorID,
+		VendorName:                req.VendorName,
+		ProjectName:               req.ProjectName,
+		TotalContractValueIDR:     req.TotalContractValueIDR,
+		TotalEscrowFundedIDR:      req.TotalContractValueIDR,
+		TotalDisbursedIDR:         0.0,
 		RemainingEscrowBalanceIDR: req.TotalContractValueIDR,
-		Milestones:               req.Milestones,
-		EscrowStatus:             "ACTIVE_ESCROW_FUNDED",
-		CreatedAt:                time.Now().Format(time.RFC3339),
+		Milestones:                req.Milestones,
+		EscrowStatus:              "ACTIVE_ESCROW_FUNDED",
+		CreatedAt:                 time.Now().Format(time.RFC3339),
 	}
 
 	escrowStore[req.ContractID] = &contract
@@ -276,15 +276,15 @@ func VerifyMilestoneReleaseLogic(req VerifyMilestoneReleaseRequest) (*VerifyMile
 	}
 
 	return &VerifyMilestoneReleaseResult{
-		ContractID:               c.ContractID,
-		MilestoneID:              ms.MilestoneID,
-		ConditionVerified:        req.FulfilledConditionCode,
-		AllConditionsMet:         allMet,
-		AmountDisbursedIDR:       disbursed,
+		ContractID:                c.ContractID,
+		MilestoneID:               ms.MilestoneID,
+		ConditionVerified:         req.FulfilledConditionCode,
+		AllConditionsMet:          allMet,
+		AmountDisbursedIDR:        disbursed,
 		RemainingEscrowBalanceIDR: c.RemainingEscrowBalanceIDR,
-		DisbursementTxID:         txID,
-		Status:                   status,
-		Message:                  msg,
+		DisbursementTxID:          txID,
+		Status:                    status,
+		Message:                   msg,
 	}, nil
 }
 

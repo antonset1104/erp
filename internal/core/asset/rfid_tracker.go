@@ -15,12 +15,12 @@ import (
 type GeofenceZone string
 
 const (
-	ZoneInboundDock      GeofenceZone = "ZONE_INBOUND_DOCK"
-	ZoneProductionFloor  GeofenceZone = "ZONE_PRODUCTION_FLOOR"
-	ZoneFinishedGoodsWH  GeofenceZone = "ZONE_FINISHED_GOODS_WH"
-	ZoneOutboundBay      GeofenceZone = "ZONE_OUTBOUND_BAY"
-	ZoneCustomerSite     GeofenceZone = "ZONE_EXTERNAL_CUSTOMER_SITE"
-	ZoneMaintenanceBay   GeofenceZone = "ZONE_MAINTENANCE_BAY"
+	ZoneInboundDock     GeofenceZone = "ZONE_INBOUND_DOCK"
+	ZoneProductionFloor GeofenceZone = "ZONE_PRODUCTION_FLOOR"
+	ZoneFinishedGoodsWH GeofenceZone = "ZONE_FINISHED_GOODS_WH"
+	ZoneOutboundBay     GeofenceZone = "ZONE_OUTBOUND_BAY"
+	ZoneCustomerSite    GeofenceZone = "ZONE_EXTERNAL_CUSTOMER_SITE"
+	ZoneMaintenanceBay  GeofenceZone = "ZONE_MAINTENANCE_BAY"
 )
 
 // TrackedAssetCategory defines the asset family.

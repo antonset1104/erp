@@ -342,7 +342,6 @@ func (h *Handler) ReceiptOCR(c *gin.Context) {
 	c.JSON(http.StatusOK, analysis)
 }
 
-
 // Demand Sensing & Smart Inventory Replenishment
 func (h *Handler) DemandSensing(c *gin.Context) {
 	_, companyID, _ := middleware.GetUserContext(c)

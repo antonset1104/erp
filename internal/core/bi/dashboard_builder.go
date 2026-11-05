@@ -187,10 +187,10 @@ func computeWidgetData(db *gorm.DB, w *BIWidget, companyID uint) {
 			totalRev = 46020000.0 // nominal fallback
 		}
 		w.DataPayload = map[string]interface{}{
-			"value":       totalRev,
-			"formatted":   fmt.Sprintf("IDR %.2f", totalRev),
-			"trend":       "+14.2% MoM",
-			"period":      "2026-YTD",
+			"value":         totalRev,
+			"formatted":     fmt.Sprintf("IDR %.2f", totalRev),
+			"trend":         "+14.2% MoM",
+			"period":        "2026-YTD",
 			"series_labels": []string{"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"},
 			"series_values": []float64{totalRev * 0.12, totalRev * 0.15, totalRev * 0.18, totalRev * 0.22, totalRev * 0.25, totalRev * 0.08},
 		}
@@ -228,8 +228,8 @@ func computeWidgetData(db *gorm.DB, w *BIWidget, companyID uint) {
 
 	case "manufacturing_efficiency":
 		w.DataPayload = map[string]interface{}{
-			"oee_pct":       84.5,
-			"scrap_rate":    1.2,
+			"oee_pct":         84.5,
+			"scrap_rate":      1.2,
 			"active_mo_count": 2,
 		}
 

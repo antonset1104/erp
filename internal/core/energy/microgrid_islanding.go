@@ -12,10 +12,10 @@ import (
 // MicrogridTelemetry represents sub-second electrical grid telemetry
 type MicrogridTelemetry struct {
 	FacilityID           string    `json:"facility_id"`
-	GridFrequencyHz      float64   `json:"grid_frequency_hz"`      // Nominal 50.00 Hz
-	GridVoltageKV        float64   `json:"grid_voltage_kv"`        // Nominal 20.00 kV
+	GridFrequencyHz      float64   `json:"grid_frequency_hz"` // Nominal 50.00 Hz
+	GridVoltageKV        float64   `json:"grid_voltage_kv"`   // Nominal 20.00 kV
 	SolarGenerationKW    float64   `json:"solar_generation_kw"`
-	BESSChargePct        float64   `json:"bess_charge_percent"`    // Battery State of Charge
+	BESSChargePct        float64   `json:"bess_charge_percent"` // Battery State of Charge
 	ActiveDemandLoadKW   float64   `json:"active_demand_load_kw"`
 	GridTieBreakerStatus string    `json:"grid_tie_breaker_status"` // "CLOSED_GRID_TIED", "OPEN_ISLANDED"
 	Timestamp            time.Time `json:"timestamp"`
@@ -23,27 +23,27 @@ type MicrogridTelemetry struct {
 
 // IslandingTriggerEvent models autonomous disconnection from main grid
 type IslandingTriggerEvent struct {
-	EventID              string    `json:"event_id"`
-	FacilityID           string    `json:"facility_id"`
-	TriggerCause         string    `json:"trigger_cause"`         // "FREQUENCY_UNDER_DEVIATION", "VOLTAGE_SAG_SAG", "BLACKOUT"
-	DetectedFrequencyHz  float64   `json:"detected_frequency_hz"`
-	DetectedVoltageKV    float64   `json:"detected_voltage_kv"`
-	IslandingLatencyMS   float64   `json:"islanding_latency_ms"`  // e.g. 18.2 ms (IEC 61850 Goose trip)
-	NewOperatingMode     string    `json:"new_operating_mode"`    // "ISLANDED_AUTONOMOUS"
-	IslandedAt           time.Time `json:"islanded_at"`
+	EventID             string    `json:"event_id"`
+	FacilityID          string    `json:"facility_id"`
+	TriggerCause        string    `json:"trigger_cause"` // "FREQUENCY_UNDER_DEVIATION", "VOLTAGE_SAG_SAG", "BLACKOUT"
+	DetectedFrequencyHz float64   `json:"detected_frequency_hz"`
+	DetectedVoltageKV   float64   `json:"detected_voltage_kv"`
+	IslandingLatencyMS  float64   `json:"islanding_latency_ms"` // e.g. 18.2 ms (IEC 61850 Goose trip)
+	NewOperatingMode    string    `json:"new_operating_mode"`   // "ISLANDED_AUTONOMOUS"
+	IslandedAt          time.Time `json:"islanded_at"`
 }
 
 // LoadSheddingDispatch represents OpenADR 2.0b prioritized load shedding
 type LoadSheddingDispatch struct {
-	DispatchID           string    `json:"dispatch_id"`
-	FacilityID           string    `json:"facility_id"`
-	ProtocolStandard     string    `json:"protocol_standard"` // "OpenADR_2.0b_DemandResponse"
-	Tier1CriticalLoadKW  float64   `json:"tier1_critical_load_kw"` // Reaktor Kimia, Cleanrooms, Server MES (100% Protected)
-	Tier2SheddableLoadKW float64   `json:"tier2_sheddable_load_kw"` // HVAC Office, Forklift Chargers (Shed)
-	TotalLoadShedKW      float64   `json:"total_load_shed_kw"`
-	EstimatedSavedCostUSD float64  `json:"estimated_saved_cost_usd"`
-	MESThrottledOrders   []string  `json:"mes_throttled_orders"`
-	DispatchedAt         time.Time `json:"dispatched_at"`
+	DispatchID            string    `json:"dispatch_id"`
+	FacilityID            string    `json:"facility_id"`
+	ProtocolStandard      string    `json:"protocol_standard"`       // "OpenADR_2.0b_DemandResponse"
+	Tier1CriticalLoadKW   float64   `json:"tier1_critical_load_kw"`  // Reaktor Kimia, Cleanrooms, Server MES (100% Protected)
+	Tier2SheddableLoadKW  float64   `json:"tier2_sheddable_load_kw"` // HVAC Office, Forklift Chargers (Shed)
+	TotalLoadShedKW       float64   `json:"total_load_shed_kw"`
+	EstimatedSavedCostUSD float64   `json:"estimated_saved_cost_usd"`
+	MESThrottledOrders    []string  `json:"mes_throttled_orders"`
+	DispatchedAt          time.Time `json:"dispatched_at"`
 }
 
 // MicrogridVault thread-safe store
@@ -221,10 +221,10 @@ func RegisterMicrogridRoutes(r *gin.RouterGroup) {
 
 		mg.POST("/dispatch-load-shedding", func(c *gin.Context) {
 			var req struct {
-				FacilityID             string  `json:"facility_id" binding:"required"`
-				Tier1CriticalLoadKW    float64 `json:"tier1_critical_load_kw" binding:"required"`
-				Tier2SheddableLoadKW   float64 `json:"tier2_sheddable_load_kw" binding:"required"`
-				HourlyDowntimeLossUSD  float64 `json:"hourly_downtime_loss_usd" binding:"required"`
+				FacilityID            string  `json:"facility_id" binding:"required"`
+				Tier1CriticalLoadKW   float64 `json:"tier1_critical_load_kw" binding:"required"`
+				Tier2SheddableLoadKW  float64 `json:"tier2_sheddable_load_kw" binding:"required"`
+				HourlyDowntimeLossUSD float64 `json:"hourly_downtime_loss_usd" binding:"required"`
 			}
 			if err := c.ShouldBindJSON(&req); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

@@ -29,15 +29,15 @@ type CustomerBehavioralCreditProfile struct {
 
 // TradeCreditInsuranceCoverage represents external underwriter policy binding
 type TradeCreditInsuranceCoverage struct {
-	BindingID             string    `json:"binding_id"`
-	CustomerID            string    `json:"customer_id"`
-	PolicyNumber          string    `json:"policy_number"`
-	UnderwriterName       string    `json:"underwriter_name"` // "Allianz Trade (Euler Hermes)", "Atradius", "PT Askrindo"
-	InsuredLimitUSD       float64   `json:"insured_limit_usd"`
-	CoverageRatioPercent  float64   `json:"coverage_ratio_percent"` // e.g. 90.0%
-	MaxDeductibleUSD      float64   `json:"max_deductible_usd"`
-	PolicyStatus          string    `json:"policy_status"` // "ACTIVE_POLICY_BOUND", "SUSPENDED"
-	BoundAt               time.Time `json:"bound_at"`
+	BindingID            string    `json:"binding_id"`
+	CustomerID           string    `json:"customer_id"`
+	PolicyNumber         string    `json:"policy_number"`
+	UnderwriterName      string    `json:"underwriter_name"` // "Allianz Trade (Euler Hermes)", "Atradius", "PT Askrindo"
+	InsuredLimitUSD      float64   `json:"insured_limit_usd"`
+	CoverageRatioPercent float64   `json:"coverage_ratio_percent"` // e.g. 90.0%
+	MaxDeductibleUSD     float64   `json:"max_deductible_usd"`
+	PolicyStatus         string    `json:"policy_status"` // "ACTIVE_POLICY_BOUND", "SUSPENDED"
+	BoundAt              time.Time `json:"bound_at"`
 }
 
 // OrderCreditHoldAssessment represents the real-time order clearance decision

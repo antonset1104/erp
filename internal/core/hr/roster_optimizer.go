@@ -43,10 +43,10 @@ type RosterEmployee struct {
 
 // ShiftRequirement defines staffing needs per shift.
 type ShiftRequirement struct {
-	ShiftCode         ShiftCode `json:"shift_code"`
-	RequiredOperators int       `json:"required_operators"`
-	RequiredSeniors   int       `json:"required_seniors"`
-	RequiredSupervisors int     `json:"required_supervisors"`
+	ShiftCode           ShiftCode `json:"shift_code"`
+	RequiredOperators   int       `json:"required_operators"`
+	RequiredSeniors     int       `json:"required_seniors"`
+	RequiredSupervisors int       `json:"required_supervisors"`
 }
 
 // ShiftAssignment represents a scheduled shift for an employee.

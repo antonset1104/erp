@@ -21,7 +21,7 @@ type HelpdeskTeam struct {
 type HelpdeskTicket struct {
 	models.ModelBase
 	TicketNumber string        `gorm:"size:64;not null;uniqueIndex" json:"ticket_number"` // e.g. TICKET/2026/00001
-	Name         string        `gorm:"size:255;not null" json:"name"`                    // Subject / title
+	Name         string        `gorm:"size:255;not null" json:"name"`                     // Subject / title
 	TeamID       *uint         `gorm:"index" json:"team_id,omitempty"`
 	Team         *HelpdeskTeam `gorm:"foreignKey:TeamID" json:"team,omitempty"`
 	PartnerID    *uint         `gorm:"index" json:"partner_id,omitempty"`
@@ -31,9 +31,9 @@ type HelpdeskTicket struct {
 	PartnerPhone string        `gorm:"size:64" json:"partner_phone,omitempty"`
 	UserID       *uint         `gorm:"index" json:"user_id,omitempty"` // Assigned agent
 	User         *base.User    `gorm:"foreignKey:UserID" json:"user,omitempty"`
-	Priority     string        `gorm:"size:8;default:'1';index" json:"priority"`           // "0" Low, "1" Medium, "2" High, "3" Urgent
-	Category     string        `gorm:"size:32;default:'technical';index" json:"category"`  // "technical", "billing", "inquiry", "warranty"
-	Stage        string        `gorm:"size:32;default:'new';index" json:"stage"`           // "new", "in_progress", "waiting", "solved", "cancelled"
+	Priority     string        `gorm:"size:8;default:'1';index" json:"priority"`          // "0" Low, "1" Medium, "2" High, "3" Urgent
+	Category     string        `gorm:"size:32;default:'technical';index" json:"category"` // "technical", "billing", "inquiry", "warranty"
+	Stage        string        `gorm:"size:32;default:'new';index" json:"stage"`          // "new", "in_progress", "waiting", "solved", "cancelled"
 	Description  string        `gorm:"type:text" json:"description"`
 	Resolution   string        `gorm:"type:text" json:"resolution,omitempty"`
 	CloseDate    string        `gorm:"size:32" json:"close_date,omitempty"`

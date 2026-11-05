@@ -46,9 +46,9 @@ type PackedItemCoord struct {
 }
 
 type PackOptimizationRequest struct {
-	PickingRef    string            `json:"picking_ref"` // e.g. WH/OUT/00001
-	ContainerType string            `json:"container_type"` // EURO_PALLET (default)
-	Items         []PackItemInput   `json:"items" binding:"required,dive"`
+	PickingRef    string          `json:"picking_ref"`    // e.g. WH/OUT/00001
+	ContainerType string          `json:"container_type"` // EURO_PALLET (default)
+	Items         []PackItemInput `json:"items" binding:"required,dive"`
 }
 
 type PackOptimizationResponse struct {
@@ -112,11 +112,11 @@ func Optimize3DPacking(req *PackOptimizationRequest) *PackOptimizationResponse {
 
 	// Expand items into single units and sort: non-fragile heavy first, fragile last
 	type unitItem struct {
-		code      string
-		name      string
-		l, w, h   float64
-		weight    float64
-		fragile   bool
+		code    string
+		name    string
+		l, w, h float64
+		weight  float64
+		fragile bool
 	}
 
 	var units []unitItem

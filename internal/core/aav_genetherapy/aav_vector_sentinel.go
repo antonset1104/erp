@@ -15,16 +15,16 @@ import (
 // AAVVectorTelemetry captures continuous gene therapy adeno-associated virus (AAV) vector purification under FDA 21 CFR Part 610 & ICH Q5A
 type AAVVectorTelemetry struct {
 	TelemetryID                string    `json:"telemetry_id"`
-	BatchID                    string    `json:"batch_id"`                             // "BATCH-AAV9-SMA-CLINICAL-008"
-	BioreactorLineID           string    `json:"bioreactor_line_id"`                  // "LINE-PERFUSION-AAV-02"
-	ViralVectorSerotype        string    `json:"viral_vector_serotype"`                // "AAV9"
-	UvAbsorbanceRatioA260A280  float64   `json:"uv_absorbance_ratio_a260_a280"`        // e.g. 1.08 (full ~1.30-1.35, empty ~0.60-0.70)
-	FullCapsidPercentage       float64   `json:"full_capsid_percentage"`               // e.g. 62.5% (clinical release spec > 75.0%)
-	HollowFiberShearRatePerSec float64   `json:"hollow_fiber_shear_rate_per_sec"`       // e.g. 4850.0 s^-1 (capsid rupture threshold > 4000 s^-1)
-	TransmembranePressureBar   float64   `json:"transmembrane_pressure_bar"`           // e.g. 1.45 bar (safe operating limit < 1.0 bar)
-	ElutionConductivityMsPerCm float64   `json:"elution_conductivity_ms_per_cm"`       // e.g. 38.5 mS/cm
-	DlsMeanParticleDiameterNm  float64   `json:"dls_mean_particle_diameter_nm"`        // e.g. 26.2 nm (nominal AAV2/8/9 capsid ~25-27 nm)
-	CapsidAggregationIndexPct  float64   `json:"capsid_aggregation_index_pct"`         // e.g. 3.8%
+	BatchID                    string    `json:"batch_id"`                        // "BATCH-AAV9-SMA-CLINICAL-008"
+	BioreactorLineID           string    `json:"bioreactor_line_id"`              // "LINE-PERFUSION-AAV-02"
+	ViralVectorSerotype        string    `json:"viral_vector_serotype"`           // "AAV9"
+	UvAbsorbanceRatioA260A280  float64   `json:"uv_absorbance_ratio_a260_a280"`   // e.g. 1.08 (full ~1.30-1.35, empty ~0.60-0.70)
+	FullCapsidPercentage       float64   `json:"full_capsid_percentage"`          // e.g. 62.5% (clinical release spec > 75.0%)
+	HollowFiberShearRatePerSec float64   `json:"hollow_fiber_shear_rate_per_sec"` // e.g. 4850.0 s^-1 (capsid rupture threshold > 4000 s^-1)
+	TransmembranePressureBar   float64   `json:"transmembrane_pressure_bar"`      // e.g. 1.45 bar (safe operating limit < 1.0 bar)
+	ElutionConductivityMsPerCm float64   `json:"elution_conductivity_ms_per_cm"`  // e.g. 38.5 mS/cm
+	DlsMeanParticleDiameterNm  float64   `json:"dls_mean_particle_diameter_nm"`   // e.g. 26.2 nm (nominal AAV2/8/9 capsid ~25-27 nm)
+	CapsidAggregationIndexPct  float64   `json:"capsid_aggregation_index_pct"`    // e.g. 3.8%
 	RecordedAt                 time.Time `json:"recorded_at"`
 }
 
@@ -33,8 +33,8 @@ type AAVAssessment struct {
 	AssessmentID                   string    `json:"assessment_id"`
 	BatchID                        string    `json:"batch_id"`
 	FullCapsidDeficitPct           float64   `json:"full_capsid_deficit_pct"`
-	ViralCapsidPackagingPurity     string    `json:"viral_capsid_packaging_purity"`      // "HIGH_FULL_CAPSID_CLINICAL_GRADE", "SUB_OPTIMAL_PACKAGING_WARNING", "CRITICAL_EMPTY_CAPSID_IMMUNOGENICITY_HAZARD"
-	CapsidShearLysisRisk           string    `json:"capsid_shear_lysis_risk"`            // "LAMINAR_SHEAR_SAFE", "ELEVATED_MEMBRANE_SHEAR_WARNING", "IRREVERSIBLE_CAPSID_SHEAR_LYSIS"
+	ViralCapsidPackagingPurity     string    `json:"viral_capsid_packaging_purity"` // "HIGH_FULL_CAPSID_CLINICAL_GRADE", "SUB_OPTIMAL_PACKAGING_WARNING", "CRITICAL_EMPTY_CAPSID_IMMUNOGENICITY_HAZARD"
+	CapsidShearLysisRisk           string    `json:"capsid_shear_lysis_risk"`       // "LAMINAR_SHEAR_SAFE", "ELEVATED_MEMBRANE_SHEAR_WARNING", "IRREVERSIBLE_CAPSID_SHEAR_LYSIS"
 	AEXConductivityStepTrimMandate bool      `json:"aex_conductivity_step_trim_mandate"`
 	MembraneTMPDampeningMandate    bool      `json:"membrane_tmp_dampening_mandate"`
 	AuditDigest                    string    `json:"audit_digest"`
@@ -43,13 +43,13 @@ type AAVAssessment struct {
 
 // AAVMitigationAction models Anion-Exchange (AEX) step conductivity trim, tangential flow TMP throttling, and empty capsid diversion
 type AAVMitigationAction struct {
-	ActionID                             string    `json:"action_id"`
-	BatchID                              string    `json:"batch_id"`
-	ModulatedAEXElutionConductivityMsCm  float64   `json:"modulated_aex_elution_conductivity_ms_cm"`
-	CommandedTMPSetpointBar              float64   `json:"commanded_tmp_setpoint_bar"`
-	DivertedImpurityVolumeLiters         float64   `json:"diverted_impurity_volume_liters"`
-	AvoidedGeneTherapyBatchLossUSD       float64   `json:"avoided_gene_therapy_batch_loss_usd"`
-	ActionTimestamp                      time.Time `json:"action_timestamp"`
+	ActionID                            string    `json:"action_id"`
+	BatchID                             string    `json:"batch_id"`
+	ModulatedAEXElutionConductivityMsCm float64   `json:"modulated_aex_elution_conductivity_ms_cm"`
+	CommandedTMPSetpointBar             float64   `json:"commanded_tmp_setpoint_bar"`
+	DivertedImpurityVolumeLiters        float64   `json:"diverted_impurity_volume_liters"`
+	AvoidedGeneTherapyBatchLossUSD      float64   `json:"avoided_gene_therapy_batch_loss_usd"`
+	ActionTimestamp                     time.Time `json:"action_timestamp"`
 }
 
 // AAVVault thread-safe in-memory store
@@ -153,7 +153,7 @@ func (v *AAVVault) TriggerConductivityTrimAndTMPDamping(batchID string) (AAVMiti
 	divertedImpurity := 0.0
 
 	if asm.AEXConductivityStepTrimMandate {
-		condTrim = 42.0 // sharp step conductivity shift to desorb empty capsids before full capsids elute
+		condTrim = 42.0         // sharp step conductivity shift to desorb empty capsids before full capsids elute
 		divertedImpurity = 14.5 // divert pre-peak empty fraction volume to quarantine drain
 	}
 	if asm.MembraneTMPDampeningMandate {

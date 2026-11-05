@@ -12,18 +12,18 @@ import (
 
 // SupplierHumanRightsProfile encapsulates social audit and modern slavery diligence metrics.
 type SupplierHumanRightsProfile struct {
-	SupplierID             string  `json:"supplier_id"` // e.g. "SUP-GARMENT-BD-01"
-	SupplierName           string  `json:"supplier_name"`
-	FactoryLocation        string  `json:"factory_location"`
-	CountryCode            string  `json:"country_code"`
-	TierLevel              int     `json:"tier_level"` // 1 = Direct Tier-1, 2 = Fabric mill, 3 = Raw farm
-	SocialAuditStandard    string  `json:"social_audit_standard"` // "SMETA_4_PILLAR", "SA8000", "WRAP_GOLD"
-	LastAuditDate          string  `json:"last_audit_date"`
-	ForcedLaborRiskScore   float64 `json:"forced_labor_risk_score"` // 0.0 - 100.0 (Higher = worse)
-	ChildLaborRiskScore    float64 `json:"child_labor_risk_score"`
-	FairWageScore          float64 `json:"fair_wage_score"` // 0.0 - 100.0 (Higher = better)
+	SupplierID              string  `json:"supplier_id"` // e.g. "SUP-GARMENT-BD-01"
+	SupplierName            string  `json:"supplier_name"`
+	FactoryLocation         string  `json:"factory_location"`
+	CountryCode             string  `json:"country_code"`
+	TierLevel               int     `json:"tier_level"`            // 1 = Direct Tier-1, 2 = Fabric mill, 3 = Raw farm
+	SocialAuditStandard     string  `json:"social_audit_standard"` // "SMETA_4_PILLAR", "SA8000", "WRAP_GOLD"
+	LastAuditDate           string  `json:"last_audit_date"`
+	ForcedLaborRiskScore    float64 `json:"forced_labor_risk_score"` // 0.0 - 100.0 (Higher = worse)
+	ChildLaborRiskScore     float64 `json:"child_labor_risk_score"`
+	FairWageScore           float64 `json:"fair_wage_score"` // 0.0 - 100.0 (Higher = better)
 	CompositeCSDDDRiskScore float64 `json:"composite_csddd_risk_score"`
-	ComplianceStanding     string  `json:"compliance_standing"` // "LOW_RISK_APPROVED", "ELEVATED_AUDIT_REQUIRED", "HIGH_RISK_SUSPENDED"
+	ComplianceStanding      string  `json:"compliance_standing"` // "LOW_RISK_APPROVED", "ELEVATED_AUDIT_REQUIRED", "HIGH_RISK_SUSPENDED"
 }
 
 // SupplyChainGrievanceReport captures labor grievance notifications from factory workers or NGOs.
@@ -41,17 +41,17 @@ type SupplyChainGrievanceReport struct {
 
 // CSDDDAnnualDeclaration formalizes the statutory disclosure required by EU and German LkSG authorities.
 type CSDDDAnnualDeclaration struct {
-	DeclarationID              string                       `json:"declaration_id"`
-	ReportingYear              int                          `json:"reporting_year"`
-	EnterpriseName             string                       `json:"enterprise_name"`
-	TotalSuppliersAudited      int                          `json:"total_suppliers_audited"`
-	HighRiskSuppliersCount     int                          `json:"high_risk_suppliers_count"`
-	GrievancesInvestigatedCount int                         `json:"grievances_investigated_count"`
-	RemediationSuccessRatePct  float64                      `json:"remediation_success_rate_pct"`
-	StatutoryFineExposureUSD   float64                      `json:"statutory_fine_exposure_usd"`
-	AuditComplianceStatus      string                       `json:"audit_compliance_status"` // "FULL_EU_CSDDD_COMPLIANCE", "ACTION_PLAN_IN_PROGRESS"
-	MonitoredSuppliers         []SupplierHumanRightsProfile `json:"monitored_suppliers"`
-	GeneratedAt                string                       `json:"generated_at"`
+	DeclarationID               string                       `json:"declaration_id"`
+	ReportingYear               int                          `json:"reporting_year"`
+	EnterpriseName              string                       `json:"enterprise_name"`
+	TotalSuppliersAudited       int                          `json:"total_suppliers_audited"`
+	HighRiskSuppliersCount      int                          `json:"high_risk_suppliers_count"`
+	GrievancesInvestigatedCount int                          `json:"grievances_investigated_count"`
+	RemediationSuccessRatePct   float64                      `json:"remediation_success_rate_pct"`
+	StatutoryFineExposureUSD    float64                      `json:"statutory_fine_exposure_usd"`
+	AuditComplianceStatus       string                       `json:"audit_compliance_status"` // "FULL_EU_CSDDD_COMPLIANCE", "ACTION_PLAN_IN_PROGRESS"
+	MonitoredSuppliers          []SupplierHumanRightsProfile `json:"monitored_suppliers"`
+	GeneratedAt                 string                       `json:"generated_at"`
 }
 
 // EvaluateSupplierRequest holds parameters to evaluate a vendor's social responsibility risk.

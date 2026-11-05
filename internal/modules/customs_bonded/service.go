@@ -141,9 +141,9 @@ func (s *service) CreateCustomsDocument(req CreateCustomsDocumentRequest, compan
 	// Log to Chatter
 	if s.chatterSvc != nil {
 		_ = s.chatterSvc.PostMessage(&chatter.MailMessage{
-			ModelName:   "customs.document",
-			ResID:       doc.ID,
-			AuthorName:  "Customs CEISA 4.0",
+			ModelName:  "customs.document",
+			ResID:      doc.ID,
+			AuthorName: "Customs CEISA 4.0",
 			Body: fmt.Sprintf("Dokumen Pabean %s (%s) No. Aju %s didaftarkan. Total CIF: USD %.2f (Rp %.2f), BM Ditangguhkan: Rp %.2f",
 				doc.DocumentType, doc.RegistrationNumber, doc.SubmissionNumber, doc.TotalCIFUSD, doc.TotalCIFIDR, doc.DutyAmount),
 			MessageType: "comment",
@@ -252,9 +252,9 @@ func (s *service) ApproveSPPB(id uint, req ApproveSPPBRequest) (*CustomsDocument
 	// Log to Chatter
 	if s.chatterSvc != nil {
 		_ = s.chatterSvc.PostMessage(&chatter.MailMessage{
-			ModelName:   "customs.document",
-			ResID:       doc.ID,
-			AuthorName:  "Customs CEISA 4.0",
+			ModelName:  "customs.document",
+			ResID:      doc.ID,
+			AuthorName: "Customs CEISA 4.0",
 			Body: fmt.Sprintf("SPPB Bea Cukai Terbit: No. %s Tanggal %s. Barang resmi masuk/keluar Kawasan Berikat dan dimutasi ke IT Inventory DJBC.",
 				req.SPPBNumber, sppbDate.Format("02-01-2006")),
 			MessageType: "comment",
@@ -304,15 +304,15 @@ func (s *service) GetITInventoryBookReport(companyID uint, bookCategory string, 
 
 	// Agregasi per produk
 	type agg struct {
-		code      string
-		name      string
-		uom       string
-		beg       float64
-		in        float64
-		out       float64
-		end       float64
-		physical  float64
-		hasBeg    bool
+		code     string
+		name     string
+		uom      string
+		beg      float64
+		in       float64
+		out      float64
+		end      float64
+		physical float64
+		hasBeg   bool
 	}
 	mMap := make(map[uint]*agg)
 

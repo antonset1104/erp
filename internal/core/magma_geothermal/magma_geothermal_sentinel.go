@@ -15,21 +15,21 @@ import (
 type MagmaGeothermalTelemetry struct {
 	TelemetryID               string    `json:"telemetry_id"`
 	WellboreID                string    `json:"wellbore_id"`
-	WellDepthMeters           float64   `json:"well_depth_meters"`              // 4500.0 - 5200.0 m
-	BottomHoleTempC           float64   `json:"bottom_hole_temp_c"`             // limit < 480.0°C (magma intrusion > 500°C)
-	SupercriticalPressureBar  float64   `json:"supercritical_pressure_bar"`     // limit < 350.0 bar
-	CasingVonMisesStressMpa   float64   `json:"casing_von_mises_stress_mpa"`    // yield limit < 550.0 MPa
-	DrillstringChloridePpm    float64   `json:"drillstring_chloride_ppm"`       // threshold > 2500 ppm
-	HydrogenSulfideH2sPpm     float64   `json:"hydrogen_sulfide_h2s_ppm"`       // threshold > 150 ppm
-	DrillingMudReturnTempC    float64   `json:"drilling_mud_return_temp_c"`     // nominal 80 - 140°C
-	ThermalExpansionStrainPct float64   `json:"thermal_expansion_strain_pct"`   // thermal strain > 1.25%
+	WellDepthMeters           float64   `json:"well_depth_meters"`            // 4500.0 - 5200.0 m
+	BottomHoleTempC           float64   `json:"bottom_hole_temp_c"`           // limit < 480.0°C (magma intrusion > 500°C)
+	SupercriticalPressureBar  float64   `json:"supercritical_pressure_bar"`   // limit < 350.0 bar
+	CasingVonMisesStressMpa   float64   `json:"casing_von_mises_stress_mpa"`  // yield limit < 550.0 MPa
+	DrillstringChloridePpm    float64   `json:"drillstring_chloride_ppm"`     // threshold > 2500 ppm
+	HydrogenSulfideH2sPpm     float64   `json:"hydrogen_sulfide_h2s_ppm"`     // threshold > 150 ppm
+	DrillingMudReturnTempC    float64   `json:"drilling_mud_return_temp_c"`   // nominal 80 - 140°C
+	ThermalExpansionStrainPct float64   `json:"thermal_expansion_strain_pct"` // thermal strain > 1.25%
 	Timestamp                 time.Time `json:"timestamp"`
 }
 
 // MagmaGeothermalAssessment models supercritical steam influx, casing buckling risk, and API Spec 5CT compliance
 type MagmaGeothermalAssessment struct {
 	AssessmentID                     string    `json:"assessment_id"`
-	WellboreID                      string    `json:"wellbore_id"`
+	WellboreID                       string    `json:"wellbore_id"`
 	WellboreIntegrityStatus          string    `json:"wellbore_integrity_status"` // SUPERCRITICAL_EQUILIBRIUM, THERMAL_EMBRITTLEMENT_WARNING, MAGMATIC_SUPERHEATED_BLOWOUT_CRITICAL
 	CasingBucklingRisk               string    `json:"casing_buckling_risk"`      // ELASTIC_STABLE, PLASTIC_DEFORMATION_BUCKLING_HAZARD
 	StressYieldMarginPct             float64   `json:"stress_yield_margin_pct"`
@@ -41,13 +41,13 @@ type MagmaGeothermalAssessment struct {
 
 // MagmaGeothermalMitigationAction models heavy quench mud influx suppression, telescopic slip joint stroke, and N2 purge
 type MagmaGeothermalMitigationAction struct {
-	ActionID                    string    `json:"action_id"`
-	WellboreID                  string    `json:"wellbore_id"`
-	CommandedQuenchMudFlowLpm   float64   `json:"commanded_quench_mud_flow_lpm"`
-	SlipJointAxialStrokeMm      float64   `json:"slip_joint_axial_stroke_mm"`
-	NitrogenPurgePressureBar    float64   `json:"nitrogen_purge_pressure_bar"`
-	AvoidedMagmaBlowoutLossUSD  float64   `json:"avoided_magma_blowout_loss_usd"`
-	ExecutedAt                  time.Time `json:"executed_at"`
+	ActionID                   string    `json:"action_id"`
+	WellboreID                 string    `json:"wellbore_id"`
+	CommandedQuenchMudFlowLpm  float64   `json:"commanded_quench_mud_flow_lpm"`
+	SlipJointAxialStrokeMm     float64   `json:"slip_joint_axial_stroke_mm"`
+	NitrogenPurgePressureBar   float64   `json:"nitrogen_purge_pressure_bar"`
+	AvoidedMagmaBlowoutLossUSD float64   `json:"avoided_magma_blowout_loss_usd"`
+	ExecutedAt                 time.Time `json:"executed_at"`
 }
 
 // MagmaGeothermalVault manages deep-earth magma wellbore telemetry and emergency blowout mitigation
@@ -117,7 +117,7 @@ func (v *MagmaGeothermalVault) EvaluateBlowoutAndCasingBuckling(wellboreID strin
 
 	assessment := MagmaGeothermalAssessment{
 		AssessmentID:                     fmt.Sprintf("ASM-MAGMA-%d", time.Now().UnixNano()%1000000),
-		WellboreID:                      wellboreID,
+		WellboreID:                       wellboreID,
 		WellboreIntegrityStatus:          wellboreStatus,
 		CasingBucklingRisk:               bucklingRisk,
 		StressYieldMarginPct:             excessStress,

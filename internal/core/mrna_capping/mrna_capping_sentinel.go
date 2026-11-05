@@ -15,41 +15,41 @@ import (
 // MRNASynthesisTelemetry captures continuous in vitro transcription (IVT) mRNA capping & quality dynamics under FDA 21 CFR Part 211 & ISO 20387
 type MRNASynthesisTelemetry struct {
 	TelemetryID                  string    `json:"telemetry_id"`
-	BatchID                      string    `json:"batch_id"`                                // "BATCH-MRNA-ONCOLOGY-VACC-004"
-	BioreactorLineID             string    `json:"bioreactor_line_id"`                      // "LINE-IVT-MICROFLUIDIC-01"
-	TargetAntigenCode            string    `json:"target_antigen_code"`                     // "AG-NEOANTIGEN-MELANOMA"
-	Cap1MethylationEfficiencyPct float64   `json:"cap1_methylation_efficiency_pct"`         // e.g. 88.5% (release spec > 95.0%)
-	PolyATailMeanLengthNt        float64   `json:"poly_a_tail_mean_length_nt"`              // e.g. 115.0 nt (optimal 100-120 nt)
-	DoubleStrandedRnaFractionPpm float64   `json:"double_stranded_rna_fraction_ppm"`         // e.g. 48.5 ppm (spec limit < 20.0 ppm)
-	SamCofactorConcentrationMm   float64   `json:"sam_cofactor_concentration_mm"`           // e.g. 0.42 mM (nominal 0.80 mM)
-	IvtReactionTempC             float64   `json:"ivt_reaction_temp_c"`                     // e.g. 37.8°C
-	NtpConsumptionRateMmPerHr    float64   `json:"ntp_consumption_rate_mm_per_hr"`          // e.g. 14.2 mM/hr
-	TranscriptIntegrityRin       float64   `json:"transcript_integrity_rin"`                // e.g. 8.4
+	BatchID                      string    `json:"batch_id"`                         // "BATCH-MRNA-ONCOLOGY-VACC-004"
+	BioreactorLineID             string    `json:"bioreactor_line_id"`               // "LINE-IVT-MICROFLUIDIC-01"
+	TargetAntigenCode            string    `json:"target_antigen_code"`              // "AG-NEOANTIGEN-MELANOMA"
+	Cap1MethylationEfficiencyPct float64   `json:"cap1_methylation_efficiency_pct"`  // e.g. 88.5% (release spec > 95.0%)
+	PolyATailMeanLengthNt        float64   `json:"poly_a_tail_mean_length_nt"`       // e.g. 115.0 nt (optimal 100-120 nt)
+	DoubleStrandedRnaFractionPpm float64   `json:"double_stranded_rna_fraction_ppm"` // e.g. 48.5 ppm (spec limit < 20.0 ppm)
+	SamCofactorConcentrationMm   float64   `json:"sam_cofactor_concentration_mm"`    // e.g. 0.42 mM (nominal 0.80 mM)
+	IvtReactionTempC             float64   `json:"ivt_reaction_temp_c"`              // e.g. 37.8°C
+	NtpConsumptionRateMmPerHr    float64   `json:"ntp_consumption_rate_mm_per_hr"`   // e.g. 14.2 mM/hr
+	TranscriptIntegrityRin       float64   `json:"transcript_integrity_rin"`         // e.g. 8.4
 	RecordedAt                   time.Time `json:"recorded_at"`
 }
 
 // MRNASynthesisAssessment evaluates translational Cap-1 efficiency, innate immune reactogenicity, and dsRNA toxicity
 type MRNASynthesisAssessment struct {
-	AssessmentID                 string    `json:"assessment_id"`
-	BatchID                      string    `json:"batch_id"`
-	Cap1DeficitPct               float64   `json:"cap1_deficit_pct"`
-	CappingQualityStatus         string    `json:"capping_quality_status"`          // "HIGH_TRANSLATIONAL_CAP1_GRADE", "SUB_OPTIMAL_CAPPING_WARNING", "IMMUNOGENIC_UNCAPPED_MESSENGER_HAZARD"
-	DoubleStrandedRnaRisk        string    `json:"double_stranded_rna_risk"`         // "LOW_IMMUNOGENICITY_CLEAN", "ELEVATED_DSRNA_WARNING", "CRITICAL_INFLAMMATORY_DSRNA_REJECT"
-	SamMicroInfusionMandate      bool      `json:"sam_micro_infusion_mandate"`
-	ReactionTempStepDownMandate  bool      `json:"reaction_temp_step_down_mandate"`
-	AuditDigest                  string    `json:"audit_digest"`
-	EvaluatedAt                  time.Time `json:"evaluated_at"`
+	AssessmentID                string    `json:"assessment_id"`
+	BatchID                     string    `json:"batch_id"`
+	Cap1DeficitPct              float64   `json:"cap1_deficit_pct"`
+	CappingQualityStatus        string    `json:"capping_quality_status"`   // "HIGH_TRANSLATIONAL_CAP1_GRADE", "SUB_OPTIMAL_CAPPING_WARNING", "IMMUNOGENIC_UNCAPPED_MESSENGER_HAZARD"
+	DoubleStrandedRnaRisk       string    `json:"double_stranded_rna_risk"` // "LOW_IMMUNOGENICITY_CLEAN", "ELEVATED_DSRNA_WARNING", "CRITICAL_INFLAMMATORY_DSRNA_REJECT"
+	SamMicroInfusionMandate     bool      `json:"sam_micro_infusion_mandate"`
+	ReactionTempStepDownMandate bool      `json:"reaction_temp_step_down_mandate"`
+	AuditDigest                 string    `json:"audit_digest"`
+	EvaluatedAt                 time.Time `json:"evaluated_at"`
 }
 
 // MRNAMitigationAction models S-adenosylmethionine (SAM) micro-infusion, IVT reaction temperature ramp-down, and SEC diverter trimming
 type MRNAMitigationAction struct {
-	ActionID                      string    `json:"action_id"`
-	BatchID                       string    `json:"batch_id"`
-	PulsedSamInfusionRateMlPerMin float64   `json:"pulsed_sam_infusion_rate_ml_per_min"`
-	CommandedIvtTempSetpointC     float64   `json:"commanded_ivt_temp_setpoint_c"`
-	DivertedAberrantFractionLiters float64  `json:"diverted_aberrant_fraction_liters"`
-	AvoidedMrnaBatchLossUSD       float64   `json:"avoided_mrna_batch_loss_usd"`
-	ActionTimestamp               time.Time `json:"action_timestamp"`
+	ActionID                       string    `json:"action_id"`
+	BatchID                        string    `json:"batch_id"`
+	PulsedSamInfusionRateMlPerMin  float64   `json:"pulsed_sam_infusion_rate_ml_per_min"`
+	CommandedIvtTempSetpointC      float64   `json:"commanded_ivt_temp_setpoint_c"`
+	DivertedAberrantFractionLiters float64   `json:"diverted_aberrant_fraction_liters"`
+	AvoidedMrnaBatchLossUSD        float64   `json:"avoided_mrna_batch_loss_usd"`
+	ActionTimestamp                time.Time `json:"action_timestamp"`
 }
 
 // MRNAVault thread-safe in-memory store
@@ -165,13 +165,13 @@ func (v *MRNAVault) TriggerSamInfusionAndTempRamp(batchID string) (MRNAMitigatio
 	}
 
 	action := MRNAMitigationAction{
-		ActionID:                      fmt.Sprintf("ACT-MRNA-%d", time.Now().UnixNano()%1000000),
-		BatchID:                       batchID,
-		PulsedSamInfusionRateMlPerMin: samRate,
-		CommandedIvtTempSetpointC:     targetTemp,
+		ActionID:                       fmt.Sprintf("ACT-MRNA-%d", time.Now().UnixNano()%1000000),
+		BatchID:                        batchID,
+		PulsedSamInfusionRateMlPerMin:  samRate,
+		CommandedIvtTempSetpointC:      targetTemp,
 		DivertedAberrantFractionLiters: divertedVol,
-		AvoidedMrnaBatchLossUSD:       35000000.0,
-		ActionTimestamp:               time.Now(),
+		AvoidedMrnaBatchLossUSD:        35000000.0,
+		ActionTimestamp:                time.Now(),
 	}
 
 	v.actions[batchID] = action

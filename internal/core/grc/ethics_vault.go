@@ -14,12 +14,12 @@ import (
 
 // WhistleblowerReportRequest represents the anonymous incident disclosure payload.
 type WhistleblowerReportRequest struct {
-	Category        string   `json:"category"` // "CORRUPTION_BRIBERY", "FINANCIAL_FRAUD", "ANTITRUST", "HARASSMENT", "SAFETY_VIOLATION"
-	BusinessUnit    string   `json:"business_unit"`
-	IncidentDate    string   `json:"incident_date"`
-	Narrative       string   `json:"narrative"`
-	EvidenceFiles   []string `json:"evidence_files"` // names or base64 raw evidence
-	ContactAlias    string   `json:"contact_alias"`  // optional non-identifying pseudonym
+	Category      string   `json:"category"` // "CORRUPTION_BRIBERY", "FINANCIAL_FRAUD", "ANTITRUST", "HARASSMENT", "SAFETY_VIOLATION"
+	BusinessUnit  string   `json:"business_unit"`
+	IncidentDate  string   `json:"incident_date"`
+	Narrative     string   `json:"narrative"`
+	EvidenceFiles []string `json:"evidence_files"` // names or base64 raw evidence
+	ContactAlias  string   `json:"contact_alias"`  // optional non-identifying pseudonym
 }
 
 // EvidenceDigest records the SHA-256 integrity hash for an evidence attachment.
@@ -59,13 +59,13 @@ type InvestigateCaseRequest struct {
 
 // EthicsDashboardSummary provides executive GRC metrics for the board audit committee.
 type EthicsDashboardSummary struct {
-	TotalCasesSubmitted   int            `json:"total_cases_submitted"`
-	ActiveInvestigations  int            `json:"active_investigations"`
-	SubstantiatedCases    int            `json:"substantiated_cases"`
-	ClosedCases           int            `json:"closed_cases"`
-	AverageRiskScore      float64        `json:"average_risk_score"`
+	TotalCasesSubmitted  int            `json:"total_cases_submitted"`
+	ActiveInvestigations int            `json:"active_investigations"`
+	SubstantiatedCases   int            `json:"substantiated_cases"`
+	ClosedCases          int            `json:"closed_cases"`
+	AverageRiskScore     float64        `json:"average_risk_score"`
 	CategoryDistribution map[string]int `json:"category_distribution"`
-	Cases                 []EthicsCase   `json:"cases"`
+	Cases                []EthicsCase   `json:"cases"`
 }
 
 var (
@@ -255,13 +255,13 @@ func GetEthicsDashboardLogic() EthicsDashboardSummary {
 	}
 
 	return EthicsDashboardSummary{
-		TotalCasesSubmitted:   len(cases),
-		ActiveInvestigations:  active,
-		SubstantiatedCases:    substantiated,
-		ClosedCases:           closed,
-		AverageRiskScore:      avgRisk,
+		TotalCasesSubmitted:  len(cases),
+		ActiveInvestigations: active,
+		SubstantiatedCases:   substantiated,
+		ClosedCases:          closed,
+		AverageRiskScore:     avgRisk,
 		CategoryDistribution: catMap,
-		Cases:                 cases,
+		Cases:                cases,
 	}
 }
 

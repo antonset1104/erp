@@ -14,29 +14,29 @@ import (
 
 // LH2StorageTelemetry models cryogenic liquid hydrogen storage and spin isomer monitoring
 type LH2StorageTelemetry struct {
-	TelemetryID                   string    `json:"telemetry_id"`
-	StorageTankID                 string    `json:"storage_tank_id"`                   // "TANK-CRYO-LH2-50000L-01"
-	LiquidLevelPct                float64   `json:"liquid_level_pct"`                  // e.g. 84.5%
-	TankStorageTempKelvin         float64   `json:"tank_storage_temp_kelvin"`          // e.g. 20.4 K (-252.75°C)
-	TankVaporPressureBar          float64   `json:"tank_vapor_pressure_bar"`           // e.g. 1.85 bar (normal 1.2 - 2.5 bar)
-	ParaHydrogenFraction          float64   `json:"para_hydrogen_fraction"`            // e.g. 0.92 (equilibrium at 20K is 0.998)
-	CatalystBedIronOxideHealthPct float64   `json:"catalyst_bed_iron_oxide_health_pct"` // Fe2O3 catalyst activity
-	VacuumJacketPressureMbar      float64   `json:"vacuum_jacket_pressure_mbar"`       // MLI vacuum (e.g. 3.5e-5 mbar; limit < 1e-4)
-	ReliquefactionCompressorActive bool     `json:"reliquefaction_compressor_active"`
-	RecordedAt                    time.Time `json:"recorded_at"`
+	TelemetryID                    string    `json:"telemetry_id"`
+	StorageTankID                  string    `json:"storage_tank_id"`                    // "TANK-CRYO-LH2-50000L-01"
+	LiquidLevelPct                 float64   `json:"liquid_level_pct"`                   // e.g. 84.5%
+	TankStorageTempKelvin          float64   `json:"tank_storage_temp_kelvin"`           // e.g. 20.4 K (-252.75°C)
+	TankVaporPressureBar           float64   `json:"tank_vapor_pressure_bar"`            // e.g. 1.85 bar (normal 1.2 - 2.5 bar)
+	ParaHydrogenFraction           float64   `json:"para_hydrogen_fraction"`             // e.g. 0.92 (equilibrium at 20K is 0.998)
+	CatalystBedIronOxideHealthPct  float64   `json:"catalyst_bed_iron_oxide_health_pct"` // Fe2O3 catalyst activity
+	VacuumJacketPressureMbar       float64   `json:"vacuum_jacket_pressure_mbar"`        // MLI vacuum (e.g. 3.5e-5 mbar; limit < 1e-4)
+	ReliquefactionCompressorActive bool      `json:"reliquefaction_compressor_active"`
+	RecordedAt                     time.Time `json:"recorded_at"`
 }
 
 // SpinIsomerizationAssessment models exothermic ortho-to-para conversion heat and boil-off rate
 type SpinIsomerizationAssessment struct {
-	AssessmentID                   string    `json:"assessment_id"`
-	StorageTankID                  string    `json:"storage_tank_id"`
-	ExothermicHeatReleaseRateKW    float64   `json:"exothermic_heat_release_rate_kw"`   // 527 kJ/kg conversion heat
-	ProjectedDailyBoilOffLossKg    float64   `json:"projected_daily_boil_off_loss_kg"`
-	BoilOffRatePctPerDay           float64   `json:"boil_off_rate_pct_per_day"`
-	TankPressurizationRiskLevel    string    `json:"tank_pressurization_risk_level"`    // "STABLE_EQUILIBRIUM_PARA", "ELEVATED_ORTHO_SPIN_HEAT", "CRITICAL_OVERPRESSURE_VENTING_HAZARD"
-	CatalystBedRegenerationNeeded  bool      `json:"catalyst_bed_regeneration_needed"`
-	AuditDigest                    string    `json:"audit_digest"`
-	EvaluatedAt                    time.Time `json:"evaluated_at"`
+	AssessmentID                  string    `json:"assessment_id"`
+	StorageTankID                 string    `json:"storage_tank_id"`
+	ExothermicHeatReleaseRateKW   float64   `json:"exothermic_heat_release_rate_kw"` // 527 kJ/kg conversion heat
+	ProjectedDailyBoilOffLossKg   float64   `json:"projected_daily_boil_off_loss_kg"`
+	BoilOffRatePctPerDay          float64   `json:"boil_off_rate_pct_per_day"`
+	TankPressurizationRiskLevel   string    `json:"tank_pressurization_risk_level"` // "STABLE_EQUILIBRIUM_PARA", "ELEVATED_ORTHO_SPIN_HEAT", "CRITICAL_OVERPRESSURE_VENTING_HAZARD"
+	CatalystBedRegenerationNeeded bool      `json:"catalyst_bed_regeneration_needed"`
+	AuditDigest                   string    `json:"audit_digest"`
+	EvaluatedAt                   time.Time `json:"evaluated_at"`
 }
 
 // LH2BoilOffSuppressionAction models closed-loop cold helium loop reliquefaction and zero venting
@@ -67,16 +67,16 @@ var GlobalCryoVault = &CryoVault{
 func init() {
 	// Seed demo liquid hydrogen bulk storage tank
 	GlobalCryoVault.telemetries["TANK-CRYO-LH2-50000L-01"] = LH2StorageTelemetry{
-		TelemetryID:                   "TEL-LH2-001",
-		StorageTankID:                 "TANK-CRYO-LH2-50000L-01",
-		LiquidLevelPct:                84.5,
-		TankStorageTempKelvin:         20.4,
-		TankVaporPressureBar:          1.92,
-		ParaHydrogenFraction:          0.91, // Elevated ortho-hydrogen content 9%
-		CatalystBedIronOxideHealthPct: 78.5, // Catalyst aging
-		VacuumJacketPressureMbar:      3.8e-5,
+		TelemetryID:                    "TEL-LH2-001",
+		StorageTankID:                  "TANK-CRYO-LH2-50000L-01",
+		LiquidLevelPct:                 84.5,
+		TankStorageTempKelvin:          20.4,
+		TankVaporPressureBar:           1.92,
+		ParaHydrogenFraction:           0.91, // Elevated ortho-hydrogen content 9%
+		CatalystBedIronOxideHealthPct:  78.5, // Catalyst aging
+		VacuumJacketPressureMbar:       3.8e-5,
 		ReliquefactionCompressorActive: true,
-		RecordedAt:                    time.Now(),
+		RecordedAt:                     time.Now(),
 	}
 }
 

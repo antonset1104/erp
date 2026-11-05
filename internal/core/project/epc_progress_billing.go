@@ -12,45 +12,45 @@ import (
 
 // EPCContractMilestone models macro FIDIC construction contract terms and escrow covenants
 type EPCContractMilestone struct {
-	ProjectID                    string    `json:"project_id"`
-	ProjectName                  string    `json:"project_name"`
-	ClientEmployerName           string    `json:"client_employer_name"`
-	LeadContractorName           string    `json:"lead_contractor_name"`
-	TotalContractValueUSD        float64   `json:"total_contract_value_usd"`
-	CumulativeCertifiedProgressPct float64 `json:"cumulative_certified_progress_pct"` // %
-	RetentionPercentage          float64   `json:"retention_percentage"`               // e.g. 5.0% or 10.0%
-	MobilizationAdvanceTotalUSD  float64   `json:"mobilization_advance_total_usd"`
-	AdvanceAmortizationPct       float64   `json:"advance_amortization_pct"`          // % deducted per IPC
-	EscrowAccountIBAN            string    `json:"escrow_account_iban"`
-	CreatedAt                    time.Time `json:"created_at"`
+	ProjectID                      string    `json:"project_id"`
+	ProjectName                    string    `json:"project_name"`
+	ClientEmployerName             string    `json:"client_employer_name"`
+	LeadContractorName             string    `json:"lead_contractor_name"`
+	TotalContractValueUSD          float64   `json:"total_contract_value_usd"`
+	CumulativeCertifiedProgressPct float64   `json:"cumulative_certified_progress_pct"` // %
+	RetentionPercentage            float64   `json:"retention_percentage"`              // e.g. 5.0% or 10.0%
+	MobilizationAdvanceTotalUSD    float64   `json:"mobilization_advance_total_usd"`
+	AdvanceAmortizationPct         float64   `json:"advance_amortization_pct"` // % deducted per IPC
+	EscrowAccountIBAN              string    `json:"escrow_account_iban"`
+	CreatedAt                      time.Time `json:"created_at"`
 }
 
 // InterimPaymentCertificateIPC models monthly progress claim certified by FIDIC Engineer
 type InterimPaymentCertificateIPC struct {
-	CertificateNumber              string    `json:"certificate_number"`
-	ProjectID                      string    `json:"project_id"`
-	BillingPeriodMonth             string    `json:"billing_period_month"`
-	CurrentPeriodProgressPct       float64   `json:"current_period_progress_pct"`
-	GrossValuationUSD              float64   `json:"gross_valuation_usd"`
-	MaterialsOnSiteAllowanceUSD    float64   `json:"materials_on_site_allowance_usd"`
-	RetentionDeductedUSD           float64   `json:"retention_deducted_usd"`
-	AdvanceRecoveryDeductedUSD     float64   `json:"advance_recovery_deducted_usd"`
-	NetCertifiedAmountUSD          float64   `json:"net_certified_amount_usd"`
-	EngineerCertificationStatus    string    `json:"engineer_certification_status"` // "CERTIFIED_APPROVED_FIDIC_CLAUSE_14", "DISPUTED_VARIATION"
-	CertifiedAt                    time.Time `json:"certified_at"`
+	CertificateNumber           string    `json:"certificate_number"`
+	ProjectID                   string    `json:"project_id"`
+	BillingPeriodMonth          string    `json:"billing_period_month"`
+	CurrentPeriodProgressPct    float64   `json:"current_period_progress_pct"`
+	GrossValuationUSD           float64   `json:"gross_valuation_usd"`
+	MaterialsOnSiteAllowanceUSD float64   `json:"materials_on_site_allowance_usd"`
+	RetentionDeductedUSD        float64   `json:"retention_deducted_usd"`
+	AdvanceRecoveryDeductedUSD  float64   `json:"advance_recovery_deducted_usd"`
+	NetCertifiedAmountUSD       float64   `json:"net_certified_amount_usd"`
+	EngineerCertificationStatus string    `json:"engineer_certification_status"` // "CERTIFIED_APPROVED_FIDIC_CLAUSE_14", "DISPUTED_VARIATION"
+	CertifiedAt                 time.Time `json:"certified_at"`
 }
 
 // SubcontractorEscrowDisbursement captures direct ring-fenced payout from project escrow to subcons
 type SubcontractorEscrowDisbursement struct {
-	DisbursementID      string    `json:"disbursement_id"`
-	CertificateNumber   string    `json:"certificate_number"`
-	SubcontractorID     string    `json:"subcontractor_id"`
-	SubcontractorName   string    `json:"subcontractor_name"`
-	TierLevel           int       `json:"tier_level"` // 1 = Tier 1 MEP/Civil, 2 = Tier 2 Specialist
-	AllocatedAmountUSD  float64   `json:"allocated_amount_usd"`
-	DisbursementStatus  string    `json:"disbursement_status"` // "ESCROW_FUNDS_RELEASED_DIRECT", "HELD_PENDING_QC_SIGN_OFF"
-	BankWireReference   string    `json:"bank_wire_reference"`
-	DisbursedAt         time.Time `json:"disbursed_at"`
+	DisbursementID     string    `json:"disbursement_id"`
+	CertificateNumber  string    `json:"certificate_number"`
+	SubcontractorID    string    `json:"subcontractor_id"`
+	SubcontractorName  string    `json:"subcontractor_name"`
+	TierLevel          int       `json:"tier_level"` // 1 = Tier 1 MEP/Civil, 2 = Tier 2 Specialist
+	AllocatedAmountUSD float64   `json:"allocated_amount_usd"`
+	DisbursementStatus string    `json:"disbursement_status"` // "ESCROW_FUNDS_RELEASED_DIRECT", "HELD_PENDING_QC_SIGN_OFF"
+	BankWireReference  string    `json:"bank_wire_reference"`
+	DisbursedAt        time.Time `json:"disbursed_at"`
 }
 
 // EPCProgressVault thread-safe store
@@ -241,8 +241,8 @@ func RegisterEPCRoutes(r *gin.RouterGroup) {
 	{
 		epc.POST("/generate-interim-payment-certificate", func(c *gin.Context) {
 			var req struct {
-				ProjectID           string  `json:"project_id" binding:"required"`
-				ProgressPct         float64 `json:"progress_pct" binding:"required"`
+				ProjectID          string  `json:"project_id" binding:"required"`
+				ProgressPct        float64 `json:"progress_pct" binding:"required"`
 				MaterialsOnSiteUSD float64 `json:"materials_on_site_usd"`
 			}
 			if err := c.ShouldBindJSON(&req); err != nil {

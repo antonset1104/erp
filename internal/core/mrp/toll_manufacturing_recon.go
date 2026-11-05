@@ -12,53 +12,53 @@ import (
 
 // JobWorkOrder models the subcontracting toll manufacturing agreement
 type JobWorkOrder struct {
-	JobWorkID                  string    `json:"job_work_id"`
-	VendorID                   string    `json:"vendor_id"`
-	VendorName                 string    `json:"vendor_name"`
-	FinishedProductSKU         string    `json:"finished_product_sku"`
-	PlannedFinishedUnits       int       `json:"planned_finished_units"`
-	BOMMaterialPerUnitKG       float64   `json:"bom_material_per_unit_kg"`       // e.g. 2.5 kg raw material per unit
-	RawMaterialPricePerKGUSD   float64   `json:"raw_material_price_per_kg_usd"`   // e.g. $12.50/kg
-	AllowableScrapPct          float64   `json:"allowable_scrap_pct"`            // e.g. 2.0%
-	ProcessingFeePerUnitUSD    float64   `json:"processing_fee_per_unit_usd"`    // e.g. $15.00/unit
+	JobWorkID                   string    `json:"job_work_id"`
+	VendorID                    string    `json:"vendor_id"`
+	VendorName                  string    `json:"vendor_name"`
+	FinishedProductSKU          string    `json:"finished_product_sku"`
+	PlannedFinishedUnits        int       `json:"planned_finished_units"`
+	BOMMaterialPerUnitKG        float64   `json:"bom_material_per_unit_kg"`      // e.g. 2.5 kg raw material per unit
+	RawMaterialPricePerKGUSD    float64   `json:"raw_material_price_per_kg_usd"` // e.g. $12.50/kg
+	AllowableScrapPct           float64   `json:"allowable_scrap_pct"`           // e.g. 2.0%
+	ProcessingFeePerUnitUSD     float64   `json:"processing_fee_per_unit_usd"`   // e.g. $15.00/unit
 	CustomsBonded180DayDeadline time.Time `json:"customs_bonded_180day_deadline"`
-	Status                     string    `json:"status"`                         // "ORDER_ISSUED", "MATERIALS_DISPATCHED", "RECONCILED_CLOSED"
-	CreatedAt                  time.Time `json:"created_at"`
+	Status                      string    `json:"status"` // "ORDER_ISSUED", "MATERIALS_DISPATCHED", "RECONCILED_CLOSED"
+	CreatedAt                   time.Time `json:"created_at"`
 }
 
 // MaterialOutwardChallan tracks physical movement of raw materials to job-worker
 type MaterialOutwardChallan struct {
-	ChallanNumber              string    `json:"challan_number"`
-	JobWorkID                  string    `json:"job_work_id"`
-	DispatchedMaterialKG       float64   `json:"dispatched_material_kg"`
-	VehiclePlateNumber         string    `json:"vehicle_plate_number"`
-	CustomsPassSlipReference   string    `json:"customs_pass_slip_reference"`
-	DispatchedAt               time.Time `json:"dispatched_at"`
+	ChallanNumber            string    `json:"challan_number"`
+	JobWorkID                string    `json:"job_work_id"`
+	DispatchedMaterialKG     float64   `json:"dispatched_material_kg"`
+	VehiclePlateNumber       string    `json:"vehicle_plate_number"`
+	CustomsPassSlipReference string    `json:"customs_pass_slip_reference"`
+	DispatchedAt             time.Time `json:"dispatched_at"`
 }
 
 // SubcontractingReconciliationResult models inward yield audit and excess scrap contra recovery
 type SubcontractingReconciliationResult struct {
-	ReconciliationID           string    `json:"reconciliation_id"`
-	JobWorkID                  string    `json:"job_work_id"`
-	ReceivedFinishedUnits      int       `json:"received_finished_units"`
-	TheoreticalMaterialNeededKG float64  `json:"theoretical_material_needed_kg"`
-	ReturnedScrapKG            float64   `json:"returned_scrap_kg"`
-	AllowableScrapKG           float64   `json:"allowable_scrap_kg"`
-	UnexplainedExcessScrapKG   float64   `json:"unexplained_excess_scrap_kg"`
-	ExcessScrapPenaltyUSD      float64   `json:"excess_scrap_penalty_usd"`
-	GrossProcessingFeeUSD      float64   `json:"gross_processing_fee_usd"`
-	NetVendorPayableUSD        float64   `json:"net_vendor_payable_usd"`
-	ContraDebitNoteReference   string    `json:"contra_debit_note_reference,omitempty"`
-	CustomsBondedCompliant     bool      `json:"customs_bonded_compliant"`
-	ReconciledAt               time.Time `json:"reconciled_at"`
+	ReconciliationID            string    `json:"reconciliation_id"`
+	JobWorkID                   string    `json:"job_work_id"`
+	ReceivedFinishedUnits       int       `json:"received_finished_units"`
+	TheoreticalMaterialNeededKG float64   `json:"theoretical_material_needed_kg"`
+	ReturnedScrapKG             float64   `json:"returned_scrap_kg"`
+	AllowableScrapKG            float64   `json:"allowable_scrap_kg"`
+	UnexplainedExcessScrapKG    float64   `json:"unexplained_excess_scrap_kg"`
+	ExcessScrapPenaltyUSD       float64   `json:"excess_scrap_penalty_usd"`
+	GrossProcessingFeeUSD       float64   `json:"gross_processing_fee_usd"`
+	NetVendorPayableUSD         float64   `json:"net_vendor_payable_usd"`
+	ContraDebitNoteReference    string    `json:"contra_debit_note_reference,omitempty"`
+	CustomsBondedCompliant      bool      `json:"customs_bonded_compliant"`
+	ReconciledAt                time.Time `json:"reconciled_at"`
 }
 
 // TollManufacturingVault thread-safe store
 type TollManufacturingVault struct {
-	mu           sync.RWMutex
-	orders       map[string]*JobWorkOrder
-	challans     map[string]MaterialOutwardChallan
-	reconciles   map[string]SubcontractingReconciliationResult
+	mu         sync.RWMutex
+	orders     map[string]*JobWorkOrder
+	challans   map[string]MaterialOutwardChallan
+	reconciles map[string]SubcontractingReconciliationResult
 }
 
 // Global Toll Manufacturing instance

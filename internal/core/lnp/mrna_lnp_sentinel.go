@@ -16,7 +16,7 @@ import (
 type MRNALNPTelemetry struct {
 	TelemetryID                string    `json:"telemetry_id"`
 	BatchID                    string    `json:"batch_id"`                      // "BATCH-MRNA-LNP-ONCOLOGY-042"
-	FormulationLineID          string    `json:"formulation_line_id"`          // "LINE-HERRINGBONE-CHIP-02"
+	FormulationLineID          string    `json:"formulation_line_id"`           // "LINE-HERRINGBONE-CHIP-02"
 	AqueousFlowRateMlMin       float64   `json:"aqueous_flow_rate_ml_min"`      // e.g. 12.0 mL/min (mRNA in sodium citrate buffer pH 4.0)
 	EthanolFlowRateMlMin       float64   `json:"ethanol_flow_rate_ml_min"`      // e.g. 4.0 mL/min (lipids: ionizable, DSPC, cholesterol, PEG in ethanol)
 	TotalFlowRateMlMin         float64   `json:"total_flow_rate_ml_min"`        // e.g. 16.0 mL/min
@@ -34,8 +34,8 @@ type MRNALNPAssessment struct {
 	BatchID                               string    `json:"batch_id"`
 	FlowRateRatioFRR                      float64   `json:"flow_rate_ratio_frr"` // aqueous / ethanol flow ratio (~3.0:1)
 	SizeDriftFromTargetNm                 float64   `json:"size_drift_from_target_nm"`
-	PdiComplianceStatus                   string    `json:"pdi_compliance_status"`                    // "MONODISPERSE_OPTIMAL", "BORDERLINE_BROADENING_WARNING", "POLYDISPERSE_BATCH_FAILURE"
-	EncapsulationQuality                  string    `json:"encapsulation_quality"`                   // "EXCELLENT_HIGH_EFFICIENCY", "SUBPOTENT_EFFICIENCY_WARNING", "CRITICAL_UNENCAPSULATED_MRNA_DEGRADATION"
+	PdiComplianceStatus                   string    `json:"pdi_compliance_status"` // "MONODISPERSE_OPTIMAL", "BORDERLINE_BROADENING_WARNING", "POLYDISPERSE_BATCH_FAILURE"
+	EncapsulationQuality                  string    `json:"encapsulation_quality"` // "EXCELLENT_HIGH_EFFICIENCY", "SUBPOTENT_EFFICIENCY_WARNING", "CRITICAL_UNENCAPSULATED_MRNA_DEGRADATION"
 	PumpServoTrimMandate                  bool      `json:"pump_servo_trim_mandate"`
 	BufferDiafiltrationAdjustmentRequired bool      `json:"buffer_diafiltration_adjustment_required"`
 	AuditDigest                           string    `json:"audit_digest"`

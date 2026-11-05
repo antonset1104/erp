@@ -17,7 +17,7 @@ type MaterialComponent struct {
 	Name                  string  `json:"name"`
 	MaterialType          string  `json:"material_type"` // e.g. "Recycled Lithium-Ion", "Post-Consumer Aluminum", "Bio-Polymer"
 	WeightKg              float64 `json:"weight_kg"`
-	RecycledPercentage    float64 `json:"recycled_percentage"` // 0.0 - 100.0%
+	RecycledPercentage    float64 `json:"recycled_percentage"`   // 0.0 - 100.0%
 	CriticalRawMaterial   bool    `json:"critical_raw_material"` // EU Critical Raw Materials Act classification
 	SupplierOriginCountry string  `json:"supplier_origin_country"`
 	RoHSCompliant         bool    `json:"rohs_compliant"`
@@ -68,21 +68,21 @@ type DigitalProductPassport struct {
 
 // IssuePassportRequest holds payload to mint a new Digital Product Passport.
 type IssuePassportRequest struct {
-	ProductSKU             string              `json:"product_sku"`
-	ProductName            string              `json:"product_name"`
-	BatchNumber            string              `json:"batch_number"`
-	SerialNumber           string              `json:"serial_number"`
-	ManufacturerName       string              `json:"manufacturer_name"`
-	ManufacturingFacility  string              `json:"manufacturing_facility"`
-	Components             []MaterialComponent `json:"components"`
-	Scope1KgCO2e           float64             `json:"scope1_kg_co2e"`
-	Scope2KgCO2e           float64             `json:"scope2_kg_co2e"`
-	Scope3KgCO2e           float64             `json:"scope3_kg_co2e"`
-	RepairabilityScore     float64             `json:"repairability_score"`
-	DisassemblySteps       int                 `json:"disassembly_steps"`
-	SparePartsYears        int                 `json:"spare_parts_years"`
-	RecyclabilityRatePct   float64             `json:"recyclability_rate_pct"`
-	DisassemblyManualURL   string              `json:"disassembly_manual_url"`
+	ProductSKU            string              `json:"product_sku"`
+	ProductName           string              `json:"product_name"`
+	BatchNumber           string              `json:"batch_number"`
+	SerialNumber          string              `json:"serial_number"`
+	ManufacturerName      string              `json:"manufacturer_name"`
+	ManufacturingFacility string              `json:"manufacturing_facility"`
+	Components            []MaterialComponent `json:"components"`
+	Scope1KgCO2e          float64             `json:"scope1_kg_co2e"`
+	Scope2KgCO2e          float64             `json:"scope2_kg_co2e"`
+	Scope3KgCO2e          float64             `json:"scope3_kg_co2e"`
+	RepairabilityScore    float64             `json:"repairability_score"`
+	DisassemblySteps      int                 `json:"disassembly_steps"`
+	SparePartsYears       int                 `json:"spare_parts_years"`
+	RecyclabilityRatePct  float64             `json:"recyclability_rate_pct"`
+	DisassemblyManualURL  string              `json:"disassembly_manual_url"`
 }
 
 // PassportVerificationResult provides verification output for public / audit lookup.

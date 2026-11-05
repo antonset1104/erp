@@ -27,15 +27,15 @@ type WorkerBiometricTelemetry struct {
 
 // HeatStressEvaluationResult represents physiological strain evaluation under ISO 7243
 type HeatStressEvaluationResult struct {
-	WorkerID                 string    `json:"worker_id"`
-	WorkcenterID             string    `json:"workcenter_id"`
-	PhysiologicalStrainIndex float64   `json:"physiological_strain_index"` // PSI 0.0 - 10.0
-	WBGTThresholdExceeded    bool      `json:"wbgt_threshold_exceeded"`
-	ThermalRiskZone          string    `json:"thermal_risk_zone"` // "SAFE_NORMAL", "CAUTION_HYDRATION_WATCH", "DANGER_CRITICAL_HEAT_STRAIN"
-	RecommendedRestIntervalMin int     `json:"recommended_rest_interval_min"`
-	RecommendedFluidIntakeML int       `json:"recommended_fluid_intake_ml"`
-	SafetyAdvice             string    `json:"safety_advice"`
-	EvaluatedAt              time.Time `json:"evaluated_at"`
+	WorkerID                   string    `json:"worker_id"`
+	WorkcenterID               string    `json:"workcenter_id"`
+	PhysiologicalStrainIndex   float64   `json:"physiological_strain_index"` // PSI 0.0 - 10.0
+	WBGTThresholdExceeded      bool      `json:"wbgt_threshold_exceeded"`
+	ThermalRiskZone            string    `json:"thermal_risk_zone"` // "SAFE_NORMAL", "CAUTION_HYDRATION_WATCH", "DANGER_CRITICAL_HEAT_STRAIN"
+	RecommendedRestIntervalMin int       `json:"recommended_rest_interval_min"`
+	RecommendedFluidIntakeML   int       `json:"recommended_fluid_intake_ml"`
+	SafetyAdvice               string    `json:"safety_advice"`
+	EvaluatedAt                time.Time `json:"evaluated_at"`
 }
 
 // RestMandateOrder represents an automated command sent to the wearable and floor supervisor
@@ -54,14 +54,14 @@ type RestMandateOrder struct {
 
 // WorkcenterThermalHeatmap summarizes occupational safety across an industrial area
 type WorkcenterThermalHeatmap struct {
-	WorkcenterID          string                       `json:"workcenter_id"`
-	WorkcenterName        string                       `json:"workcenter_name"`
-	CurrentWBGTCelsius    float64                      `json:"current_wbgt_celsius"`
-	ActiveWorkersCount    int                          `json:"active_workers_count"`
-	WorkersInRestBreak    int                          `json:"workers_in_rest_break"`
-	ThermalSafetyStatus   string                       `json:"thermal_safety_status"` // "OPTIMAL_GREEN", "HEAT_ADVISORY_YELLOW", "CRITICAL_RED_ROTATION"
-	RecentEvaluations     []HeatStressEvaluationResult `json:"recent_evaluations"`
-	LastRefreshedAt       time.Time                    `json:"last_refreshed_at"`
+	WorkcenterID        string                       `json:"workcenter_id"`
+	WorkcenterName      string                       `json:"workcenter_name"`
+	CurrentWBGTCelsius  float64                      `json:"current_wbgt_celsius"`
+	ActiveWorkersCount  int                          `json:"active_workers_count"`
+	WorkersInRestBreak  int                          `json:"workers_in_rest_break"`
+	ThermalSafetyStatus string                       `json:"thermal_safety_status"` // "OPTIMAL_GREEN", "HEAT_ADVISORY_YELLOW", "CRITICAL_RED_ROTATION"
+	RecentEvaluations   []HeatStressEvaluationResult `json:"recent_evaluations"`
+	LastRefreshedAt     time.Time                    `json:"last_refreshed_at"`
 }
 
 // HeatStressEngine manages wearable biometrics and ISO 7243 heat stress mitigation
@@ -109,18 +109,18 @@ func (e *HeatStressEngine) EvaluateHeatStress(workerID string) HeatStressEvaluat
 	b, exists := e.biometrics[workerID]
 	if !exists {
 		b = WorkerBiometricTelemetry{
-			WorkerID:             workerID,
-			WorkerName:           "Joko Subroto (Furnace Operator)",
-			WorkcenterID:         "WC-HOT-FOUNDRY-01",
-			HeartRateBPM:         138.0,
-			SkinTemperatureC:     37.2,
-			EstimatedCoreTempC:   38.6,
+			WorkerID:              workerID,
+			WorkerName:            "Joko Subroto (Furnace Operator)",
+			WorkcenterID:          "WC-HOT-FOUNDRY-01",
+			HeartRateBPM:          138.0,
+			SkinTemperatureC:      37.2,
+			EstimatedCoreTempC:    38.6,
 			ContinuousWorkMinutes: 75,
-			ExertionWorkload:     "HEAVY",
-			AmbientTemperatureC:  39.5,
-			RelativeHumidityPct:  65.0,
-			WetBulbGlobeTempWBGT: 31.8,
-			Timestamp:            time.Now(),
+			ExertionWorkload:      "HEAVY",
+			AmbientTemperatureC:   39.5,
+			RelativeHumidityPct:   65.0,
+			WetBulbGlobeTempWBGT:  31.8,
+			Timestamp:             time.Now(),
 		}
 	}
 
@@ -160,15 +160,15 @@ func (e *HeatStressEngine) EvaluateHeatStress(workerID string) HeatStressEvaluat
 	}
 
 	res := HeatStressEvaluationResult{
-		WorkerID:                 workerID,
-		WorkcenterID:             b.WorkcenterID,
-		PhysiologicalStrainIndex: psi,
-		WBGTThresholdExceeded:    thresholdExceeded,
-		ThermalRiskZone:          riskZone,
+		WorkerID:                   workerID,
+		WorkcenterID:               b.WorkcenterID,
+		PhysiologicalStrainIndex:   psi,
+		WBGTThresholdExceeded:      thresholdExceeded,
+		ThermalRiskZone:            riskZone,
 		RecommendedRestIntervalMin: restMin,
-		RecommendedFluidIntakeML: fluidML,
-		SafetyAdvice:             advice,
-		EvaluatedAt:              time.Now(),
+		RecommendedFluidIntakeML:   fluidML,
+		SafetyAdvice:               advice,
+		EvaluatedAt:                time.Now(),
 	}
 
 	e.evaluations[workerID] = res

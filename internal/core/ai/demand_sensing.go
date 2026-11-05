@@ -17,34 +17,34 @@ type ProductDemandMetric struct {
 	ProductName           string  `json:"product_name"`
 	CurrentOnHand         float64 `json:"current_on_hand"`
 	DailyDemandVelocity   float64 `json:"daily_demand_velocity"`   // units/day
-	Projected30DayDemand  float64 `json:"projected_30d_demand"`   // 30 days
-	Projected60DayDemand  float64 `json:"projected_60d_demand"`   // 60 days
-	Projected90DayDemand  float64 `json:"projected_90d_demand"`   // 90 days
-	SupplierLeadTimeDays  int     `json:"supplier_lead_time_days"`// Lead time in days
-	DynamicSafetyStock    float64 `json:"dynamic_safety_stock"`   // Dynamic safety buffer
-	ReorderPoint          float64 `json:"reorder_point"`          // ROP = (LeadTime * DailyDemand) + SafetyStock
-	EconomicOrderQuantity float64 `json:"economic_order_quantity"`// EOQ = sqrt((2*D*S)/H)
-	StockoutRiskLevel     string  `json:"stockout_risk_level"`    // "CRITICAL", "REORDER_NEEDED", "OPTIMAL", "OVERSTOCK"
-	DaysOfInventoryOnHand float64 `json:"days_of_inventory_left"` // OnHand / DailyDemand
-	RecommendedOrderQty   float64 `json:"recommended_order_qty"`  // Suggested replenishment quantity
+	Projected30DayDemand  float64 `json:"projected_30d_demand"`    // 30 days
+	Projected60DayDemand  float64 `json:"projected_60d_demand"`    // 60 days
+	Projected90DayDemand  float64 `json:"projected_90d_demand"`    // 90 days
+	SupplierLeadTimeDays  int     `json:"supplier_lead_time_days"` // Lead time in days
+	DynamicSafetyStock    float64 `json:"dynamic_safety_stock"`    // Dynamic safety buffer
+	ReorderPoint          float64 `json:"reorder_point"`           // ROP = (LeadTime * DailyDemand) + SafetyStock
+	EconomicOrderQuantity float64 `json:"economic_order_quantity"` // EOQ = sqrt((2*D*S)/H)
+	StockoutRiskLevel     string  `json:"stockout_risk_level"`     // "CRITICAL", "REORDER_NEEDED", "OPTIMAL", "OVERSTOCK"
+	DaysOfInventoryOnHand float64 `json:"days_of_inventory_left"`  // OnHand / DailyDemand
+	RecommendedOrderQty   float64 `json:"recommended_order_qty"`   // Suggested replenishment quantity
 	EstimatedOrderCostIDR float64 `json:"estimated_order_cost_idr"`
 	SupplierPartnerID     uint    `json:"supplier_partner_id"`
 }
 
 // DemandSensingRequest is the payload for GET & POST /api/v1/ai/demand-sensing
 type DemandSensingRequest struct {
-	HorizonDays      int     `json:"horizon_days"`       // 30, 60, or 90
-	ServiceLevel     float64 `json:"service_level"`      // e.g. 0.95 (95% service level -> Z=1.65)
-	OrderingCostIDR  float64 `json:"ordering_cost_idr"`  // S = fixed cost per purchase order (default IDR 250,000)
-	HoldingCostRate  float64 `json:"holding_cost_rate"`  // H = annual holding cost as % of unit cost (default 0.15 / 15%)
-	ProductID        uint    `json:"product_id"`         // Optional filter for single product
+	HorizonDays     int     `json:"horizon_days"`      // 30, 60, or 90
+	ServiceLevel    float64 `json:"service_level"`     // e.g. 0.95 (95% service level -> Z=1.65)
+	OrderingCostIDR float64 `json:"ordering_cost_idr"` // S = fixed cost per purchase order (default IDR 250,000)
+	HoldingCostRate float64 `json:"holding_cost_rate"` // H = annual holding cost as % of unit cost (default 0.15 / 15%)
+	ProductID       uint    `json:"product_id"`        // Optional filter for single product
 }
 
 // AutoReplenishRequest is the payload for POST /api/v1/ai/replenish/auto-po
 type AutoReplenishRequest struct {
-	ProductIDs []uint  `json:"product_ids"`
-	Notes      string  `json:"notes"`
-	CompanyID  uint    `json:"company_id"`
+	ProductIDs []uint `json:"product_ids"`
+	Notes      string `json:"notes"`
+	CompanyID  uint   `json:"company_id"`
 }
 
 // AnalyzeDemandSensing computes predictive demand, dynamic safety stock, ROP, and EOQ for products
@@ -140,7 +140,7 @@ func (c *Client) AnalyzeDemandSensing(db *gorm.DB, req *DemandSensingRequest, co
 		riskLevel := "OPTIMAL"
 		daysLeft := 999.0
 		if dailyDemand > 0 {
-			daysLeft = math.Round((currentStock / dailyDemand) * 10) / 10
+			daysLeft = math.Round((currentStock/dailyDemand)*10) / 10
 		}
 
 		var recommendedQty float64 = 0
@@ -193,9 +193,9 @@ func (c *Client) AnalyzeDemandSensing(db *gorm.DB, req *DemandSensingRequest, co
 		"algorithm":               "AI Demand Sensing + EOQ + Dynamic Gaussian Safety Stock (Z=1.65)",
 		"total_products_analyzed": len(metrics),
 		"summary": map[string]interface{}{
-			"critical_stockout_items":  criticalCount,
-			"reorder_needed_items":     reorderCount,
-			"optimal_stocked_items":    optimalCount,
+			"critical_stockout_items":     criticalCount,
+			"reorder_needed_items":        reorderCount,
+			"optimal_stocked_items":       optimalCount,
 			"total_current_inventory_idr": totalStockValue,
 			"total_recommended_spend_idr": totalRecommendedSpend,
 		},
@@ -278,11 +278,11 @@ func (c *Client) ExecuteAutoReplenishmentPO(db *gorm.DB, req *AutoReplenishReque
 		db.Create(&poLine)
 
 		createdLines = append(createdLines, map[string]interface{}{
-			"product_id":       item.ProductID,
-			"product_name":     item.ProductName,
-			"quantity":         item.RecommendedOrderQty,
-			"price_unit":       pCost,
-			"price_subtotal":   subtotal,
+			"product_id":     item.ProductID,
+			"product_name":   item.ProductName,
+			"quantity":       item.RecommendedOrderQty,
+			"price_unit":     pCost,
+			"price_subtotal": subtotal,
 		})
 	}
 
@@ -296,15 +296,15 @@ func (c *Client) ExecuteAutoReplenishmentPO(db *gorm.DB, req *AutoReplenishReque
 	poID := po.ID
 
 	return map[string]interface{}{
-		"success":              true,
-		"message":              fmt.Sprintf("Successfully generated draft Purchase Order %s for %d replenishable items.", poNumber, len(itemsToOrder)),
-		"purchase_order_id":    poID,
-		"purchase_order_name":  poNumber,
-		"supplier_partner_id":  itemsToOrder[0].SupplierPartnerID,
-		"lines_created":        len(createdLines),
-		"amount_untaxed":       totalPOAmount,
-		"ppn_11_tax":           taxAmount,
-		"amount_total":         grandTotal,
-		"items_replenished":    createdLines,
+		"success":             true,
+		"message":             fmt.Sprintf("Successfully generated draft Purchase Order %s for %d replenishable items.", poNumber, len(itemsToOrder)),
+		"purchase_order_id":   poID,
+		"purchase_order_name": poNumber,
+		"supplier_partner_id": itemsToOrder[0].SupplierPartnerID,
+		"lines_created":       len(createdLines),
+		"amount_untaxed":      totalPOAmount,
+		"ppn_11_tax":          taxAmount,
+		"amount_total":        grandTotal,
+		"items_replenished":   createdLines,
 	}
 }

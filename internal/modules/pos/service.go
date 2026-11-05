@@ -159,7 +159,6 @@ func (s *Service) CreateOrder(order *PosOrder, companyID uint) (*PosOrder, error
 	return order, nil
 }
 
-
 type OfflineOrderPayload struct {
 	OfflineID       string         `json:"offline_id"`
 	ClientTimestamp string         `json:"client_timestamp"`
@@ -210,10 +209,10 @@ func (s *Service) SyncOfflineBatch(orders []OfflineOrderPayload, userID, company
 		}
 
 		posOrder := PosOrder{
-			SessionID:     session.ID,
-			PartnerID:     partnerPtr,
-			AmountPaid:    paid,
-			Lines:         off.Lines,
+			SessionID:  session.ID,
+			PartnerID:  partnerPtr,
+			AmountPaid: paid,
+			Lines:      off.Lines,
 		}
 		posOrder.CreateUID = userID
 		posOrder.WriteUID = userID

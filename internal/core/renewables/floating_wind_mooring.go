@@ -14,17 +14,17 @@ import (
 
 // MooringLineTelemetry models deepwater floating wind catenary mooring tension under DNV-ST-0119
 type MooringLineTelemetry struct {
-	TelemetryID             string    `json:"telemetry_id"`
-	TurbineID               string    `json:"turbine_id"`                  // "FOWT-15MW-NORTHSEA-04"
-	MooringLineID           string    `json:"mooring_line_id"`             // "LINE-CATENARY-01-SE"
-	WindSpeedMPS            float64   `json:"wind_speed_mps"`              // Storm wind speed (e.g. 28.5 m/s)
-	SignificantWaveHeightHsM float64  `json:"significant_wave_height_hs_m"` // Extreme wave height Hs (e.g. 8.4 m)
-	PeakWavePeriodTpSec     float64   `json:"peak_wave_period_tp_sec"`     // Wave period (e.g. 12.2 s)
-	TensionKN               float64   `json:"tension_kn"`                  // Live fairlead tension (e.g. 3450.0 kN)
-	MaximumBreakingLoadKN   float64   `json:"maximum_breaking_load_kn"`    // MBL (e.g. 6200.0 kN)
-	AnchorPulloutCapacityKN float64   `json:"anchor_pullout_capacity_kn"`  // Suction anchor hold (e.g. 7500.0 kN)
-	FairleadAngleDeg        float64   `json:"fairlead_angle_deg"`          // Catenary angle (e.g. 38.5 deg)
-	RecordedAt              time.Time `json:"recorded_at"`
+	TelemetryID              string    `json:"telemetry_id"`
+	TurbineID                string    `json:"turbine_id"`                   // "FOWT-15MW-NORTHSEA-04"
+	MooringLineID            string    `json:"mooring_line_id"`              // "LINE-CATENARY-01-SE"
+	WindSpeedMPS             float64   `json:"wind_speed_mps"`               // Storm wind speed (e.g. 28.5 m/s)
+	SignificantWaveHeightHsM float64   `json:"significant_wave_height_hs_m"` // Extreme wave height Hs (e.g. 8.4 m)
+	PeakWavePeriodTpSec      float64   `json:"peak_wave_period_tp_sec"`      // Wave period (e.g. 12.2 s)
+	TensionKN                float64   `json:"tension_kn"`                   // Live fairlead tension (e.g. 3450.0 kN)
+	MaximumBreakingLoadKN    float64   `json:"maximum_breaking_load_kn"`     // MBL (e.g. 6200.0 kN)
+	AnchorPulloutCapacityKN  float64   `json:"anchor_pullout_capacity_kn"`   // Suction anchor hold (e.g. 7500.0 kN)
+	FairleadAngleDeg         float64   `json:"fairlead_angle_deg"`           // Catenary angle (e.g. 38.5 deg)
+	RecordedAt               time.Time `json:"recorded_at"`
 }
 
 // MooringFatigueAssessment models Rainflow cycle damage and T-N curve under API RP 2SK & IEC 61400-3-2
@@ -43,20 +43,20 @@ type MooringFatigueAssessment struct {
 
 // TurbineStormDeratingAction models automated aerodynamic pitch feathering and yaw drift control
 type TurbineStormDeratingAction struct {
-	ActionID                  string    `json:"action_id"`
-	TurbineID                 string    `json:"turbine_id"`
-	RotorPitchFeatheredDeg    float64   `json:"rotor_pitch_feathered_deg"`
-	ThrustLoadReductionPct    float64   `json:"thrust_load_reduction_pct"`
-	AvoidedMooringFailureUSD  float64   `json:"avoided_mooring_failure_usd"` // Avoided $18.5M turbine drift & subsea cable rupture
-	ActionTimestamp           time.Time `json:"action_timestamp"`
+	ActionID                 string    `json:"action_id"`
+	TurbineID                string    `json:"turbine_id"`
+	RotorPitchFeatheredDeg   float64   `json:"rotor_pitch_feathered_deg"`
+	ThrustLoadReductionPct   float64   `json:"thrust_load_reduction_pct"`
+	AvoidedMooringFailureUSD float64   `json:"avoided_mooring_failure_usd"` // Avoided $18.5M turbine drift & subsea cable rupture
+	ActionTimestamp          time.Time `json:"action_timestamp"`
 }
 
 // RenewablesVault thread-safe in-memory store
 type RenewablesVault struct {
-	mu           sync.RWMutex
-	telemetries  map[string]MooringLineTelemetry
-	assessments  map[string]MooringFatigueAssessment
-	actions      map[string]TurbineStormDeratingAction
+	mu          sync.RWMutex
+	telemetries map[string]MooringLineTelemetry
+	assessments map[string]MooringFatigueAssessment
+	actions     map[string]TurbineStormDeratingAction
 }
 
 // Global instance
@@ -69,17 +69,17 @@ var GlobalRenewablesVault = &RenewablesVault{
 func init() {
 	// Seed demo 15MW floating offshore wind turbine in North Sea
 	GlobalRenewablesVault.telemetries["FOWT-15MW-NORTHSEA-04"] = MooringLineTelemetry{
-		TelemetryID:             "TEL-FOWT-001",
-		TurbineID:               "FOWT-15MW-NORTHSEA-04",
-		MooringLineID:           "LINE-CATENARY-01-SE",
-		WindSpeedMPS:            29.2, // Storm wind
+		TelemetryID:              "TEL-FOWT-001",
+		TurbineID:                "FOWT-15MW-NORTHSEA-04",
+		MooringLineID:            "LINE-CATENARY-01-SE",
+		WindSpeedMPS:             29.2, // Storm wind
 		SignificantWaveHeightHsM: 8.8,  // Severe sea state
-		PeakWavePeriodTpSec:     12.6,
-		TensionKN:               3950.0, // Elevated tension
-		MaximumBreakingLoadKN:   6200.0,
-		AnchorPulloutCapacityKN: 7500.0,
-		FairleadAngleDeg:        41.2,
-		RecordedAt:              time.Now(),
+		PeakWavePeriodTpSec:      12.6,
+		TensionKN:                3950.0, // Elevated tension
+		MaximumBreakingLoadKN:    6200.0,
+		AnchorPulloutCapacityKN:  7500.0,
+		FairleadAngleDeg:         41.2,
+		RecordedAt:               time.Now(),
 	}
 }
 

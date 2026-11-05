@@ -120,4 +120,3 @@ func (h *Handler) ExportSalesCSV(c *gin.Context) {
 
 	export.StreamCSV(c, "sales_orders_export.csv", headers, rows)
 }
-

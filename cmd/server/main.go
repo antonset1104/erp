@@ -7,32 +7,44 @@ import (
 	"time"
 
 	"erp-golang/internal/config"
-	"erp-golang/internal/core/ai"
-	"erp-golang/internal/core/audit"
-	"erp-golang/internal/core/bi"
-	"erp-golang/internal/core/commandcenter"
+	coreaavgenetherapy "erp-golang/internal/core/aav_genetherapy"
 	coreaccount "erp-golang/internal/core/account"
 	coreaerospace "erp-golang/internal/core/aerospace"
 	coreagriculture "erp-golang/internal/core/agriculture"
+	"erp-golang/internal/core/ai"
+	coreairbornehts "erp-golang/internal/core/airborne_hts"
 	coreammonia "erp-golang/internal/core/ammonia"
+	coreammoniamarine "erp-golang/internal/core/ammonia_marine"
+	coreicebergscour "erp-golang/internal/core/arctic_iceberg_scour"
 	coreasset "erp-golang/internal/core/asset"
+	coreasteroidmining "erp-golang/internal/core/asteroid_mining"
+	"erp-golang/internal/core/audit"
 	coreautomotive "erp-golang/internal/core/automotive"
 	coreaviation "erp-golang/internal/core/aviation"
 	corebess "erp-golang/internal/core/bess"
+	"erp-golang/internal/core/bi"
 	corebiopharma "erp-golang/internal/core/biopharma"
 	corebop "erp-golang/internal/core/bop"
 	corecart "erp-golang/internal/core/cart"
 	coreccus "erp-golang/internal/core/ccus"
+	"erp-golang/internal/core/commandcenter"
 	corecosting "erp-golang/internal/core/costing"
 	corecpo "erp-golang/internal/core/cpo"
 	corecpq "erp-golang/internal/core/cpq"
+	corecrisprpat "erp-golang/internal/core/crispr_pat"
 	corecrm "erp-golang/internal/core/crm"
 	corecryo "erp-golang/internal/core/cryo"
+	corecryoquantum "erp-golang/internal/core/cryo_quantum"
 	corecustoms "erp-golang/internal/core/customs"
 	coredac "erp-golang/internal/core/dac"
+	"erp-golang/internal/core/database"
+	coredgrcanister "erp-golang/internal/core/dgr_canister"
+	coredoccocean "erp-golang/internal/core/docc_ocean"
 	coreedi "erp-golang/internal/core/edi"
 	coreehs "erp-golang/internal/core/ehs"
 	coreenergy "erp-golang/internal/core/energy"
+	"erp-golang/internal/core/esg"
+	"erp-golang/internal/core/events"
 	coreevtol "erp-golang/internal/core/evtol"
 	coreexpense "erp-golang/internal/core/expense"
 	corefermentation "erp-golang/internal/core/fermentation"
@@ -40,28 +52,46 @@ import (
 	corefinance "erp-golang/internal/core/finance"
 	corefleet "erp-golang/internal/core/fleet"
 	corefusion "erp-golang/internal/core/fusion"
+	corefusionblanket "erp-golang/internal/core/fusion_blanket"
 	coregaafet "erp-golang/internal/core/gaafet"
+	coregasfermentation "erp-golang/internal/core/gas_fermentation"
 	coregeotech "erp-golang/internal/core/geotech"
 	coregeothermal "erp-golang/internal/core/geothermal"
 	coregeothermalshr "erp-golang/internal/core/geothermal_shr"
+	coreglasstgv "erp-golang/internal/core/glass_tgv"
 	coregraphql "erp-golang/internal/core/graphql"
 	coregrc "erp-golang/internal/core/grc"
 	corehallthruster "erp-golang/internal/core/hallthruster"
+	corehbm4bonding "erp-golang/internal/core/hbm4_bonding"
+	corehdristeel "erp-golang/internal/core/hdri_steel"
+	corehighnaeuv "erp-golang/internal/core/highna_euv"
 	corehr "erp-golang/internal/core/hr"
 	corehyperloop "erp-golang/internal/core/hyperloop"
 	corehypersonic "erp-golang/internal/core/hypersonic"
+	coreimmersionchf "erp-golang/internal/core/immersion_chf"
+	"erp-golang/internal/core/iot"
+	coreisrumethalox "erp-golang/internal/core/isru_methalox"
 	coreitops "erp-golang/internal/core/itops"
 	corelegal "erp-golang/internal/core/legal"
+	corelh2aviation "erp-golang/internal/core/lh2_aviation"
 	corelnp "erp-golang/internal/core/lnp"
 	corelogistics "erp-golang/internal/core/logistics"
+	corelunarsintering "erp-golang/internal/core/lunar_sintering"
 	corelyo "erp-golang/internal/core/lyophilization"
+	coremagmageothermal "erp-golang/internal/core/magma_geothermal"
 	coremaintenance "erp-golang/internal/core/maintenance"
 	coremarine "erp-golang/internal/core/marine"
+	corembmw "erp-golang/internal/core/mbmw"
+	coremicroreactor "erp-golang/internal/core/microreactor_heatpipe"
+	"erp-golang/internal/core/middleware"
 	coremining "erp-golang/internal/core/mining"
 	coremoltensalt "erp-golang/internal/core/moltensalt"
+	coremrnacapping "erp-golang/internal/core/mrna_capping"
 	coremrp "erp-golang/internal/core/mrp"
 	coremsr "erp-golang/internal/core/msr"
+	"erp-golang/internal/core/multitenancy"
 	corenuclear "erp-golang/internal/core/nuclear"
+	"erp-golang/internal/core/openapi"
 	corepackaging "erp-golang/internal/core/packaging"
 	corepellicle "erp-golang/internal/core/pellicle"
 	corepharma "erp-golang/internal/core/pharma"
@@ -71,78 +101,49 @@ import (
 	coreprocurement "erp-golang/internal/core/procurement"
 	coreproject "erp-golang/internal/core/project"
 	corepyrolysis "erp-golang/internal/core/pyrolysis"
-	corequality "erp-golang/internal/core/quality"
 	coreqled "erp-golang/internal/core/qled"
+	corequality "erp-golang/internal/core/quality"
 	corequantum "erp-golang/internal/core/quantum"
 	corerailway "erp-golang/internal/core/railway"
+	"erp-golang/internal/core/registry"
 	corerenewables "erp-golang/internal/core/renewables"
-	corescm "erp-golang/internal/core/scm"
-	coresaltcavern "erp-golang/internal/core/saltcavern"
 	corerocketgridfin "erp-golang/internal/core/rocket_gridfin"
-	corembmw "erp-golang/internal/core/mbmw"
-	coreaavgenetherapy "erp-golang/internal/core/aav_genetherapy"
-	coredryelectrode "erp-golang/internal/core/solidstate_dryelectrode"
-	coreisrumethalox "erp-golang/internal/core/isru_methalox"
-	corelh2aviation "erp-golang/internal/core/lh2_aviation"
-	corehbm4bonding "erp-golang/internal/core/hbm4_bonding"
-	coremicroreactor "erp-golang/internal/core/microreactor_heatpipe"
-	coremrnacapping "erp-golang/internal/core/mrna_capping"
-	coresubseacompressor "erp-golang/internal/core/subsea_compressor"
-	coreairbornehts "erp-golang/internal/core/airborne_hts"
-	corehdristeel "erp-golang/internal/core/hdri_steel"
-	corecryoquantum "erp-golang/internal/core/cryo_quantum"
-	coreammoniamarine "erp-golang/internal/core/ammonia_marine"
-	corelunarsintering "erp-golang/internal/core/lunar_sintering"
-	coredgrcanister "erp-golang/internal/core/dgr_canister"
-	corefusionblanket "erp-golang/internal/core/fusion_blanket"
-	corespacesolar "erp-golang/internal/core/space_solar"
-	corehighnaeuv "erp-golang/internal/core/highna_euv"
-	corecrisprpat "erp-golang/internal/core/crispr_pat"
-	coreuhtchypersonic "erp-golang/internal/core/uhtc_hypersonic"
-	coremagmageothermal "erp-golang/internal/core/magma_geothermal"
-	coreimmersionchf "erp-golang/internal/core/immersion_chf"
-	coreasteroidmining "erp-golang/internal/core/asteroid_mining"
-	coredoccocean "erp-golang/internal/core/docc_ocean"
+	coresaltcavern "erp-golang/internal/core/saltcavern"
 	coresatellitelaserpat "erp-golang/internal/core/satellite_laser_pat"
-	coreglasstgv "erp-golang/internal/core/glass_tgv"
-	corethoriumlftr "erp-golang/internal/core/thorium_lftr"
-	coregasfermentation "erp-golang/internal/core/gas_fermentation"
-	coreicebergscour "erp-golang/internal/core/arctic_iceberg_scour"
+	corescm "erp-golang/internal/core/scm"
 	corescramjet "erp-golang/internal/core/scramjet"
 	coreseabed "erp-golang/internal/core/seabed"
+	"erp-golang/internal/core/security"
 	coresemiconductor "erp-golang/internal/core/semiconductor"
+	coreservice "erp-golang/internal/core/service"
 	coresmr "erp-golang/internal/core/smr"
 	coresoec "erp-golang/internal/core/soec"
 	coresolidstate "erp-golang/internal/core/solidstate"
-	coreservice "erp-golang/internal/core/service"
-	coresubsea "erp-golang/internal/core/subsea"
-	coresubseaccs "erp-golang/internal/core/subsea_ccs"
-	coresubseaauv "erp-golang/internal/core/subsea_auv"
+	coredryelectrode "erp-golang/internal/core/solidstate_dryelectrode"
+	corespacesolar "erp-golang/internal/core/space_solar"
+	"erp-golang/internal/core/storage"
 	coresubscription "erp-golang/internal/core/subscription"
+	coresubsea "erp-golang/internal/core/subsea"
+	coresubseaauv "erp-golang/internal/core/subsea_auv"
+	coresubseaccs "erp-golang/internal/core/subsea_ccs"
+	coresubseacompressor "erp-golang/internal/core/subsea_compressor"
 	coresystem "erp-golang/internal/core/system"
 	coretax "erp-golang/internal/core/tax"
+	corethoriumlftr "erp-golang/internal/core/thorium_lftr"
 	coretradefinance "erp-golang/internal/core/tradefinance"
 	coretreasury "erp-golang/internal/core/treasury"
+	coreuhtchypersonic "erp-golang/internal/core/uhtc_hypersonic"
 	coreuhvdc "erp-golang/internal/core/uhvdc"
 	coreutilities "erp-golang/internal/core/utilities"
 	corevmi "erp-golang/internal/core/vmi"
-	corewms "erp-golang/internal/core/wms"
 	corewetchem "erp-golang/internal/core/wetchem"
-	"erp-golang/internal/core/esg"
-	"erp-golang/internal/core/iot"
-	"erp-golang/internal/core/database"
-	"erp-golang/internal/core/events"
-	"erp-golang/internal/core/middleware"
-	"erp-golang/internal/core/multitenancy"
-	"erp-golang/internal/core/openapi"
-	"erp-golang/internal/core/registry"
-	"erp-golang/internal/core/security"
-	"erp-golang/internal/core/storage"
+	corewms "erp-golang/internal/core/wms"
 	"erp-golang/internal/modules/account"
 	"erp-golang/internal/modules/approval"
 	"erp-golang/internal/modules/asset"
 	"erp-golang/internal/modules/attachment"
 	"erp-golang/internal/modules/attendance"
+	"erp-golang/internal/modules/audit_trail"
 	"erp-golang/internal/modules/bank_reconciliation"
 	"erp-golang/internal/modules/barcode"
 	"erp-golang/internal/modules/base"
@@ -150,44 +151,43 @@ import (
 	"erp-golang/internal/modules/chatter"
 	"erp-golang/internal/modules/crm"
 	"erp-golang/internal/modules/currency"
+	"erp-golang/internal/modules/customer_portal"
+	"erp-golang/internal/modules/customs_bonded"
+	"erp-golang/internal/modules/esignature"
 	"erp-golang/internal/modules/expense"
 	"erp-golang/internal/modules/fleet"
 	"erp-golang/internal/modules/helpdesk"
 	"erp-golang/internal/modules/hr"
+	"erp-golang/internal/modules/inbound_webhook"
+	"erp-golang/internal/modules/integration_hub"
+	"erp-golang/internal/modules/intercompany"
 	"erp-golang/internal/modules/landed_cost"
 	"erp-golang/internal/modules/leave"
+	"erp-golang/internal/modules/lowcode_studio"
 	"erp-golang/internal/modules/maintenance"
 	"erp-golang/internal/modules/mrp"
-	"erp-golang/internal/modules/pos"
+	"erp-golang/internal/modules/mrp_advanced"
 	"erp-golang/internal/modules/payroll"
+	"erp-golang/internal/modules/pos"
 	"erp-golang/internal/modules/product"
 	"erp-golang/internal/modules/project"
 	"erp-golang/internal/modules/purchase"
 	"erp-golang/internal/modules/purchase_requisition"
 	"erp-golang/internal/modules/quality"
 	"erp-golang/internal/modules/recruitment"
+	"erp-golang/internal/modules/reports"
 	"erp-golang/internal/modules/sale"
 	"erp-golang/internal/modules/stock"
 	"erp-golang/internal/modules/stock_inventory"
+	"erp-golang/internal/modules/subscription"
+	"erp-golang/internal/modules/tax_ebupot"
 	"erp-golang/internal/modules/tax_efaktur"
 	"erp-golang/internal/modules/traceability"
-	"erp-golang/internal/modules/subscription"
-	"erp-golang/internal/modules/audit_trail"
-	"erp-golang/internal/modules/webhook"
-	"erp-golang/internal/modules/inbound_webhook"
-	"erp-golang/internal/modules/intercompany"
 	"erp-golang/internal/modules/treasury"
-	"erp-golang/internal/modules/mrp_advanced"
-	"erp-golang/internal/modules/tax_ebupot"
-	"erp-golang/internal/modules/esignature"
-	"erp-golang/internal/modules/wms"
 	"erp-golang/internal/modules/vendor_portal"
-	"erp-golang/internal/modules/customer_portal"
-	"erp-golang/internal/modules/customs_bonded"
-	"erp-golang/internal/modules/lowcode_studio"
-	"erp-golang/internal/modules/reports"
+	"erp-golang/internal/modules/webhook"
+	"erp-golang/internal/modules/wms"
 	"erp-golang/internal/modules/workflow_engine"
-	"erp-golang/internal/modules/integration_hub"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -851,90 +851,89 @@ func getDashboardStats(c *gin.Context, db *gorm.DB) {
 	db.Table("integration_logs").Count(&integrationLogCount)
 
 	payload := gin.H{
-		"products":                  productCount,
-		"customers":                 customerCount,
-		"vendors":                   vendorCount,
-		"sales_orders":              saleCount,
-		"purchase_orders":           purchaseCount,
-		"pickings":                  pickingCount,
-		"invoices":                  invoiceCount,
-		"total_sales":               totalSales,
-		"mrp_orders":                mrpCount,
-		"pos_orders":                posOrderCount,
-		"employees":                 empCount,
-		"crm_leads":                 leadCount,
-		"projects":                  projectCount,
-		"tasks":                     taskCount,
-		"assets":                    assetCount,
-		"tickets":                   ticketCount,
-		"equipments":                equipmentCount,
-		"maintenance_requests":      maintRequestCount,
-		"vehicles":                  vehicleCount,
-		"leaves":                    leaveCount,
-		"expenses":                  expenseCount,
-		"expense_sheets":            expenseSheetCount,
-		"quality_checks":            qcCount,
-		"quality_alerts":            qaCount,
-		"approvals":                 approvalCount,
-		"attachments":               docCount,
-		"attendances":               attCount,
-		"job_openings":              openingCount,
-		"applicants":                applicantCount,
-		"stock_inventories":         stockInventoryCount,
-		"payroll_payslips":          payrollSlipCount,
-		"budgets":                   budgetCount,
-		"lots":                      lotCount,
-		"purchase_requisitions":     reqCount,
-		"currencies":                currencyCount,
-		"tax_invoices":              taxInvoiceCount,
-		"bank_statements":           bankStatementCount,
-		"landed_costs":              landedCostCount,
-		"traceability_records":      traceCount,
-		"recalls":                   recallCount,
-		"subscriptions":             subCount,
-		"subscription_mrr":          subMRR,
-		"audit_logs":                auditLogCount,
-		"suspicious_audit_logs":     suspiciousAuditCount,
-		"webhook_subscriptions":     webhookSubCount,
-		"webhook_deliveries":        webhookDeliveryCount,
-		"inbound_webhook_endpoints": inboundEndpointCount,
-		"inbound_webhook_logs":      inboundLogCount,
-		"intercompany_groups":       icGroupCount,
-		"intercompany_transactions": icTxCount,
-		"consolidation_runs":        icRunCount,
-		"treasury_bank_accounts":    bankAccCount,
-		"cash_flow_forecasts":       forecastCount,
-		"interbank_transfers":       transferCount,
-		"total_liquid_cash":         totalLiquidCash,
-		"work_centers":              workCenterCount,
-		"routings":                  routingCount,
-		"work_orders":               workOrderCount,
-		"ebupot_periods":            ebupotPeriodCount,
-		"ebupot_slips":              ebupotSlipCount,
-		"total_ebupot_tax":          totalEbupotTax,
-		"esign_requests":            esignRequestCount,
-		"esign_signed":              esignSignedCount,
-		"wms_zones":                 wmsZoneCount,
-		"wms_bins":                  wmsBinCount,
-		"wms_waves":                 wmsWaveCount,
-		"vendor_portal_accounts":    vendorAccCount,
-		"vendor_quotation_bids":     vendorBidCount,
-		"vendor_asns":               vendorASNCount,
+		"products":                   productCount,
+		"customers":                  customerCount,
+		"vendors":                    vendorCount,
+		"sales_orders":               saleCount,
+		"purchase_orders":            purchaseCount,
+		"pickings":                   pickingCount,
+		"invoices":                   invoiceCount,
+		"total_sales":                totalSales,
+		"mrp_orders":                 mrpCount,
+		"pos_orders":                 posOrderCount,
+		"employees":                  empCount,
+		"crm_leads":                  leadCount,
+		"projects":                   projectCount,
+		"tasks":                      taskCount,
+		"assets":                     assetCount,
+		"tickets":                    ticketCount,
+		"equipments":                 equipmentCount,
+		"maintenance_requests":       maintRequestCount,
+		"vehicles":                   vehicleCount,
+		"leaves":                     leaveCount,
+		"expenses":                   expenseCount,
+		"expense_sheets":             expenseSheetCount,
+		"quality_checks":             qcCount,
+		"quality_alerts":             qaCount,
+		"approvals":                  approvalCount,
+		"attachments":                docCount,
+		"attendances":                attCount,
+		"job_openings":               openingCount,
+		"applicants":                 applicantCount,
+		"stock_inventories":          stockInventoryCount,
+		"payroll_payslips":           payrollSlipCount,
+		"budgets":                    budgetCount,
+		"lots":                       lotCount,
+		"purchase_requisitions":      reqCount,
+		"currencies":                 currencyCount,
+		"tax_invoices":               taxInvoiceCount,
+		"bank_statements":            bankStatementCount,
+		"landed_costs":               landedCostCount,
+		"traceability_records":       traceCount,
+		"recalls":                    recallCount,
+		"subscriptions":              subCount,
+		"subscription_mrr":           subMRR,
+		"audit_logs":                 auditLogCount,
+		"suspicious_audit_logs":      suspiciousAuditCount,
+		"webhook_subscriptions":      webhookSubCount,
+		"webhook_deliveries":         webhookDeliveryCount,
+		"inbound_webhook_endpoints":  inboundEndpointCount,
+		"inbound_webhook_logs":       inboundLogCount,
+		"intercompany_groups":        icGroupCount,
+		"intercompany_transactions":  icTxCount,
+		"consolidation_runs":         icRunCount,
+		"treasury_bank_accounts":     bankAccCount,
+		"cash_flow_forecasts":        forecastCount,
+		"interbank_transfers":        transferCount,
+		"total_liquid_cash":          totalLiquidCash,
+		"work_centers":               workCenterCount,
+		"routings":                   routingCount,
+		"work_orders":                workOrderCount,
+		"ebupot_periods":             ebupotPeriodCount,
+		"ebupot_slips":               ebupotSlipCount,
+		"total_ebupot_tax":           totalEbupotTax,
+		"esign_requests":             esignRequestCount,
+		"esign_signed":               esignSignedCount,
+		"wms_zones":                  wmsZoneCount,
+		"wms_bins":                   wmsBinCount,
+		"wms_waves":                  wmsWaveCount,
+		"vendor_portal_accounts":     vendorAccCount,
+		"vendor_quotation_bids":      vendorBidCount,
+		"vendor_asns":                vendorASNCount,
 		"vendor_invoice_submissions": vendorInvCount,
-		"customer_portal_accounts":  custAccCount,
-		"customer_b2b_orders":       custOrderCount,
-		"customer_rmas":             custRMACount,
-		"customer_payment_notifs":   custPayCount,
-		"customs_documents":         customsDocCount,
-		"customs_mutations":         customsMutationCount,
-		"customs_subcontracts":      customsSubcontractCount,
-		"workflow_definitions":      workflowDefCount,
-		"workflow_instances":        workflowInstCount,
-		"integration_api_keys":      integrationKeyCount,
-		"integration_connectors":    integrationConnectorCount,
-		"integration_logs":          integrationLogCount,
+		"customer_portal_accounts":   custAccCount,
+		"customer_b2b_orders":        custOrderCount,
+		"customer_rmas":              custRMACount,
+		"customer_payment_notifs":    custPayCount,
+		"customs_documents":          customsDocCount,
+		"customs_mutations":          customsMutationCount,
+		"customs_subcontracts":       customsSubcontractCount,
+		"workflow_definitions":       workflowDefCount,
+		"workflow_instances":         workflowInstCount,
+		"integration_api_keys":       integrationKeyCount,
+		"integration_connectors":     integrationConnectorCount,
+		"integration_logs":           integrationLogCount,
 	}
 	commandcenter.EnrichDashboardStats(db, companyID, payload)
 	c.JSON(http.StatusOK, payload)
 }
-

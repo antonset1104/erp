@@ -12,38 +12,38 @@ import (
 
 // SubAccountNode represents a subsidiary bank account participating in ZBA
 type SubAccountNode struct {
-	SubsidiaryID       string  `json:"subsidiary_id"`
-	SubsidiaryName     string  `json:"subsidiary_name"`
-	SubAccountIBAN     string  `json:"sub_account_iban"`
-	CurrentBalance     float64 `json:"current_balance"`
-	TargetBalance      float64 `json:"target_balance"`      // Typically 0 or minimum operational buffer
+	SubsidiaryID             string  `json:"subsidiary_id"`
+	SubsidiaryName           string  `json:"subsidiary_name"`
+	SubAccountIBAN           string  `json:"sub_account_iban"`
+	CurrentBalance           float64 `json:"current_balance"`
+	TargetBalance            float64 `json:"target_balance"`          // Typically 0 or minimum operational buffer
 	CumulativeLoanWithParent float64 `json:"cumulative_loan_balance"` // Positive = Parent lent to sub, Negative = Sub lent to parent
 }
 
 // ZBAPoolStructure represents master cash pool hierarchy
 type ZBAPoolStructure struct {
-	PoolID               string                    `json:"pool_id"`
-	HoldingCompanyID     string                    `json:"holding_company_id"`
-	HoldingCompanyName   string                    `json:"holding_company_name"`
-	MasterAccountIBAN    string                    `json:"master_account_iban"`
-	Currency             string                    `json:"currency"`
-	MasterBalance        float64                   `json:"master_balance"`
-	SweepStrategy        string                    `json:"sweep_strategy"` // "TWO_WAY_ZBA_ZERO_BALANCE"
-	SubAccounts          map[string]*SubAccountNode `json:"sub_accounts"`
-	CreatedAt            time.Time                 `json:"created_at"`
+	PoolID             string                     `json:"pool_id"`
+	HoldingCompanyID   string                     `json:"holding_company_id"`
+	HoldingCompanyName string                     `json:"holding_company_name"`
+	MasterAccountIBAN  string                     `json:"master_account_iban"`
+	Currency           string                     `json:"currency"`
+	MasterBalance      float64                    `json:"master_balance"`
+	SweepStrategy      string                     `json:"sweep_strategy"` // "TWO_WAY_ZBA_ZERO_BALANCE"
+	SubAccounts        map[string]*SubAccountNode `json:"sub_accounts"`
+	CreatedAt          time.Time                  `json:"created_at"`
 }
 
 // SweepTransactionLine models an individual sweep transfer
 type SweepTransactionLine struct {
-	SweepLineID        string    `json:"sweep_line_id"`
-	SubsidiaryID       string    `json:"subsidiary_id"`
-	FromAccount        string    `json:"from_account"`
-	ToAccount          string    `json:"to_account"`
-	SweepAmount        float64   `json:"sweep_amount"`
-	SweepDirection      string    `json:"sweep_direction"` // "UPWARD_SWEEP", "DOWNWARD_TOPUP"
-	SubBalanceBefore   float64   `json:"sub_balance_before"`
-	SubBalanceAfter    float64   `json:"sub_balance_after"`
-	IntercompanyMoveRef string   `json:"intercompany_move_ref"`
+	SweepLineID         string  `json:"sweep_line_id"`
+	SubsidiaryID        string  `json:"subsidiary_id"`
+	FromAccount         string  `json:"from_account"`
+	ToAccount           string  `json:"to_account"`
+	SweepAmount         float64 `json:"sweep_amount"`
+	SweepDirection      string  `json:"sweep_direction"` // "UPWARD_SWEEP", "DOWNWARD_TOPUP"
+	SubBalanceBefore    float64 `json:"sub_balance_before"`
+	SubBalanceAfter     float64 `json:"sub_balance_after"`
+	IntercompanyMoveRef string  `json:"intercompany_move_ref"`
 }
 
 // ZBASweepExecutionRecord represents the complete batch sweep run
@@ -60,28 +60,28 @@ type ZBASweepExecutionRecord struct {
 
 // IntercompanyInterestAccrual models arm's length interest calculation and statutory tax withholding
 type IntercompanyInterestAccrual struct {
-	AccrualID             string    `json:"accrual_id"`
-	SubsidiaryID          string    `json:"subsidiary_id"`
-	PrincipalLoanAmount   float64   `json:"principal_loan_amount"`
-	BenchmarkRateAPR      float64   `json:"benchmark_rate_apr"`      // e.g. 6.00% (BI-Rate / SOFR)
-	ArmsLengthSpreadAPR   float64   `json:"arms_length_spread_apr"`  // e.g. 1.25%
-	EffectiveRateAPR      float64   `json:"effective_rate_apr"`      // e.g. 7.25%
-	DaysAccrued           int       `json:"days_accrued"`
-	GrossInterestAmount   float64   `json:"gross_interest_amount"`
-	TaxWithholdingRate    float64   `json:"tax_withholding_rate"`    // 15% (PPh 23) or 10% (PPh 26/DTAA)
-	TaxWithholdingAmount  float64   `json:"tax_withholding_amount"`
-	NetInterestPayable    float64   `json:"net_interest_payable"`
-	DebitAccountParent    string    `json:"debit_account_parent"`
-	CreditAccountSub      string    `json:"credit_account_sub"`
-	AccruedAt             time.Time `json:"accrued_at"`
+	AccrualID            string    `json:"accrual_id"`
+	SubsidiaryID         string    `json:"subsidiary_id"`
+	PrincipalLoanAmount  float64   `json:"principal_loan_amount"`
+	BenchmarkRateAPR     float64   `json:"benchmark_rate_apr"`     // e.g. 6.00% (BI-Rate / SOFR)
+	ArmsLengthSpreadAPR  float64   `json:"arms_length_spread_apr"` // e.g. 1.25%
+	EffectiveRateAPR     float64   `json:"effective_rate_apr"`     // e.g. 7.25%
+	DaysAccrued          int       `json:"days_accrued"`
+	GrossInterestAmount  float64   `json:"gross_interest_amount"`
+	TaxWithholdingRate   float64   `json:"tax_withholding_rate"` // 15% (PPh 23) or 10% (PPh 26/DTAA)
+	TaxWithholdingAmount float64   `json:"tax_withholding_amount"`
+	NetInterestPayable   float64   `json:"net_interest_payable"`
+	DebitAccountParent   string    `json:"debit_account_parent"`
+	CreditAccountSub     string    `json:"credit_account_sub"`
+	AccruedAt            time.Time `json:"accrued_at"`
 }
 
 // ZBACashSweepingVault thread-safe store
 type ZBACashSweepingVault struct {
-	mu           sync.RWMutex
-	pools        map[string]*ZBAPoolStructure
-	executions   map[string]*ZBASweepExecutionRecord
-	accruals     map[string][]IntercompanyInterestAccrual
+	mu         sync.RWMutex
+	pools      map[string]*ZBAPoolStructure
+	executions map[string]*ZBASweepExecutionRecord
+	accruals   map[string][]IntercompanyInterestAccrual
 }
 
 // Global ZBA Vault instance
@@ -185,14 +185,14 @@ func (v *ZBACashSweepingVault) ExecuteEODSweeping(holdingID string) (*ZBASweepEx
 			sub.CumulativeLoanWithParent -= sweepAmt
 
 			line := SweepTransactionLine{
-				SweepLineID:        fmt.Sprintf("SWP-%d", time.Now().UnixNano()%1000000),
-				SubsidiaryID:       sub.SubsidiaryID,
-				FromAccount:        sub.SubAccountIBAN,
-				ToAccount:          pool.MasterAccountIBAN,
-				SweepAmount:        sweepAmt,
+				SweepLineID:         fmt.Sprintf("SWP-%d", time.Now().UnixNano()%1000000),
+				SubsidiaryID:        sub.SubsidiaryID,
+				FromAccount:         sub.SubAccountIBAN,
+				ToAccount:           pool.MasterAccountIBAN,
+				SweepAmount:         sweepAmt,
 				SweepDirection:      "UPWARD_SWEEP",
-				SubBalanceBefore:   sub.CurrentBalance + sweepAmt,
-				SubBalanceAfter:    sub.CurrentBalance,
+				SubBalanceBefore:    sub.CurrentBalance + sweepAmt,
+				SubBalanceAfter:     sub.CurrentBalance,
 				IntercompanyMoveRef: fmt.Sprintf("GL-IC-UP-%s-%d", sub.SubsidiaryID, time.Now().Unix()%10000),
 			}
 			record.Transactions = append(record.Transactions, line)
@@ -205,14 +205,14 @@ func (v *ZBACashSweepingVault) ExecuteEODSweeping(holdingID string) (*ZBASweepEx
 			sub.CumulativeLoanWithParent += topupAmt
 
 			line := SweepTransactionLine{
-				SweepLineID:        fmt.Sprintf("SWP-%d", time.Now().UnixNano()%1000000),
-				SubsidiaryID:       sub.SubsidiaryID,
-				FromAccount:        pool.MasterAccountIBAN,
-				ToAccount:          sub.SubAccountIBAN,
-				SweepAmount:        topupAmt,
+				SweepLineID:         fmt.Sprintf("SWP-%d", time.Now().UnixNano()%1000000),
+				SubsidiaryID:        sub.SubsidiaryID,
+				FromAccount:         pool.MasterAccountIBAN,
+				ToAccount:           sub.SubAccountIBAN,
+				SweepAmount:         topupAmt,
 				SweepDirection:      "DOWNWARD_TOPUP",
-				SubBalanceBefore:   sub.CurrentBalance - topupAmt,
-				SubBalanceAfter:    sub.CurrentBalance,
+				SubBalanceBefore:    sub.CurrentBalance - topupAmt,
+				SubBalanceAfter:     sub.CurrentBalance,
 				IntercompanyMoveRef: fmt.Sprintf("GL-IC-DOWN-%s-%d", sub.SubsidiaryID, time.Now().Unix()%10000),
 			}
 			record.Transactions = append(record.Transactions, line)
@@ -294,18 +294,18 @@ func (v *ZBACashSweepingVault) GetPoolingOverview(holdingID string) (gin.H, erro
 	}
 
 	return gin.H{
-		"pool_id":                pool.PoolID,
-		"holding_company_id":     pool.HoldingCompanyID,
-		"holding_company_name":   pool.HoldingCompanyName,
-		"currency":               pool.Currency,
-		"master_account_iban":    pool.MasterAccountIBAN,
-		"master_cash_balance":    pool.MasterBalance,
-		"total_subsidiary_cash":  totalSubsidiaryCash,
+		"pool_id":                 pool.PoolID,
+		"holding_company_id":      pool.HoldingCompanyID,
+		"holding_company_name":    pool.HoldingCompanyName,
+		"currency":                pool.Currency,
+		"master_account_iban":     pool.MasterAccountIBAN,
+		"master_cash_balance":     pool.MasterBalance,
+		"total_subsidiary_cash":   totalSubsidiaryCash,
 		"total_conglomerate_cash": pool.MasterBalance + totalSubsidiaryCash,
-		"subsidiary_nodes":       subList,
-		"recent_accruals":        v.accruals[holdingID],
-		"sweep_strategy":         pool.SweepStrategy,
-		"interest_tax_status":    "COMPLIANT_WITH_PMK_TRANSFER_PRICING",
+		"subsidiary_nodes":        subList,
+		"recent_accruals":         v.accruals[holdingID],
+		"sweep_strategy":          pool.SweepStrategy,
+		"interest_tax_status":     "COMPLIANT_WITH_PMK_TRANSFER_PRICING",
 	}, nil
 }
 

@@ -16,13 +16,13 @@ type SatelliteLaserPATTelemetry struct {
 	TelemetryID                    string    `json:"telemetry_id"`
 	SatelliteID                    string    `json:"satellite_id"`
 	TargetSatelliteID              string    `json:"target_satellite_id"`
-	InterSatelliteRangeKm          float64   `json:"inter_satellite_range_km"`            // 1500.0 - 5000.0 km
-	OpticalPointingErrorUrad       float64   `json:"optical_pointing_error_urad"`          // limit < 5.0 urad
-	MicroVibrationJitterRmsUrad    float64   `json:"micro_vibration_jitter_rms_urad"`     // threshold > 3.5 urad
-	FsmPiezoActuatorStrokePct      float64   `json:"fsm_piezo_actuator_stroke_pct"`       // limit < 85.0%
-	OpticalSignalToNoiseRatioDb    float64   `json:"optical_signal_to_noise_ratio_db"`     // limit > 18.0 dB
-	LaserDiodeTxPowerMw            float64   `json:"laser_diode_tx_power_mw"`             // nominal 500 - 1500 mW
-	ConstellationMeshPacketLossPct float64   `json:"constellation_mesh_packet_loss_pct"`  // limit < 0.05%
+	InterSatelliteRangeKm          float64   `json:"inter_satellite_range_km"`           // 1500.0 - 5000.0 km
+	OpticalPointingErrorUrad       float64   `json:"optical_pointing_error_urad"`        // limit < 5.0 urad
+	MicroVibrationJitterRmsUrad    float64   `json:"micro_vibration_jitter_rms_urad"`    // threshold > 3.5 urad
+	FsmPiezoActuatorStrokePct      float64   `json:"fsm_piezo_actuator_stroke_pct"`      // limit < 85.0%
+	OpticalSignalToNoiseRatioDb    float64   `json:"optical_signal_to_noise_ratio_db"`   // limit > 18.0 dB
+	LaserDiodeTxPowerMw            float64   `json:"laser_diode_tx_power_mw"`            // nominal 500 - 1500 mW
+	ConstellationMeshPacketLossPct float64   `json:"constellation_mesh_packet_loss_pct"` // limit < 0.05%
 	Timestamp                      time.Time `json:"timestamp"`
 }
 
@@ -30,8 +30,8 @@ type SatelliteLaserPATTelemetry struct {
 type SatelliteLaserPATAssessment struct {
 	AssessmentID                          string    `json:"assessment_id"`
 	SatelliteID                           string    `json:"satellite_id"`
-	LaserCrosslinkIntegrityStatus         string    `json:"laser_crosslink_integrity_status"`         // OPTICAL_LINK_LOCKED, MICRO_JITTER_DEVIATION_WARNING, CROSS_LINK_BREAKUP_AVALANCHE_CRITICAL
-	FineSteeringMirrorStatus              string    `json:"fine_steering_mirror_status"`             // LINEAR_PIEZO_TRACKING, ACTUATOR_STROKE_SATURATION_RISK
+	LaserCrosslinkIntegrityStatus         string    `json:"laser_crosslink_integrity_status"` // OPTICAL_LINK_LOCKED, MICRO_JITTER_DEVIATION_WARNING, CROSS_LINK_BREAKUP_AVALANCHE_CRITICAL
+	FineSteeringMirrorStatus              string    `json:"fine_steering_mirror_status"`      // LINEAR_PIEZO_TRACKING, ACTUATOR_STROKE_SATURATION_RISK
 	PointingErrorExcessMarginPct          float64   `json:"pointing_error_excess_margin_pct"`
 	FastSteeringMirrorJitterRejectMandate bool      `json:"fast_steering_mirror_jitter_reject_mandate"`
 	DiodePowerBoostAndRerouteMandate      bool      `json:"diode_power_boost_and_reroute_mandate"`
@@ -41,13 +41,13 @@ type SatelliteLaserPATAssessment struct {
 
 // SatelliteLaserPATMitigationAction models piezo FSM closed-loop jitter compensation, diode power boosting, and mesh packet rerouting
 type SatelliteLaserPATMitigationAction struct {
-	ActionID                    string    `json:"action_id"`
-	SatelliteID                 string    `json:"satellite_id"`
-	FsmPiezoVoltageOffsetVolts  float64   `json:"fsm_piezo_voltage_offset_volts"`
-	CommandedLaserPowerBoostMw  float64   `json:"commanded_laser_power_boost_mw"`
-	ConstellationRerouteMeshHops int      `json:"constellation_reroute_mesh_hops"`
-	AvoidedSatelliteLinkLossUSD float64   `json:"avoided_satellite_link_loss_usd"`
-	ExecutedAt                  time.Time `json:"executed_at"`
+	ActionID                     string    `json:"action_id"`
+	SatelliteID                  string    `json:"satellite_id"`
+	FsmPiezoVoltageOffsetVolts   float64   `json:"fsm_piezo_voltage_offset_volts"`
+	CommandedLaserPowerBoostMw   float64   `json:"commanded_laser_power_boost_mw"`
+	ConstellationRerouteMeshHops int       `json:"constellation_reroute_mesh_hops"`
+	AvoidedSatelliteLinkLossUSD  float64   `json:"avoided_satellite_link_loss_usd"`
+	ExecutedAt                   time.Time `json:"executed_at"`
 }
 
 // SatelliteLaserPATVault manages mega-constellation laser crosslink telemetry and autonomous beam acquisition safety
@@ -158,13 +158,13 @@ func (v *SatelliteLaserPATVault) TriggerJitterRejectionAndReroute(satelliteID st
 	}
 
 	action := SatelliteLaserPATMitigationAction{
-		ActionID:                    fmt.Sprintf("ACT-SAT-PAT-%d", time.Now().UnixNano()%1000000),
-		SatelliteID:                 satelliteID,
-		FsmPiezoVoltageOffsetVolts:  fsmVoltage,
-		CommandedLaserPowerBoostMw:  diodePower,
+		ActionID:                     fmt.Sprintf("ACT-SAT-PAT-%d", time.Now().UnixNano()%1000000),
+		SatelliteID:                  satelliteID,
+		FsmPiezoVoltageOffsetVolts:   fsmVoltage,
+		CommandedLaserPowerBoostMw:   diodePower,
 		ConstellationRerouteMeshHops: rerouteHops,
-		AvoidedSatelliteLinkLossUSD: 220000000.0, // $220M USD avoided constellation link failure, mesh partitioning & SLA penalties
-		ExecutedAt:                  time.Now(),
+		AvoidedSatelliteLinkLossUSD:  220000000.0, // $220M USD avoided constellation link failure, mesh partitioning & SLA penalties
+		ExecutedAt:                   time.Now(),
 	}
 
 	v.actions[satelliteID] = action

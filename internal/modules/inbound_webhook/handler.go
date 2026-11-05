@@ -82,9 +82,14 @@ func (h *Handler) HandlePublicInbound(c *gin.Context) {
 			status = log.HTTPStatusCode
 		}
 		c.JSON(status, gin.H{
-			"status":   "error",
-			"log_code": func() string { if log != nil { return log.LogCode }; return "" }(),
-			"error":    err.Error(),
+			"status": "error",
+			"log_code": func() string {
+				if log != nil {
+					return log.LogCode
+				}
+				return ""
+			}(),
+			"error": err.Error(),
 		})
 		return
 	}

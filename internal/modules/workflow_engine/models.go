@@ -62,8 +62,8 @@ type WorkflowNode struct {
 	ApproverUserID *uint  `gorm:"index" json:"approver_user_id,omitempty"`
 	TimeoutHours   int    `gorm:"default:24" json:"timeout_hours"`
 	ActionHook     string `gorm:"size:128" json:"action_hook,omitempty"` // e.g. post_gl, send_email, auto_validate
-	PosX           int    `gorm:"default:100" json:"pos_x"`               // Visual Canvas coordinate X
-	PosY           int    `gorm:"default:100" json:"pos_y"`               // Visual Canvas coordinate Y
+	PosX           int    `gorm:"default:100" json:"pos_x"`              // Visual Canvas coordinate X
+	PosY           int    `gorm:"default:100" json:"pos_y"`              // Visual Canvas coordinate Y
 }
 
 func (WorkflowNode) TableName() string {
@@ -77,7 +77,7 @@ type WorkflowTransition struct {
 	FromNodeKey         string `gorm:"size:64;not null;index" json:"from_node_key"`
 	ToNodeKey           string `gorm:"size:64;not null;index" json:"to_node_key"`
 	ActionName          string `gorm:"size:64;not null;default:'approve'" json:"action_name"` // submit, approve, reject, rework, auto
-	ConditionExpression string `gorm:"size:255" json:"condition_expression,omitempty"`       // e.g. amount >= 50000000, is_capex == true
+	ConditionExpression string `gorm:"size:255" json:"condition_expression,omitempty"`        // e.g. amount >= 50000000, is_capex == true
 	Priority            int    `gorm:"default:10" json:"priority"`                            // Evaluated in ascending priority order
 }
 
@@ -127,11 +127,11 @@ func (WorkflowActivityLog) TableName() string {
 // --- DTO Requests & Responses ---
 
 type CreateWorkflowDefinitionRequest struct {
-	Code           string                           `json:"code" binding:"required"`
-	Name           string                           `json:"name" binding:"required"`
-	Description    string                           `json:"description"`
-	TargetModel    string                           `json:"target_model" binding:"required"`
-	InitialNodeKey string                           `json:"initial_node_key"`
+	Code           string                            `json:"code" binding:"required"`
+	Name           string                            `json:"name" binding:"required"`
+	Description    string                            `json:"description"`
+	TargetModel    string                            `json:"target_model" binding:"required"`
+	InitialNodeKey string                            `json:"initial_node_key"`
 	Nodes          []CreateWorkflowNodeRequest       `json:"nodes"`
 	Transitions    []CreateWorkflowTransitionRequest `json:"transitions"`
 }
@@ -185,12 +185,12 @@ type AIWorkflowDesignRequest struct {
 }
 
 type AIWorkflowReport struct {
-	ScenarioName        string                       `json:"scenario_name"`
-	TargetModel         string                       `json:"target_model"`
+	ScenarioName        string                            `json:"scenario_name"`
+	TargetModel         string                            `json:"target_model"`
 	RecommendedNodes    []CreateWorkflowNodeRequest       `json:"recommended_nodes"`
 	RecommendedEdges    []CreateWorkflowTransitionRequest `json:"recommended_edges"`
-	ComplianceGuideline string                       `json:"compliance_guideline"`
-	EfficiencyRating    string                       `json:"efficiency_rating"`
-	OptimizationTips    []string                     `json:"optimization_tips"`
-	Provider            string                       `json:"provider"`
+	ComplianceGuideline string                            `json:"compliance_guideline"`
+	EfficiencyRating    string                            `json:"efficiency_rating"`
+	OptimizationTips    []string                          `json:"optimization_tips"`
+	Provider            string                            `json:"provider"`
 }

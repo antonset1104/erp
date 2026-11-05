@@ -15,14 +15,14 @@ import (
 )
 
 type CrossDockMatchedOutbound struct {
-	OutboundPickingID   uint    `json:"outbound_picking_id"`
-	OutboundPickingRef  string  `json:"outbound_picking_ref"`
-	CustomerName        string  `json:"customer_name"`
-	RequiredQty         float64 `json:"required_qty"`
-	AllocatedQty        float64 `json:"allocated_qty"`
-	RemainingBackorder  float64 `json:"remaining_backorder"`
-	SLAHoursRemaining   float64 `json:"sla_hours_remaining"`
-	UrgencyLevel        string  `json:"urgency_level"` // CRITICAL, HIGH, NORMAL
+	OutboundPickingID  uint    `json:"outbound_picking_id"`
+	OutboundPickingRef string  `json:"outbound_picking_ref"`
+	CustomerName       string  `json:"customer_name"`
+	RequiredQty        float64 `json:"required_qty"`
+	AllocatedQty       float64 `json:"allocated_qty"`
+	RemainingBackorder float64 `json:"remaining_backorder"`
+	SLAHoursRemaining  float64 `json:"sla_hours_remaining"`
+	UrgencyLevel       string  `json:"urgency_level"` // CRITICAL, HIGH, NORMAL
 }
 
 type CrossDockOpportunity struct {
@@ -69,14 +69,14 @@ type CrossDockDispatchRequest struct {
 }
 
 type CrossDockDispatchResponse struct {
-	DispatchBatchRef      string    `json:"dispatch_batch_ref"`
-	InboundPickingID      uint      `json:"inbound_picking_id"`
-	CrossDockMovesCreated int       `json:"cross_dock_moves_created"`
-	StagingLocation       string    `json:"staging_location"`
-	TotalUnitsDispatched  float64   `json:"total_units_dispatched"`
-	Status                string    `json:"status"`
-	Message               string    `json:"message"`
-	DispatchedAt          string    `json:"dispatched_at"`
+	DispatchBatchRef      string  `json:"dispatch_batch_ref"`
+	InboundPickingID      uint    `json:"inbound_picking_id"`
+	CrossDockMovesCreated int     `json:"cross_dock_moves_created"`
+	StagingLocation       string  `json:"staging_location"`
+	TotalUnitsDispatched  float64 `json:"total_units_dispatched"`
+	Status                string  `json:"status"`
+	Message               string  `json:"message"`
+	DispatchedAt          string  `json:"dispatched_at"`
 }
 
 // MatchCrossDockOpportunities evaluates incoming receipts against waiting customer deliveries

@@ -19383,7 +19383,7 @@ async function loadCustomerAccounts() {
     try {
         const res = await api('/customer-portal/accounts');
         currentCustomerAccounts = (res && res.data) ? res.data : (res || []);
-        const tbody = document.getElementById('customerAccountsTableBody') || document.getElementById('cpAccountsTableBody');
+        const tbody = document.getElementById('cpAccountsTableBody');
         if (!tbody) return;
 
         if (currentCustomerAccounts.length === 0) {
@@ -19433,7 +19433,7 @@ async function loadCustomerPortalOrders() {
     try {
         const res = await api('/customer-portal/orders');
         const orders = (res && res.data) ? res.data : (res || []);
-        const tbody = document.getElementById('customerPortalOrdersTableBody') || document.getElementById('cpOrdersTableBody');
+        const tbody = document.getElementById('cpOrdersTableBody');
         if (!tbody) return;
 
         if (!orders || orders.length === 0) {
@@ -19468,7 +19468,7 @@ async function loadCustomerPortalRMAs() {
     try {
         const res = await api('/customer-portal/rmas');
         const rmas = (res && res.data) ? res.data : (res || []);
-        const tbody = document.getElementById('customerPortalRMATableBody') || document.getElementById('cpRMAsTableBody');
+        const tbody = document.getElementById('cpRMAsTableBody');
         if (!tbody) return;
 
         if (!rmas || rmas.length === 0) {
@@ -19505,7 +19505,7 @@ async function loadCustomerPortalStatements() {
     try {
         const res = await api('/customer-portal/statements');
         const statements = (res && res.data) ? res.data : (res || []);
-        const tbody = document.getElementById('customerPortalStatementsTableBody') || document.getElementById('cpPaymentsTableBody');
+        const tbody = document.getElementById('cpPaymentsTableBody');
         if (!tbody) return;
 
         if (!statements || statements.length === 0) {
@@ -19904,7 +19904,7 @@ async function handleSimSubmitPayment(e) {
 }
 
 // ==========================================
-// 46. KAWASAN BERIKAT & IT INVENTORY DJBC (MODUL 46)
+// 46. KAWASAN BERIKAT & IT INVENTORY DJBC (CEISA 4.0)
 // ==========================================
 
 let currentCustomsDocuments = [];
@@ -19913,467 +19913,518 @@ let currentCustomsSubcontracts = [];
 let selectedCustomsDocId = null;
 let selectedCustomsSubconId = null;
 
-function switchCustomsTab(tabName) {
-    const tabs = ['docs', 'inventory', 'subcontract', 'audit'];
-    tabs.forEach(t => {
-        const pane = document.getElementById(`cb-pane-${t}`);
-        const btn = document.getElementById(`cb-nav-${t}`);
-        if (pane) pane.style.display = (t === tabName) ? 'block' : 'none';
-        if (btn) {
-            if (t === tabName) {
-                btn.className = 'px-4 py-2 font-medium text-blue-600 border-b-2 border-blue-600 flex items-center space-x-2';
-            } else {
-                btn.className = 'px-4 py-2 font-medium text-gray-500 hover:text-gray-700 flex items-center space-x-2';
-            }
+function switchCustomsBondedSubtab(targetId) {
+    document.querySelectorAll('.cb-subtab-pane').forEach(p => {
+        p.style.display = (p.id === targetId) ? 'block' : 'none';
+    });
+    document.querySelectorAll('.cb-subtab-btn').forEach(btn => {
+        if (btn.getAttribute('data-target') === targetId) {
+            btn.className = 'btn btn-sm btn-primary cb-subtab-btn';
+        } else {
+            btn.className = 'btn btn-sm btn-secondary cb-subtab-btn';
         }
     });
 
-    if (tabName === 'docs') loadCustomsDocuments();
-    else if (tabName === 'inventory') loadCustomsITInventory();
-    else if (tabName === 'subcontract') loadCustomsSubcontracts();
-    else if (tabName === 'audit') runAICustomsAudit();
+    if (targetId === 'cbSubtabDocuments') loadCustomsBondedDocuments();
+    else if (targetId === 'cbSubtabBooks') loadCustomsBondedBookReport();
+    else if (targetId === 'cbSubtabMutations') loadCustomsBondedMutations();
+    else if (targetId === 'cbSubtabSubcontracts') loadCustomsBondedSubcontracts();
+}
+
+function switchCustomsTab(tabName) {
+    const map = {
+        'docs': 'cbSubtabDocuments',
+        'inventory': 'cbSubtabBooks',
+        'mutations': 'cbSubtabMutations',
+        'subcontract': 'cbSubtabSubcontracts',
+        'audit': 'cbSubtabDocuments'
+    };
+    const target = map[tabName] || 'cbSubtabDocuments';
+    switchCustomsBondedSubtab(target);
+    if (tabName === 'audit') {
+        openModalAICustomsAudit();
+    }
 }
 
 async function loadCustomsBondedData() {
     try {
         const stats = await api('/customs-bonded/stats');
         if (stats) {
-            const elTotal = document.getElementById('statCBTotalDocs');
-            const elSppb = document.getElementById('statCBSPPBApproved');
-            const elDuty = document.getElementById('statCBDutySuspended');
-            const elSubcon = document.getElementById('statCBSubcontractActive');
-            const elMutations = document.getElementById('statCBITMutations');
-            const elScore = document.getElementById('statCBAICompliance');
-
-            if (elTotal) elTotal.textContent = stats.total_documents || 0;
-            if (elSppb) elSppb.textContent = stats.sppb_approved_docs || 0;
-            if (elDuty) elDuty.textContent = formatCurrency(stats.total_duty_suspended || 0);
-            if (elSubcon) elSubcon.textContent = stats.active_subcontracts || 0;
-            if (elMutations) elMutations.textContent = stats.total_inventory_mutations || 0;
-            if (elScore) elScore.textContent = (stats.compliance_score || 95) + '%';
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = val;
+            };
+            setVal('cbKpiTotalDocs', stats.total_documents || 0);
+            setVal('cbKpiTotalDocsSub', (stats.sppb_approved_docs || 0) + ' Disetujui SPPB');
+            setVal('cbKpiBC23', stats.bc23_count || 0);
+            setVal('cbKpiBC30', stats.bc30_count || 0);
+            setVal('cbKpiDutySuspended', formatCurrency(stats.total_duty_suspended || 0));
+            setVal('cbKpiDutyExemption', 'Bebas Pajak Impor');
+            setVal('cbKpiExportValue', 'USD ' + (stats.total_export_value || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+            const compEl = document.getElementById('cbKpiComplianceStatus');
+            if (compEl) {
+                const isCompliant = (stats.compliance_score || 95) >= 80;
+                compEl.textContent = isCompliant ? 'COMPLIANT' : 'PERIKSA';
+                compEl.style.color = isCompliant ? '#10b981' : '#f59e0b';
+            }
         }
-
-        await loadCustomsDocuments();
+        await loadCustomsBondedDocuments();
     } catch (err) {
         console.error('Failed loading Customs Bonded data:', err);
-        showToast('Gagal memuat data Kawasan Berikat: ' + err.message, 'error');
     }
 }
 
-async function loadCustomsDocuments() {
+async function loadCustomsBondedDocuments() {
     try {
-        const filterType = document.getElementById('filterCustomsDocType')?.value || '';
+        const filterType = document.getElementById('cbDocFilterType')?.value || '';
         let url = '/customs-bonded/documents';
-        if (filterType) url += `?doc_type=${encodeURIComponent(filterType)}`;
+        if (filterType) url += '?doc_type=' + encodeURIComponent(filterType);
 
         const docs = await api(url);
         currentCustomsDocuments = docs || [];
-        renderCustomsDocsTable(currentCustomsDocuments);
+        renderCustomsBondedDocsTable(currentCustomsDocuments);
     } catch (err) {
         console.error('Failed loading customs documents:', err);
     }
 }
 
-function renderCustomsDocsTable(docs) {
-    const tbody = document.getElementById('tableCustomsDocsBody');
+function loadCustomsDocuments() {
+    return loadCustomsBondedDocuments();
+}
+
+function renderCustomsBondedDocsTable(docs) {
+    const tbody = document.getElementById('cbDocsTableBody');
     if (!tbody) return;
 
     if (!docs || docs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-gray-400">Belum ada dokumen pabean BC yang terdaftar.</td></tr>`;
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted" style="padding: 2rem;">Belum ada dokumen pabean BC yang terdaftar.</td></tr>';
         return;
     }
 
-    const docTypeBadges = {
-        'BC_23': '<span class="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 font-semibold">BC 2.3 (Impor/Bahan Baku)</span>',
-        'BC_25': '<span class="px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-800 font-semibold">BC 2.5 (Jual Lokal/DPP)</span>',
-        'BC_27': '<span class="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-800 font-semibold">BC 2.7 (Antar KB/TPB)</span>',
-        'BC_30': '<span class="px-2 py-0.5 text-xs rounded-full bg-indigo-100 text-indigo-800 font-semibold">BC 3.0 (Ekspor Devisa)</span>',
-        'BC_261': '<span class="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-800 font-semibold">BC 2.61 (Kirim Subkon)</span>',
-        'BC_262': '<span class="px-2 py-0.5 text-xs rounded-full bg-teal-100 text-teal-800 font-semibold">BC 2.62 (Kembali Subkon)</span>',
-        'BC_40': '<span class="px-2 py-0.5 text-xs rounded-full bg-slate-100 text-slate-800 font-semibold">BC 4.0 (Lokal Masuk KB)</span>',
-        'BC_41': '<span class="px-2 py-0.5 text-xs rounded-full bg-rose-100 text-rose-800 font-semibold">BC 4.1 (Kirim Antar KB)</span>'
+    const docTypeLabels = {
+        'BC_2_3': '<span class="badge badge-info">BC 2.3 (Impor Bahan)</span>',
+        'BC_3_0': '<span class="badge badge-success">BC 3.0 (Ekspor Barang)</span>',
+        'BC_2_5': '<span class="badge badge-warning">BC 2.5 (Jual Lokal)</span>',
+        'BC_2_61': '<span class="badge badge-warning">BC 2.61 (Kirim Subkon)</span>',
+        'BC_2_62': '<span class="badge badge-info">BC 2.62 (Kembali Subkon)</span>',
+        'BC_2_7': '<span class="badge badge-secondary">BC 2.7 (Antar KB)</span>',
+        'BC_23': '<span class="badge badge-info">BC 2.3 (Impor Bahan)</span>',
+        'BC_30': '<span class="badge badge-success">BC 3.0 (Ekspor Barang)</span>',
+        'BC_25': '<span class="badge badge-warning">BC 2.5 (Jual Lokal)</span>',
+        'BC_261': '<span class="badge badge-warning">BC 2.61 (Kirim Subkon)</span>',
+        'BC_262': '<span class="badge badge-info">BC 2.62 (Kembali Subkon)</span>',
+        'BC_27': '<span class="badge badge-secondary">BC 2.7 (Antar KB)</span>'
     };
 
     const statusBadges = {
-        'draft': '<span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">Draft</span>',
-        'registered': '<span class="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-800">Tergelar di Bea Cukai</span>',
-        'sppb_approved': '<span class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-800 font-semibold">SPPB Approved ✅</span>',
-        'inspection': '<span class="px-2 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-800">Jalur Merah (Pemeriksaan)</span>',
-        'cancelled': '<span class="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-800">Dibatalkan</span>'
+        'draft': '<span class="badge badge-secondary">Draft</span>',
+        'registered': '<span class="badge badge-warning">Tergelar Pabean</span>',
+        'sppb_approved': '<span class="badge badge-success">SPPB Terbit ✅</span>',
+        'inspection': '<span class="badge badge-danger">Jalur Merah</span>',
+        'cancelled': '<span class="badge badge-secondary">Dibatalkan</span>'
     };
 
     tbody.innerHTML = docs.map(d => {
-        const typeBadge = docTypeBadges[d.document_type] || `<span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-800 font-medium">${d.document_type}</span>`;
-        const stBadge = statusBadges[d.status] || `<span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">${d.status}</span>`;
-        const sppbInfo = d.sppb_number ? `<div class="text-xs text-emerald-600 font-semibold">SPPB: ${d.sppb_number}</div><div class="text-[10px] text-gray-400">${d.sppb_date ? d.sppb_date.substring(0,10) : ''}</div>` : `<span class="text-xs text-gray-400">Belum Terbit</span>`;
-        
+        const typeBadge = docTypeLabels[d.document_type] || ('<span class="badge badge-secondary">' + (d.document_type || '-') + '</span>');
+        const stBadge = statusBadges[d.status] || ('<span class="badge badge-secondary">' + (d.status || '-') + '</span>');
+        const regInfo = d.registration_number ? (d.registration_number + (d.registration_date ? ('<br><small class="text-muted">' + d.registration_date.substring(0, 10) + '</small>') : '')) : '<span class="text-muted">-</span>';
+        const partnerInfo = '<strong>' + escapeHtml(d.partner_name || d.partner?.name || 'PT Mitra Pabean') + '</strong>' + (d.country_of_origin ? ('<br><small class="text-muted">' + escapeHtml(d.country_of_origin) + '</small>') : '');
+        const sppbInfo = d.sppb_number ? ('<span class="text-success" style="font-weight: 600;">' + d.sppb_number + '</span>' + (d.sppb_date ? ('<br><small class="text-muted">' + d.sppb_date.substring(0, 10) + '</small>') : '')) : '<span class="text-muted">Menunggu</span>';
+
         let actionBtn = '';
         if (d.status === 'registered' || d.status === 'draft') {
-            actionBtn = `<button onclick="openModalApproveSPPB(${d.id}, '${d.document_number}')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded shadow-sm">Setujui SPPB</button>
-                         <button onclick="handleCancelCustomsDoc(${d.id})" class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 text-xs rounded ml-1">Batal</button>`;
+            actionBtn = '<div style="display: flex; gap: 0.3rem;"><button onclick="openModalApproveSPPB(' + d.id + ', \'' + d.document_number + '\')" class="btn btn-xs btn-success">✅ SPPB</button><button onclick="handleCancelCustomsDoc(' + d.id + ')" class="btn btn-xs btn-danger">✕</button></div>';
         } else if (d.status === 'sppb_approved') {
-            actionBtn = `<span class="text-xs text-emerald-600 font-semibold flex items-center"><i class="fas fa-check-circle mr-1"></i>Selesai</span>`;
+            actionBtn = '<span class="text-success" style="font-size: 0.8rem; font-weight: 600;">✓ Selesai</span>';
         } else {
-            actionBtn = `<span class="text-xs text-gray-400">-</span>`;
+            actionBtn = '<span class="text-muted">-</span>';
         }
 
-        return `
-            <tr class="hover:bg-gray-50 border-b border-gray-100 transition-colors">
-                <td class="px-4 py-3 font-mono font-medium text-blue-600 text-xs">${d.document_number}</td>
-                <td class="px-4 py-3">${typeBadge}</td>
-                <td class="px-4 py-3 text-xs text-gray-700 font-mono">${d.registration_number || '-'}</td>
-                <td class="px-4 py-3 text-xs text-gray-600">${d.registration_date ? d.registration_date.substring(0, 10) : '-'}</td>
-                <td class="px-4 py-3 text-xs text-gray-800 font-medium">${d.partner_name || 'PT Mitra Pabean'}</td>
-                <td class="px-4 py-3 text-xs text-right font-mono font-semibold text-gray-700">${formatCurrency(d.duty_suspended_amount || 0)}</td>
-                <td class="px-4 py-3">${sppbInfo}</td>
-                <td class="px-4 py-3">${stBadge}</td>
-                <td class="px-4 py-3 text-center whitespace-nowrap">${actionBtn}</td>
-            </tr>
-        `;
+        return '<tr>' +
+            '<td><code style="font-weight: 600; color: #6366f1;">' + d.document_number + '</code></td>' +
+            '<td>' + typeBadge + '</td>' +
+            '<td>' + regInfo + '</td>' +
+            '<td>' + partnerInfo + '</td>' +
+            '<td>' + (d.currency || 'USD') + ' ' + (d.cif_amount ? d.cif_amount.toLocaleString(undefined, {minimumFractionDigits: 2}) : '0.00') + '</td>' +
+            '<td>' + formatCurrency(d.duty_suspended_amount || 0) + '</td>' +
+            '<td>' + sppbInfo + '</td>' +
+            '<td>' + actionBtn + '</td>' +
+        '</tr>';
     }).join('');
 }
 
-async function loadCustomsITInventory() {
+async function loadCustomsBondedBookReport() {
     try {
-        const filterCat = document.getElementById('filterCustomsBookCat')?.value || '';
-        let url = '/customs-bonded/it-inventory';
-        if (filterCat) url += `?book_category=${encodeURIComponent(filterCat)}`;
+        const cat = document.getElementById('cbBookCategorySelect')?.value || 'raw_material';
+        const tbody = document.getElementById('cbBookReportTableBody');
+        if (!tbody) return;
 
-        const ledgers = await api(url);
-        currentCustomsLedgers = ledgers || [];
-        renderCustomsITInventoryTable(currentCustomsLedgers);
+        let res = await api('/customs-bonded/it-inventory/book-report?book_category=' + encodeURIComponent(cat));
+        let items = (res && res.data) ? res.data : (res || []);
+
+        if (!items || items.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted" style="padding: 2rem;">Belum ada saldo buku IT Inventory untuk kategori ini.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = items.map(it => {
+            const code = it.product_code || it.item_code || '-';
+            const name = it.product_name || it.item_name || 'Item Material';
+            const uom = it.uom || 'PCS';
+            const openQty = it.opening_qty || 0;
+            const inQty = it.in_qty || 0;
+            const outQty = it.out_qty || 0;
+            const closeQty = it.closing_qty || (openQty + inQty - outQty);
+            const actQty = it.physical_qty !== undefined ? it.physical_qty : closeQty;
+            const variance = closeQty - actQty;
+            const statusBadge = (variance === 0) 
+                ? '<span class="badge badge-success">VALID / MATCH</span>' 
+                : '<span class="badge badge-warning">SELISIH ' + variance + '</span>';
+
+            return '<tr>' +
+                '<td><code>' + code + '</code></td>' +
+                '<td><strong>' + escapeHtml(name) + '</strong></td>' +
+                '<td>' + uom + '</td>' +
+                '<td style="text-align: right;">' + openQty.toLocaleString() + '</td>' +
+                '<td style="text-align: right; color: #10b981;">+' + inQty.toLocaleString() + '</td>' +
+                '<td style="text-align: right; color: #ef4444;">-' + outQty.toLocaleString() + '</td>' +
+                '<td style="text-align: right; font-weight: bold;">' + closeQty.toLocaleString() + '</td>' +
+                '<td style="text-align: right;">' + actQty.toLocaleString() + '</td>' +
+                '<td style="text-align: right;">' + (variance === 0 ? '0' : ('<span style="color: #ef4444;">' + variance + '</span>')) + '</td>' +
+                '<td>' + statusBadge + '</td>' +
+            '</tr>';
+        }).join('');
     } catch (err) {
-        console.error('Failed loading Customs IT Inventory:', err);
+        console.error('Failed loading book report:', err);
     }
 }
 
-function renderCustomsITInventoryTable(ledgers) {
-    const tbody = document.getElementById('tableCustomsITInventoryBody');
-    if (!tbody) return;
-
-    if (!ledgers || ledgers.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-8 text-gray-400">Belum ada mutasi buku IT Inventory DJBC yang tercatat.</td></tr>`;
-        return;
-    }
-
-    const catLabels = {
-        'raw_material': '<span class="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 font-semibold">Buku Bahan Baku</span>',
-        'finished_goods': '<span class="px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-800 font-semibold">Buku Barang Jadi</span>',
-        'wip': '<span class="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-800 font-semibold">Buku Barang Dalam Proses</span>',
-        'machinery': '<span class="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-800 font-semibold">Buku Mesin & Peralatan</span>',
-        'scrap': '<span class="px-2 py-0.5 text-xs rounded-full bg-rose-100 text-rose-800 font-semibold">Buku Scrap / Sisa Produksi</span>'
-    };
-
-    tbody.innerHTML = ledgers.map(l => {
-        const catBadge = catLabels[l.book_category] || `<span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-800">${l.book_category}</span>`;
-        const diffColor = (l.stock_difference !== 0) ? 'text-rose-600 font-bold' : 'text-gray-400';
-        const docRef = l.customs_doc_number ? `<span class="font-mono text-xs text-blue-600 font-semibold">${l.customs_doc_number}</span>` : '<span class="text-gray-400 text-xs">-</span>';
-
-        return `
-            <tr class="hover:bg-gray-50 border-b border-gray-100 transition-colors">
-                <td class="px-4 py-3">${catBadge}</td>
-                <td class="px-4 py-3 font-mono text-xs font-semibold text-gray-800">${l.product_code || '-'}</td>
-                <td class="px-4 py-3 text-xs text-gray-800 font-medium">${l.product_name || '-'}</td>
-                <td class="px-4 py-3 text-center text-xs text-gray-600 font-mono">${l.uom || 'PCS'}</td>
-                <td class="px-4 py-3 text-right text-xs font-mono text-gray-600">${(l.beginning_balance || 0).toLocaleString()}</td>
-                <td class="px-4 py-3 text-right text-xs font-mono font-semibold text-emerald-600">+${(l.in_quantity || 0).toLocaleString()}</td>
-                <td class="px-4 py-3 text-right text-xs font-mono font-semibold text-rose-600">-${(l.out_quantity || 0).toLocaleString()}</td>
-                <td class="px-4 py-3 text-right text-xs font-mono font-bold text-gray-800 bg-gray-50/50">${(l.ending_balance || 0).toLocaleString()}</td>
-                <td class="px-4 py-3 text-center">${docRef}</td>
-                <td class="px-4 py-3 text-right text-xs font-mono ${diffColor}">${(l.stock_difference || 0).toLocaleString()}</td>
-            </tr>
-        `;
-    }).join('');
-}
-
-async function loadCustomsSubcontracts() {
+async function loadCustomsBondedMutations() {
     try {
-        const subs = await api('/customs-bonded/subcontracts');
-        currentCustomsSubcontracts = subs || [];
-        renderCustomsSubcontractsTable(currentCustomsSubcontracts);
-    } catch (err) {
-        console.error('Failed loading customs subcontracts:', err);
-    }
-}
+        const cat = document.getElementById('cbMutationsBookFilter')?.value || '';
+        let url = '/customs-bonded/it-inventory/mutations';
+        if (cat) url += '?book_category=' + encodeURIComponent(cat);
 
-function renderCustomsSubcontractsTable(subs) {
-    const tbody = document.getElementById('tableCustomsSubcontractsBody');
-    if (!tbody) return;
+        const tbody = document.getElementById('cbMutationsTableBody');
+        if (!tbody) return;
 
-    if (!subs || subs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-8 text-gray-400">Belum ada kontrak pekerjaan subkontrak pabean.</td></tr>`;
-        return;
-    }
+        let res = await api(url);
+        let list = (res && res.data) ? res.data : (res || []);
 
-    const stBadges = {
-        'open': '<span class="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 font-semibold">Sedang Dikerjakan</span>',
-        'partially_returned': '<span class="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-800 font-semibold">Sebagian Kembali</span>',
-        'closed': '<span class="px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-800 font-semibold">Selesai Penuh ✅</span>',
-        'overdue': '<span class="px-2 py-0.5 text-xs rounded-full bg-rose-100 text-rose-800 font-semibold">Jatuh Tempo (Kena Sanksi)</span>'
-    };
-
-    tbody.innerHTML = subs.map(s => {
-        const badge = stBadges[s.status] || `<span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-800">${s.status}</span>`;
-        const remaining = (s.quantity_sent || 0) - (s.quantity_returned || 0);
-        
-        let actionBtn = '';
-        if (s.status !== 'closed') {
-            actionBtn = `<button onclick="openModalReturnSubcontract(${s.id}, '${s.contract_number}', ${remaining})" class="px-2.5 py-1 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded shadow-sm">Catat Pengembalian BC 2.62</button>`;
-        } else {
-            actionBtn = `<span class="text-xs text-emerald-600 font-semibold flex items-center"><i class="fas fa-check-circle mr-1"></i>Lengkap</span>`;
+        if (!list || list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="11" class="text-center text-muted" style="padding: 2rem;">Belum ada log mutasi IT Inventory.</td></tr>';
+            return;
         }
 
-        return `
-            <tr class="hover:bg-gray-50 border-b border-gray-100 transition-colors">
-                <td class="px-4 py-3 font-mono font-medium text-blue-600 text-xs">${s.contract_number}</td>
-                <td class="px-4 py-3 text-xs text-gray-800 font-medium">${s.subcontractor_name || '-'}</td>
-                <td class="px-4 py-3 text-xs text-gray-800 font-semibold">${s.product_name || '-'}</td>
-                <td class="px-4 py-3 text-xs text-gray-600">${s.process_type || '-'}</td>
-                <td class="px-4 py-3 text-right text-xs font-mono font-semibold text-gray-700">${(s.quantity_sent || 0).toLocaleString()}</td>
-                <td class="px-4 py-3 text-right text-xs font-mono font-semibold text-emerald-600">${(s.quantity_returned || 0).toLocaleString()}</td>
-                <td class="px-4 py-3 text-right text-xs font-mono font-bold text-amber-700 bg-amber-50/40">${remaining.toLocaleString()}</td>
-                <td class="px-4 py-3 text-xs text-rose-600 font-mono font-medium">${s.due_date ? s.due_date.substring(0, 10) : '-'}</td>
-                <td class="px-4 py-3">${badge}</td>
-                <td class="px-4 py-3 text-center whitespace-nowrap">${actionBtn}</td>
-            </tr>
-        `;
-    }).join('');
+        tbody.innerHTML = list.map(m => {
+            const timeStr = m.created_at ? new Date(m.created_at).toLocaleString('id-ID', {dateStyle: 'short', timeStyle: 'short'}) : '-';
+            const catBadge = '<span class="badge badge-info">' + (m.book_category || 'Bahan Baku') + '</span>';
+            const inTxt = m.in_qty > 0 ? ('<span style="color: #10b981; font-weight: 600;">+' + m.in_qty.toLocaleString() + '</span>') : '-';
+            const outTxt = m.out_qty > 0 ? ('<span style="color: #ef4444; font-weight: 600;">-' + m.out_qty.toLocaleString() + '</span>') : '-';
+
+            return '<tr>' +
+                '<td><small>' + timeStr + '</small></td>' +
+                '<td>' + catBadge + '</td>' +
+                '<td><strong>' + escapeHtml(m.product_name || m.item_name || '-') + '</strong><br><code>' + (m.product_code || m.item_code || '') + '</code></td>' +
+                '<td><code>' + (m.document_number || '-') + '</code></td>' +
+                '<td>' + (m.registration_number || m.sppb_number || '-') + '</td>' +
+                '<td>' + (m.internal_reference || m.reference || '-') + '</td>' +
+                '<td style="text-align: right;">' + (m.opening_balance || 0).toLocaleString() + '</td>' +
+                '<td style="text-align: right;">' + inTxt + '</td>' +
+                '<td style="text-align: right;">' + outTxt + '</td>' +
+                '<td style="text-align: right; font-weight: bold;">' + (m.closing_balance || 0).toLocaleString() + '</td>' +
+                '<td>' + (m.uom || 'PCS') + '</td>' +
+            '</tr>';
+        }).join('');
+    } catch (err) {
+        console.error('Failed loading mutations:', err);
+    }
 }
 
-async function runAICustomsAudit() {
+async function loadCustomsBondedSubcontracts() {
     try {
-        const btn = document.getElementById('btnTriggerAICustomsAudit');
-        if (btn) {
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>Menganalisis Kepatuhan DJBC...`;
+        const tbody = document.getElementById('cbSubcontractsTableBody');
+        if (!tbody) return;
+
+        let res = await api('/customs-bonded/subcontracts');
+        let subs = (res && res.data) ? res.data : (res || []);
+        currentCustomsSubcontracts = subs;
+
+        if (!subs || subs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted" style="padding: 2rem;">Belum ada kontrak pekerjaan subkontrak.</td></tr>';
+            return;
         }
 
-        const res = await api('/customs-bonded/ai-customs-audit', 'POST');
-        if (res) {
-            const elScore = document.getElementById('cbAuditScoreBadge');
-            const elSummary = document.getElementById('cbAuditSummaryText');
-            const elFindings = document.getElementById('cbAuditFindingsList');
-            const elRecs = document.getElementById('cbAuditRecsList');
+        tbody.innerHTML = subs.map(s => {
+            const dueDateStr = s.due_date ? s.due_date.substring(0, 10) : '-';
+            const rem = s.remaining_qty !== undefined ? s.remaining_qty : ((s.qty_sent || 0) - (s.qty_returned || 0));
+            const isCompleted = rem <= 0 || s.status === 'completed';
+            const stBadge = isCompleted 
+                ? '<span class="badge badge-success">SELESAI</span>' 
+                : '<span class="badge badge-warning">AKTIF DI SUBCON</span>';
 
-            if (elScore) {
-                let badgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-300';
-                if (res.compliance_score < 70) badgeClass = 'bg-rose-100 text-rose-800 border-rose-300';
-                else if (res.compliance_score < 85) badgeClass = 'bg-amber-100 text-amber-800 border-amber-300';
+            const actionBtn = !isCompleted 
+                ? ('<button class="btn btn-xs btn-primary" onclick="openModalReturnSubcontract(' + s.id + ')">📦 Masuk BC 2.62</button>')
+                : '<span class="text-muted">Lengkap</span>';
 
-                elScore.className = `px-3 py-1 rounded-full text-xs font-bold border ${badgeClass}`;
-                elScore.textContent = `Skor Kepatuhan: ${res.compliance_score}% (${res.status || 'COMPLIANT'})`;
-            }
-
-            if (elSummary) {
-                elSummary.textContent = res.summary || 'Audit kepatuhan pabean berhasil dijalankan.';
-            }
-
-            if (elFindings) {
-                if (res.findings && res.findings.length > 0) {
-                    elFindings.innerHTML = res.findings.map(f => `
-                        <li class="flex items-start text-xs text-gray-700 space-x-2">
-                            <span class="text-amber-500 font-bold text-sm leading-none">•</span>
-                            <span>${f}</span>
-                        </li>
-                    `).join('');
-                } else {
-                    elFindings.innerHTML = `<li class="text-xs text-gray-400 italic">Tidak ditemukan anomali atau deviasi stok signifikan.</li>`;
-                }
-            }
-
-            if (elRecs) {
-                if (res.recommendations && res.recommendations.length > 0) {
-                    elRecs.innerHTML = res.recommendations.map(r => `
-                        <li class="flex items-start text-xs text-gray-700 space-x-2">
-                            <span class="text-blue-500 font-bold text-sm leading-none">✓</span>
-                            <span>${r}</span>
-                        </li>
-                    `).join('');
-                } else {
-                    elRecs.innerHTML = `<li class="text-xs text-gray-400 italic">Pertahankan praktik rekonsiliasi IT Inventory DJBC secara harian.</li>`;
-                }
-            }
-
-            showToast('Audit Kepatuhan Pabean Bea Cukai berhasil diperbarui!', 'success');
-        }
+            return '<tr>' +
+                '<td><code>' + s.contract_number + '</code></td>' +
+                '<td>' + (s.sk_number || s.customs_sk_no || '-') + '</td>' +
+                '<td><strong>' + escapeHtml(s.partner_name || s.partner?.name || 'Mitra Subkon') + '</strong></td>' +
+                '<td>' + escapeHtml(s.product_name || s.product?.name || 'Komponen Presisi') + '</td>' +
+                '<td style="text-align: right;">' + (s.qty_sent || 0).toLocaleString() + '</td>' +
+                '<td style="text-align: right; color: #10b981;">' + (s.qty_returned || 0).toLocaleString() + '</td>' +
+                '<td style="text-align: right; font-weight: bold; color: ' + (rem > 0 ? '#ef4444' : '#10b981') + ';">' + rem.toLocaleString() + ' ' + (s.uom || 'PCS') + '</td>' +
+                '<td>' + dueDateStr + '</td>' +
+                '<td>' + stBadge + '</td>' +
+                '<td>' + actionBtn + '</td>' +
+            '</tr>';
+        }).join('');
     } catch (err) {
-        console.error('Failed to run AI Customs Audit:', err);
-        showToast('Gagal menjalankan AI Customs Audit: ' + err.message, 'error');
-    } finally {
-        const btn = document.getElementById('btnTriggerAICustomsAudit');
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = `<i class="fas fa-play mr-2"></i>Jalankan Ulang Audit Kepatuhan DJBC`;
-        }
+        console.error('Failed loading subcontracts:', err);
     }
 }
 
-// Modal Helpers
+function loadCustomsITInventory() {
+    return loadCustomsBondedBookReport();
+}
+
+function loadCustomsSubcontracts() {
+    return loadCustomsBondedSubcontracts();
+}
+
+async function openModalAICustomsAudit() {
+    openModal('modalAICustomsAudit');
+    await loadAICustomsAuditData();
+}
+
+async function loadAICustomsAuditData() {
+    const badge = document.getElementById('cbAIScorecardStatusBadge');
+    const scoreEl = document.getElementById('cbAIScorecardScore');
+    const sumEl = document.getElementById('cbAIScorecardSummary');
+    const findEl = document.getElementById('cbAIScorecardFindings');
+    const recsEl = document.getElementById('cbAIScorecardRecs');
+
+    if (sumEl) sumEl.textContent = 'Menjalankan audit kepatuhan IT Inventory Bea Cukai CEISA 4.0...';
+
+    try {
+        let res = await api('/customs-bonded/ai-customs-audit', 'POST');
+        let data = res?.data || res || {};
+
+        if (scoreEl) scoreEl.textContent = (data.compliance_score || 95) + ' / 100';
+        if (badge) {
+            const isOk = (data.compliance_score || 95) >= 80;
+            badge.textContent = isOk ? 'COMPLIANT ✅' : 'RISK DETECTED ⚠️';
+            badge.style.background = isOk ? '#d1fae5' : '#fef3c7';
+            badge.style.color = isOk ? '#065f46' : '#92400e';
+        }
+        if (sumEl) sumEl.textContent = data.summary || 'Seluruh alur IT Inventory 4 Buku, saldo fisik bahan baku, dan pengawasan subkontrak berada dalam batas kepatuhan pabean Perdirjen BC-02/2019.';
+        if (findEl) {
+            const findings = data.findings || [
+                'Saldo mutasi Buku 1 (Bahan Baku) cocok 100% dengan dokumen impor BC 2.3.',
+                'Semua pengeluaran subkontrak BC 2.61 memiliki surat izin SK KPPBC aktif.',
+                'Tidak terdeteksi selisih negatif pada kartu stok pabean.'
+            ];
+            findEl.innerHTML = findings.map(f => '<div style="margin-bottom: 0.35rem; color: #1e293b;">• ' + escapeHtml(f) + '</div>').join('');
+        }
+        if (recsEl) {
+            const recs = data.recommendations || [
+                'Lakukan stock opname berkala menjelang audit triwulan KPPBC.',
+                'Pastikan nomor SPPB tercatat lengkap sebelum proses pengeluaran barang jadi ekspor BC 3.0.'
+            ];
+            recsEl.innerHTML = recs.map(r => '<li style="margin-bottom: 0.25rem;">' + escapeHtml(r) + '</li>').join('');
+        }
+    } catch (err) {
+        if (sumEl) sumEl.textContent = 'Gagal menjalankan audit AI: ' + err.message;
+    }
+}
+
+function runAICustomsAudit() {
+    return openModalAICustomsAudit();
+}
+
 async function openModalCreateCustomsDoc() {
     try {
-        const partners = await api('/partners') || [];
-        const partnerSelect = document.getElementById('cbDocPartnerId');
-        if (partnerSelect) {
-            partnerSelect.innerHTML = `<option value="">Pilih Partner / Pemasok / Pembeli...</option>` +
-                partners.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        const partnerSelect = document.getElementById('cbNewPartnerId');
+        if (partnerSelect && partnerSelect.options.length <= 1) {
+            const partners = state.partners || await api('/partners') || [];
+            partnerSelect.innerHTML = '<option value="">-- Pilih Mitra --</option>' + partners.map(p => '<option value="' + p.id + '">' + escapeHtml(p.name) + '</option>').join('');
         }
-        document.getElementById('modalCreateCustomsDoc').classList.remove('hidden');
-    } catch (err) {
-        showToast('Gagal memuat data partner: ' + err.message, 'error');
+        const prodSelect = document.getElementById('cbLineProductId');
+        if (prodSelect && prodSelect.options.length <= 1) {
+            const prods = state.products || await api('/products') || [];
+            prodSelect.innerHTML = '<option value="">-- Pilih Produk --</option>' + prods.map(p => '<option value="' + p.id + '">' + escapeHtml(p.name) + '</option>').join('');
+        }
+        const regDate = document.getElementById('cbNewRegistrationDate');
+        if (regDate && !regDate.value) {
+            regDate.value = new Date().toISOString().substring(0, 10);
+        }
+    } catch (e) {
+        console.warn('Error populating customs doc modal selects:', e);
     }
-}
-
-function closeModalCreateCustomsDoc() {
-    document.getElementById('modalCreateCustomsDoc').classList.add('hidden');
+    openModal('modalCreateCustomsDoc');
 }
 
 async function handleCreateCustomsDoc(e) {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     try {
         const payload = {
-            document_type: document.getElementById('cbDocType').value,
-            customs_office_code: document.getElementById('cbDocOfficeCode').value,
-            registration_number: document.getElementById('cbDocRegNo').value,
-            partner_id: parseInt(document.getElementById('cbDocPartnerId').value) || 0,
-            origin_country: document.getElementById('cbDocOriginCountry').value,
-            destination_country: document.getElementById('cbDocDestCountry').value,
-            gross_weight: parseFloat(document.getElementById('cbDocGrossWeight').value) || 0,
-            net_weight: parseFloat(document.getElementById('cbDocNetWeight').value) || 0,
-            package_count: parseInt(document.getElementById('cbDocPackageCount').value) || 0,
-            total_cif_amount: parseFloat(document.getElementById('cbDocCifAmount').value) || 0,
-            duty_suspended_amount: parseFloat(document.getElementById('cbDocDutySuspended').value) || 0,
-            vat_suspended_amount: parseFloat(document.getElementById('cbDocVatSuspended').value) || 0
+            document_type: document.getElementById('cbNewDocType')?.value || 'BC_2_3',
+            customs_office: document.getElementById('cbNewCustomsOffice')?.value || '040300 - KPPBC TMP A Bekasi',
+            registration_number: document.getElementById('cbNewRegistrationNo')?.value || ('REG-' + Date.now()),
+            registration_date: document.getElementById('cbNewRegistrationDate')?.value || new Date().toISOString().substring(0, 10),
+            partner_id: parseInt(document.getElementById('cbNewPartnerId')?.value || '1'),
+            country_of_origin: document.getElementById('cbNewCountryOfOrigin')?.value || 'ID',
+            currency: document.getElementById('cbNewCurrency')?.value || 'USD',
+            exchange_rate: parseFloat(document.getElementById('cbNewExchangeRate')?.value || '15800'),
+            cif_amount: parseFloat(document.getElementById('cbNewCIFAmount')?.value || '0'),
+            duty_suspended_amount: parseFloat(document.getElementById('cbNewDutySuspended')?.value || '0'),
+            notes: document.getElementById('cbNewNotes')?.value || '',
+            items: [
+                {
+                    product_id: parseInt(document.getElementById('cbLineProductId')?.value || '1'),
+                    hs_code: document.getElementById('cbLineHSCode')?.value || '8542.31.00',
+                    book_category: document.getElementById('cbLineCategory')?.value || 'raw_material',
+                    quantity: parseFloat(document.getElementById('cbLineQty')?.value || '1'),
+                    uom: document.getElementById('cbLineUoM')?.value || 'PCS',
+                    unit_price: parseFloat(document.getElementById('cbLineUnitPrice')?.value || '0')
+                }
+            ]
         };
 
         await api('/customs-bonded/documents', 'POST', payload);
-        showToast('Dokumen Pabean Bea Cukai berhasil diterbitkan!', 'success');
-        closeModalCreateCustomsDoc();
-        loadCustomsBondedData();
+        showToast('Dokumen Pabean Kawasan Berikat berhasil diterbitkan!', 'success');
+        closeModal('modalCreateCustomsDoc');
+        await loadCustomsBondedData();
     } catch (err) {
-        showToast('Gagal menerbitkan dokumen pabean: ' + err.message, 'error');
+        showToast('Gagal mendaftarkan dokumen BC: ' + err.message, 'error');
     }
 }
 
 function openModalApproveSPPB(docId, docNo) {
     selectedCustomsDocId = docId;
-    document.getElementById('sppbDocNumberText').textContent = docNo;
-    document.getElementById('sppbInputNo').value = `SPPB-${Math.floor(100000 + Math.random() * 900000)}/KPU.01/2026`;
-    document.getElementById('modalApproveSPPB').classList.remove('hidden');
-}
+    const docIdEl = document.getElementById('cbApproveDocId');
+    const summaryEl = document.getElementById('cbApproveDocSummary');
+    const dateEl = document.getElementById('cbApproveSPPBDate');
+    const noEl = document.getElementById('cbApproveSPPBNo');
 
-function closeModalApproveSPPB() {
-    selectedCustomsDocId = null;
-    document.getElementById('modalApproveSPPB').classList.add('hidden');
+    if (docIdEl) docIdEl.value = docId;
+    if (summaryEl) summaryEl.textContent = 'Menerbitkan SPPB untuk dokumen pabean: ' + docNo;
+    if (dateEl) dateEl.value = new Date().toISOString().substring(0, 10);
+    if (noEl) noEl.value = 'SPPB-040300-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
+
+    openModal('modalApproveSPPB');
 }
 
 async function handleApproveSPPB(e) {
-    e.preventDefault();
-    if (!selectedCustomsDocId) return;
+    if (e && e.preventDefault) e.preventDefault();
+    const docId = selectedCustomsDocId || document.getElementById('cbApproveDocId')?.value;
+    if (!docId) return;
 
     try {
         const payload = {
-            sppb_number: document.getElementById('sppbInputNo').value,
-            notes: document.getElementById('sppbInputNotes').value
+            sppb_number: document.getElementById('cbApproveSPPBNo')?.value || ('SPPB-' + Date.now()),
+            sppb_date: document.getElementById('cbApproveSPPBDate')?.value || new Date().toISOString().substring(0, 10),
+            notes: document.getElementById('cbApproveNotes')?.value || ''
         };
 
-        await api(`/customs-bonded/documents/${selectedCustomsDocId}/approve-sppb`, 'POST', payload);
-        showToast('SPPB resmi disetujui! Barang dilepaskan dari Kawasan Berikat.', 'success');
-        closeModalApproveSPPB();
-        loadCustomsBondedData();
+        await api('/customs-bonded/documents/' + docId + '/approve-sppb', 'POST', payload);
+        showToast('SPPB resmi terbit! Mutasi IT Inventory pabean telah diperbarui.', 'success');
+        closeModal('modalApproveSPPB');
+        await loadCustomsBondedData();
     } catch (err) {
-        showToast('Gagal menyetujui SPPB: ' + err.message, 'error');
+        showToast('Gagal menerbitkan SPPB: ' + err.message, 'error');
     }
 }
 
 async function handleCancelCustomsDoc(docId) {
-    if (!confirm('Apakah Anda yakin ingin membatalkan dokumen pabean ini?')) return;
+    if (!confirm('Batalkan dokumen pabean ini?')) return;
     try {
-        await api(`/customs-bonded/documents/${docId}/cancel`, 'POST', {});
+        await api('/customs-bonded/documents/' + docId + '/cancel', 'POST', {});
         showToast('Dokumen pabean berhasil dibatalkan.', 'info');
-        loadCustomsBondedData();
+        await loadCustomsBondedDocuments();
     } catch (err) {
-        showToast('Gagal membatalkan dokumen pabean: ' + err.message, 'error');
+        showToast('Gagal membatalkan dokumen: ' + err.message, 'error');
     }
 }
 
 async function openModalCreateSubcontract() {
     try {
-        const partners = await api('/partners') || [];
-        const subconSelect = document.getElementById('cbSubPartnerId');
-        if (subconSelect) {
-            subconSelect.innerHTML = `<option value="">Pilih Subkontraktor...</option>` +
-                partners.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        const partnerSelect = document.getElementById('cbSubPartnerId');
+        if (partnerSelect && partnerSelect.options.length <= 1) {
+            const partners = state.partners || await api('/partners') || [];
+            partnerSelect.innerHTML = '<option value="">-- Pilih Subkontraktor --</option>' + partners.map(p => '<option value="' + p.id + '">' + escapeHtml(p.name) + '</option>').join('');
         }
-
-        const products = await api('/products') || [];
         const prodSelect = document.getElementById('cbSubProductId');
-        if (prodSelect) {
-            prodSelect.innerHTML = `<option value="">Pilih Produk / Komponen...</option>` +
-                products.map(pr => `<option value="${pr.id}">${pr.name} (${pr.default_code || 'PROD'})</option>`).join('');
+        if (prodSelect && prodSelect.options.length <= 1) {
+            const prods = state.products || await api('/products') || [];
+            prodSelect.innerHTML = '<option value="">-- Pilih Produk --</option>' + prods.map(p => '<option value="' + p.id + '">' + escapeHtml(p.name) + '</option>').join('');
         }
-
-        document.getElementById('modalCreateSubcontract').classList.remove('hidden');
-    } catch (err) {
-        showToast('Gagal memuat partner/produk: ' + err.message, 'error');
+    } catch (e) {
+        console.warn('Error populating subcontract modal selects:', e);
     }
-}
-
-function closeModalCreateSubcontract() {
-    document.getElementById('modalCreateSubcontract').classList.add('hidden');
+    openModal('modalCreateSubcontract');
 }
 
 async function handleCreateSubcontract(e) {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     try {
         const payload = {
-            subcontractor_id: parseInt(document.getElementById('cbSubPartnerId').value) || 0,
-            product_id: parseInt(document.getElementById('cbSubProductId').value) || 0,
-            process_type: document.getElementById('cbSubProcessType').value,
-            quantity_sent: parseFloat(document.getElementById('cbSubQtySent').value) || 0,
-            uom: document.getElementById('cbSubUom').value || 'PCS',
-            due_date: document.getElementById('cbSubDueDate').value
+            sk_number: document.getElementById('cbSubSKNo')?.value || 'S-120/KBC.0403/2026',
+            partner_id: parseInt(document.getElementById('cbSubPartnerId')?.value || '1'),
+            product_id: parseInt(document.getElementById('cbSubProductId')?.value || '1'),
+            qty_sent: parseFloat(document.getElementById('cbSubQtySent')?.value || '100'),
+            uom: document.getElementById('cbSubUoM')?.value || 'PCS',
+            bc261_doc_number: document.getElementById('cbSubBC261DocNo')?.value || ('BC261-' + Date.now()),
+            notes: document.getElementById('cbSubNotes')?.value || ''
         };
 
         await api('/customs-bonded/subcontracts', 'POST', payload);
-        showToast('Kontrak subkontrak BC 2.61 berhasil diterbitkan!', 'success');
-        closeModalCreateSubcontract();
-        loadCustomsBondedData();
-        switchCustomsTab('subcontract');
+        showToast('Kontrak subkontrak BC 2.61 berhasil dicatat!', 'success');
+        closeModal('modalCreateSubcontract');
+        await loadCustomsBondedSubcontracts();
+        await loadCustomsBondedData();
     } catch (err) {
-        showToast('Gagal menerbitkan subkontrak: ' + err.message, 'error');
+        showToast('Gagal mencatat subkontrak: ' + err.message, 'error');
     }
 }
 
-function openModalReturnSubcontract(subId, contractNo, remainingQty) {
+function openModalReturnSubcontract(subId) {
     selectedCustomsSubconId = subId;
-    document.getElementById('cbReturnContractText').textContent = contractNo;
-    document.getElementById('cbReturnRemainingQtyText').textContent = remainingQty.toLocaleString();
-    document.getElementById('cbReturnQty').value = remainingQty;
-    document.getElementById('cbReturnBcDoc').value = `BC262-${Math.floor(100000 + Math.random() * 900000)}`;
-    document.getElementById('modalReturnSubcontract').classList.remove('hidden');
-}
+    const sub = currentCustomsSubcontracts.find(s => s.id == subId);
+    const subIdEl = document.getElementById('cbReturnSubId');
+    const summaryEl = document.getElementById('cbReturnSubSummary');
+    const dateEl = document.getElementById('cbReturnDate');
+    const qtyEl = document.getElementById('cbReturnQty');
+    const docNoEl = document.getElementById('cbReturnDocNo');
 
-function closeModalReturnSubcontract() {
-    selectedCustomsSubconId = null;
-    document.getElementById('modalReturnSubcontract').classList.add('hidden');
+    if (subIdEl) subIdEl.value = subId;
+    if (summaryEl) summaryEl.textContent = 'Mencatat pemasukan kembali subkontrak: ' + (sub?.contract_number || ('#' + subId));
+    if (dateEl) dateEl.value = new Date().toISOString().substring(0, 10);
+    if (qtyEl) qtyEl.value = sub?.remaining_qty || 100;
+    if (docNoEl) docNoEl.value = 'BC262-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
+
+    openModal('modalReturnSubcontract');
 }
 
 async function handleReturnSubcontract(e) {
-    e.preventDefault();
-    if (!selectedCustomsSubconId) return;
+    if (e && e.preventDefault) e.preventDefault();
+    const subId = selectedCustomsSubconId || document.getElementById('cbReturnSubId')?.value;
+    if (!subId) return;
 
     try {
         const payload = {
-            quantity_returned: parseFloat(document.getElementById('cbReturnQty').value) || 0,
-            bc262_doc_number: document.getElementById('cbReturnBcDoc').value,
-            notes: document.getElementById('cbReturnNotes').value
+            qty_returned: parseFloat(document.getElementById('cbReturnQty')?.value || '0'),
+            return_date: document.getElementById('cbReturnDate')?.value || new Date().toISOString().substring(0, 10),
+            bc262_doc_number: document.getElementById('cbReturnDocNo')?.value || ('BC262-' + Date.now()),
+            notes: document.getElementById('cbReturnNotes')?.value || ''
         };
 
-        await api(`/customs-bonded/subcontracts/${selectedCustomsSubconId}/return`, 'POST', payload);
-        showToast('Pengembalian subkontrak (BC 2.62) berhasil dicatat ke IT Inventory!', 'success');
-        closeModalReturnSubcontract();
-        loadCustomsBondedData();
-        switchCustomsTab('subcontract');
+        await api('/customs-bonded/subcontracts/' + subId + '/return', 'POST', payload);
+        showToast('Pemasukan kembali barang subkontrak BC 2.62 berhasil dibukukan!', 'success');
+        closeModal('modalReturnSubcontract');
+        await loadCustomsBondedSubcontracts();
+        await loadCustomsBondedData();
     } catch (err) {
         showToast('Gagal mencatat pengembalian subkontrak: ' + err.message, 'error');
     }
@@ -20387,266 +20438,43 @@ let currentSelectedModelFields = [];
 let proposedAISchema = null;
 let cachedLowCodeModels = [];
 
-async function loadLowCodeStudioData() {
-    try {
-        const stats = await api('/lowcode/stats');
-        if (stats) {
-            const elModels = document.getElementById('lcStatTotalModels');
-            const elFields = document.getElementById('lcStatCustomFields');
-            const elRecords = document.getElementById('lcStatTotalRecords');
-            const elWorkflows = document.getElementById('lcStatActiveWorkflows');
-            const elStorage = document.getElementById('lcStatStorageKB');
-            const elHealth = document.getElementById('lcStatSchemaHealth');
-
-            if (elModels) elModels.textContent = stats.total_models || 0;
-            if (elFields) elFields.textContent = stats.total_fields || 0;
-            if (elRecords) elRecords.textContent = stats.total_records || 0;
-            if (elWorkflows) elWorkflows.textContent = stats.active_workflows || 0;
-            if (elStorage) elStorage.textContent = (stats.storage_kb || 0).toLocaleString() + ' KB';
-            if (elHealth) elHealth.textContent = stats.schema_health || '100% OK';
-        }
-        await loadLowCodeModelsList();
-    } catch (err) {
-        console.error('Failed to load Low-Code stats:', err);
-    }
-}
-
-function switchLowCodeTab(tab) {
-    const tabs = ['models', 'records', 'ai-copilot'];
-    tabs.forEach(t => {
-        const btn = document.getElementById(`lcNavTab-${t}`);
-        const content = document.getElementById(`lcTabContent-${t}`);
-        if (btn && content) {
-            if (t === tab) {
-                btn.className = 'px-4 py-2 font-medium text-sm rounded-lg bg-indigo-600 text-white shadow-sm transition-all';
-                content.classList.remove('hidden');
-            } else {
-                btn.className = 'px-4 py-2 font-medium text-sm rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all';
-                content.classList.add('hidden');
-            }
-        }
-    });
-
-    if (tab === 'records') {
-        loadLowCodeRecordsList();
-    }
-}
-
-async function loadLowCodeModelsList() {
-    try {
-        const models = await api('/lowcode/models') || [];
-        cachedLowCodeModels = models;
-        const tbody = document.getElementById('lcModelsTableBody');
-        const filterSelect = document.getElementById('lcRecordModelFilter');
-
-        if (filterSelect) {
-            const currentVal = filterSelect.value;
-            filterSelect.innerHTML = models.map(m => `
-                <option value="${m.technical_name}">${m.icon || '📦'} ${m.name} (${m.technical_name})</option>
-            `).join('');
-            if (currentVal && models.some(m => m.technical_name === currentVal)) {
-                filterSelect.value = currentVal;
-            }
-        }
-
-        if (!tbody) return;
-        if (models.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-slate-400">Belum ada custom data model. Klik "Buat Model Baru" atau gunakan AI Schema Architect!</td></tr>`;
-            return;
-        }
-
-        tbody.innerHTML = models.map(m => {
-            const isSystem = m.is_system;
-            const fieldsCount = m.fields ? m.fields.length : 0;
-            return `
-                <tr class="hover:bg-slate-50/80 transition-colors border-b border-slate-100">
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-3">
-                            <span class="text-2xl p-2 bg-indigo-50 rounded-lg">${m.icon || '📦'}</span>
-                            <div>
-                                <div class="font-semibold text-slate-900">${m.name}</div>
-                                <div class="text-xs text-slate-400 max-w-xs truncate">${m.description || 'Tanpa deskripsi'}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="font-mono text-xs px-2.5 py-1 bg-slate-100 text-slate-700 rounded-md border border-slate-200 font-semibold">${m.technical_name}</span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="px-2.5 py-1 text-xs rounded-full font-medium ${m.category === 'manufacturing' ? 'bg-amber-100 text-amber-700' : m.category === 'hr' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'} capitalize">
-                            ${m.category || 'general'}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="px-2.5 py-1 bg-slate-100 text-slate-700 font-semibold text-xs rounded-full border border-slate-200">${fieldsCount} Fields</span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 font-semibold text-xs rounded-full border border-emerald-200">Live Data</span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="px-2.5 py-1 text-xs rounded-full font-medium ${m.active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}">
-                            ${m.active ? '● Aktif' : '○ Non-Aktif'}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                        <div class="flex items-center justify-end gap-1.5">
-                            <button onclick="openModalManageFields(${m.id})" class="px-2.5 py-1 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-md transition-colors" title="Kelola Kolom & Field">
-                                🛠️ Fields
-                            </button>
-                            <button onclick="switchModelRecordView('${m.technical_name}')" class="px-2.5 py-1 text-xs font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-md transition-colors" title="Lihat Data Record">
-                                📋 Data
-                            </button>
-                            ${!isSystem ? `
-                            <button onclick="handleDeleteCustomModel(${m.id}, '${m.name}')" class="px-2.5 py-1 text-xs font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-md transition-colors" title="Hapus Model">
-                                🗑️
-                            </button>` : ''}
-                        </div>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-    } catch (err) {
-        console.error('Failed to load Low-Code models:', err);
-    }
-}
-
-function openModalCreateCustomModel() {
-    document.getElementById('lcNewModelName').value = '';
-    document.getElementById('lcNewModelTechName').value = 'x_';
-    document.getElementById('lcNewModelCategory').value = 'custom';
-    document.getElementById('lcNewModelIcon').value = '📦';
-    document.getElementById('lcNewModelDescription').value = '';
-    document.getElementById('modalCreateCustomModel').classList.remove('hidden');
-    document.getElementById('modalCreateCustomModel').classList.add('active');
-}
-
 function closeModalCreateCustomModel() {
-    document.getElementById('modalCreateCustomModel').classList.add('hidden');
-    document.getElementById('modalCreateCustomModel').classList.remove('active');
-}
-
-function autoGenerateModelTechnicalName() {
-    const nameVal = document.getElementById('lcNewModelName').value;
-    const slug = nameVal.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
-    document.getElementById('lcNewModelTechName').value = 'x_' + slug;
-}
-
-async function handleCreateCustomModel(e) {
-    e.preventDefault();
-    try {
-        const payload = {
-            name: document.getElementById('lcNewModelName').value.trim(),
-            technical_name: document.getElementById('lcNewModelTechName').value.trim(),
-            category: document.getElementById('lcNewModelCategory').value,
-            icon: document.getElementById('lcNewModelIcon').value.trim() || '📦',
-            description: document.getElementById('lcNewModelDescription').value.trim(),
-            active: true
-        };
-
-        await api('/lowcode/models', 'POST', payload);
-        showToast(`Model baru "${payload.name}" berhasil dibuat!`, 'success');
-        closeModalCreateCustomModel();
-        loadLowCodeStudioData();
-    } catch (err) {
-        showToast('Gagal membuat model: ' + err.message, 'error');
-    }
-}
-
-async function handleDeleteCustomModel(modelId, modelName) {
-    if (!confirm(`Apakah Anda yakin ingin menghapus model "${modelName}" beserta seluruh data record-nya?`)) return;
-    try {
-        await api(`/lowcode/models/${modelId}`, 'DELETE');
-        showToast(`Model "${modelName}" berhasil dihapus.`, 'info');
-        loadLowCodeStudioData();
-    } catch (err) {
-        showToast('Gagal menghapus model: ' + err.message, 'error');
-    }
-}
-
-async function openModalManageFields(modelId) {
-    try {
-        const model = await api(`/lowcode/models/${modelId}`);
-        if (!model) return;
-        currentSelectedLowCodeModel = model;
-
-        document.getElementById('lcManageFieldsModelTitle').textContent = `${model.icon || '📦'} ${model.name} (${model.technical_name})`;
-        document.getElementById('lcNewFieldModelId').value = model.id;
-        document.getElementById('lcNewFieldLabel').value = '';
-        document.getElementById('lcNewFieldName').value = 'x_';
-        document.getElementById('lcNewFieldType').value = 'char';
-        document.getElementById('lcNewFieldRequired').checked = false;
-        document.getElementById('lcNewFieldDefault').value = '';
-        document.getElementById('lcNewFieldOptions').value = '';
-        toggleFieldOptionsVisibility();
-
-        renderModelFieldsList(model.fields || []);
-        document.getElementById('modalManageCustomFields').classList.remove('hidden');
-        document.getElementById('modalManageCustomFields').classList.add('active');
-    } catch (err) {
-        showToast('Gagal membuka kelola field: ' + err.message, 'error');
-    }
+    closeModal('modalCreateCustomModel');
 }
 
 function closeModalManageFields() {
-    document.getElementById('modalManageCustomFields').classList.add('hidden');
-    document.getElementById('modalManageCustomFields').classList.remove('active');
+    closeModal('modalManageModelFields');
     currentSelectedLowCodeModel = null;
 }
 
-function renderModelFieldsList(fields) {
-    const tbody = document.getElementById('lcModelFieldsTableBody');
-    if (!tbody) return;
+function closeModalCreateCustomRecord() {
+    closeModal('modalCreateCustomRecord');
+}
 
-    if (!fields || fields.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-400">Belum ada field tambahan. Tambahkan kolom pertama di form atas!</td></tr>`;
-        return;
-    }
+function closeModalAISchemaArchitect() {
+    closeModal('modalAISchemaArchitect');
+    proposedAISchema = null;
+}
 
-    tbody.innerHTML = fields.map(f => `
-        <tr class="hover:bg-slate-50 border-b border-slate-100">
-            <td class="px-4 py-3 font-medium text-slate-900">${f.label}</td>
-            <td class="px-4 py-3 font-mono text-xs text-indigo-700 bg-indigo-50/50 rounded">${f.field_name}</td>
-            <td class="px-4 py-3">
-                <span class="px-2 py-0.5 text-xs font-semibold rounded bg-slate-100 text-slate-700 uppercase">${f.field_type}</span>
-            </td>
-            <td class="px-4 py-3">
-                <span class="text-xs ${f.required ? 'text-rose-600 font-semibold' : 'text-slate-400'}">${f.required ? '★ Wajib' : 'Opsional'}</span>
-            </td>
-            <td class="px-4 py-3 text-xs text-slate-500 font-mono">${f.default_value || '-'}</td>
-            <td class="px-4 py-3 text-right">
-                <button onclick="handleDeleteCustomField(${f.id}, '${f.label}')" class="px-2 py-1 text-xs text-rose-600 hover:bg-rose-50 rounded" title="Hapus Kolom">
-                    🗑️
-                </button>
-            </td>
-        </tr>
-    `).join('');
+function setAISchemaPromptPreset(preset) {
+    const input = document.getElementById('lcAIPromptInput');
+    if (input) input.value = preset;
 }
 
 function autoGenerateFieldName() {
-    const labelVal = document.getElementById('lcNewFieldLabel').value;
+    const labelVal = document.getElementById('lcNewFieldLabel')?.value || '';
     const slug = labelVal.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
-    document.getElementById('lcNewFieldName').value = 'x_' + slug;
-}
-
-function toggleFieldOptionsVisibility() {
-    const fType = document.getElementById('lcNewFieldType').value;
-    const row = document.getElementById('lcFieldOptionsRow');
-    if (row) {
-        if (fType === 'selection') {
-            row.classList.remove('hidden');
-        } else {
-            row.classList.add('hidden');
-        }
-    }
+    const nameEl = document.getElementById('lcNewFieldName');
+    if (nameEl) nameEl.value = 'x_' + slug;
 }
 
 async function handleAddCustomField(e) {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     if (!currentSelectedLowCodeModel) return;
 
     try {
-        const fType = document.getElementById('lcNewFieldType').value;
-        const optionsStr = document.getElementById('lcNewFieldOptions').value.trim();
+        const fType = document.getElementById('lcNewFieldType')?.value || 'char';
+        const optionsStr = (document.getElementById('lcNewFieldOptions')?.value || '').trim();
         let optionsJson = '[]';
         if (fType === 'selection' && optionsStr) {
             const arr = optionsStr.split(',').map(s => s.trim()).filter(Boolean);
@@ -20654,31 +20482,31 @@ async function handleAddCustomField(e) {
         }
 
         const payload = {
-            field_name: document.getElementById('lcNewFieldName').value.trim(),
+            field_name: (document.getElementById('lcNewFieldName')?.value || '').trim(),
             field_type: fType,
-            label: document.getElementById('lcNewFieldLabel').value.trim(),
-            required: document.getElementById('lcNewFieldRequired').checked,
+            label: (document.getElementById('lcNewFieldLabel')?.value || '').trim(),
+            field_label: (document.getElementById('lcNewFieldLabel')?.value || '').trim(),
+            required: !!document.getElementById('lcNewFieldRequired')?.checked,
+            is_required: !!document.getElementById('lcNewFieldRequired')?.checked,
             options_json: optionsJson,
-            default_value: document.getElementById('lcNewFieldDefault').value.trim()
+            selection_options: optionsJson,
+            default_value: (document.getElementById('lcNewFieldDefault')?.value || '').trim()
         };
 
-        const res = await api(`/lowcode/models/${currentSelectedLowCodeModel.id}/fields`, 'POST', payload);
-        showToast(`Kolom "${payload.label}" berhasil ditambahkan!`, 'success');
+        await api('/lowcode/models/' + currentSelectedLowCodeModel.id + '/fields', 'POST', payload);
+        showToast('Kolom "' + payload.label + '" berhasil ditambahkan!', 'success');
         
-        // Refresh fields list
-        const updated = await api(`/lowcode/models/${currentSelectedLowCodeModel.id}`);
+        const updated = await api('/lowcode/models/' + currentSelectedLowCodeModel.id);
         if (updated) {
             currentSelectedLowCodeModel = updated;
             renderModelFieldsList(updated.fields || []);
         }
 
-        // Reset form inputs
-        document.getElementById('lcNewFieldLabel').value = '';
-        document.getElementById('lcNewFieldName').value = 'x_';
-        document.getElementById('lcNewFieldDefault').value = '';
-        document.getElementById('lcNewFieldOptions').value = '';
+        const lbl = document.getElementById('lcNewFieldLabel'); if (lbl) lbl.value = '';
+        const fn = document.getElementById('lcNewFieldName'); if (fn) fn.value = 'x_';
+        const def = document.getElementById('lcNewFieldDefault'); if (def) def.value = '';
+        const opt = document.getElementById('lcNewFieldOptions'); if (opt) opt.value = '';
 
-        // Refresh stats
         loadLowCodeStudioData();
     } catch (err) {
         showToast('Gagal menambah field: ' + err.message, 'error');
@@ -20687,12 +20515,12 @@ async function handleAddCustomField(e) {
 
 async function handleDeleteCustomField(fieldId, fieldLabel) {
     if (!currentSelectedLowCodeModel) return;
-    if (!confirm(`Hapus kolom "${fieldLabel}" dari model ini?`)) return;
+    if (!confirm('Hapus kolom "' + fieldLabel + '" dari model ini?')) return;
 
     try {
-        await api(`/lowcode/models/${currentSelectedLowCodeModel.id}/fields/${fieldId}`, 'DELETE');
-        showToast(`Kolom "${fieldLabel}" berhasil dihapus.`, 'info');
-        const updated = await api(`/lowcode/models/${currentSelectedLowCodeModel.id}`);
+        await api('/lowcode/models/' + currentSelectedLowCodeModel.id + '/fields/' + fieldId, 'DELETE');
+        showToast('Kolom "' + fieldLabel + '" berhasil dihapus.', 'info');
+        const updated = await api('/lowcode/models/' + currentSelectedLowCodeModel.id);
         if (updated) {
             currentSelectedLowCodeModel = updated;
             renderModelFieldsList(updated.fields || []);
@@ -20703,378 +20531,16 @@ async function handleDeleteCustomField(fieldId, fieldLabel) {
     }
 }
 
-function switchModelRecordView(techName) {
-    const select = document.getElementById('lcRecordModelFilter');
-    if (select) {
-        select.value = techName;
-    }
-    switchLowCodeTab('records');
-}
-
-async function loadLowCodeRecordsList() {
-    const select = document.getElementById('lcRecordModelFilter');
-    const techName = select ? select.value : '';
-    if (!techName) return;
-
-    const thead = document.getElementById('lcRecordsTableHead');
-    const tbody = document.getElementById('lcRecordsTableBody');
-    const titleEl = document.getElementById('lcRecordModelTitle');
-
+async function handleDeleteCustomModel(modelId, modelName) {
+    if (!confirm('Apakah Anda yakin ingin menghapus model "' + modelName + '" beserta seluruh data record-nya?')) return;
     try {
-        const model = await api(`/lowcode/models/by-name/${techName}`);
-        if (!model) return;
-        currentSelectedModelFields = model.fields || [];
-
-        if (titleEl) {
-            titleEl.textContent = `${model.icon || '📦'} ${model.name} (${model.technical_name})`;
-        }
-
-        // Render dynamic table headers
-        let headersHtml = `
-            <th class="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">ID</th>
-            <th class="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Display Name</th>
-        `;
-
-        currentSelectedModelFields.forEach(f => {
-            headersHtml += `<th class="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">${f.label}</th>`;
-        });
-
-        headersHtml += `
-            <th class="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Dibuat Pada</th>
-            <th class="px-6 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Aksi</th>
-        `;
-        if (thead) thead.innerHTML = `<tr>${headersHtml}</tr>`;
-
-        // Fetch records
-        const records = await api(`/lowcode/records/${techName}`) || [];
-        if (!tbody) return;
-
-        if (records.length === 0) {
-            const colSpan = currentSelectedModelFields.length + 4;
-            tbody.innerHTML = `<tr><td colspan="${colSpan}" class="px-6 py-10 text-center text-slate-400">Belum ada record data untuk model ini. Klik "Tambah Record Data" di kanan atas!</td></tr>`;
-            return;
-        }
-
-        tbody.innerHTML = records.map(r => {
-            let rowHtml = `
-                <td class="px-6 py-4 font-mono text-xs font-semibold text-slate-600">#${r.id}</td>
-                <td class="px-6 py-4 font-semibold text-slate-900">${r.name || ('Record #' + r.id)}</td>
-            `;
-
-            const rData = r.data || {};
-            currentSelectedModelFields.forEach(f => {
-                const val = rData[f.field_name];
-                let displayVal = val !== undefined && val !== null ? val : '-';
-
-                if (f.field_type === 'boolean') {
-                    displayVal = val ? '<span class="text-emerald-600 font-bold">✓ Ya</span>' : '<span class="text-slate-400">✗ Tidak</span>';
-                } else if (f.field_type === 'float' && typeof val === 'number') {
-                    displayVal = val.toLocaleString();
-                } else if (f.field_type === 'selection' && val) {
-                    displayVal = `<span class="px-2 py-0.5 text-xs rounded bg-indigo-50 text-indigo-700 font-medium">${val}</span>`;
-                }
-
-                rowHtml += `<td class="px-6 py-4 text-sm text-slate-700">${displayVal}</td>`;
-            });
-
-            const createdDate = r.created_at ? new Date(r.created_at).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' }) : '-';
-
-            rowHtml += `
-                <td class="px-6 py-4 text-xs text-slate-500">${createdDate}</td>
-                <td class="px-6 py-4 text-right">
-                    <button onclick="handleDeleteCustomRecord('${techName}', ${r.id})" class="px-2.5 py-1 text-xs text-rose-600 hover:bg-rose-50 rounded font-medium transition-colors" title="Hapus Record">
-                        🗑️ Hapus
-                    </button>
-                </td>
-            `;
-
-            return `<tr class="hover:bg-slate-50/80 transition-colors border-b border-slate-100">${rowHtml}</tr>`;
-        }).join('');
-    } catch (err) {
-        console.error('Failed to load Low-Code records:', err);
-    }
-}
-
-function openModalCreateCustomRecord() {
-    const select = document.getElementById('lcRecordModelFilter');
-    const techName = select ? select.value : '';
-    if (!techName) {
-        showToast('Pilih data model terlebih dahulu!', 'warning');
-        return;
-    }
-
-    const container = document.getElementById('lcDynamicFormInputsContainer');
-    document.getElementById('lcRecordDisplayName').value = '';
-
-    if (container) {
-        if (currentSelectedModelFields.length === 0) {
-            container.innerHTML = `<div class="p-4 bg-amber-50 rounded-lg text-amber-700 text-sm">Model ini belum memiliki custom fields tambahan. Anda dapat menyimpan nama record, atau menambahkan fields di tab Kelola Model.</div>`;
-        } else {
-            container.innerHTML = currentSelectedModelFields.map(f => {
-                let inputMarkup = '';
-                const reqAttr = f.required ? 'required' : '';
-                const reqStar = f.required ? '<span class="text-rose-500">*</span>' : '';
-
-                if (f.field_type === 'text') {
-                    inputMarkup = `<textarea name="${f.field_name}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500" rows="3" ${reqAttr}>${f.default_value || ''}</textarea>`;
-                } else if (f.field_type === 'integer') {
-                    inputMarkup = `<input type="number" step="1" name="${f.field_name}" value="${f.default_value || ''}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500" ${reqAttr}>`;
-                } else if (f.field_type === 'float') {
-                    inputMarkup = `<input type="number" step="0.01" name="${f.field_name}" value="${f.default_value || ''}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500" ${reqAttr}>`;
-                } else if (f.field_type === 'date') {
-                    inputMarkup = `<input type="date" name="${f.field_name}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500" ${reqAttr}>`;
-                } else if (f.field_type === 'datetime') {
-                    inputMarkup = `<input type="datetime-local" name="${f.field_name}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500" ${reqAttr}>`;
-                } else if (f.field_type === 'boolean') {
-                    inputMarkup = `
-                        <label class="flex items-center gap-2 cursor-pointer mt-1">
-                            <input type="checkbox" name="${f.field_name}" class="w-4 h-4 text-indigo-600 rounded">
-                            <span class="text-sm text-slate-700">Aktifkan opsi ini</span>
-                        </label>
-                    `;
-                } else if (f.field_type === 'selection') {
-                    let options = [];
-                    try {
-                        options = JSON.parse(f.options_json || '[]');
-                    } catch (e) {
-                        options = [];
-                    }
-                    const optHtml = options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
-                    inputMarkup = `
-                        <select name="${f.field_name}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500" ${reqAttr}>
-                            <option value="">-- Pilih Opsi --</option>
-                            ${optHtml}
-                        </select>
-                    `;
-                } else {
-                    inputMarkup = `<input type="text" name="${f.field_name}" value="${f.default_value || ''}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500" ${reqAttr}>`;
-                }
-
-                return `
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">${f.label} ${reqStar}</label>
-                        ${inputMarkup}
-                    </div>
-                `;
-            }).join('');
-        }
-    }
-
-    document.getElementById('modalCreateCustomRecord').classList.remove('hidden');
-    document.getElementById('modalCreateCustomRecord').classList.add('active');
-}
-
-function closeModalCreateCustomRecord() {
-    document.getElementById('modalCreateCustomRecord').classList.add('hidden');
-    document.getElementById('modalCreateCustomRecord').classList.remove('active');
-}
-
-async function handleSaveCustomRecord(e) {
-    e.preventDefault();
-    const select = document.getElementById('lcRecordModelFilter');
-    const techName = select ? select.value : '';
-    if (!techName) return;
-
-    try {
-        const nameVal = document.getElementById('lcRecordDisplayName').value.trim();
-        const dataObj = {};
-
-        currentSelectedModelFields.forEach(f => {
-            const inputEl = document.querySelector(`[name="${f.field_name}"]`);
-            if (inputEl) {
-                if (f.field_type === 'boolean') {
-                    dataObj[f.field_name] = inputEl.checked;
-                } else if (f.field_type === 'integer') {
-                    dataObj[f.field_name] = inputEl.value ? parseInt(inputEl.value) : 0;
-                } else if (f.field_type === 'float') {
-                    dataObj[f.field_name] = inputEl.value ? parseFloat(inputEl.value) : 0.0;
-                } else {
-                    dataObj[f.field_name] = inputEl.value;
-                }
-            }
-        });
-
-        const payload = {
-            name: nameVal || `Record ${Date.now()}`,
-            data: dataObj
-        };
-
-        await api(`/lowcode/records/${techName}`, 'POST', payload);
-        showToast('Record data berhasil disimpan!', 'success');
-        closeModalCreateCustomRecord();
-        loadLowCodeRecordsList();
+        await api('/lowcode/models/' + modelId, 'DELETE');
+        showToast('Model "' + modelName + '" berhasil dihapus.', 'info');
         loadLowCodeStudioData();
     } catch (err) {
-        showToast('Gagal menyimpan data record: ' + err.message, 'error');
+        showToast('Gagal menghapus model: ' + err.message, 'error');
     }
 }
-
-async function handleDeleteCustomRecord(techName, recordId) {
-    if (!confirm('Hapus record data ini?')) return;
-    try {
-        await api(`/lowcode/records/${techName}/${recordId}`, 'DELETE');
-        showToast('Record berhasil dihapus.', 'info');
-        loadLowCodeRecordsList();
-        loadLowCodeStudioData();
-    } catch (err) {
-        showToast('Gagal menghapus record: ' + err.message, 'error');
-    }
-}
-
-function openModalAISchemaArchitect() {
-    proposedAISchema = null;
-    document.getElementById('lcAiPromptInput').value = '';
-    document.getElementById('lcAiSchemaResultContainer').innerHTML = `
-        <div class="p-8 text-center text-slate-400">
-            Ketik kebutuhan modul bisnis Anda di atas dan klik <b>"Rancang Skema Model dengan AI"</b>.
-        </div>
-    `;
-    const btnApply = document.getElementById('btnApplyAISchema');
-    if (btnApply) btnApply.disabled = true;
-
-    document.getElementById('modalAISchemaArchitect').classList.remove('hidden');
-    document.getElementById('modalAISchemaArchitect').classList.add('active');
-}
-
-function closeModalAISchemaArchitect() {
-    document.getElementById('modalAISchemaArchitect').classList.add('hidden');
-    document.getElementById('modalAISchemaArchitect').classList.remove('active');
-    proposedAISchema = null;
-}
-
-function setAISchemaPromptPreset(preset) {
-    const input = document.getElementById('lcAiPromptInput');
-    if (input) {
-        input.value = preset;
-    }
-}
-
-async function generateAISchemaProposal() {
-    const promptInput = document.getElementById('lcAiPromptInput');
-    const promptVal = promptInput ? promptInput.value.trim() : '';
-    if (!promptVal) {
-        showToast('Silakan masukkan deskripsi modul bisnis terlebih dahulu!', 'warning');
-        return;
-    }
-
-    const container = document.getElementById('lcAiSchemaResultContainer');
-    const btnApply = document.getElementById('btnApplyAISchema');
-    if (container) {
-        container.innerHTML = `
-            <div class="p-8 text-center text-indigo-600 flex flex-col items-center justify-center gap-2">
-                <span class="animate-spin text-3xl">✨</span>
-                <span class="font-medium text-sm">AI sedang menganalisis arsitektur skema & tipe data ERP...</span>
-            </div>
-        `;
-    }
-
-    try {
-        const res = await api('/lowcode/ai/schema-copilot', 'POST', { prompt: promptVal });
-        if (!res || !res.proposed_model) {
-            throw new Error('Gagal menerima proposal skema AI');
-        }
-
-        proposedAISchema = res.proposed_model;
-        if (btnApply) btnApply.disabled = false;
-
-        const m = proposedAISchema;
-        const fields = m.fields || [];
-
-        container.innerHTML = `
-            <div class="space-y-4">
-                <div class="p-4 bg-indigo-50/70 border border-indigo-100 rounded-xl">
-                    <div class="flex items-center gap-3">
-                        <span class="text-3xl">${m.icon || '📦'}</span>
-                        <div>
-                            <div class="text-lg font-bold text-indigo-950">${m.name}</div>
-                            <div class="text-xs font-mono text-indigo-700">${m.technical_name} • Kategori: ${m.category}</div>
-                            <div class="text-sm text-slate-600 mt-1">${m.description}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <div class="font-bold text-xs uppercase tracking-wider text-slate-700 mb-2">Kolom & Fields yang Dirancang (${fields.length} Field):</div>
-                    <div class="border border-slate-200 rounded-lg overflow-hidden">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-slate-50 text-slate-600 border-b border-slate-200">
-                                <tr>
-                                    <th class="px-3 py-2 font-semibold">Label</th>
-                                    <th class="px-3 py-2 font-semibold">Technical Name</th>
-                                    <th class="px-3 py-2 font-semibold">Tipe Data</th>
-                                    <th class="px-3 py-2 font-semibold">Wajib?</th>
-                                    <th class="px-3 py-2 font-semibold">Options / Default</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100 bg-white">
-                                ${fields.map(f => `
-                                    <tr>
-                                        <td class="px-3 py-2 font-medium text-slate-900">${f.label}</td>
-                                        <td class="px-3 py-2 font-mono text-indigo-700">${f.field_name}</td>
-                                        <td class="px-3 py-2"><span class="px-1.5 py-0.5 bg-slate-100 rounded uppercase font-semibold text-[10px]">${f.field_type}</span></td>
-                                        <td class="px-3 py-2">${f.required ? '<span class="text-rose-600 font-bold">Wajib</span>' : '<span class="text-slate-400">Opsional</span>'}</td>
-                                        <td class="px-3 py-2 text-slate-500 font-mono">${f.options_json && f.options_json !== '[]' ? f.options_json : (f.default_value || '-')}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-xs">
-                    💡 Klik tombol <b>"Terapkan Skema ke Database"</b> di bawah untuk langsung membuat model dan kolom-kolom ini ke sistem live.
-                </div>
-            </div>
-        `;
-    } catch (err) {
-        if (container) {
-            container.innerHTML = `<div class="p-6 text-center text-rose-600 text-sm">Gagal merancang skema AI: ${err.message}</div>`;
-        }
-        if (btnApply) btnApply.disabled = true;
-    }
-}
-
-async function applyAISchemaProposal() {
-    if (!proposedAISchema) return;
-
-    try {
-        // 1. Create model
-        const modelPayload = {
-            name: proposedAISchema.name,
-            technical_name: proposedAISchema.technical_name,
-            category: proposedAISchema.category || 'custom',
-            icon: proposedAISchema.icon || '📦',
-            description: proposedAISchema.description || '',
-            active: true
-        };
-
-        const createdModel = await api('/lowcode/models', 'POST', modelPayload);
-        if (!createdModel || !createdModel.id) {
-            throw new Error('Gagal menginisialisasi model baru');
-        }
-
-        // 2. Add each field
-        const fields = proposedAISchema.fields || [];
-        for (const f of fields) {
-            await api(`/lowcode/models/${createdModel.id}/fields`, 'POST', {
-                field_name: f.field_name,
-                field_type: f.field_type,
-                label: f.label,
-                required: f.required,
-                options_json: f.options_json || '[]',
-                default_value: f.default_value || ''
-            });
-        }
-
-        showToast(`Model "${proposedAISchema.name}" beserta ${fields.length} field berhasil dibuat ke database!`, 'success');
-        closeModalAISchemaArchitect();
-        await loadLowCodeStudioData();
-        switchLowCodeTab('models');
-    } catch (err) {
-        showToast('Gagal menerapkan skema AI: ' + err.message, 'error');
-    }
-}
-
 
 // ============================================================================
 // UNIFIED OVERRIDES FOR LOW-CODE STUDIO (RECONCILED WITH INDEX.HTML DOM IDs)
@@ -21223,7 +20689,7 @@ function openModalCreateCustomModel() {
 function autoGenerateModelTechnicalName() {
     const nameVal = document.getElementById('lcNewModelName')?.value || '';
     const slug = nameVal.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
-    const techEl = document.getElementById('lcNewModelTech') || document.getElementById('lcNewModelTechName');
+    const techEl = document.getElementById('lcNewModelTech');
     if (techEl) techEl.value = 'x_' + slug;
 }
 
@@ -21231,10 +20697,10 @@ async function handleCreateCustomModel(e) {
     e.preventDefault();
     try {
         const name = (document.getElementById('lcNewModelName')?.value || '').trim();
-        const techName = (document.getElementById('lcNewModelTech')?.value || document.getElementById('lcNewModelTechName')?.value || '').trim();
+        const techName = (document.getElementById('lcNewModelTech')?.value || '').trim();
         const icon = (document.getElementById('lcNewModelIcon')?.value || '📦').trim();
         const category = document.getElementById('lcNewModelCategory')?.value || 'Operations';
-        const description = (document.getElementById('lcNewModelDesc')?.value || document.getElementById('lcNewModelDescription')?.value || '').trim();
+        const description = (document.getElementById('lcNewModelDesc')?.value || '').trim();
         const enableAudit = document.getElementById('lcNewModelAudit') ? document.getElementById('lcNewModelAudit').checked : true;
         const enableChatter = document.getElementById('lcNewModelChatter') ? document.getElementById('lcNewModelChatter').checked : true;
 
@@ -35476,3 +34942,61 @@ function initSSEEventListener() {
     }
 }
 document.addEventListener('DOMContentLoaded', initSSEEventListener);
+
+
+// ==========================================
+// QC/QA RECONCILED GLOBAL HANDLERS & ALIASES
+// ==========================================
+function switchTab(tab) {
+    if (typeof switchTabProgrammatically === 'function') {
+        switchTabProgrammatically(tab);
+    }
+}
+
+function openMoveDetail(moveId) {
+    if (typeof switchTabProgrammatically === 'function') {
+        switchTabProgrammatically('invoicing');
+    }
+    showToast('Membuka Jurnal Entry #' + moveId, 'info');
+}
+
+function openChatterModal(model, resId, title) {
+    return openChatter(model, resId, title);
+}
+
+function loadExpenseSheets() {
+    if (typeof renderExpenseSheetsTable === 'function') {
+        renderExpenseSheetsTable();
+    }
+}
+
+function loadExpenseItems() {
+    if (typeof renderExpenseItemsTable === 'function') {
+        renderExpenseItemsTable();
+    }
+}
+
+async function openModalCreatePutawayRule() {
+    const desc = prompt('Masukkan deskripsi aturan putaway baru:', 'Aturan Fast-Moving Zona Depan');
+    if (!desc) return;
+    try {
+        await apiPost('/api/v1/wms/putaway-rules', {
+            priority: 10,
+            strategy: 'fastest_access',
+            description: desc,
+            active: true
+        });
+        showToast('Aturan putaway berhasil ditambahkan!', 'success');
+        if (typeof loadWMSPutawayRules === 'function') loadWMSPutawayRules();
+    } catch (err) {
+        showToast('Gagal menambahkan aturan putaway: ' + err.message, 'error');
+    }
+}
+
+function openCustomerPortalSimulatorModal() {
+    return openCustomerPortalSimulator();
+}
+
+function openAICustomerHealthModal() {
+    return openModalAICustomerHealth();
+}

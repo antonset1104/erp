@@ -15,12 +15,12 @@ type TransformerDGATelemetry struct {
 	TelemetryID             string    `json:"telemetry_id"`
 	AssetID                 string    `json:"asset_id"` // e.g. "TRF-MAIN-150KV-02"
 	SubstationID            string    `json:"substation_id"`
-	HydrogenPPM_H2          float64   `json:"hydrogen_ppm_h2"`          // Partial discharge
-	MethanePPM_CH4          float64   `json:"methane_ppm_ch4"`          // Low/medium thermal
-	EthanePPM_C2H6          float64   `json:"ethane_ppm_c2h6"`          // High thermal
-	EthylenePPM_C2H4        float64   `json:"ethylene_ppm_c2h4"`        // Very high thermal
-	AcetylenePPM_C2H2       float64   `json:"acetylene_ppm_c2h2"`       // High-energy electrical arcing (>35 ppm danger)
-	CarbonMonoxidePPM_CO    float64   `json:"carbon_monoxide_ppm_co"`   // Paper insulation breakdown
+	HydrogenPPM_H2          float64   `json:"hydrogen_ppm_h2"`        // Partial discharge
+	MethanePPM_CH4          float64   `json:"methane_ppm_ch4"`        // Low/medium thermal
+	EthanePPM_C2H6          float64   `json:"ethane_ppm_c2h6"`        // High thermal
+	EthylenePPM_C2H4        float64   `json:"ethylene_ppm_c2h4"`      // Very high thermal
+	AcetylenePPM_C2H2       float64   `json:"acetylene_ppm_c2h2"`     // High-energy electrical arcing (>35 ppm danger)
+	CarbonMonoxidePPM_CO    float64   `json:"carbon_monoxide_ppm_co"` // Paper insulation breakdown
 	CarbonDioxidePPM_CO2    float64   `json:"carbon_dioxide_ppm_co2"`
 	TotalCombustibleGasTDCG float64   `json:"total_combustible_gas_tdcg"`
 	OilTemperatureC         float64   `json:"oil_temperature_c"`
@@ -30,35 +30,35 @@ type TransformerDGATelemetry struct {
 
 // DuvalFaultDiagnosis models Duval Triangle 1 and IEC 60599 gas ratio fault classifications
 type DuvalFaultDiagnosis struct {
-	DiagnosisID                 string    `json:"diagnosis_id"`
-	AssetID                     string    `json:"asset_id"`
-	CH4_RatioPct                float64   `json:"ch4_ratio_pct"`  // % CH4 / (CH4 + C2H4 + C2H2)
-	C2H4_RatioPct               float64   `json:"c2h4_ratio_pct"` // % C2H4 / (CH4 + C2H4 + C2H2)
-	C2H2_RatioPct               float64   `json:"c2h2_ratio_pct"` // % C2H2 / (CH4 + C2H4 + C2H2)
-	IdentifiedFaultType         string    `json:"identified_fault_type"` // "D2_HIGH_ENERGY_ARCING_CRITICAL", "T3_THERMAL_OVER_700C", "PD_PARTIAL_DISCHARGE", "NORMAL_NO_FAULT"
-	CellulosePaperCO2toCORatio  float64   `json:"cellulose_paper_co2_to_co_ratio"`
-	ActionSeverity              string    `json:"action_severity"` // "CRITICAL_EXPLOSION_HAZARD", "WARNING_INCREASE_SAMPLING", "STABLE_NORMAL"
-	RecommendedAction           string    `json:"recommended_action"`
-	DiagnosedAt                 time.Time `json:"diagnosed_at"`
+	DiagnosisID                string    `json:"diagnosis_id"`
+	AssetID                    string    `json:"asset_id"`
+	CH4_RatioPct               float64   `json:"ch4_ratio_pct"`         // % CH4 / (CH4 + C2H4 + C2H2)
+	C2H4_RatioPct              float64   `json:"c2h4_ratio_pct"`        // % C2H4 / (CH4 + C2H4 + C2H2)
+	C2H2_RatioPct              float64   `json:"c2h2_ratio_pct"`        // % C2H2 / (CH4 + C2H4 + C2H2)
+	IdentifiedFaultType        string    `json:"identified_fault_type"` // "D2_HIGH_ENERGY_ARCING_CRITICAL", "T3_THERMAL_OVER_700C", "PD_PARTIAL_DISCHARGE", "NORMAL_NO_FAULT"
+	CellulosePaperCO2toCORatio float64   `json:"cellulose_paper_co2_to_co_ratio"`
+	ActionSeverity             string    `json:"action_severity"` // "CRITICAL_EXPLOSION_HAZARD", "WARNING_INCREASE_SAMPLING", "STABLE_NORMAL"
+	RecommendedAction          string    `json:"recommended_action"`
+	DiagnosedAt                time.Time `json:"diagnosed_at"`
 }
 
 // SafetyDeratingWorkOrder models autonomous transformer electrical load throttling
 type SafetyDeratingWorkOrder struct {
-	WorkOrderID                    string    `json:"work_order_id"`
-	AssetID                        string    `json:"asset_id"`
-	MaxAllowedLoadCapacityPct      float64   `json:"max_allowed_load_capacity_pct"` // e.g. 60.0%
-	AvoidedTransformerLossUSD      float64   `json:"avoided_transformer_loss_usd"`
-	EmergencyOilDegasification     bool      `json:"emergency_oil_degasification"`
-	ScheduledOutageDate            time.Time `json:"scheduled_outage_date"`
-	AuthorizedAt                   time.Time `json:"authorized_at"`
+	WorkOrderID                string    `json:"work_order_id"`
+	AssetID                    string    `json:"asset_id"`
+	MaxAllowedLoadCapacityPct  float64   `json:"max_allowed_load_capacity_pct"` // e.g. 60.0%
+	AvoidedTransformerLossUSD  float64   `json:"avoided_transformer_loss_usd"`
+	EmergencyOilDegasification bool      `json:"emergency_oil_degasification"`
+	ScheduledOutageDate        time.Time `json:"scheduled_outage_date"`
+	AuthorizedAt               time.Time `json:"authorized_at"`
 }
 
 // TransformerDGAVault thread-safe store
 type TransformerDGAVault struct {
-	mu           sync.RWMutex
-	telemetries  map[string]TransformerDGATelemetry
-	diagnoses    map[string]DuvalFaultDiagnosis
-	deratings    map[string]SafetyDeratingWorkOrder
+	mu          sync.RWMutex
+	telemetries map[string]TransformerDGATelemetry
+	diagnoses   map[string]DuvalFaultDiagnosis
+	deratings   map[string]SafetyDeratingWorkOrder
 }
 
 // Global Transformer DGA instance

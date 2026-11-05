@@ -33,28 +33,28 @@ type EnterpriseSSOResponse struct {
 }
 
 type ModulePermission struct {
-	Module      string   `json:"module"`
-	Read        bool     `json:"read"`
-	Create      bool     `json:"create"`
-	Update      bool     `json:"update"`
-	Delete      bool     `json:"delete"`
-	Post        bool     `json:"post"`
-	Approve     bool     `json:"approve"`
+	Module       string   `json:"module"`
+	Read         bool     `json:"read"`
+	Create       bool     `json:"create"`
+	Update       bool     `json:"update"`
+	Delete       bool     `json:"delete"`
+	Post         bool     `json:"post"`
+	Approve      bool     `json:"approve"`
 	MaskedFields []string `json:"masked_fields,omitempty"`
 }
 
 type RoleRBACProfile struct {
-	RoleName        string             `json:"role_name"`
-	Description     string             `json:"description"`
-	Permissions     []ModulePermission `json:"permissions"`
-	FieldMaskRules  map[string][]string `json:"field_mask_rules"`
+	RoleName       string              `json:"role_name"`
+	Description    string              `json:"description"`
+	Permissions    []ModulePermission  `json:"permissions"`
+	FieldMaskRules map[string][]string `json:"field_mask_rules"`
 }
 
 type RBACMatrixResponse struct {
-	SystemRoles     []string           `json:"system_roles"`
+	SystemRoles      []string          `json:"system_roles"`
 	AvailableModules []string          `json:"available_modules"`
-	RoleProfiles    []RoleRBACProfile  `json:"role_profiles"`
-	LastAuditedAt   string             `json:"last_audited_at"`
+	RoleProfiles     []RoleRBACProfile `json:"role_profiles"`
+	LastAuditedAt    string            `json:"last_audited_at"`
 }
 
 type MaskRecordRequest struct {

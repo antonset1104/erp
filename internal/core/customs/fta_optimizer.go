@@ -23,9 +23,9 @@ const (
 
 // BOMComponentOrigin represents an individual raw material/component in the bill of materials.
 type BOMComponentOrigin struct {
-	ComponentSKU     string  `json:"component_sku"`
+	ComponentSKU    string  `json:"component_sku"`
 	ComponentName   string  `json:"component_name"`
-	HSCode          string  `json:"hs_code"` // e.g. 8541.10
+	HSCode          string  `json:"hs_code"`           // e.g. 8541.10
 	CountryOfOrigin string  `json:"country_of_origin"` // ISO 2-letter (ID, VN, MY, CN, US)
 	UnitCostIDR     float64 `json:"unit_cost_idr"`
 	QuantityPerUnit float64 `json:"quantity_per_unit"`
@@ -36,10 +36,10 @@ type BOMComponentOrigin struct {
 // OriginQualificationResult represents the compliance verdict for an FTA agreement.
 type OriginQualificationResult struct {
 	TradeBlocName       FTATradeBloc `json:"trade_bloc_name"`
-	OfficialFormType    string       `json:"official_form_type"` // Form D, Form E, Form RCEP
+	OfficialFormType    string       `json:"official_form_type"`   // Form D, Form E, Form RCEP
 	QualifyingCriterion string       `json:"qualifying_criterion"` // RVC >= 40% or CTH Change
-	RVCPercentage       float64      `json:"rvc_percentage"` // Regional Value Content %
-	MinimumThreshold    float64      `json:"minimum_threshold"` // Usually 40.0%
+	RVCPercentage       float64      `json:"rvc_percentage"`       // Regional Value Content %
+	MinimumThreshold    float64      `json:"minimum_threshold"`    // Usually 40.0%
 	IsQualified         bool         `json:"is_qualified"`
 	StandardMFNDutyPct  float64      `json:"standard_mfn_duty_pct"` // e.g. 12.5%
 	PreferentialDutyPct float64      `json:"preferential_duty_pct"` // 0.0%
@@ -60,18 +60,18 @@ type EvaluateOriginRequest struct {
 
 // EvaluateOriginResponse encapsulates the complete trade certificate optimization report.
 type EvaluateOriginResponse struct {
-	EvaluationID            string                       `json:"evaluation_id"`
-	EvaluatedAt             string                       `json:"evaluated_at"`
-	FinishedGoodSKU         string                       `json:"finished_good_sku"`
-	FinishedGoodName        string                       `json:"finished_good_name"`
-	FinishedGoodHS          string                       `json:"finished_good_hs"`
-	FOBPriceIDR             float64                      `json:"fob_price_idr"`
-	TotalBOMCostIDR         float64                      `json:"total_bom_cost_idr"`
-	OriginatingMaterialCost float64                      `json:"originating_material_cost_idr"`
-	NonOriginatingMatCost   float64                      `json:"non_originating_material_cost_idr"`
-	TotalAnnualDutySavedIDR float64                      `json:"total_annual_duty_saved_idr"`
+	EvaluationID            string                      `json:"evaluation_id"`
+	EvaluatedAt             string                      `json:"evaluated_at"`
+	FinishedGoodSKU         string                      `json:"finished_good_sku"`
+	FinishedGoodName        string                      `json:"finished_good_name"`
+	FinishedGoodHS          string                      `json:"finished_good_hs"`
+	FOBPriceIDR             float64                     `json:"fob_price_idr"`
+	TotalBOMCostIDR         float64                     `json:"total_bom_cost_idr"`
+	OriginatingMaterialCost float64                     `json:"originating_material_cost_idr"`
+	NonOriginatingMatCost   float64                     `json:"non_originating_material_cost_idr"`
+	TotalAnnualDutySavedIDR float64                     `json:"total_annual_duty_saved_idr"`
 	FTAResults              []OriginQualificationResult `json:"fta_results"`
-	StrategicAdvice         string                       `json:"strategic_advice"`
+	StrategicAdvice         string                      `json:"strategic_advice"`
 }
 
 // FTAOptimizerService evaluates Rules of Origin and maximizes customs duty savings.
@@ -103,11 +103,11 @@ func (s *FTAOptimizerService) EvaluateOrigin(req EvaluateOriginRequest) (*Evalua
 	// Default BOM components if empty
 	if len(req.BOMComponents) == 0 {
 		req.BOMComponents = []BOMComponentOrigin{
-			{ComponentSKU: "COMP-LCD-PANEL", ComponentName: "IPS LCD Display Panel 27 Inch", HSCode: "9013.80", CountryOfOrigin: "VN", UnitCostIDR: 1600000, QuantityPerUnit: 1, TotalCostIDR: 1600000, IsOriginating: true},  // Vietnam (ASEAN)
-			{ComponentSKU: "COMP-MAIN-PCB", ComponentName: "Main Controller Board SMT", HSCode: "8534.00", CountryOfOrigin: "ID", UnitCostIDR: 750000, QuantityPerUnit: 1, TotalCostIDR: 750000, IsOriginating: true},         // Indonesia (Local)
-			{ComponentSKU: "COMP-CHASSIS", ComponentName: "ABS Plastic Enclosure & Stand", HSCode: "3926.90", CountryOfOrigin: "ID", UnitCostIDR: 350000, QuantityPerUnit: 1, TotalCostIDR: 350000, IsOriginating: true},       // Indonesia (Local)
-			{ComponentSKU: "COMP-PWR-SUPPLY", ComponentName: "AC/DC Switching Power Supply", HSCode: "8504.40", CountryOfOrigin: "MY", UnitCostIDR: 300000, QuantityPerUnit: 1, TotalCostIDR: 300000, IsOriginating: true},    // Malaysia (ASEAN)
-			{ComponentSKU: "COMP-DSP-CHIP", ComponentName: "Video Scaler DSP IC Microchip", HSCode: "8542.31", CountryOfOrigin: "US", UnitCostIDR: 450000, QuantityPerUnit: 1, TotalCostIDR: 450000, IsOriginating: false},    // USA (Non-originating)
+			{ComponentSKU: "COMP-LCD-PANEL", ComponentName: "IPS LCD Display Panel 27 Inch", HSCode: "9013.80", CountryOfOrigin: "VN", UnitCostIDR: 1600000, QuantityPerUnit: 1, TotalCostIDR: 1600000, IsOriginating: true}, // Vietnam (ASEAN)
+			{ComponentSKU: "COMP-MAIN-PCB", ComponentName: "Main Controller Board SMT", HSCode: "8534.00", CountryOfOrigin: "ID", UnitCostIDR: 750000, QuantityPerUnit: 1, TotalCostIDR: 750000, IsOriginating: true},        // Indonesia (Local)
+			{ComponentSKU: "COMP-CHASSIS", ComponentName: "ABS Plastic Enclosure & Stand", HSCode: "3926.90", CountryOfOrigin: "ID", UnitCostIDR: 350000, QuantityPerUnit: 1, TotalCostIDR: 350000, IsOriginating: true},     // Indonesia (Local)
+			{ComponentSKU: "COMP-PWR-SUPPLY", ComponentName: "AC/DC Switching Power Supply", HSCode: "8504.40", CountryOfOrigin: "MY", UnitCostIDR: 300000, QuantityPerUnit: 1, TotalCostIDR: 300000, IsOriginating: true},   // Malaysia (ASEAN)
+			{ComponentSKU: "COMP-DSP-CHIP", ComponentName: "Video Scaler DSP IC Microchip", HSCode: "8542.31", CountryOfOrigin: "US", UnitCostIDR: 450000, QuantityPerUnit: 1, TotalCostIDR: 450000, IsOriginating: false},   // USA (Non-originating)
 		}
 	}
 

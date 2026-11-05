@@ -13,30 +13,30 @@ import (
 
 // Scope3BOMComponent represents carbon emissions embedded in an upstream purchased raw material.
 type Scope3BOMComponent struct {
-	ComponentSKU           string  `json:"component_sku"`
-	ComponentName         string  `json:"component_name"`
-	WeightKg              float64 `json:"weight_kg"`
-	SupplierName          string  `json:"supplier_name"`
-	SupplierCountry       string  `json:"supplier_country"`
-	EmissionFactorKgCO2e  float64 `json:"emission_factor_kg_co2e"`
-	TotalEmissionsKgCO2e  float64 `json:"total_emissions_kg_co2e"`
-	SupplierESGGrade      string  `json:"supplier_esg_grade"`
+	ComponentSKU         string  `json:"component_sku"`
+	ComponentName        string  `json:"component_name"`
+	WeightKg             float64 `json:"weight_kg"`
+	SupplierName         string  `json:"supplier_name"`
+	SupplierCountry      string  `json:"supplier_country"`
+	EmissionFactorKgCO2e float64 `json:"emission_factor_kg_co2e"`
+	TotalEmissionsKgCO2e float64 `json:"total_emissions_kg_co2e"`
+	SupplierESGGrade     string  `json:"supplier_esg_grade"`
 }
 
 // ProductCarbonPassportRequest defines inputs to calculate a product's cradle-to-gate carbon passport.
 type ProductCarbonPassportRequest struct {
-	ProductID             string               `json:"product_id"`
-	SKU                   string               `json:"sku"`
-	ProductName           string               `json:"product_name"`
-	CNCode                string               `json:"cn_code"`
-	ExportOrderID         string               `json:"export_order_id"`
-	DestinationCountry    string               `json:"destination_country"`
-	NetWeightKg           float64              `json:"net_weight_kg"`
-	ManufacturingSite     string               `json:"manufacturing_site"`
-	DirectScope1KgCO2e    float64              `json:"direct_scope1_kg_co2e"`
-	IndirectScope2KgCO2e  float64              `json:"indirect_scope2_kg_co2e"`
-	TransportDistanceKM   float64              `json:"transport_distance_km"`
-	Components            []Scope3BOMComponent `json:"components"`
+	ProductID            string               `json:"product_id"`
+	SKU                  string               `json:"sku"`
+	ProductName          string               `json:"product_name"`
+	CNCode               string               `json:"cn_code"`
+	ExportOrderID        string               `json:"export_order_id"`
+	DestinationCountry   string               `json:"destination_country"`
+	NetWeightKg          float64              `json:"net_weight_kg"`
+	ManufacturingSite    string               `json:"manufacturing_site"`
+	DirectScope1KgCO2e   float64              `json:"direct_scope1_kg_co2e"`
+	IndirectScope2KgCO2e float64              `json:"indirect_scope2_kg_co2e"`
+	TransportDistanceKM  float64              `json:"transport_distance_km"`
+	Components           []Scope3BOMComponent `json:"components"`
 }
 
 // ProductCarbonPassport represents the comprehensive carbon footprint certificate.

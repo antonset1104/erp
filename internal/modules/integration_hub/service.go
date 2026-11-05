@@ -270,8 +270,8 @@ func (s *Service) ExecuteRPCAction(req *RPCExecuteActionRequest, companyID uint)
 	case "account.move":
 		if req.Action == "action_post" {
 			err = s.db.Table(tableName).Where("id = ? AND company_id = ?", req.ID, companyID).Updates(map[string]interface{}{
-				"state":   "posted",
-				"date":    now.Format("2006-01-02"),
+				"state": "posted",
+				"date":  now.Format("2006-01-02"),
 			}).Error
 			message = fmt.Sprintf("Account Move (Invoice) #%d posted to General Ledger", req.ID)
 		}

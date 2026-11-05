@@ -42,7 +42,7 @@ type Budget struct {
 	models.ModelBase
 	Name                   string       `gorm:"size:128;not null" json:"name"`
 	Code                   string       `gorm:"size:64;not null;uniqueIndex" json:"code"` // e.g. "BDG/2026/Q4/0001"
-	UserID                 uint         `gorm:"not null;index" json:"user_id"`           // Responsible Manager / PIC
+	UserID                 uint         `gorm:"not null;index" json:"user_id"`            // Responsible Manager / PIC
 	User                   *base.User   `gorm:"foreignKey:UserID" json:"user,omitempty"`
 	DateFrom               string       `gorm:"size:32;not null;index" json:"date_from"`
 	DateTo                 string       `gorm:"size:32;not null;index" json:"date_to"`
@@ -122,8 +122,8 @@ type CreateBudgetRequest struct {
 type AIBudgetAuditResult struct {
 	BudgetID           uint     `json:"budget_id"`
 	BudgetName         string   `json:"budget_name"`
-	RiskLevel          string   `json:"risk_level"` // low, medium, high, critical
-	RiskScore          float64  `json:"risk_score"` // 0-100
+	RiskLevel          string   `json:"risk_level"`        // low, medium, high, critical
+	RiskScore          float64  `json:"risk_score"`        // 0-100
 	OverallBurnRate    string   `json:"overall_burn_rate"` // normal, elevated, critical
 	FlaggedOverspends  []string `json:"flagged_overspends"`
 	ExecutiveSummary   string   `json:"executive_summary"`

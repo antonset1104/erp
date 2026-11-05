@@ -14,27 +14,27 @@ import (
 
 // SaltCavernTelemetry captures underground hydrogen salt cavern geomechanics and microbial souring under ISO 27913 & API RP 1114
 type SaltCavernTelemetry struct {
-	TelemetryID                        string    `json:"telemetry_id"`
-	CavernID                           string    `json:"cavern_id"`                                // "CAVERN-H2-DOMAL-SALT-350K-01"
-	StorageSiteID                      string    `json:"storage_site_id"`                          // "SITE-SALT-DOME-GULF-COAST"
-	StoredHydrogenMassTons             float64   `json:"stored_hydrogen_mass_tons"`                // e.g. 4850.0 tons
-	CavernPressureBar                  float64   `json:"cavern_pressure_bar"`                      // e.g. 175.0 bar (operating 60-200 bar)
-	PressureRampRateBarPerDay          float64   `json:"pressure_ramp_rate_bar_per_day"`           // e.g. 14.5 bar/day (safe < 10.0 bar/day)
-	GeothermalTemperatureC             float64   `json:"geothermal_temperature_c"`                // e.g. 64.5°C
-	HaliteViscoplasticCreepRatePctPerYr float64  `json:"halite_viscoplastic_creep_rate_pct_per_yr"`// e.g. 1.85%/yr (volume loss rate)
-	AcousticEmissionEventRatePerHour   float64   `json:"acoustic_emission_event_rate_per_hour"`    // e.g. 42.0 events/hr (micro-fracturing)
-	HydrogenSulfideTracePpm            float64   `json:"hydrogen_sulfide_trace_ppm"`               // e.g. 0.018 ppm (ISO 14687 limit < 0.004 ppm)
-	CushionGasNitrogenVolumePct        float64   `json:"cushion_gas_nitrogen_volume_pct"`          // e.g. 12.5%
-	RecordedAt                         time.Time `json:"recorded_at"`
+	TelemetryID                         string    `json:"telemetry_id"`
+	CavernID                            string    `json:"cavern_id"`                                 // "CAVERN-H2-DOMAL-SALT-350K-01"
+	StorageSiteID                       string    `json:"storage_site_id"`                           // "SITE-SALT-DOME-GULF-COAST"
+	StoredHydrogenMassTons              float64   `json:"stored_hydrogen_mass_tons"`                 // e.g. 4850.0 tons
+	CavernPressureBar                   float64   `json:"cavern_pressure_bar"`                       // e.g. 175.0 bar (operating 60-200 bar)
+	PressureRampRateBarPerDay           float64   `json:"pressure_ramp_rate_bar_per_day"`            // e.g. 14.5 bar/day (safe < 10.0 bar/day)
+	GeothermalTemperatureC              float64   `json:"geothermal_temperature_c"`                  // e.g. 64.5°C
+	HaliteViscoplasticCreepRatePctPerYr float64   `json:"halite_viscoplastic_creep_rate_pct_per_yr"` // e.g. 1.85%/yr (volume loss rate)
+	AcousticEmissionEventRatePerHour    float64   `json:"acoustic_emission_event_rate_per_hour"`     // e.g. 42.0 events/hr (micro-fracturing)
+	HydrogenSulfideTracePpm             float64   `json:"hydrogen_sulfide_trace_ppm"`                // e.g. 0.018 ppm (ISO 14687 limit < 0.004 ppm)
+	CushionGasNitrogenVolumePct         float64   `json:"cushion_gas_nitrogen_volume_pct"`           // e.g. 12.5%
+	RecordedAt                          time.Time `json:"recorded_at"`
 }
 
 // SaltCavernAssessment models halite dilatancy shear failure, cavern convergence, and SRB biocatalytic H2S souring
 type SaltCavernAssessment struct {
 	AssessmentID                   string    `json:"assessment_id"`
 	CavernID                       string    `json:"cavern_id"`
-	DilatancyBoundarySafetyFactor  float64   `json:"dilatancy_boundary_safety_factor"`  // sigma_oct / tau_oct boundary ratio
-	CavernWallStabilityStatus      string    `json:"cavern_wall_stability_status"`      // "ELASTOPLASTIC_DILATANCY_STABLE", "MICRO_CRACKING_DILATANCY_WARNING", "CRITICAL_SALT_SPALLING_COLLAPSE_HAZARD"
-	HydrogenPuritySouringStatus    string    `json:"hydrogen_purity_souring_status"`    // "ISO_14687_FUEL_CELL_GRADE", "MICROBIAL_SRB_SOURING_ALERT", "CONTAMINATED_SOUR_GAS_LOCKOUT"
+	DilatancyBoundarySafetyFactor  float64   `json:"dilatancy_boundary_safety_factor"` // sigma_oct / tau_oct boundary ratio
+	CavernWallStabilityStatus      string    `json:"cavern_wall_stability_status"`     // "ELASTOPLASTIC_DILATANCY_STABLE", "MICRO_CRACKING_DILATANCY_WARNING", "CRITICAL_SALT_SPALLING_COLLAPSE_HAZARD"
+	HydrogenPuritySouringStatus    string    `json:"hydrogen_purity_souring_status"`   // "ISO_14687_FUEL_CELL_GRADE", "MICROBIAL_SRB_SOURING_ALERT", "CONTAMINATED_SOUR_GAS_LOCKOUT"
 	PressureRampThrottlingMandate  bool      `json:"pressure_ramp_throttling_mandate"`
 	HalophilicBiocideDosingMandate bool      `json:"halophilic_biocide_dosing_mandate"`
 	AuditDigest                    string    `json:"audit_digest"`
@@ -187,14 +187,14 @@ func (v *SaltCavernVault) GetSaltCavernIntegrityDossier(cavernID string) (map[st
 	}
 
 	return map[string]interface{}{
-		"cavern_id":           cavernID,
-		"storage_site_id":     telem.StorageSiteID,
-		"iso_27913_compliant": true,
+		"cavern_id":            cavernID,
+		"storage_site_id":      telem.StorageSiteID,
+		"iso_27913_compliant":  true,
 		"api_rp1114_certified": true,
-		"telemetry":           telem,
-		"assessment":          asm,
-		"latest_action":       act,
-		"compiled_at":         time.Now(),
+		"telemetry":            telem,
+		"assessment":           asm,
+		"latest_action":        act,
+		"compiled_at":          time.Now(),
 	}, nil
 }
 

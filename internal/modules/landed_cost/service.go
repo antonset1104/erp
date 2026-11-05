@@ -475,13 +475,13 @@ func (s *Service) AILandedCostCopilot(id, companyID uint) (*AILandedCostReport, 
 
 	// Consolidate product-level figures
 	type ProdSummary struct {
-		ID          uint
-		Name        string
-		Qty         float64
-		FormerCost  float64
-		AddCost     float64
-		FinalCost   float64
-		SellPrice   float64
+		ID         uint
+		Name       string
+		Qty        float64
+		FormerCost float64
+		AddCost    float64
+		FinalCost  float64
+		SellPrice  float64
 	}
 
 	prodMap := make(map[uint]*ProdSummary)
@@ -579,7 +579,7 @@ func (s *Service) AILandedCostCopilot(id, companyID uint) (*AILandedCostReport, 
 		Summary: fmt.Sprintf("Analisis Landed Cost %s: Total biaya pengadaan tambahan sebesar Rp %.2f dialokasikan ke %d produk. Rasio beban logistik terhadap harga beli adalah %.1f%% dengan profil risiko %s.",
 			cost.Name, totalAddCost, len(productImpacts), overallOverheadPct, riskLevel),
 		TotalAdditionalCost: totalAddCost,
-		OverallOverheadPct:   math.Round(overallOverheadPct*10) / 10,
+		OverallOverheadPct:  math.Round(overallOverheadPct*10) / 10,
 		ProductImpacts:      productImpacts,
 		Recommendations:     recommendations,
 		RiskLevel:           riskLevel,

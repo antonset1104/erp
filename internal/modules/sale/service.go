@@ -106,12 +106,12 @@ func (s *Service) ActionConfirm(id uint, companyID uint) (*SaleOrder, *stock.Sto
 		if err := s.db.First(&prod, line.ProductID).Error; err == nil {
 			if prod.Type == "product" { // Storable
 				move := stock.StockMove{
-					ProductID:     line.ProductID,
-					ProductName:   line.Name,
-					ProductUomQty: line.ProductUomQty,
-					LocationID:    1, // WH/Stock
+					ProductID:      line.ProductID,
+					ProductName:    line.Name,
+					ProductUomQty:  line.ProductUomQty,
+					LocationID:     1, // WH/Stock
 					LocationDestID: 3, // Virtual Locations/Customers
-					State:         "confirmed",
+					State:          "confirmed",
 				}
 				move.CompanyID = companyID
 				moveLines = append(moveLines, move)

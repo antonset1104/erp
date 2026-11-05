@@ -11,55 +11,55 @@ import (
 
 // NDFContract represents a Non-Deliverable Forward derivative contract
 type NDFContract struct {
-	ContractID         string    `json:"contract_id"` // e.g. "NDF-USDIDR-2026-081"
-	CompanyID          string    `json:"company_id"`
-	CounterpartyBank   string    `json:"counterparty_bank"` // e.g. "Citibank N.A. Jakarta"
-	CurrencyPair       string    `json:"currency_pair"`     // "USD/IDR"
-	NotionalAmountUSD  float64   `json:"notional_amount_usd"`
-	ContractForwardRate float64  `json:"contract_forward_rate"` // e.g. 15850.0 IDR/USD
-	TradeDate          time.Time `json:"trade_date"`
-	FixingDate         time.Time `json:"fixing_date"`
-	SettlementDate     time.Time `json:"settlement_date"`
-	FixingBenchmark    string    `json:"fixing_benchmark"` // e.g. "BI_JISDOR"
-	HedgeDesignation   string    `json:"hedge_designation"` // "CASH_FLOW_HEDGE", "FAIR_VALUE_HEDGE"
-	Status             string    `json:"status"` // "ACTIVE_UNSETTLED", "SETTLED_CASH_DELIVERED"
+	ContractID          string    `json:"contract_id"` // e.g. "NDF-USDIDR-2026-081"
+	CompanyID           string    `json:"company_id"`
+	CounterpartyBank    string    `json:"counterparty_bank"` // e.g. "Citibank N.A. Jakarta"
+	CurrencyPair        string    `json:"currency_pair"`     // "USD/IDR"
+	NotionalAmountUSD   float64   `json:"notional_amount_usd"`
+	ContractForwardRate float64   `json:"contract_forward_rate"` // e.g. 15850.0 IDR/USD
+	TradeDate           time.Time `json:"trade_date"`
+	FixingDate          time.Time `json:"fixing_date"`
+	SettlementDate      time.Time `json:"settlement_date"`
+	FixingBenchmark     string    `json:"fixing_benchmark"`  // e.g. "BI_JISDOR"
+	HedgeDesignation    string    `json:"hedge_designation"` // "CASH_FLOW_HEDGE", "FAIR_VALUE_HEDGE"
+	Status              string    `json:"status"`            // "ACTIVE_UNSETTLED", "SETTLED_CASH_DELIVERED"
 }
 
 // FixingSettlementResult represents the cash-settled payoff of an NDF contract
 type FixingSettlementResult struct {
-	ContractID           string    `json:"contract_id"`
-	PublishedFixingRate  float64   `json:"published_fixing_rate"` // e.g. 16120.0 IDR/USD
-	AgreedForwardRate    float64   `json:"agreed_forward_rate"`
-	RateDifferential     float64   `json:"rate_differential"`
-	SettlementPayoffUSD  float64   `json:"settlement_payoff_usd"`
-	SettlementDirection  string    `json:"settlement_direction"` // "BANK_PAYS_COMPANY", "COMPANY_PAYS_BANK"
-	GLJournalEntryRef    string    `json:"gl_journal_entry_ref"`
-	SettledAt            time.Time `json:"settled_at"`
+	ContractID          string    `json:"contract_id"`
+	PublishedFixingRate float64   `json:"published_fixing_rate"` // e.g. 16120.0 IDR/USD
+	AgreedForwardRate   float64   `json:"agreed_forward_rate"`
+	RateDifferential    float64   `json:"rate_differential"`
+	SettlementPayoffUSD float64   `json:"settlement_payoff_usd"`
+	SettlementDirection string    `json:"settlement_direction"` // "BANK_PAYS_COMPANY", "COMPANY_PAYS_BANK"
+	GLJournalEntryRef   string    `json:"gl_journal_entry_ref"`
+	SettledAt           time.Time `json:"settled_at"`
 }
 
 // IFRS9HedgeTest represents regulatory hedge effectiveness assessment under IFRS 9 / PSAK 71
 type IFRS9HedgeTest struct {
-	ContractID               string    `json:"contract_id"`
-	DerivativeMTMDeltaUSD    float64   `json:"derivative_mtm_delta_usd"`
-	HedgedItemFairValueUSD   float64   `json:"hedged_item_fair_value_usd"`
-	EffectivenessRatioPct    float64   `json:"effectiveness_ratio_pct"` // Must be 80% - 125%
-	HedgeQualifyingStatus    string    `json:"hedge_qualifying_status"`  // "HIGHLY_EFFECTIVE_COMPLIANT", "INEFFECTIVE_DISQUALIFIED"
-	OCICashFlowReserveUSD    float64   `json:"oci_cash_flow_reserve_usd"`
-	PnLIneffectivenessUSD    float64   `json:"pnl_ineffectiveness_usd"`
-	AuditedAt                time.Time `json:"audited_at"`
+	ContractID             string    `json:"contract_id"`
+	DerivativeMTMDeltaUSD  float64   `json:"derivative_mtm_delta_usd"`
+	HedgedItemFairValueUSD float64   `json:"hedged_item_fair_value_usd"`
+	EffectivenessRatioPct  float64   `json:"effectiveness_ratio_pct"` // Must be 80% - 125%
+	HedgeQualifyingStatus  string    `json:"hedge_qualifying_status"` // "HIGHLY_EFFECTIVE_COMPLIANT", "INEFFECTIVE_DISQUALIFIED"
+	OCICashFlowReserveUSD  float64   `json:"oci_cash_flow_reserve_usd"`
+	PnLIneffectivenessUSD  float64   `json:"pnl_ineffectiveness_usd"`
+	AuditedAt              time.Time `json:"audited_at"`
 }
 
 // NDFPortfolioExposure represents aggregated corporate currency hedge portfolio
 type NDFPortfolioExposure struct {
-	CompanyID             string        `json:"company_id"`
-	CurrencyPair          string        `json:"currency_pair"`
-	TotalHedgedNotionalUSD float64      `json:"total_hedged_notional_usd"`
-	WeightedAverageRate   float64       `json:"weighted_average_rate"`
-	TotalNetMTMUSD        float64       `json:"total_net_mtm_usd"`
-	UnhedgedForecastUSD   float64       `json:"unhedged_forecast_usd"`
-	HedgeCoverageRatioPct float64       `json:"hedge_coverage_ratio_pct"`
-	ActiveContracts       []NDFContract `json:"active_contracts"`
-	LastEvaluatedAt       time.Time     `json:"last_evaluated_at"`
+	CompanyID              string        `json:"company_id"`
+	CurrencyPair           string        `json:"currency_pair"`
+	TotalHedgedNotionalUSD float64       `json:"total_hedged_notional_usd"`
+	WeightedAverageRate    float64       `json:"weighted_average_rate"`
+	TotalNetMTMUSD         float64       `json:"total_net_mtm_usd"`
+	UnhedgedForecastUSD    float64       `json:"unhedged_forecast_usd"`
+	HedgeCoverageRatioPct  float64       `json:"hedge_coverage_ratio_pct"`
+	ActiveContracts        []NDFContract `json:"active_contracts"`
+	LastEvaluatedAt        time.Time     `json:"last_evaluated_at"`
 }
 
 // NDFEngine manages Non-Deliverable Forward derivative contracts and IFRS 9 hedge accounting
@@ -196,14 +196,14 @@ func (e *NDFEngine) TestHedgeEffectiveness(contractID string, derivativeDeltaUSD
 	}
 
 	test := IFRS9HedgeTest{
-		ContractID:            contractID,
-		DerivativeMTMDeltaUSD: derivativeDeltaUSD,
+		ContractID:             contractID,
+		DerivativeMTMDeltaUSD:  derivativeDeltaUSD,
 		HedgedItemFairValueUSD: hedgedItemDeltaUSD,
-		EffectivenessRatioPct: ratio,
-		HedgeQualifyingStatus: status,
-		OCICashFlowReserveUSD: ociReserve,
-		PnLIneffectivenessUSD: pnlIneffective,
-		AuditedAt:             time.Now(),
+		EffectivenessRatioPct:  ratio,
+		HedgeQualifyingStatus:  status,
+		OCICashFlowReserveUSD:  ociReserve,
+		PnLIneffectivenessUSD:  pnlIneffective,
+		AuditedAt:              time.Now(),
 	}
 
 	e.hedgeTests[contractID] = test
@@ -240,15 +240,15 @@ func (e *NDFEngine) GetPortfolioExposure(companyID string) NDFPortfolioExposure 
 	}
 
 	return NDFPortfolioExposure{
-		CompanyID:             companyID,
-		CurrencyPair:          "USD/IDR",
+		CompanyID:              companyID,
+		CurrencyPair:           "USD/IDR",
 		TotalHedgedNotionalUSD: totalNotional,
-		WeightedAverageRate:   wtdRate,
-		TotalNetMTMUSD:        83870.0,
-		UnhedgedForecastUSD:   unhedgedForecast,
-		HedgeCoverageRatioPct: coveragePct,
-		ActiveContracts:       active,
-		LastEvaluatedAt:       time.Now(),
+		WeightedAverageRate:    wtdRate,
+		TotalNetMTMUSD:         83870.0,
+		UnhedgedForecastUSD:    unhedgedForecast,
+		HedgeCoverageRatioPct:  coveragePct,
+		ActiveContracts:        active,
+		LastEvaluatedAt:        time.Now(),
 	}
 }
 
@@ -287,9 +287,9 @@ func RegisterNDFRoutes(r *gin.RouterGroup) {
 
 		group.POST("/test-hedge-effectiveness", func(c *gin.Context) {
 			var req struct {
-				ContractID            string  `json:"contract_id" binding:"required"`
-				DerivativeDeltaUSD    float64 `json:"derivative_delta_usd" binding:"required"`
-				HedgedItemDeltaUSD    float64 `json:"hedged_item_delta_usd" binding:"required"`
+				ContractID         string  `json:"contract_id" binding:"required"`
+				DerivativeDeltaUSD float64 `json:"derivative_delta_usd" binding:"required"`
+				HedgedItemDeltaUSD float64 `json:"hedged_item_delta_usd" binding:"required"`
 			}
 			if err := c.ShouldBindJSON(&req); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

@@ -375,11 +375,11 @@ func (s *Service) parseCSVRecords(csvContent string, format string, statementID 
 		}
 
 		line := AccountBankStatementLine{
-			StatementID: statementID,
-			Date:        dateStr,
-			Name:        descStr,
-			Amount:      amount,
-			Ref:         refStr,
+			StatementID:  statementID,
+			Date:         dateStr,
+			Name:         descStr,
+			Amount:       amount,
+			Ref:          refStr,
 			IsReconciled: false,
 		}
 		line.CompanyID = companyID

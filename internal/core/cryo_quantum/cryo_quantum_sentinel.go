@@ -13,41 +13,41 @@ import (
 
 // CryoQuantumTelemetry captures 10 mK dilution refrigerator cryostat and quantum coherence telemetry
 type CryoQuantumTelemetry struct {
-	TelemetryID                     string    `json:"telemetry_id"`
-	CryostatID                      string    `json:"cryostat_id"`
-	QuantumLabID                    string    `json:"quantum_lab_id"`
-	MixingChamberTempMilliKelvin    float64   `json:"mixing_chamber_temp_milli_kelvin"` // target < 12.0 mK; threshold 14.5 mK
-	He3StillFlowRateMolPerSec       float64   `json:"he3_still_flow_rate_mol_per_sec"` // nominal 1.8e-4 to 2.5e-4 mol/s
-	CoaxialRfThermalAttenuationDb   float64   `json:"coaxial_rf_thermal_attenuation_db"` // limit > 40 dB
-	QubitT1DecoherenceMicroSec      float64   `json:"qubit_t1_decoherence_micro_sec"` // nominal > 85.0 µs
-	QubitT2DephasingMicroSec        float64   `json:"qubit_t2_dephasing_micro_sec"`   // nominal > 70.0 µs
-	PulseTubeVibrationDisplacementNm float64  `json:"pulse_tube_vibration_displacement_nm"` // limit < 15.0 nm
-	CryopermShieldingHealthPct      float64   `json:"cryoperm_shielding_health_pct"` // limit > 95.0%
-	Timestamp                       time.Time `json:"timestamp"`
+	TelemetryID                      string    `json:"telemetry_id"`
+	CryostatID                       string    `json:"cryostat_id"`
+	QuantumLabID                     string    `json:"quantum_lab_id"`
+	MixingChamberTempMilliKelvin     float64   `json:"mixing_chamber_temp_milli_kelvin"`     // target < 12.0 mK; threshold 14.5 mK
+	He3StillFlowRateMolPerSec        float64   `json:"he3_still_flow_rate_mol_per_sec"`      // nominal 1.8e-4 to 2.5e-4 mol/s
+	CoaxialRfThermalAttenuationDb    float64   `json:"coaxial_rf_thermal_attenuation_db"`    // limit > 40 dB
+	QubitT1DecoherenceMicroSec       float64   `json:"qubit_t1_decoherence_micro_sec"`       // nominal > 85.0 µs
+	QubitT2DephasingMicroSec         float64   `json:"qubit_t2_dephasing_micro_sec"`         // nominal > 70.0 µs
+	PulseTubeVibrationDisplacementNm float64   `json:"pulse_tube_vibration_displacement_nm"` // limit < 15.0 nm
+	CryopermShieldingHealthPct       float64   `json:"cryoperm_shielding_health_pct"`        // limit > 95.0%
+	Timestamp                        time.Time `json:"timestamp"`
 }
 
 // CryoQuantumAssessment models dilution refrigerator thermal stability, qubit coherence, and IEEE P7130 compliance
 type CryoQuantumAssessment struct {
-	AssessmentID                     string    `json:"assessment_id"`
-	CryostatID                       string    `json:"cryostat_id"`
+	AssessmentID                      string    `json:"assessment_id"`
+	CryostatID                        string    `json:"cryostat_id"`
 	DilutionRefrigeratorThermalStatus string    `json:"dilution_refrigerator_thermal_status"` // MILLIKELVIN_SUPERCOOLED, THERMAL_MICRO_LEAK_WARNING, DILUTION_UNIT_THERMAL_COLLAPSE
-	QubitCoherenceStability          string    `json:"qubit_coherence_stability"`           // COHERENT_QUANTUM_REGIME, DEPHASING_JITTER_ELEVATED, PHASE_DECOHERENCE_COLLAPSE
-	ThermalHeatLeakDeficitMilliKelvin float64  `json:"thermal_heat_leak_deficit_milli_kelvin"`
-	StillHeaterOptimizationMandate   bool      `json:"still_heater_optimization_mandate"`
-	CryopermFieldShieldingMandate    bool      `json:"cryoperm_field_shielding_mandate"`
-	AuditDigest                      string    `json:"audit_digest"`
-	EvaluatedAt                      time.Time `json:"evaluated_at"`
+	QubitCoherenceStability           string    `json:"qubit_coherence_stability"`            // COHERENT_QUANTUM_REGIME, DEPHASING_JITTER_ELEVATED, PHASE_DECOHERENCE_COLLAPSE
+	ThermalHeatLeakDeficitMilliKelvin float64   `json:"thermal_heat_leak_deficit_milli_kelvin"`
+	StillHeaterOptimizationMandate    bool      `json:"still_heater_optimization_mandate"`
+	CryopermFieldShieldingMandate     bool      `json:"cryoperm_field_shielding_mandate"`
+	AuditDigest                       string    `json:"audit_digest"`
+	EvaluatedAt                       time.Time `json:"evaluated_at"`
 }
 
 // CryoQuantumMitigationAction models still heater tuning, pulse-tube vibration cancellation, and RF attenuator trimming
 type CryoQuantumMitigationAction struct {
-	ActionID                                   string    `json:"action_id"`
-	CryostatID                                 string    `json:"cryostat_id"`
-	CommandedStillHeaterPowerMilliWatts        float64   `json:"commanded_still_heater_power_milli_watts"`
-	ActivePulseTubeVibrationCancellationPct    float64   `json:"active_pulse_tube_vibration_cancellation_pct"`
-	MicrowaveAttenuatorTrimDb                  float64   `json:"microwave_attenuator_trim_db"`
-	AvoidedQuantumDecoherenceLossUSD           float64   `json:"avoided_quantum_decoherence_loss_usd"`
-	ExecutedAt                                 time.Time `json:"executed_at"`
+	ActionID                                string    `json:"action_id"`
+	CryostatID                              string    `json:"cryostat_id"`
+	CommandedStillHeaterPowerMilliWatts     float64   `json:"commanded_still_heater_power_milli_watts"`
+	ActivePulseTubeVibrationCancellationPct float64   `json:"active_pulse_tube_vibration_cancellation_pct"`
+	MicrowaveAttenuatorTrimDb               float64   `json:"microwave_attenuator_trim_db"`
+	AvoidedQuantumDecoherenceLossUSD        float64   `json:"avoided_quantum_decoherence_loss_usd"`
+	ExecutedAt                              time.Time `json:"executed_at"`
 }
 
 // CryoQuantumVault manages dilution refrigerator and qubit coherence state
@@ -117,15 +117,15 @@ func (v *CryoQuantumVault) EvaluateHeatLeakAndDecoherence(cryostatID string) (Cr
 	digest := hex.EncodeToString(hasher.Sum(nil))
 
 	assessment := CryoQuantumAssessment{
-		AssessmentID:                     fmt.Sprintf("ASM-QCRYO-%d", time.Now().UnixNano()%1000000),
-		CryostatID:                       cryostatID,
+		AssessmentID:                      fmt.Sprintf("ASM-QCRYO-%d", time.Now().UnixNano()%1000000),
+		CryostatID:                        cryostatID,
 		DilutionRefrigeratorThermalStatus: thermalStatus,
-		QubitCoherenceStability:          coherenceStatus,
+		QubitCoherenceStability:           coherenceStatus,
 		ThermalHeatLeakDeficitMilliKelvin: leakDeficit,
-		StillHeaterOptimizationMandate:   stillHeaterMandate,
-		CryopermFieldShieldingMandate:    shieldingMandate,
-		AuditDigest:                      digest,
-		EvaluatedAt:                      time.Now(),
+		StillHeaterOptimizationMandate:    stillHeaterMandate,
+		CryopermFieldShieldingMandate:     shieldingMandate,
+		AuditDigest:                       digest,
+		EvaluatedAt:                       time.Now(),
 	}
 
 	v.assessments[cryostatID] = assessment
@@ -148,7 +148,7 @@ func (v *CryoQuantumVault) TriggerStillHeaterAndVibrationCancellation(cryostatID
 	rfTrim := 0.0
 
 	if asm.StillHeaterOptimizationMandate {
-		stillPower = 3.85 // apply 3.85 mW to still heater to boost 3He distillation circulation
+		stillPower = 3.85      // apply 3.85 mW to still heater to boost 3He distillation circulation
 		vibCancellation = 94.5 // 94.5% piezo active phase vibration cancellation on pulse tube neck
 	}
 	if asm.CryopermFieldShieldingMandate {
@@ -183,21 +183,21 @@ func (v *CryoQuantumVault) GetQuantumIntegrityDossier(cryostatID string) (map[st
 	}
 
 	dossier := map[string]interface{}{
-		"cryostat_id":                  cryostatID,
-		"quantum_lab_id":               telem.QuantumLabID,
-		"ieee_p7130_compliant":         asm.QubitCoherenceStability != "PHASE_DECOHERENCE_COLLAPSE" || (hasAct && act.AvoidedQuantumDecoherenceLossUSD > 0),
-		"iso_iec_23837_certified":      true,
-		"mixing_chamber_temp_mk":       telem.MixingChamberTempMilliKelvin,
-		"thermal_leak_deficit_mk":      asm.ThermalHeatLeakDeficitMilliKelvin,
-		"qubit_t1_micro_sec":           telem.QubitT1DecoherenceMicroSec,
-		"qubit_t2_micro_sec":           telem.QubitT2DephasingMicroSec,
-		"thermal_status":               asm.DilutionRefrigeratorThermalStatus,
-		"coherence_stability":          asm.QubitCoherenceStability,
-		"still_heater_active":          hasAct && act.CommandedStillHeaterPowerMilliWatts > 0,
-		"vibration_cancellation_pct":   0.0,
-		"avoided_loss_usd":             0.0,
-		"audit_digest":                 asm.AuditDigest,
-		"compiled_at":                  time.Now(),
+		"cryostat_id":                cryostatID,
+		"quantum_lab_id":             telem.QuantumLabID,
+		"ieee_p7130_compliant":       asm.QubitCoherenceStability != "PHASE_DECOHERENCE_COLLAPSE" || (hasAct && act.AvoidedQuantumDecoherenceLossUSD > 0),
+		"iso_iec_23837_certified":    true,
+		"mixing_chamber_temp_mk":     telem.MixingChamberTempMilliKelvin,
+		"thermal_leak_deficit_mk":    asm.ThermalHeatLeakDeficitMilliKelvin,
+		"qubit_t1_micro_sec":         telem.QubitT1DecoherenceMicroSec,
+		"qubit_t2_micro_sec":         telem.QubitT2DephasingMicroSec,
+		"thermal_status":             asm.DilutionRefrigeratorThermalStatus,
+		"coherence_stability":        asm.QubitCoherenceStability,
+		"still_heater_active":        hasAct && act.CommandedStillHeaterPowerMilliWatts > 0,
+		"vibration_cancellation_pct": 0.0,
+		"avoided_loss_usd":           0.0,
+		"audit_digest":               asm.AuditDigest,
+		"compiled_at":                time.Now(),
 	}
 
 	if hasAct {

@@ -14,43 +14,43 @@ import (
 
 // SubseaFlowlineTelemetry captures deepwater production multiphase flow status under API 17D
 type SubseaFlowlineTelemetry struct {
-	TelemetryID                string    `json:"telemetry_id"`
-	FlowlineID                 string    `json:"flowline_id"` // "FLOWLINE-NATUNA-DEEPWATER-01"
-	SubseaFieldID              string    `json:"subsea_field_id"`
-	WaterDepthMeters           float64   `json:"water_depth_meters"`
-	SeabedAmbientTempC         float64   `json:"seabed_ambient_temp_c"` // ~4.0°C in deepwater
-	FlowlineInletPressureBar   float64   `json:"flowline_inlet_pressure_bar"`
-	FlowlineOutletPressureBar  float64   `json:"flowline_outlet_pressure_bar"`
-	FluidMassFlowRateKGD       float64   `json:"fluid_mass_flow_rate_kgd"`
-	WaterCutPercentage         float64   `json:"water_cut_percentage"` // Free water %
-	GasSpecificGravity         float64   `json:"gas_specific_gravity"`
-	CurrentMEGInjectionRateKGHr float64  `json:"current_meg_injection_rate_kg_hr"` // Monoethylene Glycol
-	RecordedAt                 time.Time `json:"recorded_at"`
+	TelemetryID                 string    `json:"telemetry_id"`
+	FlowlineID                  string    `json:"flowline_id"` // "FLOWLINE-NATUNA-DEEPWATER-01"
+	SubseaFieldID               string    `json:"subsea_field_id"`
+	WaterDepthMeters            float64   `json:"water_depth_meters"`
+	SeabedAmbientTempC          float64   `json:"seabed_ambient_temp_c"` // ~4.0°C in deepwater
+	FlowlineInletPressureBar    float64   `json:"flowline_inlet_pressure_bar"`
+	FlowlineOutletPressureBar   float64   `json:"flowline_outlet_pressure_bar"`
+	FluidMassFlowRateKGD        float64   `json:"fluid_mass_flow_rate_kgd"`
+	WaterCutPercentage          float64   `json:"water_cut_percentage"` // Free water %
+	GasSpecificGravity          float64   `json:"gas_specific_gravity"`
+	CurrentMEGInjectionRateKGHr float64   `json:"current_meg_injection_rate_kg_hr"` // Monoethylene Glycol
+	RecordedAt                  time.Time `json:"recorded_at"`
 }
 
 // HydrateRiskAssessment models Hammerschmidt hydrate equilibrium temperature depression
 type HydrateRiskAssessment struct {
-	AssessmentID                 string    `json:"assessment_id"`
-	FlowlineID                   string    `json:"flowline_id"`
-	HydrateEquilibriumTempC      float64   `json:"hydrate_equilibrium_temp_c"` // Uninhibited ~18.5°C
-	SubseaOperatingTempC         float64   `json:"subsea_operating_temp_c"`
-	HydrateSubcoolingMarginC     float64   `json:"hydrate_subcooling_margin_c"` // Operating Temp - Equilibrium Temp
-	HydrateBlockageRisk          string    `json:"hydrate_blockage_risk"`       // "SAFE_ABOVE_EQUILIBRIUM", "ELEVATED_COOLING_RISK", "CRITICAL_HYDRATE_PLUG_FORMATION"
-	RecommendedMEGInjectionRateKGHr float64 `json:"recommended_meg_injection_rate_kg_hr"`
-	SluggingSeverityIndex        float64   `json:"slugging_severity_index"` // Hydrodynamic slugging index (0 - 100)
-	FlowAssuranceAuditDigest     string    `json:"flow_assurance_audit_digest"`
-	EvaluatedAt                  time.Time `json:"evaluated_at"`
+	AssessmentID                    string    `json:"assessment_id"`
+	FlowlineID                      string    `json:"flowline_id"`
+	HydrateEquilibriumTempC         float64   `json:"hydrate_equilibrium_temp_c"` // Uninhibited ~18.5°C
+	SubseaOperatingTempC            float64   `json:"subsea_operating_temp_c"`
+	HydrateSubcoolingMarginC        float64   `json:"hydrate_subcooling_margin_c"` // Operating Temp - Equilibrium Temp
+	HydrateBlockageRisk             string    `json:"hydrate_blockage_risk"`       // "SAFE_ABOVE_EQUILIBRIUM", "ELEVATED_COOLING_RISK", "CRITICAL_HYDRATE_PLUG_FORMATION"
+	RecommendedMEGInjectionRateKGHr float64   `json:"recommended_meg_injection_rate_kg_hr"`
+	SluggingSeverityIndex           float64   `json:"slugging_severity_index"` // Hydrodynamic slugging index (0 - 100)
+	FlowAssuranceAuditDigest        string    `json:"flow_assurance_audit_digest"`
+	EvaluatedAt                     time.Time `json:"evaluated_at"`
 }
 
 // MEGChemicalOptimizationRecord calculates optimized thermodynamic inhibitor dosage
 type MEGChemicalOptimizationRecord struct {
-	RecordID                           string    `json:"record_id"`
-	FlowlineID                         string    `json:"flowline_id"`
-	TargetMEGWeightPctWater            float64   `json:"target_meg_weight_pct_water"` // Typically 40 - 50 wt% in aqueous phase
-	CalculatedMEGRateKGHr              float64   `json:"calculated_meg_rate_kg_hr"`
-	DailyMEGSavingsUSD                 float64   `json:"daily_meg_savings_usd"`
-	AvoidedDeepwaterPlugDowntimeUSD    float64   `json:"avoided_deepwater_plug_downtime_usd"`
-	OptimizedAt                        time.Time `json:"optimized_at"`
+	RecordID                        string    `json:"record_id"`
+	FlowlineID                      string    `json:"flowline_id"`
+	TargetMEGWeightPctWater         float64   `json:"target_meg_weight_pct_water"` // Typically 40 - 50 wt% in aqueous phase
+	CalculatedMEGRateKGHr           float64   `json:"calculated_meg_rate_kg_hr"`
+	DailyMEGSavingsUSD              float64   `json:"daily_meg_savings_usd"`
+	AvoidedDeepwaterPlugDowntimeUSD float64   `json:"avoided_deepwater_plug_downtime_usd"`
+	OptimizedAt                     time.Time `json:"optimized_at"`
 }
 
 // SubseaVault thread-safe in-memory store
@@ -209,13 +209,13 @@ func (v *SubseaVault) GetSubseaFlowlineIntegrityDossier(flowlineID string) (map[
 	opt, hasOpt := v.optimizations[flowlineID]
 
 	dossier := map[string]interface{}{
-		"flowline_id":             flowlineID,
-		"has_flowline_telemetry":  hasTel,
-		"has_hydrate_assessment":  hasAssess,
-		"has_meg_optimization":    hasOpt,
-		"api_17d_compliant":       true,
-		"dnv_rp_f105_certified":   true,
-		"compiled_at":             time.Now(),
+		"flowline_id":            flowlineID,
+		"has_flowline_telemetry": hasTel,
+		"has_hydrate_assessment": hasAssess,
+		"has_meg_optimization":   hasOpt,
+		"api_17d_compliant":      true,
+		"dnv_rp_f105_certified":  true,
+		"compiled_at":            time.Now(),
 	}
 
 	if hasTel {

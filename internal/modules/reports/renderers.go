@@ -118,25 +118,25 @@ func RenderDocument(db *gorm.DB, module string, id uint) (string, error) {
 // 1. SALE ORDER / QUOTATION
 func RenderSaleOrder(db *gorm.DB, id uint) (string, error) {
 	var order struct {
-		ID         uint
-		Name       string
-		State      string
-		DateOrder  string
+		ID            uint
+		Name          string
+		State         string
+		DateOrder     string
 		AmountUntaxed float64
 		AmountTax     float64
 		AmountTotal   float64
-		PartnerID  uint
-		PartnerName string
-		Note       string
+		PartnerID     uint
+		PartnerName   string
+		Note          string
 	}
 	if err := db.Table("sale_orders").Where("id = ?", id).First(&order).Error; err != nil {
 		return "", fmt.Errorf("pesanan penjualan #%d tidak ditemukan: %w", id, err)
 	}
 
 	var lines []struct {
-		Name         string
+		Name          string
 		ProductUomQty float64
-		PriceUnit    float64
+		PriceUnit     float64
 		PriceSubtotal float64
 	}
 	db.Table("sale_order_lines").Where("order_id = ?", id).Find(&lines)
@@ -250,25 +250,25 @@ func RenderSaleOrder(db *gorm.DB, id uint) (string, error) {
 // 2. PURCHASE ORDER
 func RenderPurchaseOrder(db *gorm.DB, id uint) (string, error) {
 	var po struct {
-		ID         uint
-		Name       string
-		State      string
-		DateOrder  string
+		ID            uint
+		Name          string
+		State         string
+		DateOrder     string
 		AmountUntaxed float64
 		AmountTax     float64
 		AmountTotal   float64
-		PartnerID  uint
-		PartnerName string
-		Note       string
+		PartnerID     uint
+		PartnerName   string
+		Note          string
 	}
 	if err := db.Table("purchase_orders").Where("id = ?", id).First(&po).Error; err != nil {
 		return "", fmt.Errorf("pesanan pembelian #%d tidak ditemukan: %w", id, err)
 	}
 
 	var lines []struct {
-		Name         string
-		ProductQty   float64
-		PriceUnit    float64
+		Name          string
+		ProductQty    float64
+		PriceUnit     float64
 		PriceSubtotal float64
 	}
 	db.Table("purchase_order_lines").Where("order_id = ?", id).Find(&lines)
@@ -405,9 +405,9 @@ func RenderAccountMove(db *gorm.DB, id uint) (string, error) {
 	`, FormatDateTime(parseTimeAny(move.InvoiceDate)))
 
 	var lines []struct {
-		Name         string
-		Quantity     float64
-		PriceUnit    float64
+		Name          string
+		Quantity      float64
+		PriceUnit     float64
 		PriceSubtotal float64
 	}
 	db.Table("account_move_lines").Where("move_id = ?", id).Find(&lines)
@@ -490,12 +490,12 @@ func RenderAccountMove(db *gorm.DB, id uint) (string, error) {
 // 4. STOCK PICKING (DELIVERY SLIP / RECEIPT)
 func RenderStockPicking(db *gorm.DB, id uint) (string, error) {
 	var pick struct {
-		ID          uint
-		Name        string
-		PickingType string
-		State       string
-		Origin      string
-		PartnerName string
+		ID            uint
+		Name          string
+		PickingType   string
+		State         string
+		Origin        string
+		PartnerName   string
 		ScheduledDate string
 	}
 	if err := db.Table("stock_pickings").Where("id = ?", id).First(&pick).Error; err != nil {
@@ -522,9 +522,9 @@ func RenderStockPicking(db *gorm.DB, id uint) (string, error) {
 	`, strings.ToUpper(pick.PickingType), FormatDateTime(parseTimeAny(pick.ScheduledDate)))
 
 	var lines []struct {
-		ProductName  string
+		ProductName   string
 		ProductUomQty float64
-		QuantityDone float64
+		QuantityDone  float64
 	}
 	db.Table("stock_moves").Where("picking_id = ?", id).Find(&lines)
 
@@ -684,9 +684,9 @@ func RenderPosOrder(db *gorm.DB, id uint) (string, error) {
 	}
 
 	var lines []struct {
-		ProductName  string
-		Qty          float64
-		PriceUnit    float64
+		ProductName   string
+		Qty           float64
+		PriceUnit     float64
 		PriceSubtotal float64
 	}
 	db.Table("pos_order_lines").Where("order_id = ?", id).Find(&lines)
@@ -853,15 +853,15 @@ func RenderPayslip(db *gorm.DB, id uint) (string, error) {
 // 8. CRM LEAD SUMMARY
 func RenderLead(db *gorm.DB, id uint) (string, error) {
 	var lead struct {
-		ID            uint
-		Name          string
-		ContactName   string
-		Email         string
-		Phone         string
+		ID              uint
+		Name            string
+		ContactName     string
+		Email           string
+		Phone           string
 		ExpectedRevenue float64
-		Probability   float64
-		StageName     string
-		CreatedAt     string
+		Probability     float64
+		StageName       string
+		CreatedAt       string
 	}
 	if err := db.Table("crm_leads").Where("id = ?", id).First(&lead).Error; err != nil {
 		return "", fmt.Errorf("lead CRM #%d tidak ditemukan: %w", id, err)
@@ -990,12 +990,12 @@ func RenderProject(db *gorm.DB, id uint) (string, error) {
 // 10. ASSET (KARTU AKTIVA TETAP)
 func RenderAsset(db *gorm.DB, id uint) (string, error) {
 	var a struct {
-		ID          uint
-		Name        string
+		ID            uint
+		Name          string
 		OriginalValue float64
-		BookValue   float64
-		Category    string
-		PurchaseDate string
+		BookValue     float64
+		Category      string
+		PurchaseDate  string
 	}
 	if err := db.Table("assets").Where("id = ?", id).First(&a).Error; err != nil {
 		return "", fmt.Errorf("aset tetap #%d tidak ditemukan: %w", id, err)
@@ -1055,10 +1055,10 @@ func RenderAsset(db *gorm.DB, id uint) (string, error) {
 // 11. HELPDESK TICKET
 func RenderTicket(db *gorm.DB, id uint) (string, error) {
 	var t struct {
-		ID        uint
-		Name      string
-		Priority  string
-		Stage     string
+		ID          uint
+		Name        string
+		Priority    string
+		Stage       string
 		PartnerName string
 	}
 	if err := db.Table("helpdesk_tickets").Where("id = ?", id).First(&t).Error; err != nil {
@@ -1084,10 +1084,10 @@ func RenderTicket(db *gorm.DB, id uint) (string, error) {
 // 12. MAINTENANCE REQUEST
 func RenderMaintenance(db *gorm.DB, id uint) (string, error) {
 	var m struct {
-		ID          uint
-		Name        string
+		ID              uint
+		Name            string
 		MaintenanceType string
-		RequestDate string
+		RequestDate     string
 	}
 	if err := db.Table("maintenance_requests").Where("id = ?", id).First(&m).Error; err != nil {
 		return "", fmt.Errorf("permintaan pemeliharaan #%d tidak ditemukan: %w", id, err)
@@ -1112,10 +1112,10 @@ func RenderMaintenance(db *gorm.DB, id uint) (string, error) {
 // 13. FLEET VEHICLE (SURAT PERINTAH JALAN)
 func RenderVehicle(db *gorm.DB, id uint) (string, error) {
 	var v struct {
-		ID          uint
+		ID           uint
 		LicensePlate string
-		ModelName   string
-		DriverName  string
+		ModelName    string
+		DriverName   string
 	}
 	if err := db.Table("fleet_vehicles").Where("id = ?", id).First(&v).Error; err != nil {
 		return "", fmt.Errorf("kendaraan #%d tidak ditemukan: %w", id, err)
@@ -1226,10 +1226,10 @@ func RenderQuality(db *gorm.DB, id uint) (string, error) {
 // 17. APPROVAL REQUEST
 func RenderApproval(db *gorm.DB, id uint) (string, error) {
 	var appr struct {
-		ID          uint
-		Name        string
-		Status      string
-		Amount      float64
+		ID     uint
+		Name   string
+		Status string
+		Amount float64
 	}
 	if err := db.Table("approval_requests").Where("id = ?", id).First(&appr).Error; err != nil {
 		return "", fmt.Errorf("pengajuan persetujuan #%d tidak ditemukan: %w", id, err)
@@ -1281,9 +1281,9 @@ func RenderStockInventory(db *gorm.DB, id uint) (string, error) {
 // 19. BUDGET VARIANCE
 func RenderBudget(db *gorm.DB, id uint) (string, error) {
 	var b struct {
-		ID          uint
-		Name        string
-		PlannedAmount float64
+		ID              uint
+		Name            string
+		PlannedAmount   float64
 		PracticalAmount float64
 	}
 	if err := db.Table("budgets").Where("id = ?", id).First(&b).Error; err != nil {
@@ -1507,9 +1507,9 @@ func RenderBankRec(db *gorm.DB, id uint) (string, error) {
 // 24. LANDED COST
 func RenderLandedCost(db *gorm.DB, id uint) (string, error) {
 	var lc struct {
-		ID       uint
-		Name     string
-		State    string
+		ID        uint
+		Name      string
+		State     string
 		TotalCost float64
 	}
 	if err := db.Table("landed_costs").Where("id = ?", id).First(&lc).Error; err != nil {
@@ -1562,11 +1562,11 @@ func RenderTraceabilityLot(db *gorm.DB, id uint) (string, error) {
 // 26. SUBSCRIPTION CONTRACT
 func RenderSubscription(db *gorm.DB, id uint) (string, error) {
 	var sub struct {
-		ID            uint
-		Code          string
-		PartnerName   string
+		ID             uint
+		Code           string
+		PartnerName    string
 		RecurringPrice float64
-		Status        string
+		Status         string
 	}
 	if err := db.Table("subscriptions").Where("id = ?", id).First(&sub).Error; err != nil {
 		return "", fmt.Errorf("kontrak langganan #%d tidak ditemukan: %w", id, err)
@@ -1621,10 +1621,10 @@ func RenderAuditLog(db *gorm.DB, id uint) (string, error) {
 // 28. WEBHOOK LOG
 func RenderWebhookLog(db *gorm.DB, id uint) (string, error) {
 	var wh struct {
-		ID           uint
-		Event        string
+		ID             uint
+		Event          string
 		DeliveryStatus string
-		TargetURL    string
+		TargetURL      string
 	}
 	if err := db.Table("webhook_logs").Where("id = ?", id).First(&wh).Error; err != nil {
 		return "", fmt.Errorf("log webhook #%d tidak ditemukan: %w", id, err)
@@ -1678,10 +1678,10 @@ func RenderInboundWebhookLog(db *gorm.DB, id uint) (string, error) {
 // 30. CONSOLIDATION REPORT
 func RenderConsolidation(db *gorm.DB, id uint) (string, error) {
 	var rep struct {
-		ID                   uint
-		PeriodYear           int
-		PeriodMonth          int
-		ConsolidatedRevenue  float64
+		ID                    uint
+		PeriodYear            int
+		PeriodMonth           int
+		ConsolidatedRevenue   float64
 		ConsolidatedNetIncome float64
 	}
 	if err := db.Table("consolidation_reports").Where("id = ?", id).First(&rep).Error; err != nil {
@@ -1740,10 +1740,10 @@ func RenderTreasuryForecast(db *gorm.DB, id uint) (string, error) {
 // 32. MRP ADVANCED WORK ORDER
 func RenderWorkOrder(db *gorm.DB, id uint) (string, error) {
 	var wo struct {
-		ID            uint
-		Code          string
-		State         string
-		MachineCost   float64
+		ID             uint
+		Code           string
+		State          string
+		MachineCost    float64
 		WorkCenterName string
 		DurationActual float64
 	}
@@ -1770,10 +1770,10 @@ func RenderWorkOrder(db *gorm.DB, id uint) (string, error) {
 // 33. ESIGNATURE DOCUMENT
 func RenderEsignDoc(db *gorm.DB, id uint) (string, error) {
 	var doc struct {
-		ID          uint
-		DocCode     string
-		DocumentName string
-		Status      string
+		ID             uint
+		DocCode        string
+		DocumentName   string
+		Status         string
 		Sha256Checksum string
 	}
 	if err := db.Table("signed_documents").Where("id = ?", id).First(&doc).Error; err != nil {
@@ -1883,14 +1883,14 @@ func RenderCustomerRMA(db *gorm.DB, id uint) (string, error) {
 // 37. CUSTOMS BONDED DOCUMENT (DOKUMEN PABEAN BC 2.3 / BC 3.0)
 func RenderCustomsDoc(db *gorm.DB, id uint) (string, error) {
 	var doc struct {
-		ID             uint
-		DocumentType   string
-		NomorAju       string
-		NomorDaftar    string
-		NomorSppb      string
-		CifUsd         float64
-		Status         string
-		NamaPemasok    string
+		ID           uint
+		DocumentType string
+		NomorAju     string
+		NomorDaftar  string
+		NomorSppb    string
+		CifUsd       float64
+		Status       string
+		NamaPemasok  string
 	}
 	if err := db.Table("customs_documents").Where("id = ?", id).First(&doc).Error; err != nil {
 		return "", fmt.Errorf("dokumen pabean #%d tidak ditemukan: %w", id, err)

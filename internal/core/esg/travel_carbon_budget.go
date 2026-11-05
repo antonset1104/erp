@@ -10,51 +10,51 @@ import (
 
 // TripSpecification represents the details of an employee business travel booking
 type TripSpecification struct {
-	TripID            string    `json:"trip_id"` // e.g. "TRIP-2026-LON-089"
-	EmployeeID        string    `json:"employee_id"`
-	DepartmentID      string    `json:"department_id"` // e.g. "DEPT-SALES-APAC"
-	OriginCity        string    `json:"origin_city"`   // e.g. "CGK" (Jakarta)
-	DestinationCity   string    `json:"destination_city"` // e.g. "SIN" (Singapore)
-	DistanceKM        float64   `json:"distance_km"`
-	TravelMode        string    `json:"travel_mode"` // "FLIGHT", "HIGH_SPEED_RAIL", "ELECTRIC_VEHICLE"
-	CabinClass        string    `json:"cabin_class"` // "ECONOMY", "PREMIUM_ECONOMY", "BUSINESS"
-	HotelNights       int       `json:"hotel_nights"`
+	TripID              string  `json:"trip_id"` // e.g. "TRIP-2026-LON-089"
+	EmployeeID          string  `json:"employee_id"`
+	DepartmentID        string  `json:"department_id"`    // e.g. "DEPT-SALES-APAC"
+	OriginCity          string  `json:"origin_city"`      // e.g. "CGK" (Jakarta)
+	DestinationCity     string  `json:"destination_city"` // e.g. "SIN" (Singapore)
+	DistanceKM          float64 `json:"distance_km"`
+	TravelMode          string  `json:"travel_mode"` // "FLIGHT", "HIGH_SPEED_RAIL", "ELECTRIC_VEHICLE"
+	CabinClass          string  `json:"cabin_class"` // "ECONOMY", "PREMIUM_ECONOMY", "BUSINESS"
+	HotelNights         int     `json:"hotel_nights"`
 	HotelGreenCertified bool    `json:"hotel_green_certified"`
 }
 
 // TripEmissionsResult represents calculated Scope 3 Category 6 travel emissions
 type TripEmissionsResult struct {
-	TripID                  string    `json:"trip_id"`
-	FlightEmissionsKgCO2e   float64   `json:"flight_emissions_kg_co2e"`
-	HotelEmissionsKgCO2e    float64   `json:"hotel_emissions_kg_co2e"`
-	TotalTripEmissionsKg    float64   `json:"total_trip_emissions_kg"`
-	InternalCarbonFeeUSD    float64   `json:"internal_carbon_fee_usd"` // Shadow carbon price ($50/ton)
-	HighSpeedRailFeasible   bool      `json:"high_speed_rail_feasible"`
-	RailAlternativeSavingsKg float64  `json:"rail_alternative_savings_kg"`
-	CalculatedAt            time.Time `json:"calculated_at"`
+	TripID                   string    `json:"trip_id"`
+	FlightEmissionsKgCO2e    float64   `json:"flight_emissions_kg_co2e"`
+	HotelEmissionsKgCO2e     float64   `json:"hotel_emissions_kg_co2e"`
+	TotalTripEmissionsKg     float64   `json:"total_trip_emissions_kg"`
+	InternalCarbonFeeUSD     float64   `json:"internal_carbon_fee_usd"` // Shadow carbon price ($50/ton)
+	HighSpeedRailFeasible    bool      `json:"high_speed_rail_feasible"`
+	RailAlternativeSavingsKg float64   `json:"rail_alternative_savings_kg"`
+	CalculatedAt             time.Time `json:"calculated_at"`
 }
 
 // PolicyAuditVerdict represents green corporate travel policy compliance
 type PolicyAuditVerdict struct {
-	TripID              string    `json:"trip_id"`
-	PolicyCompliance    string    `json:"policy_compliance"` // "APPROVED_GREEN_TIER", "POLICY_EXCEPTION_REQUIRED", "VIOLATION_REJECTED"
-	ViolationsFound     []string  `json:"violations_found"`
-	RequiresVPApproval  bool      `json:"requires_vp_approval"`
-	RecommendedAction   string    `json:"recommended_action"`
-	AuditedAt           time.Time `json:"audited_at"`
+	TripID             string    `json:"trip_id"`
+	PolicyCompliance   string    `json:"policy_compliance"` // "APPROVED_GREEN_TIER", "POLICY_EXCEPTION_REQUIRED", "VIOLATION_REJECTED"
+	ViolationsFound    []string  `json:"violations_found"`
+	RequiresVPApproval bool      `json:"requires_vp_approval"`
+	RecommendedAction  string    `json:"recommended_action"`
+	AuditedAt          time.Time `json:"audited_at"`
 }
 
 // DepartmentCarbonBudget represents quarterly Scope 3 carbon quota for a division
 type DepartmentCarbonBudget struct {
-	DepartmentID           string    `json:"department_id"`
-	QuarterPeriod          string    `json:"quarter_period"` // "2026-Q1"
-	AllocatedBudgetTons    float64   `json:"allocated_budget_tons"`
-	ConsumedEmissionsTons  float64   `json:"consumed_emissions_tons"`
-	RemainingQuotaTons     float64   `json:"remaining_quota_tons"`
-	BudgetBurnRatePct      float64   `json:"budget_burn_rate_pct"`
-	InternalCarbonLevyUSD  float64   `json:"internal_carbon_levy_usd"`
-	DepartmentStanding     string    `json:"department_standing"` // "ON_TRACK_GREEN", "NEAR_CAP_WARNING", "BUDGET_EXCEEDED"
-	LastUpdated            time.Time `json:"last_updated"`
+	DepartmentID          string    `json:"department_id"`
+	QuarterPeriod         string    `json:"quarter_period"` // "2026-Q1"
+	AllocatedBudgetTons   float64   `json:"allocated_budget_tons"`
+	ConsumedEmissionsTons float64   `json:"consumed_emissions_tons"`
+	RemainingQuotaTons    float64   `json:"remaining_quota_tons"`
+	BudgetBurnRatePct     float64   `json:"budget_burn_rate_pct"`
+	InternalCarbonLevyUSD float64   `json:"internal_carbon_levy_usd"`
+	DepartmentStanding    string    `json:"department_standing"` // "ON_TRACK_GREEN", "NEAR_CAP_WARNING", "BUDGET_EXCEEDED"
+	LastUpdated           time.Time `json:"last_updated"`
 }
 
 // TravelCarbonEngine manages corporate travel emissions auditing and budget tracking

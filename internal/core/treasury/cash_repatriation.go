@@ -28,19 +28,19 @@ type SubsidiaryLiquidityProfile struct {
 
 // RepatriationPathwaySimulation models multi-route tax and yield comparative analysis
 type RepatriationPathwaySimulation struct {
-	SimulationID                   string    `json:"simulation_id"`
-	SubsidiaryID                   string    `json:"subsidiary_id"`
-	PathwayType                    string    `json:"pathway_type"` // "STATUTORY_DIVIDEND_DTAA", "MANAGEMENT_FEE_COST_SHARING", "IP_ROYALTY_LICENSE", "INTERCOMPANY_LOAN_REPAYMENT"
-	GrossRemittanceAmountUSD       float64   `json:"gross_remittance_amount_usd"`
-	ApplicableWithholdingTaxPct    float64   `json:"applicable_withholding_tax_pct"` // %
-	WithholdingTaxDeductionUSD     float64   `json:"withholding_tax_deduction_usd"`
-	FXSpreadAndBankingFeeUSD       float64   `json:"fx_spread_and_banking_fee_usd"`
-	NetEffectiveYieldUSD           float64   `json:"net_effective_yield_usd"`
-	NetYieldPercentage             float64   `json:"net_yield_percentage"` // %
+	SimulationID                    string    `json:"simulation_id"`
+	SubsidiaryID                    string    `json:"subsidiary_id"`
+	PathwayType                     string    `json:"pathway_type"` // "STATUTORY_DIVIDEND_DTAA", "MANAGEMENT_FEE_COST_SHARING", "IP_ROYALTY_LICENSE", "INTERCOMPANY_LOAN_REPAYMENT"
+	GrossRemittanceAmountUSD        float64   `json:"gross_remittance_amount_usd"`
+	ApplicableWithholdingTaxPct     float64   `json:"applicable_withholding_tax_pct"` // %
+	WithholdingTaxDeductionUSD      float64   `json:"withholding_tax_deduction_usd"`
+	FXSpreadAndBankingFeeUSD        float64   `json:"fx_spread_and_banking_fee_usd"`
+	NetEffectiveYieldUSD            float64   `json:"net_effective_yield_usd"`
+	NetYieldPercentage              float64   `json:"net_yield_percentage"` // %
 	EstimatedRegulatoryLeadTimeDays int       `json:"estimated_regulatory_lead_time_days"`
-	OECDComplianceRating           string    `json:"oecd_compliance_rating"`
-	RecommendedRanking             int       `json:"recommended_ranking"` // 1 = Best
-	SimulatedAt                    time.Time `json:"simulated_at"`
+	OECDComplianceRating            string    `json:"oecd_compliance_rating"`
+	RecommendedRanking              int       `json:"recommended_ranking"` // 1 = Best
+	SimulatedAt                     time.Time `json:"simulated_at"`
 }
 
 // InternationalRemittanceOrder models formal execution of cross-border treasury remittance
@@ -57,10 +57,10 @@ type InternationalRemittanceOrder struct {
 
 // CashRepatriationVault thread-safe store
 type CashRepatriationVault struct {
-	mu           sync.RWMutex
-	profiles     map[string]SubsidiaryLiquidityProfile
-	simulations  map[string][]RepatriationPathwaySimulation
-	remittances  map[string]InternationalRemittanceOrder
+	mu          sync.RWMutex
+	profiles    map[string]SubsidiaryLiquidityProfile
+	simulations map[string][]RepatriationPathwaySimulation
+	remittances map[string]InternationalRemittanceOrder
 }
 
 // Global Cash Repatriation instance
@@ -226,12 +226,12 @@ func (v *CashRepatriationVault) GetGroupLiquidityDossier(holdingID string) (gin.
 	}
 
 	return gin.H{
-		"holding_company_id":         holdingID,
-		"group_total_trapped_usd":    totalTrapped,
-		"group_available_yield_usd":  totalAvailable,
-		"repatriation_efficiency":    "96.8% Average Net Realized Yield",
-		"tax_treaty_optimization":    "OECD BEPS Pillar 2 & Bilateral DTAA Minimized Withholding",
-		"central_bank_compliance":    "Mandatory FX Repatriation Clearances Validated",
+		"holding_company_id":        holdingID,
+		"group_total_trapped_usd":   totalTrapped,
+		"group_available_yield_usd": totalAvailable,
+		"repatriation_efficiency":   "96.8% Average Net Realized Yield",
+		"tax_treaty_optimization":   "OECD BEPS Pillar 2 & Bilateral DTAA Minimized Withholding",
+		"central_bank_compliance":   "Mandatory FX Repatriation Clearances Validated",
 	}, nil
 }
 

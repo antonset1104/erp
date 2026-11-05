@@ -14,47 +14,47 @@ import (
 
 // PatentAssetRecord models registered intellectual property patent assets under WIPO/USPTO/EPO/IAS 38
 type PatentAssetRecord struct {
-	PatentID                   string    `json:"patent_id"`
-	PortfolioID                string    `json:"portfolio_id"`
-	Title                      string    `json:"title"`
-	PatentOffice               string    `json:"patent_office"` // "USPTO", "EPO", "WIPO_PCT", "DJKI_INDONESIA", "JPO"
-	PatentType                 string    `json:"patent_type"`   // "UTILITY_PATENT", "DESIGN_PATENT"
-	FilingDate                 time.Time `json:"filing_date"`
-	GrantDate                  time.Time `json:"grant_date"`
-	NextAnnuityDueDate         time.Time `json:"next_annuity_due_date"`
-	StatutoryAnnuityFeeUSD     float64   `json:"statutory_annuity_fee_usd"`
-	GracePeriodDeadline        time.Time `json:"grace_period_deadline"`
-	ActiveCommercialProductLink string   `json:"active_commercial_product_link"`
-	RegisteredAt               time.Time `json:"registered_at"`
+	PatentID                    string    `json:"patent_id"`
+	PortfolioID                 string    `json:"portfolio_id"`
+	Title                       string    `json:"title"`
+	PatentOffice                string    `json:"patent_office"` // "USPTO", "EPO", "WIPO_PCT", "DJKI_INDONESIA", "JPO"
+	PatentType                  string    `json:"patent_type"`   // "UTILITY_PATENT", "DESIGN_PATENT"
+	FilingDate                  time.Time `json:"filing_date"`
+	GrantDate                   time.Time `json:"grant_date"`
+	NextAnnuityDueDate          time.Time `json:"next_annuity_due_date"`
+	StatutoryAnnuityFeeUSD      float64   `json:"statutory_annuity_fee_usd"`
+	GracePeriodDeadline         time.Time `json:"grace_period_deadline"`
+	ActiveCommercialProductLink string    `json:"active_commercial_product_link"`
+	RegisteredAt                time.Time `json:"registered_at"`
 }
 
 // PatentAnnuityScore calculates commercial ROI, citation significance, and renewal/abandonment recommendation
 type PatentAnnuityScore struct {
-	EvaluationID                 string    `json:"evaluation_id"`
-	PatentID                     string    `json:"patent_id"`
-	PortfolioID                  string    `json:"portfolio_id"`
-	CommercialRevenueLinkageUSD  float64   `json:"commercial_revenue_linkage_usd"`
-	ForwardCitationScore         int       `json:"forward_citation_score"` // Third-party competitor citations
-	CompetitiveFTOBlockingScore  float64   `json:"competitive_fto_blocking_score"` // 0 - 100 Freedom to Operate / competitor defensive moat
-	AnnuityROIIndex              float64   `json:"annuity_roi_index"`              // Revenue & Moat / Annuity Fee
-	DecisionVerdict              string    `json:"decision_verdict"`               // "PAY_MAINTENANCE_ANNUITY", "ABANDON_LET_EXPIRE_PRUNING", "OFFER_FOR_OUT_LICENSING"
-	RecommendedAction            string    `json:"recommended_action"`
-	PortfolioHealthAuditDigest   string    `json:"portfolio_health_audit_digest"`
-	EvaluatedAt                  time.Time `json:"evaluated_at"`
+	EvaluationID                string    `json:"evaluation_id"`
+	PatentID                    string    `json:"patent_id"`
+	PortfolioID                 string    `json:"portfolio_id"`
+	CommercialRevenueLinkageUSD float64   `json:"commercial_revenue_linkage_usd"`
+	ForwardCitationScore        int       `json:"forward_citation_score"`         // Third-party competitor citations
+	CompetitiveFTOBlockingScore float64   `json:"competitive_fto_blocking_score"` // 0 - 100 Freedom to Operate / competitor defensive moat
+	AnnuityROIIndex             float64   `json:"annuity_roi_index"`              // Revenue & Moat / Annuity Fee
+	DecisionVerdict             string    `json:"decision_verdict"`               // "PAY_MAINTENANCE_ANNUITY", "ABANDON_LET_EXPIRE_PRUNING", "OFFER_FOR_OUT_LICENSING"
+	RecommendedAction           string    `json:"recommended_action"`
+	PortfolioHealthAuditDigest  string    `json:"portfolio_health_audit_digest"`
+	EvaluatedAt                 time.Time `json:"evaluated_at"`
 }
 
 // AnnuityPaymentAuthorization models legal counsel clearance and SWIFT payment dispatch for renewals
 type AnnuityPaymentAuthorization struct {
-	AuthorizationID             string    `json:"authorization_id"`
-	PortfolioID                 string    `json:"portfolio_id"`
-	AuthorizedPatentsCount      int       `json:"authorized_patents_count"`
-	TotalStatutoryFeesUSD       float64   `json:"total_statutory_fees_usd"`
-	PrunedPatentsCount          int       `json:"pruned_patents_count"`
-	CostAvoidanceSavingsUSD     float64   `json:"cost_avoidance_savings_usd"`
-	SWIFTPaymentRef             string    `json:"swift_payment_ref"`
-	ApprovedByLegalCounsel      string    `json:"approved_by_legal_counsel"`
-	LegalSanctionVerified       bool      `json:"legal_sanction_verified"`
-	AuthorizedAt                time.Time `json:"authorized_at"`
+	AuthorizationID         string    `json:"authorization_id"`
+	PortfolioID             string    `json:"portfolio_id"`
+	AuthorizedPatentsCount  int       `json:"authorized_patents_count"`
+	TotalStatutoryFeesUSD   float64   `json:"total_statutory_fees_usd"`
+	PrunedPatentsCount      int       `json:"pruned_patents_count"`
+	CostAvoidanceSavingsUSD float64   `json:"cost_avoidance_savings_usd"`
+	SWIFTPaymentRef         string    `json:"swift_payment_ref"`
+	ApprovedByLegalCounsel  string    `json:"approved_by_legal_counsel"`
+	LegalSanctionVerified   bool      `json:"legal_sanction_verified"`
+	AuthorizedAt            time.Time `json:"authorized_at"`
 }
 
 // PatentPortfolioVault thread-safe in-memory store
@@ -261,9 +261,9 @@ func RegisterPatentRoutes(r *gin.RouterGroup) {
 
 		patentGroup.POST("/evaluate-portfolio-annuity-score", func(c *gin.Context) {
 			var body struct {
-				PatentID                 string  `json:"patent_id"`
-				CommercialRevenueUSD     float64 `json:"commercial_revenue_usd"`
-				CitationsCount           int     `json:"citations_count"`
+				PatentID                    string  `json:"patent_id"`
+				CommercialRevenueUSD        float64 `json:"commercial_revenue_usd"`
+				CitationsCount              int     `json:"citations_count"`
 				CompetitiveFTOBlockingScore float64 `json:"competitive_fto_blocking_score"`
 			}
 			if err := c.ShouldBindJSON(&body); err != nil {

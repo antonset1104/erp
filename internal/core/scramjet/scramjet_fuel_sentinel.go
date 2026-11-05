@@ -14,18 +14,18 @@ import (
 
 // ScramjetPropulsionTelemetry captures Mach 5-8+ hypersonic scramjet combustion & cryogenic fuel heat sink dynamics under AIAA S-113A & NASA-STD-5001
 type ScramjetPropulsionTelemetry struct {
-	TelemetryID                        string    `json:"telemetry_id"`
-	EngineID                           string    `json:"engine_id"`                                // "SCRAMJET-X43D-MACH7-01"
-	VehicleID                          string    `json:"vehicle_id"`                              // "VEHICLE-AURORA-HYPERSONIC-DEMO"
-	FlightMachNumber                   float64   `json:"flight_mach_number"`                      // e.g. 6.85 Mach
-	CombustorStagnationTempK           float64   `json:"combustor_stagnation_temp_k"`             // e.g. 2150.0 K
-	CombustorWallHeatFluxMWm2          float64   `json:"combustor_wall_heat_flux_mwm2"`           // e.g. 18.5 MW/m2 extreme hypersonic thermal boundary layer
-	FuelCoolingJacketInletPressureBar  float64   `json:"fuel_cooling_jacket_inlet_pressure_bar"`  // e.g. 68.0 bar supercritical hydrocarbon fuel
-	FuelCoolingJacketOutletTempK       float64   `json:"fuel_cooling_jacket_outlet_temp_k"`       // e.g. 965.0 K (endothermic cracking range 850-1050 K)
-	EndothermicCrackingConversionPct   float64   `json:"endothermic_cracking_conversion_pct"`     // e.g. 74.5% conversion of methylcyclohexane/JP-7 to light olefins/H2
-	IsolatorShockTrainPositionMm       float64   `json:"isolator_shock_train_position_mm"`        // e.g. 138.0 mm from inlet cowl lip (choke margin)
-	CombustorAcousticRmsDb             float64   `json:"combustor_acoustic_rms_db"`               // e.g. 164.5 dB supersonic combustion acoustic oscillation
-	RecordedAt                         time.Time `json:"recorded_at"`
+	TelemetryID                       string    `json:"telemetry_id"`
+	EngineID                          string    `json:"engine_id"`                              // "SCRAMJET-X43D-MACH7-01"
+	VehicleID                         string    `json:"vehicle_id"`                             // "VEHICLE-AURORA-HYPERSONIC-DEMO"
+	FlightMachNumber                  float64   `json:"flight_mach_number"`                     // e.g. 6.85 Mach
+	CombustorStagnationTempK          float64   `json:"combustor_stagnation_temp_k"`            // e.g. 2150.0 K
+	CombustorWallHeatFluxMWm2         float64   `json:"combustor_wall_heat_flux_mwm2"`          // e.g. 18.5 MW/m2 extreme hypersonic thermal boundary layer
+	FuelCoolingJacketInletPressureBar float64   `json:"fuel_cooling_jacket_inlet_pressure_bar"` // e.g. 68.0 bar supercritical hydrocarbon fuel
+	FuelCoolingJacketOutletTempK      float64   `json:"fuel_cooling_jacket_outlet_temp_k"`      // e.g. 965.0 K (endothermic cracking range 850-1050 K)
+	EndothermicCrackingConversionPct  float64   `json:"endothermic_cracking_conversion_pct"`    // e.g. 74.5% conversion of methylcyclohexane/JP-7 to light olefins/H2
+	IsolatorShockTrainPositionMm      float64   `json:"isolator_shock_train_position_mm"`       // e.g. 138.0 mm from inlet cowl lip (choke margin)
+	CombustorAcousticRmsDb            float64   `json:"combustor_acoustic_rms_db"`              // e.g. 164.5 dB supersonic combustion acoustic oscillation
+	RecordedAt                        time.Time `json:"recorded_at"`
 }
 
 // ScramjetPropulsionAssessment models heat sink capacity, pyrolytic carbon coking, and isolator unstart margin
@@ -33,10 +33,10 @@ type ScramjetPropulsionAssessment struct {
 	AssessmentID                    string    `json:"assessment_id"`
 	EngineID                        string    `json:"engine_id"`
 	EndothermicHeatSinkAbsorbedKjKg float64   `json:"endothermic_heat_sink_absorbed_kj_kg"` // e.g. ~1850 kJ/kg fuel chemical heat sink
-	CokingPropensityIndex           float64   `json:"coking_propensity_index"`             // normalized index (0.0 - 2.0; > 1.0 critical coking rate)
-	SupersonicIgnitionDelayMs       float64   `json:"supersonic_ignition_delay_ms"`        // auto-ignition delay in supersonic flow (< 0.85 ms residence time)
-	ThermalChokeRisk                string    `json:"thermal_choke_risk"`                  // "STABLE_SUPERSONIC_FLOW", "PRE_COMBUSTOR_PRESSURE_SPIKE_WARNING", "CRITICAL_ISOLATOR_UNSTART_SHOCK_EXPULSION"
-	CokingHazardLevel               string    `json:"coking_hazard_level"`                 // "COKING_FREE_CLEAN_TUBING", "PYROLYTIC_CARBON_DEPOSITION_WARNING", "CRITICAL_JACKET_CHOKING_MELTDOWN"
+	CokingPropensityIndex           float64   `json:"coking_propensity_index"`              // normalized index (0.0 - 2.0; > 1.0 critical coking rate)
+	SupersonicIgnitionDelayMs       float64   `json:"supersonic_ignition_delay_ms"`         // auto-ignition delay in supersonic flow (< 0.85 ms residence time)
+	ThermalChokeRisk                string    `json:"thermal_choke_risk"`                   // "STABLE_SUPERSONIC_FLOW", "PRE_COMBUSTOR_PRESSURE_SPIKE_WARNING", "CRITICAL_ISOLATOR_UNSTART_SHOCK_EXPULSION"
+	CokingHazardLevel               string    `json:"coking_hazard_level"`                  // "COKING_FREE_CLEAN_TUBING", "PYROLYTIC_CARBON_DEPOSITION_WARNING", "CRITICAL_JACKET_CHOKING_MELTDOWN"
 	DynamicFuelSplitMandate         bool      `json:"dynamic_fuel_split_mandate"`
 	VariableBleedActuationRequired  bool      `json:"variable_bleed_actuation_required"`
 	AuditDigest                     string    `json:"audit_digest"`
@@ -45,13 +45,13 @@ type ScramjetPropulsionAssessment struct {
 
 // ScramjetMitigationAction models dual-circuit fuel split, variable boundary layer bleed, and nano-inhibitor injection
 type ScramjetMitigationAction struct {
-	ActionID                        string    `json:"action_id"`
-	EngineID                        string    `json:"engine_id"`
-	CommandedEndothermicFuelSplitPct float64  `json:"commanded_endothermic_fuel_split_pct"` // e.g. 78.5% through catalytic cracking channels
-	IsolatorBleedDoorAngleDeg       float64   `json:"isolator_bleed_door_angle_deg"`        // e.g. 14.5 deg boundary bleed to hold shock train
-	AeroAntiCokingAdditivePpm       float64   `json:"aero_anti_coking_additive_ppm"`        // e.g. 95.0 ppm nano-dispersant inhibitor
-	AvoidedHypersonicLossUSD        float64   `json:"avoided_hypersonic_loss_usd"`          // Avoided $140M USD scramjet combustor burnout and catastrophic unstart breakup
-	ActionTimestamp                 time.Time `json:"action_timestamp"`
+	ActionID                         string    `json:"action_id"`
+	EngineID                         string    `json:"engine_id"`
+	CommandedEndothermicFuelSplitPct float64   `json:"commanded_endothermic_fuel_split_pct"` // e.g. 78.5% through catalytic cracking channels
+	IsolatorBleedDoorAngleDeg        float64   `json:"isolator_bleed_door_angle_deg"`        // e.g. 14.5 deg boundary bleed to hold shock train
+	AeroAntiCokingAdditivePpm        float64   `json:"aero_anti_coking_additive_ppm"`        // e.g. 95.0 ppm nano-dispersant inhibitor
+	AvoidedHypersonicLossUSD         float64   `json:"avoided_hypersonic_loss_usd"`          // Avoided $140M USD scramjet combustor burnout and catastrophic unstart breakup
+	ActionTimestamp                  time.Time `json:"action_timestamp"`
 }
 
 // ScramjetVault thread-safe in-memory store
@@ -168,13 +168,13 @@ func (v *ScramjetVault) TriggerFuelSplitAndIsolatorControl(engineID string) (Scr
 	}
 
 	action := ScramjetMitigationAction{
-		ActionID:                        fmt.Sprintf("ACT-SCRAMJET-%d", time.Now().UnixNano()%1000000),
-		EngineID:                        engineID,
+		ActionID:                         fmt.Sprintf("ACT-SCRAMJET-%d", time.Now().UnixNano()%1000000),
+		EngineID:                         engineID,
 		CommandedEndothermicFuelSplitPct: fuelSplitPct,
-		IsolatorBleedDoorAngleDeg:       bleedAngleDeg,
-		AeroAntiCokingAdditivePpm:       antiCokingPpm,
-		AvoidedHypersonicLossUSD:        140000000.0,
-		ActionTimestamp:                 time.Now(),
+		IsolatorBleedDoorAngleDeg:        bleedAngleDeg,
+		AeroAntiCokingAdditivePpm:        antiCokingPpm,
+		AvoidedHypersonicLossUSD:         140000000.0,
+		ActionTimestamp:                  time.Now(),
 	}
 
 	v.actions[engineID] = action
@@ -191,13 +191,13 @@ func (v *ScramjetVault) GetHypersonicPropulsionDossier(engineID string) (map[str
 	act, hasAct := v.actions[engineID]
 
 	dossier := map[string]interface{}{
-		"engine_id":              engineID,
-		"aiaa_s113a_compliant":   true,
+		"engine_id":               engineID,
+		"aiaa_s113a_compliant":    true,
 		"nasa_std_5001_certified": true,
-		"has_telemetry":          hasTelem,
-		"has_assessment":         hasAsm,
-		"has_action":             hasAct,
-		"dossier_compiled_at":    time.Now(),
+		"has_telemetry":           hasTelem,
+		"has_assessment":          hasAsm,
+		"has_action":              hasAct,
+		"dossier_compiled_at":     time.Now(),
 	}
 	if hasTelem {
 		dossier["telemetry"] = telem

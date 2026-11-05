@@ -11,34 +11,34 @@ import (
 
 // GATTTransactionValue represents the customs valuation elements under WTO GATT Article VII & Article 8
 type GATTTransactionValue struct {
-	ShipmentID                string    `json:"shipment_id"`
-	ImporterEntity            string    `json:"importer_entity"`
-	ExporterAffiliate         string    `json:"exporter_affiliate"`
-	BaseInvoiceFOBUSD         float64   `json:"base_invoice_fob_usd"`
-	InternationalFreightUSD   float64   `json:"international_freight_usd"`
-	MarineInsuranceUSD        float64   `json:"marine_insurance_usd"`
-	DutiableAssistsUSD        float64   `json:"dutiable_assists_usd"` // Tools, dies, engineering provided free
-	RoyaltiesLicenseFeesUSD   float64   `json:"royalties_license_fees_usd"`
-	PackingAndContainersUSD   float64   `json:"packing_and_containers_usd"`
-	SellingCommissionsUSD     float64   `json:"selling_commissions_usd"`
-	CalculatedDutiableCIFUSD  float64   `json:"calculated_dutiable_cif_usd"`
-	ValuationMethodCited      string    `json:"valuation_method_cited"` // "METHOD_1_TRANSACTION_VALUE", "METHOD_2_IDENTICAL_GOODS"
-	EvaluatedAt               time.Time `json:"evaluated_at"`
+	ShipmentID               string    `json:"shipment_id"`
+	ImporterEntity           string    `json:"importer_entity"`
+	ExporterAffiliate        string    `json:"exporter_affiliate"`
+	BaseInvoiceFOBUSD        float64   `json:"base_invoice_fob_usd"`
+	InternationalFreightUSD  float64   `json:"international_freight_usd"`
+	MarineInsuranceUSD       float64   `json:"marine_insurance_usd"`
+	DutiableAssistsUSD       float64   `json:"dutiable_assists_usd"` // Tools, dies, engineering provided free
+	RoyaltiesLicenseFeesUSD  float64   `json:"royalties_license_fees_usd"`
+	PackingAndContainersUSD  float64   `json:"packing_and_containers_usd"`
+	SellingCommissionsUSD    float64   `json:"selling_commissions_usd"`
+	CalculatedDutiableCIFUSD float64   `json:"calculated_dutiable_cif_usd"`
+	ValuationMethodCited     string    `json:"valuation_method_cited"` // "METHOD_1_TRANSACTION_VALUE", "METHOD_2_IDENTICAL_GOODS"
+	EvaluatedAt              time.Time `json:"evaluated_at"`
 }
 
 // TransferPricingReconciliation matches Customs CIF against OECD Arm's Length Interquartile Range
 type TransferPricingReconciliation struct {
-	ShipmentID               string    `json:"shipment_id"`
-	CustomsCIFUnitPriceUSD   float64   `json:"customs_cif_unit_price_usd"`
-	TPLowerQuartileQ1USD     float64   `json:"tp_lower_quartile_q1_usd"`
-	TPMedianArmLengthUSD     float64   `json:"tp_median_arm_length_usd"`
-	TPUpperQuartileQ3USD     float64   `json:"tp_upper_quartile_q3_usd"`
-	AlignmentStatus          string    `json:"alignment_status"` // "HARMONIZED_IN_RANGE", "CUSTOMS_UNDERVALUATION_RISK", "TAX_PROFIT_SHIFTING_RISK"
-	CustomsDutyExposureUSD   float64   `json:"customs_duty_exposure_usd"`
-	CorporateIncomeTaxRiskUSD float64  `json:"corporate_income_tax_risk_usd"`
-	CompensatingAdjustmentUSD float64  `json:"compensating_adjustment_usd"`
-	RecommendedAction        string    `json:"recommended_action"`
-	ReconciledAt             time.Time `json:"reconciled_at"`
+	ShipmentID                string    `json:"shipment_id"`
+	CustomsCIFUnitPriceUSD    float64   `json:"customs_cif_unit_price_usd"`
+	TPLowerQuartileQ1USD      float64   `json:"tp_lower_quartile_q1_usd"`
+	TPMedianArmLengthUSD      float64   `json:"tp_median_arm_length_usd"`
+	TPUpperQuartileQ3USD      float64   `json:"tp_upper_quartile_q3_usd"`
+	AlignmentStatus           string    `json:"alignment_status"` // "HARMONIZED_IN_RANGE", "CUSTOMS_UNDERVALUATION_RISK", "TAX_PROFIT_SHIFTING_RISK"
+	CustomsDutyExposureUSD    float64   `json:"customs_duty_exposure_usd"`
+	CorporateIncomeTaxRiskUSD float64   `json:"corporate_income_tax_risk_usd"`
+	CompensatingAdjustmentUSD float64   `json:"compensating_adjustment_usd"`
+	RecommendedAction         string    `json:"recommended_action"`
+	ReconciledAt              time.Time `json:"reconciled_at"`
 }
 
 // CustomsClearanceDeclaration represents the formal customs import entry document (PIB / Entry Pack)
@@ -141,16 +141,16 @@ func (e *GATTHarmonizerEngine) ReconcileTransferPricing(shipmentID string, unitC
 
 	recon := TransferPricingReconciliation{
 		ShipmentID:                shipmentID,
-		CustomsCIFUnitPriceUSD:   unitCIF,
-		TPLowerQuartileQ1USD:     q1,
-		TPMedianArmLengthUSD:     median,
-		TPUpperQuartileQ3USD:     q3,
-		AlignmentStatus:          status,
-		CustomsDutyExposureUSD:   dutyExposure,
+		CustomsCIFUnitPriceUSD:    unitCIF,
+		TPLowerQuartileQ1USD:      q1,
+		TPMedianArmLengthUSD:      median,
+		TPUpperQuartileQ3USD:      q3,
+		AlignmentStatus:           status,
+		CustomsDutyExposureUSD:    dutyExposure,
 		CorporateIncomeTaxRiskUSD: citRisk,
 		CompensatingAdjustmentUSD: compAdj,
-		RecommendedAction:        action,
-		ReconciledAt:             time.Now(),
+		RecommendedAction:         action,
+		ReconciledAt:              time.Now(),
 	}
 
 	e.reconciles[shipmentID] = recon
@@ -170,7 +170,7 @@ func (e *GATTHarmonizerEngine) GenerateClearanceDeclaration(shipmentID string, h
 
 	importDuty := (dutyRate / 100.0) * cif
 	vatBase := cif + importDuty
-	importVAT := (11.0 / 100.0) * vatBase // 11% standard import VAT
+	importVAT := (11.0 / 100.0) * vatBase  // 11% standard import VAT
 	incomeTax22 := (2.5 / 100.0) * vatBase // 2.5% PPh 22 with API-U license
 	totalTaxes := importDuty + importVAT + incomeTax22
 

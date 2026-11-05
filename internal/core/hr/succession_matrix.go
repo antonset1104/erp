@@ -11,29 +11,29 @@ import (
 
 // TalentAssessmentRequest holds performance and potential ratings for a manager or specialist.
 type TalentAssessmentRequest struct {
-	EmployeeID          string `json:"employee_id"`
-	EmployeeName        string `json:"employee_name"`
-	CurrentJobTitle     string `json:"current_job_title"`
-	Department          string `json:"department"`
-	PerformanceRating   int    `json:"performance_rating"` // 1 = Low, 2 = Medium, 3 = High
-	PotentialRating     int    `json:"potential_rating"`   // 1 = Low, 2 = Medium, 3 = High
+	EmployeeID           string `json:"employee_id"`
+	EmployeeName         string `json:"employee_name"`
+	CurrentJobTitle      string `json:"current_job_title"`
+	Department           string `json:"department"`
+	PerformanceRating    int    `json:"performance_rating"` // 1 = Low, 2 = Medium, 3 = High
+	PotentialRating      int    `json:"potential_rating"`   // 1 = Low, 2 = Medium, 3 = High
 	TargetLeadershipRole string `json:"target_leadership_role"`
-	ReadinessTimeline   string `json:"readiness_timeline"` // "READY_NOW", "READY_1_TO_2_YEARS", "READY_3_PLUS_YEARS"
+	ReadinessTimeline    string `json:"readiness_timeline"` // "READY_NOW", "READY_1_TO_2_YEARS", "READY_3_PLUS_YEARS"
 }
 
 // TalentAssessmentResult maps the employee onto the McKinsey/GE 9-Box Grid.
 type TalentAssessmentResult struct {
-	EmployeeID             string `json:"employee_id"`
-	EmployeeName           string `json:"employee_name"`
-	CurrentJobTitle        string `json:"current_job_title"`
-	Department             string `json:"department"`
-	NineBoxClassification  string `json:"nine_box_classification"`
-	GridCoordinates        string `json:"grid_coordinates"` // e.g. "(High Performance, High Potential)"
-	DevelopmentActionPlan  string `json:"development_action_plan"`
-	TargetLeadershipRole   string `json:"target_leadership_role"`
-	ReadinessTimeline      string `json:"readiness_timeline"`
-	FlightRiskProtection   string `json:"flight_risk_protection"`
-	AssessedAt             string `json:"assessed_at"`
+	EmployeeID            string `json:"employee_id"`
+	EmployeeName          string `json:"employee_name"`
+	CurrentJobTitle       string `json:"current_job_title"`
+	Department            string `json:"department"`
+	NineBoxClassification string `json:"nine_box_classification"`
+	GridCoordinates       string `json:"grid_coordinates"` // e.g. "(High Performance, High Potential)"
+	DevelopmentActionPlan string `json:"development_action_plan"`
+	TargetLeadershipRole  string `json:"target_leadership_role"`
+	ReadinessTimeline     string `json:"readiness_timeline"`
+	FlightRiskProtection  string `json:"flight_risk_protection"`
+	AssessedAt            string `json:"assessed_at"`
 }
 
 // SuccessionNominee represents a vetted successor for a critical executive/operational role.

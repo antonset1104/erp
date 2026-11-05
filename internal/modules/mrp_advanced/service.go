@@ -665,13 +665,13 @@ func (s *service) AnalyzeMRPCapacityWithAI(companyID uint) (*AIMRPCapacityReport
 
 	return &AIMRPCapacityReport{
 		ScheduleEfficiencyScore: score,
-		OverallStatus:            status,
-		BottleneckWorkCenter:     worstWC,
-		BottleneckUtilization:    worstUtil,
-		RecommendedLeadTimeDays:  5,
-		ExecutiveSummary:         summary,
-		LineBalancingAdvice:      advice,
-		CriticalPathOperations:   criticalOps,
-		AIProvider:               "Local Heuristic Engine (APICS / CPIM MRP II Baseline)",
+		OverallStatus:           status,
+		BottleneckWorkCenter:    worstWC,
+		BottleneckUtilization:   worstUtil,
+		RecommendedLeadTimeDays: 5,
+		ExecutiveSummary:        summary,
+		LineBalancingAdvice:     advice,
+		CriticalPathOperations:  criticalOps,
+		AIProvider:              "Local Heuristic Engine (APICS / CPIM MRP II Baseline)",
 	}, nil
 }

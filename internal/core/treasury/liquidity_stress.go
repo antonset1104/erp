@@ -12,41 +12,41 @@ import (
 
 // MacroShockScenario encapsulates macro-financial parameters for corporate stress testing.
 type MacroShockScenario struct {
-	ScenarioName             string  `json:"scenario_name"` // "STAGFLATION_CRISIS", "CURRENCY_SHOCK_2026", "SUPPLY_CHAIN_FREEZE"
-	InterestRateShockBps     float64 `json:"interest_rate_shock_bps"` // e.g. +200 bps
-	FXDepreciationPct        float64 `json:"fx_depreciation_pct"`    // e.g. -15.0%
-	CustomerDefaultRatePct   float64 `json:"customer_default_rate_pct"` // e.g. 12.0%
+	ScenarioName             string  `json:"scenario_name"`               // "STAGFLATION_CRISIS", "CURRENCY_SHOCK_2026", "SUPPLY_CHAIN_FREEZE"
+	InterestRateShockBps     float64 `json:"interest_rate_shock_bps"`     // e.g. +200 bps
+	FXDepreciationPct        float64 `json:"fx_depreciation_pct"`         // e.g. -15.0%
+	CustomerDefaultRatePct   float64 `json:"customer_default_rate_pct"`   // e.g. 12.0%
 	CreditFacilityHaircutPct float64 `json:"credit_facility_haircut_pct"` // e.g. 25.0%
 }
 
 // LiquidityStressTestResult delivers probabilistic Monte Carlo liquidity outcomes and Basel III metrics.
 type LiquidityStressTestResult struct {
-	SimulationID                string   `json:"simulation_id"`
-	ScenarioName                string   `json:"scenario_name"`
-	BaselineCashUSD             float64  `json:"baseline_cash_usd"`
-	HighQualityLiquidAssetsUSD  float64  `json:"high_quality_liquid_assets_usd"` // HQLA
-	Projected30DayOutflowsUSD   float64  `json:"projected_30_day_outflows_usd"`
-	LCRRatioPct                 float64  `json:"lcr_ratio_pct"`  // Liquidity Coverage Ratio (Min 100%)
-	NSFRRatioPct                float64  `json:"nsfr_ratio_pct"` // Net Stable Funding Ratio (Min 100%)
-	CashFlowAtRisk95USD         float64  `json:"cash_flow_at_risk_95_usd"` // 95% Confidence VaR
-	CashFlowAtRisk99USD         float64  `json:"cash_flow_at_risk_99_usd"` // 99% Confidence VaR
-	SurvivalHorizonDays         int      `json:"survival_horizon_days"`
-	Basel3Compliant             bool     `json:"basel3_compliant"`
-	LiquidityRiskTier           string   `json:"liquidity_risk_tier"` // "PRUDENT_RESILIENT", "MODERATE_WATCHLIST", "SEVERE_VULNERABILITY"
-	ContingencyFundingActions   []string `json:"contingency_funding_actions"`
-	SimulatedAt                 string   `json:"simulated_at"`
+	SimulationID               string   `json:"simulation_id"`
+	ScenarioName               string   `json:"scenario_name"`
+	BaselineCashUSD            float64  `json:"baseline_cash_usd"`
+	HighQualityLiquidAssetsUSD float64  `json:"high_quality_liquid_assets_usd"` // HQLA
+	Projected30DayOutflowsUSD  float64  `json:"projected_30_day_outflows_usd"`
+	LCRRatioPct                float64  `json:"lcr_ratio_pct"`            // Liquidity Coverage Ratio (Min 100%)
+	NSFRRatioPct               float64  `json:"nsfr_ratio_pct"`           // Net Stable Funding Ratio (Min 100%)
+	CashFlowAtRisk95USD        float64  `json:"cash_flow_at_risk_95_usd"` // 95% Confidence VaR
+	CashFlowAtRisk99USD        float64  `json:"cash_flow_at_risk_99_usd"` // 99% Confidence VaR
+	SurvivalHorizonDays        int      `json:"survival_horizon_days"`
+	Basel3Compliant            bool     `json:"basel3_compliant"`
+	LiquidityRiskTier          string   `json:"liquidity_risk_tier"` // "PRUDENT_RESILIENT", "MODERATE_WATCHLIST", "SEVERE_VULNERABILITY"
+	ContingencyFundingActions  []string `json:"contingency_funding_actions"`
+	SimulatedAt                string   `json:"simulated_at"`
 }
 
 // ContingencyFundingPlan defines actionable treasury liquidity emergency interventions.
 type ContingencyFundingPlan struct {
-	PlanID                      string   `json:"plan_id"`
-	SimulationID                string   `json:"simulation_id"`
-	ImmediateAction             string   `json:"immediate_action"`
-	RevolvingCreditDrawdownUSD  float64  `json:"revolving_credit_drawdown_usd"`
-	DiscretionaryCapexFreezeUSD float64  `json:"discretionary_capex_freeze_usd"`
-	RevisedSurvivalHorizonDays  int      `json:"revised_survival_horizon_days"`
-	Status                      string   `json:"status"` // "ACTIVATED", "STANDBY"
-	ActivatedAt                 string   `json:"activated_at"`
+	PlanID                      string  `json:"plan_id"`
+	SimulationID                string  `json:"simulation_id"`
+	ImmediateAction             string  `json:"immediate_action"`
+	RevolvingCreditDrawdownUSD  float64 `json:"revolving_credit_drawdown_usd"`
+	DiscretionaryCapexFreezeUSD float64 `json:"discretionary_capex_freeze_usd"`
+	RevisedSurvivalHorizonDays  int     `json:"revised_survival_horizon_days"`
+	Status                      string  `json:"status"` // "ACTIVATED", "STANDBY"
+	ActivatedAt                 string  `json:"activated_at"`
 }
 
 // LiquidityStressStore manages thread-safe treasury stress testing state.
@@ -107,9 +107,9 @@ func SimulateMonteCarloLiquidityLogic(scenario MacroShockScenario) (*LiquiditySt
 	hqla := 36000000.0         // Level 1 sovereign bonds + cash reserves
 
 	// Calculate shock impacts
-	fxLoss := baselineCash * (math.Abs(scenario.FXDepreciationPct) / 100.0) * 0.35 // 35% foreign currency exposure
+	fxLoss := baselineCash * (math.Abs(scenario.FXDepreciationPct) / 100.0) * 0.35         // 35% foreign currency exposure
 	interestExtraCost := (baselineCash * 0.40) * (scenario.InterestRateShockBps / 10000.0) // Floating debt
-	creditLoss := 32000000.0 * (scenario.CustomerDefaultRatePct / 100.0) // On $32M receivables
+	creditLoss := 32000000.0 * (scenario.CustomerDefaultRatePct / 100.0)                   // On $32M receivables
 
 	projectedOutflows := 26000000.0 + fxLoss + interestExtraCost + creditLoss
 	lcr := (hqla / projectedOutflows) * 100.0

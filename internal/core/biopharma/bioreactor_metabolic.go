@@ -32,7 +32,7 @@ type MetabolicGrowthAssessment struct {
 	AssessmentID                 string    `json:"assessment_id"`
 	BatchID                      string    `json:"batch_id"`
 	SpecificGrowthRateMuPerHr    float64   `json:"specific_growth_rate_mu_per_hr"` // Monod growth rate mu
-	CellDeathRateKdPerHr         float64   `json:"cell_death_rate_kd_per_hr"`     // Specific death rate kd
+	CellDeathRateKdPerHr         float64   `json:"cell_death_rate_kd_per_hr"`      // Specific death rate kd
 	MetabolicHealthStatus        string    `json:"metabolic_health_status"`        // "OPTIMAL_EXPONENTIAL_GROWTH", "ELEVATED_LACTATE_INHIBITION", "CRITICAL_APOPTOSIS_RISK"
 	RecommendedGlucoseFeedRateML float64   `json:"recommended_glucose_feed_rate_ml_hr"`
 	RecommendedBaseTitrationML   float64   `json:"recommended_base_titration_ml_hr"`
@@ -52,10 +52,10 @@ type NutrientFeedCorrectionRecord struct {
 
 // BiopharmaVault thread-safe in-memory store
 type BiopharmaVault struct {
-	mu           sync.RWMutex
-	telemetries  map[string]BioreactorCultureTelemetry
-	assessments  map[string]MetabolicGrowthAssessment
-	corrections  map[string]NutrientFeedCorrectionRecord
+	mu          sync.RWMutex
+	telemetries map[string]BioreactorCultureTelemetry
+	assessments map[string]MetabolicGrowthAssessment
+	corrections map[string]NutrientFeedCorrectionRecord
 }
 
 // Global instance
@@ -137,7 +137,7 @@ func (v *BiopharmaVault) EvaluateMetabolicGrowth(batchID string) (MetabolicGrowt
 
 	// Recommend glucose feed rate: Target 3.0 g/L in 2000L working volume
 	// Glucose consumption rate Qs approx 0.05 g / (10^6 cells * hr)
-	qs := 0.048 // g / (10^6 cells * hr)
+	qs := 0.048                                                 // g / (10^6 cells * hr)
 	hourlyDemandG := qs * tel.ViableCellDensity_10e6ML * 2000.0 // grams/hr
 	// Feed stock solution is 500 g/L (50% w/v glucose syrup)
 	recommendedFeedRateML := (hourlyDemandG / 500.0) * 1000.0 // mL/hr

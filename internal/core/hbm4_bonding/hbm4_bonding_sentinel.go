@@ -14,42 +14,42 @@ import (
 
 // HBM4StackTelemetry captures 16-die / 20-die HBM4 wafer-to-wafer direct Cu-Cu hybrid bonding under SEMI 3D-0613 & IEEE 1581
 type HBM4StackTelemetry struct {
-	TelemetryID                         string    `json:"telemetry_id"`
-	StackID                             string    `json:"stack_id"`                                // "HBM4-16HI-DRAM-STACK-008"
-	WaferLotID                          string    `json:"wafer_lot_id"`                            // "LOT-HBM4-AI-ACCEL-440"
-	DieStackCount                       int       `json:"die_stack_count"`                         // e.g. 16
-	CuPadDishingDepthNm                 float64   `json:"cu_pad_dishing_depth_nm"`                 // e.g. 2.85 nm (target < 2.0 nm)
-	DielectricRecessVarianceNm          float64   `json:"dielectric_recess_variance_nm"`           // e.g. 1.45 nm
-	InterfacialVoidAreaFractionPct      float64   `json:"interfacial_void_area_fraction_pct"`       // e.g. 1.85% (acceptance limit < 0.80%)
-	ContactResistancePerPadOhms         float64   `json:"contact_resistance_per_pad_ohms"`         // e.g. 0.28 Ohms (nominal < 0.15 Ohms)
-	ThermalAnnealTempC                  float64   `json:"thermal_anneal_temp_c"`                   // e.g. 215.0°C
-	ElectromigrationCurrentDensityAcm2  float64   `json:"electromigration_current_density_acm2"`   // e.g. 1.45e6 A/cm2 (limit 1.2e6 A/cm2)
-	OverlayAlignmentRunoutNm            float64   `json:"overlay_alignment_runout_nm"`             // e.g. 58.5 nm (spec < 40.0 nm)
-	RecordedAt                          time.Time `json:"recorded_at"`
+	TelemetryID                        string    `json:"telemetry_id"`
+	StackID                            string    `json:"stack_id"`                              // "HBM4-16HI-DRAM-STACK-008"
+	WaferLotID                         string    `json:"wafer_lot_id"`                          // "LOT-HBM4-AI-ACCEL-440"
+	DieStackCount                      int       `json:"die_stack_count"`                       // e.g. 16
+	CuPadDishingDepthNm                float64   `json:"cu_pad_dishing_depth_nm"`               // e.g. 2.85 nm (target < 2.0 nm)
+	DielectricRecessVarianceNm         float64   `json:"dielectric_recess_variance_nm"`         // e.g. 1.45 nm
+	InterfacialVoidAreaFractionPct     float64   `json:"interfacial_void_area_fraction_pct"`    // e.g. 1.85% (acceptance limit < 0.80%)
+	ContactResistancePerPadOhms        float64   `json:"contact_resistance_per_pad_ohms"`       // e.g. 0.28 Ohms (nominal < 0.15 Ohms)
+	ThermalAnnealTempC                 float64   `json:"thermal_anneal_temp_c"`                 // e.g. 215.0°C
+	ElectromigrationCurrentDensityAcm2 float64   `json:"electromigration_current_density_acm2"` // e.g. 1.45e6 A/cm2 (limit 1.2e6 A/cm2)
+	OverlayAlignmentRunoutNm           float64   `json:"overlay_alignment_runout_nm"`           // e.g. 58.5 nm (spec < 40.0 nm)
+	RecordedAt                         time.Time `json:"recorded_at"`
 }
 
 // HBM4StackAssessment evaluates interfacial voiding, Cu grain boundary growth, and electromigration current crowding
 type HBM4StackAssessment struct {
-	AssessmentID                   string    `json:"assessment_id"`
-	StackID                        string    `json:"stack_id"`
-	InterfacialBondingQualityPct   float64   `json:"interfacial_bonding_quality_pct"`
-	HybridBondingIntegrityStatus   string    `json:"hybrid_bonding_integrity_status"` // "CU_CU_CRYSTALLIZED_BOND", "INTERFACIAL_VOID_WARNING", "INTERFACIAL_VOID_COALESCENCE_REJECT"
-	ElectromigrationHazard         string    `json:"electromigration_hazard"`         // "CURRENT_DENSITY_STABLE", "CURRENT_CROWDING_WARNING", "ELECTROMIGRATION_CURRENT_CROWDING_HAZARD"
-	ThermalAnnealPulseMandate      bool      `json:"thermal_anneal_pulse_mandate"`
-	PiezoClampingForceTrimMandate  bool      `json:"piezo_clamping_force_trim_mandate"`
-	AuditDigest                    string    `json:"audit_digest"`
-	EvaluatedAt                    time.Time `json:"evaluated_at"`
+	AssessmentID                  string    `json:"assessment_id"`
+	StackID                       string    `json:"stack_id"`
+	InterfacialBondingQualityPct  float64   `json:"interfacial_bonding_quality_pct"`
+	HybridBondingIntegrityStatus  string    `json:"hybrid_bonding_integrity_status"` // "CU_CU_CRYSTALLIZED_BOND", "INTERFACIAL_VOID_WARNING", "INTERFACIAL_VOID_COALESCENCE_REJECT"
+	ElectromigrationHazard        string    `json:"electromigration_hazard"`         // "CURRENT_DENSITY_STABLE", "CURRENT_CROWDING_WARNING", "ELECTROMIGRATION_CURRENT_CROWDING_HAZARD"
+	ThermalAnnealPulseMandate     bool      `json:"thermal_anneal_pulse_mandate"`
+	PiezoClampingForceTrimMandate bool      `json:"piezo_clamping_force_trim_mandate"`
+	AuditDigest                   string    `json:"audit_digest"`
+	EvaluatedAt                   time.Time `json:"evaluated_at"`
 }
 
 // HBM4MitigationAction models localized infrared laser thermal anneal, piezo clamp load modulation, and redundant TSV rerouting
 type HBM4MitigationAction struct {
-	ActionID                    string    `json:"action_id"`
-	StackID                     string    `json:"stack_id"`
-	CommandedAnnealPulseTempC   float64   `json:"commanded_anneal_pulse_temp_c"`
-	AnnealPulseDurationMs       float64   `json:"anneal_pulse_duration_ms"`
-	PiezoBondingClampForceKN    float64   `json:"piezo_bonding_clamp_force_kn"`
-	AvoidedHBM4ScrapLossUSD     float64   `json:"avoided_hbm4_scrap_loss_usd"`
-	ActionTimestamp             time.Time `json:"action_timestamp"`
+	ActionID                  string    `json:"action_id"`
+	StackID                   string    `json:"stack_id"`
+	CommandedAnnealPulseTempC float64   `json:"commanded_anneal_pulse_temp_c"`
+	AnnealPulseDurationMs     float64   `json:"anneal_pulse_duration_ms"`
+	PiezoBondingClampForceKN  float64   `json:"piezo_bonding_clamp_force_kn"`
+	AvoidedHBM4ScrapLossUSD   float64   `json:"avoided_hbm4_scrap_loss_usd"`
+	ActionTimestamp           time.Time `json:"action_timestamp"`
 }
 
 // HBM4Vault thread-safe in-memory store
@@ -191,15 +191,15 @@ func (v *HBM4Vault) GetHBM4QualityDossier(stackID string) (map[string]interface{
 	}
 
 	return map[string]interface{}{
-		"stack_id":               stackID,
-		"wafer_lot_id":           telem.WaferLotID,
-		"die_stack_count":        telem.DieStackCount,
-		"semi_3d0613_compliant":  true,
-		"ieee_1581_certified":    true,
-		"telemetry":              telem,
-		"assessment":             asm,
-		"latest_action":          act,
-		"compiled_at":            time.Now(),
+		"stack_id":              stackID,
+		"wafer_lot_id":          telem.WaferLotID,
+		"die_stack_count":       telem.DieStackCount,
+		"semi_3d0613_compliant": true,
+		"ieee_1581_certified":   true,
+		"telemetry":             telem,
+		"assessment":            asm,
+		"latest_action":         act,
+		"compiled_at":           time.Now(),
 	}, nil
 }
 

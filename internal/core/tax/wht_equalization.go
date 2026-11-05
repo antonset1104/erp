@@ -48,16 +48,16 @@ type WHTEqualizationDiscrepancy struct {
 
 // WHTEqualizationReport summarizes tax base equalization and audit exposure.
 type WHTEqualizationReport struct {
-	ReportID                    string                       `json:"report_id"`
-	FiscalPeriod                string                       `json:"fiscal_period"`
-	TotalGLExpensesAuditedIDR   float64                      `json:"total_gl_expenses_audited_idr"`
-	TotalReportedDPPIDR         float64                      `json:"total_reported_dpp_idr"`
-	TotalTaxWithheldIDR         float64                      `json:"total_tax_withheld_idr"`
-	TotalDiscrepancyIDR         float64                      `json:"total_discrepancy_idr"`
+	ReportID                     string                       `json:"report_id"`
+	FiscalPeriod                 string                       `json:"fiscal_period"`
+	TotalGLExpensesAuditedIDR    float64                      `json:"total_gl_expenses_audited_idr"`
+	TotalReportedDPPIDR          float64                      `json:"total_reported_dpp_idr"`
+	TotalTaxWithheldIDR          float64                      `json:"total_tax_withheld_idr"`
+	TotalDiscrepancyIDR          float64                      `json:"total_discrepancy_idr"`
 	TotalPotentialTaxExposureIDR float64                      `json:"total_potential_tax_exposure_idr"`
-	AuditStatus                 string                       `json:"audit_status"` // "EQUALIZED_CLEAN", "DISCREPANCY_DETECTED"
-	Discrepancies               []WHTEqualizationDiscrepancy `json:"discrepancies"`
-	GeneratedAt                 string                       `json:"generated_at"`
+	AuditStatus                  string                       `json:"audit_status"` // "EQUALIZED_CLEAN", "DISCREPANCY_DETECTED"
+	Discrepancies                []WHTEqualizationDiscrepancy `json:"discrepancies"`
+	GeneratedAt                  string                       `json:"generated_at"`
 }
 
 // DGT1ValidationRequest holds foreign vendor certificate data under tax treaties (P3B).

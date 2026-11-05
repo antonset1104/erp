@@ -14,41 +14,41 @@ import (
 
 // SSBCellTelemetry models all-solid-state battery cell and interface acoustics under IEC 62660-3 & ISO 12405-4
 type SSBCellTelemetry struct {
-	TelemetryID                      string    `json:"telemetry_id"`
-	CellID                           string    `json:"cell_id"`                              // "CELL-SSB-SULFIDE-LITHIUM-01"
-	PackID                           string    `json:"pack_id"`                              // "PACK-EV-800V-100KWH"
-	CurrentDensityMA_CM2             float64   `json:"current_density_ma_cm2"`               // e.g. 5.8 mA/cm^2 (critical limit ~5.0)
-	SolidElectrolyteShearModulusGPA  float64   `json:"solid_electrolyte_shear_modulus_gpa"`  // G_se (e.g. 8.2 GPa; Li is 3.4 GPa)
-	AcousticEmissionHitCount         int       `json:"acoustic_emission_hit_count"`          // e.g. 142 hits/min
-	AcousticEmissionPeakDB           float64   `json:"acoustic_emission_peak_db"`            // e.g. 58.5 dB
-	AppliedStackPressureMPA          float64   `json:"applied_stack_pressure_mpa"`           // e.g. 3.2 MPa (target 5.0 MPa)
-	InternalImpedanceMilliOhm        float64   `json:"internal_impedance_milli_ohm"`         // e.g. 14.5 mOhm
-	CellTemperatureC                 float64   `json:"cell_temperature_c"`                  // e.g. 38.5°C
-	RecordedAt                       time.Time `json:"recorded_at"`
+	TelemetryID                     string    `json:"telemetry_id"`
+	CellID                          string    `json:"cell_id"`                             // "CELL-SSB-SULFIDE-LITHIUM-01"
+	PackID                          string    `json:"pack_id"`                             // "PACK-EV-800V-100KWH"
+	CurrentDensityMA_CM2            float64   `json:"current_density_ma_cm2"`              // e.g. 5.8 mA/cm^2 (critical limit ~5.0)
+	SolidElectrolyteShearModulusGPA float64   `json:"solid_electrolyte_shear_modulus_gpa"` // G_se (e.g. 8.2 GPa; Li is 3.4 GPa)
+	AcousticEmissionHitCount        int       `json:"acoustic_emission_hit_count"`         // e.g. 142 hits/min
+	AcousticEmissionPeakDB          float64   `json:"acoustic_emission_peak_db"`           // e.g. 58.5 dB
+	AppliedStackPressureMPA         float64   `json:"applied_stack_pressure_mpa"`          // e.g. 3.2 MPa (target 5.0 MPa)
+	InternalImpedanceMilliOhm       float64   `json:"internal_impedance_milli_ohm"`        // e.g. 14.5 mOhm
+	CellTemperatureC                float64   `json:"cell_temperature_c"`                  // e.g. 38.5°C
+	RecordedAt                      time.Time `json:"recorded_at"`
 }
 
 // DendriteAndCrackingAssessment models Monroe-Newman shear stability and acoustic crack propagation
 type DendriteAndCrackingAssessment struct {
-	AssessmentID                     string    `json:"assessment_id"`
-	CellID                           string    `json:"cell_id"`
-	MonroeNewmanShearRatio           float64   `json:"monroe_newman_shear_ratio"`           // G_se / G_li (must be > 2.0)
-	CriticalCurrentDensityMargin     float64   `json:"critical_current_density_margin"`     // CCD - J
-	InterfacialCrackingHazardLevel   string    `json:"interfacial_cracking_hazard_level"`   // "ELASTIC_STABLE_SOLID_INTERFACE", "ELEVATED_ACOUSTIC_MICROCRACKING", "CRITICAL_LITHIUM_DENDRITE_SHORT_HAZARD"
-	StackPressureAdjustmentRequired  bool      `json:"stack_pressure_adjustment_required"`
-	TargetStackPressureMPA           float64   `json:"target_stack_pressure_mpa"`
-	ReversePulseRejuvenationMandate  bool      `json:"reverse_pulse_rejuvenation_mandate"`
-	AuditDigest                      string    `json:"audit_digest"`
-	EvaluatedAt                      time.Time `json:"evaluated_at"`
+	AssessmentID                    string    `json:"assessment_id"`
+	CellID                          string    `json:"cell_id"`
+	MonroeNewmanShearRatio          float64   `json:"monroe_newman_shear_ratio"`         // G_se / G_li (must be > 2.0)
+	CriticalCurrentDensityMargin    float64   `json:"critical_current_density_margin"`   // CCD - J
+	InterfacialCrackingHazardLevel  string    `json:"interfacial_cracking_hazard_level"` // "ELASTIC_STABLE_SOLID_INTERFACE", "ELEVATED_ACOUSTIC_MICROCRACKING", "CRITICAL_LITHIUM_DENDRITE_SHORT_HAZARD"
+	StackPressureAdjustmentRequired bool      `json:"stack_pressure_adjustment_required"`
+	TargetStackPressureMPA          float64   `json:"target_stack_pressure_mpa"`
+	ReversePulseRejuvenationMandate bool      `json:"reverse_pulse_rejuvenation_mandate"`
+	AuditDigest                     string    `json:"audit_digest"`
+	EvaluatedAt                     time.Time `json:"evaluated_at"`
 }
 
 // SSBPressureAndPulseAction models mechanical stack pressure modulation and pulsed current rejuvenation
 type SSBPressureAndPulseAction struct {
-	ActionID                   string    `json:"action_id"`
-	CellID                     string    `json:"cell_id"`
-	AdjustedStackPressureMPA   float64   `json:"adjusted_stack_pressure_mpa"`
-	ReversePulseFrequencyKhz   float64   `json:"reverse_pulse_frequency_khz"`
-	AvoidedBatteryRecallLossUSD float64  `json:"avoided_battery_recall_loss_usd"` // Avoided $19M USD EV pack fires, fleet recall, and warranty claims
-	ActionTimestamp            time.Time `json:"action_timestamp"`
+	ActionID                    string    `json:"action_id"`
+	CellID                      string    `json:"cell_id"`
+	AdjustedStackPressureMPA    float64   `json:"adjusted_stack_pressure_mpa"`
+	ReversePulseFrequencyKhz    float64   `json:"reverse_pulse_frequency_khz"`
+	AvoidedBatteryRecallLossUSD float64   `json:"avoided_battery_recall_loss_usd"` // Avoided $19M USD EV pack fires, fleet recall, and warranty claims
+	ActionTimestamp             time.Time `json:"action_timestamp"`
 }
 
 // SolidStateVault thread-safe in-memory store
@@ -178,13 +178,13 @@ func (v *SolidStateVault) GetBatteryReliabilityDossier(cellID string) (map[strin
 	act, hasAct := v.actions[cellID]
 
 	dossier := map[string]interface{}{
-		"cell_id":                cellID,
-		"has_cell_telemetry":     hasTel,
-		"has_crack_assessment":   hasAssess,
-		"has_pressure_action":    hasAct,
-		"iec_62660_3_compliant":  true,
-		"iso_12405_4_certified":  true,
-		"compiled_at":            time.Now(),
+		"cell_id":               cellID,
+		"has_cell_telemetry":    hasTel,
+		"has_crack_assessment":  hasAssess,
+		"has_pressure_action":   hasAct,
+		"iec_62660_3_compliant": true,
+		"iso_12405_4_certified": true,
+		"compiled_at":           time.Now(),
 	}
 
 	if hasTel {

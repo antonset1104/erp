@@ -14,32 +14,32 @@ import (
 
 // UHVDCValveTelemetry captures ±1100 kV converter station thyristor valve state under IEC 60700-1 & IEEE 857
 type UHVDCValveTelemetry struct {
-	TelemetryID                        string    `json:"telemetry_id"`
-	ConverterStationID                 string    `json:"converter_station_id"`                   // "STATION-CHANGJI-GUQUAN-1100KV"
-	ThyristorValveHallID               string    `json:"thyristor_valve_hall_id"`                // "VALVE-HALL-POLE1-INVERTER-12PULSE"
-	TransmissionVoltageKV              float64   `json:"transmission_voltage_kv"`               // e.g. 1100.0 kV
-	TransmissionCurrentAmps            float64   `json:"transmission_current_amps"`             // e.g. 5450.0 A
-	FiringAngleAlphaDeg                float64   `json:"firing_angle_alpha_deg"`                 // e.g. 142.5° (inverter mode)
-	ExtinctionAngleGammaDeg            float64   `json:"extinction_angle_gamma_deg"`             // e.g. 13.8° (minimum limit 15.0° -> failure risk)
-	ThyristorJunctionTempC             float64   `json:"thyristor_junction_temp_c"`              // e.g. 118.5°C (silicon ceiling 125.0°C)
-	DeionizedCoolingWaterLPM           float64   `json:"deionized_cooling_water_lpm"`            // e.g. 2400.0 LPM
-	ACGridVoltageHarmonicTHDPct        float64   `json:"ac_grid_voltage_harmonic_thd_pct"`       // e.g. 4.8% (distortion limit < 3.0%)
-	CommutationFailureCountLastMinute int       `json:"commutation_failure_count_last_minute"`  // e.g. 2 instances
-	RecordedAt                         time.Time `json:"recorded_at"`
+	TelemetryID                       string    `json:"telemetry_id"`
+	ConverterStationID                string    `json:"converter_station_id"`                  // "STATION-CHANGJI-GUQUAN-1100KV"
+	ThyristorValveHallID              string    `json:"thyristor_valve_hall_id"`               // "VALVE-HALL-POLE1-INVERTER-12PULSE"
+	TransmissionVoltageKV             float64   `json:"transmission_voltage_kv"`               // e.g. 1100.0 kV
+	TransmissionCurrentAmps           float64   `json:"transmission_current_amps"`             // e.g. 5450.0 A
+	FiringAngleAlphaDeg               float64   `json:"firing_angle_alpha_deg"`                // e.g. 142.5° (inverter mode)
+	ExtinctionAngleGammaDeg           float64   `json:"extinction_angle_gamma_deg"`            // e.g. 13.8° (minimum limit 15.0° -> failure risk)
+	ThyristorJunctionTempC            float64   `json:"thyristor_junction_temp_c"`             // e.g. 118.5°C (silicon ceiling 125.0°C)
+	DeionizedCoolingWaterLPM          float64   `json:"deionized_cooling_water_lpm"`           // e.g. 2400.0 LPM
+	ACGridVoltageHarmonicTHDPct       float64   `json:"ac_grid_voltage_harmonic_thd_pct"`      // e.g. 4.8% (distortion limit < 3.0%)
+	CommutationFailureCountLastMinute int       `json:"commutation_failure_count_last_minute"` // e.g. 2 instances
+	RecordedAt                        time.Time `json:"recorded_at"`
 }
 
 // UHVDCCommutationAssessment models commutation margin angle, junction temperature, and AC voltage zero-crossing
 type UHVDCCommutationAssessment struct {
-	AssessmentID                      string    `json:"assessment_id"`
-	ConverterStationID                string    `json:"converter_station_id"`
-	ExtinctionMarginAngleDeltaDeg     float64   `json:"extinction_margin_angle_delta_deg"`
-	ValveJunctionThermalHeadroomC     float64   `json:"valve_junction_thermal_headroom_c"`
-	CommutationFailureHazardLevel     string    `json:"commutation_failure_hazard_level"`     // "SYNCHRONOUS_INVERSION_STABLE", "ELEVATED_VOLTAGE_SAG_COMMUTATION_RISK", "CRITICAL_VALVE_SHORT_CIRCUIT_COMMUTATION_COLLAPSE"
-	ValveThermalStressTier            string    `json:"valve_thermal_stress_tier"`            // "NORMAL_COOLING_FLOW", "HIGH_JUNCTION_THERMAL_STRESS", "CRITICAL_THYRISTOR_OVERHEAT_TRIP"
-	FiringAngleAdvanceMandate         bool      `json:"firing_angle_advance_mandate"`
-	DynamicSTATCOMInjectionRequired   bool      `json:"dynamic_statcom_injection_required"`
-	AuditDigest                       string    `json:"audit_digest"`
-	EvaluatedAt                       time.Time `json:"evaluated_at"`
+	AssessmentID                    string    `json:"assessment_id"`
+	ConverterStationID              string    `json:"converter_station_id"`
+	ExtinctionMarginAngleDeltaDeg   float64   `json:"extinction_margin_angle_delta_deg"`
+	ValveJunctionThermalHeadroomC   float64   `json:"valve_junction_thermal_headroom_c"`
+	CommutationFailureHazardLevel   string    `json:"commutation_failure_hazard_level"` // "SYNCHRONOUS_INVERSION_STABLE", "ELEVATED_VOLTAGE_SAG_COMMUTATION_RISK", "CRITICAL_VALVE_SHORT_CIRCUIT_COMMUTATION_COLLAPSE"
+	ValveThermalStressTier          string    `json:"valve_thermal_stress_tier"`        // "NORMAL_COOLING_FLOW", "HIGH_JUNCTION_THERMAL_STRESS", "CRITICAL_THYRISTOR_OVERHEAT_TRIP"
+	FiringAngleAdvanceMandate       bool      `json:"firing_angle_advance_mandate"`
+	DynamicSTATCOMInjectionRequired bool      `json:"dynamic_statcom_injection_required"`
+	AuditDigest                     string    `json:"audit_digest"`
+	EvaluatedAt                     time.Time `json:"evaluated_at"`
 }
 
 // UHVDCConverterControlAction models fast firing angle advance, STATCOM reactive injection, and cooling boost
@@ -71,18 +71,18 @@ var GlobalUHVDVault = &UHVDVault{
 func init() {
 	// Seed demo ±1100 kV UHVDC converter station undergoing severe AC voltage sag and extinction angle collapse
 	GlobalUHVDVault.telemetries["STATION-CHANGJI-GUQUAN-1100KV"] = UHVDCValveTelemetry{
-		TelemetryID:                        "TEL-UHVDC-001",
-		ConverterStationID:                 "STATION-CHANGJI-GUQUAN-1100KV",
-		ThyristorValveHallID:               "VALVE-HALL-POLE1-INVERTER-12PULSE",
-		TransmissionVoltageKV:              1100.0,
-		TransmissionCurrentAmps:            5600.0,
-		FiringAngleAlphaDeg:                144.0,
-		ExtinctionAngleGammaDeg:            13.2, // Below 15.0° safety limit
-		ThyristorJunctionTempC:             121.5, // Only 3.5°C headroom
-		DeionizedCoolingWaterLPM:           2350.0,
-		ACGridVoltageHarmonicTHDPct:        5.2,
+		TelemetryID:                       "TEL-UHVDC-001",
+		ConverterStationID:                "STATION-CHANGJI-GUQUAN-1100KV",
+		ThyristorValveHallID:              "VALVE-HALL-POLE1-INVERTER-12PULSE",
+		TransmissionVoltageKV:             1100.0,
+		TransmissionCurrentAmps:           5600.0,
+		FiringAngleAlphaDeg:               144.0,
+		ExtinctionAngleGammaDeg:           13.2,  // Below 15.0° safety limit
+		ThyristorJunctionTempC:            121.5, // Only 3.5°C headroom
+		DeionizedCoolingWaterLPM:          2350.0,
+		ACGridVoltageHarmonicTHDPct:       5.2,
 		CommutationFailureCountLastMinute: 3,
-		RecordedAt:                         time.Now(),
+		RecordedAt:                        time.Now(),
 	}
 }
 
@@ -165,9 +165,9 @@ func (v *UHVDVault) TriggerFastAdvanceAndReactiveSupport(stationID string) (UHVD
 	action := UHVDCConverterControlAction{
 		ActionID:                              actionID,
 		ConverterStationID:                    stationID,
-		AdvancedFiringAngleAlphaDeg:           135.0,  // Fast advance from 144° to 135° in 5ms
-		InjectedReactivePowerMVAR:             450.0,  // STATCOM instant reactive boost to recover AC voltage
-		CoolingWaterFlowBoostLPM:              600.0,  // Inverter valve closed-loop cooling boost
+		AdvancedFiringAngleAlphaDeg:           135.0, // Fast advance from 144° to 135° in 5ms
+		InjectedReactivePowerMVAR:             450.0, // STATCOM instant reactive boost to recover AC voltage
+		CoolingWaterFlowBoostLPM:              600.0, // Inverter valve closed-loop cooling boost
 		AvoidedContinentalGridBlackoutLossUSD: avoidedLoss,
 		ActionTimestamp:                       time.Now(),
 	}
@@ -186,13 +186,13 @@ func (v *UHVDVault) GetUHVDCConverterSafetyDossier(stationID string) (map[string
 	act, hasAct := v.actions[stationID]
 
 	dossier := map[string]interface{}{
-		"converter_station_id":    stationID,
-		"has_valve_telemetry":     hasTel,
-		"has_commutation_assess":  hasAssess,
-		"has_mitigation_action":   hasAct,
-		"iec_60700_1_compliant":   true,
-		"ieee_857_certified":      true,
-		"compiled_at":             time.Now(),
+		"converter_station_id":   stationID,
+		"has_valve_telemetry":    hasTel,
+		"has_commutation_assess": hasAssess,
+		"has_mitigation_action":  hasAct,
+		"iec_60700_1_compliant":  true,
+		"ieee_857_certified":     true,
+		"compiled_at":            time.Now(),
 	}
 
 	if hasTel {

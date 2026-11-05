@@ -15,13 +15,13 @@ import (
 type LunarSinteringTelemetry struct {
 	TelemetryID                      string    `json:"telemetry_id"`
 	SinteringRoverID                 string    `json:"sintering_rover_id"`
-	LunarSiteCoordinates             string    `json:"lunar_site_coordinates"` // e.g. "SHACKLETON_CRATER_RIM_89.9S"
-	VitrificationDepthMm             float64   `json:"vitrification_depth_mm"` // target > 150.0 mm
-	MicrowaveFrequencyGhz            float64   `json:"microwave_frequency_ghz"` // 2.45 GHz
-	RegolithMeltTempC                float64   `json:"regolith_melt_temp_c"`   // nominal 1180 - 1240°C
-	ThermalShearStressMpa            float64   `json:"thermal_shear_stress_mpa"` // limit < 45.0 MPa
-	SinteredMatrixDensityGramsPerCm3 float64   `json:"sintered_matrix_density_grams_per_cm3"` // target > 2.85 g/cm3
-	IlmeniteFractionPct              float64   `json:"ilmenite_fraction_pct"`  // microwave receptive mineral
+	LunarSiteCoordinates             string    `json:"lunar_site_coordinates"`                 // e.g. "SHACKLETON_CRATER_RIM_89.9S"
+	VitrificationDepthMm             float64   `json:"vitrification_depth_mm"`                 // target > 150.0 mm
+	MicrowaveFrequencyGhz            float64   `json:"microwave_frequency_ghz"`                // 2.45 GHz
+	RegolithMeltTempC                float64   `json:"regolith_melt_temp_c"`                   // nominal 1180 - 1240°C
+	ThermalShearStressMpa            float64   `json:"thermal_shear_stress_mpa"`               // limit < 45.0 MPa
+	SinteredMatrixDensityGramsPerCm3 float64   `json:"sintered_matrix_density_grams_per_cm3"`  // target > 2.85 g/cm3
+	IlmeniteFractionPct              float64   `json:"ilmenite_fraction_pct"`                  // microwave receptive mineral
 	PlumeSurfaceBlastVelocityMPerSec float64   `json:"plume_surface_blast_velocity_m_per_sec"` // threshold > 1200 m/s
 	Timestamp                        time.Time `json:"timestamp"`
 }
@@ -31,7 +31,7 @@ type LunarSinteringAssessment struct {
 	AssessmentID                     string    `json:"assessment_id"`
 	SinteringRoverID                 string    `json:"sintering_rover_id"`
 	VitrificationStructuralIntegrity string    `json:"vitrification_structural_integrity"` // MONOLITHIC_HIGH_STRENGTH, MICRO_CRACK_COALESCENCE, SPALLATION_BLAST_FAILURE
-	PlumeBlastErosionResistance      string    `json:"plume_blast_erosion_resistance"`      // SUPERSONIC_JET_RESISTANT, HIGH_VELOCITY_EJECTA_HAZARD
+	PlumeBlastErosionResistance      string    `json:"plume_blast_erosion_resistance"`     // SUPERSONIC_JET_RESISTANT, HIGH_VELOCITY_EJECTA_HAZARD
 	ThermalStressExcessMpa           float64   `json:"thermal_stress_excess_mpa"`
 	MicrowavePowerModulationMandate  bool      `json:"microwave_power_modulation_mandate"`
 	BasaltFluxAdditiveMandate        bool      `json:"basalt_flux_additive_mandate"`
@@ -41,13 +41,13 @@ type LunarSinteringAssessment struct {
 
 // LunarSinteringMitigationAction models microwave power modulation, in-situ basalt flux dosing, and ultrasonic scan
 type LunarSinteringMitigationAction struct {
-	ActionID                            string    `json:"action_id"`
-	SinteringRoverID                     string    `json:"sintering_rover_id"`
-	CommandedMicrowaveArrayPowerKw      float64   `json:"commanded_microwave_array_power_kw"`
-	InSituBasaltFluxDosingKgPerM2       float64   `json:"in_situ_basalt_flux_dosing_kg_per_m2"`
-	UltrasonicPulseVerificationHz       float64   `json:"ultrasonic_pulse_verification_hz"`
-	AvoidedLunarInfrastructureLossUSD   float64   `json:"avoided_lunar_infrastructure_loss_usd"`
-	ExecutedAt                          time.Time `json:"executed_at"`
+	ActionID                          string    `json:"action_id"`
+	SinteringRoverID                  string    `json:"sintering_rover_id"`
+	CommandedMicrowaveArrayPowerKw    float64   `json:"commanded_microwave_array_power_kw"`
+	InSituBasaltFluxDosingKgPerM2     float64   `json:"in_situ_basalt_flux_dosing_kg_per_m2"`
+	UltrasonicPulseVerificationHz     float64   `json:"ultrasonic_pulse_verification_hz"`
+	AvoidedLunarInfrastructureLossUSD float64   `json:"avoided_lunar_infrastructure_loss_usd"`
+	ExecutedAt                        time.Time `json:"executed_at"`
 }
 
 // LunarSinteringVault manages autonomous lunar 3D sintering and structural integrity actions
@@ -147,7 +147,7 @@ func (v *LunarSinteringVault) TriggerMicrowaveModulationAndFluxDosing(roverID st
 	sonarHz := 0.0
 
 	if asm.MicrowavePowerModulationMandate {
-		powerKw = 65.0  // boost phased-array magnetron power to 65.0 kW to deepen thermal skin vitrification
+		powerKw = 65.0    // boost phased-array magnetron power to 65.0 kW to deepen thermal skin vitrification
 		sonarHz = 40000.0 // 40 kHz ultrasonic array pulse to confirm crack-free basaltic matrix bond
 	}
 	if asm.BasaltFluxAdditiveMandate {
@@ -156,7 +156,7 @@ func (v *LunarSinteringVault) TriggerMicrowaveModulationAndFluxDosing(roverID st
 
 	action := LunarSinteringMitigationAction{
 		ActionID:                          fmt.Sprintf("ACT-LUNAR-%d", time.Now().UnixNano()%1000000),
-		SinteringRoverID:                   roverID,
+		SinteringRoverID:                  roverID,
 		CommandedMicrowaveArrayPowerKw:    powerKw,
 		InSituBasaltFluxDosingKgPerM2:     fluxDose,
 		UltrasonicPulseVerificationHz:     sonarHz,
@@ -182,22 +182,22 @@ func (v *LunarSinteringVault) GetLunarPadQualityDossier(roverID string) (map[str
 	}
 
 	dossier := map[string]interface{}{
-		"sintering_rover_id":          roverID,
-		"lunar_site_coordinates":      telem.LunarSiteCoordinates,
-		"nasa_sp8000_compliant":       asm.VitrificationStructuralIntegrity != "SPALLATION_BLAST_FAILURE" || (hasAct && act.AvoidedLunarInfrastructureLossUSD > 0),
-		"iso_14620_certified":         asm.PlumeBlastErosionResistance != "HIGH_VELOCITY_EJECTA_HAZARD" || hasAct,
-		"aiaa_s102_cleared":           true,
-		"vitrification_depth_mm":      telem.VitrificationDepthMm,
-		"regolith_melt_temp_c":        telem.RegolithMeltTempC,
-		"thermal_shear_stress_mpa":    telem.ThermalShearStressMpa,
-		"sintered_density_g_cm3":      telem.SinteredMatrixDensityGramsPerCm3,
-		"vitrification_integrity":     asm.VitrificationStructuralIntegrity,
-		"plume_blast_resistance":      asm.PlumeBlastErosionResistance,
-		"microwave_array_power_kw":    0.0,
-		"basalt_flux_dosing_kg_m2":    0.0,
-		"avoided_loss_usd":             0.0,
-		"audit_digest":                asm.AuditDigest,
-		"compiled_at":                 time.Now(),
+		"sintering_rover_id":       roverID,
+		"lunar_site_coordinates":   telem.LunarSiteCoordinates,
+		"nasa_sp8000_compliant":    asm.VitrificationStructuralIntegrity != "SPALLATION_BLAST_FAILURE" || (hasAct && act.AvoidedLunarInfrastructureLossUSD > 0),
+		"iso_14620_certified":      asm.PlumeBlastErosionResistance != "HIGH_VELOCITY_EJECTA_HAZARD" || hasAct,
+		"aiaa_s102_cleared":        true,
+		"vitrification_depth_mm":   telem.VitrificationDepthMm,
+		"regolith_melt_temp_c":     telem.RegolithMeltTempC,
+		"thermal_shear_stress_mpa": telem.ThermalShearStressMpa,
+		"sintered_density_g_cm3":   telem.SinteredMatrixDensityGramsPerCm3,
+		"vitrification_integrity":  asm.VitrificationStructuralIntegrity,
+		"plume_blast_resistance":   asm.PlumeBlastErosionResistance,
+		"microwave_array_power_kw": 0.0,
+		"basalt_flux_dosing_kg_m2": 0.0,
+		"avoided_loss_usd":         0.0,
+		"audit_digest":             asm.AuditDigest,
+		"compiled_at":              time.Now(),
 	}
 
 	if hasAct {

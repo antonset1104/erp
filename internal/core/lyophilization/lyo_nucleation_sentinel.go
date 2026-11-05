@@ -14,42 +14,42 @@ import (
 
 // LyophilizerTelemetry captures commercial biopharmaceutical freeze-drying and ice nucleation telemetry under FDA 21 CFR 211 & ISPE GAMP 5
 type LyophilizerTelemetry struct {
-	TelemetryID                    string    `json:"telemetry_id"`
-	DryerID                        string    `json:"dryer_id"`                          // "LYO-COMMERCIAL-BIOLOGICS-50K-01"
-	BatchID                        string    `json:"batch_id"`                          // "BATCH-MAB-LYO-STERILE-1029"
-	TotalVialCount                 int       `json:"total_vial_count"`                  // e.g. 50000 vials per freeze-dryer load
-	ShelfTemperatureC              float64   `json:"shelf_temperature_c"`               // e.g. -28.5°C
-	ProductCollapseThresholdC      float64   `json:"product_collapse_threshold_c"`       // e.g. -32.0°C (glass transition Tc limit)
-	ChamberPiraniPressureMicrobar  float64   `json:"chamber_pirani_pressure_microbar"`  // e.g. 145.0 µbar (thermal conductivity gauge)
-	CapacitanceManometerMicrobar   float64   `json:"capacitance_manometer_microbar"`    // e.g. 98.0 µbar (absolute capacitance gauge)
-	TdlasSublimationRateGPerSec    float64   `json:"tdlas_sublimation_rate_g_per_sec"`  // e.g. 84.5 g/s water vapor mass flux
-	AcousticNucleationUniformityPct float64  `json:"acoustic_nucleation_uniformity_pct"`// e.g. 64.2% (controlled > 90%)
-	IceCrystalMeanPoreDiameterUm   float64   `json:"ice_crystal_mean_pore_diameter_um"` // e.g. 18.5 µm (sublimation resistance metric)
-	RecordedAt                     time.Time `json:"recorded_at"`
+	TelemetryID                     string    `json:"telemetry_id"`
+	DryerID                         string    `json:"dryer_id"`                           // "LYO-COMMERCIAL-BIOLOGICS-50K-01"
+	BatchID                         string    `json:"batch_id"`                           // "BATCH-MAB-LYO-STERILE-1029"
+	TotalVialCount                  int       `json:"total_vial_count"`                   // e.g. 50000 vials per freeze-dryer load
+	ShelfTemperatureC               float64   `json:"shelf_temperature_c"`                // e.g. -28.5°C
+	ProductCollapseThresholdC       float64   `json:"product_collapse_threshold_c"`       // e.g. -32.0°C (glass transition Tc limit)
+	ChamberPiraniPressureMicrobar   float64   `json:"chamber_pirani_pressure_microbar"`   // e.g. 145.0 µbar (thermal conductivity gauge)
+	CapacitanceManometerMicrobar    float64   `json:"capacitance_manometer_microbar"`     // e.g. 98.0 µbar (absolute capacitance gauge)
+	TdlasSublimationRateGPerSec     float64   `json:"tdlas_sublimation_rate_g_per_sec"`   // e.g. 84.5 g/s water vapor mass flux
+	AcousticNucleationUniformityPct float64   `json:"acoustic_nucleation_uniformity_pct"` // e.g. 64.2% (controlled > 90%)
+	IceCrystalMeanPoreDiameterUm    float64   `json:"ice_crystal_mean_pore_diameter_um"`  // e.g. 18.5 µm (sublimation resistance metric)
+	RecordedAt                      time.Time `json:"recorded_at"`
 }
 
 // LyophilizerAssessment models primary drying sublimation endpoint, cake collapse margins, and controlled nucleation uniformity
 type LyophilizerAssessment struct {
-	AssessmentID                   string    `json:"assessment_id"`
-	DryerID                        string    `json:"dryer_id"`
-	CollapseMarginDeltaTC          float64   `json:"collapse_margin_delta_t_c"`         // ShelfTemp - CollapseThreshold (must be < 0 for safety)
-	PressureRatioPiraniToCM        float64   `json:"pressure_ratio_pirani_to_cm"`       // Pirani / CM ratio (approaching 1.0 signals sublimation end)
-	CakeCollapseHazardLevel        string    `json:"cake_collapse_hazard_level"`        // "STABLE_VITRIFIED_CAKE", "MARGINAL_MICRO_COLLAPSE_WARNING", "CRITICAL_CAKE_MELT_COLLAPSE_FAILURE"
-	FreezingNucleationQuality      string    `json:"freezing_nucleation_quality"`       // "UNIFORM_CONTROLLED_NUCLEATION", "MODERATE_CRYSTAL_DISPERSION", "CRITICAL_STOCHASTIC_HETEROGENEITY_ABORT"
-	CryogenicIceFogTriggerMandate  bool      `json:"cryogenic_ice_fog_trigger_mandate"`
-	VacuumModulationRequired       bool      `json:"vacuum_modulation_required"`
-	AuditDigest                    string    `json:"audit_digest"`
-	EvaluatedAt                    time.Time `json:"evaluated_at"`
+	AssessmentID                  string    `json:"assessment_id"`
+	DryerID                       string    `json:"dryer_id"`
+	CollapseMarginDeltaTC         float64   `json:"collapse_margin_delta_t_c"`   // ShelfTemp - CollapseThreshold (must be < 0 for safety)
+	PressureRatioPiraniToCM       float64   `json:"pressure_ratio_pirani_to_cm"` // Pirani / CM ratio (approaching 1.0 signals sublimation end)
+	CakeCollapseHazardLevel       string    `json:"cake_collapse_hazard_level"`  // "STABLE_VITRIFIED_CAKE", "MARGINAL_MICRO_COLLAPSE_WARNING", "CRITICAL_CAKE_MELT_COLLAPSE_FAILURE"
+	FreezingNucleationQuality     string    `json:"freezing_nucleation_quality"` // "UNIFORM_CONTROLLED_NUCLEATION", "MODERATE_CRYSTAL_DISPERSION", "CRITICAL_STOCHASTIC_HETEROGENEITY_ABORT"
+	CryogenicIceFogTriggerMandate bool      `json:"cryogenic_ice_fog_trigger_mandate"`
+	VacuumModulationRequired      bool      `json:"vacuum_modulation_required"`
+	AuditDigest                   string    `json:"audit_digest"`
+	EvaluatedAt                   time.Time `json:"evaluated_at"`
 }
 
 // LyophilizerMitigationAction models sterile ice fog injection, shelf temperature setpoint trimming, and chamber vacuum modulation
 type LyophilizerMitigationAction struct {
 	ActionID                          string    `json:"action_id"`
-	DryerID                            string    `json:"dryer_id"`
+	DryerID                           string    `json:"dryer_id"`
 	SterileIceFogInjectionDurationSec float64   `json:"sterile_ice_fog_injection_duration_sec"` // e.g. 2.5 sec pressurized ice fog
-	ShelfTempTrimSetpointC            float64   `json:"shelf_temp_trim_setpoint_c"`            // trimmed to -34.5°C to restore margin
-	ChamberVacuumSetpointMicrobar     float64   `json:"chamber_vacuum_setpoint_microbar"`      // modulated to 80.0 µbar
-	AvoidedBiopharmaceuticalLossUSD   float64   `json:"avoided_biopharmaceutical_loss_usd"`    // Avoided $42M USD antibody cake melt & batch quarantine
+	ShelfTempTrimSetpointC            float64   `json:"shelf_temp_trim_setpoint_c"`             // trimmed to -34.5°C to restore margin
+	ChamberVacuumSetpointMicrobar     float64   `json:"chamber_vacuum_setpoint_microbar"`       // modulated to 80.0 µbar
+	AvoidedBiopharmaceuticalLossUSD   float64   `json:"avoided_biopharmaceutical_loss_usd"`     // Avoided $42M USD antibody cake melt & batch quarantine
 	ActionTimestamp                   time.Time `json:"action_timestamp"`
 }
 
@@ -166,7 +166,7 @@ func (v *LyophilizationVault) TriggerIceFogAndSublimationControl(dryerID string)
 
 	action := LyophilizerMitigationAction{
 		ActionID:                          fmt.Sprintf("ACT-LYO-%d", time.Now().UnixNano()%1000000),
-		DryerID:                            dryerID,
+		DryerID:                           dryerID,
 		SterileIceFogInjectionDurationSec: iceFogSec,
 		ShelfTempTrimSetpointC:            shelfTrim,
 		ChamberVacuumSetpointMicrobar:     vacSetpoint,

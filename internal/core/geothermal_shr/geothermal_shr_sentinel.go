@@ -15,41 +15,41 @@ import (
 // SuperhotGeothermalTelemetry captures ultra-deep supercritical superhot rock (SHR) wellhead & downhole dynamics under API 5CT & ISO 19901-2
 type SuperhotGeothermalTelemetry struct {
 	TelemetryID               string    `json:"telemetry_id"`
-	WellID                    string    `json:"well_id"`                     // "WELL-SHR-KRAFLA-MAGMA-01"
-	GeothermalFieldID         string    `json:"geothermal_field_id"`         // "FIELD-ICELAND-DEEP-DRILLING-PROJECT"
-	WellDepthMeters           float64   `json:"well_depth_meters"`           // e.g. 4650.0 m (near ductile-brittle transition)
-	ReservoirTemperatureC     float64   `json:"reservoir_temperature_c"`     // e.g. 485.0°C (supercritical rock > 400°C)
-	ReservoirPressureBar      float64   `json:"reservoir_pressure_bar"`      // e.g. 320.0 bar hydrostatic/lithostatic
-	CasingVonMisesStressMpa   float64   `json:"casing_von_mises_stress_mpa"` // e.g. 685.0 MPa (high alloy casing yield 720 MPa)
-	InducedSeismicMagnitudeML float64   `json:"induced_seismic_magnitude_ml"`// e.g. 1.85 ML (Traffic Light Protocol threshold 2.0 ML)
-	PeakGroundAccelerationG   float64   `json:"peak_ground_acceleration_g"`  // e.g. 0.042 g
+	WellID                    string    `json:"well_id"`                        // "WELL-SHR-KRAFLA-MAGMA-01"
+	GeothermalFieldID         string    `json:"geothermal_field_id"`            // "FIELD-ICELAND-DEEP-DRILLING-PROJECT"
+	WellDepthMeters           float64   `json:"well_depth_meters"`              // e.g. 4650.0 m (near ductile-brittle transition)
+	ReservoirTemperatureC     float64   `json:"reservoir_temperature_c"`        // e.g. 485.0°C (supercritical rock > 400°C)
+	ReservoirPressureBar      float64   `json:"reservoir_pressure_bar"`         // e.g. 320.0 bar hydrostatic/lithostatic
+	CasingVonMisesStressMpa   float64   `json:"casing_von_mises_stress_mpa"`    // e.g. 685.0 MPa (high alloy casing yield 720 MPa)
+	InducedSeismicMagnitudeML float64   `json:"induced_seismic_magnitude_ml"`   // e.g. 1.85 ML (Traffic Light Protocol threshold 2.0 ML)
+	PeakGroundAccelerationG   float64   `json:"peak_ground_acceleration_g"`     // e.g. 0.042 g
 	ColdWaterInjectionRateKgS float64   `json:"cold_water_injection_rate_kg_s"` // e.g. 95.0 kg/s (cold water ~25°C)
 	RecordedAt                time.Time `json:"recorded_at"`
 }
 
 // SuperhotGeothermalAssessment models Coulomb failure stress change, casing thermal shock, and Traffic Light Protocol (TLP) compliance
 type SuperhotGeothermalAssessment struct {
-	AssessmentID                  string    `json:"assessment_id"`
-	WellID                        string    `json:"well_id"`
-	CoulombStressChangeDeltaCFSBar float64  `json:"coulomb_stress_change_delta_cfs_bar"` // dCFS = dTau - mu * (dSigma - dP)
-	ThermalShockDeltaTC           float64   `json:"thermal_shock_delta_t_c"`             // delta T between reservoir and injection fluid
-	TrafficLightProtocolStatus    string    `json:"traffic_light_protocol_status"`       // "TLP_GREEN_NORMAL", "TLP_AMBER_FLOW_THROTTLE_REQUIRED", "TLP_RED_CRITICAL_SEISMIC_STOP_MANDATE"
-	CasingIntegrityRisk           string    `json:"casing_integrity_risk"`               // "ELASTIC_RANGE_SAFE", "PLASTIC_DEFORMATION_WARNING", "CRITICAL_CASING_SHEAR_BUCKLING_FAILURE"
-	FlowThrottlingMandate         bool      `json:"flow_throttling_mandate"`
-	ThermalTemperingCycleRequired bool      `json:"thermal_tempering_cycle_required"`
-	AuditDigest                   string    `json:"audit_digest"`
-	EvaluatedAt                   time.Time `json:"evaluated_at"`
+	AssessmentID                   string    `json:"assessment_id"`
+	WellID                         string    `json:"well_id"`
+	CoulombStressChangeDeltaCFSBar float64   `json:"coulomb_stress_change_delta_cfs_bar"` // dCFS = dTau - mu * (dSigma - dP)
+	ThermalShockDeltaTC            float64   `json:"thermal_shock_delta_t_c"`             // delta T between reservoir and injection fluid
+	TrafficLightProtocolStatus     string    `json:"traffic_light_protocol_status"`       // "TLP_GREEN_NORMAL", "TLP_AMBER_FLOW_THROTTLE_REQUIRED", "TLP_RED_CRITICAL_SEISMIC_STOP_MANDATE"
+	CasingIntegrityRisk            string    `json:"casing_integrity_risk"`               // "ELASTIC_RANGE_SAFE", "PLASTIC_DEFORMATION_WARNING", "CRITICAL_CASING_SHEAR_BUCKLING_FAILURE"
+	FlowThrottlingMandate          bool      `json:"flow_throttling_mandate"`
+	ThermalTemperingCycleRequired  bool      `json:"thermal_tempering_cycle_required"`
+	AuditDigest                    string    `json:"audit_digest"`
+	EvaluatedAt                    time.Time `json:"evaluated_at"`
 }
 
 // SuperhotGeothermalAction models adaptive injection throttling, pulsed wellhead bleed-off, and thermal pre-tempering
 type SuperhotGeothermalAction struct {
-	ActionID                    string    `json:"action_id"`
-	WellID                      string    `json:"well_id"`
-	ModulatedInjectionRateKgS   float64   `json:"modulated_injection_rate_kg_s"`   // throttled down to 45.0 kg/s
-	WellheadBleedOffPressureBar float64   `json:"wellhead_bleed_off_pressure_bar"` // pulsed bleed-off 28.0 bar
-	TemperingTemperatureBoostC  float64   `json:"tempering_temperature_boost_c"`  // pre-tempering fluid to 125.0°C to soften thermal gradient
-	AvoidedGeothermalWellLossUSD float64  `json:"avoided_geothermal_well_loss_usd"` // Avoided $120M USD well collapse and regulatory shutdown
-	ActionTimestamp             time.Time `json:"action_timestamp"`
+	ActionID                     string    `json:"action_id"`
+	WellID                       string    `json:"well_id"`
+	ModulatedInjectionRateKgS    float64   `json:"modulated_injection_rate_kg_s"`    // throttled down to 45.0 kg/s
+	WellheadBleedOffPressureBar  float64   `json:"wellhead_bleed_off_pressure_bar"`  // pulsed bleed-off 28.0 bar
+	TemperingTemperatureBoostC   float64   `json:"tempering_temperature_boost_c"`    // pre-tempering fluid to 125.0°C to soften thermal gradient
+	AvoidedGeothermalWellLossUSD float64   `json:"avoided_geothermal_well_loss_usd"` // Avoided $120M USD well collapse and regulatory shutdown
+	ActionTimestamp              time.Time `json:"action_timestamp"`
 }
 
 // SuperhotGeothermalVault thread-safe in-memory store
@@ -120,16 +120,16 @@ func (v *SuperhotGeothermalVault) EvaluateThermalStressAndSeismicity(wellID stri
 	digest := hex.EncodeToString(hash[:])
 
 	assessment := SuperhotGeothermalAssessment{
-		AssessmentID:                  fmt.Sprintf("ASM-SHR-%d", time.Now().UnixNano()%1000000),
-		WellID:                        wellID,
+		AssessmentID:                   fmt.Sprintf("ASM-SHR-%d", time.Now().UnixNano()%1000000),
+		WellID:                         wellID,
 		CoulombStressChangeDeltaCFSBar: coulombDelta,
-		ThermalShockDeltaTC:           thermalShock,
-		TrafficLightProtocolStatus:    tlpStatus,
-		CasingIntegrityRisk:           casingRisk,
-		FlowThrottlingMandate:         throttleMandate,
-		ThermalTemperingCycleRequired: temperingRequired,
-		AuditDigest:                   digest,
-		EvaluatedAt:                   time.Now(),
+		ThermalShockDeltaTC:            thermalShock,
+		TrafficLightProtocolStatus:     tlpStatus,
+		CasingIntegrityRisk:            casingRisk,
+		FlowThrottlingMandate:          throttleMandate,
+		ThermalTemperingCycleRequired:  temperingRequired,
+		AuditDigest:                    digest,
+		EvaluatedAt:                    time.Now(),
 	}
 
 	v.assessments[wellID] = assessment
@@ -160,13 +160,13 @@ func (v *SuperhotGeothermalVault) TriggerSeismicMitigationAndTempering(wellID st
 	}
 
 	action := SuperhotGeothermalAction{
-		ActionID:                    fmt.Sprintf("ACT-SHR-%d", time.Now().UnixNano()%1000000),
-		WellID:                      wellID,
-		ModulatedInjectionRateKgS:   throttledFlow,
-		WellheadBleedOffPressureBar: bleedPressure,
-		TemperingTemperatureBoostC:  temperingBoost,
+		ActionID:                     fmt.Sprintf("ACT-SHR-%d", time.Now().UnixNano()%1000000),
+		WellID:                       wellID,
+		ModulatedInjectionRateKgS:    throttledFlow,
+		WellheadBleedOffPressureBar:  bleedPressure,
+		TemperingTemperatureBoostC:   temperingBoost,
 		AvoidedGeothermalWellLossUSD: 120000000.0,
-		ActionTimestamp:             time.Now(),
+		ActionTimestamp:              time.Now(),
 	}
 
 	v.actions[wellID] = action
@@ -183,13 +183,13 @@ func (v *SuperhotGeothermalVault) GetSuperhotGeothermalDossier(wellID string) (m
 	act, hasAct := v.actions[wellID]
 
 	dossier := map[string]interface{}{
-		"well_id":                 wellID,
-		"api_5ct_compliant":       true,
-		"iso_19901_2_certified":   true,
-		"has_telemetry":           hasTelem,
-		"has_assessment":          hasAsm,
-		"has_action":              hasAct,
-		"dossier_compiled_at":     time.Now(),
+		"well_id":               wellID,
+		"api_5ct_compliant":     true,
+		"iso_19901_2_certified": true,
+		"has_telemetry":         hasTelem,
+		"has_assessment":        hasAsm,
+		"has_action":            hasAct,
+		"dossier_compiled_at":   time.Now(),
 	}
 	if hasTelem {
 		dossier["telemetry"] = telem

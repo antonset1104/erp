@@ -240,5 +240,3 @@ func (h *Handler) ExportTrialBalanceCSV(c *gin.Context) {
 
 	export.StreamCSV(c, "trial_balance_export.csv", headers, rows)
 }
-
-

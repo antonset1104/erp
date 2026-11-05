@@ -13,55 +13,55 @@ import (
 
 // ArmLengthBenchmark defines the OECD interquartile range for comparable independent companies.
 type ArmLengthBenchmark struct {
-	IndustrySector      string  `json:"industry_sector"`
-	MethodUsed          string  `json:"method_used"` // "TNMM", "COST_PLUS", "CUP"
-	MinimumPct          float64 `json:"minimum_pct"`
-	LowerQuartileQ1Pct  float64 `json:"lower_quartile_q1_pct"`
-	MedianPct           float64 `json:"median_pct"`
-	UpperQuartileQ3Pct  float64 `json:"upper_quartile_q3_pct"`
-	MaximumPct          float64 `json:"maximum_pct"`
+	IndustrySector     string  `json:"industry_sector"`
+	MethodUsed         string  `json:"method_used"` // "TNMM", "COST_PLUS", "CUP"
+	MinimumPct         float64 `json:"minimum_pct"`
+	LowerQuartileQ1Pct float64 `json:"lower_quartile_q1_pct"`
+	MedianPct          float64 `json:"median_pct"`
+	UpperQuartileQ3Pct float64 `json:"upper_quartile_q3_pct"`
+	MaximumPct         float64 `json:"maximum_pct"`
 }
 
 // IntercompanyTxRequest defines an affiliated cross-border transaction to audit.
 type IntercompanyTxRequest struct {
-	TxID                         string  `json:"tx_id"`
-	SourceEntity                 string  `json:"source_entity"`
-	TargetEntity                 string  `json:"target_entity"`
-	SourceJurisdiction           string  `json:"source_jurisdiction"` // e.g. "ID" (Indonesia)
-	TargetJurisdiction           string  `json:"target_jurisdiction"` // e.g. "SG" (Singapore)
-	TxType                       string  `json:"tx_type"` // "TANGIBLE_GOODS", "MANAGEMENT_SERVICES", "IP_ROYALTY", "FINANCIAL_LOAN"
-	TransactionVolumeIDR         float64 `json:"transaction_volume_idr"`
-	TestedPartyCostIDR           float64 `json:"tested_party_cost_idr"`
+	TxID                          string  `json:"tx_id"`
+	SourceEntity                  string  `json:"source_entity"`
+	TargetEntity                  string  `json:"target_entity"`
+	SourceJurisdiction            string  `json:"source_jurisdiction"` // e.g. "ID" (Indonesia)
+	TargetJurisdiction            string  `json:"target_jurisdiction"` // e.g. "SG" (Singapore)
+	TxType                        string  `json:"tx_type"`             // "TANGIBLE_GOODS", "MANAGEMENT_SERVICES", "IP_ROYALTY", "FINANCIAL_LOAN"
+	TransactionVolumeIDR          float64 `json:"transaction_volume_idr"`
+	TestedPartyCostIDR            float64 `json:"tested_party_cost_idr"`
 	TestedPartyOperatingProfitIDR float64 `json:"tested_party_operating_profit_idr"`
-	MethodUsed                   string  `json:"method_used"`
+	MethodUsed                    string  `json:"method_used"`
 }
 
 // TransferPricingAuditResult represents the arm's-length compliance audit verdict.
 type TransferPricingAuditResult struct {
-	TxID                         string              `json:"tx_id"`
-	SourceEntity                 string              `json:"source_entity"`
-	TargetEntity                 string              `json:"target_entity"`
-	TestedMarginPct              float64             `json:"tested_margin_pct"`
-	MethodUsed                   string              `json:"method_used"`
-	BenchmarkRange               ArmLengthBenchmark  `json:"benchmark_range"`
-	IsWithinArmLength            bool                `json:"is_within_arm_length"`
-	AuditRiskLevel               string              `json:"audit_risk_level"` // "LOW_AUDIT_RISK_COMPLIANT", "HIGH_EXPOSURE_OUTSIDE_RANGE"
-	RecommendedTaxAdjustmentIDR  float64             `json:"recommended_tax_adjustment_idr"`
-	ComplianceVerdict            string              `json:"compliance_verdict"`
-	AuditedAt                    string              `json:"audited_at"`
+	TxID                        string             `json:"tx_id"`
+	SourceEntity                string             `json:"source_entity"`
+	TargetEntity                string             `json:"target_entity"`
+	TestedMarginPct             float64            `json:"tested_margin_pct"`
+	MethodUsed                  string             `json:"method_used"`
+	BenchmarkRange              ArmLengthBenchmark `json:"benchmark_range"`
+	IsWithinArmLength           bool               `json:"is_within_arm_length"`
+	AuditRiskLevel              string             `json:"audit_risk_level"` // "LOW_AUDIT_RISK_COMPLIANT", "HIGH_EXPOSURE_OUTSIDE_RANGE"
+	RecommendedTaxAdjustmentIDR float64            `json:"recommended_tax_adjustment_idr"`
+	ComplianceVerdict           string             `json:"compliance_verdict"`
+	AuditedAt                   string             `json:"audited_at"`
 }
 
 // CbCRRecord represents Country-by-Country tax reporting data for a single tax jurisdiction.
 type CbCRRecord struct {
-	JurisdictionCode     string  `json:"jurisdiction_code"`
-	JurisdictionName     string  `json:"jurisdiction_name"`
-	EntityCount          int     `json:"entity_count"`
-	TotalRevenuesIDR     float64 `json:"total_revenues_idr"`
-	ProfitBeforeTaxIDR   float64 `json:"profit_before_tax_idr"`
-	IncomeTaxPaidIDR     float64 `json:"income_tax_paid_idr"`
-	StatedCapitalIDR     float64 `json:"stated_capital_idr"`
+	JurisdictionCode       string  `json:"jurisdiction_code"`
+	JurisdictionName       string  `json:"jurisdiction_name"`
+	EntityCount            int     `json:"entity_count"`
+	TotalRevenuesIDR       float64 `json:"total_revenues_idr"`
+	ProfitBeforeTaxIDR     float64 `json:"profit_before_tax_idr"`
+	IncomeTaxPaidIDR       float64 `json:"income_tax_paid_idr"`
+	StatedCapitalIDR       float64 `json:"stated_capital_idr"`
 	AccumulatedEarningsIDR float64 `json:"accumulated_earnings_idr"`
-	TotalHeadcount       int     `json:"total_headcount"`
+	TotalHeadcount         int     `json:"total_headcount"`
 }
 
 // CbCRReport aggregates the corporate group's global tax footprint under OECD BEPS Action 13.

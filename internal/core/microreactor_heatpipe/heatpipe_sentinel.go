@@ -14,18 +14,18 @@ import (
 
 // HeatPipeTelemetry captures alkali liquid metal (NaK/Sodium) heat pipe dynamics under ASME BPVC Section III Division 5 & ANS 54.1
 type HeatPipeTelemetry struct {
-	TelemetryID                 string    `json:"telemetry_id"`
-	ReactorID                   string    `json:"reactor_id"`                     // "MICRO-REACTOR-NAK-5MWE-01"
-	HeatPipeClusterID           string    `json:"heat_pipe_cluster_id"`           // "CLUSTER-CORE-EVAP-A12"
-	CoreThermalPowerKw          float64   `json:"core_thermal_power_kw"`          // e.g. 5200.0 kW
-	EvaporatorWallTempC         float64   `json:"evaporator_wall_temp_c"`         // e.g. 745.0°C (design threshold 720.0°C)
-	CondenserExitTempC          float64   `json:"condenser_exit_temp_c"`          // e.g. 620.0°C
-	SodiumVaporMachNumber       float64   `json:"sodium_vapor_mach_number"`       // e.g. 0.94 (sonic choking limit > 0.85)
-	WickCapillaryPressureDropBar float64  `json:"wick_capillary_pressure_drop_bar"`// e.g. 0.48 bar
-	RadialHeatFluxWPerCm2       float64   `json:"radial_heat_flux_w_per_cm2"`     // e.g. 88.5 W/cm2 (burnout limit > 75.0 W/cm2)
-	FastNeutronFluenceNPerCm2   float64   `json:"fast_neutron_fluence_n_per_cm2"` // e.g. 4.8e21 n/cm2
-	InertHeliumLeakTracePpm     float64   `json:"inert_helium_leak_trace_ppm"`     // e.g. 1.25 ppm
-	RecordedAt                  time.Time `json:"recorded_at"`
+	TelemetryID                  string    `json:"telemetry_id"`
+	ReactorID                    string    `json:"reactor_id"`                       // "MICRO-REACTOR-NAK-5MWE-01"
+	HeatPipeClusterID            string    `json:"heat_pipe_cluster_id"`             // "CLUSTER-CORE-EVAP-A12"
+	CoreThermalPowerKw           float64   `json:"core_thermal_power_kw"`            // e.g. 5200.0 kW
+	EvaporatorWallTempC          float64   `json:"evaporator_wall_temp_c"`           // e.g. 745.0°C (design threshold 720.0°C)
+	CondenserExitTempC           float64   `json:"condenser_exit_temp_c"`            // e.g. 620.0°C
+	SodiumVaporMachNumber        float64   `json:"sodium_vapor_mach_number"`         // e.g. 0.94 (sonic choking limit > 0.85)
+	WickCapillaryPressureDropBar float64   `json:"wick_capillary_pressure_drop_bar"` // e.g. 0.48 bar
+	RadialHeatFluxWPerCm2        float64   `json:"radial_heat_flux_w_per_cm2"`       // e.g. 88.5 W/cm2 (burnout limit > 75.0 W/cm2)
+	FastNeutronFluenceNPerCm2    float64   `json:"fast_neutron_fluence_n_per_cm2"`   // e.g. 4.8e21 n/cm2
+	InertHeliumLeakTracePpm      float64   `json:"inert_helium_leak_trace_ppm"`      // e.g. 1.25 ppm
+	RecordedAt                   time.Time `json:"recorded_at"`
 }
 
 // HeatPipeAssessment evaluates capillary wick dryout, vapor sonic choking, and entrainment limit violations
@@ -33,8 +33,8 @@ type HeatPipeAssessment struct {
 	AssessmentID               string    `json:"assessment_id"`
 	ReactorID                  string    `json:"reactor_id"`
 	AxialTemperatureGradientC  float64   `json:"axial_temperature_gradient_c"`
-	CapillaryDryoutHazard      string    `json:"capillary_dryout_hazard"`      // "CAPILLARY_RETURN_OPTIMAL", "WICK_ENTRAINMENT_WARNING", "WICK_CAPILLARY_DRYOUT_COLLAPSE"
-	VaporSonicChokingStatus    string    `json:"vapor_sonic_choking_status"`  // "SUBSONIC_VAPOR_FLOW", "TRANSONIC_THROTTLING_WARNING", "SONIC_CHOKING_VAPOR_SHOCK"
+	CapillaryDryoutHazard      string    `json:"capillary_dryout_hazard"`    // "CAPILLARY_RETURN_OPTIMAL", "WICK_ENTRAINMENT_WARNING", "WICK_CAPILLARY_DRYOUT_COLLAPSE"
+	VaporSonicChokingStatus    string    `json:"vapor_sonic_choking_status"` // "SUBSONIC_VAPOR_FLOW", "TRANSONIC_THROTTLING_WARNING", "SONIC_CHOKING_VAPOR_SHOCK"
 	ControlDrumRotationMandate bool      `json:"control_drum_rotation_mandate"`
 	TurbineLoadSheddingMandate bool      `json:"turbine_load_shedding_mandate"`
 	AuditDigest                string    `json:"audit_digest"`
@@ -153,7 +153,7 @@ func (v *HeatPipeVault) TriggerControlDrumAndLoadShed(reactorID string) (HeatPip
 	fanSpeed := 1800.0 // nominal cooler fan 1800 RPM
 
 	if asm.ControlDrumRotationMandate {
-		drumStep = 18.5 // rotate B4C reflector drum 18.5° outward to insert negative reactivity
+		drumStep = 18.5  // rotate B4C reflector drum 18.5° outward to insert negative reactivity
 		deratePct = 25.0 // derate core thermal power by 25% to drop vapor Mach number below 0.60
 	}
 	if asm.TurbineLoadSheddingMandate {
@@ -188,14 +188,14 @@ func (v *HeatPipeVault) GetHeatPipeSafetyDossier(reactorID string) (map[string]i
 	}
 
 	return map[string]interface{}{
-		"reactor_id":                reactorID,
+		"reactor_id":               reactorID,
 		"heat_pipe_cluster_id":     telem.HeatPipeClusterID,
-		"asme_bpvc_div5_compliant":  true,
-		"ans_54_1_certified":        true,
-		"telemetry":                 telem,
-		"assessment":                asm,
-		"latest_action":             act,
-		"compiled_at":               time.Now(),
+		"asme_bpvc_div5_compliant": true,
+		"ans_54_1_certified":       true,
+		"telemetry":                telem,
+		"assessment":               asm,
+		"latest_action":            act,
+		"compiled_at":              time.Now(),
 	}, nil
 }
 

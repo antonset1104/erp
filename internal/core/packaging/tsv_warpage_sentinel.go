@@ -14,47 +14,47 @@ import (
 
 // PackageWarpageTelemetry captures Shadow Moire laser profilometry and micro-bump strain in 3D chiplets
 type PackageWarpageTelemetry struct {
-	TelemetryID                     string    `json:"telemetry_id"`
-	WaferLotID                      string    `json:"wafer_lot_id"`                         // "LOT-HBM4-AI-CHIPLET-9901"
-	PackageID                       string    `json:"package_id"`                           // "PKG-2.5D-COWOS-72X72"
-	PeakReflowTempC                 float64   `json:"peak_reflow_temp_c"`                   // e.g. 260.0°C SAC305 profile
-	SubstrateDimensionXMM           float64   `json:"substrate_dimension_x_mm"`            // e.g. 72.0 mm
-	SubstrateDimensionYMM           float64   `json:"substrate_dimension_y_mm"`            // e.g. 72.0 mm
-	SiliconDieThicknessMicron       float64   `json:"silicon_die_thickness_micron"`        // e.g. 50.0 um
-	TSVCopperProtrusionNanometer    float64   `json:"tsv_copper_protrusion_nanometer"`     // e.g. 185.0 nm
-	MeasuredShadowMoireWarpageMicron float64  `json:"measured_shadow_moire_warpage_micron"` // e.g. 165.0 um (JEDEC limit < 150 um)
-	MicroBumpPitchMicron            float64   `json:"micro_bump_pitch_micron"`             // e.g. 25.0 um
-	RecordedAt                      time.Time `json:"recorded_at"`
+	TelemetryID                      string    `json:"telemetry_id"`
+	WaferLotID                       string    `json:"wafer_lot_id"`                         // "LOT-HBM4-AI-CHIPLET-9901"
+	PackageID                        string    `json:"package_id"`                           // "PKG-2.5D-COWOS-72X72"
+	PeakReflowTempC                  float64   `json:"peak_reflow_temp_c"`                   // e.g. 260.0°C SAC305 profile
+	SubstrateDimensionXMM            float64   `json:"substrate_dimension_x_mm"`             // e.g. 72.0 mm
+	SubstrateDimensionYMM            float64   `json:"substrate_dimension_y_mm"`             // e.g. 72.0 mm
+	SiliconDieThicknessMicron        float64   `json:"silicon_die_thickness_micron"`         // e.g. 50.0 um
+	TSVCopperProtrusionNanometer     float64   `json:"tsv_copper_protrusion_nanometer"`      // e.g. 185.0 nm
+	MeasuredShadowMoireWarpageMicron float64   `json:"measured_shadow_moire_warpage_micron"` // e.g. 165.0 um (JEDEC limit < 150 um)
+	MicroBumpPitchMicron             float64   `json:"micro_bump_pitch_micron"`              // e.g. 25.0 um
+	RecordedAt                       time.Time `json:"recorded_at"`
 }
 
 // WarpageStressAssessment models Suhir bimetallic thermal warpage deflection and TSV shear stress
 type WarpageStressAssessment struct {
-	AssessmentID                   string    `json:"assessment_id"`
-	PackageID                      string    `json:"package_id"`
-	SuhirMaxDeflectionMicron       float64   `json:"suhir_max_deflection_micron"`       // Theoretical bimetallic model deflection
-	TSVShearStressMPa              float64   `json:"tsv_shear_stress_mpa"`              // Shear stress at Cu/Si TSV boundary
-	WarpageComplianceStatus        string    `json:"warpage_compliance_status"`         // "JEDEC_PASS_NOMINAL", "ELEVATED_WARPAGE_WARNING", "CRITICAL_MICROBUMP_BRIDGING_HAZARD"
-	RecommendedCoolingRateCPerSec  float64   `json:"recommended_cooling_rate_c_per_sec"` // Optimized cooling profile
-	AuditDigest                    string    `json:"audit_digest"`
-	EvaluatedAt                    time.Time `json:"evaluated_at"`
+	AssessmentID                  string    `json:"assessment_id"`
+	PackageID                     string    `json:"package_id"`
+	SuhirMaxDeflectionMicron      float64   `json:"suhir_max_deflection_micron"`        // Theoretical bimetallic model deflection
+	TSVShearStressMPa             float64   `json:"tsv_shear_stress_mpa"`               // Shear stress at Cu/Si TSV boundary
+	WarpageComplianceStatus       string    `json:"warpage_compliance_status"`          // "JEDEC_PASS_NOMINAL", "ELEVATED_WARPAGE_WARNING", "CRITICAL_MICROBUMP_BRIDGING_HAZARD"
+	RecommendedCoolingRateCPerSec float64   `json:"recommended_cooling_rate_c_per_sec"` // Optimized cooling profile
+	AuditDigest                   string    `json:"audit_digest"`
+	EvaluatedAt                   time.Time `json:"evaluated_at"`
 }
 
 // ReflowProfileOptimizationAction models closed-loop reflow thermal profile tuning
 type ReflowProfileOptimizationAction struct {
-	ActionID                         string    `json:"action_id"`
-	PackageID                        string    `json:"package_id"`
-	OptimizedCoolingRampCPerSec      float64   `json:"optimized_cooling_ramp_c_per_sec"`
-	TargetPostReflowWarpageMicron    float64   `json:"target_post_reflow_warpage_micron"`
-	AvoidedChipletPackagingScrapUSD  float64   `json:"avoided_chiplet_packaging_scrap_usd"` // Avoided $14.8M wafer lot scrap
-	OptimizedAt                      time.Time `json:"optimized_at"`
+	ActionID                        string    `json:"action_id"`
+	PackageID                       string    `json:"package_id"`
+	OptimizedCoolingRampCPerSec     float64   `json:"optimized_cooling_ramp_c_per_sec"`
+	TargetPostReflowWarpageMicron   float64   `json:"target_post_reflow_warpage_micron"`
+	AvoidedChipletPackagingScrapUSD float64   `json:"avoided_chiplet_packaging_scrap_usd"` // Avoided $14.8M wafer lot scrap
+	OptimizedAt                     time.Time `json:"optimized_at"`
 }
 
 // PackagingVault thread-safe in-memory store
 type PackagingVault struct {
-	mu           sync.RWMutex
-	telemetries  map[string]PackageWarpageTelemetry
-	assessments  map[string]WarpageStressAssessment
-	actions      map[string]ReflowProfileOptimizationAction
+	mu          sync.RWMutex
+	telemetries map[string]PackageWarpageTelemetry
+	assessments map[string]WarpageStressAssessment
+	actions     map[string]ReflowProfileOptimizationAction
 }
 
 // Global instance
@@ -67,17 +67,17 @@ var GlobalPackagingVault = &PackagingVault{
 func init() {
 	// Seed demo 2.5D/3D AI chiplet packaging run
 	GlobalPackagingVault.telemetries["PKG-2.5D-COWOS-72X72"] = PackageWarpageTelemetry{
-		TelemetryID:                     "TEL-PKG-001",
-		WaferLotID:                      "LOT-HBM4-AI-CHIPLET-9901",
-		PackageID:                       "PKG-2.5D-COWOS-72X72",
-		PeakReflowTempC:                 260.0,
-		SubstrateDimensionXMM:           72.0,
-		SubstrateDimensionYMM:           72.0,
-		SiliconDieThicknessMicron:       50.0,
-		TSVCopperProtrusionNanometer:    185.0, // High Cu expansion
+		TelemetryID:                      "TEL-PKG-001",
+		WaferLotID:                       "LOT-HBM4-AI-CHIPLET-9901",
+		PackageID:                        "PKG-2.5D-COWOS-72X72",
+		PeakReflowTempC:                  260.0,
+		SubstrateDimensionXMM:            72.0,
+		SubstrateDimensionYMM:            72.0,
+		SiliconDieThicknessMicron:        50.0,
+		TSVCopperProtrusionNanometer:     185.0, // High Cu expansion
 		MeasuredShadowMoireWarpageMicron: 168.0, // Exceeds JEDEC 150 um limit
-		MicroBumpPitchMicron:            25.0,
-		RecordedAt:                      time.Now(),
+		MicroBumpPitchMicron:             25.0,
+		RecordedAt:                       time.Now(),
 	}
 }
 

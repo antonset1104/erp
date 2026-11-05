@@ -16,38 +16,38 @@ type FusionBlanketTelemetry struct {
 	TelemetryID                     string    `json:"telemetry_id"`
 	BlanketModuleID                 string    `json:"blanket_module_id"`
 	FusionReactorID                 string    `json:"fusion_reactor_id"`
-	TritiumBreedingRatio            float64   `json:"tritium_breeding_ratio"`             // target TBR > 1.15; self-sufficiency minimum > 1.05
-	MhdPressureDropMpa              float64   `json:"mhd_pressure_drop_mpa"`              // limit < 1.85 MPa
-	PbLiCoolantVelocityMPerSec      float64   `json:"pb_li_coolant_velocity_m_per_sec"`   // nominal 1.5 - 3.0 m/s
-	ToroidalMagneticFieldTesla      float64   `json:"toroidal_magnetic_field_tesla"`      // e.g. 12.0 Tesla
-	TritiumPermeationCiPerDay       float64   `json:"tritium_permeation_ci_per_day"`       // limit < 10.0 Ci/day
+	TritiumBreedingRatio            float64   `json:"tritium_breeding_ratio"`               // target TBR > 1.15; self-sufficiency minimum > 1.05
+	MhdPressureDropMpa              float64   `json:"mhd_pressure_drop_mpa"`                // limit < 1.85 MPa
+	PbLiCoolantVelocityMPerSec      float64   `json:"pb_li_coolant_velocity_m_per_sec"`     // nominal 1.5 - 3.0 m/s
+	ToroidalMagneticFieldTesla      float64   `json:"toroidal_magnetic_field_tesla"`        // e.g. 12.0 Tesla
+	TritiumPermeationCiPerDay       float64   `json:"tritium_permeation_ci_per_day"`        // limit < 10.0 Ci/day
 	RafmSteelCorrosionRateMicronsYr float64   `json:"rafm_steel_corrosion_rate_microns_yr"` // limit < 25.0 µm/yr
-	NeutronWallLoadMwPerM2          float64   `json:"neutron_wall_load_mw_per_m2"`        // e.g. 2.5 MW/m2
+	NeutronWallLoadMwPerM2          float64   `json:"neutron_wall_load_mw_per_m2"`          // e.g. 2.5 MW/m2
 	Timestamp                       time.Time `json:"timestamp"`
 }
 
 // FusionBlanketAssessment models tritium breeding sustainability, MHD drag, and ASME BPVC Section III Division 4 compliance
 type FusionBlanketAssessment struct {
-	AssessmentID                   string    `json:"assessment_id"`
-	BlanketModuleID                string    `json:"blanket_module_id"`
-	TritiumSelfSufficiencyStatus   string    `json:"tritium_self_sufficiency_status"` // SUFFICIENT_TRITIUM_SURPLUS, MARGINAL_BREEDING_DEFICIT, CRITICAL_TRITIUM_STARVATION
-	MhdFlowSuppressionHazard       string    `json:"mhd_flow_suppression_hazard"`     // OPTIMAL_MHD_LAMINAR, FLOW_STAGNATION_THERMAL_HOTSPOT, CATASTROPHIC_MHD_CHOKE
-	TbrDeficitRatio                float64   `json:"tbr_deficit_ratio"`
-	FciDielectricBiasMandate       bool      `json:"fci_dielectric_bias_mandate"`
-	VacuumPermeatorBoostMandate     bool      `json:"vacuum_permeator_boost_mandate"`
-	AuditDigest                    string    `json:"audit_digest"`
-	EvaluatedAt                    time.Time `json:"evaluated_at"`
+	AssessmentID                 string    `json:"assessment_id"`
+	BlanketModuleID              string    `json:"blanket_module_id"`
+	TritiumSelfSufficiencyStatus string    `json:"tritium_self_sufficiency_status"` // SUFFICIENT_TRITIUM_SURPLUS, MARGINAL_BREEDING_DEFICIT, CRITICAL_TRITIUM_STARVATION
+	MhdFlowSuppressionHazard     string    `json:"mhd_flow_suppression_hazard"`     // OPTIMAL_MHD_LAMINAR, FLOW_STAGNATION_THERMAL_HOTSPOT, CATASTROPHIC_MHD_CHOKE
+	TbrDeficitRatio              float64   `json:"tbr_deficit_ratio"`
+	FciDielectricBiasMandate     bool      `json:"fci_dielectric_bias_mandate"`
+	VacuumPermeatorBoostMandate  bool      `json:"vacuum_permeator_boost_mandate"`
+	AuditDigest                  string    `json:"audit_digest"`
+	EvaluatedAt                  time.Time `json:"evaluated_at"`
 }
 
 // FusionBlanketMitigationAction models Flow Channel Insert bias modulation, vacuum permeator degassing, and flow trim
 type FusionBlanketMitigationAction struct {
-	ActionID                               string    `json:"action_id"`
-	BlanketModuleID                        string    `json:"blanket_module_id"`
-	CommandedFciDielectricBiasVolts        float64   `json:"commanded_fci_dielectric_bias_volts"`
-	VacuumPermeatorPumpingSpeedLitersPerSec float64  `json:"vacuum_permeator_pumping_speed_liters_per_sec"`
-	PbLiLoopFlowTrimPct                    float64   `json:"pb_li_loop_flow_trim_pct"`
-	AvoidedFusionBlanketDamageUSD          float64   `json:"avoided_fusion_blanket_damage_usd"`
-	ExecutedAt                             time.Time `json:"executed_at"`
+	ActionID                                string    `json:"action_id"`
+	BlanketModuleID                         string    `json:"blanket_module_id"`
+	CommandedFciDielectricBiasVolts         float64   `json:"commanded_fci_dielectric_bias_volts"`
+	VacuumPermeatorPumpingSpeedLitersPerSec float64   `json:"vacuum_permeator_pumping_speed_liters_per_sec"`
+	PbLiLoopFlowTrimPct                     float64   `json:"pb_li_loop_flow_trim_pct"`
+	AvoidedFusionBlanketDamageUSD           float64   `json:"avoided_fusion_blanket_damage_usd"`
+	ExecutedAt                              time.Time `json:"executed_at"`
 }
 
 // FusionBlanketVault manages fusion reactor liquid metal blanket state and emergency actions
@@ -123,7 +123,7 @@ func (v *FusionBlanketVault) EvaluateBlanketIntegrity(blanketModuleID string) (F
 		MhdFlowSuppressionHazard:     mhdHazard,
 		TbrDeficitRatio:              tbrDeficit,
 		FciDielectricBiasMandate:     fciMandate,
-		VacuumPermeatorBoostMandate:   permeatorMandate,
+		VacuumPermeatorBoostMandate:  permeatorMandate,
 		AuditDigest:                  digest,
 		EvaluatedAt:                  time.Now(),
 	}
@@ -156,13 +156,13 @@ func (v *FusionBlanketVault) TriggerFciBiasAndPermeatorBoost(blanketModuleID str
 	}
 
 	action := FusionBlanketMitigationAction{
-		ActionID:                               fmt.Sprintf("ACT-BLANKET-%d", time.Now().UnixNano()%1000000),
-		BlanketModuleID:                        blanketModuleID,
-		CommandedFciDielectricBiasVolts:        biasVolts,
+		ActionID:                                fmt.Sprintf("ACT-BLANKET-%d", time.Now().UnixNano()%1000000),
+		BlanketModuleID:                         blanketModuleID,
+		CommandedFciDielectricBiasVolts:         biasVolts,
 		VacuumPermeatorPumpingSpeedLitersPerSec: pumpSpeed,
-		PbLiLoopFlowTrimPct:                    flowTrim,
-		AvoidedFusionBlanketDamageUSD:          320000000.0, // $320M USD avoided fusion blanket meltdown, tritium fuel starvation, and plant shutdown
-		ExecutedAt:                             time.Now(),
+		PbLiLoopFlowTrimPct:                     flowTrim,
+		AvoidedFusionBlanketDamageUSD:           320000000.0, // $320M USD avoided fusion blanket meltdown, tritium fuel starvation, and plant shutdown
+		ExecutedAt:                              time.Now(),
 	}
 
 	v.actions[blanketModuleID] = action
@@ -183,22 +183,22 @@ func (v *FusionBlanketVault) GetFusionBlanketDossier(blanketModuleID string) (ma
 	}
 
 	dossier := map[string]interface{}{
-		"blanket_module_id":            blanketModuleID,
-		"fusion_reactor_id":            telem.FusionReactorID,
-		"asme_bpvc_div4_compliant":     asm.MhdFlowSuppressionHazard != "CATASTROPHIC_MHD_CHOKE" || (hasAct && act.AvoidedFusionBlanketDamageUSD > 0),
-		"iter_tritium_code_certified":  asm.TritiumSelfSufficiencyStatus != "CRITICAL_TRITIUM_STARVATION" || hasAct,
-		"tritium_breeding_ratio":       telem.TritiumBreedingRatio,
-		"tbr_deficit_ratio":            asm.TbrDeficitRatio,
-		"mhd_pressure_drop_mpa":        telem.MhdPressureDropMpa,
-		"tritium_permeation_ci_day":    telem.TritiumPermeationCiPerDay,
-		"pb_li_velocity_m_s":           telem.PbLiCoolantVelocityMPerSec,
-		"tbr_status":                   asm.TritiumSelfSufficiencyStatus,
-		"mhd_hazard":                   asm.MhdFlowSuppressionHazard,
-		"fci_bias_volts":               0.0,
-		"permeator_pumping_l_s":        0.0,
-		"avoided_loss_usd":             0.0,
-		"audit_digest":                 asm.AuditDigest,
-		"compiled_at":                  time.Now(),
+		"blanket_module_id":           blanketModuleID,
+		"fusion_reactor_id":           telem.FusionReactorID,
+		"asme_bpvc_div4_compliant":    asm.MhdFlowSuppressionHazard != "CATASTROPHIC_MHD_CHOKE" || (hasAct && act.AvoidedFusionBlanketDamageUSD > 0),
+		"iter_tritium_code_certified": asm.TritiumSelfSufficiencyStatus != "CRITICAL_TRITIUM_STARVATION" || hasAct,
+		"tritium_breeding_ratio":      telem.TritiumBreedingRatio,
+		"tbr_deficit_ratio":           asm.TbrDeficitRatio,
+		"mhd_pressure_drop_mpa":       telem.MhdPressureDropMpa,
+		"tritium_permeation_ci_day":   telem.TritiumPermeationCiPerDay,
+		"pb_li_velocity_m_s":          telem.PbLiCoolantVelocityMPerSec,
+		"tbr_status":                  asm.TritiumSelfSufficiencyStatus,
+		"mhd_hazard":                  asm.MhdFlowSuppressionHazard,
+		"fci_bias_volts":              0.0,
+		"permeator_pumping_l_s":       0.0,
+		"avoided_loss_usd":            0.0,
+		"audit_digest":                asm.AuditDigest,
+		"compiled_at":                 time.Now(),
 	}
 
 	if hasAct {

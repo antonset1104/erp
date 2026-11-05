@@ -45,9 +45,9 @@ type Payslip struct {
 	Period      string   `gorm:"size:32;not null" json:"period"` // e.g. "October 2026"
 	Date        string   `gorm:"size:32;not null" json:"date"`
 	BasicSalary float64  `gorm:"not null" json:"basic_salary"`
-	Allowances  float64  `gorm:"default:0" json:"allowances"` // Tunjangan transport, makan, bonus
-	Deductions  float64  `gorm:"default:0" json:"deductions"` // BPJS, PPh 21, potongan
-	NetSalary   float64  `gorm:"not null" json:"net_salary"`   // Basic + Allowances - Deductions
+	Allowances  float64  `gorm:"default:0" json:"allowances"`                // Tunjangan transport, makan, bonus
+	Deductions  float64  `gorm:"default:0" json:"deductions"`                // BPJS, PPh 21, potongan
+	NetSalary   float64  `gorm:"not null" json:"net_salary"`                 // Basic + Allowances - Deductions
 	State       string   `gorm:"size:32;default:'draft';index" json:"state"` // "draft", "confirmed", "paid"
 	Note        string   `gorm:"type:text" json:"note"`
 }

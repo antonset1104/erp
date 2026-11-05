@@ -180,7 +180,7 @@ func (h *Handler) ParseAndImportCSV(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data":         stmt,
+		"data":        stmt,
 		"lines_count": count,
 		"message":     fmt.Sprintf("Berhasil mengimpor %d transaksi mutasi bank", count),
 	})

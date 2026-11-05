@@ -22,7 +22,7 @@ type LeaseContract struct {
 	LeaseTermMonths                   int     `json:"lease_term_months"`
 	MonthlyPaymentIDR                 float64 `json:"monthly_payment_idr"`
 	IncrementalBorrowingRateAnnualPct float64 `json:"incremental_borrowing_rate_annual_pct"` // IBR %
-	PaymentTiming                     string  `json:"payment_timing"`                         // "IN_ADVANCE", "IN_ARREARS"
+	PaymentTiming                     string  `json:"payment_timing"`                        // "IN_ADVANCE", "IN_ARREARS"
 }
 
 // LeaseSchedulePeriod holds monthly amortization figures for lease liability and ROU asset.
@@ -32,7 +32,7 @@ type LeaseSchedulePeriod struct {
 	OpeningLiabilityIDR       float64 `json:"opening_liability_idr"`
 	InterestExpenseIDR        float64 `json:"interest_expense_idr"`
 	PrincipalRepaymentIDR     float64 `json:"principal_repayment_idr"`
-	PaymentIDR               float64 `json:"payment_idr"`
+	PaymentIDR                float64 `json:"payment_idr"`
 	ClosingLiabilityIDR       float64 `json:"closing_liability_idr"`
 	ROUAssetDepreciationIDR   float64 `json:"rou_asset_depreciation_idr"`
 	ClosingROUNetBookValueIDR float64 `json:"closing_rou_net_book_value_idr"`
@@ -136,7 +136,7 @@ func GenerateLeaseScheduleLogic(req LeaseContract) (*LeaseAccountingSchedule, er
 			OpeningLiabilityIDR:       opening,
 			InterestExpenseIDR:        interest,
 			PrincipalRepaymentIDR:     principal,
-			PaymentIDR:               req.MonthlyPaymentIDR,
+			PaymentIDR:                req.MonthlyPaymentIDR,
 			ClosingLiabilityIDR:       closingLiab,
 			ROUAssetDepreciationIDR:   monthlyDepr,
 			ClosingROUNetBookValueIDR: currROU,

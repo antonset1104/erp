@@ -14,16 +14,16 @@ import (
 
 // OreStockpileParcel models discrete stockpiles with JORC-compliant mineral assays and deleterious elements
 type OreStockpileParcel struct {
-	ParcelID       string    `json:"parcel_id"`
-	StockpileName  string    `json:"stockpile_name"`
-	OreType        string    `json:"ore_type"` // "PORPHYRY_PRIMARY_SULFIDE", "SKARN_OXIDE_CAP", "SUPERGENE_ENRICHED"
-	Tons           float64   `json:"tons"`
-	CuGradePct     float64   `json:"cu_grade_pct"`      // Copper grade %
-	AuGradeGpt     float64   `json:"au_grade_gpt"`      // Gold grade grams/ton
-	SilicaSiO2Pct  float64   `json:"silica_sio2_pct"`   // Slag acidifier penalty element
-	ArsenicPPM     float64   `json:"arsenic_ppm"`       // Deleterious penalty element
-	MoisturePct    float64   `json:"moisture_pct"`      // Transport transportable moisture limit (TML)
-	RegisteredAt   time.Time `json:"registered_at"`
+	ParcelID      string    `json:"parcel_id"`
+	StockpileName string    `json:"stockpile_name"`
+	OreType       string    `json:"ore_type"` // "PORPHYRY_PRIMARY_SULFIDE", "SKARN_OXIDE_CAP", "SUPERGENE_ENRICHED"
+	Tons          float64   `json:"tons"`
+	CuGradePct    float64   `json:"cu_grade_pct"`    // Copper grade %
+	AuGradeGpt    float64   `json:"au_grade_gpt"`    // Gold grade grams/ton
+	SilicaSiO2Pct float64   `json:"silica_sio2_pct"` // Slag acidifier penalty element
+	ArsenicPPM    float64   `json:"arsenic_ppm"`     // Deleterious penalty element
+	MoisturePct   float64   `json:"moisture_pct"`    // Transport transportable moisture limit (TML)
+	RegisteredAt  time.Time `json:"registered_at"`
 }
 
 // BlendOptimizationRequest specifies blending constraints for mill throughput
@@ -39,36 +39,36 @@ type BlendOptimizationRequest struct {
 
 // BlendOptimizationRecipe models the calculated recipe, metallurgical recovery, and recovery loss
 type BlendOptimizationRecipe struct {
-	RecipeID                   string             `json:"recipe_id"`
-	MineSiteID                 string             `json:"mine_site_id"`
-	TotalBlendedTons           float64            `json:"total_blended_tons"`
-	ResultingCuGradePct        float64            `json:"resulting_cu_grade_pct"`
-	ResultingAuGradeGpt        float64            `json:"resulting_au_grade_gpt"`
-	ResultingSilicaSiO2Pct     float64            `json:"resulting_silica_sio2_pct"`
-	ResultingArsenicPPM        float64            `json:"resulting_arsenic_ppm"`
-	FlotationRecoveryRatePct   float64            `json:"flotation_recovery_rate_pct"` // Predicted recovery %
-	CalculatedBlendCostPerTon  float64            `json:"calculated_blend_cost_per_ton"`
-	ComponentRatios            map[string]float64 `json:"component_ratios"` // ParcelID -> % ratio
-	BlendQualityCompliance     bool               `json:"blend_quality_compliance"`
-	ComplianceAuditDigest      string             `json:"compliance_audit_digest"`
-	OptimizedAt                time.Time          `json:"optimized_at"`
+	RecipeID                  string             `json:"recipe_id"`
+	MineSiteID                string             `json:"mine_site_id"`
+	TotalBlendedTons          float64            `json:"total_blended_tons"`
+	ResultingCuGradePct       float64            `json:"resulting_cu_grade_pct"`
+	ResultingAuGradeGpt       float64            `json:"resulting_au_grade_gpt"`
+	ResultingSilicaSiO2Pct    float64            `json:"resulting_silica_sio2_pct"`
+	ResultingArsenicPPM       float64            `json:"resulting_arsenic_ppm"`
+	FlotationRecoveryRatePct  float64            `json:"flotation_recovery_rate_pct"` // Predicted recovery %
+	CalculatedBlendCostPerTon float64            `json:"calculated_blend_cost_per_ton"`
+	ComponentRatios           map[string]float64 `json:"component_ratios"` // ParcelID -> % ratio
+	BlendQualityCompliance    bool               `json:"blend_quality_compliance"`
+	ComplianceAuditDigest     string             `json:"compliance_audit_digest"`
+	OptimizedAt               time.Time          `json:"optimized_at"`
 }
 
 // SmelterSettlementManifest calculates commercial settlement, TC/RC treatment and penalties
 type SmelterSettlementManifest struct {
-	SettlementID                   string    `json:"settlement_id"`
-	RecipeID                       string    `json:"recipe_id"`
-	PayableCuMetalTons             float64   `json:"payable_cu_metal_tons"`
-	PayableAuMetalOunces           float64   `json:"payable_au_metal_ounces"`
-	LmeCuPriceUSDPerTon            float64   `json:"lme_cu_price_usd_per_ton"`
-	GrossMetalValuationUSD         float64   `json:"gross_metal_valuation_usd"`
-	TreatmentChargesTC_USD         float64   `json:"treatment_charges_tc_usd"`
-	RefiningChargesRC_USD          float64   `json:"refining_charges_rc_usd"`
-	ArsenicPenaltyDeductionsUSD    float64   `json:"arsenic_penalty_deductions_usd"`
-	MoisturePenaltyDeductionsUSD   float64   `json:"moisture_penalty_deductions_usd"`
-	NetPayableSmelterRevenueUSD    float64   `json:"net_payable_smelter_revenue_usd"`
-	CommercialSettlementReference  string    `json:"commercial_settlement_reference"`
-	SettledAt                      time.Time `json:"settled_at"`
+	SettlementID                  string    `json:"settlement_id"`
+	RecipeID                      string    `json:"recipe_id"`
+	PayableCuMetalTons            float64   `json:"payable_cu_metal_tons"`
+	PayableAuMetalOunces          float64   `json:"payable_au_metal_ounces"`
+	LmeCuPriceUSDPerTon           float64   `json:"lme_cu_price_usd_per_ton"`
+	GrossMetalValuationUSD        float64   `json:"gross_metal_valuation_usd"`
+	TreatmentChargesTC_USD        float64   `json:"treatment_charges_tc_usd"`
+	RefiningChargesRC_USD         float64   `json:"refining_charges_rc_usd"`
+	ArsenicPenaltyDeductionsUSD   float64   `json:"arsenic_penalty_deductions_usd"`
+	MoisturePenaltyDeductionsUSD  float64   `json:"moisture_penalty_deductions_usd"`
+	NetPayableSmelterRevenueUSD   float64   `json:"net_payable_smelter_revenue_usd"`
+	CommercialSettlementReference string    `json:"commercial_settlement_reference"`
+	SettledAt                     time.Time `json:"settled_at"`
 }
 
 // OreBlendingVault thread-safe in-memory store

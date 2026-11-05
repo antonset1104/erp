@@ -31,7 +31,7 @@ type HypersonicFlightTelemetry struct {
 type TPSAblationPlasmaAssessment struct {
 	AssessmentID                     string    `json:"assessment_id"`
 	VehicleTailID                    string    `json:"vehicle_tail_id"`
-	FayRiddellHeatFluxMW_M2          float64   `json:"fay_riddell_heat_flux_mw_m2"`          // Aerodynamic convective heat flux
+	FayRiddellHeatFluxMW_M2          float64   `json:"fay_riddell_heat_flux_mw_m2"`         // Aerodynamic convective heat flux
 	RemainingTPSThicknessMM          float64   `json:"remaining_tps_thickness_mm"`          // Thickness remaining (limit > 15 mm)
 	PlasmaCutoffFrequencyGHz         float64   `json:"plasma_cutoff_frequency_ghz"`         // fp = sqrt(ne*e^2/(eps0*me)) / 2pi
 	RFCommunicationState             string    `json:"rf_communication_state"`              // "NOMINAL_RF_LINK", "MODERATE_IONIZED_ATTENUATION", "TOTAL_PLASMA_BLACKOUT_ACTIVE"
@@ -43,20 +43,20 @@ type TPSAblationPlasmaAssessment struct {
 
 // HypersonicTrajectoryModulationAction models automated angle-of-attack lofting and heat shedding
 type HypersonicTrajectoryModulationAction struct {
-	ActionID                   string    `json:"action_id"`
-	VehicleTailID              string    `json:"vehicle_tail_id"`
-	ModulatedAngleOfAttackDeg  float64   `json:"modulated_angle_of_attack_deg"`
-	HeatFluxReductionPct       float64   `json:"heat_flux_reduction_pct"`
-	AvoidedAirframeLossUSD     float64   `json:"avoided_airframe_loss_usd"` // Avoided $58M hypersonic vehicle structural burnthrough
-	ActionTimestamp            time.Time `json:"action_timestamp"`
+	ActionID                  string    `json:"action_id"`
+	VehicleTailID             string    `json:"vehicle_tail_id"`
+	ModulatedAngleOfAttackDeg float64   `json:"modulated_angle_of_attack_deg"`
+	HeatFluxReductionPct      float64   `json:"heat_flux_reduction_pct"`
+	AvoidedAirframeLossUSD    float64   `json:"avoided_airframe_loss_usd"` // Avoided $58M hypersonic vehicle structural burnthrough
+	ActionTimestamp           time.Time `json:"action_timestamp"`
 }
 
 // HypersonicVault thread-safe in-memory store
 type HypersonicVault struct {
-	mu           sync.RWMutex
-	telemetries  map[string]HypersonicFlightTelemetry
-	assessments  map[string]TPSAblationPlasmaAssessment
-	modulations  map[string]HypersonicTrajectoryModulationAction
+	mu          sync.RWMutex
+	telemetries map[string]HypersonicFlightTelemetry
+	assessments map[string]TPSAblationPlasmaAssessment
+	modulations map[string]HypersonicTrajectoryModulationAction
 }
 
 // Global instance
@@ -78,7 +78,7 @@ func init() {
 		CurrentRecessionDepthMM:      9.5,
 		ElectronDensity_PerM3:        4.8e18, // Dense plasma sheath
 		AngleOfAttackDeg:             14.5,
-		TelemetrySignalAttenuationDB: 44.0,   // Total RF communication blackout
+		TelemetrySignalAttenuationDB: 44.0, // Total RF communication blackout
 		RecordedAt:                   time.Now(),
 	}
 }

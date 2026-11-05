@@ -49,7 +49,7 @@ type MaintenanceEquipment struct {
 type MaintenanceRequest struct {
 	models.ModelBase
 	RequestNumber   string                `gorm:"size:64;not null;uniqueIndex" json:"request_number"` // e.g. REQ/MAINT/2026/00001
-	Name            string                `gorm:"size:255;not null" json:"name"`                     // Subject / problem summary
+	Name            string                `gorm:"size:255;not null" json:"name"`                      // Subject / problem summary
 	EquipmentID     uint                  `gorm:"not null;index" json:"equipment_id"`
 	Equipment       *MaintenanceEquipment `gorm:"foreignKey:EquipmentID" json:"equipment,omitempty"`
 	MaintenanceType string                `gorm:"size:32;default:'corrective';index" json:"maintenance_type"` // "preventive", "corrective"

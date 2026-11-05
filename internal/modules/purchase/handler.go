@@ -109,4 +109,3 @@ func (h *Handler) RunReorderingRules(c *gin.Context) {
 		"orders":  orders,
 	})
 }
-

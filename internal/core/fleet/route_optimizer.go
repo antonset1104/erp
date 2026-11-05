@@ -50,7 +50,7 @@ type OptimizedRouteCluster struct {
 }
 
 type RouteOptimizationRequest struct {
-	HubDepotLocation string            `json:"hub_depot_location"`
+	HubDepotLocation  string            `json:"hub_depot_location"`
 	DepotLatitude     float64           `json:"depot_latitude"`
 	DepotLongitude    float64           `json:"depot_longitude"`
 	AvailableVehicles []VehicleResource `json:"available_vehicles"`
@@ -79,13 +79,13 @@ type DispatchManifestRequest struct {
 }
 
 type DispatchManifestResponse struct {
-	ManifestNumber   string `json:"manifest_number"`
-	ClusterID        string `json:"cluster_id"`
-	VehicleAssigned  string `json:"vehicle_assigned"`
-	StopsCount       int    `json:"stops_count"`
-	TrackingURL      string `json:"tracking_url"`
-	Status           string `json:"status"`
-	DispatchedAt     string `json:"dispatched_at"`
+	ManifestNumber  string `json:"manifest_number"`
+	ClusterID       string `json:"cluster_id"`
+	VehicleAssigned string `json:"vehicle_assigned"`
+	StopsCount      int    `json:"stops_count"`
+	TrackingURL     string `json:"tracking_url"`
+	Status          string `json:"status"`
+	DispatchedAt    string `json:"dispatched_at"`
 }
 
 // Haversine distance in KM

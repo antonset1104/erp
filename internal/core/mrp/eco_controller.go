@@ -27,13 +27,13 @@ type ECOImpactBlastRadius struct {
 
 // ECODispositionAction specifies the inventory handling rules for phasing out parts.
 type ECODispositionAction struct {
-	ComponentSKU           string  `json:"component_sku"`
-	ComponentName          string  `json:"component_name"`
-	DispositionStrategy    string  `json:"disposition_strategy"` // "USE_UP_EXISTING_STOCK", "SCRAP_IMMEDIATE", "REWORK_RETROFIT", "RETURN_TO_VENDOR"
-	QuantityOnHand         float64 `json:"quantity_on_hand"`
-	UnitCostUSD            float64 `json:"unit_cost_usd"`
+	ComponentSKU            string  `json:"component_sku"`
+	ComponentName           string  `json:"component_name"`
+	DispositionStrategy     string  `json:"disposition_strategy"` // "USE_UP_EXISTING_STOCK", "SCRAP_IMMEDIATE", "REWORK_RETROFIT", "RETURN_TO_VENDOR"
+	QuantityOnHand          float64 `json:"quantity_on_hand"`
+	UnitCostUSD             float64 `json:"unit_cost_usd"`
 	TotalDispositionCostUSD float64 `json:"total_disposition_cost_usd"`
-	AccountingGLPosting    string  `json:"accounting_gl_posting"`
+	AccountingGLPosting     string  `json:"accounting_gl_posting"`
 }
 
 // ECOApprovalRecord tracks sign-offs from engineering, operations, and quality management.
@@ -123,22 +123,22 @@ func init() {
 		},
 		Dispositions: []ECODispositionAction{
 			{
-				ComponentSKU:           "CMP-HSINK-ALU-01",
-				ComponentName:          "Legacy Extruded Aluminum Heat Sink (Rev B)",
-				DispositionStrategy:    "USE_UP_EXISTING_STOCK",
-				QuantityOnHand:         320.0,
-				UnitCostUSD:            45.0,
+				ComponentSKU:            "CMP-HSINK-ALU-01",
+				ComponentName:           "Legacy Extruded Aluminum Heat Sink (Rev B)",
+				DispositionStrategy:     "USE_UP_EXISTING_STOCK",
+				QuantityOnHand:          320.0,
+				UnitCostUSD:             45.0,
 				TotalDispositionCostUSD: 14400.0,
-				AccountingGLPosting:    "GL-INV-VALUATION-RAW-1410",
+				AccountingGLPosting:     "GL-INV-VALUATION-RAW-1410",
 			},
 			{
-				ComponentSKU:           "CMP-TIM-PAD-02",
-				ComponentName:          "Phase-Change Thermal Pad 0.5mm",
-				DispositionStrategy:    "SCRAP_IMMEDIATE",
-				QuantityOnHand:         450.0,
-				UnitCostUSD:            9.0,
+				ComponentSKU:            "CMP-TIM-PAD-02",
+				ComponentName:           "Phase-Change Thermal Pad 0.5mm",
+				DispositionStrategy:     "SCRAP_IMMEDIATE",
+				QuantityOnHand:          450.0,
+				UnitCostUSD:             9.0,
 				TotalDispositionCostUSD: 4050.0,
-				AccountingGLPosting:    "GL-EXP-SCRAP-WRITEOFF-5420",
+				AccountingGLPosting:     "GL-EXP-SCRAP-WRITEOFF-5420",
 			},
 		},
 		Approvals: make([]ECOApprovalRecord, 0),
@@ -190,13 +190,13 @@ func CreateEngineeringChangeOrderLogic(req CreateECORequest) (*EngineeringChange
 		},
 		Dispositions: []ECODispositionAction{
 			{
-				ComponentSKU:           "CMP-LEGACY-01",
-				ComponentName:          "Substituted Fastener Component",
-				DispositionStrategy:    "USE_UP_EXISTING_STOCK",
-				QuantityOnHand:         500.0,
-				UnitCostUSD:            4.5,
+				ComponentSKU:            "CMP-LEGACY-01",
+				ComponentName:           "Substituted Fastener Component",
+				DispositionStrategy:     "USE_UP_EXISTING_STOCK",
+				QuantityOnHand:          500.0,
+				UnitCostUSD:             4.5,
 				TotalDispositionCostUSD: 2250.0,
-				AccountingGLPosting:    "GL-INV-VALUATION-RAW-1410",
+				AccountingGLPosting:     "GL-INV-VALUATION-RAW-1410",
 			},
 		},
 		Approvals: make([]ECOApprovalRecord, 0),

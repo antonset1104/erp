@@ -14,42 +14,42 @@ import (
 
 // DryElectrodeTelemetry captures gigafactory all-solid-state battery (ASSB) solvent-free dry electrode continuous extrusion & calendering under IEC 62660-3 & USABC
 type DryElectrodeTelemetry struct {
-	TelemetryID                  string    `json:"telemetry_id"`
-	ProductionLineID             string    `json:"production_line_id"`                  // "LINE-GIGAFACTORY-DRY-CATHODE-01"
-	CoatingLotID                 string    `json:"coating_lot_id"`                      // "LOT-DRY-NMC811-ASSB-408"
-	TwinScrewMeltPressureBar     float64   `json:"twin_screw_melt_pressure_bar"`        // e.g. 185.0 bar
-	ExtruderShearTorqueNm        float64   `json:"extruder_shear_torque_nm"`            // e.g. 340.0 Nm
-	CalenderRollNipGapUm         float64   `json:"calender_roll_nip_gap_um"`            // e.g. 78.5 um
-	CalenderRollSurfaceTempC     float64   `json:"calender_roll_surface_temp_c"`        // e.g. 112.5°C
-	ElectrodeArealLoadingMgPerCm2 float64  `json:"electrode_areal_loading_mg_per_cm2"`  // e.g. 32.5 mg/cm2
-	CalenderedPorosityPct        float64   `json:"calendered_porosity_pct"`             // e.g. 18.2% (solid-state target 14-16%)
-	CrossWebThicknessVariationUm float64   `json:"cross_web_thickness_variation_um"`    // e.g. 4.8 um (strict limit < 2.0 um)
-	WebTensionN                  float64   `json:"web_tension_n"`                       // e.g. 245.0 N
-	RecordedAt                   time.Time `json:"recorded_at"`
+	TelemetryID                   string    `json:"telemetry_id"`
+	ProductionLineID              string    `json:"production_line_id"`                 // "LINE-GIGAFACTORY-DRY-CATHODE-01"
+	CoatingLotID                  string    `json:"coating_lot_id"`                     // "LOT-DRY-NMC811-ASSB-408"
+	TwinScrewMeltPressureBar      float64   `json:"twin_screw_melt_pressure_bar"`       // e.g. 185.0 bar
+	ExtruderShearTorqueNm         float64   `json:"extruder_shear_torque_nm"`           // e.g. 340.0 Nm
+	CalenderRollNipGapUm          float64   `json:"calender_roll_nip_gap_um"`           // e.g. 78.5 um
+	CalenderRollSurfaceTempC      float64   `json:"calender_roll_surface_temp_c"`       // e.g. 112.5°C
+	ElectrodeArealLoadingMgPerCm2 float64   `json:"electrode_areal_loading_mg_per_cm2"` // e.g. 32.5 mg/cm2
+	CalenderedPorosityPct         float64   `json:"calendered_porosity_pct"`            // e.g. 18.2% (solid-state target 14-16%)
+	CrossWebThicknessVariationUm  float64   `json:"cross_web_thickness_variation_um"`   // e.g. 4.8 um (strict limit < 2.0 um)
+	WebTensionN                   float64   `json:"web_tension_n"`                      // e.g. 245.0 N
+	RecordedAt                    time.Time `json:"recorded_at"`
 }
 
 // DryElectrodeAssessment evaluates PTFE binder shear fibrillation, calender roll nip pressure, and cross-web porosity gradients
 type DryElectrodeAssessment struct {
-	AssessmentID                   string    `json:"assessment_id"`
-	ProductionLineID               string    `json:"production_line_id"`
-	PorosityDeviationPct           float64   `json:"porosity_deviation_pct"`
-	ElectrodeCoatingUniformity     string    `json:"electrode_coating_uniformity"`      // "UNIFORM_HIGH_DENSITY_WEB", "POROSITY_GRADIENT_EDGE_WARNING", "CRITICAL_DENDRITE_SHORT_HAZARD"
-	PTFEFibrillationIntegrity      string    `json:"ptfe_fibrillation_integrity"`       // "COMPLETE_FIBRILLAR_MATRIX", "INSUFFICIENT_SHEAR_WEAK_WEB", "OVER_SHEARED_BRITTLE_TEAR"
-	CalenderNipServoTrimMandate    bool      `json:"calender_nip_servo_trim_mandate"`
-	ThermalInductionZoneTrimMandate bool     `json:"thermal_induction_zone_trim_mandate"`
-	AuditDigest                    string    `json:"audit_digest"`
-	EvaluatedAt                    time.Time `json:"evaluated_at"`
+	AssessmentID                    string    `json:"assessment_id"`
+	ProductionLineID                string    `json:"production_line_id"`
+	PorosityDeviationPct            float64   `json:"porosity_deviation_pct"`
+	ElectrodeCoatingUniformity      string    `json:"electrode_coating_uniformity"` // "UNIFORM_HIGH_DENSITY_WEB", "POROSITY_GRADIENT_EDGE_WARNING", "CRITICAL_DENDRITE_SHORT_HAZARD"
+	PTFEFibrillationIntegrity       string    `json:"ptfe_fibrillation_integrity"`  // "COMPLETE_FIBRILLAR_MATRIX", "INSUFFICIENT_SHEAR_WEAK_WEB", "OVER_SHEARED_BRITTLE_TEAR"
+	CalenderNipServoTrimMandate     bool      `json:"calender_nip_servo_trim_mandate"`
+	ThermalInductionZoneTrimMandate bool      `json:"thermal_induction_zone_trim_mandate"`
+	AuditDigest                     string    `json:"audit_digest"`
+	EvaluatedAt                     time.Time `json:"evaluated_at"`
 }
 
 // DryElectrodeMitigationAction models calender servo roll nip trim, induction heating zone trim, and extruder screw speed modulation
 type DryElectrodeMitigationAction struct {
-	ActionID                       string    `json:"action_id"`
-	ProductionLineID               string    `json:"production_line_id"`
-	ModulatedCalenderRollNipGapUm  float64   `json:"modulated_calender_roll_nip_gap_um"`
-	ZoneThermalInductionBoostC     float64   `json:"zone_thermal_induction_boost_c"`
-	ExtruderScrewSpeedRpmTrim      float64   `json:"extruder_screw_speed_rpm_trim"`
-	AvoidedBatteryScrapLossUSD     float64   `json:"avoided_battery_scrap_loss_usd"`
-	ActionTimestamp                time.Time `json:"action_timestamp"`
+	ActionID                      string    `json:"action_id"`
+	ProductionLineID              string    `json:"production_line_id"`
+	ModulatedCalenderRollNipGapUm float64   `json:"modulated_calender_roll_nip_gap_um"`
+	ZoneThermalInductionBoostC    float64   `json:"zone_thermal_induction_boost_c"`
+	ExtruderScrewSpeedRpmTrim     float64   `json:"extruder_screw_speed_rpm_trim"`
+	AvoidedBatteryScrapLossUSD    float64   `json:"avoided_battery_scrap_loss_usd"`
+	ActionTimestamp               time.Time `json:"action_timestamp"`
 }
 
 // DryElectrodeVault thread-safe in-memory store
@@ -121,15 +121,15 @@ func (v *DryElectrodeVault) EvaluatePorosityAndFibrillation(lineID string) (DryE
 	digest := hex.EncodeToString(hash[:])
 
 	assessment := DryElectrodeAssessment{
-		AssessmentID:                   fmt.Sprintf("ASM-DRY-%d", time.Now().UnixNano()%1000000),
-		ProductionLineID:               lineID,
-		PorosityDeviationPct:           porosityDev,
-		ElectrodeCoatingUniformity:     uniformity,
-		PTFEFibrillationIntegrity:      fibrillation,
-		CalenderNipServoTrimMandate:    calenderTrim,
+		AssessmentID:                    fmt.Sprintf("ASM-DRY-%d", time.Now().UnixNano()%1000000),
+		ProductionLineID:                lineID,
+		PorosityDeviationPct:            porosityDev,
+		ElectrodeCoatingUniformity:      uniformity,
+		PTFEFibrillationIntegrity:       fibrillation,
+		CalenderNipServoTrimMandate:     calenderTrim,
 		ThermalInductionZoneTrimMandate: thermalTrim,
-		AuditDigest:                    digest,
-		EvaluatedAt:                    time.Now(),
+		AuditDigest:                     digest,
+		EvaluatedAt:                     time.Now(),
 	}
 
 	v.assessments[lineID] = assessment
@@ -155,7 +155,7 @@ func (v *DryElectrodeVault) TriggerCalenderGapAndThermalTrim(lineID string) (Dry
 		cmdNipGap = 74.2 // micro-adjust calender nip servo down to compress free volume to 15.0% porosity
 	}
 	if asm.ThermalInductionZoneTrimMandate {
-		thermalBoost = 3.5    // +3.5°C thermal induction boost to soften PTFE fibrils without thermal degradation
+		thermalBoost = 3.5     // +3.5°C thermal induction boost to soften PTFE fibrils without thermal degradation
 		screwSpeedTrim = -15.0 // reduce twin-screw RPM to relieve excessive melt shear stress
 	}
 

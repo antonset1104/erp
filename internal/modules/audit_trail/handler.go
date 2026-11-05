@@ -192,7 +192,7 @@ func (h *Handler) RollbackLog(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":     fmt.Sprintf("Berhasil melakukan rollback untuk log %s", compEntry.LogCode),
+		"message":      fmt.Sprintf("Berhasil melakukan rollback untuk log %s", compEntry.LogCode),
 		"rollback_log": compEntry,
 	})
 }

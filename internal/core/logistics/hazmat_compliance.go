@@ -13,30 +13,30 @@ import (
 
 // HazmatItem represents a single dangerous goods chemical or product entry
 type HazmatItem struct {
-	ItemSKU             string  `json:"item_sku"`
-	UNNumber            string  `json:"un_number"` // e.g. "UN 3480", "UN 1203", "UN 1805"
-	ProperShippingName  string  `json:"proper_shipping_name"` // e.g. "LITHIUM ION BATTERIES"
-	PrimaryHazardClass  string  `json:"primary_hazard_class"` // e.g. "CLASS_9", "CLASS_3", "CLASS_8"
-	SubsidiaryRisk      string  `json:"subsidiary_risk"`      // e.g. "NONE", "CLASS_6.1"
-	PackingGroup        string  `json:"packing_group"`        // "PG_I", "PG_II", "PG_III"
-	QuantityPackages    int     `json:"quantity_packages"`
-	PackageTypeDescription string `json:"package_type_description"` // "FIBREBOARD_BOX_4G", "STEEL_DRUM_1A1"
-	NetMassPerPackageKG float64 `json:"net_mass_per_package_kg"`
-	FlashPointCelsius   float64 `json:"flash_point_celsius"` // For flammable liquids (Class 3)
-	IsMarinePollutant   bool    `json:"is_marine_pollutant"`
-	IsLimitedQuantity   bool    `json:"is_limited_quantity"`
+	ItemSKU                string  `json:"item_sku"`
+	UNNumber               string  `json:"un_number"`            // e.g. "UN 3480", "UN 1203", "UN 1805"
+	ProperShippingName     string  `json:"proper_shipping_name"` // e.g. "LITHIUM ION BATTERIES"
+	PrimaryHazardClass     string  `json:"primary_hazard_class"` // e.g. "CLASS_9", "CLASS_3", "CLASS_8"
+	SubsidiaryRisk         string  `json:"subsidiary_risk"`      // e.g. "NONE", "CLASS_6.1"
+	PackingGroup           string  `json:"packing_group"`        // "PG_I", "PG_II", "PG_III"
+	QuantityPackages       int     `json:"quantity_packages"`
+	PackageTypeDescription string  `json:"package_type_description"` // "FIBREBOARD_BOX_4G", "STEEL_DRUM_1A1"
+	NetMassPerPackageKG    float64 `json:"net_mass_per_package_kg"`
+	FlashPointCelsius      float64 `json:"flash_point_celsius"` // For flammable liquids (Class 3)
+	IsMarinePollutant      bool    `json:"is_marine_pollutant"`
+	IsLimitedQuantity      bool    `json:"is_limited_quantity"`
 }
 
 // StowageAuditResult represents the chemical segregation assessment inside a freight container
 type StowageAuditResult struct {
-	ShipmentID               string       `json:"shipment_id"`
-	ContainerNumber          string       `json:"container_number"`
-	ItemsAudited             []HazmatItem `json:"items_audited"`
-	SegregationStatus        string       `json:"segregation_status"` // "COMPLIANT_PERMITTED", "SEGREGATION_CONFLICT_FORBIDDEN"
-	IncompatiblePairsFound   []string     `json:"incompatible_pairs_found"`
-	TotalNetExplosiveMassKG  float64      `json:"total_net_explosive_mass_kg"`
-	TunnelRestrictionCode    string       `json:"tunnel_restriction_code"` // e.g. "(E)", "(D/E)"
-	AuditedAt                time.Time    `json:"audited_at"`
+	ShipmentID              string       `json:"shipment_id"`
+	ContainerNumber         string       `json:"container_number"`
+	ItemsAudited            []HazmatItem `json:"items_audited"`
+	SegregationStatus       string       `json:"segregation_status"` // "COMPLIANT_PERMITTED", "SEGREGATION_CONFLICT_FORBIDDEN"
+	IncompatiblePairsFound  []string     `json:"incompatible_pairs_found"`
+	TotalNetExplosiveMassKG float64      `json:"total_net_explosive_mass_kg"`
+	TunnelRestrictionCode   string       `json:"tunnel_restriction_code"` // e.g. "(E)", "(D/E)"
+	AuditedAt               time.Time    `json:"audited_at"`
 }
 
 // DangerousGoodsDeclaration represents the official IMO / IATA Multimodal DGD document
@@ -59,12 +59,12 @@ type DangerousGoodsDeclaration struct {
 
 // HazmatComplianceManifest compiles full dangerous goods shipping dossier
 type HazmatComplianceManifest struct {
-	ShipmentID             string                    `json:"shipment_id"`
-	AuditSummary           StowageAuditResult        `json:"audit_summary"`
-	Declaration            DangerousGoodsDeclaration `json:"declaration"`
-	PlacardRequirement     string                    `json:"placard_requirement"` // e.g. "CLASS 9 MISCELLANEOUS & BATTERY MARK"
-	ComplianceVerdict      string                    `json:"compliance_verdict"`
-	LastAuditedAt          time.Time                 `json:"last_audited_at"`
+	ShipmentID         string                    `json:"shipment_id"`
+	AuditSummary       StowageAuditResult        `json:"audit_summary"`
+	Declaration        DangerousGoodsDeclaration `json:"declaration"`
+	PlacardRequirement string                    `json:"placard_requirement"` // e.g. "CLASS 9 MISCELLANEOUS & BATTERY MARK"
+	ComplianceVerdict  string                    `json:"compliance_verdict"`
+	LastAuditedAt      time.Time                 `json:"last_audited_at"`
 }
 
 // HazmatEngine manages dangerous goods classification, segregation, and DGD document generation

@@ -34,7 +34,7 @@ type Task struct {
 	UserID         *uint           `json:"user_id,omitempty"` // Assigned to
 	User           *base.User      `gorm:"foreignKey:UserID" json:"user,omitempty"`
 	Stage          string          `gorm:"size:32;default:'todo';index" json:"stage"` // "todo", "in_progress", "review", "done", "cancelled"
-	Priority       string          `gorm:"size:16;default:'1'" json:"priority"`      // "0" (Low), "1" (Normal), "2" (High), "3" (Urgent)
+	Priority       string          `gorm:"size:16;default:'1'" json:"priority"`       // "0" (Low), "1" (Normal), "2" (High), "3" (Urgent)
 	PlannedHours   float64         `gorm:"default:0" json:"planned_hours"`
 	EffectiveHours float64         `gorm:"default:0" json:"effective_hours"`
 	Progress       float64         `gorm:"default:0" json:"progress"` // In %
@@ -51,6 +51,6 @@ type TimesheetLine struct {
 	UserID     uint       `gorm:"not null;index" json:"user_id"`
 	User       *base.User `gorm:"foreignKey:UserID" json:"user,omitempty"`
 	Date       string     `gorm:"size:32;not null" json:"date"`
-	UnitAmount float64    `gorm:"not null" json:"unit_amount"` // Hours spent e.g. 2.5
+	UnitAmount float64    `gorm:"not null" json:"unit_amount"`   // Hours spent e.g. 2.5
 	Name       string     `gorm:"size:255;not null" json:"name"` // Description of work
 }

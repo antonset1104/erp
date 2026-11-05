@@ -75,26 +75,26 @@ type SimulateSubstitutionRequest struct {
 
 // BOMSubstitutionSimulation represents engineering and financial impact of alternative materials.
 type BOMSubstitutionSimulation struct {
-	SimulationID             string   `json:"simulation_id"`
-	FinishedProductSKU       string   `json:"finished_product_sku"`
-	OriginalMaterialID       string   `json:"original_material_id"`
-	SubstituteMaterial       string   `json:"substitute_material"`
-	TechnicalFeasibilityPct  float64  `json:"technical_feasibility_pct"`
-	AnnualCostDeltaUSD       float64  `json:"annual_cost_delta_usd"`
-	PaybackMonths            float64  `json:"payback_months"`
-	QualificationLeadTime    string   `json:"qualification_lead_time"`
-	RegulatoryClearancePath  string   `json:"regulatory_clearance_path"`
-	RiskReductionScore       float64  `json:"risk_reduction_score"`
-	StrategicVerdict         string   `json:"strategic_verdict"`
-	SimulatedAt              string   `json:"simulated_at"`
+	SimulationID            string  `json:"simulation_id"`
+	FinishedProductSKU      string  `json:"finished_product_sku"`
+	OriginalMaterialID      string  `json:"original_material_id"`
+	SubstituteMaterial      string  `json:"substitute_material"`
+	TechnicalFeasibilityPct float64 `json:"technical_feasibility_pct"`
+	AnnualCostDeltaUSD      float64 `json:"annual_cost_delta_usd"`
+	PaybackMonths           float64 `json:"payback_months"`
+	QualificationLeadTime   string  `json:"qualification_lead_time"`
+	RegulatoryClearancePath string  `json:"regulatory_clearance_path"`
+	RiskReductionScore      float64 `json:"risk_reduction_score"`
+	StrategicVerdict        string  `json:"strategic_verdict"`
+	SimulatedAt             string  `json:"simulated_at"`
 }
 
 // CRMResilienceStore manages thread-safe storage for CRM resilience assets.
 type CRMResilienceStore struct {
-	mu           sync.RWMutex
-	materials    map[string]*CriticalMaterialItem
-	evaluations  map[string]*DualSourcingEvaluation
-	simulations  map[string]*BOMSubstitutionSimulation
+	mu          sync.RWMutex
+	materials   map[string]*CriticalMaterialItem
+	evaluations map[string]*DualSourcingEvaluation
+	simulations map[string]*BOMSubstitutionSimulation
 }
 
 var globalCRMStore = &CRMResilienceStore{

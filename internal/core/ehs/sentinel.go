@@ -23,35 +23,35 @@ type SensorZoneAlert struct {
 
 // OSHA300LogEntry encapsulates an official workplace injury or illness log item.
 type OSHA300LogEntry struct {
-	CaseNo                   string `json:"case_no"`
-	EmployeeClassification   string `json:"employee_classification"`
-	DateOfIncident           string `json:"date_of_incident"`
-	WhereEventOccurred       string `json:"where_event_occurred"`
-	DescribeInjuryOrIllness  string `json:"describe_injury_or_illness"`
-	Classification           string `json:"classification"` // "DEATH", "DAYS_AWAY_FROM_WORK", "JOB_TRANSFER_RESTRICTION", "OTHER_RECORDABLE"
-	DaysAwayCount            int    `json:"days_away_count"`
-	DaysRestrictedCount      int    `json:"days_restricted_count"`
+	CaseNo                  string `json:"case_no"`
+	EmployeeClassification  string `json:"employee_classification"`
+	DateOfIncident          string `json:"date_of_incident"`
+	WhereEventOccurred      string `json:"where_event_occurred"`
+	DescribeInjuryOrIllness string `json:"describe_injury_or_illness"`
+	Classification          string `json:"classification"` // "DEATH", "DAYS_AWAY_FROM_WORK", "JOB_TRANSFER_RESTRICTION", "OTHER_RECORDABLE"
+	DaysAwayCount           int    `json:"days_away_count"`
+	DaysRestrictedCount     int    `json:"days_restricted_count"`
 }
 
 // OSHA300ASummary contains calculated occupational health and safety metrics for statutory reporting.
 type OSHA300ASummary struct {
-	Year                        int               `json:"year"`
-	EstablishmentName           string            `json:"establishment_name"`
-	TotalHoursWorked            float64           `json:"total_hours_worked"`
-	AverageAnnualEmployees      int               `json:"average_annual_employees"`
-	TotalDeaths                 int               `json:"total_deaths"`
-	TotalCasesWithDaysAway      int               `json:"total_cases_with_days_away"`
-	TotalCasesWithRestriction   int               `json:"total_cases_with_restriction"`
-	TotalOtherRecordableCases   int               `json:"total_other_recordable_cases"`
-	TotalRecordableCases        int               `json:"total_recordable_cases"`
-	TotalDaysAway               int               `json:"total_days_away"`
-	TotalDaysRestricted         int               `json:"total_days_restricted"`
-	TRIRScore                   float64           `json:"trir_score"` // Total Recordable Incident Rate
-	DARTScore                   float64           `json:"dart_score"` // Days Away, Restricted or Transferred Rate
-	SeverityIndex               float64           `json:"severity_index"`
-	ISO45001AuditStatus         string            `json:"iso45001_audit_status"` // "CERTIFIED_COMPLIANT", "OBSERVATION_WARNING", "NON_CONFORMING"
-	RecentEntries               []OSHA300LogEntry `json:"recent_entries"`
-	GeneratedAt                 string            `json:"generated_at"`
+	Year                      int               `json:"year"`
+	EstablishmentName         string            `json:"establishment_name"`
+	TotalHoursWorked          float64           `json:"total_hours_worked"`
+	AverageAnnualEmployees    int               `json:"average_annual_employees"`
+	TotalDeaths               int               `json:"total_deaths"`
+	TotalCasesWithDaysAway    int               `json:"total_cases_with_days_away"`
+	TotalCasesWithRestriction int               `json:"total_cases_with_restriction"`
+	TotalOtherRecordableCases int               `json:"total_other_recordable_cases"`
+	TotalRecordableCases      int               `json:"total_recordable_cases"`
+	TotalDaysAway             int               `json:"total_days_away"`
+	TotalDaysRestricted       int               `json:"total_days_restricted"`
+	TRIRScore                 float64           `json:"trir_score"` // Total Recordable Incident Rate
+	DARTScore                 float64           `json:"dart_score"` // Days Away, Restricted or Transferred Rate
+	SeverityIndex             float64           `json:"severity_index"`
+	ISO45001AuditStatus       string            `json:"iso45001_audit_status"` // "CERTIFIED_COMPLIANT", "OBSERVATION_WARNING", "NON_CONFORMING"
+	RecentEntries             []OSHA300LogEntry `json:"recent_entries"`
+	GeneratedAt               string            `json:"generated_at"`
 }
 
 // CAPAEscalation represents a formal Corrective and Preventive Action workflow.

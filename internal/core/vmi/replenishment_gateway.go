@@ -15,62 +15,62 @@ import (
 type VMIReplenishStatus string
 
 const (
-	StatusDispatchUrgent  VMIReplenishStatus = "DISPATCH_URGENT"  // Below Min Band
-	StatusStockOptimal    VMIReplenishStatus = "STOCK_OPTIMAL"    // Within Min-Max Band
-	StatusOverstocked     VMIReplenishStatus = "OVERSTOCKED"      // Above Max Band
+	StatusDispatchUrgent VMIReplenishStatus = "DISPATCH_URGENT" // Below Min Band
+	StatusStockOptimal   VMIReplenishStatus = "STOCK_OPTIMAL"   // Within Min-Max Band
+	StatusOverstocked    VMIReplenishStatus = "OVERSTOCKED"     // Above Max Band
 )
 
 // VMIConsignmentItem represents an item tracked under a VMI consignment agreement.
 type VMIConsignmentItem struct {
-	SKU                   string             `json:"sku"`
-	ProductName           string             `json:"product_name"`
-	VendorID              uint               `json:"vendor_id"`
-	VendorName            string             `json:"vendor_name"`
-	WarehouseLocation     string             `json:"warehouse_location"`
-	UnitCostIDR           float64            `json:"unit_cost_idr"`
-	MinStockBand          float64            `json:"min_stock_band"`
-	MaxStockBand          float64            `json:"max_stock_band"`
-	CurrentConsignedOnHand float64           `json:"current_consigned_on_hand"`
-	Projected14dDemand    float64            `json:"projected_14d_demand"`
-	Status                VMIReplenishStatus `json:"status"`
-	SuggestedDispatchQty  float64            `json:"suggested_dispatch_qty"`
+	SKU                    string             `json:"sku"`
+	ProductName            string             `json:"product_name"`
+	VendorID               uint               `json:"vendor_id"`
+	VendorName             string             `json:"vendor_name"`
+	WarehouseLocation      string             `json:"warehouse_location"`
+	UnitCostIDR            float64            `json:"unit_cost_idr"`
+	MinStockBand           float64            `json:"min_stock_band"`
+	MaxStockBand           float64            `json:"max_stock_band"`
+	CurrentConsignedOnHand float64            `json:"current_consigned_on_hand"`
+	Projected14dDemand     float64            `json:"projected_14d_demand"`
+	Status                 VMIReplenishStatus `json:"status"`
+	SuggestedDispatchQty   float64            `json:"suggested_dispatch_qty"`
 }
 
 // VMIForecastReport encapsulates the supplier-facing VMI dashboard.
 type VMIForecastReport struct {
-	ReportID              string               `json:"report_id"`
-	GeneratedAt           string               `json:"generated_at"`
-	VendorID              uint                 `json:"vendor_id"`
-	VendorName            string               `json:"vendor_name"`
-	TotalItemsMonitored   int                  `json:"total_items_monitored"`
-	UrgentDispatchCount   int                  `json:"urgent_dispatch_count"`
-	TotalConsignmentValIDR float64             `json:"total_consignment_val_idr"`
-	Items                 []VMIConsignmentItem `json:"items"`
-	ConsignmentGuidelines string               `json:"consignment_guidelines"`
+	ReportID               string               `json:"report_id"`
+	GeneratedAt            string               `json:"generated_at"`
+	VendorID               uint                 `json:"vendor_id"`
+	VendorName             string               `json:"vendor_name"`
+	TotalItemsMonitored    int                  `json:"total_items_monitored"`
+	UrgentDispatchCount    int                  `json:"urgent_dispatch_count"`
+	TotalConsignmentValIDR float64              `json:"total_consignment_val_idr"`
+	Items                  []VMIConsignmentItem `json:"items"`
+	ConsignmentGuidelines  string               `json:"consignment_guidelines"`
 }
 
 // ConsignmentConsumptionRequest logs materials consumed in manufacturing.
 type ConsignmentConsumptionRequest struct {
-	SKU                 string  `json:"sku"`
-	QuantityConsumed    float64 `json:"quantity_consumed"`
-	ProductionOrderRef  string  `json:"production_order_ref"`
-	ConsumedByWorkCenter string `json:"consumed_by_work_center"`
+	SKU                  string  `json:"sku"`
+	QuantityConsumed     float64 `json:"quantity_consumed"`
+	ProductionOrderRef   string  `json:"production_order_ref"`
+	ConsumedByWorkCenter string  `json:"consumed_by_work_center"`
 }
 
 // ConsignmentConsumptionResponse confirms auto-billing and stock drawdown.
 type ConsignmentConsumptionResponse struct {
-	Success                bool    `json:"success"`
-	ConsumptionLogID       string  `json:"consumption_log_id"`
-	SKU                    string  `json:"sku"`
-	ProductName            string  `json:"product_name"`
-	QuantityConsumed       float64 `json:"quantity_consumed"`
+	Success                 bool    `json:"success"`
+	ConsumptionLogID        string  `json:"consumption_log_id"`
+	SKU                     string  `json:"sku"`
+	ProductName             string  `json:"product_name"`
+	QuantityConsumed        float64 `json:"quantity_consumed"`
 	RemainingConsignedStock float64 `json:"remaining_consigned_stock"`
-	BillableSubtotalIDR    float64 `json:"billable_subtotal_idr"`
-	VATAmountIDR           float64 `json:"vat_amount_idr"` // 11% PPN
-	TotalPayableVendorIDR  float64 `json:"total_payable_vendor_idr"`
-	AutoGeneratedBillCode  string  `json:"auto_generated_bill_code"`
-	Timestamp              string  `json:"timestamp"`
-	Message                string  `json:"message"`
+	BillableSubtotalIDR     float64 `json:"billable_subtotal_idr"`
+	VATAmountIDR            float64 `json:"vat_amount_idr"` // 11% PPN
+	TotalPayableVendorIDR   float64 `json:"total_payable_vendor_idr"`
+	AutoGeneratedBillCode   string  `json:"auto_generated_bill_code"`
+	Timestamp               string  `json:"timestamp"`
+	Message                 string  `json:"message"`
 }
 
 // VMIService manages vendor-managed inventory and consignment automation.
