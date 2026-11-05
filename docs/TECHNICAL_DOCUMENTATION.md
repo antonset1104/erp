@@ -1725,3 +1725,40 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
   - Reconciles unmatched bank payments to zero-residual balance status.
 - **Deduplication Candidate Ingestion**: Endpoint `GET /api/v1/ai/self-healing/dedup/candidates` returns candidate duplicate pairs with pairwise similarity scores and recommended consolidation targets.
 - **Demo Anomaly Seeding**: Endpoint `POST /api/v1/ai/self-healing/seed-demo` injects synthetic GR/IR clearing delays and master data duplications for operator training and compliance verification.
+
+
+## 53. Ambient Multimodal Computer Vision & Autonomous Volumetric Receiving Dock AI
+
+### 53.1 3D Spatial Volumetric Dimensional Sizing & Freight Overcharge Protection (`internal/core/ai/multimodal_vision.go`)
+- **Automated Dimension Extraction**: Processes edge vision camera streams and depth sensors deployed at warehouse receiving docks to compute spatial packaging dimensions (Length, Width, Height in centimeters) and cubic meter volume.
+- **IATA Volumetric Weight Standard**: Evaluates chargeable freight weight against the international standard divisor ($5000\text{ cm}^3/\text{kg}$):
+  $$\text{Volumetric Weight (kg)} = \frac{\text{Length (cm)} \times \text{Width (cm)} \times \text{Height (cm)}}{5000}$$
+  $$\text{Billed Weight (kg)} = \max(\text{Actual Weight}, \text{Volumetric Weight})$$
+- **Catalog Discrepancy & Tariff Leakage Detection**: Cross-references scanned dimensions against master product catalog specifications. Deviations exceeding $\pm 15\%$ trigger volumetric variance alerts and compute prevented carrier freight surcharges ($Rp\ 35.000/\text{kg}$).
+
+### 53.2 Multimodal Packaging Defect Classification & Quality Scoring
+- **Edge Vision Defect Detection**: Identifies physical cargo and container damage in real time, classifying defect severity:
+  - `CRITICAL` (45 pts): Crushed carton corners with internal product exposure, ruptured liquid containers, or severed cold-chain tamper seals.
+  - `HIGH` (25 pts): Forklift puncture penetrations or significant water/condensation damage.
+  - `MEDIUM` (15 pts): Dented edges, deformed box flaps, or loose strapping bands.
+  - `LOW` (5 pts): Scuffed surfaces or partially obscured barcode labels.
+- **Automated QC Verdicts**:
+  - Defect Score $\ge 40.0\%$: Cargo rejected (`REJECTED_DAMAGED`), dock intake halted.
+  - $15.0\% \le \text{Defect Score} < 40.0\%$: Warning issued (`WARNING`), manual physical inspection required.
+  - Defect Score $< 15.0\%$: Immediate warehouse clearance (`ACCEPTED`).
+
+### 53.3 Autonomous Return Merchandise Authorization (RMA) & AP Chargeback Generation
+- **Automated Claims Issuance**: When inbound cargo fails QC thresholds with auto-claim enabled, the engine instantiates an authorized `CargoRMARecord` (`ai_cargo_rmas`).
+- **Financial Loss Quantification & Debit Memo**:
+  - Automatically calculates financial exposure based on purchase order unit prices:
+    $$\text{Estimated Loss} = \text{Damaged Units} \times \text{Unit Price IDR}$$
+  - Synthesizes formal Accounts Payable (AP) debit memo chargeback documentation containing photographic evidence links, scan codes, and vendor indemnity citations.
+
+### 53.4 REST API Specification & Edge Vision Integration
+- `GET /api/v1/ai/vision/overview`: Aggregates 24-hour scan throughput, packaging integrity index, rejected damaged volumes, and prevented freight overcharges.
+- `GET /api/v1/ai/vision/scans`: Queries scan audit history filtered by quality status (`ACCEPTED`, `WARNING`, `REJECTED_DAMAGED`).
+- `GET /api/v1/ai/vision/scans/:id`: Returns comprehensive scan telemetry, including 3D wireframe bounding box coordinates and localized defect annotations.
+- `POST /api/v1/ai/vision/scan`: Ingests sensor/camera payload for dimensional and visual quality analysis.
+- `POST /api/v1/ai/vision/scans/:id/rma`: Issues an automated RMA claim and AP debit memo for an inspected parcel.
+- `GET /api/v1/ai/vision/rmas`: Lists active supplier return authorizations and chargeback records.
+- `POST /api/v1/ai/vision/seed-demo`: Seeds realistic receiving scenarios (pristine cargo, crushed electronics pallets, oversized plastic totes, compromised cold-chain pharmaceuticals, and heavy crated machinery).

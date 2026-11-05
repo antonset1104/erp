@@ -2,6 +2,7 @@ package ai
 
 import (
 	"encoding/base64"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -804,6 +805,112 @@ func (h *Handler) SeedSelfHealingDemoData(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Demo self-healing anomalies successfully seeded", "count": len(anomalies), "data": anomalies})
 }
 
+// Ambient Multimodal Computer Vision & Autonomous Volumetric Receiving
+func (h *Handler) GetCargoVisionOverview(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	engine := GetMultimodalVisionEngine(h.db)
+	overview, err := engine.GetOverview(companyID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": overview})
+}
+
+func (h *Handler) GetCargoVisionScans(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	status := c.Query("status")
+	engine := GetMultimodalVisionEngine(h.db)
+	scans, err := engine.GetScans(companyID, status, 50)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": scans, "count": len(scans)})
+}
+
+func (h *Handler) GetCargoVisionScanByID(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	idStr := c.Param("id")
+	var id uint
+	if _, err := fmt.Sscanf(idStr, "%d", &id); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid scan ID"})
+		return
+	}
+	engine := GetMultimodalVisionEngine(h.db)
+	scan, err := engine.GetScanByID(companyID, id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Scan record not found"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": scan})
+}
+
+func (h *Handler) ProcessCargoVisionScan(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	var req ScanCargoRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	engine := GetMultimodalVisionEngine(h.db)
+	record, err := engine.ProcessVisionScan(companyID, req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Cargo vision scan successfully processed", "data": record})
+}
+
+type GenerateRMARequest struct {
+	Reason     string  `json:"reason"`
+	DamagedQty int     `json:"damaged_qty"`
+	UnitPrice  float64 `json:"unit_price"`
+}
+
+func (h *Handler) GenerateCargoRMA(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	idStr := c.Param("id")
+	var id uint
+	if _, err := fmt.Sscanf(idStr, "%d", &id); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid scan ID"})
+		return
+	}
+	var req GenerateRMARequest
+	_ = c.ShouldBindJSON(&req)
+	if req.Reason == "" {
+		req.Reason = "Kerusakan kargo hasil deteksi inspeksi AI Vision Inbound Dock"
+	}
+	engine := GetMultimodalVisionEngine(h.db)
+	rma, err := engine.GenerateRMAForScan(companyID, id, req.Reason, req.DamagedQty, req.UnitPrice)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Automated RMA and chargeback successfully created", "data": rma})
+}
+
+func (h *Handler) GetCargoRMAs(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	engine := GetMultimodalVisionEngine(h.db)
+	rmas, err := engine.GetRMAs(companyID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": rmas, "count": len(rmas)})
+}
+
+func (h *Handler) SeedCargoVisionDemoData(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	engine := GetMultimodalVisionEngine(h.db)
+	if err := engine.SeedDemoData(companyID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Demo cargo vision scans and RMAs successfully seeded"})
+}
+
 // RegisterRootProtocolRoutes registers public protocol discovery endpoints like /.well-known/agent.json and /mcp
 func RegisterRootProtocolRoutes(r *gin.Engine, h *Handler) {
 	r.GET("/.well-known/agent.json", h.GetA2AAgentCard)
@@ -907,6 +1014,15 @@ func RegisterAIRoutes(router *gin.RouterGroup, authMiddleware gin.HandlerFunc, h
 			authed.POST("/self-healing/anomalies/:id/remediate", h.ExecuteSelfHealingRemediation)
 			authed.GET("/self-healing/dedup/candidates", h.GetSemanticDedupCandidates)
 			authed.POST("/self-healing/seed-demo", h.SeedSelfHealingDemoData)
+
+			// Ambient Multimodal Computer Vision & Autonomous Volumetric Receiving
+			authed.GET("/vision/overview", h.GetCargoVisionOverview)
+			authed.GET("/vision/scans", h.GetCargoVisionScans)
+			authed.GET("/vision/scans/:id", h.GetCargoVisionScanByID)
+			authed.POST("/vision/scan", h.ProcessCargoVisionScan)
+			authed.POST("/vision/scans/:id/rma", h.GenerateCargoRMA)
+			authed.GET("/vision/rmas", h.GetCargoRMAs)
+			authed.POST("/vision/seed-demo", h.SeedCargoVisionDemoData)
 		}
 	}
 }

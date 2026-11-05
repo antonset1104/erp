@@ -120,6 +120,7 @@ var erpModuleCatalog = []ModuleCatalogItem{
 	{Tab: "digital-twin-simulator", Title: "Digital Twin & What-If War-Room", Category: "AI & INTELLIGENCE", Icon: "🔮", Keywords: "digital twin monte carlo simulasi skenario what if krisis valas shock stress test runway playbook"},
 	{Tab: "fraud-graph-sentinel", Title: "Anti-Fraud & Collusion Graph", Category: "AI & INTELLIGENCE", Icon: "🛡️", Keywords: "anti-fraud gnn knowledge graph audit forensik pengadaan kolusi vendor bid rigging split po rekening bersama sindikat"},
 	{Tab: "self-healing-data", Title: "Self-Healing Data Sentinel", Category: "AI & INTELLIGENCE", Icon: "✨", Keywords: "self healing data rekonsiliasi otomatis zero touch closing gr ir clearing deduplikasi semantik master data buku besar"},
+	{Tab: "ambient-vision-dock", Title: "Ambient Vision Logistics (WMS Dock AI)", Category: "AI & INTELLIGENCE", Icon: "👁️", Keywords: "ambient computer vision wms dock receiving kargo volumetrik dimensi p l t defect detection kerusakan rma klaim asuransi freight surcharges"},
 }
 
 // RegisterRoutes mounts the continuous improvement Command Center endpoints on /api/v1

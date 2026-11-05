@@ -276,6 +276,10 @@
                     <span class="nav-icon">✨</span>
                     <span class="nav-label">Self-Healing Data Sentinel</span>
                 </button>
+                <button class="nav-item" data-tab="ambient-vision-dock">
+                    <span class="nav-icon">👁️</span>
+                    <span class="nav-label">Ambient Vision Logistics</span>
+                </button>
             </nav>
 
             <div class="user-profile">
@@ -4079,6 +4083,263 @@
                                     </thead>
                                     <tbody id="healingHistoryTableBody">
                                         <tr><td colspan="6" class="text-center text-muted" style="padding: 2rem;">Memuat riwayat pemulihan...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                
+                <!-- ===================================================== -->
+                <!-- SECTION: AMBIENT MULTIMODAL COMPUTER VISION & DOCK AI -->
+                <!-- ===================================================== -->
+                <section id="tab-ambient-vision-dock" class="tab-view">
+                    <div class="content-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                                <h2>Ambient Multimodal Computer Vision &amp; Autonomous Volumetric Dock AI</h2>
+                                <span class="badge" style="background: rgba(14, 165, 233, 0.15); color: #0284c7; border: 1px solid rgba(14, 165, 233, 0.3); font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.75rem;">EDGE DOCK VISION &amp; QC AUTOMATION</span>
+                            </div>
+                            <p class="subtitle">Inspeksi visual kargo bongkar muat otomatis, kalkulasi dimensi spasial 3D &amp; berat volumetrik (IATA), deteksi anomali/cacat fisik kemasan real-time, dan penerbitan klaim retur vendor (RMA) otomatis.</p>
+                        </div>
+                        <div class="header-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <button class="btn btn-primary" onclick="triggerVisionScanModal()" style="background: linear-gradient(135deg, #0284c7, #0369a1); border: none; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);">
+                                <span>📷</span> Scan Kargo Inbound Baru
+                            </button>
+                            <button class="btn btn-secondary" onclick="seedVisionDemoData()" title="Injeksi data demo kargo normal, cacat kemasan, selisih dimensi, dan klaim RMA">
+                                <span>🧪</span> Injeksi Data Demo Kargo
+                            </button>
+                            <button class="btn btn-secondary" onclick="loadAmbientVisionData()" title="Segarkan Data Vision Dock">
+                                <span>🔄</span> Refresh Vision Dock
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 5 KPI Metric Cards -->
+                    <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                        <div class="card stat-card" style="border-top: 3px solid #0284c7;">
+                            <div class="stat-icon" style="background: rgba(2, 132, 199, 0.15); color: #0284c7;">📦</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Total Scan Kargo 24 Jam</span>
+                                <h3 id="visionStatTotalScans" class="stat-value">0</h3>
+                                <small style="color: #0284c7; font-size: 0.75rem; font-weight: 600;">EDGE GPU INFERENCE (185ms)</small>
+                            </div>
+                        </div>
+
+                        <div class="card stat-card" style="border-top: 3px solid #10b981;">
+                            <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">🛡️</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Indeks Integritas Kemasan</span>
+                                <h3 id="visionStatIntegrityIndex" class="stat-value">100%</h3>
+                                <small style="color: #10b981; font-size: 0.75rem; font-weight: 600;">LOLOS UJI QC FISIK</small>
+                            </div>
+                        </div>
+
+                        <div class="card stat-card" style="border-top: 3px solid #ef4444;">
+                            <div class="stat-icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">⚠️</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Kargo Rusak Ditolak</span>
+                                <h3 id="visionStatHighRiskDamaged" class="stat-value" style="color: #ef4444;">0</h3>
+                                <small style="color: var(--text-muted); font-size: 0.75rem;">Skor Kerusakan &gt; 40%</small>
+                            </div>
+                        </div>
+
+                        <div class="card stat-card" style="border-top: 3px solid #f59e0b;">
+                            <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">📏</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Selisih Volumetrik Dicegah</span>
+                                <h3 id="visionStatFreightSavings" class="stat-value" style="color: #f59e0b;">Rp 0</h3>
+                                <small id="visionStatVarianceCount" style="color: var(--text-muted); font-size: 0.75rem;">0 Anomali Dimensi Ekspedisi</small>
+                            </div>
+                        </div>
+
+                        <div class="card stat-card" style="border-top: 3px solid #8b5cf6;">
+                            <div class="stat-icon" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">📑</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Klaim Retur &amp; Potongan RMA</span>
+                                <h3 id="visionStatTotalRMA" class="stat-value" style="color: #8b5cf6;">Rp 0</h3>
+                                <small style="color: #8b5cf6; font-size: 0.75rem; font-weight: 600;">AUTO AP DEBIT MEMO</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Live Viewport & Active Scan Inspector -->
+                    <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                        <!-- Left: Live Inbound Dock Viewport with SVG Spatial Overlay -->
+                        <div class="card" style="padding: 1.25rem; display: flex; flex-direction: column;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <div>
+                                    <h4 style="margin: 0; font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                                        <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #10b981; animation: pulse 2s infinite;"></span>
+                                        Inbound Dock Camera Feed (DOCK-CAMERA-01)
+                                    </h4>
+                                    <small style="color: var(--text-muted); font-size: 0.75rem;">Spatial 3D Bounding Box, Volumetric Mesh &amp; Defect HUD Overlay</small>
+                                </div>
+                                <span class="badge" id="dockCameraStatusBadge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 600; font-size: 0.75rem;">LIVE STREAMING</span>
+                            </div>
+
+                            <div id="visionViewportContainer" style="position: relative; width: 100%; height: 340px; background: #0f172a; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                                <!-- Grid lines background -->
+                                <div style="position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 30px 30px;"></div>
+
+                                <!-- Crosshairs & Viewfinder Markers -->
+                                <div style="position: absolute; top: 12px; left: 12px; width: 24px; height: 24px; border-top: 2px solid #0284c7; border-left: 2px solid #0284c7;"></div>
+                                <div style="position: absolute; top: 12px; right: 12px; width: 24px; height: 24px; border-top: 2px solid #0284c7; border-right: 2px solid #0284c7;"></div>
+                                <div style="position: absolute; bottom: 12px; left: 12px; width: 24px; height: 24px; border-bottom: 2px solid #0284c7; border-left: 2px solid #0284c7;"></div>
+                                <div style="position: absolute; bottom: 12px; right: 12px; width: 24px; height: 24px; border-bottom: 2px solid #0284c7; border-right: 2px solid #0284c7;"></div>
+
+                                <!-- Dynamic SVG 3D Wireframe & Defect Overlay -->
+                                <svg id="visionSpatialSVG" viewBox="0 0 600 340" style="position: absolute; inset: 0; width: 100%; height: 100%;">
+                                    <!-- Rendered dynamically via JavaScript -->
+                                </svg>
+
+                                <!-- HUD Metric Overlay Bar -->
+                                <div style="position: absolute; bottom: 12px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.1); font-size: 0.75rem;">
+                                    <div style="display: flex; gap: 1rem; color: #94a3b8;">
+                                        <span>Dimensi Spasial: <strong id="hudDimensions" style="color: #38bdf8;">-- x -- x -- cm</strong></span>
+                                        <span>Berat Volumetrik: <strong id="hudVolumetricWeight" style="color: #f59e0b;">-- kg</strong></span>
+                                        <span>Berat Aktual: <strong id="hudActualWeight" style="color: #e2e8f0;">-- kg</strong></span>
+                                    </div>
+                                    <div>
+                                        <span>Skor Cacat: <strong id="hudDefectScore" style="color: #10b981;">0.0%</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Live Simulation Preset Triggers -->
+                            <div style="margin-top: 1rem;">
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600;">SIMULASI KAMERA DOCK REAL-TIME:</div>
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                    <button class="btn btn-sm btn-secondary" onclick="simulateVisionScan('NORMAL')">
+                                        📦 Karton Standar (Lolos QC)
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="simulateVisionScan('CRUSHED')" style="border-color: #ef4444; color: #ef4444;">
+                                        💥 Palet Rusak Ringsek (Auto RMA)
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="simulateVisionScan('OVERSIZED')" style="border-color: #f59e0b; color: #f59e0b;">
+                                        📏 Kargo Oversized (Cegah Overcharge)
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="simulateVisionScan('WATER_STAIN')" style="border-color: #3b82f6; color: #3b82f6;">
+                                        💧 Basah / Segel Putus (Vaksin/Medis)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Active Inspection Telemetry & Decision Inspector -->
+                        <div class="card" style="padding: 1.25rem; display: flex; flex-direction: column;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <h4 style="margin: 0; font-size: 1rem; font-weight: 600;">Hasil Telemetri Kargo Terkini</h4>
+                                <span id="inspectorStatusBadge" class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; font-weight: 700; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 999px;">ACCEPTED</span>
+                            </div>
+
+                            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span style="font-size: 0.75rem; color: var(--text-muted);">Kode Scan:</span>
+                                    <strong id="inspectorScanCode" style="font-size: 0.8rem; font-family: monospace; color: #38bdf8;">VIS-SCN-READY</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span style="font-size: 0.75rem; color: var(--text-muted);">No. Referensi Kargo:</span>
+                                    <strong id="inspectorRefNumber" style="font-size: 0.8rem;">INB/2026/04/001</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span style="font-size: 0.75rem; color: var(--text-muted);">Vendor / Pemasok:</span>
+                                    <span id="inspectorVendorName" style="font-size: 0.8rem; font-weight: 600;">PT Indofood CBP Sukses Makmur</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="font-size: 0.75rem; color: var(--text-muted);">SKU &amp; Produk:</span>
+                                    <span id="inspectorProductName" style="font-size: 0.8rem; text-align: right; max-width: 60%;">SKU-FNB-ICBP-01 (Master Karton)</span>
+                                </div>
+                            </div>
+
+                            <!-- Volumetric & Weight Metric Comparison -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+                                <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); padding: 0.75rem; border-radius: 6px;">
+                                    <span style="font-size: 0.7rem; color: var(--text-muted); display: block;">BERAT VOLUMETRIK (IATA):</span>
+                                    <strong id="inspectorVolWeight" style="font-size: 1.1rem; color: #f59e0b;">4.80 kg</strong>
+                                    <small id="inspectorVolFormula" style="display: block; font-size: 0.65rem; color: var(--text-muted);">(40x30x20cm / 5000)</small>
+                                </div>
+                                <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); padding: 0.75rem; border-radius: 6px;">
+                                    <span style="font-size: 0.7rem; color: var(--text-muted); display: block;">BERAT DIKENAKAN TARIF:</span>
+                                    <strong id="inspectorBilledWeight" style="font-size: 1.1rem; color: #38bdf8;">4.80 kg</strong>
+                                    <small id="inspectorBilledMode" style="display: block; font-size: 0.65rem; color: #10b981;">Billed: Volumetrik</small>
+                                </div>
+                            </div>
+
+                            <!-- Defect Analysis Breakdown -->
+                            <div style="flex: 1; display: flex; flex-direction: column;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                    <span style="font-size: 0.75rem; font-weight: 600;">Deteksi Cacat Kemasan:</span>
+                                    <span id="inspectorDefectCountBadge" class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; font-size: 0.7rem;">0 CACAT</span>
+                                </div>
+                                <div id="inspectorDefectsList" style="flex: 1; max-height: 120px; overflow-y: auto; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; padding: 0.5rem; font-size: 0.75rem; margin-bottom: 1rem;">
+                                    <div style="color: #10b981; text-align: center; padding: 1rem 0;">Kemasan prima, tidak ada deformasi atau rembesan terdeteksi.</div>
+                                </div>
+
+                                <div id="inspectorActionArea" style="margin-top: auto;">
+                                    <button id="inspectorBtnRMA" class="btn btn-primary" onclick="triggerRMAFromInspector()" style="display: none; width: 100%; background: linear-gradient(135deg, #ef4444, #dc2626); border: none; font-size: 0.85rem; font-weight: 600;">
+                                        🚨 Terbitkan Klaim Retur &amp; Potong Tagihan Vendor (RMA)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subtabs Section: 1. Scans Log, 2. RMA Claims -->
+                    <div class="card" style="padding: 1.25rem;">
+                        <div style="display: flex; gap: 0.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                            <button id="btnVisionSubtabScans" class="btn btn-sm btn-primary" onclick="switchVisionSubtab('scans')">
+                                📋 Riwayat Inbound Vision Scans (<span id="countSubtabScans">0</span>)
+                            </button>
+                            <button id="btnVisionSubtabRMAs" class="btn btn-sm btn-secondary" onclick="switchVisionSubtab('rmas')">
+                                📑 Daftar Klaim Retur &amp; RMA (<span id="countSubtabRMAs">0</span>)
+                            </button>
+                        </div>
+
+                        <!-- Subtab 1: Vision Scans Table -->
+                        <div id="visionSubtabScansView">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Kode Scan</th>
+                                            <th>Waktu</th>
+                                            <th>No. Ref / DO</th>
+                                            <th>Pemasok &amp; SKU</th>
+                                            <th>Dimensi Fisik (PxLxT)</th>
+                                            <th>Berat (Aktual / Vol / Billed)</th>
+                                            <th>Skor Cacat</th>
+                                            <th>Status QC</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="visionScansTableBody">
+                                        <tr><td colspan="9" class="text-center text-muted" style="padding: 2rem;">Memuat riwayat scan vision...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Subtab 2: RMA Claims Table -->
+                        <div id="visionSubtabRMAsView" style="display: none;">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nomor Klaim RMA</th>
+                                            <th>Waktu Diterbitkan</th>
+                                            <th>Ref Kargo / Scan</th>
+                                            <th>Pemasok / Vendor</th>
+                                            <th>SKU &amp; Qty Rusak</th>
+                                            <th>Estimasi Kerugian</th>
+                                            <th>Alasan Klaim</th>
+                                            <th>Status</th>
+                                            <th>Nota Debit AP</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="visionRMAsTableBody">
+                                        <tr><td colspan="9" class="text-center text-muted" style="padding: 2rem;">Memuat daftar klaim RMA...</td></tr>
                                     </tbody>
                                 </table>
                             </div>

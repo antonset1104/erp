@@ -353,6 +353,7 @@ function loadCurrentTab() {
         case 'digital-twin-simulator': loadDigitalTwinSimulatorData(); break;
         case 'fraud-graph-sentinel': loadFraudSentinelData(); break;
         case 'self-healing-data': loadSelfHealingData(); break;
+        case 'ambient-vision-dock': loadAmbientVisionData(); break;
     }
 }
 
@@ -36678,4 +36679,613 @@ async function seedHealingDemoData() {
             showToast('Gagal menyuntikkan data demo: ' + err.message, 'error');
         }
     }
+}
+
+
+// =========================================================================
+// SECTION 101: AMBIENT MULTIMODAL COMPUTER VISION & DOCK AI
+// =========================================================================
+
+let cachedVisionOverview = null;
+let currentVisionScan = null;
+let currentVisionSubtab = 'scans';
+
+async function loadAmbientVisionData() {
+    try {
+        const res = await api('/ai/vision/overview');
+        const overview = (res && res.data) ? res.data : (res || {});
+        cachedVisionOverview = overview;
+
+        renderVisionOverview(overview);
+
+        const scans = overview.recent_scans || [];
+        const rmas = overview.active_rmas || [];
+
+        document.getElementById('countSubtabScans').textContent = scans.length;
+        document.getElementById('countSubtabRMAs').textContent = rmas.length;
+
+        if (scans.length > 0) {
+            // Preserve current selection or select the latest scan
+            if (!currentVisionScan) {
+                currentVisionScan = scans[0];
+            } else {
+                const found = scans.find(s => s.id === currentVisionScan.id);
+                currentVisionScan = found || scans[0];
+            }
+            renderVisionViewport(currentVisionScan);
+            renderVisionInspector(currentVisionScan);
+        } else {
+            renderVisionEmptyState();
+        }
+
+        renderVisionScansTable(scans);
+        renderVisionRMAsTable(rmas);
+    } catch (err) {
+        console.error('Error loading ambient vision data:', err);
+        if (typeof showToast === 'function') {
+            showToast('Gagal memuat data Ambient Vision Dock: ' + err.message, 'error');
+        }
+    }
+}
+
+function renderVisionOverview(overview) {
+    if (!overview) return;
+
+    const elTotalScans = document.getElementById('visionStatTotalScans');
+    const elIntegrity = document.getElementById('visionStatIntegrityIndex');
+    const elDamaged = document.getElementById('visionStatHighRiskDamaged');
+    const elFreight = document.getElementById('visionStatFreightSavings');
+    const elVarianceCount = document.getElementById('visionStatVarianceCount');
+    const elTotalRMA = document.getElementById('visionStatTotalRMA');
+
+    if (elTotalScans) elTotalScans.textContent = overview.total_scans_24h || 0;
+    if (elIntegrity) elIntegrity.textContent = (overview.packaging_integrity_index || 100).toFixed(1) + '%';
+    if (elDamaged) elDamaged.textContent = (overview.high_risk_damaged_count || 0) + ' Kargo';
+    if (elFreight) elFreight.textContent = formatCurrency(overview.total_freight_savings_idr || 0);
+    if (elVarianceCount) elVarianceCount.textContent = (overview.volumetric_variance_count || 0) + ' Anomali Dimensi Ekspedisi';
+    if (elTotalRMA) elTotalRMA.textContent = formatCurrency(overview.total_rma_claims_idr || 0);
+}
+
+function renderVisionViewport(scan) {
+    const svg = document.getElementById('visionSpatialSVG');
+    if (!svg || !scan) return;
+
+    // Dimensions
+    const L = Math.max(scan.length_cm || 40, 10);
+    const W = Math.max(scan.width_cm || 30, 10);
+    const H = Math.max(scan.height_cm || 20, 10);
+
+    // Dynamic scale to fit inside 600x340 SVG
+    const maxDim = Math.max(L, W, H);
+    const scale = Math.min(1.8, 120 / maxDim);
+
+    const ox = 290;
+    const oy = 210;
+
+    // Isometric vectors
+    const cos30 = 0.866;
+    const sin30 = 0.500;
+
+    // Vector L (down-right)
+    const vLx = L * scale * cos30;
+    const vLy = L * scale * sin30;
+
+    // Vector W (down-left)
+    const vWx = -W * scale * cos30;
+    const vWy = W * scale * sin30;
+
+    // Vector H (up)
+    const vHy = -H * scale * 1.1;
+
+    // 8 Isometric Vertices
+    // Bottom: B0 (origin), B1 (+L), B2 (+L+W), B3 (+W)
+    const B0 = { x: ox, y: oy };
+    const B1 = { x: ox + vLx, y: oy + vLy };
+    const B2 = { x: ox + vLx + vWx, y: oy + vLy + vWy };
+    const B3 = { x: ox + vWx, y: oy + vWy };
+
+    // Top: T0, T1, T2, T3
+    const T0 = { x: B0.x, y: B0.y + vHy };
+    const T1 = { x: B1.x, y: B1.y + vHy };
+    const T2 = { x: B2.x, y: B2.y + vHy };
+    const T3 = { x: B3.x, y: B3.y + vHy };
+
+    let wireColor = '#0284c7';
+    let faceTopFill = 'rgba(2, 132, 199, 0.15)';
+    let faceLeftFill = 'rgba(2, 132, 199, 0.08)';
+    let faceRightFill = 'rgba(2, 132, 199, 0.12)';
+
+    if (scan.quality_status === 'REJECTED_DAMAGED') {
+        wireColor = '#ef4444';
+        faceTopFill = 'rgba(239, 68, 68, 0.20)';
+        faceLeftFill = 'rgba(239, 68, 68, 0.12)';
+        faceRightFill = 'rgba(239, 68, 68, 0.16)';
+    } else if (scan.quality_status === 'WARNING') {
+        wireColor = '#f59e0b';
+        faceTopFill = 'rgba(245, 158, 11, 0.20)';
+        faceLeftFill = 'rgba(245, 158, 11, 0.12)';
+        faceRightFill = 'rgba(245, 158, 11, 0.16)';
+    }
+
+    // Parse defects
+    let defects = [];
+    if (scan.detected_defects_json) {
+        try {
+            defects = JSON.parse(scan.detected_defects_json);
+        } catch (e) {
+            defects = [];
+        }
+    }
+
+    let defectOverlaysHTML = '';
+    defects.forEach((d, idx) => {
+        const cx = (idx % 2 === 0) ? B1.x - 20 : B3.x + 20;
+        const cy = (idx % 2 === 0) ? B1.y + vHy * 0.6 : B3.y + vHy * 0.4;
+        const label = d.type.replace('_', ' ') + ' (' + Math.round((d.confidence || 0.9) * 100) + '%)';
+        const color = (d.severity === 'CRITICAL') ? '#ef4444' : '#f59e0b';
+
+        defectOverlaysHTML += `
+            <g class="defect-marker">
+                <circle cx="${cx}" cy="${cy}" r="22" fill="none" stroke="${color}" stroke-width="2" stroke-dasharray="4 2">
+                    <animate attributeName="r" values="18;26;18" dur="2s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite" />
+                </circle>
+                <circle cx="${cx}" cy="${cy}" r="6" fill="${color}" />
+                <rect x="${cx - 55}" y="${cy - 38}" width="110" height="20" rx="4" fill="rgba(15, 23, 42, 0.9)" stroke="${color}" stroke-width="1" />
+                <text x="${cx}" y="${cy - 24}" fill="${color}" font-size="9" font-weight="700" text-anchor="middle">${label}</text>
+            </g>
+        `;
+    });
+
+    svg.innerHTML = `
+        <!-- Wireframe faces -->
+        <polygon points="${T0.x},${T0.y} ${T1.x},${T1.y} ${T2.x},${T2.y} ${T3.x},${T3.y}" fill="${faceTopFill}" stroke="${wireColor}" stroke-width="1.5" />
+        <polygon points="${B3.x},${B3.y} ${T3.x},${T3.y} ${T2.x},${T2.y} ${B2.x},${B2.y}" fill="${faceLeftFill}" stroke="${wireColor}" stroke-width="1.5" />
+        <polygon points="${B0.x},${B0.y} ${T0.x},${T0.y} ${T1.x},${T1.y} ${B1.x},${B1.y}" fill="${faceRightFill}" stroke="${wireColor}" stroke-width="1.5" />
+        
+        <!-- Base Lines -->
+        <line x1="${B0.x}" y1="${B0.y}" x2="${B3.x}" y2="${B3.y}" stroke="${wireColor}" stroke-width="1.5" stroke-dasharray="3 3" />
+        <line x1="${B3.x}" y1="${B3.y}" x2="${B2.x}" y2="${B2.y}" stroke="${wireColor}" stroke-width="1.5" stroke-dasharray="3 3" />
+        
+        <!-- Upright corner edges -->
+        <line x1="${B0.x}" y1="${B0.y}" x2="${T0.x}" y2="${T0.y}" stroke="${wireColor}" stroke-width="2" />
+        <line x1="${B1.x}" y1="${B1.y}" x2="${T1.x}" y2="${T1.y}" stroke="${wireColor}" stroke-width="2" />
+        <line x1="${B2.x}" y1="${B2.y}" x2="${T2.x}" y2="${T2.y}" stroke="${wireColor}" stroke-width="2" />
+        <line x1="${B3.x}" y1="${B3.y}" x2="${T3.x}" y2="${T3.y}" stroke="${wireColor}" stroke-width="2" />
+
+        <!-- Dimension dimension callouts -->
+        <!-- Length (Right axis) -->
+        <path d="M ${B0.x + 8} ${B0.y + 12} L ${B1.x + 8} ${B1.y + 12}" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#arrow)" />
+        <text x="${(B0.x + B1.x)/2 + 20}" y="${(B0.y + B1.y)/2 + 25}" fill="#38bdf8" font-size="11" font-weight="600" text-anchor="middle">P: ${scan.length_cm} cm</text>
+
+        <!-- Width (Left axis) -->
+        <path d="M ${B0.x - 8} ${B0.y + 12} L ${B3.x - 8} ${B3.y + 12}" stroke="#38bdf8" stroke-width="1.5" />
+        <text x="${(B0.x + B3.x)/2 - 20}" y="${(B0.y + B3.y)/2 + 25}" fill="#38bdf8" font-size="11" font-weight="600" text-anchor="middle">L: ${scan.width_cm} cm</text>
+
+        <!-- Height (Vertical) -->
+        <line x1="${B1.x + 18}" y1="${B1.y}" x2="${T1.x + 18}" y2="${T1.y}" stroke="#38bdf8" stroke-width="1.5" />
+        <text x="${B1.x + 40}" y="${(B1.y + T1.y)/2}" fill="#38bdf8" font-size="11" font-weight="600" text-anchor="middle">T: ${scan.height_cm} cm</text>
+
+        <!-- Defect Overlays -->
+        ${defectOverlaysHTML}
+    `;
+
+    // Update bottom HUD
+    const hudDims = document.getElementById('hudDimensions');
+    const hudVol = document.getElementById('hudVolumetricWeight');
+    const hudAct = document.getElementById('hudActualWeight');
+    const hudDef = document.getElementById('hudDefectScore');
+
+    if (hudDims) hudDims.textContent = `${scan.length_cm} x ${scan.width_cm} x ${scan.height_cm} cm`;
+    if (hudVol) hudVol.textContent = `${(scan.volumetric_weight_kg || 0).toFixed(2)} kg`;
+    if (hudAct) hudAct.textContent = `${(scan.actual_weight_kg || 0).toFixed(2)} kg`;
+    if (hudDef) {
+        const score = (scan.defect_score || 0).toFixed(1);
+        hudDef.textContent = score + '%';
+        if (scan.defect_score >= 40) {
+            hudDef.style.color = '#ef4444';
+        } else if (scan.defect_score >= 15) {
+            hudDef.style.color = '#f59e0b';
+        } else {
+            hudDef.style.color = '#10b981';
+        }
+    }
+}
+
+function renderVisionInspector(scan) {
+    if (!scan) return;
+
+    document.getElementById('inspectorScanCode').textContent = scan.scan_code || '--';
+    document.getElementById('inspectorRefNumber').textContent = scan.reference_number || '--';
+    document.getElementById('inspectorVendorName').textContent = scan.vendor_name || 'Vendor Tidak Dikenal';
+    document.getElementById('inspectorProductName').textContent = (scan.product_sku ? scan.product_sku + ' - ' : '') + (scan.product_name || 'Standard Package');
+
+    const badge = document.getElementById('inspectorStatusBadge');
+    if (badge) {
+        badge.textContent = scan.quality_status || 'ACCEPTED';
+        if (scan.quality_status === 'REJECTED_DAMAGED') {
+            badge.style.background = 'rgba(239, 68, 68, 0.15)';
+            badge.style.color = '#ef4444';
+        } else if (scan.quality_status === 'WARNING') {
+            badge.style.background = 'rgba(245, 158, 11, 0.15)';
+            badge.style.color = '#f59e0b';
+        } else {
+            badge.style.background = 'rgba(16, 185, 129, 0.15)';
+            badge.style.color = '#10b981';
+        }
+    }
+
+    document.getElementById('inspectorVolWeight').textContent = (scan.volumetric_weight_kg || 0).toFixed(2) + ' kg';
+    document.getElementById('inspectorVolFormula').textContent = `(${scan.length_cm}x${scan.width_cm}x${scan.height_cm}cm / 5000)`;
+    document.getElementById('inspectorBilledWeight').textContent = (scan.billed_weight_kg || 0).toFixed(2) + ' kg';
+
+    const billedMode = document.getElementById('inspectorBilledMode');
+    if (billedMode) {
+        if (scan.volumetric_weight_kg > scan.actual_weight_kg) {
+            billedMode.textContent = 'Billed: Volumetrik IATA';
+            billedMode.style.color = '#f59e0b';
+        } else {
+            billedMode.textContent = 'Billed: Berat Aktual';
+            billedMode.style.color = '#10b981';
+        }
+    }
+
+    // Defects list
+    let defects = [];
+    if (scan.detected_defects_json) {
+        try {
+            defects = JSON.parse(scan.detected_defects_json);
+        } catch (e) {
+            defects = [];
+        }
+    }
+
+    const defectCountBadge = document.getElementById('inspectorDefectCountBadge');
+    if (defectCountBadge) {
+        defectCountBadge.textContent = defects.length + ' CACAT';
+        defectCountBadge.style.background = defects.length > 0 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)';
+        defectCountBadge.style.color = defects.length > 0 ? '#ef4444' : '#10b981';
+    }
+
+    const defectsList = document.getElementById('inspectorDefectsList');
+    if (defectsList) {
+        if (defects.length === 0) {
+            defectsList.innerHTML = '<div style="color: #10b981; text-align: center; padding: 1rem 0;">Kemasan prima, tidak ada deformasi atau rembesan terdeteksi.</div>';
+        } else {
+            let html = '';
+            defects.forEach(d => {
+                const badgeColor = (d.severity === 'CRITICAL') ? '#ef4444' : '#f59e0b';
+                html += `
+                    <div style="margin-bottom: 0.5rem; padding: 0.5rem; background: rgba(255, 255, 255, 0.03); border-left: 3px solid ${badgeColor}; border-radius: 4px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                            <strong style="color: ${badgeColor};">${d.type.replace('_', ' ')}</strong>
+                            <span style="font-size: 0.65rem; color: var(--text-muted);">Conf: ${Math.round((d.confidence || 0.9) * 100)}% | ${d.severity}</span>
+                        </div>
+                        <div style="font-size: 0.7rem; color: var(--text-secondary);">${d.description}</div>
+                    </div>
+                `;
+            });
+            defectsList.innerHTML = html;
+        }
+    }
+
+    // RMA Button display
+    const btnRMA = document.getElementById('inspectorBtnRMA');
+    if (btnRMA) {
+        if ((scan.quality_status === 'REJECTED_DAMAGED' || scan.defect_score >= 40) && !scan.rma_generated) {
+            btnRMA.style.display = 'block';
+            btnRMA.textContent = '🚨 Terbitkan Klaim Retur & Potong Tagihan Vendor (RMA)';
+        } else if (scan.rma_generated) {
+            btnRMA.style.display = 'block';
+            btnRMA.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+            btnRMA.textContent = '✅ Klaim RMA Terbit (' + scan.rma_code + ')';
+        } else {
+            btnRMA.style.display = 'none';
+        }
+    }
+}
+
+function renderVisionEmptyState() {
+    const svg = document.getElementById('visionSpatialSVG');
+    if (svg) {
+        svg.innerHTML = `
+            <text x="300" y="160" fill="rgba(255,255,255,0.4)" font-size="14" text-anchor="middle">
+                Silakan lakukan scan kargo atau injeksi data demo.
+            </text>
+        `;
+    }
+}
+
+function renderVisionScansTable(scans) {
+    const tbody = document.getElementById('visionScansTableBody');
+    if (!tbody) return;
+
+    if (!scans || scans.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted" style="padding: 2rem;">Belum ada riwayat scan vision kargo.</td></tr>';
+        return;
+    }
+
+    let rows = '';
+    scans.forEach(s => {
+        let badgeBg = 'rgba(16, 185, 129, 0.15)';
+        let badgeColor = '#10b981';
+        if (s.quality_status === 'REJECTED_DAMAGED') {
+            badgeBg = 'rgba(239, 68, 68, 0.15)';
+            badgeColor = '#ef4444';
+        } else if (s.quality_status === 'WARNING') {
+            badgeBg = 'rgba(245, 158, 11, 0.15)';
+            badgeColor = '#f59e0b';
+        }
+
+        const dateStr = s.created_at ? new Date(s.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '--:--';
+        const dims = `${s.length_cm}x${s.width_cm}x${s.height_cm} cm`;
+        const weights = `${s.actual_weight_kg.toFixed(1)} / ${s.volumetric_weight_kg.toFixed(1)} / ${s.billed_weight_kg.toFixed(1)} kg`;
+
+        rows += `
+            <tr style="cursor: pointer;" onclick="selectVisionScan(${s.id})">
+                <td style="font-family: monospace; font-size: 0.8rem; color: #38bdf8;">${s.scan_code}</td>
+                <td>${dateStr}</td>
+                <td style="font-weight: 600;">${s.reference_number}</td>
+                <td>
+                    <div style="font-weight: 500;">${s.vendor_name || '--'}</div>
+                    <small style="color: var(--text-muted);">${s.product_sku || '--'}</small>
+                </td>
+                <td style="font-family: monospace;">${dims}</td>
+                <td style="font-family: monospace; font-size: 0.8rem;">${weights}</td>
+                <td>
+                    <strong style="color: ${s.defect_score >= 40 ? '#ef4444' : (s.defect_score >= 15 ? '#f59e0b' : '#10b981')};">
+                        ${s.defect_score.toFixed(1)}%
+                    </strong>
+                </td>
+                <td>
+                    <span class="badge" style="background: ${badgeBg}; color: ${badgeColor}; font-weight: 600; padding: 0.2rem 0.5rem; border-radius: 999px; font-size: 0.7rem;">
+                        ${s.quality_status}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); selectVisionScan(${s.id})">
+                        🔍 Tinjau
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = rows;
+}
+
+function renderVisionRMAsTable(rmas) {
+    const tbody = document.getElementById('visionRMAsTableBody');
+    if (!tbody) return;
+
+    if (!rmas || rmas.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted" style="padding: 2rem;">Belum ada klaim retur atau nota debit RMA diterbitkan.</td></tr>';
+        return;
+    }
+
+    let rows = '';
+    rmas.forEach(r => {
+        const dateStr = r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID') : '--';
+        rows += `
+            <tr>
+                <td style="font-family: monospace; font-weight: 700; color: #8b5cf6;">${r.rma_code}</td>
+                <td>${dateStr}</td>
+                <td>${r.reference_number || '--'}</td>
+                <td style="font-weight: 600;">${r.vendor_name}</td>
+                <td>
+                    <div>${r.product_sku}</div>
+                    <small style="color: #ef4444; font-weight: 600;">${r.damaged_quantity} Unit Rusak</small>
+                </td>
+                <td style="font-weight: 700; color: #ef4444;">${formatCurrency(r.estimated_loss_amount_idr)}</td>
+                <td style="font-size: 0.75rem; max-width: 200px;">${r.claim_reason}</td>
+                <td>
+                    <span class="badge" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6; font-weight: 600; padding: 0.2rem 0.5rem; border-radius: 999px; font-size: 0.7rem;">
+                        ${r.status}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-secondary" onclick="alert(\`${(r.auto_chargeback_draft || '').replace(/"/g, '&quot;')}\`)">
+                        📄 Lihat Nota
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = rows;
+}
+
+function selectVisionScan(scanId) {
+    if (!cachedVisionOverview || !cachedVisionOverview.recent_scans) return;
+    const found = cachedVisionOverview.recent_scans.find(s => s.id === scanId);
+    if (found) {
+        currentVisionScan = found;
+        renderVisionViewport(found);
+        renderVisionInspector(found);
+    }
+}
+
+async function simulateVisionScan(scenario) {
+    try {
+        let payload = {};
+        if (scenario === 'NORMAL') {
+            payload = {
+                reference_number: 'INB/' + new Date().getFullYear() + '/SIM-01',
+                vendor_name: 'PT Indofood CBP Sukses Makmur',
+                product_sku: 'SKU-FNB-ICBP-01',
+                product_name: 'Master Karton Bumbu Racik Gurih 24x100g',
+                scan_mode: 'FULL_AUDIT',
+                length_cm: 40.0,
+                width_cm: 30.0,
+                height_cm: 20.0,
+                actual_weight_kg: 4.8,
+                catalog_length_cm: 40.0,
+                catalog_width_cm: 30.0,
+                catalog_height_cm: 20.0,
+                simulate_defects: false,
+                inspected_by: 'DOCK-CAMERA-INB-01'
+            };
+        } else if (scenario === 'CRUSHED') {
+            payload = {
+                reference_number: 'INB/' + new Date().getFullYear() + '/SIM-CRUSH',
+                vendor_name: 'PT Global Logistik Makmur',
+                product_sku: 'SKU-ELEC-SMART-TV',
+                product_name: 'Smart LED TV 55-Inch 4K UHD UltraSlim',
+                scan_mode: 'FULL_AUDIT',
+                length_cm: 130.0,
+                width_cm: 80.0,
+                height_cm: 25.0,
+                actual_weight_kg: 18.5,
+                unit_price_idr: 6500000.0,
+                quantity: 4,
+                simulate_defects: true,
+                custom_defects: [
+                    {
+                        type: 'CRUSHED_CORNER',
+                        severity: 'CRITICAL',
+                        confidence: 0.96,
+                        bbox_2d: [0.75, 0.60, 0.22, 0.35],
+                        description: 'Sudut benturan hebat, rangka panel layar bengkok dan tertekan lebih dari 7 cm.'
+                    },
+                    {
+                        type: 'PUNCTURE_HOLE',
+                        severity: 'HIGH',
+                        confidence: 0.92,
+                        bbox_2d: [0.25, 0.40, 0.12, 0.15],
+                        description: 'Tembusan garpu forklift menusuk lapisan pelindung EPS bagian dalam.'
+                    }
+                ],
+                auto_generate_rma: true,
+                inspected_by: 'DOCK-CAMERA-INB-02'
+            };
+        } else if (scenario === 'OVERSIZED') {
+            payload = {
+                reference_number: 'INB/' + new Date().getFullYear() + '/SIM-OVERSIZE',
+                vendor_name: 'PT Mitra Packaging Solusindo',
+                product_sku: 'SKU-RAW-PLAST-RESIN',
+                product_name: 'Resin Granule Polimer Grade-A 25kg (Oversized Box)',
+                scan_mode: 'VOLUMETRIC',
+                length_cm: 70.0,
+                width_cm: 55.0,
+                height_cm: 45.0,
+                actual_weight_kg: 25.0,
+                catalog_length_cm: 50.0,
+                catalog_width_cm: 40.0,
+                catalog_height_cm: 30.0,
+                simulate_defects: false,
+                inspected_by: 'DOCK-CAMERA-INB-01'
+            };
+        } else if (scenario === 'WATER_STAIN') {
+            payload = {
+                reference_number: 'INB/' + new Date().getFullYear() + '/SIM-COLDCHAIN',
+                vendor_name: 'PT BioFarmaka Nusantara',
+                product_sku: 'SKU-MED-VACC-SERUM',
+                product_name: 'Serum Imunoglobulin Steril Dingin 50ml',
+                scan_mode: 'FULL_AUDIT',
+                length_cm: 35.0,
+                width_cm: 25.0,
+                height_cm: 20.0,
+                actual_weight_kg: 3.2,
+                unit_price_idr: 8400000.0,
+                quantity: 5,
+                simulate_defects: true,
+                custom_defects: [
+                    {
+                        type: 'WATER_STAIN',
+                        severity: 'CRITICAL',
+                        confidence: 0.98,
+                        bbox_2d: [0.10, 0.45, 0.40, 0.50],
+                        description: 'Rembesan cairan/kondensasi es kering bocor membasahi karton steril.'
+                    },
+                    {
+                        type: 'BROKEN_SEAL',
+                        severity: 'HIGH',
+                        confidence: 0.94,
+                        bbox_2d: [0.48, 0.05, 0.15, 0.10],
+                        description: 'Segel tamper-evident cold-chain terputus.'
+                    }
+                ],
+                auto_generate_rma: true,
+                inspected_by: 'DOCK-CAMERA-INB-03'
+            };
+        }
+
+        const res = await api('/ai/vision/scan', 'POST', payload);
+        if (typeof showToast === 'function') {
+            const sc = res.data || {};
+            showToast('Simulasi Scan Selesai! Kode: ' + sc.scan_code + ' - Status: ' + sc.quality_status, 'success');
+        }
+        await loadAmbientVisionData();
+        if (res.data && res.data.id) {
+            selectVisionScan(res.data.id);
+        }
+    } catch (err) {
+        console.error('Error simulating vision scan:', err);
+        if (typeof showToast === 'function') {
+            showToast('Gagal simulasi scan: ' + err.message, 'error');
+        }
+    }
+}
+
+async function triggerRMAFromInspector() {
+    if (!currentVisionScan) return;
+    try {
+        const res = await api(`/ai/vision/scans/${currentVisionScan.id}/rma`, 'POST', {
+            reason: 'Kerusakan kemasan parah terdeteksi oleh Ambient Vision Dock Kamera',
+            damaged_qty: 5,
+            unit_price: 3500000.0
+        });
+        if (typeof showToast === 'function') {
+            showToast('Klaim RMA Berhasil Diterbitkan! ' + (res.data ? res.data.rma_code : ''), 'success');
+        }
+        await loadAmbientVisionData();
+    } catch (err) {
+        console.error('Error generating RMA:', err);
+        if (typeof showToast === 'function') {
+            showToast('Gagal menerbitkan RMA: ' + err.message, 'error');
+        }
+    }
+}
+
+async function seedVisionDemoData() {
+    try {
+        await api('/ai/vision/seed-demo', 'POST');
+        if (typeof showToast === 'function') {
+            showToast('Data demo kargo dock berhasil disuntikkan & diverifikasi!', 'success');
+        }
+        await loadAmbientVisionData();
+    } catch (err) {
+        console.error('Error seeding demo vision data:', err);
+        if (typeof showToast === 'function') {
+            showToast('Gagal menyuntikkan data demo: ' + err.message, 'error');
+        }
+    }
+}
+
+function switchVisionSubtab(tabName) {
+    currentVisionSubtab = tabName;
+    const btnScans = document.getElementById('btnVisionSubtabScans');
+    const btnRMAs = document.getElementById('btnVisionSubtabRMAs');
+    const viewScans = document.getElementById('visionSubtabScansView');
+    const viewRMAs = document.getElementById('visionSubtabRMAsView');
+
+    if (tabName === 'scans') {
+        if (btnScans) { btnScans.classList.add('btn-primary'); btnScans.classList.remove('btn-secondary'); }
+        if (btnRMAs) { btnRMAs.classList.add('btn-secondary'); btnRMAs.classList.remove('btn-primary'); }
+        if (viewScans) viewScans.style.display = 'block';
+        if (viewRMAs) viewRMAs.style.display = 'none';
+    } else {
+        if (btnScans) { btnScans.classList.add('btn-secondary'); btnScans.classList.remove('btn-primary'); }
+        if (btnRMAs) { btnRMAs.classList.add('btn-primary'); btnRMAs.classList.remove('btn-secondary'); }
+        if (viewScans) viewScans.style.display = 'none';
+        if (viewRMAs) viewRMAs.style.display = 'block';
+    }
+}
+
+function triggerVisionScanModal() {
+    // Quick prompt for live scan parameters
+    const ref = prompt('Masukkan Nomor Referensi / Surat Jalan Kargo:', 'INB/' + new Date().getFullYear() + '/0492');
+    if (!ref) return;
+
+    simulateVisionScan('NORMAL');
 }
