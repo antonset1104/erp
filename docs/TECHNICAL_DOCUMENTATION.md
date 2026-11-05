@@ -1703,3 +1703,25 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
   - `resolve`: Formally marks findings remediated and reallocates supply contracts to certified suppliers.
   - `dismiss`: Logs audited rationale for false-positive exclusions.
 - **Demo Syndicate Injection**: Endpoint `POST /api/v1/ai/fraud-sentinel/seed-demo` seeds multi-vendor bid-rigging syndicates and split-PO structures for compliance stress testing.
+
+
+## 52. Self-Healing Enterprise Data & Autonomous Continuous Reconciliation Sentinel
+
+### 52.1 Continuous General Ledger & Clearing Account Anomaly Scanner (`internal/core/ai/self_healing_data.go`)
+- **Unbilled GR/IR Variance Sentinel**: Scans 3-way reconciliation gaps between inbound warehouse receipts (`stock_pickings`) and posted vendor invoices (`account_moves`). Flags dangling clearing balances where Goods Receipts are completed without corresponding accounts payable bills, preventing understated liabilities during month-end closes.
+- **Cent Rounding & Bank Settlement Variance**: Detects fractional cent discrepancies and inter-bank SKN/BI-FAST clearing fee deviations ($< \text{IDR }5.000$) on corporate bank statement flows.
+- **Unmatched Escrow & Settlement Float**: Identifies delayed payment gateway settlements (e.g. QRIS/Virtual Account escrow float holding period $> 48\text{ hours}$) and links them to open customer sales invoices.
+
+### 52.2 Semantic Vector Master Data Deduplication Engine
+- **Token-Based Jaccard & Multilingual Fuzzy Similarity**: Scans product and vendor master tables using character n-grams and normalized tokenization to detect semantic duplicates (e.g. `"Kabel Tembaga 2.5mm 100m Roll"` vs `"Copper Cable 2.5 mm @100M Roll Supreme"`).
+- **Non-Destructive Inventory Merge Recipes**: Formulates merge strategies that consolidate physical on-hand quant balances into primary Master SKUs while safely archiving duplicate records without breaking historical sales ledger references.
+
+### 52.3 Executive Health Cockpit & 1-Click Autonomous Remediation
+- **Enterprise Data Health Score**: Endpoint `GET /api/v1/ai/self-healing/overview` computes a comprehensive data hygiene index ($0.0\text{ - }100.0\%$) and evaluates month-end closing readiness (`READY_FOR_CLOSE`, `ATTENTION_REQUIRED`, `CLOSING_BLOCKED`).
+- **Comprehensive Anomaly Scan**: Endpoint `POST /api/v1/ai/self-healing/scan` executes automated scanning across general ledger moves, stock receipts, and master records.
+- **1-Click Self-Healing Execution**: Endpoint `POST /api/v1/ai/self-healing/anomalies/:id/remediate` applies automated remediation recipes:
+  - Generates and posts balanced double-entry accrual adjustment moves for unbilled GR/IR differences.
+  - Automatically posts rounding variance adjustment moves to clearing account `710200`.
+  - Reconciles unmatched bank payments to zero-residual balance status.
+- **Deduplication Candidate Ingestion**: Endpoint `GET /api/v1/ai/self-healing/dedup/candidates` returns candidate duplicate pairs with pairwise similarity scores and recommended consolidation targets.
+- **Demo Anomaly Seeding**: Endpoint `POST /api/v1/ai/self-healing/seed-demo` injects synthetic GR/IR clearing delays and master data duplications for operator training and compliance verification.

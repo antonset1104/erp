@@ -272,6 +272,10 @@
                     <span class="nav-icon">🛡️</span>
                     <span class="nav-label">Anti-Fraud Graph Sentinel</span>
                 </button>
+                <button class="nav-item" data-tab="self-healing-data">
+                    <span class="nav-icon">✨</span>
+                    <span class="nav-label">Self-Healing Data Sentinel</span>
+                </button>
             </nav>
 
             <div class="user-profile">
@@ -3887,6 +3891,194 @@
                                     </thead>
                                     <tbody id="fraudBidRiggingTableBody">
                                         <tr><td colspan="8" class="text-center text-muted" style="padding: 2rem;">Memuat data persekongkolan tender...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===================================================== -->
+                <!-- SECTION: SELF-HEALING ENTERPRISE DATA & CONTINUOUS RECONCILIATION -->
+                <!-- ===================================================== -->
+                <section id="tab-self-healing-data" class="tab-view">
+                    <div class="content-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                                <h2>Self-Healing Enterprise Data &amp; Autonomous Reconciliation</h2>
+                                <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.75rem;">ZERO-TOUCH CLOSING &amp; DATA HYGIENE</span>
+                            </div>
+                            <p class="subtitle">Pemulihan otomatis selisih rekonsiliasi buku besar, kliring akun perantara GR/IR mengendap, pembuatan jurnal penyesuaian mandiri, dan deduplikasi semantik master data produk.</p>
+                        </div>
+                        <div class="header-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <button class="btn btn-primary" onclick="runSelfHealingScan()" style="background: linear-gradient(135deg, #10b981, #059669); border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);">
+                                <span>⚡</span> Jalankan AI Self-Healing Scan
+                            </button>
+                            <button class="btn btn-secondary" onclick="seedHealingDemoData()" title="Injeksi data anomali GR/IR dan master SKU untuk simulasi pemulihan">
+                                <span>🧪</span> Injeksi Data Demo Anomali
+                            </button>
+                            <button class="btn btn-secondary" onclick="loadSelfHealingData()" title="Segarkan Data Sentinel">
+                                <span>🔄</span> Refresh Sentinel
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 5 KPI Metric Cards -->
+                    <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                        <div class="card stat-card" style="border-top: 3px solid #10b981;">
+                            <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">✨</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Skor Kesehatan Data Ledger</span>
+                                <h3 id="healingStatHealthScore" class="stat-value">100%</h3>
+                                <small id="healingStatReadinessStatus" style="color: #10b981; font-size: 0.75rem; font-weight: 600;">SIAP TUTUP BUKU (READY)</small>
+                            </div>
+                        </div>
+
+                        <div class="card stat-card" style="border-top: 3px solid #f59e0b;">
+                            <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">⚠️</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Anomali Terdeteksi</span>
+                                <h3 id="healingStatTotalAnomalies" class="stat-value" style="color: #f59e0b;">0</h3>
+                                <small id="healingStatUnresolvedCount" style="color: var(--text-muted); font-size: 0.75rem;">0 Memerlukan Perbaikan</small>
+                            </div>
+                        </div>
+
+                        <div class="card stat-card" style="border-top: 3px solid #ef4444;">
+                            <div class="stat-icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">📦</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Selisih GR/IR Mengendap</span>
+                                <h3 id="healingStatGRIRVolume" class="stat-value" style="font-size: 1.15rem; color: #ef4444;">Rp 0</h3>
+                                <small style="color: var(--text-muted); font-size: 0.75rem;">Penerimaan Belum Ditagih</small>
+                            </div>
+                        </div>
+
+                        <div class="card stat-card" style="border-top: 3px solid #3b82f6;">
+                            <div class="stat-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">🛡️</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Varians Terlindungi (IDR)</span>
+                                <h3 id="healingStatSafeguardedVolume" class="stat-value" style="font-size: 1.15rem; color: #3b82f6;">Rp 0</h3>
+                                <small style="color: var(--text-muted); font-size: 0.75rem;">Nilai Rekonsiliasi Otomatis</small>
+                            </div>
+                        </div>
+
+                        <div class="card stat-card" style="border-top: 3px solid #8b5cf6;">
+                            <div class="stat-icon" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">🧬</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Kandidat SKU Duplikat</span>
+                                <h3 id="healingStatDuplicateSKU" class="stat-value" style="color: #8b5cf6;">0</h3>
+                                <small style="color: var(--text-muted); font-size: 0.75rem;">Identifikasi Kemiripan Semantik</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4 Subtab Navigations -->
+                    <div class="twin-subtabs" style="display: flex; gap: 0.5rem; border-bottom: 2px solid var(--border-color); margin-bottom: 1.5rem;">
+                        <button class="twin-tab-btn active" onclick="switchHealingSubtab('anomalies')" id="healingTabBtn-anomalies">
+                            🛠️ Anomali &amp; Auto-Fix Mandiri (<span id="healingAnomaliesCountBadge">0</span>)
+                        </button>
+                        <button class="twin-tab-btn" onclick="switchHealingSubtab('grir')" id="healingTabBtn-grir">
+                            📑 Kliring Akun GR/IR &amp; Jurnal Tutup Buku
+                        </button>
+                        <button class="twin-tab-btn" onclick="switchHealingSubtab('dedup')" id="healingTabBtn-dedup">
+                            🧬 Deduplikasi Semantik Master Data
+                        </button>
+                        <button class="twin-tab-btn" onclick="switchHealingSubtab('history')" id="healingTabBtn-history">
+                            📋 Audit Trail &amp; Log Pemulihan Data
+                        </button>
+                    </div>
+
+                    <!-- Subtab 1: Anomalies Table -->
+                    <div id="healingPane-anomalies" class="twin-subpane active">
+                        <div class="card" style="padding: 1.25rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                                <h3 style="margin: 0; font-size: 1rem;">Daftar Anomali Data Aktif &amp; Resep Perbaikan Otomatis (1-Click Auto-Remediation)</h3>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <select id="healingFilterCategory" onchange="filterHealingAnomaliesCategory()" class="form-control" style="font-size: 0.85rem; padding: 0.35rem 0.75rem; width: auto;">
+                                        <option value="ALL">Semua Kategori Anomali</option>
+                                        <option value="UNBILLED_GR_IR_VARIANCE">Selisih Kliring GR/IR</option>
+                                        <option value="UNMATCHED_BANK_SETTLEMENT">Setoran Bank Mengendap</option>
+                                        <option value="ROUNDING_DISCREPANCY">Selisih Pembulatan Transfer</option>
+                                        <option value="SEMANTIC_DUPLICATE_MASTER">Duplikasi Semantik Master Data</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID Anomali</th>
+                                            <th>Kategori &amp; Tingkat Keparahan</th>
+                                            <th>Judul Masalah Data</th>
+                                            <th>Resep Perbaikan AI (Auto-Remediation)</th>
+                                            <th>Nilai Selisih</th>
+                                            <th>Status</th>
+                                            <th style="text-align: right;">Aksi Perbaikan Mandiri</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="healingAnomaliesTableBody">
+                                        <tr><td colspan="7" class="text-center text-muted" style="padding: 2rem;">Memuat anomali data...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subtab 2: GR/IR Clearing Panel -->
+                    <div id="healingPane-grir" class="twin-subpane" style="display: none;">
+                        <div class="card" style="padding: 1.25rem;">
+                            <h3 style="margin-top: 0; margin-bottom: 0.5rem; font-size: 1.05rem;">Dashboard Kliring Akun Perantara Barang Belum Ditagih (Unbilled GR/IR Clearing)</h3>
+                            <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 1rem;">Mendeteksi ketidaksesuaian 3-arah antara Surat Jalan Penerimaan Barang Gudang (`stock_pickings`) dan Faktur Tagihan Vendor (`account_moves`). AI mengenerate draf jurnal akrual penyeimbang secara instan untuk mempercepat tutup buku akhir bulan.</p>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nomor Penerimaan</th>
+                                            <th>Linked PO</th>
+                                            <th>Usia Mengendap</th>
+                                            <th>Akun Kliring Terpapar</th>
+                                            <th>Estimasi Varians</th>
+                                            <th>Status Rekonsiliasi</th>
+                                            <th style="text-align: right;">Eksekusi Kliring</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="healingGRIRTableBody">
+                                        <tr><td colspan="7" class="text-center text-muted" style="padding: 2rem;">Memuat data kliring GR/IR...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subtab 3: Semantic Deduplication -->
+                    <div id="healingPane-dedup" class="twin-subpane" style="display: none;">
+                        <div class="card" style="padding: 1.25rem;">
+                            <h3 style="margin-top: 0; margin-bottom: 0.5rem; font-size: 1.05rem;">Deduplikasi Semantik Master Data Produk &amp; Komponen Manufaktur</h3>
+                            <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 1rem;">Memindai database master data menggunakan vector embeddings dan token similarity untuk mendeteksi barang kembar beda penulisan atau singkatan multibahasa (misal: "Kabel Tembaga 2.5mm" vs "Copper Cable 2.5 mm").</p>
+                            <div id="healingDedupGrid" class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.25rem;">
+                                <div class="text-center text-muted" style="padding: 2rem; grid-column: 1/-1;">Memuat kandidat deduplikasi...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subtab 4: Remediation History & Audit Trail -->
+                    <div id="healingPane-history" class="twin-subpane" style="display: none;">
+                        <div class="card" style="padding: 1.25rem;">
+                            <h3 style="margin-top: 0; margin-bottom: 0.5rem; font-size: 1.05rem;">Riwayat &amp; Catatan Audit Pemulihan Mandiri (Self-Healing Audit Trail)</h3>
+                            <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 1rem;">Jejak audit permanen atas seluruh jurnal penyesuaian otomatis yang berhasil dieksekusi, nomor bukti move akuntansi, dan otorisator sistem.</p>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Waktu Penyelesaian</th>
+                                            <th>ID Anomali</th>
+                                            <th>Kategori Masalah</th>
+                                            <th>Rincian Jurnal / Tindakan Eksekusi</th>
+                                            <th>Nilai Selisih Dipulihkan</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="healingHistoryTableBody">
+                                        <tr><td colspan="6" class="text-center text-muted" style="padding: 2rem;">Memuat riwayat pemulihan...</td></tr>
                                     </tbody>
                                 </table>
                             </div>

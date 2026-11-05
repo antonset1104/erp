@@ -289,7 +289,8 @@ function updateHeaderTitles(tab) {
         'integration-hub': { title: 'Universal Integration Hub & Open RPC Gateway', sub: 'Manajemen M2M API Keys, konektor Shopee/Tokopedia/Midtrans/SAP, Open RPC & Batch ETL' },
         'agentic-swarm': { title: 'Agentic AI Swarm & Autonomous Orchestrator', sub: 'Multi-Agent Network otonom untuk pengadaan cerdas, 3-way matching, audit likuiditas & human-in-the-loop governance' },
         'digital-twin-simulator': { title: 'Neuro-Symbolic Enterprise Digital Twin & What-If War-Room', sub: 'Simulasi skenario krisis multi-faktor, proyeksi likuiditas 13-minggu & AI actionable mitigation playbooks' },
-        'fraud-graph-sentinel': { title: 'Enterprise Knowledge Graph & GNN Anti-Fraud Sentinel', sub: 'Deteksi persekongkolan tender (bid rigging), pemecahan nilai PO (split purchasing) & rekening bayangan berbasis GNN' }
+        'fraud-graph-sentinel': { title: 'Enterprise Knowledge Graph & GNN Anti-Fraud Sentinel', sub: 'Deteksi persekongkolan tender (bid rigging), pemecahan nilai PO (split purchasing) & rekening bayangan berbasis GNN' },
+        'self-healing-data': { title: 'Self-Healing Enterprise Data & Autonomous Reconciliation', sub: 'Pemulihan otomatis selisih rekonsiliasi buku besar, kliring akun GR/IR mengendap & deduplikasi semantik master data' }
     };
     const t = titleMap[tab] || titleMap.dashboard;
     document.getElementById('pageTitle').textContent = t.title;
@@ -351,6 +352,7 @@ function loadCurrentTab() {
         case 'agentic-swarm': loadAgentSwarmData(); break;
         case 'digital-twin-simulator': loadDigitalTwinSimulatorData(); break;
         case 'fraud-graph-sentinel': loadFraudSentinelData(); break;
+        case 'self-healing-data': loadSelfHealingData(); break;
     }
 }
 
@@ -36359,6 +36361,321 @@ async function executeFraudMitigation(findingId, action) {
         console.error('Error executing fraud mitigation:', err);
         if (typeof showToast === 'function') {
             showToast('Gagal mengeksekusi aksi: ' + err.message, 'error');
+        }
+    }
+}
+
+
+// =============================================================================
+// SELF-HEALING ENTERPRISE DATA & AUTONOMOUS RECONCILIATION LOGIC
+// =============================================================================
+
+let cachedHealingOverview = null;
+let currentHealingSubtab = 'anomalies';
+
+async function loadSelfHealingData() {
+    try {
+        const res = await api('/ai/self-healing/overview');
+        const overview = (res && res.data) ? res.data : (res || {});
+        cachedHealingOverview = overview;
+
+        renderSelfHealingOverview(overview);
+        renderHealingAnomaliesTable(overview.recent_anomalies || []);
+        renderHealingGRIRTable(overview.recent_anomalies || []);
+        renderHealingDedupGrid(overview.top_dedup_candidates || []);
+        renderHealingHistoryTable(overview.recent_anomalies || []);
+    } catch (err) {
+        console.error('Error loading Self-Healing data:', err);
+        if (typeof showToast === 'function') {
+            showToast('Gagal memuat data Self-Healing Sentinel: ' + err.message, 'error');
+        }
+    }
+}
+
+function renderSelfHealingOverview(overview) {
+    if (!overview) return;
+
+    const healthEl = document.getElementById('healingStatHealthScore');
+    const statusEl = document.getElementById('healingStatReadinessStatus');
+    const totalEl = document.getElementById('healingStatTotalAnomalies');
+    const unresolvedEl = document.getElementById('healingStatUnresolvedCount');
+    const grirEl = document.getElementById('healingStatGRIRVolume');
+    const safeEl = document.getElementById('healingStatSafeguardedVolume');
+    const dedupEl = document.getElementById('healingStatDuplicateSKU');
+    const badgeEl = document.getElementById('healingAnomaliesCountBadge');
+
+    const score = overview.data_health_score || 100;
+    if (healthEl) {
+        healthEl.textContent = score.toFixed(1) + '%';
+        healthEl.style.color = score >= 85 ? '#10b981' : (score >= 60 ? '#f59e0b' : '#ef4444');
+    }
+
+    if (statusEl) {
+        if (overview.month_end_readiness_status === 'READY_FOR_CLOSE') {
+            statusEl.textContent = 'SIAP TUTUP BUKU (READY FOR CLOSE)';
+            statusEl.style.color = '#10b981';
+        } else if (overview.month_end_readiness_status === 'ATTENTION_REQUIRED') {
+            statusEl.textContent = 'PERHATIAN DIPERLUKAN (VARIANS AKTIF)';
+            statusEl.style.color = '#f59e0b';
+        } else {
+            statusEl.textContent = 'TUTUP BUKU TERHALANG (CLOSING BLOCKED)';
+            statusEl.style.color = '#ef4444';
+        }
+    }
+
+    if (totalEl) totalEl.textContent = (overview.total_anomalies_detected || 0).toLocaleString('id-ID');
+    if (unresolvedEl) unresolvedEl.textContent = (overview.unresolved_anomalies_count || 0) + ' Memerlukan Perbaikan';
+
+    if (grirEl) {
+        grirEl.textContent = 'IDR ' + (overview.gr_ir_unbilled_volume_idr || 0).toLocaleString('id-ID');
+    }
+    if (safeEl) {
+        safeEl.textContent = 'IDR ' + (overview.total_variance_safeguarded_idr || 0).toLocaleString('id-ID');
+    }
+    if (dedupEl) {
+        dedupEl.textContent = (overview.duplicate_sku_candidates || 0).toLocaleString('id-ID');
+    }
+    if (badgeEl) {
+        badgeEl.textContent = overview.unresolved_anomalies_count || 0;
+    }
+}
+
+function switchHealingSubtab(tabName) {
+    currentHealingSubtab = tabName;
+    ['anomalies', 'grir', 'dedup', 'history'].forEach(t => {
+        const btn = document.getElementById('healingTabBtn-' + t);
+        const pane = document.getElementById('healingPane-' + t);
+        if (btn) {
+            if (t === tabName) btn.classList.add('active');
+            else btn.classList.remove('active');
+        }
+        if (pane) {
+            pane.style.display = (t === tabName) ? 'block' : 'none';
+        }
+    });
+}
+
+function filterHealingAnomaliesCategory() {
+    const sel = document.getElementById('healingFilterCategory');
+    const val = sel ? sel.value : 'ALL';
+    if (!cachedHealingOverview || !cachedHealingOverview.recent_anomalies) return;
+
+    let filtered = cachedHealingOverview.recent_anomalies;
+    if (val !== 'ALL') {
+        filtered = filtered.filter(a => a.category === val);
+    }
+    renderHealingAnomaliesTable(filtered);
+}
+
+function renderHealingAnomaliesTable(anomalies) {
+    const tbody = document.getElementById('healingAnomaliesTableBody');
+    if (!tbody) return;
+
+    if (!anomalies || anomalies.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted" style="padding: 2rem;">Tidak ada anomali aktif. Seluruh data ledger dan master record bersih!</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = anomalies.map(a => {
+        let sevBadge = '<span class="badge badge-secondary">LOW</span>';
+        if (a.severity === 'CRITICAL') sevBadge = '<span class="badge" style="background:#ef4444; color:#fff; font-weight:700;">CRITICAL</span>';
+        else if (a.severity === 'HIGH') sevBadge = '<span class="badge" style="background:#f97316; color:#fff; font-weight:600;">HIGH</span>';
+        else if (a.severity === 'MEDIUM') sevBadge = '<span class="badge" style="background:#f59e0b; color:#fff;">MEDIUM</span>';
+
+        let statusBadge = '<span class="badge badge-warning">TERDETEKSI</span>';
+        if (a.status === 'REMEDIATED') statusBadge = '<span class="badge badge-success">DIPULIHKAN</span>';
+        else if (a.status === 'MANUAL_REVIEW') statusBadge = '<span class="badge badge-info">REVIEW MANUAL</span>';
+
+        const varianceFmt = (a.variance_amount_idr > 0) ? 'Rp ' + a.variance_amount_idr.toLocaleString('id-ID') : '-';
+
+        return `
+            <tr>
+                <td><strong style="color: #6366f1;">${escapeHtml(a.anomaly_id)}</strong></td>
+                <td>
+                    <div style="font-weight: 600; font-size: 0.8rem;">${escapeHtml(a.category)}</div>
+                    <div>${sevBadge}</div>
+                </td>
+                <td style="max-width: 280px;">
+                    <div style="font-weight: 600; font-size: 0.85rem;">${escapeHtml(a.title)}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">${escapeHtml(a.description)}</div>
+                </td>
+                <td style="max-width: 260px; font-size: 0.8rem; color: #0284c7;">
+                    <div><em>${escapeHtml(a.remediation_recipe)}</em></div>
+                </td>
+                <td style="font-weight: 700; color: #ef4444;">${varianceFmt}</td>
+                <td>${statusBadge}</td>
+                <td style="text-align: right; white-space: nowrap;">
+                    ${a.status !== 'REMEDIATED' ? `
+                        <button class="btn btn-sm btn-primary" onclick="executeHealingRemediation('${escapeHtml(a.anomaly_id)}')" style="background: linear-gradient(135deg, #10b981, #059669); border: none;">
+                            ⚡ Perbaiki Otomatis
+                        </button>
+                    ` : `
+                        <span style="color: #10b981; font-weight: 700; font-size: 0.8rem;">✓ Tuntas</span>
+                    `}
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderHealingGRIRTable(anomalies) {
+    const tbody = document.getElementById('healingGRIRTableBody');
+    if (!tbody) return;
+
+    const grirList = (anomalies || []).filter(a => a.category === 'UNBILLED_GR_IR_VARIANCE');
+    if (grirList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted" style="padding: 2rem;">Tidak ada selisih akun perantara GR/IR mengendap. Seluruh penerimaan barang telah terfaktur.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = grirList.map(g => {
+        let ev = {};
+        try { ev = JSON.parse(g.evidence_json || '{}'); } catch(e) {}
+        return `
+            <tr>
+                <td><strong>${escapeHtml(ev.picking_number || g.source_record_id)}</strong></td>
+                <td><span class="badge badge-secondary">${escapeHtml(ev.linked_po || 'PO-2026-00045')}</span></td>
+                <td>${ev.unbilled_age_days || 4} hari</td>
+                <td><code>${escapeHtml(ev.clearing_account || '210100 - Unbilled GR/IR')}</code></td>
+                <td style="font-weight: 700; color: #ef4444;">Rp ${(g.variance_amount_idr || 0).toLocaleString('id-ID')}</td>
+                <td><span class="badge ${g.status === 'REMEDIATED' ? 'badge-success' : 'badge-warning'}">${escapeHtml(g.status)}</span></td>
+                <td style="text-align: right;">
+                    ${g.status !== 'REMEDIATED' ? `
+                        <button class="btn btn-sm btn-primary" onclick="executeHealingRemediation('${escapeHtml(g.anomaly_id)}')" style="background: linear-gradient(135deg, #3b82f6, #2563eb); border: none;">
+                            Posting Akrual Kliring
+                        </button>
+                    ` : `
+                        <span style="color:#10b981; font-weight:600; font-size:0.8rem;">✓ Terkliring</span>
+                    `}
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderHealingDedupGrid(candidates) {
+    const grid = document.getElementById('healingDedupGrid');
+    if (!grid) return;
+
+    if (!candidates || candidates.length === 0) {
+        grid.innerHTML = '<div class="text-center text-muted" style="padding: 2rem; grid-column: 1/-1;">Tidak ada kandidat master data duplikat yang terdeteksi.</div>';
+        return;
+    }
+
+    grid.innerHTML = candidates.map(c => {
+        const simPct = (c.similarity_score * 100.0).toFixed(1);
+        return `
+            <div class="card" style="padding: 1.25rem; border-top: 3px solid #8b5cf6; background: var(--bg-secondary);">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 0.75rem;">
+                    <div>
+                        <span class="badge" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6; font-size: 0.75rem; font-weight:700;">
+                            Kemiripan Semantik: ${simPct}%
+                        </span>
+                    </div>
+                    <button class="btn btn-sm btn-secondary" onclick="executeHealingRemediation('ANM-DEDUP-MERGE')" style="font-size:0.75rem;">
+                        🔗 Gabungkan SKU
+                    </button>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.25); padding: 0.6rem 0.75rem; border-radius: 6px; margin-bottom: 0.5rem;">
+                    <div style="font-size:0.75rem; color:#94a3b8; font-weight:600;">MASTER SKU (UTAMA):</div>
+                    <div style="font-weight:700; color:var(--text-main); font-size:0.85rem;">${escapeHtml(c.name_1)}</div>
+                    <div style="font-size:0.7rem; color:var(--text-muted);">ID: ${escapeHtml(c.entity_id_1)}</div>
+                </div>
+
+                <div style="background: rgba(239, 68, 68, 0.08); border: 1px dashed rgba(239,68,68,0.3); padding: 0.6rem 0.75rem; border-radius: 6px; margin-bottom: 0.75rem;">
+                    <div style="font-size:0.75rem; color:#ef4444; font-weight:600;">KANDIDAT DUPLIKAT:</div>
+                    <div style="font-weight:600; color:var(--text-main); font-size:0.85rem;">${escapeHtml(c.name_2)}</div>
+                    <div style="font-size:0.7rem; color:var(--text-muted);">ID: ${escapeHtml(c.entity_id_2)}</div>
+                </div>
+
+                <div style="font-size:0.75rem; color:#cbd5e1;">
+                    <strong>Rekomendasi:</strong> ${escapeHtml(c.recommendation)}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderHealingHistoryTable(anomalies) {
+    const tbody = document.getElementById('healingHistoryTableBody');
+    if (!tbody) return;
+
+    const resolved = (anomalies || []).filter(a => a.status === 'REMEDIATED');
+    if (resolved.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted" style="padding: 2rem;">Belum ada riwayat pemulihan otomatis yang tercatat.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = resolved.map(r => {
+        const timeStr = r.resolved_at ? new Date(r.resolved_at).toLocaleString('id-ID') : new Date(r.updated_at).toLocaleString('id-ID');
+        return `
+            <tr>
+                <td style="font-size: 0.8rem; color: var(--text-muted);">${timeStr}</td>
+                <td><strong style="color: #6366f1;">${escapeHtml(r.anomaly_id)}</strong></td>
+                <td><span class="badge badge-secondary">${escapeHtml(r.category)}</span></td>
+                <td style="max-width: 380px; font-size: 0.85rem;">
+                    <div style="color: #10b981; font-weight: 600;">${escapeHtml(r.resolution_details || r.remediation_recipe)}</div>
+                </td>
+                <td style="font-weight: 700; color: #10b981;">Rp ${(r.variance_amount_idr || 0).toLocaleString('id-ID')}</td>
+                <td><span class="badge badge-success">SUKSES DIPULIHKAN</span></td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function runSelfHealingScan() {
+    try {
+        if (typeof showToast === 'function') {
+            showToast('⚡ Menjalankan pemindaian mandiri rekonsiliasi buku besar & master data...', 'info');
+        }
+        const res = await api('/ai/self-healing/scan', 'POST');
+        if (typeof showToast === 'function') {
+            showToast('Scan selesai! Terdeteksi ' + (res.count || 0) + ' potensi perbaikan data.', 'success');
+        }
+        await loadSelfHealingData();
+    } catch (err) {
+        console.error('Error running self-healing scan:', err);
+        if (typeof showToast === 'function') {
+            showToast('Gagal menjalankan scan: ' + err.message, 'error');
+        }
+    }
+}
+
+async function executeHealingRemediation(anomalyId) {
+    try {
+        if (typeof showToast === 'function') {
+            showToast('🛠️ Mengeksekusi resep perbaikan data mandiri...', 'info');
+        }
+        const res = await api('/ai/self-healing/anomalies/' + anomalyId + '/remediate', 'POST', {
+            actor: 'Chief Financial Officer (Autonomous AI Sentinel)'
+        });
+        if (typeof showToast === 'function') {
+            showToast('Sukses! ' + (res.message || 'Anomali berhasil dipulihkan secara otomatis.'), 'success');
+        }
+        await loadSelfHealingData();
+    } catch (err) {
+        console.error('Error executing healing remediation:', err);
+        if (typeof showToast === 'function') {
+            showToast('Gagal memperbaiki anomali: ' + err.message, 'error');
+        }
+    }
+}
+
+async function seedHealingDemoData() {
+    try {
+        if (typeof showToast === 'function') {
+            showToast('🧪 Menyuntikkan data varians GR/IR & master SKU demo...', 'info');
+        }
+        await api('/ai/self-healing/seed-demo', 'POST');
+        if (typeof showToast === 'function') {
+            showToast('Data anomali demo berhasil disuntikkan & diverifikasi!', 'success');
+        }
+        await loadSelfHealingData();
+    } catch (err) {
+        console.error('Error seeding demo healing data:', err);
+        if (typeof showToast === 'function') {
+            showToast('Gagal menyuntikkan data demo: ' + err.message, 'error');
         }
     }
 }

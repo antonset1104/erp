@@ -723,6 +723,87 @@ func (h *Handler) SeedFraudDemoData(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Demo collusion cluster seeded and verified", "findings": findings})
 }
 
+// Self-Healing Enterprise Data & Autonomous Reconciliation Handlers
+
+func (h *Handler) GetSelfHealingOverview(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	engine := GetSelfHealingEngine(h.db)
+	overview, err := engine.GetOverview(companyID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": overview})
+}
+
+func (h *Handler) RunSelfHealingScan(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	engine := GetSelfHealingEngine(h.db)
+	anomalies, err := engine.RunComprehensiveScan(companyID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Self-healing scan completed successfully", "count": len(anomalies), "data": anomalies})
+}
+
+func (h *Handler) GetSelfHealingAnomalies(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	var anomalies []DataHealingAnomalyRecord
+	category := c.Query("category")
+	status := c.Query("status")
+	q := h.db.Where("company_id = ?", companyID)
+	if category != "" && category != "ALL" {
+		q = q.Where("category = ?", category)
+	}
+	if status != "" && status != "ALL" {
+		q = q.Where("status = ?", status)
+	}
+	if err := q.Order("created_at DESC").Find(&anomalies).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": anomalies, "count": len(anomalies)})
+}
+
+func (h *Handler) ExecuteSelfHealingRemediation(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	anomalyID := c.Param("id")
+	var req struct {
+		Actor string `json:"actor"`
+	}
+	_ = c.ShouldBindJSON(&req)
+	if req.Actor == "" {
+		req.Actor = "Chief Financial Officer (AI Sentinel)"
+	}
+
+	engine := GetSelfHealingEngine(h.db)
+	record, err := engine.ExecuteRemediation(companyID, anomalyID, req.Actor)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Anomaly successfully remediated", "data": record})
+}
+
+func (h *Handler) GetSemanticDedupCandidates(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	engine := GetSelfHealingEngine(h.db)
+	candidates := engine.FindSemanticDuplicateProducts(companyID)
+	c.JSON(http.StatusOK, gin.H{"data": candidates, "count": len(candidates)})
+}
+
+func (h *Handler) SeedSelfHealingDemoData(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	engine := GetSelfHealingEngine(h.db)
+	anomalies, err := engine.RunComprehensiveScan(companyID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Demo self-healing anomalies successfully seeded", "count": len(anomalies), "data": anomalies})
+}
+
 // RegisterRootProtocolRoutes registers public protocol discovery endpoints like /.well-known/agent.json and /mcp
 func RegisterRootProtocolRoutes(r *gin.Engine, h *Handler) {
 	r.GET("/.well-known/agent.json", h.GetA2AAgentCard)
@@ -818,6 +899,14 @@ func RegisterAIRoutes(router *gin.RouterGroup, authMiddleware gin.HandlerFunc, h
 			authed.GET("/fraud-sentinel/findings", h.GetFraudSentinelFindings)
 			authed.POST("/fraud-sentinel/findings/:id/action", h.ExecuteFraudMitigationAction)
 			authed.POST("/fraud-sentinel/seed-demo", h.SeedFraudDemoData)
+
+			// Self-Healing Enterprise Data & Autonomous Continuous Reconciliation Sentinel
+			authed.GET("/self-healing/overview", h.GetSelfHealingOverview)
+			authed.POST("/self-healing/scan", h.RunSelfHealingScan)
+			authed.GET("/self-healing/anomalies", h.GetSelfHealingAnomalies)
+			authed.POST("/self-healing/anomalies/:id/remediate", h.ExecuteSelfHealingRemediation)
+			authed.GET("/self-healing/dedup/candidates", h.GetSemanticDedupCandidates)
+			authed.POST("/self-healing/seed-demo", h.SeedSelfHealingDemoData)
 		}
 	}
 }
