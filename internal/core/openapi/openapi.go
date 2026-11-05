@@ -2197,6 +2197,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/space/satellite-laser-pat/evaluate-crosslink-and-jitter": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Optical Satellite Laser Crosslink (OISL) Pointing-Acquisition-Tracking (PAT) Jitter Sentinel (CCSDS 141.0-B-1 & ISO 14620)",
+					"description": "Monitors inter-satellite laser pointing error urad, micro-vibration jitter RMS, fine steering mirror piezo stroke, OSNR, and constellation packet loss.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Laser crosslink integrity status, FSM tracking state, piezo voltage offset volts, diode power boost mW, and mesh reroute hops"},
+					},
+				},
+			},
+			"/api/v1/semicon/glass-tgv/evaluate-substrate-and-via-integrity": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Semiconductor Wafer-Scale Glass Substrate Through-Glass Via (TGV) Micro-Cracking Sentinel (SEMI 3D10 & IEEE 1500)",
+					"description": "Monitors acoustic emission micro-cracking events, reflow oven peak temperature, glass fracture intensity K1, Kelvin contact resistance, and warpage bow deflection.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Glass substrate integrity status, TGV electrical continuity, UV laser anneal energy mJ/cm2, and isolated faulty via count"},
+					},
+				},
+			},
+			"/api/v1/nuclear/thorium-lftr/evaluate-fission-gas-and-reactivity": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Thorium Liquid Fluoride Molten Salt Reactor (LFTR) Fission Gas Cryo-Capture Sentinel (ASME BPVC Sec III Div 5 & IAEA SSR-2/1)",
+					"description": "Monitors helium sparging flow L/min, Xenon-135 poison concentration ppm, core reactivity swing pcm, cryo carbon bed temperature K, and off-gas activity.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Fission gas containment status, cryogenic adsorption condition, helium sparger surge flow L/min, and Stirling cryocooler power watts"},
+					},
+				},
+			},
+			"/api/v1/biotech/gas-fermentation/evaluate-metabolic-pathway-and-toxification": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Precision Gas Fermentation Syngas Mass-Transfer & Auto-Toxification Sentinel (ASTM D7566 & ISO 22716)",
+					"description": "Monitors dissolved hydrogen tension MPa, syngas H2:CO feed ratio, undissociated acetic acid g/L, broth pH, and microbial cell viability %.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Metabolic pathway state, mass-transfer efficiency, commanded H2:CO feed ratio, microbubble sparger pressure bar, and caustic buffer L/min"},
+					},
+				},
+			},
+			"/api/v1/polar/iceberg-scour/evaluate-iceberg-encroachment": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Arctic Subsea Iceberg Scour Wellhead Silo & Shear-Rupture Sentinel (DNV-OS-F101 & ISO 19906)",
+					"description": "Monitors iceberg keel draft meters, seabed scour trench depth, iceberg drift velocity, distance to wellhead meters, and silo berm axial stress.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Iceberg encroachment status, silo containment integrity, acoustic deflector decibels, storm choke closure seconds, and EQD release seconds"},
+					},
+				},
+			},
 		},
 	}
 }

@@ -35130,6 +35130,334 @@ async function triggerDOCCOcean() {
 }
 
 
+
+async function triggerSatelliteLaserPAT() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memantau link komunikasi laser antar-satelit (OISL), jitter mikro-getaran, dan fine steering mirror...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const satID = "SAT-CONSTELLATION-LEO-ALPHA-01";
+        await api('/space/satellite-laser-pat/ingest-laser-telemetry', 'POST', {
+            telemetry_id: "TEL-SAT-PAT-1001",
+            satellite_id: satID,
+            target_satellite_id: "SAT-CONSTELLATION-LEO-BETA-02",
+            inter_satellite_range_km: 2850.0,
+            optical_pointing_error_urad: 5.65,
+            micro_vibration_jitter_rms_urad: 4.15,
+            fsm_piezo_actuator_stroke_pct: 88.5,
+            optical_signal_to_noise_ratio_db: 16.2,
+            laser_diode_tx_power_mw: 950.0,
+            constellation_mesh_packet_loss_pct: 0.082
+        });
+
+        const evalRes = await api('/space/satellite-laser-pat/evaluate-crosslink-and-jitter', 'POST', { satellite_id: satID });
+        const actRes = await api('/space/satellite-laser-pat/trigger-jitter-rejection-and-reroute', 'POST', { satellite_id: satID });
+        const dossierRes = await api(`/space/satellite-laser-pat/satellite-laser-dossier/${satID}`, 'GET');
+
+        if (badge) badge.textContent = `🛰️ Satellite Laser PAT: Pointing ${dossierRes.data.pointing_error_urad} µrad | OSNR: ${dossierRes.data.osnr_db} dB | Status: ${evalRes.data.laser_crosslink_integrity_status}`;
+        if (answerEl) {
+            let out = `🛰️ SATELLITE OPTICAL LASER CROSSLINK (OISL) POINTING-ACQUISITION-TRACKING (PAT) SENTINEL (CCSDS 141.0-B-1 & ISO 14620):\n`;
+            out += `Satelit Pengirim: ${satID} | Satelit Target: ${dossierRes.data.target_satellite_id} | Jarak Antar-Satelit: ${dossierRes.data.inter_satellite_range_km.toLocaleString()} km\n`;
+            out += `Kepatuhan Protokol Optik Antariksa: CCSDS 141.0-B-1 (${dossierRes.data.ccsds_141_compliant ? 'Compliant' : 'Warning'}) | ISO 14620 (Certified)\n\n`;
+            out += `PARAMETER AKUISISI BEAM LASER & JITTER MIKRO-GETARAN:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Kesalahan Arah Berkas Laser (Pointing Error): ${dossierRes.data.pointing_error_urad} µrad (Batas Divergensi Berkas Optik < 5.00 µrad) | Ekses: +${evalRes.data.pointing_error_excess_margin_pct.toFixed(1)}%\n`;
+            out += `• Jitter Mikro-Getaran RMS (Reaction Wheels / Solar Drive): ${dossierRes.data.jitter_rms_urad} µrad (Batas Toleransi < 3.50 µrad)\n`;
+            out += `• Stroke Cermin Kemudi Halus (FSM Piezo Stroke): ${dossierRes.data.fsm_stroke_pct}% (Batas Kejenuhan Aktuator < 85.0%)\n`;
+            out += `• Optical Signal-to-Noise Ratio (OSNR): ${dossierRes.data.osnr_db} dB (Batas Minimum Sensitivitas Penerima > 18.0 dB)\n`;
+            out += `• Status Integritas Tautan Laser Antar-Satelit: ${evalRes.data.laser_crosslink_integrity_status}\n`;
+            out += `• Status Aktuator Cermin Kemudi (FSM): ${evalRes.data.fine_steering_mirror_status}\n\n`;
+            out += `KOMPENSASI PIEZO FSM, SURGE DAYA DIODE & REROUTING PAKET MESH KONSTELASI:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Manuver Komunikasi Optik: ${actRes.data.action_id}\n`;
+            out += `• Offset Tegangan Tertutup Piezo FSM: ${actRes.data.fsm_piezo_voltage_offset_volts} V (Menghilangkan Jitter Mikro Frekuensi Tinggi 150 Hz)\n`;
+            out += `• Perintah Peningkatan Daya Diode Laser Pemancar: ${actRes.data.commanded_laser_power_boost_mw} mW (Menembus Hambatan Redaman Jitter)\n`;
+            out += `• Lompatan Rerouting Paket Mesh Konstelasi: ${actRes.data.constellation_reroute_mesh_hops} Hops (Mengalihkan Lalu-Lintas Kritis Menghindari Link Terdegradasi)\n`;
+            out += `• Nilai Kerugian Misi Satelit Terhindar: $${actRes.data.avoided_satellite_link_loss_usd.toLocaleString()} USD (Mencegah Partisi Mesh Konstelasi, Blackout Telemetri & Penalti SLA)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Offset tegangan piezo 72.5 V mengembalikan sumbu bidik berkas laser ke dalam toleransi 1.85 µrad dalam waktu kurang dari 350 mikrodetik.</li>
+                <li>Rerouting mesh 2-hops mengamankan aliran data orbit tanpa kehilangan paket (0% packet loss) selama periode stabilisasi getaran.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses satellite laser PAT sentinel: ' + err.message;
+    }
+}
+
+async function triggerGlassTGV() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memantau tegangan substrat kaca Through-Glass Via (TGV), emisi akustik retak mikro, dan reflow termal...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const panelID = "PANEL-GLASS-TGV-AI-ACCEL-08";
+        await api('/semicon/glass-tgv/ingest-glass-telemetry', 'POST', {
+            telemetry_id: "TEL-TGV-2001",
+            panel_id: panelID,
+            wafer_batch_id: "BATCH-GLASS-700MM-2026-Q4",
+            tgv_via_pitch_um: 42.0,
+            acoustic_emission_micro_cracks: 15.5,
+            reflow_oven_peak_temp_c: 264.5,
+            glass_surface_stress_intensity_mpa_sqrt_m: 0.82,
+            kelvin_contact_resistance_mohm: 48.2,
+            dielectric_breakdown_current_na: 18.5,
+            warpage_bow_deflection_um: 34.0
+        });
+
+        const evalRes = await api('/semicon/glass-tgv/evaluate-substrate-and-via-integrity', 'POST', { panel_id: panelID });
+        const actRes = await api('/semicon/glass-tgv/trigger-laser-anneal-and-via-isolation', 'POST', { panel_id: panelID });
+        const dossierRes = await api(`/semicon/glass-tgv/glass-substrate-dossier/${panelID}`, 'GET');
+
+        if (badge) badge.textContent = `🔬 Glass TGV: K1 ${dossierRes.data.stress_intensity_k1} MPa√m | Warpage: ${dossierRes.data.warpage_bow_um} µm | Status: ${evalRes.data.glass_substrate_integrity_status}`;
+        if (answerEl) {
+            let out = `🔬 SEMICONDUCTOR WAFER-SCALE GLASS SUBSTRATE TGV SENTINEL (SEMI 3D10 & IEEE 1500):\n`;
+            out += `Identifikasi Panel Kaca Kemasan AI: ${panelID} | Batch: ${dossierRes.data.wafer_batch_id} | Pitch TGV: ${dossierRes.data.tgv_pitch_um} µm\n`;
+            out += `Kepatuhan Standar Kemasan Semikonduktor: SEMI 3D10 (${dossierRes.data.semi_3d10_compliant ? 'Compliant' : 'Warning'}) | IEEE 1500 (Cleared)\n\n`;
+            out += `INTENSITAS TEGANGAN FRAKTUR KACA, RETAK MIKRO & RESISTANSI VIA:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Intensitas Tegangan Permukaan Kaca (K1): ${dossierRes.data.stress_intensity_k1} MPa·m¹/² (Batas Ketangguhan Fraktur Kaca Borosilikat < 0.75 MPa·m¹/²) | Ekses: +${evalRes.data.fracture_toughness_margin_pct.toFixed(1)}%\n`;
+            out += `• Frekuensi Emisi Akustik Retak Mikro: ${dossierRes.data.acoustic_events_sec} events/detik (Batas Peringatan Fissure < 12.0 events/s)\n`;
+            out += `• Resistansi Kontak Kelvin 4-Kawat TGV: ${dossierRes.data.contact_resistance_mohm} mΩ (Batas Kegagalan Sambungan Interkoneksi < 45.0 mΩ)\n`;
+            out += `• Defleksi Kelengkungan Termal Panel (Warpage Bow): ${dossierRes.data.warpage_bow_um} µm (Batas Kelengkungan Maksimum < 30.0 µm)\n`;
+            out += `• Status Integritas Substrat Kaca: ${evalRes.data.glass_substrate_integrity_status}\n`;
+            out += `• Status Kontinuitas Kelistrikan TGV: ${evalRes.data.tgv_electrical_continuity_status}\n\n`;
+            out += `ANNEALING LASER UV PULSA, KONTROL LAJU REFLOW & ISOLASI VIA REDUNDAN:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Proteksi Panel Kemasan: ${actRes.data.action_id}\n`;
+            out += `• Energi Penyinaran Laser Anneal UV 355nm: ${actRes.data.commanded_laser_anneal_energy_mj_per_cm2} mJ/cm² (Meredakan Tegangan Tarik di Sekitar Bibir TGV)\n`;
+            out += `• Penyesuaian Gradien Pendinginan Reflow: ${actRes.data.reflow_cooling_rate_delta_c_per_sec} °C/s (Mencegah Kejutan Termal Akibat Perbedaan CTE Kaca-Tembaga)\n`;
+            out += `• Saluran TGV Cacat Diisolasi & Dialihkan: ${actRes.data.isolated_faulty_via_channels} Jalur (Dialihkan ke Jalur Redundan Cadangan Melalui E-Fuse)\n`;
+            out += `• Nilai Kerugian Fabrikasi Terhindar: $${actRes.data.avoided_glass_substrate_loss_usd.toLocaleString()} USD (Mencegah Pecahnya Panel Kaca Kemasan Chiplet AI Skala Penuh)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penyinaran laser UV 192.5 mJ/cm² meredakan konsentrasi tegangan mikro pada antarmuka via sehingga retak tidak merambat ke badan kaca.</li>
+                <li>Pengalihan 16 via cacat ke jalur redundan memulihkan konektivitas logika silikon dengan yield fungsional 100%.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses glass TGV sentinel: ' + err.message;
+    }
+}
+
+async function triggerThoriumLFTR() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memantau pelepasan gas fisi Xenon-135 reaktor thorium garam cair (LFTR), reaktivitas, dan perangkap kriogenik...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const coreID = "CORE-THORIUM-LFTR-MODULAR-04";
+        await api('/nuclear/thorium-lftr/ingest-reactor-telemetry', 'POST', {
+            telemetry_id: "TEL-LFTR-3001",
+            reactor_core_id: coreID,
+            molten_salt_bulk_temp_c: 712.0,
+            helium_sparger_flow_lpm: 340.0,
+            xenon135_poison_concentration_ppm: 0.94,
+            krypton85_off_gas_activity_bq: 3.8e11,
+            cryo_carbon_trap_temp_k: 112.0,
+            core_reactivity_swing_pcm: 84.5,
+            off_gas_decay_tank_pressure_bar: 7.85,
+            molten_fluoride_redox_potential_mv: -415.0
+        });
+
+        const evalRes = await api('/nuclear/thorium-lftr/evaluate-fission-gas-and-reactivity', 'POST', { reactor_core_id: coreID });
+        const actRes = await api('/nuclear/thorium-lftr/trigger-sparger-surge-and-decay-diversion', 'POST', { reactor_core_id: coreID });
+        const dossierRes = await api(`/nuclear/thorium-lftr/thorium-reactor-dossier/${coreID}`, 'GET');
+
+        if (badge) badge.textContent = `☢️ Thorium LFTR: Xe-135 ${dossierRes.data.xenon135_ppm} ppm | Cryo: ${dossierRes.data.cryo_trap_temp_k} K | Status: ${evalRes.data.fission_gas_containment_status}`;
+        if (answerEl) {
+            let out = `☢️ THORIUM LIQUID FLUORIDE MOLTEN SALT REACTOR (LFTR) FISSION GAS SENTINEL (ASME BPVC SEC III DIV 5 & IAEA SSR-2/1):\n`;
+            out += `Identifikasi Teras Reaktor Garam Cair: ${coreID} | Suhu Garam Bahan Bakar: ${dossierRes.data.molten_salt_temp_c}°C\n`;
+            out += `Kepatuhan Keselamatan Nuklir Generasi IV: ASME BPVC Sec III Div 5 (${dossierRes.data.asme_sec3_div5_compliant ? 'Compliant' : 'Warning'}) | IAEA SSR-2/1 (Certified)\n\n`;
+            out += `KONSENTRASI RACUN NEUTRON XENON-135, FLUKTUASI REAKTIVITAS & PERANGKAP KRIO:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Konsentrasi Racun Fisi Xenon-135 Terlarut: ${dossierRes.data.xenon135_ppm} ppm (Batas Kritis Keracunan Teras < 0.85 ppm)\n`;
+            out += `• Fluktuasi Reaktivitas Teras (Reactivity Swing): ${dossierRes.data.reactivity_swing_pcm} pcm (Batas Aman Stabilitas < 75.0 pcm) | Ekses: +${evalRes.data.reactivity_excursion_margin_pcm.toFixed(1)} pcm\n`;
+            out += `• Debit Penggelembung Gas Helium Sparger: ${dossierRes.data.helium_sparger_lpm} L/menit (Batas Aliran Minimum Stripping > 380.0 L/min)\n`;
+            out += `• Suhu Bed Karbon Aktif Kriogenik (Cold Trap): ${dossierRes.data.cryo_trap_temp_k} K (Batas Desorpsi Termal Gas Mulia < 85.0 K)\n`;
+            out += `• Status Pengendalian Gas Fisi Teras: ${evalRes.data.fission_gas_containment_status}\n`;
+            out += `• Status Adsorpsi Karbon Kriogenik Off-Gas: ${evalRes.data.cryo_off_gas_adsorption_status}\n\n`;
+            out += `SURGE SPARGER HELIUM, DAYA STIRLING CHILLER & PENGALIHAN TANGKI LURUH:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Tanggap Keselamatan Reaktor: ${actRes.data.action_id}\n`;
+            out += `• Perintah Laju Aliran Gas Helium Sparging: ${actRes.data.commanded_helium_sparger_flow_lpm.toLocaleString()} L/menit (Mengupas Gelembung Gas Xe-135 & Kr-85 dari Garam Cair)\n`;
+            out += `• Daya Pendingin Kriogenik Stirling Chiller: ${actRes.data.cryo_stirling_chiller_power_watts.toLocaleString()} W (Mendinginkan Kembali Bed Adsorpsi Karbon ke 77 K)\n`;
+            out += `• Bukaan Katup Pengalihan Tangki Peluruhan Bawah Tanah: ${actRes.data.emergency_decay_tank_valve_open_pct}% (Mengalirkan Gas Radioaktif ke Ruang Aman Terisolasi)\n`;
+            out += `• Nilai Kerugian Insiden Nuklir Terhindar: $${actRes.data.avoided_nuclear_event_loss_usd.toLocaleString()} USD (Mencegah Pemadaman Teras Akibat Xe-Poison, Kebocoran Gas Radioaktif & Penutupan Izin Reaktor)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Surge helium 1,350 L/menit dengan cepat mengekstraksi racun Xe-135 sehingga stabilitas reaktivitas kembali ke batas netral.</li>
+                <li>Daya pendingin Stirling 5,600 W membekukan kembali gas mulia volatil ke dalam matriks karbon tanpa risiko kebocoran atmosfer.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses thorium LFTR sentinel: ' + err.message;
+    }
+}
+
+async function triggerGasFermentation() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memantau bioreaktor fermentasi syngas gas-fermenting, rasio H2:CO, dan akumulasi asam asetat...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const bioID = "BIOREACTOR-SYNGAS-SAF-DEEP-02";
+        await api('/biotech/gas-fermentation/ingest-fermentation-telemetry', 'POST', {
+            telemetry_id: "TEL-GAS-FERM-4001",
+            bioreactor_id: bioID,
+            batch_run_id: "BATCH-SAF-ETHANOL-500KL-09",
+            dissolved_hydrogen_tension_mpa: 0.042,
+            syngas_h2_to_co_feed_ratio: 1.35,
+            undissociated_acetic_acid_g_per_l: 16.8,
+            broth_ph: 4.28,
+            microbial_cell_viability_pct: 82.5,
+            gas_holdup_fraction_pct: 15.2,
+            ethanol_to_acetate_product_ratio: 2.85
+        });
+
+        const evalRes = await api('/biotech/gas-fermentation/evaluate-metabolic-pathway-and-toxification', 'POST', { bioreactor_id: bioID });
+        const actRes = await api('/biotech/gas-fermentation/trigger-syngas-trim-and-caustic-buffer', 'POST', { bioreactor_id: bioID });
+        const dossierRes = await api(`/biotech/gas-fermentation/gas-fermentation-dossier/${bioID}`, 'GET');
+
+        if (badge) badge.textContent = `🧪 Gas Fermentation: Acid ${dossierRes.data.acetic_acid_g_l} g/L | pH: ${dossierRes.data.broth_ph} | Status: ${evalRes.data.metabolic_pathway_state}`;
+        if (answerEl) {
+            let out = `🧪 PRECISION GAS FERMENTATION SYNGAS MASS-TRANSFER & SAF PRECURSOR SENTINEL (ASTM D7566 & ISO 22716):\n`;
+            out += `Identifikasi Bioreaktor Syngas: ${bioID} | Batch: ${dossierRes.data.batch_run_id}\n`;
+            out += `Kepatuhan Mutu Bioavtur Berkelanjutan: ASTM D7566 (${dossierRes.data.astm_d7566_compliant ? 'Compliant' : 'Warning'}) | ISO 22716 (Certified)\n\n`;
+            out += `TRANSFER MASSA GAS SYNGAS, AKUMULASI ASAM TOKSIK & VIABILITAS SEL:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Konsentrasi Asam Asetat Bebas Tak-Terdisosiasi: ${dossierRes.data.acetic_acid_g_l} g/L (Batas Toksisitas Seluler Clostridium < 15.0 g/L) | Ekses: +${evalRes.data.acetic_acid_excess_margin_pct.toFixed(1)}%\n`;
+            out += `• Nilai pH Kaldu Fermentasi (Broth pH): ${dossierRes.data.broth_ph} pH (Batas Ambang Asidifikasi Kritis > 4.40 pH)\n`;
+            out += `• Tegangan Gas Hidrogen Terlarut (dH2 Tension): ${dossierRes.data.dissolved_h2_mpa} MPa (Batas Kelaparan Reduktif < 0.05 MPa)\n`;
+            out += `• Rasio Umpan Molar Gas H2:CO: ${dossierRes.data.syngas_h2_co_ratio} (Target Stoikiometri Sintesis Etanol: 1.80 - 2.40)\n`;
+            out += `• Persentase Viabilitas Sel Bakteri Fermentasi: ${dossierRes.data.viability_pct}% (Batas Minimum Populasi > 85.0%)\n`;
+            out += `• Status Jalur Metabolisme Seluler: ${evalRes.data.metabolic_pathway_state}\n`;
+            out += `• Efisiensi Transfer Massa Gas-Cair (kLa): ${evalRes.data.mass_transfer}\n\n`;
+            out += `TRIMMING UMPAN SYNGAS, PENINGKATAN TEKANAN SPARGER & BUFFER KAUSTIK:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Kontrol Bioproses: ${actRes.data.action_id}\n`;
+            out += `• Rasio Umpan H2:CO Terkomando: ${actRes.data.commanded_h2_to_co_ratio_trim} (Dipotong ke Rasio Stoikiometris Optimal untuk Solventogenesis)\n`;
+            out += `• Tekanan Pompa Injektor Mikro-Gelembung: ${actRes.data.microbubble_sparger_pressure_bar} bar (Meningkatkan Luas Antarmuka Gelembung Gas)\n`;
+            out += `• Laju Dosis Buffer Netralisasi Kaustik (2M NaOH): ${actRes.data.caustic_buffer_injection_rate_lpm} L/menit (Menaikkan pH ke Zona Aman Tanpa Merusak Kultur)\n`;
+            out += `• Nilai Kerugian Batch Bioreaktor Terhindar: $${actRes.data.avoided_bioreactor_crash_loss_usd.toLocaleString()} USD (Mencegah Pembusukan Kaldu 500.000 L, Lisis Kultur Biokatalis & Gagal Mutu SAF)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Trimming rasio H2:CO ke 2.15 dan sparger 6.45 bar memulihkan transfer massa hidrogen terlarut ke dalam sel mikroba.</li>
+                <li>Dosis buffer kaustik 52.0 L/menit menaikkan pH kaldu ke 4.95 sehingga menghentikan akumulasi asam asetat toksik.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses gas fermentation sentinel: ' + err.message;
+    }
+}
+
+async function triggerIcebergScour() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memantau pergerakan gunung es kutub, kedalaman kerukan dasar laut, dan silo kepala sumur migas subsea...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const wellheadID = "WELLHEAD-ARCTIC-SILO-BARENTS-03";
+        await api('/polar/iceberg-scour/ingest-scour-telemetry', 'POST', {
+            telemetry_id: "TEL-ICEBERG-5001",
+            wellhead_id: wellheadID,
+            silo_sector_id: "SECTOR-BARENTS-DEEP-GLORY-HOLE-09",
+            iceberg_keel_draft_meters: 228.5,
+            seabed_scour_depth_meters: 3.15,
+            iceberg_drift_velocity_knots: 1.85,
+            distance_to_wellhead_meters: 285.0,
+            silo_berm_axial_stress_mpa: 510.0,
+            downhole_packer_pressure_bar: 385.0,
+            subsea_umbilical_tension_kn: 365.0
+        });
+
+        const evalRes = await api('/polar/iceberg-scour/evaluate-iceberg-encroachment', 'POST', { wellhead_id: wellheadID });
+        const actRes = await api('/polar/iceberg-scour/trigger-storm-choke-and-eqd', 'POST', { wellhead_id: wellheadID });
+        const dossierRes = await api(`/polar/iceberg-scour/arctic-wellhead-dossier/${wellheadID}`, 'GET');
+
+        if (badge) badge.textContent = `🧊 Iceberg Scour: Jarak ${dossierRes.data.distance_to_wellhead_m} m | Kerukan: ${dossierRes.data.scour_depth_m} m | Status: ${evalRes.data.iceberg_encroachment_status}`;
+        if (answerEl) {
+            let out = `🧊 ARCTIC SUBSEA ICEBERG SCOUR WELLHEAD SILO SENTINEL (DNV-OS-F101 & ISO 19906):\n`;
+            out += `Identifikasi Kepala Sumur Lepas Pantai Arktik: ${wellheadID} | Silo: ${dossierRes.data.silo_sector_id}\n`;
+            out += `Kepatuhan Rekayasa Lepas Pantai Kutub: DNV-OS-F101 (${dossierRes.data.dnv_os_f101_compliant ? 'Compliant' : 'Warning'}) | ISO 19906 (Certified)\n\n`;
+            out += `TRAJEKTORI GUNUNG ES, KEDALAMAN KERUKAN DASAR LAUT & TEGANGAN SILO:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Jarak Gunung Es ke Silo Kepala Sumur: ${dossierRes.data.distance_to_wellhead_m} m (Batas Zona Darurat Tabrakan < 350.0 m) | Margin: ${evalRes.data.wellhead_clearance_distance_margin_pct.toFixed(1)}%\n`;
+            out += `• Kedalaman Kerukan Lunas Es di Dasar Laut (Scour Trench): ${dossierRes.data.scour_depth_m} m (Batas Proteksi Parit < 2.50 m)\n`;
+            out += `• Kedalaman Sarat Lunas Gunung Es (Keel Draft): ${dossierRes.data.iceberg_draft_m} m\n`;
+            out += `• Tegangan Aksial Dinding Silo Pelindung (Berm Stress): ${dossierRes.data.silo_stress_mpa} MPa (Batas Luluh Material < 480.0 MPa)\n`;
+            out += `• Status Kedekatan Bahaya Gunung Es: ${evalRes.data.iceberg_encroachment_status}\n`;
+            out += `• Integritas Silo Penyimpanan Kepala Sumur: ${evalRes.data.silo_integrity}\n\n`;
+            out += `DEFLEKTOR AKUSTIK, PENUTUPAN STORM CHOKE & EMERGENCY QUICK DISCONNECT (EQD):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Tanggap Bahaya Bawah Laut: ${actRes.data.action_id}\n`;
+            out += `• Intensitas Gelombang Suara Pengusir Haluan Gunung Es: ${actRes.data.acoustic_deflector_decibels} dB (Memicu Efek Gelombang Hidrodinamis Pembelok Arah)\n`;
+            out += `• Waktu Penutupan Katup Pengaman Lubang Bawah (Storm Choke): ${actRes.data.storm_choke_closure_time_sec} detik (Mengunci Tekanan Reservoir Minyak Bawah Laut)\n`;
+            out += `• Waktu Pelepasan Hidrolis Darurat Cepat (EQD Riser Unlatch): ${actRes.data.eqd_hydraulic_release_time_sec} detik (Memutus Sambungan Pipa Tegak Sebelum Terbentur Lunas Es)\n`;
+            out += `• Nilai Kerugian Katastropik Terhindar: $${actRes.data.avoided_subsea_catastrophe_loss_usd.toLocaleString()} USD (Mencegah Pemotongan Kepala Sumur Arktik, Tumpahan Minyak di Bawah Es & Biaya Pemulihan Ekologis)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penutupan katup storm choke 16.8 detik dan pelepasan hidrolik EQD 4.15 detik menyegel sumur rapat di dalam dasar silo sebelum lunas es tiba.</li>
+                <li>Silo recessed glory hole membiarkan lunas es mengeruk bagian atas gundukan tanpa merusak pohon katup produksi bawah laut.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses iceberg scour sentinel: ' + err.message;
+    }
+}
+
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

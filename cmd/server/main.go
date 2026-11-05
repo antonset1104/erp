@@ -103,6 +103,11 @@ import (
 	coreimmersionchf "erp-golang/internal/core/immersion_chf"
 	coreasteroidmining "erp-golang/internal/core/asteroid_mining"
 	coredoccocean "erp-golang/internal/core/docc_ocean"
+	coresatellitelaserpat "erp-golang/internal/core/satellite_laser_pat"
+	coreglasstgv "erp-golang/internal/core/glass_tgv"
+	corethoriumlftr "erp-golang/internal/core/thorium_lftr"
+	coregasfermentation "erp-golang/internal/core/gas_fermentation"
+	coreicebergscour "erp-golang/internal/core/arctic_iceberg_scour"
 	corescramjet "erp-golang/internal/core/scramjet"
 	coreseabed "erp-golang/internal/core/seabed"
 	coresemiconductor "erp-golang/internal/core/semiconductor"
@@ -379,7 +384,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.81.0",
+			"version":    "1.82.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -599,6 +604,11 @@ func main() {
 		coreimmersionchf.RegisterImmersionCHFRoutes(apiV1)
 		coreasteroidmining.RegisterAsteroidMiningRoutes(apiV1)
 		coredoccocean.RegisterDOCCOceanRoutes(apiV1)
+		coresatellitelaserpat.RegisterSatelliteLaserPATRoutes(apiV1)
+		coreglasstgv.RegisterGlassTGVRoutes(apiV1)
+		corethoriumlftr.RegisterThoriumLFTRRoutes(apiV1)
+		coregasfermentation.RegisterGasFermentationRoutes(apiV1)
+		coreicebergscour.RegisterArcticIcebergScourRoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend
