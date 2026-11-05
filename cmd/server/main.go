@@ -83,6 +83,11 @@ import (
 	coreaavgenetherapy "erp-golang/internal/core/aav_genetherapy"
 	coredryelectrode "erp-golang/internal/core/solidstate_dryelectrode"
 	coreisrumethalox "erp-golang/internal/core/isru_methalox"
+	corelh2aviation "erp-golang/internal/core/lh2_aviation"
+	corehbm4bonding "erp-golang/internal/core/hbm4_bonding"
+	coremicroreactor "erp-golang/internal/core/microreactor_heatpipe"
+	coremrnacapping "erp-golang/internal/core/mrna_capping"
+	coresubseacompressor "erp-golang/internal/core/subsea_compressor"
 	corescramjet "erp-golang/internal/core/scramjet"
 	coreseabed "erp-golang/internal/core/seabed"
 	coresemiconductor "erp-golang/internal/core/semiconductor"
@@ -359,7 +364,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.77.0",
+			"version":    "1.78.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -559,6 +564,11 @@ func main() {
 		coreaavgenetherapy.RegisterAAVRoutes(apiV1)
 		coredryelectrode.RegisterDryElectrodeRoutes(apiV1)
 		coreisrumethalox.RegisterISRURoutes(apiV1)
+		corelh2aviation.RegisterLH2Routes(apiV1)
+		corehbm4bonding.RegisterHBM4Routes(apiV1)
+		coremicroreactor.RegisterMicroreactorRoutes(apiV1)
+		coremrnacapping.RegisterMRNARoutes(apiV1)
+		coresubseacompressor.RegisterSubseaCompressorRoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend

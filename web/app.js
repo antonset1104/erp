@@ -33831,6 +33831,335 @@ async function triggerISRUMethalox() {
     }
 }
 
+async function triggerLH2Aviation() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi degradasi jaket vakum insulasi, tekanan uap BOG tangki LH2 pesawat, dan kavitasi pompa kriogenik...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const tankID = "TANK-LH2-AIRCRAFT-A380-01";
+        await api('/aviation/lh2/ingest-tank-telemetry', 'POST', {
+            tank_id: tankID,
+            aircraft_tail_number: "N701-ZERO-E",
+            flight_phase: "CRUISE_FL350",
+            liquid_hydrogen_mass_kg: 4250.0,
+            tank_ullage_pressure_bar: 3.45,
+            bulk_hydrogen_temp_kelvin: 23.2,
+            vacuum_jacket_pressure_mbar: 0.085,
+            boil_off_gas_rate_kg_per_hr: 18.5,
+            cryo_pump_inlet_npsh_margin_m: 0.35,
+            ortho_to_para_ratio: 0.045
+        });
+
+        const evalRes = await api('/aviation/lh2/evaluate-boiloff-and-cavitation', 'POST', { tank_id: tankID });
+        const actRes = await api('/aviation/lh2/trigger-reliquefaction-and-anti-cavitation', 'POST', { tank_id: tankID });
+        const dossierRes = await api(`/aviation/lh2/lh2-flight-safety-dossier/${tankID}`, 'GET');
+
+        if (badge) badge.textContent = `✈️ LH2 Aviation: Subcooling ${evalRes.data.subcooling_margin_kelvin} K | Vacuum: ${evalRes.data.vacuum_insulation_status} | Cryopump: ${evalRes.data.cryo_pump_cavitation_risk}`;
+        if (answerEl) {
+            let out = `✈️ COMMERCIAL AIRCRAFT LIQUID HYDROGEN (LH2) CRYO TANK SENTINEL (FAA 14 CFR 25 & SAE AS6858):\n`;
+            out += `Tangki Kriogenik LH2: ${tankID} | Registrasi Pesawat: ${dossierRes.data.telemetry.aircraft_tail_number} | Fase Penerbangan: ${dossierRes.data.telemetry.flight_phase}\n`;
+            out += `Massa LH2 Tersimpan: ${dossierRes.data.telemetry.liquid_hydrogen_mass_kg} kg | Suhu Hidrogen Curah: ${dossierRes.data.telemetry.bulk_hydrogen_temp_kelvin} K\n\n`;
+            out += `INSULASI VAKUM, TEKANAN ULLAGE & KAVITASI POMPA KRIOGENIK:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Tekanan Rongga Ullage Tangki: ${dossierRes.data.telemetry.tank_ullage_pressure_bar} bar (Batas Pengaman Katup Pelepas > 3.20 bar)\n`;
+            out += `• Tekanan Jaket Dinding Vakum (Insulasi Termal): ${dossierRes.data.telemetry.vacuum_jacket_pressure_mbar} mbar (Batas Hilang Vakum > 0.050 mbar)\n`;
+            out += `• Laju Pembentukan Gas Uap (BOG): ${dossierRes.data.telemetry.boil_off_gas_rate_kg_per_hr} kg/jam (Target Normal < 8.0 kg/jam)\n`;
+            out += `• Margin NPSH Masukan Pompa Kriogenik: ${dossierRes.data.telemetry.cryo_pump_inlet_npsh_margin_m} m (Batas Kavitasi Impeller < 0.60 m)\n`;
+            out += `• Margin Subcooling Fluida: ${evalRes.data.subcooling_margin_kelvin} K | Rasio Orto-ke-Para: ${dossierRes.data.telemetry.ortho_to_para_ratio}\n`;
+            out += `• Status Integritas Insulasi Vakum: ${evalRes.data.vacuum_insulation_status}\n`;
+            out += `• Risiko Kavitasi Uap Pompa Bahan Bakar: ${evalRes.data.cryo_pump_cavitation_risk}\n\n`;
+            out += `AKTUASI BOG RELIQUEFACTION, INERTING NITROGEN SWEEP & THROTTLING POMPA:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Kelaikudaraan Aviasi: ${actRes.data.action_id}\n`;
+            out += `• Perintah Laju Kompresor Rekondensasi BOG: ${actRes.data.commanded_reliquefaction_flow_kg_hr} kg/jam (Mengembalikan Uap Menjadi Cairan)\n`;
+            out += `• Laju Sapuan Gas Nitrogen Inerting (Shroud Venting): ${actRes.data.nitrogen_inerting_sweep_rate_nm3_hr} Nm³/jam (Mencegah Campuran Gas Eksplosif)\n`;
+            out += `• Penurunan Kecepatan Pompa Kriogenik: ${actRes.data.pump_speed_throttling_pct}% (Menekan Fenomena Inception Bubble di Impeller Eye)\n`;
+            out += `• Estimasi Kerugian Pesawat Komersial Terhindar: $${actRes.data.avoided_aircraft_loss_usd.toLocaleString()} USD (Mencegah Ledakan Tangki dan Flameout Mesin)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Aktivasi kompresor BOG 22.5 kg/jam dan penyapuan N2 shroud 12 Nm³/jam mengendalikan tekanan tangki di bawah batas kejut pneumatik kelaikudaraan.</li>
+                <li>Penurunan kecepatan putar pompa kriogenik 15% memulihkan margin NPSH masukan dan mengeliminasi kavitasi uap hidrogen cair.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses LH2 Aircraft Cryo Tank sentinel: ' + err.message;
+    }
+}
+
+async function triggerHBM4Bonding() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi dishing tembaga HBM4 16-die, fraksi void antarmuka Cu-Cu, dan risiko migrasi elektro TSV...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const stackID = "HBM4-16HI-DRAM-STACK-008";
+        await api('/semicon/hbm4/ingest-stack-telemetry', 'POST', {
+            stack_id: stackID,
+            wafer_lot_id: "LOT-HBM4-AI-ACCEL-440",
+            die_stack_count: 16,
+            cu_pad_dishing_depth_nm: 2.85,
+            dielectric_recess_variance_nm: 1.45,
+            interfacial_void_area_fraction_pct: 1.85,
+            contact_resistance_per_pad_ohms: 0.28,
+            thermal_anneal_temp_c: 215.0,
+            electromigration_current_density_acm2: 1.45e6,
+            overlay_alignment_runout_nm: 58.5
+        });
+
+        const evalRes = await api('/semicon/hbm4/evaluate-voids-and-electromigration', 'POST', { stack_id: stackID });
+        const actRes = await api('/semicon/hbm4/trigger-anneal-pulse-and-stress-relief', 'POST', { stack_id: stackID });
+        const dossierRes = await api(`/semicon/hbm4/hbm4-quality-dossier/${stackID}`, 'GET');
+
+        if (badge) badge.textContent = `💾 HBM4 16-Die: Skor Ikatan ${evalRes.data.interfacial_bonding_quality_pct}% | Void: ${evalRes.data.hybrid_bonding_integrity_status} | EM: ${evalRes.data.electromigration_hazard}`;
+        if (answerEl) {
+            let out = `💾 HIGH-BANDWIDTH MEMORY (HBM4) 16-DIE Cu-Cu HYBRID DIRECT BONDING SENTINEL (SEMI 3D-0613 & IEEE 1581):\n`;
+            out += `Stack ID Memori AI: ${stackID} | Jumlah Die DRAM Tertumpuk: ${dossierRes.data.telemetry.die_stack_count} Dies | Lot Wafer: ${dossierRes.data.telemetry.wafer_lot_id}\n`;
+            out += `Ketidaksejajaran Overlay Runout: ${dossierRes.data.telemetry.overlay_alignment_runout_nm} nm (Batas Maksimum < 40.0 nm)\n\n`;
+            out += `KUALITAS BONDING Cu-Cu, KEDALAMAN DISHING & FRAKSI VOID ANTARMUKA:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Kedalaman Dishing Pad Tembaga (CMP): ${dossierRes.data.telemetry.cu_pad_dishing_depth_nm} nm (Target Spesifikasi < 2.0 nm)\n`;
+            out += `• Fraksi Luas Void Antarmuka: ${dossierRes.data.telemetry.interfacial_void_area_fraction_pct}% (Batas Penerimaan Akustik < 0.80%)\n`;
+            out += `• Resistansi Kontak per Pad Interkoneksi: ${dossierRes.data.telemetry.contact_resistance_per_pad_ohms} Ω (Nominal Ideal < 0.15 Ω)\n`;
+            out += `• Kerapatan Arus Migrasi Elektro (EM): ${dossierRes.data.telemetry.electromigration_current_density_acm2.toExponential(2)} A/cm² (Batas Kritis 1.20e6 A/cm²)\n`;
+            out += `• Skor Kualitas Ikatan Antarmuka: ${evalRes.data.interfacial_bonding_quality_pct}%\n`;
+            out += `• Status Integritas Ikatan Hybrid Cu-Cu: ${evalRes.data.hybrid_bonding_integrity_status}\n`;
+            out += `• Tingkat Bahaya Current Crowding & EM: ${evalRes.data.electromigration_hazard}\n\n`;
+            out += `AKTUASI PULSA ANIL LASER INFRAMERAH & TEKANAN KLEM PIEZOELEKTRIK:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Kemasan Semikonduktor: ${actRes.data.action_id}\n`;
+            out += `• Temperatur Pulsa Termal Anil Inframerah: Ditingkatkan ke ${actRes.data.commanded_anneal_pulse_temp_c}°C (Durasi ${actRes.data.anneal_pulse_duration_ms} ms)\n`;
+            out += `• Gaya Beban Klem Piezoelektrik Presisi: Ditingkatkan ke ${actRes.data.piezo_bonding_clamp_force_kn} kN (Menutup Celah Dishing Nanometer)\n`;
+            out += `• Estimasi Kerugian Wafer Stack Terhindar: $${actRes.data.avoided_hbm4_scrap_loss_usd.toLocaleString()} USD (Mencegah Pembuangan Modul Memori AI HBM4)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pemberian pulsa termal laser 245°C selama 450 ms mengaktifkan difusi batas butir Cu-Cu untuk menutup rongga void mikroskopis antarmuka.</li>
+                <li>Peningkatan beban tekan piezoelektrik ke 18.5 kN meratakan deformasi dishing dan memulihkan resistansi kontak pad di bawah 0.15 Ω.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses HBM4 Hybrid Bonding sentinel: ' + err.message;
+    }
+}
+
+async function triggerMicroreactorHeatPipe() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi dryout kapiler sumbu natrium, limit sonik aliran uap, dan fluks panas teras mikroreaktor nuklir...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const reactorID = "MICRO-REACTOR-NAK-5MWE-01";
+        await api('/nuclear/microreactor/ingest-heatpipe-telemetry', 'POST', {
+            reactor_id: reactorID,
+            heat_pipe_cluster_id: "CLUSTER-CORE-EVAP-A12",
+            core_thermal_power_kw: 5200.0,
+            evaporator_wall_temp_c: 745.0,
+            condenser_exit_temp_c: 620.0,
+            sodium_vapor_mach_number: 0.94,
+            wick_capillary_pressure_drop_bar: 0.48,
+            radial_heat_flux_w_per_cm2: 88.5,
+            fast_neutron_fluence_n_per_cm2: 4.8e21,
+            inert_helium_leak_trace_ppm: 1.25
+        });
+
+        const evalRes = await api('/nuclear/microreactor/evaluate-dryout-and-sonic-choking', 'POST', { reactor_id: reactorID });
+        const actRes = await api('/nuclear/microreactor/trigger-control-drum-and-load-shed', 'POST', { reactor_id: reactorID });
+        const dossierRes = await api(`/nuclear/microreactor/heatpipe-safety-dossier/${reactorID}`, 'GET');
+
+        if (badge) badge.textContent = `☢️ Microreactor: ΔT ${evalRes.data.axial_temperature_gradient_c}°C | Dryout: ${evalRes.data.capillary_dryout_hazard} | Mach: ${dossierRes.data.telemetry.sodium_vapor_mach_number}`;
+        if (answerEl) {
+            let out = `☢️ NUCLEAR MICROREACTOR ALKALI LIQUID METAL HEAT PIPE SENTINEL (ASME BPVC III-5 & ANS 54.1):\n`;
+            out += `Reaktor Modular Mikro: ${reactorID} | Klaster Pipa Kalor: ${dossierRes.data.telemetry.heat_pipe_cluster_id}\n`;
+            out += `Daya Termal Teras Reaktor: ${dossierRes.data.telemetry.core_thermal_power_kw} kW | Fluensi Neutron Cepat: ${dossierRes.data.telemetry.fast_neutron_fluence_n_per_cm2.toExponential(2)} n/cm²\n\n`;
+            out += `DINAMIKA UAP NATRIUM, GRADIENT AKSIAL & RISIKO KEKERINGAN SUMBU (DRYOUT):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Temperatur Dinding Evaporator Teras: ${dossierRes.data.telemetry.evaporator_wall_temp_c}°C (Batas Termal Desain 720.0°C)\n`;
+            out += `• Temperatur Pintu Keluar Kondensor: ${dossierRes.data.telemetry.condenser_exit_temp_c}°C | Gradien Suhu Aksial (ΔT): ${evalRes.data.axial_temperature_gradient_c}°C\n`;
+            out += `• Kecepatan Mach Uap Logam Natrium: Mach ${dossierRes.data.telemetry.sodium_vapor_mach_number} (Batas Choking Sonik > Mach 0.85)\n`;
+            out += `• Fluks Kalor Radial Evaporator: ${dossierRes.data.telemetry.radial_heat_flux_w_per_cm2} W/cm² (Batas Burnout Kapiler > 75.0 W/cm²)\n`;
+            out += `• Penurunan Tekanan Kapiler Sumbu: ${dossierRes.data.telemetry.wick_capillary_pressure_drop_bar} bar | Trace Helium: ${dossierRes.data.telemetry.inert_helium_leak_trace_ppm} ppm\n`;
+            out += `• Bahaya Kekeringan Aliran Kapiler (Dryout): ${evalRes.data.capillary_dryout_hazard}\n`;
+            out += `• Status Aliran Sonik Uap Logam Alkali: ${evalRes.data.vapor_sonic_choking_status}\n\n`;
+            out += `AKTUASI ROTASI DRUM REFLEKTOR B4C, DERATING DAYA & FAN STIRLING BOOST:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Keselamatan Nuklir: ${actRes.data.action_id}\n`;
+            out += `• Sudut Rotasi Drum Reflektor Reaktivitas: ${actRes.data.control_drum_step_rotation_deg}° (Menyisipkan Reaktivitas Negatif Teras)\n`;
+            out += `• Penurunan Daya Teras Reaktor (Derating): -${actRes.data.power_derating_setpoint_pct}% (Menurunkan Mach Uap di Bawah 0.60)\n`;
+            out += `• Kecepatan Kipas Pendingin Stirling Heat Exchanger: Ditingkatkan ke ${actRes.data.stirling_cooler_fan_speed_rpm} RPM\n`;
+            out += `• Estimasi Kerugian Reaktor Nuklir Terhindar: $${actRes.data.avoided_reactor_damage_usd.toLocaleString()} USD (Mencegah Kerusakan Fuel Pin dan Pelepasan Radiasi)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Rotasi drum reflektor B4C 18.5° dan derating daya teras 25% meredakan beban panas evaporator dan membatalkan choking aliran uap natrium.</li>
+                <li>Akselerasi kipas penukar kalor Stirling ke 3200 RPM memaksimalkan laju kondensasi untuk menjamin kembalinya cairan logam alkali ke evaporator.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Microreactor Heat Pipe sentinel: ' + err.message;
+    }
+}
+
+async function triggerMRNACapping() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi efisiensi capping Cap-1 mRNA, panjang ekor poly(A), dan akumulasi pengotor dsRNA reaktif...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const batchID = "BATCH-MRNA-ONCOLOGY-VACC-004";
+        await api('/biopharma/mrna-capping/ingest-synthesis-telemetry', 'POST', {
+            batch_id: batchID,
+            bioreactor_line_id: "LINE-IVT-MICROFLUIDIC-01",
+            target_antigen_code: "AG-NEOANTIGEN-MELANOMA",
+            cap1_methylation_efficiency_pct: 88.5,
+            poly_a_tail_mean_length_nt: 115.0,
+            double_stranded_rna_fraction_ppm: 48.5,
+            sam_cofactor_concentration_mm: 0.42,
+            ivt_reaction_temp_c: 37.8,
+            ntp_consumption_rate_mm_per_hr: 14.2,
+            transcript_integrity_rin: 8.4
+        });
+
+        const evalRes = await api('/biopharma/mrna-capping/evaluate-capping-and-impurities', 'POST', { batch_id: batchID });
+        const actRes = await api('/biopharma/mrna-capping/trigger-sam-infusion-and-temp-ramp', 'POST', { batch_id: batchID });
+        const dossierRes = await api(`/biopharma/mrna-capping/mrna-cgmp-dossier/${batchID}`, 'GET');
+
+        if (badge) badge.textContent = `🧬 mRNA: Cap-1 ${dossierRes.data.telemetry.cap1_methylation_efficiency_pct}% | Status: ${evalRes.data.capping_quality_status} | dsRNA: ${evalRes.data.double_stranded_rna_risk}`;
+        if (answerEl) {
+            let out = `🧬 CONTINUOUS mRNA CO-TRANSCRIPTIONAL 5'-CAP-1 & dsRNA PURITY SENTINEL (FDA 21 CFR 211 & ISO 20387):\n`;
+            out += `Batch Sintesis mRNA: ${batchID} | Kode Antigen Target: ${dossierRes.data.telemetry.target_antigen_code}\n`;
+            out += `Lini Mikrofluidik IVT: ${dossierRes.data.telemetry.bioreactor_line_id} | Skor Integritas Transkrip (RIN): ${dossierRes.data.telemetry.transcript_integrity_rin}\n\n`;
+            out += `EFISIENSI METILASI CAP-1, PANJANG POLY(A) & PENGOTOR dsRNA:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Efisiensi Penambahan Tudung Cap-1: ${dossierRes.data.telemetry.cap1_methylation_efficiency_pct}% (Spesifikasi Rilis cGMP > 95.0%) | Defisit: -${evalRes.data.cap1_deficit_pct}%\n`;
+            out += `• Panjang Rata-Rata Ekor Poly(A): ${dossierRes.data.telemetry.poly_a_tail_mean_length_nt} nt (Spesifikasi Ideal 100 - 120 nt)\n`;
+            out += `• Fraksi Pengotor dsRNA Untai Ganda: ${dossierRes.data.telemetry.double_stranded_rna_fraction_ppm} ppm (Batas Toksisitas Imun < 20.0 ppm)\n`;
+            out += `• Konsentrasi Kofaktor Enzim SAM: ${dossierRes.data.telemetry.sam_cofactor_concentration_mm} mM (Konsentrasi Optimal 0.80 mM)\n`;
+            out += `• Laju Konsumsi Nukleotida NTP: ${dossierRes.data.telemetry.ntp_consumption_rate_mm_per_hr} mM/jam | Suhu Reaksi IVT: ${dossierRes.data.telemetry.ivt_reaction_temp_c}°C\n`;
+            out += `• Status Kualitas Translasi Cap-1: ${evalRes.data.capping_quality_status}\n`;
+            out += `• Risiko Inflamasi Imunogenik dsRNA: ${evalRes.data.double_stranded_rna_risk}\n\n`;
+            out += `AKTUASI MIKRO-INFUS KOFAKTOR SAM, STEP-DOWN SUHU IVT & DIVERSI FRAKSI:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Biofarmasi Molekuler: ${actRes.data.action_id}\n`;
+            out += `• Laju Injeksi Mikro-Infus Kofaktor SAM: ${actRes.data.pulsed_sam_infusion_rate_ml_per_min} mL/menit (Memulihkan Kinetika Enzim Methyltransferase)\n`;
+            out += `• Pengaturan Suhu Bioreaktor IVT: Diturunkan ke ${actRes.data.commanded_ivt_temp_setpoint_c}°C (Menghentikan Transkripsi Aberan dsRNA oleh T7 Polimerase)\n`;
+            out += `• Volume Fraksi Aberan Didiversi ke Limbah: ${actRes.data.diverted_aberrant_fraction_liters} Liter\n`;
+            out += `• Estimasi Kerugian Batch Vaksin Terhindar: $${actRes.data.avoided_mrna_batch_loss_usd.toLocaleString()} USD (Mencegah Penolakan Batch Terapi Kanker)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Injeksi mikro SAM 8.5 mL/menit mendorong efisiensi metilasi Cap-1 melampaui 96% untuk memastikan ekspresi protein optimal pada sel target.</li>
+                <li>Penurunan suhu reaksi IVT ke 32.0°C dan diversi fraksi 5.2 L menekan sintesis pengotor dsRNA di bawah 15 ppm untuk mematuhi regulasi FDA.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses mRNA Cap-1 PAT Synthesis sentinel: ' + err.message;
+    }
+}
+
+async function triggerSubseaCompressor() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi slug cairan gas basah dasar laut, margin surge kompresor, dan stabilitas levitasi bantalan magnetik AMB...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const compressorID = "COMPRESSOR-SUBSEA-3000M-01";
+        await api('/subsea/compressor/ingest-compressor-telemetry', 'POST', {
+            compressor_id: compressorID,
+            seabed_station_id: "STATION-PRE-SALT-SANTOS-B02",
+            water_depth_meters: 2950.0,
+            suction_liquid_volume_fraction_pct: 28.5,
+            compressor_rpm: 10850.0,
+            pressure_ratio: 2.65,
+            surge_margin_pct: 6.8,
+            amb_radial_bearing_orbit_um: 138.5,
+            impeller_droplet_erosion_rate_mm_yr: 1.85,
+            canned_motor_winding_temp_c: 142.5
+        });
+
+        const evalRes = await api('/subsea/compressor/evaluate-slug-surge-and-amb-stability', 'POST', { compressor_id: compressorID });
+        const actRes = await api('/subsea/compressor/trigger-anti-surge-and-amb-bias-boost', 'POST', { compressor_id: compressorID });
+        const dossierRes = await api(`/subsea/compressor/compressor-integrity-dossier/${compressorID}`, 'GET');
+
+        if (badge) badge.textContent = `🌊 Subsea: Surge Margin ${dossierRes.data.telemetry.surge_margin_pct}% | Surge: ${evalRes.data.compressor_surge_hazard} | AMB: ${evalRes.data.magnetic_bearing_stability}`;
+        if (answerEl) {
+            let out = `🌊 ULTRA-DEEPWATER SUBSEA WET GAS COMPRESSOR SLUG & AMB SENTINEL (API 17D & ISO 13628-4):\n`;
+            out += `Kompresor Dasar Laut: ${compressorID} | Stasiun Seabed: ${dossierRes.data.telemetry.seabed_station_id} | Kedalaman Laut: ${dossierRes.data.telemetry.water_depth_meters} meter\n`;
+            out += `Kecepatan Putar Rotor: ${dossierRes.data.telemetry.compressor_rpm} RPM | Rasio Kompresi: ${dossierRes.data.telemetry.pressure_ratio}:1\n\n`;
+            out += `FRAKSI CAIRAN SUCTION, MARGIN SURGE & ORBIT BANTALAN MAGNETIK (AMB):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Fraksi Volume Cairan Masukan (LVF): ${dossierRes.data.telemetry.suction_liquid_volume_fraction_pct}% (Ambang Batas Slug Cairan > 15.0%)\n`;
+            out += `• Margin Aerodynamic Surge: ${dossierRes.data.telemetry.surge_margin_pct}% (Batas Minimum Aman > 12.0%) | Defisit: -${evalRes.data.effective_surge_deficit_pct}%\n`;
+            out += `• Eksentrisitas Orbit Radial Bantalan Magnetik AMB: ${dossierRes.data.telemetry.amb_radial_bearing_orbit_um} µm (Batas Clearance Touchdown 120.0 µm)\n`;
+            out += `• Laju Erosi Droplet Sudu Impeller: ${dossierRes.data.telemetry.impeller_droplet_erosion_rate_mm_yr} mm/tahun\n`;
+            out += `• Suhu Belitan Motor Kaleng (Canned Motor): ${dossierRes.data.telemetry.canned_motor_winding_temp_c}°C\n`;
+            out += `• Tingkat Bahaya Surge Akibat Slug Cairan: ${evalRes.data.compressor_surge_hazard}\n`;
+            out += `• Status Stabilitas Levitasi Magnetik AMB: ${evalRes.data.magnetic_bearing_stability}\n\n`;
+            out += `AKTUASI BUKA CEPAT ANTI-SURGE VALVE, AMB BIAS BOOST & SETBACK KECEPATAN VFD:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Integritas Pabrik Subsea: ${actRes.data.action_id}\n`;
+            out += `• Pembukaan Cepat Katup Daur Ulang Anti-Surge (25 ms): Ditetapkan ${actRes.data.commanded_anti_surge_valve_opening_pct}% (Memintas Aliran Slug Cairan)\n`;
+            out += `• Penguatan Arus Bias Kumparan Elektromagnetik AMB: +${actRes.data.amb_bias_current_boost_amps} A (Menjaga Posisi Poros dari Gaya Benturan Fluida)\n`;
+            out += `• Penurunan Kecepatan Putar Inverter VFD: ${actRes.data.vfd_speed_setback_rpm} RPM (Menghindari Lonjakan Head di Atas Batas Kritis)\n`;
+            out += `• Estimasi Kerugian Intervensi Subsea Terhindar: $${actRes.data.avoided_subsea_failure_loss_usd.toLocaleString()} USD (Mencegah Mobilisasi Kapal Berat dan Shut-in Sumur)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pembukaan katup anti-surge ke 65% dalam 25 milidetik memintas aliran gas/kondensat basah dan memulihkan margin surge kompresor di atas 15%.</li>
+                <li>Penguatan arus AMB +14.5 A menahan poros pada titik nol levitasi magnetik dan mencegah benturan sudu rotor pada kedalaman 2950 meter.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Subsea Gas Compressor AMB sentinel: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

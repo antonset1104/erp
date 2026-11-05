@@ -1997,6 +1997,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/aviation/lh2/evaluate-boiloff-and-cavitation": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Commercial Aircraft Liquid Hydrogen (LH2) Cryo Boil-Off Gas (BOG) & Cavitation Sentinel (FAA 14 CFR Part 25 & SAE AS6858)",
+					"description": "Monitors cryogenic tank ullage pressure, subcooling margin, vacuum jacket insulation loss, boil-off rate, and cryopump NPSH cavitation.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Subcooling margin K, vacuum insulation status, cryopump cavitation risk, reliquefaction flow command, and N2 sweep purge"},
+					},
+				},
+			},
+			"/api/v1/semicon/hbm4/evaluate-voids-and-electromigration": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "High-Bandwidth Memory (HBM4) 16-Die Cu-Cu Hybrid Direct Bonding & Electromigration Sentinel (SEMI 3D-0613 & IEEE 1581)",
+					"description": "Monitors Cu pad dishing depth, dielectric recess variance, interfacial void area fraction, contact resistance, and electromigration current crowding.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Interfacial bonding quality %, hybrid bonding integrity status, electromigration hazard, infrared laser anneal pulse, and piezo clamp trim"},
+					},
+				},
+			},
+			"/api/v1/nuclear/microreactor/evaluate-dryout-and-sonic-choking": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Nuclear Microreactor Liquid Metal (NaK/Sodium) Heat Pipe Dryout & Sonic Choking Sentinel (ASME BPVC Div 5 & ANS 54.1)",
+					"description": "Monitors evaporator wall temperatures, condenser delta-T, sodium vapor Mach number, wick capillary pressure drop, and radial heat flux burnout.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Axial temperature gradient C, capillary dryout hazard, vapor sonic choking status, B4C reflector drum rotation, and load shedding"},
+					},
+				},
+			},
+			"/api/v1/biopharma/mrna-capping/evaluate-capping-and-impurities": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Continuous mRNA-LNP Co-Transcriptional 5'-Cap-1 Methylation & dsRNA Impurity PAT Sentinel (FDA 21 CFR Part 211 & ISO 20387)",
+					"description": "Monitors Cap-1 methylation efficiency percentage, poly(A) tail length distribution, double-stranded RNA dsRNA impurity fraction, and SAM cofactor concentration.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Cap-1 deficit %, capping quality status, dsRNA risk, SAM cofactor micro-infusion rate, and IVT temperature step-down command"},
+					},
+				},
+			},
+			"/api/v1/subsea/compressor/evaluate-slug-surge-and-amb-stability": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Ultra-Deepwater Subsea Wet Gas Compressor Liquid Slug Surge & Active Magnetic Bearing Sentinel (API 17D & ISO 13628-4)",
+					"description": "Monitors suction liquid volume fraction LVF, compressor surge margin, active magnetic bearing AMB radial orbit displacement, and impeller droplet erosion.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Effective surge deficit %, compressor surge hazard, magnetic bearing stability, anti-surge valve opening %, and AMB bias current boost"},
+					},
+				},
+			},
 		},
 	}
 }

@@ -93,6 +93,11 @@ import (
 	coreaavgenetherapy "erp-golang/internal/core/aav_genetherapy"
 	coredryelectrode "erp-golang/internal/core/solidstate_dryelectrode"
 	coreisrumethalox "erp-golang/internal/core/isru_methalox"
+	corelh2aviation "erp-golang/internal/core/lh2_aviation"
+	corehbm4bonding "erp-golang/internal/core/hbm4_bonding"
+	coremicroreactor "erp-golang/internal/core/microreactor_heatpipe"
+	coremrnacapping "erp-golang/internal/core/mrna_capping"
+	coresubseacompressor "erp-golang/internal/core/subsea_compressor"
 	corescramjet "erp-golang/internal/core/scramjet"
 	coreseabed "erp-golang/internal/core/seabed"
 	coresemiconductor "erp-golang/internal/core/semiconductor"
@@ -14043,5 +14048,185 @@ IEA*1*000099123~`
 	t.Logf("✓ Deep-Space Planetary ISRU Methalox Sabatier Sentinel Verified: Plant='%s' (Mission='%s'), AmbP=%.1f mbar, CO2FreezerP=%.1f bar, SabatierT=%.1f°C, H2/CO2=%.2f:1 (Slip=+%.2f), Perchlorate=%.1f ppm, FilterDeltaP=%.1f mbar, Condenser=%.1f%%, CH4_Rate=%.1f kg/sol, RunawayHazard='%s', FilterStatus='%s', CommandedRatio=%.2f, PurgeDuration=%.1f s, Chiller=%.0f W, AvoidedLoss=$%.2fM USD",
 		isruTel.PlantID, isruTel.MissionCycleID, isruTel.MartianAmbientPressureMbar, isruTel.Co2IntakeCryoFreezerBar, isruTel.SabatierCatalystBedTempC, isruTel.H2ToCo2StoichiometricRatio, isruAssess.StoichiometricSlipRatio, isruTel.RutheniumPerchloratePpm, isruTel.DustFilterPressureDropMbar, isruTel.WaterCondenserSeparationPct, isruTel.LiquidMethaneProductionKgPerSol, isruAssess.SabatierThermalRunawayHazard, isruAssess.MartianDustFilterStatus, isruAct.CommandedH2Co2RatioSetpoint, isruAct.ElectrostaticDustPurgeDurationSec, isruAct.CondenserChillerBoostWatts, isruAct.AvoidedMissionLossUSD/1e6)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (91 SECTIONS: 115+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD + CONTRACT LEAKAGE SENTINEL + MICROGRID ISLANDING + CARGO GEOFENCE + SHIFT BIDDING FATIGUE + CIRCULAR PACKAGING RTI + INDUSTRIAL WATER ZLD + VENDOR SANCTIONS GRAPH + BOILER TUBE DESCALING + SAAS DUNNING WATERFALL + TOLL MANUFACTURING RECON + SILO AERATION SENTINEL + EPC PROGRESS BILLING ESCROW + DYNAMIC PORT BERTH DEMURRAGE + TRANSFORMER DGA GUARDIAN + CROSS BORDER CASH REPATRIATION + ORE BLENDING OPTIMIZER + PHARMA CRYOGENIC SENTINEL + KILN REFRACTORY GUARDIAN + IP PATENT ANNUITY + TURBINE EOH CREEP + AVIATION MRO FATIGUE + MARINE LNG RELIQUEFACTION + SEMICONDUCTOR FAB YIELD + WASTEWATER BIOMETHANE + RAILWAY WHEEL RCF + NUCLEAR RADIOPHARM DECAY + UTILITY BESS THERMAL SOH + SATELLITE ORBITAL CONJUNCTION + SUBSEA FLOW ASSURANCE + CONNECTED VEHICLE OTA SUMS + BIOPHARMA BIOREACTOR PAT + FLOATING WIND MOORING + HVDC SUBSEA DTS + CCS CO2 ENVELOPE + MINE ROCKBURST SENTINEL + TOKAMAK FUSION DISRUPTION + CRYO LH2 ORTHO-PARA + HYPERSONIC TPS ABLATION + 3D CHIPLET TSV WARPAGE + SUPERHOT EGS GEOTHERMAL SEISMICITY + QUANTUM QKD PHASE GUARDIAN + SEABED NODULE PLUME + CSP MOLTEN SALT FREEZE + SOLID-STATE BATTERY CRACK + DIRECT AIR CAPTURE OPTIMIZER + EVTOL ACOUSTIC SENTINEL + HYPERLOOP MAGLEV QUENCH + SUBSEA DEEPWATER BOP + CAR-T ACOUSTIC SORTING + PLASTIC PYROLYSIS DIOXIN SENTINEL + GREEN AMMONIA SENTINEL + ROCKET POGO SENTINEL + SMR PASSIVE CONTAINMENT + EUV PELLICLE SENTINEL + UHVDC CONVERTER SENTINEL + SUBSEA CCS CO2 HYDRATE + HYPERSONIC SCRAMJET FUEL CRACKING + MRNA LNP MICROFLUIDIC + SILICON PHOTONICS CPO SKEW + SOEC EFUEL COELECTROLYSIS + SUPERHOT ROCK GEOTHERMAL SHR + SUBSEA AUV DOCKING IPT + ELECTRONIC H2O2 RUNAWAY + BIOPHARMA CONTROLLED ICE FOG LYO + CADMIUM FREE QLED INK PRINTING + HALL EFFECT THRUSTER PROPULSION + SUB 2NM GAAFET NANOSHEET + INDUSTRIAL FERMENTATION FOAM + SALT CAVERN HYDROGEN STORAGE + MOLTEN SALT REACTOR FUEL REDOX + REUSABLE ROCKET GRID FIN HYDRAULICS + SEMICONDUCTOR MBMW RETICLE + AAV GENE THERAPY VECTOR + SOLID STATE BATTERY DRY ELECTRODE + MARS ISRU SABATIER METHALOX) PASSED 100%!")
+	// -------------------------------------------------------------------------
+	// SECTION 92: FRONTIER ENTERPRISE & DEEP-TECH SENTINELS (LH2 AVIATION CRYO TANK, HBM4 16-DIE HYBRID BONDING, MICROREACTOR HEAT PIPE, mRNA CAP-1 SYNTHESIS & SUBSEA WET GAS COMPRESSOR)
+	// -------------------------------------------------------------------------
+	t.Log("\n    --- SECTION 92: FRONTIER ENTERPRISE & DEEP-TECH SENTINELS (LH2 AVIATION CRYO TANK, HBM4 16-DIE HYBRID BONDING, MICROREACTOR HEAT PIPE, mRNA CAP-1 SYNTHESIS & SUBSEA WET GAS COMPRESSOR) ---")
+
+	// 92.1 Commercial Aircraft Liquid Hydrogen (LH2) Cryo Boil-Off Gas (BOG) & Cavitation Sentinel (FAA 14 CFR Part 25 & SAE AS6858)
+	lh2AvTel := corelh2aviation.GlobalLH2Vault.IngestTankTelemetry(corelh2aviation.LH2TankTelemetry{
+		TelemetryID:              "TEL-LH2-9901",
+		TankID:                   "TANK-LH2-AIRCRAFT-A380-99",
+		AircraftTailNumber:       "N701-ZERO-E",
+		FlightPhase:              "CRUISE_FL350",
+		LiquidHydrogenMassKg:     4250.0,
+		TankUllagePressureBar:    3.45,
+		BulkHydrogenTempKelvin:   23.2,
+		VacuumJacketPressureMbar: 0.085,
+		BoilOffGasRateKgPerHr:    18.5,
+		CryoPumpInletNPSHMarginM: 0.35,
+		OrthoToParaRatio:         0.045,
+	})
+	if lh2AvTel.TankID == "" || lh2AvTel.LiquidHydrogenMassKg != 4250.0 {
+		t.Fatalf("Failed to ingest LH2 tank telemetry: %+v", lh2AvTel)
+	}
+
+	lh2AvAssess, err := corelh2aviation.GlobalLH2Vault.EvaluateBoilOffAndCavitation("TANK-LH2-AIRCRAFT-A380-99")
+	if err != nil || lh2AvAssess.VacuumInsulationStatus != "CRITICAL_VACUUM_LOSS_THERMAL_INCURSION" || lh2AvAssess.CryoPumpCavitationRisk != "CRYOPUMP_VAPOR_LOCK_CAVITATION" || !lh2AvAssess.BoilOffReliquefactionMandate || !lh2AvAssess.AntiCavitationSubcoolingMandate {
+		t.Fatalf("Failed to evaluate LH2 boiloff and cavitation: %+v, err: %v", lh2AvAssess, err)
+	}
+
+	lh2AvAct, err := corelh2aviation.GlobalLH2Vault.TriggerReliquefactionAndAntiCavitation("TANK-LH2-AIRCRAFT-A380-99")
+	if err != nil || lh2AvAct.CommandedReliquefactionFlowKgHr < 20.0 || lh2AvAct.NitrogenInertingSweepRateNm3Hr < 10.0 || lh2AvAct.PumpSpeedThrottlingPct >= 0 || lh2AvAct.AvoidedAircraftLossUSD <= 0 {
+		t.Fatalf("Failed to trigger LH2 reliquefaction and anti-cavitation: %+v, err: %v", lh2AvAct, err)
+	}
+
+	lh2AvDossier, err := corelh2aviation.GlobalLH2Vault.GetLH2FlightSafetyDossier("TANK-LH2-AIRCRAFT-A380-99")
+	if err != nil || !lh2AvDossier["faa_14cfr25_compliant"].(bool) || !lh2AvDossier["sae_as6858_certified"].(bool) {
+		t.Fatalf("Failed to compile LH2 flight safety dossier: %+v, err: %v", lh2AvDossier, err)
+	}
+	t.Logf("✓ Aviation LH2 Fuel Tank Sentinel Verified: Tank='%s' (Tail='%s', Phase='%s'), Mass=%.0f kg, UllageP=%.2f bar, Temp=%.1f K, Subcooling=%.1f K, VacJacket=%.3f mbar, BOG=%.1f kg/hr, NPSH=%.2f m, VacStatus='%s', CavitationRisk='%s', ReliqFlow=%.1f kg/hr, N2Sweep=%.1f Nm³/hr, Throttle=%.0f%%, AvoidedLoss=$%.2fM USD",
+		lh2AvTel.TankID, lh2AvTel.AircraftTailNumber, lh2AvTel.FlightPhase, lh2AvTel.LiquidHydrogenMassKg, lh2AvTel.TankUllagePressureBar, lh2AvTel.BulkHydrogenTempKelvin, lh2AvAssess.SubcoolingMarginKelvin, lh2AvTel.VacuumJacketPressureMbar, lh2AvTel.BoilOffGasRateKgPerHr, lh2AvTel.CryoPumpInletNPSHMarginM, lh2AvAssess.VacuumInsulationStatus, lh2AvAssess.CryoPumpCavitationRisk, lh2AvAct.CommandedReliquefactionFlowKgHr, lh2AvAct.NitrogenInertingSweepRateNm3Hr, lh2AvAct.PumpSpeedThrottlingPct, lh2AvAct.AvoidedAircraftLossUSD/1e6)
+
+	// 92.2 High-Bandwidth Memory (HBM4) 16-Die Cu-Cu Hybrid Direct Bonding & Electromigration Sentinel (SEMI 3D-0613 & IEEE 1581)
+	hbm4Tel := corehbm4bonding.GlobalHBM4Vault.IngestStackTelemetry(corehbm4bonding.HBM4StackTelemetry{
+		TelemetryID:                        "TEL-HBM4-9901",
+		StackID:                            "HBM4-16HI-DRAM-STACK-99",
+		WaferLotID:                         "LOT-HBM4-AI-ACCEL-99",
+		DieStackCount:                      16,
+		CuPadDishingDepthNm:                2.85,
+		DielectricRecessVarianceNm:         1.45,
+		InterfacialVoidAreaFractionPct:     1.85,
+		ContactResistancePerPadOhms:        0.28,
+		ThermalAnnealTempC:                 215.0,
+		ElectromigrationCurrentDensityAcm2: 1.45e6,
+		OverlayAlignmentRunoutNm:           58.5,
+	})
+	if hbm4Tel.StackID == "" || hbm4Tel.DieStackCount != 16 {
+		t.Fatalf("Failed to ingest HBM4 stack telemetry: %+v", hbm4Tel)
+	}
+
+	hbm4Assess, err := corehbm4bonding.GlobalHBM4Vault.EvaluateVoidsAndElectromigration("HBM4-16HI-DRAM-STACK-99")
+	if err != nil || hbm4Assess.HybridBondingIntegrityStatus != "INTERFACIAL_VOID_COALESCENCE_REJECT" || hbm4Assess.ElectromigrationHazard != "ELECTROMIGRATION_CURRENT_CROWDING_HAZARD" || !hbm4Assess.ThermalAnnealPulseMandate || !hbm4Assess.PiezoClampingForceTrimMandate {
+		t.Fatalf("Failed to evaluate HBM4 voids and electromigration: %+v, err: %v", hbm4Assess, err)
+	}
+
+	hbm4Act, err := corehbm4bonding.GlobalHBM4Vault.TriggerAnnealPulseAndStressRelief("HBM4-16HI-DRAM-STACK-99")
+	if err != nil || hbm4Act.CommandedAnnealPulseTempC < 240.0 || hbm4Act.AnnealPulseDurationMs < 400.0 || hbm4Act.PiezoBondingClampForceKN < 15.0 || hbm4Act.AvoidedHBM4ScrapLossUSD <= 0 {
+		t.Fatalf("Failed to trigger HBM4 anneal pulse and stress relief: %+v, err: %v", hbm4Act, err)
+	}
+
+	hbm4Dossier, err := corehbm4bonding.GlobalHBM4Vault.GetHBM4QualityDossier("HBM4-16HI-DRAM-STACK-99")
+	if err != nil || !hbm4Dossier["semi_3d0613_compliant"].(bool) || !hbm4Dossier["ieee_1581_certified"].(bool) {
+		t.Fatalf("Failed to compile HBM4 quality dossier: %+v, err: %v", hbm4Dossier, err)
+	}
+	t.Logf("✓ Semiconductor HBM4 16-Die Hybrid Bonding Sentinel Verified: Stack='%s' (Lot='%s', Dies=%d), Dishing=%.2f nm, Void=%.2f%%, ContactR=%.2f Ω, CurrentDensity=%.2e A/cm², OverlayRunout=%.1f nm, BondQuality=%.1f%%, Integrity='%s', EMHazard='%s', LaserAnneal=%.1f°C (%.0f ms), PiezoClamp=%.1f kN, AvoidedLoss=$%.2fM USD",
+		hbm4Tel.StackID, hbm4Tel.WaferLotID, hbm4Tel.DieStackCount, hbm4Tel.CuPadDishingDepthNm, hbm4Tel.InterfacialVoidAreaFractionPct, hbm4Tel.ContactResistancePerPadOhms, hbm4Tel.ElectromigrationCurrentDensityAcm2, hbm4Tel.OverlayAlignmentRunoutNm, hbm4Assess.InterfacialBondingQualityPct, hbm4Assess.HybridBondingIntegrityStatus, hbm4Assess.ElectromigrationHazard, hbm4Act.CommandedAnnealPulseTempC, hbm4Act.AnnealPulseDurationMs, hbm4Act.PiezoBondingClampForceKN, hbm4Act.AvoidedHBM4ScrapLossUSD/1e6)
+
+	// 92.3 Nuclear Microreactor Liquid Metal (NaK/Sodium) Heat Pipe Dryout & Sonic Choking Sentinel (ASME BPVC Div 5 & ANS 54.1)
+	hpTel := coremicroreactor.GlobalHeatPipeVault.IngestHeatPipeTelemetry(coremicroreactor.HeatPipeTelemetry{
+		TelemetryID:                  "TEL-HP-9901",
+		ReactorID:                   "MICRO-REACTOR-NAK-5MWE-99",
+		HeatPipeClusterID:           "CLUSTER-CORE-EVAP-A12",
+		CoreThermalPowerKw:          5200.0,
+		EvaporatorWallTempC:         745.0,
+		CondenserExitTempC:          620.0,
+		SodiumVaporMachNumber:       0.94,
+		WickCapillaryPressureDropBar: 0.48,
+		RadialHeatFluxWPerCm2:       88.5,
+		FastNeutronFluenceNPerCm2:   4.8e21,
+		InertHeliumLeakTracePpm:     1.25,
+	})
+	if hpTel.ReactorID == "" || hpTel.CoreThermalPowerKw != 5200.0 {
+		t.Fatalf("Failed to ingest microreactor heat pipe telemetry: %+v", hpTel)
+	}
+
+	hpAssess, err := coremicroreactor.GlobalHeatPipeVault.EvaluateDryoutAndSonicChoking("MICRO-REACTOR-NAK-5MWE-99")
+	if err != nil || hpAssess.CapillaryDryoutHazard != "WICK_CAPILLARY_DRYOUT_COLLAPSE" || hpAssess.VaporSonicChokingStatus != "SONIC_CHOKING_VAPOR_SHOCK" || !hpAssess.ControlDrumRotationMandate || !hpAssess.TurbineLoadSheddingMandate {
+		t.Fatalf("Failed to evaluate heat pipe dryout and sonic choking: %+v, err: %v", hpAssess, err)
+	}
+
+	hpAct, err := coremicroreactor.GlobalHeatPipeVault.TriggerControlDrumAndLoadShed("MICRO-REACTOR-NAK-5MWE-99")
+	if err != nil || hpAct.ControlDrumStepRotationDeg < 15.0 || hpAct.PowerDeratingSetpointPct < 20.0 || hpAct.StirlingCoolerFanSpeedRpm < 3000.0 || hpAct.AvoidedReactorDamageUSD <= 0 {
+		t.Fatalf("Failed to trigger control drum rotation and load shed: %+v, err: %v", hpAct, err)
+	}
+
+	hpDossier, err := coremicroreactor.GlobalHeatPipeVault.GetHeatPipeSafetyDossier("MICRO-REACTOR-NAK-5MWE-99")
+	if err != nil || !hpDossier["asme_bpvc_div5_compliant"].(bool) || !hpDossier["ans_54_1_certified"].(bool) {
+		t.Fatalf("Failed to compile heat pipe safety dossier: %+v, err: %v", hpDossier, err)
+	}
+	t.Logf("✓ Nuclear Microreactor Heat Pipe Sentinel Verified: Reactor='%s' (Cluster='%s'), Power=%.0f kW, EvapT=%.1f°C, CondT=%.1f°C, ΔT=%.1f°C, Mach=%.2f, WickΔP=%.2f bar, Flux=%.1f W/cm², DryoutHazard='%s', SonicStatus='%s', DrumStep=%.1f°, Derating=%.0f%%, FanSpeed=%.0f RPM, AvoidedLoss=$%.2fM USD",
+		hpTel.ReactorID, hpTel.HeatPipeClusterID, hpTel.CoreThermalPowerKw, hpTel.EvaporatorWallTempC, hpTel.CondenserExitTempC, hpAssess.AxialTemperatureGradientC, hpTel.SodiumVaporMachNumber, hpTel.WickCapillaryPressureDropBar, hpTel.RadialHeatFluxWPerCm2, hpAssess.CapillaryDryoutHazard, hpAssess.VaporSonicChokingStatus, hpAct.ControlDrumStepRotationDeg, hpAct.PowerDeratingSetpointPct, hpAct.StirlingCoolerFanSpeedRpm, hpAct.AvoidedReactorDamageUSD/1e6)
+
+	// 92.4 Continuous mRNA-LNP Co-Transcriptional 5'-Cap-1 Methylation & dsRNA Impurity PAT Sentinel (FDA 21 CFR Part 211 & ISO 20387)
+	mrnaTel := coremrnacapping.GlobalMRNAVault.IngestSynthesisTelemetry(coremrnacapping.MRNASynthesisTelemetry{
+		TelemetryID:                  "TEL-MRNA-9901",
+		BatchID:                      "BATCH-MRNA-ONCOLOGY-VACC-99",
+		BioreactorLineID:             "LINE-IVT-MICROFLUIDIC-01",
+		TargetAntigenCode:            "AG-NEOANTIGEN-MELANOMA",
+		Cap1MethylationEfficiencyPct: 88.5,
+		PolyATailMeanLengthNt:        115.0,
+		DoubleStrandedRnaFractionPpm: 48.5,
+		SamCofactorConcentrationMm:   0.42,
+		IvtReactionTempC:             37.8,
+		NtpConsumptionRateMmPerHr:    14.2,
+		TranscriptIntegrityRin:       8.4,
+	})
+	if mrnaTel.BatchID == "" || mrnaTel.Cap1MethylationEfficiencyPct != 88.5 {
+		t.Fatalf("Failed to ingest mRNA synthesis telemetry: %+v", mrnaTel)
+	}
+
+	mrnaAssess, err := coremrnacapping.GlobalMRNAVault.EvaluateCappingAndImpurities("BATCH-MRNA-ONCOLOGY-VACC-99")
+	if err != nil || mrnaAssess.CappingQualityStatus != "IMMUNOGENIC_UNCAPPED_MESSENGER_HAZARD" || mrnaAssess.DoubleStrandedRnaRisk != "CRITICAL_INFLAMMATORY_DSRNA_REJECT" || !mrnaAssess.SamMicroInfusionMandate || !mrnaAssess.ReactionTempStepDownMandate {
+		t.Fatalf("Failed to evaluate mRNA capping and impurities: %+v, err: %v", mrnaAssess, err)
+	}
+
+	mrnaAct, err := coremrnacapping.GlobalMRNAVault.TriggerSamInfusionAndTempRamp("BATCH-MRNA-ONCOLOGY-VACC-99")
+	if err != nil || mrnaAct.PulsedSamInfusionRateMlPerMin < 8.0 || mrnaAct.CommandedIvtTempSetpointC > 35.0 || mrnaAct.DivertedAberrantFractionLiters <= 0 || mrnaAct.AvoidedMrnaBatchLossUSD <= 0 {
+		t.Fatalf("Failed to trigger SAM micro-infusion and temp ramp: %+v, err: %v", mrnaAct, err)
+	}
+
+	mrnaDossier, err := coremrnacapping.GlobalMRNAVault.GetMRNACGMPDossier("BATCH-MRNA-ONCOLOGY-VACC-99")
+	if err != nil || !mrnaDossier["fda_21cfr211_compliant"].(bool) || !mrnaDossier["iso_20387_certified"].(bool) {
+		t.Fatalf("Failed to compile mRNA cGMP dossier: %+v, err: %v", mrnaDossier, err)
+	}
+	t.Logf("✓ Biopharmaceutical mRNA Cap-1 Synthesis Sentinel Verified: Batch='%s' (Line='%s', Antigen='%s'), Cap1=%.1f%% (Deficit=-%.1f%%), PolyA=%.0f nt, dsRNA=%.1f ppm, SAM=%.2f mM, IVT_T=%.1f°C, RIN=%.1f, CappingStatus='%s', dsRNARisk='%s', SAM_Infusion=%.1f mL/min, TargetTemp=%.1f°C, DivertedVol=%.1f L, AvoidedLoss=$%.2fM USD",
+		mrnaTel.BatchID, mrnaTel.BioreactorLineID, mrnaTel.TargetAntigenCode, mrnaTel.Cap1MethylationEfficiencyPct, mrnaAssess.Cap1DeficitPct, mrnaTel.PolyATailMeanLengthNt, mrnaTel.DoubleStrandedRnaFractionPpm, mrnaTel.SamCofactorConcentrationMm, mrnaTel.IvtReactionTempC, mrnaTel.TranscriptIntegrityRin, mrnaAssess.CappingQualityStatus, mrnaAssess.DoubleStrandedRnaRisk, mrnaAct.PulsedSamInfusionRateMlPerMin, mrnaAct.CommandedIvtTempSetpointC, mrnaAct.DivertedAberrantFractionLiters, mrnaAct.AvoidedMrnaBatchLossUSD/1e6)
+
+	// 92.5 Ultra-Deepwater Subsea Wet Gas Compressor Liquid Slug Surge & Active Magnetic Bearing Sentinel (API 17D & ISO 13628-4)
+	scTel := coresubseacompressor.GlobalSubseaCompressorVault.IngestCompressorTelemetry(coresubseacompressor.SubseaCompressorTelemetry{
+		TelemetryID:                    "TEL-SCOMP-9901",
+		CompressorID:                   "COMPRESSOR-SUBSEA-3000M-99",
+		SeabedStationID:                "STATION-PRE-SALT-SANTOS-B02",
+		WaterDepthMeters:               2950.0,
+		SuctionLiquidVolumeFractionPct: 28.5,
+		CompressorRpm:                  10850.0,
+		PressureRatio:                  2.65,
+		SurgeMarginPct:                 6.8,
+		AmbRadialBearingOrbitUm:        138.5,
+		ImpellerDropletErosionRateMmYr: 1.85,
+		CannedMotorWindingTempC:        142.5,
+	})
+	if scTel.CompressorID == "" || scTel.CompressorRpm != 10850.0 {
+		t.Fatalf("Failed to ingest subsea compressor telemetry: %+v", scTel)
+	}
+
+	scAssess, err := coresubseacompressor.GlobalSubseaCompressorVault.EvaluateSlugSurgeAndAMBStability("COMPRESSOR-SUBSEA-3000M-99")
+	if err != nil || scAssess.CompressorSurgeHazard != "SUBSEA_COMPRESSOR_SLUG_SURGE_COLLAPSE" || scAssess.MagneticBearingStability != "AMB_MAGNETIC_BEARING_DELEVITATION" || !scAssess.AntiSurgeRecycleValveMandate || !scAssess.AmbCoilCurrentBoostMandate {
+		t.Fatalf("Failed to evaluate subsea compressor slug surge and AMB stability: %+v, err: %v", scAssess, err)
+	}
+
+	scAct, err := coresubseacompressor.GlobalSubseaCompressorVault.TriggerAntiSurgeAndAMBBiasBoost("COMPRESSOR-SUBSEA-3000M-99")
+	if err != nil || scAct.CommandedAntiSurgeValveOpeningPct < 60.0 || scAct.AmbBiasCurrentBoostAmps < 10.0 || scAct.VfdSpeedSetbackRpm >= 0 || scAct.AvoidedSubseaFailureLossUSD <= 0 {
+		t.Fatalf("Failed to trigger anti-surge valve opening and AMB bias boost: %+v, err: %v", scAct, err)
+	}
+
+	scDossier, err := coresubseacompressor.GlobalSubseaCompressorVault.GetCompressorIntegrityDossier("COMPRESSOR-SUBSEA-3000M-99")
+	if err != nil || !scDossier["api_17d_compliant"].(bool) || !scDossier["iso_13628_certified"].(bool) {
+		t.Fatalf("Failed to compile subsea compressor integrity dossier: %+v, err: %v", scDossier, err)
+	}
+	t.Logf("✓ Ultra-Deepwater Subsea Gas Compressor Sentinel Verified: Compressor='%s' (Station='%s', Depth=%.0f m), LVF=%.1f%%, RPM=%.0f, PR=%.2f, SurgeMargin=%.1f%% (Deficit=-%.1f%%), AMB_Orbit=%.1f µm, Erosion=%.2f mm/yr, MotorT=%.1f°C, SurgeHazard='%s', AMBStatus='%s', AntiSurgeValve=%.0f%%, AMB_Boost=+%.1f A, VFD_Setback=%.0f RPM, AvoidedLoss=$%.2fM USD",
+		scTel.CompressorID, scTel.SeabedStationID, scTel.WaterDepthMeters, scTel.SuctionLiquidVolumeFractionPct, scTel.CompressorRpm, scTel.PressureRatio, scTel.SurgeMarginPct, scAssess.EffectiveSurgeDeficitPct, scTel.AmbRadialBearingOrbitUm, scTel.ImpellerDropletErosionRateMmYr, scTel.CannedMotorWindingTempC, scAssess.CompressorSurgeHazard, scAssess.MagneticBearingStability, scAct.CommandedAntiSurgeValveOpeningPct, scAct.AmbBiasCurrentBoostAmps, scAct.VfdSpeedSetbackRpm, scAct.AvoidedSubseaFailureLossUSD/1e6)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (92 SECTIONS: 120+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD + CONTRACT LEAKAGE SENTINEL + MICROGRID ISLANDING + CARGO GEOFENCE + SHIFT BIDDING FATIGUE + CIRCULAR PACKAGING RTI + INDUSTRIAL WATER ZLD + VENDOR SANCTIONS GRAPH + BOILER TUBE DESCALING + SAAS DUNNING WATERFALL + TOLL MANUFACTURING RECON + SILO AERATION SENTINEL + EPC PROGRESS BILLING ESCROW + DYNAMIC PORT BERTH DEMURRAGE + TRANSFORMER DGA GUARDIAN + CROSS BORDER CASH REPATRIATION + ORE BLENDING OPTIMIZER + PHARMA CRYOGENIC SENTINEL + KILN REFRACTORY GUARDIAN + IP PATENT ANNUITY + TURBINE EOH CREEP + AVIATION MRO FATIGUE + MARINE LNG RELIQUEFACTION + SEMICONDUCTOR FAB YIELD + WASTEWATER BIOMETHANE + RAILWAY WHEEL RCF + NUCLEAR RADIOPHARM DECAY + UTILITY BESS THERMAL SOH + SATELLITE ORBITAL CONJUNCTION + SUBSEA FLOW ASSURANCE + CONNECTED VEHICLE OTA SUMS + BIOPHARMA BIOREACTOR PAT + FLOATING WIND MOORING + HVDC SUBSEA DTS + CCS CO2 ENVELOPE + MINE ROCKBURST SENTINEL + TOKAMAK FUSION DISRUPTION + CRYO LH2 ORTHO-PARA + HYPERSONIC TPS ABLATION + 3D CHIPLET TSV WARPAGE + SUPERHOT EGS GEOTHERMAL SEISMICITY + QUANTUM QKD PHASE GUARDIAN + SEABED NODULE PLUME + CSP MOLTEN SALT FREEZE + SOLID-STATE BATTERY CRACK + DIRECT AIR CAPTURE OPTIMIZER + EVTOL ACOUSTIC SENTINEL + HYPERLOOP MAGLEV QUENCH + SUBSEA DEEPWATER BOP + CAR-T ACOUSTIC SORTING + PLASTIC PYROLYSIS DIOXIN SENTINEL + GREEN AMMONIA SENTINEL + ROCKET POGO SENTINEL + SMR PASSIVE CONTAINMENT + EUV PELLICLE SENTINEL + UHVDC CONVERTER SENTINEL + SUBSEA CCS CO2 HYDRATE + HYPERSONIC SCRAMJET FUEL CRACKING + MRNA LNP MICROFLUIDIC + SILICON PHOTONICS CPO SKEW + SOEC EFUEL COELECTROLYSIS + SUPERHOT ROCK GEOTHERMAL SHR + SUBSEA AUV DOCKING IPT + ELECTRONIC H2O2 RUNAWAY + BIOPHARMA CONTROLLED ICE FOG LYO + CADMIUM FREE QLED INK PRINTING + HALL EFFECT THRUSTER PROPULSION + SUB 2NM GAAFET NANOSHEET + INDUSTRIAL FERMENTATION FOAM + SALT CAVERN HYDROGEN STORAGE + MOLTEN SALT REACTOR FUEL REDOX + REUSABLE ROCKET GRID FIN HYDRAULICS + SEMICONDUCTOR MBMW RETICLE + AAV GENE THERAPY VECTOR + SOLID STATE BATTERY DRY ELECTRODE + MARS ISRU SABATIER METHALOX + COMMERCIAL AIRCRAFT LH2 CRYO TANK + HBM4 16-DIE HYBRID DIRECT BONDING + NUCLEAR MICROREACTOR HEAT PIPE DRYOUT + CONTINUOUS MRNA 5-CAP1 PAT SYNTHESIS + SUBSEA WET GAS COMPRESSOR SLUG AMB) PASSED 100%!")
 }
