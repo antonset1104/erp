@@ -32847,6 +32847,333 @@ async function triggerSOECEFuel() {
     }
 }
 
+async function triggerSuperhotGeothermal() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi tegangan triaksial casing von Mises, tegangan Coulomb sesar, dan mikroseismisitas batuan superpanas superkritis...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const wellID = "WELL-SHR-KRAFLA-MAGMA-01";
+        await api('/geothermal/shr/ingest-well-telemetry', 'POST', {
+            well_id: wellID,
+            geothermal_field_id: "FIELD-ICELAND-DEEP-DRILLING-PROJECT",
+            well_depth_meters: 4650.0,
+            reservoir_temperature_c: 485.0,
+            reservoir_pressure_bar: 320.0,
+            casing_von_mises_stress_mpa: 685.0,
+            induced_seismic_magnitude_ml: 1.85,
+            peak_ground_acceleration_g: 0.042,
+            cold_water_injection_rate_kg_s: 95.0
+        });
+
+        const evalRes = await api('/geothermal/shr/evaluate-thermal-stress-and-seismicity', 'POST', { well_id: wellID });
+        const actRes = await api('/geothermal/shr/trigger-seismic-mitigation-and-tempering', 'POST', { well_id: wellID });
+        const dossierRes = await api(`/geothermal/shr/superhot-geothermal-dossier/${wellID}`, 'GET');
+
+        if (badge) badge.textContent = `🌋 Superhot Geothermal: TLP ${evalRes.data.traffic_light_protocol_status} | Stress: ${dossierRes.data.telemetry.casing_von_mises_stress_mpa} MPa | Temp: ${dossierRes.data.telemetry.reservoir_temperature_c}°C`;
+        if (answerEl) {
+            let out = `🌋 SUPERCRITICAL SUPERHOT ROCK (SHR) GEOTHERMAL CASING & MICRO-SEISMIC SENTINEL (API SPEC 5CT & ISO 19901-2):\n`;
+            out += `Sumur Panas Bumi Superkritis: ${wellID} | Wilayah Geotermal: ${dossierRes.data.telemetry.geothermal_field_id}\n`;
+            out += `Kedalaman Sumur: ${dossierRes.data.telemetry.well_depth_meters} m | Suhu Reservoir Superkritis: ${dossierRes.data.telemetry.reservoir_temperature_c}°C | Tekanan Litolastik: ${dossierRes.data.telemetry.reservoir_pressure_bar} bar\n\n`;
+            out += `ANALISIS TEGANGAN TRIAKSIAL CASING & PROTOKOL LAMPU LALU LINTAS SEISMIK (TLP):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Tegangan Efektif Von Mises Casing: ${dossierRes.data.telemetry.casing_von_mises_stress_mpa} MPa (Batas Titik Leleh 720.0 MPa)\n`;
+            out += `• Perubahan Tegangan Kegagalan Coulomb (ΔCFS): ${evalRes.data.coulomb_stress_change_delta_cfs_bar} bar\n`;
+            out += `• Kejutan Gradien Termal (ΔT): ${evalRes.data.thermal_shock_delta_t_c}°C (Injeksi Dingin 25°C ke Reservoir 485°C)\n`;
+            out += `• Magnitudo Seismik Terinduksi: ${dossierRes.data.telemetry.induced_seismic_magnitude_ml} ML | Percepatan Puncak Tanah (PGA): ${dossierRes.data.telemetry.peak_ground_acceleration_g} g\n`;
+            out += `• Status Protokol Seismik TLP: ${evalRes.data.traffic_light_protocol_status}\n`;
+            out += `• Integritas Struktural Casing Sumur: ${evalRes.data.casing_integrity_risk}\n\n`;
+            out += `AKTUASI KONTROL PREVENTIF (INJECTION THROTTLING & THERMAL PRE-TEMPERING):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Perintah Mitigasi Seismik: ${actRes.data.action_id}\n`;
+            out += `• Modulasi Debit Injeksi Air Dingin: Diturunkan dari 95.0 kg/s ke ${actRes.data.modulated_injection_rate_kg_s} kg/s (Meredam Slip Sesar Tektonik)\n`;
+            out += `• Tekanan Bleed-off Pulsed Wellhead: ${actRes.data.wellhead_bleed_off_pressure_bar} bar\n`;
+            out += `• Siklus Pre-Tempering Fluida Injeksi: Pemanasan fluida hingga ${actRes.data.tempering_temperature_boost_c}°C (Mencegah Deformasi Plastis Casing)\n`;
+            out += `• Estimasi Kerugian Casing & Gempa Terhindar: $${actRes.data.avoided_well_collapse_loss_usd.toLocaleString()} USD\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penurunan debit injeksi ke 45 kg/s menghentikan akumulasi tegangan geser Coulomb dan mencegah gempa terinduksi di atas ML 2.0.</li>
+                <li>Pre-tempering fluida injeksi ke 125°C melunakkan gradien termal sehingga casing paduan nikel-kromium tetap dalam rentang elastis aman.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Superhot Rock Geothermal sentinel: ' + err.message;
+    }
+}
+
+async function triggerSubseaAUV() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi pelacakan akustik USBL, arus bentik, efisiensi resonansi IPT nirkabel, dan pemanasan eddy hull AUV...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const vehicleID = "AUV-SEABED-RESIDENT-04";
+        await api('/auv/docking/ingest-docking-telemetry', 'POST', {
+            vehicle_id: vehicleID,
+            docking_station_id: "DOCK-BENTHIC-SUBSEA-3000M-01",
+            operating_depth_meters: 2850.0,
+            benthic_current_speed_knots: 2.65,
+            usbl_position_x_offset_mm: 18.5,
+            usbl_position_y_offset_mm: 14.2,
+            angular_tilt_error_deg: 5.8,
+            inductive_coupling_efficiency_pct: 68.5,
+            titanium_hull_eddy_temp_c: 48.5,
+            optical_modem_snr_db: 11.2
+        });
+
+        const evalRes = await api('/auv/docking/evaluate-docking-and-resonance', 'POST', { vehicle_id: vehicleID });
+        const actRes = await api('/auv/docking/trigger-vector-thruster-and-ipt-control', 'POST', { vehicle_id: vehicleID });
+        const dossierRes = await api(`/auv/docking/auv-docking-dossier/${vehicleID}`, 'GET');
+
+        if (badge) badge.textContent = `🤖 Subsea AUV: Docking ${evalRes.data.docking_alignment_status} | IPT: ${dossierRes.data.telemetry.inductive_coupling_efficiency_pct}% | Offset: ${evalRes.data.total_coil_misalignment_mm.toFixed(1)} mm`;
+        if (answerEl) {
+            let out = `🤖 DEEP-SEA AUTONOMOUS UNDERWATER VEHICLE (AUV) DOCKING & WIRELESS IPT SENTINEL (DNV-ST-0373 & ISO 13628-8):\n`;
+            out += `Wahana Bawah Laut Otonom: ${vehicleID} | Stasiun Docking Bentik: ${dossierRes.data.telemetry.docking_station_id}\n`;
+            out += `Kedalaman Operasi: ${dossierRes.data.telemetry.operating_depth_meters} m | Kecepatan Arus Bentik: ${dossierRes.data.telemetry.benthic_current_speed_knots} knots\n\n`;
+            out += `PELACAKAN AKUSTIK USBL, MISALIGNMENT KOIL & EFISIENSI PENGISIAN DAYA NIRKABEL:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Deviasi Posisi Sumbu X / Y: ${dossierRes.data.telemetry.usbl_position_x_offset_mm} mm / ${dossierRes.data.telemetry.usbl_position_y_offset_mm} mm\n`;
+            out += `• Total Deviasi Alignment Koil IPT: ${evalRes.data.total_coil_misalignment_mm.toFixed(2)} mm (Target Optimal < 10.0 mm)\n`;
+            out += `• Deviasi Sudut Kemiringan (Tilt): ${dossierRes.data.telemetry.angular_tilt_error_deg}° | Kebocoran Fluks Magnetik: ${evalRes.data.magnetic_flux_leakage_tesla} Tesla\n`;
+            out += `• Efisiensi Kopling Induktif Nirkabel (IPT): ${dossierRes.data.telemetry.inductive_coupling_efficiency_pct}% (Target Resonansi Magnetik > 88%)\n`;
+            out += `• Suhu Lambung Titanium Akibat Arus Eddy: ${dossierRes.data.telemetry.titanium_hull_eddy_temp_c}°C\n`;
+            out += `• Status Docking Mekanikal / Akustik: ${evalRes.data.docking_alignment_status}\n`;
+            out += `• Risiko Termal Induktif Titanium Hull: ${evalRes.data.inductive_thermal_risk}\n\n`;
+            out += `AKTUASI KOREKSI VEKTOR THRUSTER & PENALAAN FREKUENSI RESONANSI KOIL IPT:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Manuver Bawah Laut: ${actRes.data.action_id}\n`;
+            out += `• Perintah Gaya Dorong Thruster Surge / Sway: ${actRes.data.commanded_thruster_surge_force_n} N / ${actRes.data.commanded_thruster_sway_force_n} N (Melawan Arus Bentik)\n`;
+            out += `• Pergeseran Frekuensi Resonansi IPT (Frequency Shift): ${actRes.data.ipt_resonant_frequency_shift_khz} kHz (Mengoptimalkan Transfer Daya)\n`;
+            out += `• Peningkatan Daya Transmisi Modem Optik: +${actRes.data.optical_modem_gain_boost_db} dB (Menstabilkan Komunikasi Gbps Bawah Air)\n`;
+            out += `• Estimasi Kerugian AUV & Docking Subsea Terhindar: $${actRes.data.avoided_docking_damage_loss_usd.toLocaleString()} USD\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Koreksi vektor pendorong surge dan sway menstabilkan posisi AUV terhadap arus turbulen dasar laut 2.65 knots.</li>
+                <li>Penalaan frekuensi resonansi IPT sebesar +4.25 kHz mengembalikan efisiensi transfer daya ke atas 90% dan menghentikan panas eddy berlebih.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Subsea AUV Docking sentinel: ' + err.message;
+    }
+}
+
+async function triggerElectronicH2O2() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi laju dekomposisi eksotermis e-H2O2, konsentrasi ion logam Fe katalitik, pelepasan O2, dan bahaya thermal runaway...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const reactorID = "REACTOR-AUTOX-H2O2-UP-SSS-01";
+        await api('/wetchem/h2o2/ingest-chemical-telemetry', 'POST', {
+            reactor_id: reactorID,
+            chemical_plant_id: "PLANT-SEMICHEM-TAICHUNG-01",
+            h2o2_concentration_wt_pct: 33.5,
+            working_solution_temp_c: 48.5,
+            redox_potential_mv: 415.0,
+            vent_offgas_oxygen_vol_pct: 14.8,
+            dissolved_iron_ppt: 85.0,
+            distillation_vapor_pressure_bar: 3.85,
+            pressure_rise_rate_bar_per_sec: 0.85
+        });
+
+        const evalRes = await api('/wetchem/h2o2/evaluate-runaway-and-deoxygenation', 'POST', { reactor_id: reactorID });
+        const actRes = await api('/wetchem/h2o2/trigger-deluge-and-chelation-quench', 'POST', { reactor_id: reactorID });
+        const dossierRes = await api(`/wetchem/h2o2/wetchem-safety-dossier/${reactorID}`, 'GET');
+
+        if (badge) badge.textContent = `🧪 e-H2O2 Runaway: Hazard ${evalRes.data.thermal_explosion_hazard_level} | Fe: ${dossierRes.data.telemetry.dissolved_iron_ppt} ppt | Temp: ${dossierRes.data.telemetry.working_solution_temp_c}°C`;
+        if (answerEl) {
+            let out = `🧪 SEMICONDUCTOR ELECTRONIC-GRADE H2O2 AUTO-OXIDATION RUNAWAY SENTINEL (SEMI C30 & NFPA 432):\n`;
+            out += `Reaktor Oksidasi Basah: ${reactorID} | Pabrik Bahan Kimia Semikonduktor: ${dossierRes.data.telemetry.chemical_plant_id}\n`;
+            out += `Konsentrasi Hidrogen Peroksida: ${dossierRes.data.telemetry.h2o2_concentration_wt_pct} wt% (Grade UP-SSS) | Suhu Larutan Kerja: ${dossierRes.data.telemetry.working_solution_temp_c}°C\n\n`;
+            out += `ANALISIS KINETIKA DEKOMPOSISI EKSOTERMIS, KONTAMINASI LOGAM & FLAMMABILITY O2:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Panas Dekomposisi Eksotermis (Q_rxn): ${evalRes.data.exothermic_decomposition_heat_kw.toFixed(2)} kW (-98 kJ/mol)\n`;
+            out += `• Laju Pembentukan Gas Oksigen: ${evalRes.data.oxygen_generation_rate_nm3_hr.toFixed(2)} Nm³/jam | Konsentrasi O2 Venting: ${dossierRes.data.telemetry.vent_offgas_oxygen_vol_pct} Vol%\n`;
+            out += `• Kontaminasi Ion Besi Terlarut (Fe): ${dossierRes.data.telemetry.dissolved_iron_ppt} ppt (Standar SEMI C30 UP-SSS < 10.0 ppt)\n`;
+            out += `• Laju Kenaikan Tekanan Reaktor: ${dossierRes.data.telemetry.pressure_rise_rate_bar_per_sec} bar/s | Tekanan Uap Distilasi: ${dossierRes.data.telemetry.distillation_vapor_pressure_bar} bar\n`;
+            out += `• Tingkat Bahaya Ledakan Termal Semenov: ${evalRes.data.thermal_explosion_hazard_level}\n`;
+            out += `• Status Kepatuhan Kemurnian Ultra-Murni SEMI C30: ${evalRes.data.electronic_purity_compliance}\n\n`;
+            out += `AKTUASI KONTROL DARURAT (COLD DELUGE, AMINO-PHOSPHONATE CHELATION & N2 PURGE):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Tanggap Darurat Kimia: ${actRes.data.action_id}\n`;
+            out += `• Debit Injeksi Deluge Air Demineralisasi Dingin: ${actRes.data.cold_demineralized_deluge_l_min} L/menit (Mendinginkan Larutan Di Bawah SADT)\n`;
+            out += `• Dosis Agen Pengkelat Logam (Chelation Scavenger): ${actRes.data.chelating_stabilizer_dosing_l_hr} L/jam (Menonaktifkan Katalisis Ion Logam Transisi)\n`;
+            out += `• Aliran Gas Nitrogen Inersia Cepat: ${actRes.data.nitrogen_purge_flow_nm3_hr} Nm³/jam (Menurunkan O2 Venting ke Batas Aman < 5 Vol%)\n`;
+            out += `• Estimasi Kerugian Reaktor & Fasilitas Fab Terhindar: $${actRes.data.avoided_semiconductor_fab_loss_usd.toLocaleString()} USD\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Deluge air ultra-murni dingin 1200 L/menit meredam kenaikan suhu autotermal reaktor di bawah titik bahaya SADT 45°C.</li>
+                <li>Dosis agen pengkelat fosfonat mengikat ion Fe terlarut sehingga laju pembentukan gas O2 dan kenaikan tekanan turun drastis.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses e-H2O2 runaway sentinel: ' + err.message;
+    }
+}
+
+async function triggerBiopharmaLyo() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi keseragaman nukleasi es terkontrol, rasio tekanan Pirani/CM, dan margin pelelehan cake liofilisasi...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const dryerID = "LYO-COMMERCIAL-BIOLOGICS-50K-01";
+        await api('/lyo/bioprocess/ingest-freeze-dryer-telemetry', 'POST', {
+            dryer_id: dryerID,
+            batch_id: "BATCH-MAB-LYO-STERILE-1029",
+            total_vial_count: 50000,
+            shelf_temperature_c: -28.5,
+            product_collapse_threshold_c: -32.0,
+            chamber_pirani_pressure_microbar: 145.0,
+            capacitance_manometer_microbar: 98.0,
+            tdlas_sublimation_rate_g_per_sec: 84.5,
+            acoustic_nucleation_uniformity_pct: 64.2,
+            ice_crystal_mean_pore_diameter_um: 18.5
+        });
+
+        const evalRes = await api('/lyo/bioprocess/evaluate-nucleation-and-cake-collapse', 'POST', { dryer_id: dryerID });
+        const actRes = await api('/lyo/bioprocess/trigger-ice-fog-and-sublimation-control', 'POST', { dryer_id: dryerID });
+        const dossierRes = await api(`/lyo/bioprocess/lyophilization-cgmp-dossier/${dryerID}`, 'GET');
+
+        if (badge) badge.textContent = `🧊 Biopharma Lyo: Cake ${evalRes.data.cake_collapse_hazard_level} | Pirani/CM: ${evalRes.data.pressure_ratio_pirani_to_cm.toFixed(2)} | Shelf: ${dossierRes.data.telemetry.shelf_temperature_c}°C`;
+        if (answerEl) {
+            let out = `🧊 BIOPHARMACEUTICAL CONTROLLED ICE NUCLEATION & CAKE COLLAPSE LYO SENTINEL (ISPE GAMP 5 & FDA 21 CFR 211):\n`;
+            out += `Unit Pengering Beku Komersial: ${dryerID} | Bets Vaksin/Antibodi Monoklonal: ${dossierRes.data.telemetry.batch_id}\n`;
+            out += `Kapasitas Bets: ${dossierRes.data.telemetry.total_vial_count.toLocaleString()} vial | Suhu Shelf Rak Pengering: ${dossierRes.data.telemetry.shelf_temperature_c}°C\n\n`;
+            out += `KONTROL NUKLEASI KABUT ES TERKONTROL, SUBLIMASI PRIMER & MARGIN RUNTUH CAKE:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Batas Kritis Suhu Keruntuhan Cake Produk (Tc): ${dossierRes.data.telemetry.product_collapse_threshold_c}°C\n`;
+            out += `• Margin Suhu Terhadap Keruntuhan (ΔTc): ${evalRes.data.collapse_margin_delta_t_c.toFixed(2)}°C (Peringatan Bahaya jika Melebihi Tc)\n`;
+            out += `• Tekanan Pirani (Konduktivitas Termal) vs Manometer Kapasitansi (Absolut): ${dossierRes.data.telemetry.chamber_pirani_pressure_microbar} µbar / ${dossierRes.data.telemetry.capacitance_manometer_microbar} µbar\n`;
+            out += `• Rasio Tekanan Pirani/CM: ${evalRes.data.pressure_ratio_pirani_to_cm.toFixed(2)} (Mendekati 1.0 Menandakan Akhir Sublimasi Primer)\n`;
+            out += `• Laju Sublimasi Fluks Uap Air TDLAS: ${dossierRes.data.telemetry.tdlas_sublimation_rate_g_per_sec} g/s | Diameter Pori Kristal Es: ${dossierRes.data.telemetry.ice_crystal_mean_pore_diameter_um} µm\n`;
+            out += `• Keseragaman Nukleasi Es Terkontrol: ${dossierRes.data.telemetry.acoustic_nucleation_uniformity_pct}% (Target Ideal > 90%)\n`;
+            out += `• Tingkat Risiko Keruntuhan Struktur Cake: ${evalRes.data.cake_collapse_hazard_level}\n`;
+            out += `• Kualitas Nukleasi Pembekuan Vial: ${evalRes.data.freezing_nucleation_quality}\n\n`;
+            out += `AKTUASI STERILE ICE FOG MIST, SETPOINT SHELF TRIM & MODULASI VAKUM:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Batch Bioproses Liofilisasi: ${actRes.data.action_id}\n`;
+            out += `• Durasi Injeksi Kabut Es Steril (Ice Fog): ${actRes.data.sterile_ice_fog_injection_duration_sec} detik (Menginduksi Nukleasi Es Simultan Seragam Seluruh Rak)\n`;
+            out += `• Pemotongan Setpoint Suhu Shelf Rak: Diturunkan ke ${actRes.data.shelf_temp_trim_setpoint_c}°C (Memulihkan Margin Vitrifikasi Aman)\n`;
+            out += `• Modulasi Tekanan Ruang Vakum: Ditetapkan pada ${actRes.data.chamber_pressure_modulation_microbar} µbar\n`;
+            out += `• Estimasi Kerugian Bets Biofarmasi Terhindar: $${actRes.data.avoided_biopharma_batch_loss_usd.toLocaleString()} USD (Menjamin Kepatuhan Sterilitas FDA 21 CFR 211)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Injeksi kabut es bertekanan steril 2.5 detik menyeragamkan pembentukan inti kristal es di seluruh 50,000 vial secara simultan.</li>
+                <li>Penurunan setpoint suhu rak ke -34.5°C mengembalikan margin keamanan vitrifikasi di bawah suhu keruntuhan kritis cake (-32°C).</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Biopharma Lyophilization sentinel: ' + err.message;
+    }
+}
+
+async function triggerQLEDPrinting() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi pembentukan tetesan inkjet piezo, efek Marangoni coffee-ring, dan yield fotoluminesensi (PLQY) nanocrystal QLED...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const printerID = "INKJET-GEN85-QLED-PANEL-01";
+        await api('/qled/display/ingest-inkjet-telemetry', 'POST', {
+            printer_id: printerID,
+            substrate_batch_id: "GLASS-MOTHER-SUBSTRATE-G85-0091",
+            droplet_volume_pico_liters: 3.85,
+            droplet_velocity_m_per_sec: 7.45,
+            glovebox_oxygen_ppm: 2.15,
+            glovebox_moisture_ppm: 1.85,
+            photoluminescence_yield_plqy_pct: 74.2,
+            sub_pixel_marangoni_ratio: 1.48,
+            nanocrystal_inp_core_diameter_nm: 3.25,
+            vacuum_post_bake_temp_c: 95.0
+        });
+
+        const evalRes = await api('/qled/display/evaluate-marangoni-and-plqy', 'POST', { printer_id: printerID });
+        const actRes = await api('/qled/display/trigger-piezo-waveform-and-svsa-control', 'POST', { printer_id: printerID });
+        const dossierRes = await api(`/qled/display/qled-display-quality-dossier/${printerID}`, 'GET');
+
+        if (badge) badge.textContent = `📺 QLED Ink: Mura ${evalRes.data.coffee_ring_mura_severity} | PLQY: ${dossierRes.data.telemetry.photoluminescence_yield_plqy_pct}% | Marangoni: ${dossierRes.data.telemetry.sub_pixel_marangoni_ratio}`;
+        if (answerEl) {
+            let out = `📺 CADMIUM-FREE QUANTUM DOT (QLED) INKJET PRINTING & PLQY SENTINEL (IEC 62341 & SEMI D73):\n`;
+            out += `Printer Panel Inkjet Otonom: ${printerID} | Bets Substrat Kaca Mother Glass Gen-8.5: ${dossierRes.data.telemetry.substrate_batch_id}\n`;
+            out += `Diameter Inti Nanokristal InP: ${dossierRes.data.telemetry.nanocrystal_inp_core_diameter_nm} nm (Emiter Hijau Bebas Kadmium) | Volume Tetesan Tinta: ${dossierRes.data.telemetry.droplet_volume_pico_liters} pL\n\n`;
+            out += `ANALISIS EFEK MARANGONI COFFEE-RING, DEGRADASI PLQY & KONDISI GLOVEBOX O2/H2O:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Efisiensi Hasil Fotoluminesensi (PLQY): ${dossierRes.data.telemetry.photoluminescence_yield_plqy_pct}% (Standar Layar Premium > 90%)\n`;
+            out += `• Margin Degradasi PLQY: ${evalRes.data.plqy_degradation_margin_pct.toFixed(1)}% di bawah target nominal\n`;
+            out += `• Rasio Segregasi Aliran Marangoni Sub-Piksel: ${dossierRes.data.telemetry.sub_pixel_marangoni_ratio} (Batas Kritis > 1.20 Menghasilkan Efek Coffee-Ring Mura)\n`;
+            out += `• Kecepatan Terbang Droplet: ${dossierRes.data.telemetry.droplet_velocity_m_per_sec} m/s | Suhu Pemanggangan Pasca Vakum: ${dossierRes.data.telemetry.vacuum_post_bake_temp_c}°C\n`;
+            out += `• Kemurnian Atmosfer Glovebox: ${dossierRes.data.telemetry.glovebox_oxygen_ppm} ppm O2 / ${dossierRes.data.telemetry.glovebox_moisture_ppm} ppm H2O\n`;
+            out += `• Tingkat Keparahan Defek Coffee-Ring Mura: ${evalRes.data.coffee_ring_mura_severity}\n`;
+            out += `• Kepatuhan Mutu Efisiensi Kuantum Layar: ${evalRes.data.quantum_efficiency_compliance}\n\n`;
+            out += `AKTUASI PIEZO WAVEFORM SHAPING, SOLVENT VAPOR ANNEALING (SVSA) & UV CURE:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Mutu Manufaktur Layar: ${actRes.data.action_id}\n`;
+            out += `• Penalaan Tegangan Akustik Piezoelektrik: Disesuaikan ke ${actRes.data.tuned_piezo_acoustic_voltage_volts} V (Menghilangkan Tetesan Satelit Liar)\n`;
+            out += `• Tekanan Uap Pelarut Annealing (SVSA): ${actRes.data.svsa_solvent_chamber_pressure_mbar} mbar (Memulihkan Profil Deposisi Sub-Piksel Datar)\n`;
+            out += `• Durasi Penyinaran Silang UV Ligand In-Situ: ${actRes.data.in_situ_uv_cure_exposure_duration_sec} detik (Memulihkan Lapisan Pasivasi Cangkang ZnS)\n`;
+            out += `• Estimasi Kerugian Mother Glass Substrat Terhindar: $${actRes.data.avoided_substrate_scrap_loss_usd.toLocaleString()} USD\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penalaan gelombang pulsa piezoelektrik ke 24.8 V menghilangkan pembentukan tetesan satelit dan menstabilkan volume inkjet.</li>
+                <li>Solvent vapor annealing 18.5 mbar membalikkan aliran kapiler Marangoni sehingga nanokristal InP terdistribusi rata tanpa coffee-ring mura.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses QLED Inkjet Printing sentinel: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

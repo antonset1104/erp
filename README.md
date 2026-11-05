@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![CI Status](https://img.shields.io/badge/CI-Passing-success?style=flat&logo=githubactions)](https://github.com/antonset1104/erp/actions)
 [![Modules](https://img.shields.io/badge/Modules-50_Enterprise-indigo)](docs/FUNCTIONAL_DOCUMENTATION.md)
-[![Release](https://img.shields.io/badge/Release-v1.74.0-emerald)](https://github.com/antonset1104/erp/releases)
+[![Release](https://img.shields.io/badge/Release-v1.75.0-emerald)](https://github.com/antonset1104/erp/releases)
 [![Open Source](https://img.shields.io/badge/Open_Source-Community_Driven-purple)](docs/OPEN_SOURCE_GUIDE.md)
 
 **GoERP** is a modern, high-performance, enterprise-grade Enterprise Resource Planning (ERP) platform built natively with **Golang**. Engineered with a clean **Modular Monolith** architecture comprising **50 integrated business modules**, GoERP delivers single-binary static compilation, native Go concurrency, ultra-low memory overhead (~25 MB idle RAM), and strict transactional integrity for mission-critical enterprise workloads.

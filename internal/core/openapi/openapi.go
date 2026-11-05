@@ -1847,6 +1847,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/geothermal/shr/evaluate-thermal-stress-and-seismicity": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Ultra-Deep Supercritical Superhot Rock (SHR) Geothermal Casing Thermal-Stress & Micro-Seismic Slip Sentinel (API Spec 5CT & ISO 19901-2)",
+					"description": "Monitors bottom-hole temperature, supercritical fluid enthalpy, casing triaxial von Mises stress, and micro-seismic moment magnitude with hydraulic throttling.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Von Mises stress ratio, seismic hazard level, casing yield warning, injection tempering flow rate, and choke valve trim commands"},
+					},
+				},
+			},
+			"/api/v1/auv/docking/evaluate-docking-and-resonance": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Deep-Sea Autonomous Underwater Vehicle (AUV) Docking, Acoustic USBL & Inductive Power Transfer Sentinel (DNV-ST-0373 & ISO 13628-8)",
+					"description": "Monitors acoustic USBL positioning error, magnetic latch alignment, hydrodynamic cross-current drag, IPT coil resonance, and high-frequency wireless charging efficiency.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Positioning deviation, docking status, wireless charging efficiency %, vector thruster correction, and resonant frequency offset"},
+					},
+				},
+			},
+			"/api/v1/wetchem/h2o2/evaluate-runaway-and-deoxygenation": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Semiconductor Electronic-Grade Hydrogen Peroxide (e-H2O2) Auto-Oxidation Runaway De-Oxygenation Sentinel (SEMI C30 & NFPA 432)",
+					"description": "Calculates self-accelerating decomposition temperature (SADT), dissolved oxygen saturation, transition metal contamination catalysis, and autothermal runaway hazards.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Runaway risk status, decomposition rate %/hr, catalyst hazard level, emergency deluge quench flow rate, and chelation dose commands"},
+					},
+				},
+			},
+			"/api/v1/lyo/bioprocess/evaluate-nucleation-and-cake-collapse": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Biopharmaceutical Continuous Controlled Ice Nucleation & Cake Collapse Lyophilization Sentinel (ISPE GAMP 5 & FDA 21 CFR Part 211)",
+					"description": "Monitors ice fog acoustic nucleation uniformity, primary drying sublimating interface temperature, product collapse temperature Tc, and Pirani/capacitance manometry endpoint.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Nucleation homogeneity %, cake collapse margin degC, sublimation progress %, ice fog mist injection trigger, and shelf temperature ramp trim"},
+					},
+				},
+			},
+			"/api/v1/qled/display/evaluate-marangoni-and-plqy": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Cadmium-Free Quantum Dot (QLED / Micro-LED) Nanocrystal Ink Printing & Photoluminescence Yield (PLQY) Sentinel (IEC 62341 & SEMI D73)",
+					"description": "Monitors piezo inkjet droplet volume, flight trajectory satellite formation, Marangoni ring stain suppression, solvent vapor annealing, and photoluminescence quantum yield.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "PLQY retention %, droplet satellite risk, coffee-ring suppression index, piezo waveform pulse trim, and solvent vapor vacuum purge rate"},
+					},
+				},
+			},
 		},
 	}
 }

@@ -41,6 +41,7 @@ import (
 	corefusion "erp-golang/internal/core/fusion"
 	coregeotech "erp-golang/internal/core/geotech"
 	coregeothermal "erp-golang/internal/core/geothermal"
+	coregeothermalshr "erp-golang/internal/core/geothermal_shr"
 	coregraphql "erp-golang/internal/core/graphql"
 	coregrc "erp-golang/internal/core/grc"
 	corehr "erp-golang/internal/core/hr"
@@ -50,6 +51,7 @@ import (
 	corelegal "erp-golang/internal/core/legal"
 	corelnp "erp-golang/internal/core/lnp"
 	corelogistics "erp-golang/internal/core/logistics"
+	corelyo "erp-golang/internal/core/lyophilization"
 	coremaintenance "erp-golang/internal/core/maintenance"
 	coremarine "erp-golang/internal/core/marine"
 	coremining "erp-golang/internal/core/mining"
@@ -66,6 +68,7 @@ import (
 	coreproject "erp-golang/internal/core/project"
 	corepyrolysis "erp-golang/internal/core/pyrolysis"
 	corequality "erp-golang/internal/core/quality"
+	coreqled "erp-golang/internal/core/qled"
 	corequantum "erp-golang/internal/core/quantum"
 	corerailway "erp-golang/internal/core/railway"
 	corerenewables "erp-golang/internal/core/renewables"
@@ -79,6 +82,7 @@ import (
 	coreservice "erp-golang/internal/core/service"
 	coresubsea "erp-golang/internal/core/subsea"
 	coresubseaccs "erp-golang/internal/core/subsea_ccs"
+	coresubseaauv "erp-golang/internal/core/subsea_auv"
 	coresubscription "erp-golang/internal/core/subscription"
 	coresystem "erp-golang/internal/core/system"
 	coretax "erp-golang/internal/core/tax"
@@ -88,6 +92,7 @@ import (
 	coreutilities "erp-golang/internal/core/utilities"
 	corevmi "erp-golang/internal/core/vmi"
 	corewms "erp-golang/internal/core/wms"
+	corewetchem "erp-golang/internal/core/wetchem"
 	"erp-golang/internal/core/esg"
 	"erp-golang/internal/core/iot"
 	"erp-golang/internal/core/database"
@@ -344,7 +349,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.74.0",
+			"version":    "1.75.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -529,6 +534,11 @@ func main() {
 		corelnp.RegisterMRNALNPRoutes(apiV1)
 		corecpo.RegisterCPORoutes(apiV1)
 		coresoec.RegisterSOECRoutes(apiV1)
+		coregeothermalshr.RegisterGeothermalSHRRoutes(apiV1)
+		coresubseaauv.RegisterSubseaAUVRoutes(apiV1)
+		corewetchem.RegisterH2O2RunawayRoutes(apiV1)
+		corelyo.RegisterLyophilizationRoutes(apiV1)
+		coreqled.RegisterQLEDRoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend
