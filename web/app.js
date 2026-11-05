@@ -34160,6 +34160,328 @@ async function triggerSubseaCompressor() {
     }
 }
 
+
+async function triggerAirborneHTS() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi kondisi superkonduktor stator REBCO, quench voltage tap, dan stabilitas kriogenik propulsi pesawat megawatt...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const genID = "GEN-HTS-MEGAWATT-01";
+        await api('/aviation/airborne-hts/ingest-stator-telemetry', 'POST', {
+            generator_id: genID,
+            aircraft_tail_number: "N801-ZERO-E-HYBRID",
+            flight_phase: "TAKEOFF_CLIMB",
+            rebco_stator_temp_kelvin: 78.8,
+            stator_voltage_tap_microvolts: 32.5,
+            cryo_coolant_flow_rate_kg_per_sec: 2.1,
+            lorentz_mechanical_strain_pct: 0.38,
+            output_power_megawatts: 4.8,
+            quench_risk_index: 0.92
+        });
+
+        const evalRes = await api('/aviation/airborne-hts/evaluate-quench-and-thermal-runaway', 'POST', { generator_id: genID });
+        const actRes = await api('/aviation/airborne-hts/trigger-fast-extraction-and-bus-transfer', 'POST', { generator_id: genID });
+        const dossierRes = await api(`/aviation/airborne-hts/hts-flight-safety-dossier/${genID}`, 'GET');
+
+        if (badge) badge.textContent = `⚡ Airborne HTS: Stator ${dossierRes.data.rebco_stator_temp_kelvin} K | Quench: ${evalRes.data.localized_quench_hazard}`;
+        if (answerEl) {
+            let out = `⚡ AVIATION MEGAWATT AIRBORNE SUPERCONDUCTING (HTS) STATOR QUENCH SENTINEL (FAA 14 CFR PART 33 & SAE AS6129):\n`;
+            out += `Generator Superkonduktor: ${genID} | Ekor Pesawat: ${dossierRes.data.aircraft_tail_number} | Fase Terbang: ${dossierRes.data.flight_phase}\n`;
+            out += `Kepatuhan Regulasi Kelaikudaraan: FAA 14 CFR Part 33 (${dossierRes.data.faa_14cfr33_compliant ? 'Compliant' : 'Warning'}) | SAE AS6129 (${dossierRes.data.sae_as6129_certified ? 'Certified' : 'Review'})\n\n`;
+            out += `STATUS SUPERKONDUKTIVITAS STATOR & ANOMALI TEGANGAN TAP (QUENCH DETECTION):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Suhu Stator Pita Superkonduktor REBCO: ${dossierRes.data.rebco_stator_temp_kelvin} K (Batas Transisi Kritis 77.0 K)\n`;
+            out += `• Tegangan Voltage Tap Stator: ${dossierRes.data.voltage_tap_microvolts} µV (Ambang Batas Resistif Quench > 25.0 µV)\n`;
+            out += `• Margin Pendinginan Kriogenik: ${dossierRes.data.cryo_margin_kelvin.toFixed(1)} K\n`;
+            out += `• Status Keadaan Superkonduktor: ${evalRes.data.superconducting_state}\n`;
+            out += `• Bahaya Quench Terlokalisasi: ${evalRes.data.localized_quench_hazard}\n\n`;
+            out += `AKTUASI FAST ENERGY EXTRACTION KE DUMP RESISTOR & PENGALIHAN BUS BATERAI:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Kelaikudaraan Penerbangan: ${actRes.data.action_id}\n`;
+            out += `• Ekstraksi Cepat Energi Medan Magnet: ${(actRes.data.commanded_dump_resistor_extraction_watts / 1e6).toFixed(1)} MW ke Cryogenic Dump Resistor\n`;
+            out += `• Pengalihan Daya ke Bus Baterai Cadangan: ${actRes.data.secondary_battery_bus_transfer_pct}% (Menjamin Daya Dorong Kontinu)\n`;
+            out += `• Laju Purge Helium Superkritis Darurat: ${actRes.data.cryo_helium_purge_rate_kg_per_sec} kg/s (Meredam Kenaikan Suhu Stator)\n`;
+            out += `• Estimasi Kerugian Katastropik Terhindar: $${actRes.data.avoided_aircraft_loss_usd.toLocaleString()} USD (Mencegah Kehilangan Pesawat dan Kerusakan Mesin)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Ekstraksi energi 4.5 MW dalam waktu kurang dari 10 ms memutus loop arus medan magnet dan mencegah leburnya lilitan superkonduktor stator REBCO.</li>
+                <li>Pengalihan bus 100% ke baterai avionik menjaga thrust propulsi elektrik selama manuver descent pendaratan darurat.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Airborne HTS Quench sentinel: ' + err.message;
+    }
+}
+
+async function triggerHDRIShaft() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Menganalisis dinamika tanur reduksi langsung hidrogen 100%, fluidisasi tumpukan pelet, dan indeks sticking...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const furnaceID = "SHAFT-HDRI-GREEN-01";
+        await api('/steel/hdri-shaft/ingest-furnace-telemetry', 'POST', {
+            furnace_id: furnaceID,
+            steel_mill_id: "MILL-GREENSTEEL-NORDIC-01",
+            bustle_hydrogen_flow_nm3_hr: 125000.0,
+            bed_reduction_temp_c: 942.0,
+            top_gas_h2_utilization_pct: 29.5,
+            bed_differential_pressure_mbar: 395.0,
+            pellet_sticking_index: 0.52,
+            met_degree_metallization_pct: 95.8,
+            dust_carryover_g_per_nm3: 18.2
+        });
+
+        const evalRes = await api('/steel/hdri-shaft/evaluate-sticking-and-fluidization', 'POST', { furnace_id: furnaceID });
+        const actRes = await api('/steel/hdri-shaft/trigger-dope-injection-and-bed-pulsation', 'POST', { furnace_id: furnaceID });
+        const dossierRes = await api(`/steel/hdri-shaft/hdri-furnace-dossier/${furnaceID}`, 'GET');
+
+        if (badge) badge.textContent = `🏭 H-DRI: Temp ${dossierRes.data.bed_reduction_temp_c}°C | Sticking Index: ${dossierRes.data.pellet_sticking_index} | Status: ${evalRes.data.shaft_bed_fluidization_status}`;
+        if (answerEl) {
+            let out = `🏭 GREEN STEELMAKING 100% HYDROGEN DRI SHAFT FURNACE STICKING & FLUIDIZATION SENTINEL (ISO 14044 & DIN EN 746-2):\n`;
+            out += `Tanur Poros H-DRI: ${furnaceID} | Pabrik Baja Hijau: ${dossierRes.data.steel_mill_id}\n`;
+            out += `Kepatuhan Keselamatan Termoproses Industri: DIN EN 746-2 (${dossierRes.data.din_en746_2_certified ? 'Certified' : 'Review'}) | ISO 14044 (${dossierRes.data.iso_14044_compliant ? 'Compliant' : 'Warning'})\n\n`;
+            out += `METRIK METALURGI, PEMANFAATAN GAS HIDROGEN & TEKANAN BED TUMPUKAN:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Temperatur Bed Reduksi Hidrogen: ${dossierRes.data.bed_reduction_temp_c}°C (Rentang Operasi 850 - 950°C)\n`;
+            out += `• Pemanfaatan Gas Hidrogen Top-Gas: ${dossierRes.data.top_gas_h2_utilization_pct}% (Target Efisiensi > 32.0%)\n`;
+            out += `• Tekanan Diferensial Melintasi Bed: ${dossierRes.data.bed_differential_pressure_mbar} mbar (Ambang Batas Choking > 380.0 mbar)\n`;
+            out += `• Indeks Kecenderungan Sticking Pelet Besi: ${dossierRes.data.pellet_sticking_index} (Batas Kritis Pengelasan Pelet > 0.45) | Ekses: +${evalRes.data.sticking_excess_margin_pct.toFixed(1)}%\n`;
+            out += `• Derajat Metalisasi Besi (Met Degree): ${dossierRes.data.metallization_degree_pct}%\n`;
+            out += `• Status Fluidisasi & Penurunan Pelet: ${evalRes.data.shaft_bed_fluidization_status}\n`;
+            out += `• Bahaya Pembentukan Kluster Pelet (Sintering Cluster): ${evalRes.data.pellet_clustering_hazard}\n\n`;
+            out += `INJEKSI SERBUK PASIVASI ANTI-STICKING MgO & PULSASI PNEUMATIK TANUR:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Operasional Tanur Poros: ${actRes.data.action_id}\n`;
+            out += `• Laju Injeksi Serbuk MgO Tuyere Anti-Sticking: ${actRes.data.commanded_mgo_dope_injection_rate_kg_hr} kg/jam (Mencegah Kontak Logam Langsung)\n`;
+            out += `• Pemangkasan Kecepatan Alir Gas Bustle Hidrogen: ${actRes.data.hydrogen_bustle_trim_pct}% (Menghilangkan Hotspot Termal)\n`;
+            out += `• Frekuensi Pulsasi Pneumatik Bed: ${actRes.data.pneumatic_bed_pulsation_hz} Hz (Memecah Ikatan Sintering Jembatan Pelet)\n`;
+            out += `• Estimasi Kerugian Freeze Tanur Terhindar: $${actRes.data.avoided_furnace_freeze_loss_usd.toLocaleString()} USD (Mencegah Pembekuan Tanur dan Re-lining Refractory)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Injeksi serbuk pelapis mikro MgO 185 kg/jam pada tuyere membentuk lapisan pasivasi oksida tipis yang mencegah pelet saling mengelas (sticking).</li>
+                <li>Pulsasi pneumatik 0.75 Hz memulihkan permeabilitas tumpukan bijih besi dan menormalkan tekanan diferensial di bawah 350 mbar.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses H-DRI Shaft Furnace sentinel: ' + err.message;
+    }
+}
+
+async function triggerCryoQuantum() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memeriksa suhu mixing chamber 10 mK, sirkulasi still 3He/4He, dan waktu relaksasi koherensi qubit kuantum...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const cryoID = "CRYOSTAT-DILUTION-10MK-01";
+        await api('/quantum/cryo/ingest-cryostat-telemetry', 'POST', {
+            cryostat_id: cryoID,
+            quantum_lab_id: "LAB-QUANTUM-FOUNDRY-TOKYO",
+            mixing_chamber_temp_milli_kelvin: 15.2,
+            he3_still_flow_rate_mol_per_sec: 0.000165,
+            coaxial_rf_thermal_attenuation_db: 36.5,
+            qubit_t1_decoherence_micro_sec: 54.0,
+            qubit_t2_dephasing_micro_sec: 42.0,
+            pulse_tube_vibration_displacement_nm: 18.5,
+            cryoperm_shielding_health_pct: 94.2
+        });
+
+        const evalRes = await api('/quantum/cryo/evaluate-heatleak-and-decoherence', 'POST', { cryostat_id: cryoID });
+        const actRes = await api('/quantum/cryo/trigger-still-heater-and-vibration-cancellation', 'POST', { cryostat_id: cryoID });
+        const dossierRes = await api(`/quantum/cryo/quantum-integrity-dossier/${cryoID}`, 'GET');
+
+        if (badge) badge.textContent = `🧊 Quantum 10mK: Temp ${dossierRes.data.mixing_chamber_temp_mk} mK | T1: ${dossierRes.data.qubit_t1_micro_sec} µs | Status: ${evalRes.data.qubit_coherence_stability}`;
+        if (answerEl) {
+            let out = `🧊 QUANTUM COMPUTING 10 mK DILUTION REFRIGERATOR HEAT-LEAK & SUPERCONDUCTING QUBIT DECOHERENCE SENTINEL (IEEE P7130 & ISO/IEC 23837):\n`;
+            out += `Kriostat Pengenceran Helium: ${cryoID} | Laboratorium Kuantum: ${dossierRes.data.quantum_lab_id}\n`;
+            out += `Sertifikasi Integritas Perangkat Keras Kuantum: IEEE P7130 (${dossierRes.data.ieee_p7130_compliant ? 'Compliant' : 'Warning'}) | ISO/IEC 23837 (Certified)\n\n`;
+            out += `SUHU MIXING CHAMBER MILIKELVIN, KEBOCORAN TERMAL & WAKTU RELAKSASI QUBIT:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Suhu Ruang Pencampuran (Mixing Chamber): ${dossierRes.data.mixing_chamber_temp_mk} mK (Target Operasi < 12.0 mK) | Defisit Kenaikan: +${dossierRes.data.thermal_leak_deficit_mk.toFixed(1)} mK\n`;
+            out += `• Waktu Relaksasi Kuantum Qubit (T1): ${dossierRes.data.qubit_t1_micro_sec} µs (Batas Minimum Koherensi > 85.0 µs)\n`;
+            out += `• Waktu Dephasing Fase Kuantum (T2): ${dossierRes.data.qubit_t2_micro_sec} µs (Batas Minimum Stabilitas > 70.0 µs)\n`;
+            out += `• Status Termal Unit Pengenceran: ${evalRes.data.dilution_refrigerator_thermal_status}\n`;
+            out += `• Tingkat Stabilitas Koherensi Kuantum: ${evalRes.data.qubit_coherence_stability}\n\n`;
+            out += `OPTIMASI STILL HEATER, PEREDAMAN GETARAN AKTIF PIEZO & PENYESUAIAN RF ATTENUATOR:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Kuantum Cryostat: ${actRes.data.action_id}\n`;
+            out += `• Daya Pemanas Still (Still Heater): ${actRes.data.commanded_still_heater_power_milli_watts} mW (Memaksimalkan Laju Alir Distilasi Isotop 3He)\n`;
+            out += `• Peredaman Getaran Aktif Pulse Tube Neck: ${actRes.data.active_pulse_tube_vibration_cancellation_pct}% (Menghilangkan Jitter Mikron ke Qubit)\n`;
+            out += `• Penyesuaian Atenuasi Saluran Coaxial RF: ${actRes.data.microwave_attenuator_trim_db} dB (Menangkal Infiltrasi Foton Blackbody Termal)\n`;
+            out += `• Estimasi Kerugian QPU & Komputasi Terhindar: $${actRes.data.avoided_quantum_decoherence_loss_usd.toLocaleString()} USD (Mencegah Kerusakan Chip Qubit dan Kegagalan Batch Kalkulasi)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pemanasan still 3.85 mW meningkatkan laju penguapan parsial 3He dan memulihkan pendinginan fase hingga suhu mixing chamber turun kembali ke 9.8 mK.</li>
+                <li>Peredaman piezo 94.5% menstabilkan dephasing T2 dan mengembalikan fidelitas gerbang logika kuantum (quantum gate fidelity) di atas 99.9%.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Cryo Quantum sentinel: ' + err.message;
+    }
+}
+
+async function triggerAmmoniaMarine() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memeriksa uap amonia beracun di ruang mesin, kavitasi katup injektor bahan bakar, dan slip N2O...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const engineID = "ENGINE-MAN-B&W-AMMONIA-2S-01";
+        await api('/maritime/ammonia/ingest-engine-telemetry', 'POST', {
+            engine_id: engineID,
+            vessel_imo_number: "IMO-9988123-GREEN-OCEAN",
+            machinery_space_ammonia_vapor_ppm: 112.5,
+            fuel_rail_injection_pressure_bar: 305.0,
+            rail_pressure_ripple_bar: 38.5,
+            exhaust_n2o_slip_ppm: 52.0,
+            double_wall_annulus_pressure_bar: 3.2,
+            copper_alloy_corrosion_potential_mv: -485.0,
+            engine_output_kw: 48000.0
+        });
+
+        const evalRes = await api('/maritime/ammonia/evaluate-toxicity-and-cavitation', 'POST', { engine_id: engineID });
+        const actRes = await api('/maritime/ammonia/trigger-double-block-and-water-wash', 'POST', { engine_id: engineID });
+        const dossierRes = await api(`/maritime/ammonia/ammonia-safety-dossier/${engineID}`, 'GET');
+
+        if (badge) badge.textContent = `⚓ Ammonia Marine: Vapor ${dossierRes.data.machinery_vapor_ppm} ppm | Status: ${evalRes.data.toxic_vapor_envelope_status}`;
+        if (answerEl) {
+            let out = `⚓ CLEAN MARITIME AMMONIA (NH3) DUAL-FUEL ENGINE TOXIC VAPOR & CAVITATION SENTINEL (IMO IGF CODE & MARPOL ANNEX VI):\n`;
+            out += `Mesin Propulsi Utama Maritim: ${engineID} | Nomor IMO Kapal: ${dossierRes.data.vessel_imo_number}\n`;
+            out += `Kepatuhan Regulasi Keselamatan Pelayaran: IMO IGF Code (${dossierRes.data.imo_igf_code_compliant ? 'Compliant' : 'Warning'}) | MARPOL Annex VI (${dossierRes.data.marpol_annex_vi_certified ? 'Certified' : 'Review'})\n\n`;
+            out += `KONSENTRASI UAP AMONIA RUANG MESIN, TEKANAN COMMON RAIL & EMISI N2O SLIP:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Konsentrasi Uap Amonia di Ruang Mesin: ${dossierRes.data.machinery_vapor_ppm} ppm (Ambang Batas Bahaya Toksik Fatal Kru > 100.0 ppm)\n`;
+            out += `• Tekanan Injeksi Common Rail Amonia Cair: ${dossierRes.data.rail_pressure_bar} bar\n`;
+            out += `• Riak Fluktuasi Tekanan Rail (Kavitasi Injektor): ${dossierRes.data.rail_ripple_bar} bar (Batas Kavitasi Mikro-Gelembung > 35.0 bar)\n`;
+            out += `• Emisi Gas Buang Dinitrogen Monoksida (N2O Slip): ${dossierRes.data.exhaust_n2o_slip_ppm} ppm (Batas Kepatuhan Lingkungan IMO < 45.0 ppm)\n`;
+            out += `• Status Bahaya Amplop Uap Beracun: ${evalRes.data.toxic_vapor_envelope_status}\n`;
+            out += `• Risiko Kavitasi Katup Injektor Amonia: ${evalRes.data.fuel_injector_cavitation_risk}\n`;
+            out += `• Bahaya Slip Gas Rumah Kaca N2O: ${evalRes.data.n2o_greenhouse_slip_hazard}\n\n`;
+            out += `DOUBLE-BLOCK & BLEED CEPAT, DELUGE WATER-WASH SCRUBBING & DOSING UREA SCR:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Darurat Maritim: ${actRes.data.action_id}\n`;
+            out += `• Waktu Respon Katup Isolasi Double-Block & Bleed: ${actRes.data.commanded_double_block_bleed_response_ms} ms (Pemutusan Aliran Bahan Bakar Amonia Seketika)\n`;
+            out += `• Laju Semprot Tirai Air Asam Penyerap Uap Amonia: ${actRes.data.water_wash_deluge_flow_rate_liters_per_min} L/menit (Melarutkan Uap Amonia dari Udara)\n`;
+            out += `• Dosing Reagen Urea pada Reaktor SCR: ${actRes.data.urea_scr_dosing_rate_grams_per_kwh} g/kWh (Mengeliminasi Slip N2O Menjadi N2 Murni)\n`;
+            out += `• Estimasi Kerugian Bencana Maritim Terhindar: $${actRes.data.avoided_marine_disaster_loss_usd.toLocaleString()} USD (Mencegah Keracunan Fatal Kru, Kebakaran, dan Kerusakan Mesin)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penutupan double-block and bleed dalam 48 milidetik mengisolasi tangki amonia dan menyiram pipa dengan nitrogen bertekanan.</li>
+                <li>Tirai air deluge 450 L/menit menyerap uap amonia bebas menjadi larutan amonium stabil yang dialirkan ke tangki pembuangan netralisasi.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Ammonia Marine sentinel: ' + err.message;
+    }
+}
+
+async function triggerLunarSintering() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi peleburan gelombang mikro regolit bulan, kedalaman vitrifikasi, dan daya tahan semburan jet roket...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const roverID = "ROVER-SINTERING-LUNAR-PAD-01";
+        await api('/space/lunar-sintering/ingest-sintering-telemetry', 'POST', {
+            sintering_rover_id: roverID,
+            lunar_site_coordinates: "SHACKLETON_CRATER_RIM_89.9S",
+            vitrification_depth_mm: 135.0,
+            microwave_frequency_ghz: 2.45,
+            regolith_melt_temp_c: 1225.0,
+            thermal_shear_stress_mpa: 48.5,
+            sintered_matrix_density_grams_per_cm3: 2.78,
+            ilmenite_fraction_pct: 12.5,
+            plume_surface_blast_velocity_m_per_sec: 1450.0
+        });
+
+        const evalRes = await api('/space/lunar-sintering/evaluate-vitrification-and-blast-resistance', 'POST', { rover_id: roverID });
+        const actRes = await api('/space/lunar-sintering/trigger-microwave-modulation-and-flux-dosing', 'POST', { rover_id: roverID });
+        const dossierRes = await api(`/space/lunar-sintering/lunar-pad-quality-dossier/${roverID}`, 'GET');
+
+        if (badge) badge.textContent = `🌕 Lunar Pad: Depth ${dossierRes.data.vitrification_depth_mm} mm | Integrity: ${evalRes.data.vitrification_structural_integrity}`;
+        if (answerEl) {
+            let out = `🌕 LUNAR SURFACE REGOLITH MICROWAVE SINTERING & LANDING PAD BLAST SENTINEL (NASA SP-8000 & ISO 14620):\n`;
+            out += `Rover Sintering Aditif Otonom: ${roverID} | Koordinat Situs Bulan: ${dossierRes.data.lunar_site_coordinates}\n`;
+            out += `Standar Sertifikasi Konstruksi Antariksa: NASA SP-8000 (${dossierRes.data.nasa_sp8000_compliant ? 'Compliant' : 'Warning'}) | ISO 14620 (${dossierRes.data.iso_14620_certified ? 'Certified' : 'Review'})\n\n`;
+            out += `KEDALAMAN VITRIFIKASI, TEGANGAN GESER TERMAL & KETAHANAN EROSI BLAST ROKET:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Kedalaman Peleburan Vitrifikasi Regolit: ${dossierRes.data.vitrification_depth_mm} mm (Target Ketebalan Monolitik > 150.0 mm)\n`;
+            out += `• Temperatur Peleburan Dielektrik Gelombang Mikro: ${dossierRes.data.regolith_melt_temp_c}°C (Rentang Nominal 1180 - 1240°C)\n`;
+            out += `• Tegangan Geser Termal Kristalin: ${dossierRes.data.thermal_shear_stress_mpa} MPa (Batas Pecah Spallation > 45.0 MPa)\n`;
+            out += `• Densitas Massa Jenis Matriks Sinter Padat: ${dossierRes.data.sintered_density_g_cm3} g/cm³ (Target Kekuatan Struktur > 2.85 g/cm³)\n`;
+            out += `• Status Integritas Struktural Vitrifikasi: ${evalRes.data.vitrification_structural_integrity}\n`;
+            out += `• Tingkat Ketahanan Erosi Semburan Jet Roket: ${evalRes.data.plume_blast_erosion_resistance}\n\n`;
+            out += `MODULASI DAYA MAGNETRON MICROWAVE, FLUX BASALT & PEMINDAIAN ULTRASONIK IN-SITU:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Fabrikasi Infrastruktur Bulan: ${actRes.data.action_id}\n`;
+            out += `• Modulasi Daya Susunan Phased-Array Magnetron: ${actRes.data.commanded_microwave_array_power_kw} kW (Mendiversifikasi Kedalaman Penetrasi Energi)\n`;
+            out += `• Dosis Deposisi Flux Basalt Titano-Magnetit In-Situ: ${actRes.data.in_situ_basalt_flux_dosing_kg_per_m2} kg/m² (Menutup Fissur Retakan Mikro Permukaan)\n`;
+            out += `• Verifikasi Pulsa Ultrasonik Non-Destruktif: ${actRes.data.ultrasonic_pulse_verification_hz} Hz (Memastikan Matriks Bebas Ruang Hampa)\n`;
+            out += `• Estimasi Kerugian Infrastruktur Pangkalan Terhindar: $${actRes.data.avoided_lunar_infrastructure_loss_usd.toLocaleString()} USD (Mencegah Hancurnya Modul Pendarat dan Habitat Pangkalan)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Peningkatan daya microwave menjadi 65.0 kW memperdalam lapisan vitrifikasi hingga 180 mm dan menyatukan batuan regolit menjadi monolitik padat.</li>
+                <li>Deposisi flux basalt 14.5 kg/m2 mengikat partikel berbutir halus dan mencegah erosi partikel supersonik berkecepatan 1450 m/s saat pendaratan roket.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses Lunar Regolith Sintering sentinel: ' + err.message;
+    }
+}
+
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

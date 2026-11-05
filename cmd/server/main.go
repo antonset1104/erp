@@ -88,6 +88,11 @@ import (
 	coremicroreactor "erp-golang/internal/core/microreactor_heatpipe"
 	coremrnacapping "erp-golang/internal/core/mrna_capping"
 	coresubseacompressor "erp-golang/internal/core/subsea_compressor"
+	coreairbornehts "erp-golang/internal/core/airborne_hts"
+	corehdristeel "erp-golang/internal/core/hdri_steel"
+	corecryoquantum "erp-golang/internal/core/cryo_quantum"
+	coreammoniamarine "erp-golang/internal/core/ammonia_marine"
+	corelunarsintering "erp-golang/internal/core/lunar_sintering"
 	corescramjet "erp-golang/internal/core/scramjet"
 	coreseabed "erp-golang/internal/core/seabed"
 	coresemiconductor "erp-golang/internal/core/semiconductor"
@@ -364,7 +369,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.78.0",
+			"version":    "1.79.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -569,6 +574,11 @@ func main() {
 		coremicroreactor.RegisterMicroreactorRoutes(apiV1)
 		coremrnacapping.RegisterMRNARoutes(apiV1)
 		coresubseacompressor.RegisterSubseaCompressorRoutes(apiV1)
+		coreairbornehts.RegisterAirborneHTSRoutes(apiV1)
+		corehdristeel.RegisterHDRIShaftRoutes(apiV1)
+		corecryoquantum.RegisterCryoQuantumRoutes(apiV1)
+		coreammoniamarine.RegisterAmmoniaMarineRoutes(apiV1)
+		corelunarsintering.RegisterLunarSinteringRoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend

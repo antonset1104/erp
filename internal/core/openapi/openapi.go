@@ -2047,6 +2047,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/aviation/airborne-hts/evaluate-quench-and-thermal-runaway": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Aviation Megawatt Airborne Superconducting (HTS) Stator Quench Sentinel (FAA 14 CFR Part 33 & SAE AS6129)",
+					"description": "Monitors REBCO superconductor stator temperatures, voltage tap micro-spikes, supercritical cryo-coolant flow, and Lorentz strain for hybrid-electric propulsion.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Superconducting state, localized quench hazard, cryo margin K, fast energy dump resistor command, and battery bus failover"},
+					},
+				},
+			},
+			"/api/v1/steel/hdri-shaft/evaluate-sticking-and-fluidization": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Green Steelmaking 100% Hydrogen DRI Shaft Furnace Sticking & Fluidization Sentinel (ISO 14044 & DIN EN 746-2)",
+					"description": "Monitors hydrogen bustle gas utilization, reduction bed temperature, differential pressure drop, and pellet sticking index to prevent shaft freeze.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Shaft bed fluidization status, pellet clustering hazard, sticking margin %, MgO anti-sticking dope injection rate, and pneumatic bed pulsation"},
+					},
+				},
+			},
+			"/api/v1/quantum/cryo/evaluate-heatleak-and-decoherence": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Quantum Computing 10 mK Dilution Refrigerator Heat-Leak & Superconducting Qubit Decoherence Sentinel (IEEE P7130 & ISO/IEC 23837)",
+					"description": "Monitors 10 mK mixing chamber temperatures, He3-He4 distillation still flow, cryo-RF coaxial thermal attenuation, and qubit coherence relaxation time T1.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Dilution unit thermal status, qubit coherence stability, still heater power mW, and pulse-tube vibration cancellation %"},
+					},
+				},
+			},
+			"/api/v1/maritime/ammonia/evaluate-toxicity-and-cavitation": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Clean Maritime Ammonia Dual-Fuel Engine Toxic Vapor Envelope & Fuel Valve Cavitation Sentinel (IMO IGF Code & MARPOL Annex VI)",
+					"description": "Monitors machinery space ammonia vapor concentration, high-pressure fuel rail pressure ripple, exhaust N2O slip, and double-wall annulus pressure.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Toxic vapor envelope status, fuel injector cavitation risk, N2O greenhouse slip hazard, double-block and bleed response ms, and water-wash deluge flow"},
+					},
+				},
+			},
+			"/api/v1/space/lunar-sintering/evaluate-vitrification-and-blast-resistance": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Lunar Surface Regolith Microwave Sintering & Landing Pad Blast Sentinel (NASA SP-8000 & ISO 14620)",
+					"description": "Monitors microwave 2.45 GHz vitrification depth, regolith dielectric melt temperature, thermal shear stress, and rocket plume blast erosion resistance.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Vitrification structural integrity, plume blast erosion resistance, microwave array power kW, and in-situ basalt flux additive dosing"},
+					},
+				},
+			},
 		},
 	}
 }
