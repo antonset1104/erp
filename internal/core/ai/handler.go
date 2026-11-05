@@ -517,6 +517,75 @@ func (h *Handler) DetectLeadTimeAnomalies(c *gin.Context) {
 	c.JSON(http.StatusOK, h.client.DetectLeadTimeAnomalies(h.db, &req, companyID))
 }
 
+// ============================================================================
+// AUTONOMOUS AGENTIC MULTI-AGENT SWARM ORCHESTRATOR HANDLERS
+// ============================================================================
+
+func (h *Handler) GetSwarmStatus(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	resp := GetAgentSwarmManager().GetSwarmOverview(h.db, companyID)
+	c.JSON(http.StatusOK, resp)
+}
+
+func (h *Handler) RunSwarmCycle(c *gin.Context) {
+	userID, companyID, _ := middleware.GetUserContext(c)
+	report, err := GetAgentSwarmManager().RunSwarmCycle(h.db, companyID, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, report)
+}
+
+func (h *Handler) ApproveSwarmAction(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	actionID := c.Param("id")
+	var req struct {
+		Actor string `json:"actor"`
+	}
+	_ = c.ShouldBindJSON(&req)
+	err := GetAgentSwarmManager().ApproveAction(h.db, companyID, actionID, req.Actor)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Action approved successfully", "action_id": actionID})
+}
+
+func (h *Handler) RejectSwarmAction(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	actionID := c.Param("id")
+	var req struct {
+		Reason string `json:"reason"`
+		Actor  string `json:"actor"`
+	}
+	_ = c.ShouldBindJSON(&req)
+	err := GetAgentSwarmManager().RejectAction(h.db, companyID, actionID, req.Reason, req.Actor)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Action rejected", "action_id": actionID})
+}
+
+func (h *Handler) UpdateAgentAutonomy(c *gin.Context) {
+	role := c.Param("role")
+	var req struct {
+		AutonomyLevel string  `json:"autonomy_level"`
+		AutoLimit     float64 `json:"auto_limit"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	err := GetAgentSwarmManager().UpdateAgentAutonomy(SwarmAgentRole(role), req.AutonomyLevel, req.AutoLimit)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Agent autonomy settings updated", "role": role})
+}
+
 // RegisterRootProtocolRoutes registers public protocol discovery endpoints like /.well-known/agent.json and /mcp
 func RegisterRootProtocolRoutes(r *gin.Engine, h *Handler) {
 	r.GET("/.well-known/agent.json", h.GetA2AAgentCard)
@@ -591,6 +660,13 @@ func RegisterAIRoutes(router *gin.RouterGroup, authMiddleware gin.HandlerFunc, h
 			authed.POST("/ask", h.AskERP)
 			authed.POST("/approval-risk", h.ApprovalRisk)
 			authed.POST("/receipt-ocr", h.ReceiptOCR)
+
+			// Autonomous Agentic Multi-Agent Swarm Orchestrator
+			authed.GET("/swarm/status", h.GetSwarmStatus)
+			authed.POST("/swarm/run", h.RunSwarmCycle)
+			authed.POST("/swarm/actions/:id/approve", h.ApproveSwarmAction)
+			authed.POST("/swarm/actions/:id/reject", h.RejectSwarmAction)
+			authed.POST("/swarm/agents/:role/autonomy", h.UpdateAgentAutonomy)
 		}
 	}
 }

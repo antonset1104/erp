@@ -260,6 +260,10 @@
                     <span class="nav-icon">🔌</span>
                     <span class="nav-label">Integration Hub &amp; API</span>
                 </button>
+                <button class="nav-item" data-tab="agentic-swarm">
+                    <span class="nav-icon">🤖</span>
+                    <span class="nav-label">Agentic AI Swarm</span>
+                </button>
             </nav>
 
             <div class="user-profile">
@@ -3270,6 +3274,160 @@
                                     <input type="text" id="reqChatterInput" class="form-control" placeholder="Tulis catatan persetujuan atau justifikasi pengadaan..." style="font-size: 0.85rem;" onkeypress="handleReqChatterKey(event)">
                                     <button class="btn btn-secondary" onclick="postReqChatterMessage()" style="white-space: nowrap; font-size: 0.85rem;">Kirim Catatan</button>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- ===================================================== -->
+                <!-- SECTION: AUTONOMOUS AGENTIC MULTI-AGENT SWARM (MODUL 51) -->
+                <!-- ===================================================== -->
+                <section id="tab-agentic-swarm" class="tab-view">
+                    <div class="content-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                        <div>
+                            <h2 style="margin: 0; font-size: 1.6rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+                                <span>🤖</span> Autonomous Agentic Multi-Agent Network (Agentic ERP Orchestra)
+                            </h2>
+                            <p style="margin: 0.3rem 0 0 0; color: var(--text-muted); font-size: 0.95rem;">
+                                Jaringan Kolaboratif Multi-Agen Otonom: Pengadaan Proaktif, 3-Way Matching Otomatis, Prediksi Arus Kas &amp; Tata Kelola Human-in-the-Loop (HITL)
+                            </p>
+                        </div>
+                        <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+                            <button class="btn btn-primary" onclick="runAgentSwarmCycle()" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; border: none; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);">
+                                <span>🚀</span> Jalankan Siklus Swarm Otonom
+                            </button>
+                            <button class="btn btn-secondary" onclick="openModalSwarmConfig()">
+                                <span>⚙️</span> Konfigurasi Autonomi
+                            </button>
+                            <button class="btn btn-secondary" onclick="loadAgentSwarmData()">
+                                <span>🔄</span> Segarkan Status
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 6 KPI METRICS GRID -->
+                    <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                        <div class="metric-card" style="background: var(--surface); border-radius: 10px; padding: 1.2rem; border-left: 4px solid #6366f1; box-shadow: var(--shadow-sm);">
+                            <div class="metric-label" style="font-size: 0.82rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Total Tugas Otonom</div>
+                            <div class="metric-value" id="swarmStatTasksCompleted" style="font-size: 1.8rem; font-weight: 700; color: #6366f1; margin-top: 0.3rem;">0</div>
+                            <div class="metric-sub" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Selesai Tanpa Intervensi</div>
+                        </div>
+                        <div class="metric-card" style="background: var(--surface); border-radius: 10px; padding: 1.2rem; border-left: 4px solid #f59e0b; box-shadow: var(--shadow-sm);">
+                            <div class="metric-label" style="font-size: 0.82rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Otorisasi HITL Pending</div>
+                            <div class="metric-value" id="swarmStatPendingHITL" style="font-size: 1.8rem; font-weight: 700; color: #f59e0b; margin-top: 0.3rem;">0</div>
+                            <div class="metric-sub" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Menunggu Keputusan Manusia</div>
+                        </div>
+                        <div class="metric-card" style="background: var(--surface); border-radius: 10px; padding: 1.2rem; border-left: 4px solid #10b981; box-shadow: var(--shadow-sm);">
+                            <div class="metric-label" style="font-size: 0.82rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Jam Kerja Dihemat</div>
+                            <div class="metric-value" id="swarmStatHoursSaved" style="font-size: 1.8rem; font-weight: 700; color: #10b981; margin-top: 0.3rem;">0.0h</div>
+                            <div class="metric-sub" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Efisiensi Lintas Divisi</div>
+                        </div>
+                        <div class="metric-card" style="background: var(--surface); border-radius: 10px; padding: 1.2rem; border-left: 4px solid #06b6d4; box-shadow: var(--shadow-sm);">
+                            <div class="metric-label" style="font-size: 0.82rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Biaya Diamankan (IDR)</div>
+                            <div class="metric-value" id="swarmStatCostSafeguarded" style="font-size: 1.8rem; font-weight: 700; color: #06b6d4; margin-top: 0.3rem;">Rp 0</div>
+                            <div class="metric-sub" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Variansi &amp; Diskon Dikejar</div>
+                        </div>
+                        <div class="metric-card" style="background: var(--surface); border-radius: 10px; padding: 1.2rem; border-left: 4px solid #8b5cf6; box-shadow: var(--shadow-sm);">
+                            <div class="metric-label" style="font-size: 0.82rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Konsensus &amp; Kesehatan</div>
+                            <div class="metric-value" id="swarmStatHealthScore" style="font-size: 1.8rem; font-weight: 700; color: #8b5cf6; margin-top: 0.3rem;">99.4%</div>
+                            <div class="metric-sub" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Inter-Agent Agreement</div>
+                        </div>
+                        <div class="metric-card" style="background: var(--surface); border-radius: 10px; padding: 1.2rem; border-left: 4px solid #ec4899; box-shadow: var(--shadow-sm);">
+                            <div class="metric-label" style="font-size: 0.82rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Agen Aktif Bertugas</div>
+                            <div class="metric-value" id="swarmStatActiveAgents" style="font-size: 1.8rem; font-weight: 700; color: #ec4899; margin-top: 0.3rem;">5 / 5</div>
+                            <div class="metric-sub" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Multi-Agent Swarm Ready</div>
+                        </div>
+                    </div>
+
+                    <!-- SUBTABS NAVIGATION -->
+                    <div class="subtabs-container" style="display: flex; gap: 0.5rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                        <button class="btn btn-sm btn-outline active swarm-subtab-btn" data-target="swarmSubtabAgents" onclick="switchSwarmSubtab('swarmSubtabAgents')">
+                            👥 Skuad Agen Swarm
+                        </button>
+                        <button class="btn btn-sm btn-outline swarm-subtab-btn" data-target="swarmSubtabHITL" onclick="switchSwarmSubtab('swarmSubtabHITL')">
+                            ⏳ Otorisasi Manusia (HITL Actions)
+                        </button>
+                        <button class="btn btn-sm btn-outline swarm-subtab-btn" data-target="swarmSubtabDialogue" onclick="switchSwarmSubtab('swarmSubtabDialogue')">
+                            📜 Live Stream Dialog Antar-Agen
+                        </button>
+                        <button class="btn btn-sm btn-outline swarm-subtab-btn" data-target="swarmSubtabActionLogs" onclick="switchSwarmSubtab('swarmSubtabActionLogs')">
+                            📋 Log Audit Aksi Otonom
+                        </button>
+                    </div>
+
+                    <!-- SUBTAB 1: SQUAD AGENTS GRID -->
+                    <div id="swarmSubtabAgents" class="swarm-subtab-pane">
+                        <div id="swarmAgentsGridContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.2rem;">
+                            <div class="text-center text-muted" style="padding: 2rem;">Memuat daftar agen cerdas...</div>
+                        </div>
+                    </div>
+
+                    <!-- SUBTAB 2: HITL ACTIONS TABLE -->
+                    <div id="swarmSubtabHITL" class="swarm-subtab-pane" style="display: none;">
+                        <div class="card">
+                            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                <h3 class="card-title">Antrean Otorisasi Manusia (Human-in-the-Loop Action Approval)</h3>
+                                <button class="btn btn-sm btn-secondary" onclick="loadAgentSwarmData()">🔄 Segarkan Antrean</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Waktu &amp; ID</th>
+                                            <th>Agen Pengusul</th>
+                                            <th>Tindakan Bisnis</th>
+                                            <th>Kategori</th>
+                                            <th>Nilai Transaksi</th>
+                                            <th>Skor Risiko</th>
+                                            <th>Justifikasi AI</th>
+                                            <th>Keputusan Otorisasi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="swarmHITLTableBody">
+                                        <tr><td colspan="8" class="text-center text-muted">Tidak ada tindakan pending. Semua operasi berjalan otonom.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUBTAB 3: INTER-AGENT DIALOGUE -->
+                    <div id="swarmSubtabDialogue" class="swarm-subtab-pane" style="display: none;">
+                        <div class="card">
+                            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                <h3 class="card-title">Live Transcript Komunikasi &amp; Konsensus Antar-Agen (A2A Collaboration)</h3>
+                                <span class="badge badge-success">Live Swarm Active</span>
+                            </div>
+                            <div class="card-body" id="swarmDialogueContainer" style="padding: 1.2rem; max-height: 480px; overflow-y: auto; background: var(--bg-main); display: flex; flex-direction: column; gap: 0.8rem;">
+                                <div class="text-center text-muted">Memuat rekaman komunikasi swarm...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUBTAB 4: ACTION LOGS -->
+                    <div id="swarmSubtabActionLogs" class="swarm-subtab-pane" style="display: none;">
+                        <div class="card">
+                            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                <h3 class="card-title">Jejak Audit Seluruh Aksi Otonom &amp; Keputusan Bisnis Terverifikasi</h3>
+                                <button class="btn btn-sm btn-secondary" onclick="loadAgentSwarmData()">🔄 Segarkan Log</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID Aksi</th>
+                                            <th>Agen</th>
+                                            <th>Judul Operasi</th>
+                                            <th>Kategori</th>
+                                            <th>Nominal</th>
+                                            <th>Status</th>
+                                            <th>Diverifikasi Oleh</th>
+                                            <th>Waktu Selesai</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="swarmActionLogsTableBody">
+                                        <tr><td colspan="8" class="text-center text-muted">Memuat riwayat log aksi...</td></tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -16314,5 +16472,71 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+
+    <!-- Modal: Konfigurasi Autonomi Agen Swarm -->
+    <div id="modalSwarmConfig" class="modal-overlay">
+        <div class="modal-card" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title">⚙️ Konfigurasi Autonomi &amp; Ambang Batas Risiko Agen</h3>
+                <button class="modal-close" onclick="closeModal('modalSwarmConfig')">✕</button>
+            </div>
+            <form id="formSwarmConfig" onsubmit="handleSaveSwarmConfig(event)">
+                <div class="modal-body">
+                    <div class="form-group mb-3">
+                        <label class="form-label">Pilih Agen Cerdas *</label>
+                        <select class="form-control" id="swarmConfigRoleSelect" onchange="onSwarmConfigAgentChange()">
+                            <option value="procurement_agent">Atlas-Procure (Pengadaan &amp; PO Otonom)</option>
+                            <option value="finance_sentinel">Themis-Finance (3-Way Matching &amp; Audit)</option>
+                            <option value="cashflow_optimizer">Plutus-Cash (Arus Kas &amp; Penagihan)</option>
+                            <option value="inventory_fulfillment">Hermes-WMS (Gudang &amp; Reorder)</option>
+                            <option value="swarm_orchestrator">Apex-Orchestrator (Direktur Orkestrasi)</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label">Tingkat Autonomi (Autonomy Level) *</label>
+                        <select class="form-control" id="swarmConfigAutonomyLevel">
+                            <option value="full_autonomous">Full Autonomous (Eksekusi Mandiri Tanpa Tunggu Manusia)</option>
+                            <option value="supervised_hitl">Supervised HITL (Otonom di Bawah Batas, Minta Izin Jika di Atas Batas)</option>
+                            <option value="assistive">Assistive Only (Hanya Memberikan Saran / Draf)</option>
+                            <option value="paused">Paused (Nonaktifkan Sementara)</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label">Batas Maksimal Otonom (Auto-Approve Limit IDR) *</label>
+                        <input type="number" step="100000" class="form-control" id="swarmConfigAutoLimit" value="15000000">
+                        <small class="text-muted">Aksi di atas nominal ini akan diparkir di tab Otorisasi HITL untuk persetujuan manual.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modalSwarmConfig')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Parameter Autonomi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Tolak Tindakan HITL dengan Alasan -->
+    <div id="modalRejectHITLAction" class="modal-overlay">
+        <div class="modal-card" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 class="modal-title">❌ Tolak Usulan Aksi Agen Swarm</h3>
+                <button class="modal-close" onclick="closeModal('modalRejectHITLAction')">✕</button>
+            </div>
+            <form id="formRejectHITLAction" onsubmit="handleConfirmRejectHITL(event)">
+                <input type="hidden" id="swarmRejectActionId">
+                <div class="modal-body">
+                    <p id="swarmRejectActionTitle" style="font-size: 0.9rem; font-weight: 600; color: #ef4444; margin-bottom: 0.8rem;"></p>
+                    <div class="form-group mb-3">
+                        <label class="form-label">Alasan Penolakan / Feedback untuk Agen *</label>
+                        <textarea class="form-control" id="swarmRejectReasonInput" rows="3" placeholder="Contoh: Tunda pengadaan ke minggu depan setelah audit inventaris selesai." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modalRejectHITLAction')">Batal</button>
+                    <button type="submit" class="btn btn-danger">Konfirmasi Penolakan</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

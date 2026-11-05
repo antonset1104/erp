@@ -286,7 +286,8 @@ function updateHeaderTitles(tab) {
         'customs-bonded': { title: 'Kawasan Berikat & Kepabeanan DJBC (CEISA 4.0)', sub: 'IT Inventory Kawasan Berikat, dokumen BC 2.3/2.5/2.7/4.0/4.1, subkontrak & laporan mutasi DJBC' },
         'lowcode-studio': { title: 'Universal Low-Code Studio & Dynamic Schema Engine', sub: 'Rancang model bisnis kustom, kolom dinamis (EAV) & ekstensi entitas tanpa menulis kode Golang' },
         'workflow-engine': { title: 'BPMN 2.0 Dynamic Workflow & State Machine Engine', sub: 'Orkestrator alur persetujuan bisnis, conditional gateway, SLA tracker & AI Workflow Designer' },
-        'integration-hub': { title: 'Universal Integration Hub & Open RPC Gateway', sub: 'Manajemen M2M API Keys, konektor Shopee/Tokopedia/Midtrans/SAP, Open RPC & Batch ETL' }
+        'integration-hub': { title: 'Universal Integration Hub & Open RPC Gateway', sub: 'Manajemen M2M API Keys, konektor Shopee/Tokopedia/Midtrans/SAP, Open RPC & Batch ETL' },
+        'agentic-swarm': { title: 'Agentic AI Swarm & Autonomous Orchestrator', sub: 'Multi-Agent Network otonom untuk pengadaan cerdas, 3-way matching, audit likuiditas & human-in-the-loop governance' }
     };
     const t = titleMap[tab] || titleMap.dashboard;
     document.getElementById('pageTitle').textContent = t.title;
@@ -345,6 +346,7 @@ function loadCurrentTab() {
         case 'lowcode-studio': loadLowCodeStudioData(); break;
         case 'workflow-engine': loadWorkflowEngineData(); break;
         case 'integration-hub': loadIntegrationHubData(); break;
+        case 'agentic-swarm': loadAgentSwarmData(); break;
     }
 }
 
@@ -34999,4 +35001,424 @@ function openCustomerPortalSimulatorModal() {
 
 function openAICustomerHealthModal() {
     return openModalAICustomerHealth();
+}
+
+
+// =========================================================================
+// MODUL 51: AUTONOMOUS AGENTIC MULTI-AGENT SWARM (ORCHESTRA & HITL ENGINE)
+// =========================================================================
+let cachedSwarmAgents = [];
+let currentSwarmSubtab = 'swarmSubtabAgents';
+
+function switchSwarmSubtab(targetId) {
+    currentSwarmSubtab = targetId;
+    const panes = document.querySelectorAll('.swarm-subtab-pane');
+    panes.forEach(p => { p.style.display = 'none'; });
+
+    const activePane = document.getElementById(targetId);
+    if (activePane) {
+        activePane.style.display = 'block';
+    }
+
+    const buttons = document.querySelectorAll('.swarm-subtab-btn');
+    buttons.forEach(btn => {
+        if (btn.getAttribute('data-target') === targetId) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+}
+
+async function loadAgentSwarmData() {
+    try {
+        const res = await api('/ai/swarm/status');
+        const data = (res && res.data) ? res.data : (res || {});
+        const metrics = data.metrics || {};
+        cachedSwarmAgents = data.agents || [];
+
+        // 1. Update KPI Cards
+        const elTasks = document.getElementById('swarmStatTasksCompleted');
+        if (elTasks) elTasks.textContent = (metrics.tasks_completed ?? 0).toLocaleString('id-ID');
+
+        const elHITL = document.getElementById('swarmStatPendingHITL');
+        if (elHITL) elHITL.textContent = (metrics.pending_hitl ?? 0).toLocaleString('id-ID');
+
+        const elHours = document.getElementById('swarmStatHoursSaved');
+        if (elHours) elHours.textContent = ((metrics.hours_saved ?? 0).toFixed(1)) + 'h';
+
+        const elCost = document.getElementById('swarmStatCostSafeguarded');
+        if (elCost) elCost.textContent = typeof formatCurrency === 'function' ? formatCurrency(metrics.cost_safeguarded ?? 0) : 'Rp ' + (metrics.cost_safeguarded ?? 0).toLocaleString('id-ID');
+
+        const elHealth = document.getElementById('swarmStatHealthScore');
+        if (elHealth) elHealth.textContent = ((metrics.health_score ?? 99.4).toFixed(1)) + '%';
+
+        const elActive = document.getElementById('swarmStatActiveAgents');
+        if (elActive) elActive.textContent = (metrics.active_agents ?? 5) + ' / ' + (metrics.total_agents ?? 5);
+
+        // 2. Render Subtabs
+        renderSwarmAgentsGrid(cachedSwarmAgents);
+        renderSwarmHITLTable(data.actions || []);
+        renderSwarmDialogue(data.dialogue || []);
+        renderSwarmActionLogs(data.actions || []);
+    } catch (err) {
+        console.error('Error loading Agentic Swarm data:', err);
+        if (typeof showToast === 'function') {
+            showToast('Gagal memuat status Swarm Otonom: ' + err.message, 'error');
+        }
+    }
+}
+
+function renderSwarmAgentsGrid(agents) {
+    const container = document.getElementById('swarmAgentsGridContainer');
+    if (!container) return;
+
+    if (!agents || agents.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted" style="grid-column: 1/-1; padding: 2rem;">Tidak ada agen aktif terdaftar.</div>';
+        return;
+    }
+
+    container.innerHTML = agents.map(ag => {
+        let autonomyBadgeClass = 'badge-primary';
+        let autonomyLabel = 'Full Autonomous';
+        if (ag.autonomy_level === 'supervised_hitl') {
+            autonomyBadgeClass = 'badge-warning';
+            autonomyLabel = 'Supervised HITL';
+        } else if (ag.autonomy_level === 'assistive') {
+            autonomyBadgeClass = 'badge-info';
+            autonomyLabel = 'Assistive Only';
+        } else if (ag.autonomy_level === 'paused') {
+            autonomyBadgeClass = 'badge-danger';
+            autonomyLabel = 'Paused';
+        }
+
+        const limitFmt = typeof formatCurrency === 'function' ? formatCurrency(ag.auto_approve_limit) : 'Rp ' + ag.auto_approve_limit.toLocaleString('id-ID');
+
+        return `
+            <div class="card" style="box-shadow: var(--shadow-sm); border-radius: 10px; border-top: 4px solid #6366f1; display: flex; flex-direction: column; justify-content: space-between;">
+                <div class="card-body" style="padding: 1.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <div style="font-size: 2rem; background: rgba(99, 102, 241, 0.1); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                                ${escapeHtml(ag.avatar || '🤖')}
+                            </div>
+                            <div>
+                                <h4 style="margin: 0; font-size: 1.1rem; font-weight: 700;">${escapeHtml(ag.name)}</h4>
+                                <div style="font-size: 0.8rem; color: var(--text-muted); font-family: monospace;">${escapeHtml(ag.role)}</div>
+                            </div>
+                        </div>
+                        <span class="badge ${autonomyBadgeClass}">${autonomyLabel}</span>
+                    </div>
+
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.45; margin-bottom: 1rem; min-height: 2.6rem;">
+                        ${escapeHtml(ag.description || '')}
+                    </p>
+
+                    <div style="background: var(--bg-main); border-radius: 6px; padding: 0.75rem; font-size: 0.82rem; margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem;">
+                            <span class="text-muted">Model Mesin AI:</span>
+                            <span style="font-weight: 600; font-family: monospace;">${escapeHtml(ag.model || 'Gemini 2.5 Flash')}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem;">
+                            <span class="text-muted">Batas Auto-Approve:</span>
+                            <span style="font-weight: 600; color: #10b981;">${limitFmt}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span class="text-muted">Tugas Diselesaikan:</span>
+                            <span style="font-weight: 600;">${(ag.tasks_executed ?? 0).toLocaleString('id-ID')} aksi</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer" style="padding: 0.75rem 1.25rem; background: var(--surface-hover); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.35rem;">
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block;"></span> Aktif Siap Mandat
+                    </span>
+                    <button class="btn btn-sm btn-outline" onclick="openModalSwarmConfigWithRole('${escapeHtml(ag.role)}')">
+                        ⚙️ Setelan
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderSwarmHITLTable(actions) {
+    const tbody = document.getElementById('swarmHITLTableBody');
+    if (!tbody) return;
+
+    const pendingActions = (actions || []).filter(a => a.status === 'pending_hitl');
+
+    if (pendingActions.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted" style="padding: 2rem;">🎉 Tidak ada tindakan pending. Semua operasi berada dalam batas otonom aman.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = pendingActions.map(act => {
+        let riskBadge = '<span class="badge badge-success">Rendah (' + (act.risk_score || 0.1).toFixed(2) + ')</span>';
+        if (act.risk_score >= 0.7) {
+            riskBadge = '<span class="badge badge-danger">Tinggi (' + act.risk_score.toFixed(2) + ')</span>';
+        } else if (act.risk_score >= 0.4) {
+            riskBadge = '<span class="badge badge-warning">Sedang (' + act.risk_score.toFixed(2) + ')</span>';
+        }
+
+        const dateStr = act.created_at ? new Date(act.created_at).toLocaleString('id-ID', { hour12: false }) : '-';
+        const amountFmt = typeof formatCurrency === 'function' ? formatCurrency(act.amount) : 'Rp ' + (act.amount || 0).toLocaleString('id-ID');
+
+        return `
+            <tr>
+                <td>
+                    <div style="font-weight: 700; color: #6366f1;">#${act.id}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">${dateStr}</div>
+                </td>
+                <td>
+                    <div style="font-weight: 600;">${escapeHtml(act.agent_name || 'Agent')}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHtml(act.agent_role || '')}</div>
+                </td>
+                <td>
+                    <div style="font-weight: 600; font-size: 0.9rem;">${escapeHtml(act.title)}</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); font-family: monospace;">Tipe: ${escapeHtml(act.action_type)}</div>
+                </td>
+                <td><span class="badge badge-secondary">${escapeHtml(act.category || 'General')}</span></td>
+                <td style="font-weight: 700; color: #0284c7;">${amountFmt}</td>
+                <td>${riskBadge}</td>
+                <td style="max-width: 280px; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.4;">
+                    ${escapeHtml(act.justification || '')}
+                </td>
+                <td>
+                    <div style="display: flex; gap: 0.4rem;">
+                        <button class="btn btn-sm btn-success" onclick="approveHITLAction(${act.id})" title="Setujui dan Eksekusi Langsung">
+                            ✓ Otorisasi
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="openRejectHITLModal(${act.id}, '${escapeHtml(act.title).replace(/'/g, "\\'")}')" title="Tolak Tindakan">
+                            ✕ Tolak
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderSwarmDialogue(dialogue) {
+    const container = document.getElementById('swarmDialogueContainer');
+    if (!container) return;
+
+    if (!dialogue || dialogue.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted" style="padding: 2rem;">Belum ada log komunikasi terkini antar-agen. Tekan "Jalankan Siklus Swarm Otonom" untuk memulai orkestrasi.</div>';
+        return;
+    }
+
+    container.innerHTML = dialogue.map(msg => {
+        let borderLeftColor = '#6366f1';
+        let bgTint = 'rgba(99, 102, 241, 0.05)';
+        if (msg.agent_role === 'Atlas-Procure' || msg.agent_role === 'procurement_agent') {
+            borderLeftColor = '#f59e0b';
+            bgTint = 'rgba(245, 158, 11, 0.05)';
+        } else if (msg.agent_role === 'Themis-Finance' || msg.agent_role === 'finance_sentinel') {
+            borderLeftColor = '#10b981';
+            bgTint = 'rgba(16, 185, 129, 0.05)';
+        } else if (msg.agent_role === 'Plutus-Cash' || msg.agent_role === 'cashflow_optimizer') {
+            borderLeftColor = '#06b6d4';
+            bgTint = 'rgba(6, 182, 212, 0.05)';
+        } else if (msg.agent_role === 'Hermes-WMS' || msg.agent_role === 'inventory_fulfillment') {
+            borderLeftColor = '#ec4899';
+            bgTint = 'rgba(236, 72, 153, 0.05)';
+        }
+
+        const dateStr = msg.timestamp ? new Date(msg.timestamp).toLocaleString('id-ID', { hour12: false }) : '';
+
+        return `
+            <div style="background: ${bgTint}; border-left: 4px solid ${borderLeftColor}; border-radius: 6px; padding: 0.85rem 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-weight: 700; color: var(--text-primary); font-size: 0.88rem;">${escapeHtml(msg.agent_name || msg.agent_role)}</span>
+                        <span class="badge badge-secondary" style="font-size: 0.7rem; font-family: monospace;">${escapeHtml(msg.action_type || 'A2A_COLLAB')}</span>
+                    </div>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">${dateStr}</span>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.45; white-space: pre-wrap;">${escapeHtml(msg.content)}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderSwarmActionLogs(actions) {
+    const tbody = document.getElementById('swarmActionLogsTableBody');
+    if (!tbody) return;
+
+    if (!actions || actions.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted" style="padding: 2rem;">Belum ada riwayat aksi otonom.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = actions.map(act => {
+        let statusBadge = '<span class="badge badge-primary">Auto Executed</span>';
+        if (act.status === 'approved') {
+            statusBadge = '<span class="badge badge-success">Approved (HITL)</span>';
+        } else if (act.status === 'rejected') {
+            statusBadge = '<span class="badge badge-danger">Rejected</span>';
+        } else if (act.status === 'pending_hitl') {
+            statusBadge = '<span class="badge badge-warning">Pending HITL</span>';
+        }
+
+        const executedDate = act.executed_at ? new Date(act.executed_at).toLocaleString('id-ID', { hour12: false }) : '-';
+        const amountFmt = typeof formatCurrency === 'function' ? formatCurrency(act.amount) : 'Rp ' + (act.amount || 0).toLocaleString('id-ID');
+
+        return `
+            <tr>
+                <td style="font-family: monospace; font-weight: 700;">#${act.id}</td>
+                <td>
+                    <div style="font-weight: 600;">${escapeHtml(act.agent_name || act.agent_role)}</div>
+                </td>
+                <td>
+                    <div style="font-weight: 600;">${escapeHtml(act.title)}</div>
+                    ${act.rejection_reason ? '<div style="font-size: 0.75rem; color: #ef4444;">Alasan Tolak: ' + escapeHtml(act.rejection_reason) + '</div>' : ''}
+                </td>
+                <td><span class="badge badge-secondary">${escapeHtml(act.category || 'General')}</span></td>
+                <td style="font-weight: 600;">${amountFmt}</td>
+                <td>${statusBadge}</td>
+                <td>${escapeHtml(act.verified_by || '-')}</td>
+                <td style="font-size: 0.8rem; color: var(--text-muted);">${executedDate}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function runAgentSwarmCycle() {
+    try {
+        if (typeof showToast === 'function') {
+            showToast('🚀 Memulai siklus orkestrasi Swarm Otonom...', 'info');
+        }
+        const res = await api('/ai/swarm/run', 'POST');
+        const report = (res && res.data) ? res.data : (res || {});
+
+        const msg = report.actions_proposed !== undefined
+            ? `Siklus Swarm selesai! ${report.actions_executed || 0} aksi dieksekusi otomatis, ${report.actions_proposed || 0} diusulkan.`
+            : 'Siklus Swarm Otonom berhasil dijalankan!';
+
+        if (typeof showToast === 'function') {
+            showToast(msg, 'success');
+        }
+        await loadAgentSwarmData();
+    } catch (err) {
+        console.error('Error running Swarm cycle:', err);
+        if (typeof showToast === 'function') {
+            showToast('Gagal menjalankan siklus Swarm: ' + err.message, 'error');
+        }
+    }
+}
+
+async function approveHITLAction(actionId) {
+    if (!confirm('Apakah Anda menyetujui dan ingin mengeksekusi tindakan bisnis #' + actionId + ' sekarang?')) {
+        return;
+    }
+    try {
+        await api(`/ai/swarm/actions/${actionId}/approve`, 'POST');
+        if (typeof showToast === 'function') {
+            showToast('Aksi #' + actionId + ' berhasil disetujui & dieksekusi oleh Swarm!', 'success');
+        }
+        await loadAgentSwarmData();
+    } catch (err) {
+        console.error('Error approving action:', err);
+        if (typeof showToast === 'function') {
+            showToast('Gagal menyetujui aksi: ' + err.message, 'error');
+        }
+    }
+}
+
+function openRejectHITLModal(actionId, actionTitle) {
+    const idEl = document.getElementById('swarmRejectActionId');
+    if (idEl) idEl.value = actionId;
+
+    const titleEl = document.getElementById('swarmRejectActionTitle');
+    if (titleEl) titleEl.textContent = 'Aksi #' + actionId + ': ' + actionTitle;
+
+    const reasonEl = document.getElementById('swarmRejectReasonInput');
+    if (reasonEl) reasonEl.value = '';
+
+    if (typeof openModal === 'function') {
+        openModal('modalRejectHITLAction');
+    }
+}
+
+async function handleConfirmRejectHITL(event) {
+    if (event) event.preventDefault();
+    const actionId = document.getElementById('swarmRejectActionId').value;
+    const reason = document.getElementById('swarmRejectReasonInput').value;
+
+    if (!reason || !reason.trim()) {
+        alert('Mohon masukkan alasan penolakan untuk pembelajaran agen.');
+        return;
+    }
+
+    try {
+        await api(`/ai/swarm/actions/${actionId}/reject`, 'POST', { reason: reason.trim() });
+        if (typeof closeModal === 'function') {
+            closeModal('modalRejectHITLAction');
+        }
+        if (typeof showToast === 'function') {
+            showToast('Aksi #' + actionId + ' berhasil ditolak dengan catatan feedback.', 'warning');
+        }
+        await loadAgentSwarmData();
+    } catch (err) {
+        console.error('Error rejecting action:', err);
+        if (typeof showToast === 'function') {
+            showToast('Gagal menolak aksi: ' + err.message, 'error');
+        }
+    }
+}
+
+function openModalSwarmConfig() {
+    onSwarmConfigAgentChange();
+    if (typeof openModal === 'function') {
+        openModal('modalSwarmConfig');
+    }
+}
+
+function openModalSwarmConfigWithRole(role) {
+    const sel = document.getElementById('swarmConfigRoleSelect');
+    if (sel) sel.value = role;
+    openModalSwarmConfig();
+}
+
+function onSwarmConfigAgentChange() {
+    const sel = document.getElementById('swarmConfigRoleSelect');
+    if (!sel) return;
+    const role = sel.value;
+
+    const agent = (cachedSwarmAgents || []).find(a => a.role === role);
+    if (agent) {
+        const lvl = document.getElementById('swarmConfigAutonomyLevel');
+        if (lvl) lvl.value = agent.autonomy_level || 'supervised_hitl';
+
+        const limit = document.getElementById('swarmConfigAutoLimit');
+        if (limit) limit.value = agent.auto_approve_limit ?? 15000000;
+    }
+}
+
+async function handleSaveSwarmConfig(event) {
+    if (event) event.preventDefault();
+    const role = document.getElementById('swarmConfigRoleSelect').value;
+    const autonomyLevel = document.getElementById('swarmConfigAutonomyLevel').value;
+    const autoLimit = parseFloat(document.getElementById('swarmConfigAutoLimit').value) || 0;
+
+    try {
+        await api(`/ai/swarm/agents/${role}/autonomy`, 'POST', {
+            autonomy_level: autonomyLevel,
+            auto_approve_limit: autoLimit
+        });
+        if (typeof closeModal === 'function') {
+            closeModal('modalSwarmConfig');
+        }
+        if (typeof showToast === 'function') {
+            showToast('Parameter autonomi agen ' + role + ' berhasil disimpan!', 'success');
+        }
+        await loadAgentSwarmData();
+    } catch (err) {
+        console.error('Error updating agent autonomy:', err);
+        if (typeof showToast === 'function') {
+            showToast('Gagal menyimpan konfigurasi agen: ' + err.message, 'error');
+        }
+    }
 }

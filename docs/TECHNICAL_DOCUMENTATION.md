@@ -1617,3 +1617,22 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Iceberg Encroachment & Silo Rupture Engine**: Endpoint `POST /api/v1/polar/iceberg-scour/evaluate-iceberg-encroachment` calculates wellhead clearance margin ($-24.3\%$), diagnoses catastrophic collision trajectories (`TERMINAL_WELLHEAD_SHEAR_IMMINENT`), and flags silo protective berm penetration hazards (`BERM_PENETRATION_RUPTURE_RISK`).
 - **Acoustic Deterrent Hazing, Storm Choke & EQD Action**: Endpoint `POST /api/v1/polar/iceberg-scour/trigger-storm-choke-and-eqd` fires $218.5\text{ dB}$ subsea acoustic deflectors to alter iceberg drift course, triggers downhole subsurface storm choke closure in $16.8\text{ s}$ to isolate reservoir pressure, and executes hydraulic Emergency Quick Disconnect (EQD) unlatching in $4.15\text{ s}$ to retreat production risers flush inside the recessed seabed silo, preventing $\$350\text{M USD}$ in arctic subsea wellhead shearing, under-ice oil blowout, and environmental restoration costs.
 - **Arctic Wellhead Safety Dossier**: Endpoint `GET /api/v1/polar/iceberg-scour/arctic-wellhead-dossier/:wellhead_id` compiles sonar bathymetry scour gouge maps, seabed acoustic Doppler profiles, subsea structural strain telemetry, and DNV-OS-F101 / ISO 19906 compliance records.
+
+
+## 49. Autonomous Agentic Multi-Agent Collaboration Network (Agentic ERP Orchestra & HITL Governance Engine)
+
+### 49.1 Multi-Agent Architecture & Specialized Autonomous Squad (`internal/core/ai/agent_swarm.go`)
+- **Apex-Orchestrator (Executive Chief Swarm)**: Coordinates cross-functional task consensus, delegates mandates across domain agents, and guarantees corporate policy compliance and SLA velocity.
+- **Atlas-Procure (Autonomous Sourcing & RFQ Specialist)**: Scans low-stock thresholds (`qty_available < 10.0`), issues automated RFQs and draft POs with vendor rating evaluations, and enforces tiered purchase ceilings.
+- **Themis-Finance (3-Way Matching Sentinel & Variance Auditor)**: Ingests vendor invoices (`in_invoice`), performs automated 3-way reconciliation against purchase orders and warehouse receipts, flags price/quantity deviations, and auto-posts clean transactions.
+- **Plutus-Cash (Corporate Liquidity & Dynamic DSO Optimizer)**: Projects short-term cash flows, simulates working capital runway, scores outstanding receivables credit risks, and schedules automated collection reminders.
+- **Hermes-WMS (Intelligent Warehouse Slotting & Stockout Preventer)**: Audits inventory levels, assigns FEFO-optimized bin locations, prevents critical stockouts, and schedules picking waves.
+
+### 49.2 Autonomous Cycle Orchestration & Inter-Agent Dialogue
+- **Autonomous Swarm Cycle Execution**: Endpoint `POST /api/v1/ai/swarm/run` executes a collaborative multi-agent loop with inter-agent communication, proposal consensus, and auto-execution of low-risk actions.
+- **Real-Time Swarm Overview & Cockpit Metrics**: Endpoint `GET /api/v1/ai/swarm/status` exposes aggregate metrics including total tasks completed, pending Human-in-the-Loop approvals, estimated hours saved, cost safeguarded (IDR), swarm health score ($99.4\%$), active agents count, and recent dialogue streams.
+
+### 49.3 Human-in-the-Loop (HITL) Governance & Dynamic Risk Thresholds
+- **HITL Action Authorization**: Endpoint `POST /api/v1/ai/swarm/actions/:id/approve` enables human supervisors to validate and execute high-value or high-risk business actions that exceed agent autonomy limits.
+- **HITL Action Rejection & Feedback Loop**: Endpoint `POST /api/v1/ai/swarm/actions/:id/reject` allows operators to decline proposals with mandatory contextual feedback that is injected back into the agent dialogue.
+- **Dynamic Autonomy Configuration**: Endpoint `POST /api/v1/ai/swarm/agents/:role/autonomy` enables runtime adjustments of operating autonomy levels (`full_autonomous`, `supervised_hitl`, `assistive`, `paused`) and auto-approval amount limits.
