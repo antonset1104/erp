@@ -1673,3 +1673,33 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
   - *Discretionary OPEX Freeze & CapEx Deferral*: Auto-freezing non-essential operating expenditures to extend runway by $+3.5\text{ weeks}$.
 - **Closed-Loop Mitigation Execution**: Endpoint `POST /api/v1/ai/digital-twin/playbooks/:id/apply` enables human executive operators to authorize and execute mitigation actions directly into the operational ERP environment with persistent audit logging.
 - **Scenario History & Sensitivity Archive**: Endpoint `GET /api/v1/ai/digital-twin/history` lists archived historical simulations with variance comparisons and execution tracking.
+
+
+## 51. Enterprise Knowledge Graph & GNN Procurement Fraud / Anti-Collusion Sentinel
+
+### 51.1 Enterprise Knowledge Graph Topology Ingestion (`internal/core/ai/fraud_sentinel.go`)
+- **Heterogeneous Graph Vertex & Edge Modeling**: Endpoint `GET /api/v1/ai/fraud-sentinel/graph` reconstructs a live bipartite and semantic enterprise network:
+  - *Vertices ($V$)*: Models legal vendor entities (`vendor`), procurement purchase orders (`purchase_order`), RFQ tender competitions (`rfq_bid`), beneficiary bank accounts (`bank_account`), origin IP addresses (`ip_address`), and internal procurement personnel (`employee`).
+  - *Edges ($E$)*: Captures explicit transaction flows (`ISSUED_PURCHASE_ORDER`, `PAYMENT_DESTINATION`) and extracts latent topological links:
+    - `SHARED_BANK_ACCOUNT`: Discovered shared beneficiary bank accounts among ostensibly competing vendors (weight: $0.95$).
+    - `SHARED_IP_ADDRESS`: Identical IP subnet origins for RFQ bid submissions (weight: $0.90$).
+    - `SPLIT_PURCHASE_CLUSTER`: Multiple POs issued to the same vendor within $72\text{ hours}$ structured just beneath approval authorization thresholds (weight: $0.85$).
+    - `TENDER_COVER_BID`: Artificial complementary cover bids submitted to guarantee targeted vendor victory (weight: $0.92$).
+- **Graph Neural Network (GNN) Risk Scoring**: Calculates per-node degree centrality, clustering coefficients, and propagates collusion probabilities ($0.0\text{ - }100.0\%$).
+
+### 51.2 Autonomous Graph Traversal & Anomaly Scan Engine
+- **Comprehensive Forensics Execution**: Endpoint `POST /api/v1/ai/fraud-sentinel/scan` traverses active relational and graph databases to detect 4 primary corruption typologies:
+  1. *Shared Financial & Digital Footprint Syndicate*: Flags competing tenderers sharing identical bank accounts or gateway IP addresses.
+  2. *Split-PO Structuring (Approval Ceiling Evasion)*: Identifies consecutive POs structured below internal executive sign-off limits (e.g. $\text{IDR }40\text{M} - 49.9\text{M}$ against a $\text{IDR }50\text{M}$ ceiling).
+  3. *Tender Bid-Rigging & Cover Bidding*: Analyzes bid submission time deltas ($\Delta t < 60\text{ seconds}$) and price spreads ($+4.0\%\text{ to }+8.0\%$).
+  4. *Buyer-Vendor Conflict of Interest*: Flags suspicious $100\%$ win-rate patterns and anomalous relationship ties between buyers and suppliers.
+- **Findings Persistence**: Archives forensic evidence into `ai_fraud_findings` with potential loss valuation (`potential_loss_idr`) and cryptographic evidence traces.
+
+### 51.3 Executive Cockpit & Closed-Loop Forensic Intervention
+- **Executive Overview & Collusion Metrics**: Endpoint `GET /api/v1/ai/fraud-sentinel/overview` aggregates total graph nodes/edges, high-risk entities count, enterprise procurement collusion index ($\%$, e.g., $94.5\%$ during active syndicates), quarantined spend, and total safeguarded capital.
+- **Forensic Mitigations & Payment Quarantine**: Endpoint `POST /api/v1/ai/fraud-sentinel/findings/:id/action` allows auditors and corporate executives to execute instant one-click interventions:
+  - `quarantine`: Freezes pending cash disbursements and blacklists tainted vendor accounts.
+  - `investigate`: Escalates evidence dossiers to Internal Audit and the Board Ethics Committee.
+  - `resolve`: Formally marks findings remediated and reallocates supply contracts to certified suppliers.
+  - `dismiss`: Logs audited rationale for false-positive exclusions.
+- **Demo Syndicate Injection**: Endpoint `POST /api/v1/ai/fraud-sentinel/seed-demo` seeds multi-vendor bid-rigging syndicates and split-PO structures for compliance stress testing.

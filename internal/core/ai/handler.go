@@ -638,6 +638,91 @@ func (h *Handler) ApplyDigitalTwinPlaybook(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Playbook applied successfully", "playbook": pb})
 }
 
+// Enterprise Knowledge Graph & GNN Procurement Fraud / Anti-Collusion Handlers
+
+func (h *Handler) GetFraudSentinelOverview(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	engine := GetFraudSentinelEngine(h.db)
+	overview, err := engine.GetOverview(companyID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": overview})
+}
+
+func (h *Handler) GetFraudSentinelGraph(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	engine := GetFraudSentinelEngine(h.db)
+	graph, err := engine.BuildKnowledgeGraph(companyID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": graph})
+}
+
+func (h *Handler) RunFraudSentinelScan(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	engine := GetFraudSentinelEngine(h.db)
+	findings, err := engine.RunComprehensiveFraudScan(companyID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Graph scan completed successfully", "data": findings, "count": len(findings)})
+}
+
+func (h *Handler) GetFraudSentinelFindings(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	var findings []FraudFindingRecord
+	severity := c.Query("severity")
+	q := h.db.Where("company_id = ?", companyID)
+	if severity != "" && severity != "ALL" {
+		q = q.Where("severity = ?", strings.ToUpper(severity))
+	}
+	if err := q.Order("risk_score DESC").Find(&findings).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": findings, "count": len(findings)})
+}
+
+func (h *Handler) ExecuteFraudMitigationAction(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	findingID := c.Param("id")
+	var req struct {
+		Action string `json:"action"` // "quarantine", "investigate", "resolve", "dismiss"
+		Note   string `json:"note"`
+	}
+	_ = c.ShouldBindJSON(&req)
+	if req.Action == "" {
+		req.Action = "quarantine"
+	}
+	if req.Note == "" {
+		req.Note = "Mitigasi otomatis dieksekusi oleh Operator/Auditor Forensik"
+	}
+
+	engine := GetFraudSentinelEngine(h.db)
+	record, err := engine.ExecuteMitigationAction(companyID, findingID, req.Action, req.Note)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Action executed successfully", "data": record})
+}
+
+func (h *Handler) SeedFraudDemoData(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	engine := GetFraudSentinelEngine(h.db)
+	findings, err := engine.RunComprehensiveFraudScan(companyID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Demo collusion cluster seeded and verified", "findings": findings})
+}
+
 // RegisterRootProtocolRoutes registers public protocol discovery endpoints like /.well-known/agent.json and /mcp
 func RegisterRootProtocolRoutes(r *gin.Engine, h *Handler) {
 	r.GET("/.well-known/agent.json", h.GetA2AAgentCard)
@@ -725,6 +810,14 @@ func RegisterAIRoutes(router *gin.RouterGroup, authMiddleware gin.HandlerFunc, h
 			authed.POST("/digital-twin/monte-carlo", h.RunDigitalTwinSimulation)
 			authed.GET("/digital-twin/history", h.GetDigitalTwinHistory)
 			authed.POST("/digital-twin/playbooks/:id/apply", h.ApplyDigitalTwinPlaybook)
+
+			// Enterprise Knowledge Graph & GNN Procurement Fraud / Anti-Collusion Sentinel
+			authed.GET("/fraud-sentinel/overview", h.GetFraudSentinelOverview)
+			authed.GET("/fraud-sentinel/graph", h.GetFraudSentinelGraph)
+			authed.POST("/fraud-sentinel/scan", h.RunFraudSentinelScan)
+			authed.GET("/fraud-sentinel/findings", h.GetFraudSentinelFindings)
+			authed.POST("/fraud-sentinel/findings/:id/action", h.ExecuteFraudMitigationAction)
+			authed.POST("/fraud-sentinel/seed-demo", h.SeedFraudDemoData)
 		}
 	}
 }

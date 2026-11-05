@@ -118,6 +118,7 @@ var erpModuleCatalog = []ModuleCatalogItem{
 	{Tab: "integration-hub", Title: "Integration Hub & API", Category: "OPERATIONS & HR", Icon: "🔌", Keywords: "integration hub api key konektor sap shopee tokopedia rpc etl"},
 	{Tab: "agentic-swarm", Title: "Agentic AI Swarm", Category: "AI & INTELLIGENCE", Icon: "🤖", Keywords: "agentic ai swarm multi-agent otonom hitl orchestrator pengadaan matching procurement cashflow wms"},
 	{Tab: "digital-twin-simulator", Title: "Digital Twin & What-If War-Room", Category: "AI & INTELLIGENCE", Icon: "🔮", Keywords: "digital twin monte carlo simulasi skenario what if krisis valas shock stress test runway playbook"},
+	{Tab: "fraud-graph-sentinel", Title: "Anti-Fraud & Collusion Graph", Category: "AI & INTELLIGENCE", Icon: "🛡️", Keywords: "anti-fraud gnn knowledge graph audit forensik pengadaan kolusi vendor bid rigging split po rekening bersama sindikat"},
 }
 
 // RegisterRoutes mounts the continuous improvement Command Center endpoints on /api/v1

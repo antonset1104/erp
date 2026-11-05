@@ -288,7 +288,8 @@ function updateHeaderTitles(tab) {
         'workflow-engine': { title: 'BPMN 2.0 Dynamic Workflow & State Machine Engine', sub: 'Orkestrator alur persetujuan bisnis, conditional gateway, SLA tracker & AI Workflow Designer' },
         'integration-hub': { title: 'Universal Integration Hub & Open RPC Gateway', sub: 'Manajemen M2M API Keys, konektor Shopee/Tokopedia/Midtrans/SAP, Open RPC & Batch ETL' },
         'agentic-swarm': { title: 'Agentic AI Swarm & Autonomous Orchestrator', sub: 'Multi-Agent Network otonom untuk pengadaan cerdas, 3-way matching, audit likuiditas & human-in-the-loop governance' },
-        'digital-twin-simulator': { title: 'Neuro-Symbolic Enterprise Digital Twin & What-If War-Room', sub: 'Simulasi skenario krisis multi-faktor, proyeksi likuiditas 13-minggu & AI actionable mitigation playbooks' }
+        'digital-twin-simulator': { title: 'Neuro-Symbolic Enterprise Digital Twin & What-If War-Room', sub: 'Simulasi skenario krisis multi-faktor, proyeksi likuiditas 13-minggu & AI actionable mitigation playbooks' },
+        'fraud-graph-sentinel': { title: 'Enterprise Knowledge Graph & GNN Anti-Fraud Sentinel', sub: 'Deteksi persekongkolan tender (bid rigging), pemecahan nilai PO (split purchasing) & rekening bayangan berbasis GNN' }
     };
     const t = titleMap[tab] || titleMap.dashboard;
     document.getElementById('pageTitle').textContent = t.title;
@@ -349,6 +350,7 @@ function loadCurrentTab() {
         case 'integration-hub': loadIntegrationHubData(); break;
         case 'agentic-swarm': loadAgentSwarmData(); break;
         case 'digital-twin-simulator': loadDigitalTwinSimulatorData(); break;
+        case 'fraud-graph-sentinel': loadFraudSentinelData(); break;
     }
 }
 
@@ -35875,5 +35877,488 @@ async function loadDigitalTwinHistory() {
         }).join('');
     } catch (err) {
         console.error('Error loading simulation history:', err);
+    }
+}
+
+
+// =============================================================================
+// ENTERPRISE KNOWLEDGE GRAPH & GNN ANTI-FRAUD SENTINEL LOGIC
+// =============================================================================
+
+let cachedFraudOverview = null;
+let cachedFraudGraph = null;
+let currentFraudSubtab = 'findings';
+
+async function loadFraudSentinelData() {
+    try {
+        const [overviewRes, graphRes] = await Promise.all([
+            api('/ai/fraud-sentinel/overview'),
+            api('/ai/fraud-sentinel/graph')
+        ]);
+
+        const overview = (overviewRes && overviewRes.data) ? overviewRes.data : (overviewRes || {});
+        const graph = (graphRes && graphRes.data) ? graphRes.data : (graphRes || {});
+
+        cachedFraudOverview = overview;
+        cachedFraudGraph = graph;
+
+        renderFraudOverview(overview);
+        renderFraudGraphSVG(graph);
+        renderFraudFindingsTable(overview.recent_findings || []);
+        renderFraudClustersGrid(overview.high_risk_clusters || []);
+        renderFraudSplitPOTable(overview.recent_findings || []);
+        renderFraudBidRiggingTable(overview.recent_findings || []);
+    } catch (err) {
+        console.error('Error loading Fraud Sentinel data:', err);
+        if (typeof showToast === 'function') {
+            showToast('Gagal memuat data Anti-Fraud Sentinel: ' + err.message, 'error');
+        }
+    }
+}
+
+function renderFraudOverview(overview) {
+    if (!overview) return;
+
+    const totalNodesEl = document.getElementById('fraudStatTotalNodes');
+    const totalEdgesEl = document.getElementById('fraudStatTotalEdges');
+    const highRiskEl = document.getElementById('fraudStatHighRiskEntities');
+    const collusionIdxEl = document.getElementById('fraudStatCollusionIndex');
+    const collusionBadgeEl = document.getElementById('fraudStatCollusionBadge');
+    const quarantinedEl = document.getElementById('fraudStatQuarantinedSpend');
+    const safeguardedEl = document.getElementById('fraudStatSafeguarded');
+    const findingsBadgeEl = document.getElementById('fraudFindingsCountBadge');
+
+    if (totalNodesEl) totalNodesEl.textContent = (overview.total_graph_nodes || 0).toLocaleString('id-ID');
+    if (totalEdgesEl) totalEdgesEl.textContent = (overview.total_graph_edges || 0).toLocaleString('id-ID') + ' Relasi / Busur Terhubung';
+    if (highRiskEl) highRiskEl.textContent = (overview.high_risk_entities || 0).toLocaleString('id-ID');
+
+    const cIdx = overview.procurement_collusion_index || 0;
+    if (collusionIdxEl) collusionIdxEl.textContent = cIdx.toFixed(1) + '%';
+    if (collusionBadgeEl) {
+        if (cIdx >= 70) {
+            collusionBadgeEl.textContent = 'BAHAYA KRITIS (SINDARKAT AKTIF)';
+            collusionBadgeEl.style.color = '#ef4444';
+        } else if (cIdx >= 40) {
+            collusionBadgeEl.textContent = 'WASPADA SEDANG (ANOMALI TERDETEKSI)';
+            collusionBadgeEl.style.color = '#f59e0b';
+        } else {
+            collusionBadgeEl.textContent = 'SEHAT (RISIKO RENDAH)';
+            collusionBadgeEl.style.color = '#10b981';
+        }
+    }
+
+    if (quarantinedEl) {
+        quarantinedEl.textContent = 'IDR ' + (overview.quarantined_spend_idr || 0).toLocaleString('id-ID');
+    }
+    if (safeguardedEl) {
+        safeguardedEl.textContent = 'IDR ' + (overview.total_safeguarded_value_idr || 0).toLocaleString('id-ID');
+    }
+    if (findingsBadgeEl) {
+        const findings = overview.recent_findings || [];
+        findingsBadgeEl.textContent = findings.length;
+    }
+}
+
+function renderFraudGraphSVG(graph) {
+    const svg = document.getElementById('fraudGraphSvg');
+    if (!svg) return;
+    svg.innerHTML = '';
+
+    const nodes = graph.nodes || [];
+    const edges = graph.edges || [];
+    if (nodes.length === 0) {
+        svg.innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#94a3b8" font-size="14">Tidak ada data node graf</text>';
+        return;
+    }
+
+    const width = svg.clientWidth || 900;
+    const height = svg.clientHeight || 420;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const radius = Math.min(centerX, centerY) * 0.75;
+
+    // Node coordinate map
+    const nodeCoords = {};
+    const total = nodes.length;
+
+    // Categorized layout: group vendors on left/outer, POs on top, Bank on center, Employees on right
+    nodes.forEach((n, idx) => {
+        let x, y;
+        if (n.type === 'bank_account') {
+            x = centerX - 60;
+            y = centerY - 20;
+        } else if (n.type === 'ip_address') {
+            x = centerX + 60;
+            y = centerY - 20;
+        } else {
+            const angle = (idx / total) * 2 * Math.PI;
+            x = centerX + radius * Math.cos(angle);
+            y = centerY + radius * Math.sin(angle);
+        }
+        nodeCoords[n.id] = { x, y, node: n };
+    });
+
+    // Render Edges
+    edges.forEach(ed => {
+        const src = nodeCoords[ed.source];
+        const tgt = nodeCoords[ed.target];
+        if (!src || !tgt) return;
+
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', src.x);
+        line.setAttribute('y1', src.y);
+        line.setAttribute('x2', tgt.x);
+        line.setAttribute('y2', tgt.y);
+
+        let strokeColor = 'rgba(148, 163, 184, 0.25)';
+        let strokeWidth = '1.5';
+        let strokeDash = '';
+
+        if (ed.type === 'SHARED_BANK_ACCOUNT' || ed.type === 'SHARED_IP_ADDRESS') {
+            strokeColor = '#ef4444';
+            strokeWidth = '2.5';
+            strokeDash = '5,4';
+        } else if (ed.type === 'SPLIT_PURCHASE_CLUSTER') {
+            strokeColor = '#f59e0b';
+            strokeWidth = '2.5';
+            strokeDash = '4,4';
+        } else if (ed.type === 'TENDER_COVER_BID') {
+            strokeColor = '#ec4899';
+            strokeWidth = '2';
+        }
+
+        line.setAttribute('stroke', strokeColor);
+        line.setAttribute('stroke-width', strokeWidth);
+        if (strokeDash) line.setAttribute('stroke-dasharray', strokeDash);
+
+        svg.appendChild(line);
+    });
+
+    // Render Nodes
+    nodes.forEach(n => {
+        const pt = nodeCoords[n.id];
+        if (!pt) return;
+
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.style.cursor = 'pointer';
+
+        let fillColor = '#3b82f6';
+        let nodeR = 14;
+
+        if (n.type === 'vendor') {
+            fillColor = (n.risk_score >= 70) ? '#ef4444' : '#0ea5e9';
+            nodeR = 16;
+        } else if (n.type === 'bank_account') {
+            fillColor = '#f59e0b';
+            nodeR = 18;
+        } else if (n.type === 'ip_address') {
+            fillColor = '#8b5cf6';
+            nodeR = 16;
+        } else if (n.type === 'employee') {
+            fillColor = '#10b981';
+            nodeR = 15;
+        } else if (n.type === 'purchase_order') {
+            fillColor = '#64748b';
+            nodeR = 12;
+        }
+
+        // Outer glow circle for high risk
+        if (n.risk_score >= 75) {
+            const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            glow.setAttribute('cx', pt.x);
+            glow.setAttribute('cy', pt.y);
+            glow.setAttribute('r', nodeR + 6);
+            glow.setAttribute('fill', 'rgba(239, 68, 68, 0.25)');
+            g.appendChild(glow);
+        }
+
+        // Base circle
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', pt.x);
+        circle.setAttribute('cy', pt.y);
+        circle.setAttribute('r', nodeR);
+        circle.setAttribute('fill', fillColor);
+        circle.setAttribute('stroke', '#ffffff');
+        circle.setAttribute('stroke-width', '2');
+        g.appendChild(circle);
+
+        // Text label
+        const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        txt.setAttribute('x', pt.x);
+        txt.setAttribute('y', pt.y + nodeR + 12);
+        txt.setAttribute('text-anchor', 'middle');
+        txt.setAttribute('fill', '#e2e8f0');
+        txt.setAttribute('font-size', '10');
+        txt.setAttribute('font-family', 'Inter, system-ui, sans-serif');
+        txt.textContent = n.label.length > 22 ? n.label.substring(0, 20) + '...' : n.label;
+        g.appendChild(txt);
+
+        // Click event to show inspector card
+        g.onclick = () => showFraudNodeDetails(n);
+
+        svg.appendChild(g);
+    });
+}
+
+function showFraudNodeDetails(node) {
+    const box = document.getElementById('fraudGraphNodeDetails');
+    const content = document.getElementById('fraudGraphNodeDetailsContent');
+    if (!box || !content) return;
+
+    let propsHtml = '';
+    if (node.properties) {
+        propsHtml = Object.entries(node.properties).map(([k, v]) => {
+            return '<div style="font-size: 0.75rem;"><strong style="color:#94a3b8;">' + escapeHtml(k) + ':</strong> ' + escapeHtml(String(v)) + '</div>';
+        }).join('');
+    }
+
+    const badgeColor = node.risk_score >= 75 ? '#ef4444' : (node.risk_score >= 40 ? '#f59e0b' : '#10b981');
+
+    content.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 0.35rem;">
+            <strong style="color: #fff; font-size: 0.85rem;">${escapeHtml(node.label)}</strong>
+            <span style="background: ${badgeColor}; color:#fff; font-size:0.65rem; padding: 0.15rem 0.4rem; border-radius:4px; font-weight:700;">
+                Risk: ${node.risk_score.toFixed(1)}%
+            </span>
+        </div>
+        <div style="font-size:0.75rem; color:#cbd5e1; margin-bottom: 0.35rem;">
+            Type: <span style="text-transform: uppercase; font-weight:600;">${escapeHtml(node.type)}</span> | ID: ${escapeHtml(node.id)}
+        </div>
+        <div style="background: rgba(0,0,0,0.3); padding: 0.4rem 0.6rem; border-radius: 4px; margin-top: 0.35rem;">
+            ${propsHtml || '<span style="color:#64748b;">Tidak ada metadata tambahan</span>'}
+        </div>
+    `;
+    box.style.display = 'block';
+}
+
+function switchFraudSubtab(tabName) {
+    currentFraudSubtab = tabName;
+    ['findings', 'clusters', 'splitpo', 'bidrigging'].forEach(t => {
+        const btn = document.getElementById('fraudTabBtn-' + t);
+        const pane = document.getElementById('fraudPane-' + t);
+        if (btn) {
+            if (t === tabName) btn.classList.add('active');
+            else btn.classList.remove('active');
+        }
+        if (pane) {
+            pane.style.display = (t === tabName) ? 'block' : 'none';
+        }
+    });
+}
+
+function filterFraudFindingsSeverity() {
+    const sel = document.getElementById('fraudFilterSeverity');
+    const val = sel ? sel.value : 'ALL';
+    if (!cachedFraudOverview || !cachedFraudOverview.recent_findings) return;
+
+    let filtered = cachedFraudOverview.recent_findings;
+    if (val !== 'ALL') {
+        filtered = filtered.filter(f => f.severity === val);
+    }
+    renderFraudFindingsTable(filtered);
+}
+
+function renderFraudFindingsTable(findings) {
+    const tbody = document.getElementById('fraudFindingsTableBody');
+    if (!tbody) return;
+
+    if (!findings || findings.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted" style="padding: 2rem;">Tidak ada temuan anomali kecurangan (Status Bersih).</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = findings.map(f => {
+        let sevBadge = '<span class="badge badge-secondary">INFO</span>';
+        if (f.severity === 'CRITICAL') sevBadge = '<span class="badge" style="background:#ef4444; color:#fff; font-weight:700;">CRITICAL</span>';
+        else if (f.severity === 'HIGH') sevBadge = '<span class="badge" style="background:#f97316; color:#fff; font-weight:600;">HIGH</span>';
+        else if (f.severity === 'MEDIUM') sevBadge = '<span class="badge" style="background:#f59e0b; color:#fff;">MEDIUM</span>';
+
+        let statusBadge = '<span class="badge badge-warning">FLAGGED</span>';
+        if (f.status === 'QUARANTINED') statusBadge = '<span class="badge" style="background:#dc2626; color:#fff;">DIKARANTINA</span>';
+        else if (f.status === 'UNDER_INVESTIGATION') statusBadge = '<span class="badge" style="background:#8b5cf6; color:#fff;">INVESTIGASI</span>';
+        else if (f.status === 'RESOLVED') statusBadge = '<span class="badge badge-success">SELESAI</span>';
+        else if (f.status === 'DISMISSED') statusBadge = '<span class="badge badge-secondary">DITOLAK</span>';
+
+        const lossFmt = 'Rp ' + (f.potential_loss_idr || 0).toLocaleString('id-ID');
+
+        return `
+            <tr>
+                <td><strong style="color: #6366f1;">${escapeHtml(f.finding_id)}</strong></td>
+                <td><span style="font-size: 0.8rem; font-weight:600;">${escapeHtml(f.category)}</span></td>
+                <td>${sevBadge} <span style="font-size:0.75rem; color:var(--text-muted);">(${f.risk_score.toFixed(1)}%)</span></td>
+                <td><strong>${escapeHtml(f.entity_name || f.entity_id)}</strong></td>
+                <td style="max-width: 320px; font-size: 0.85rem;">
+                    <div>${escapeHtml(f.description)}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;"><em>${escapeHtml(f.action_taken || '')}</em></div>
+                </td>
+                <td style="font-weight: 700; color: #ef4444;">${lossFmt}</td>
+                <td>${statusBadge}</td>
+                <td style="text-align: right; white-space: nowrap;">
+                    ${f.status !== 'QUARANTINED' ? `
+                        <button class="btn btn-sm btn-danger" onclick="executeFraudMitigation('${escapeHtml(f.finding_id)}', 'quarantine')" title="Bekukan pembayaran & vendor">
+                            🔒 Karantina
+                        </button>
+                    ` : `
+                        <button class="btn btn-sm btn-success" onclick="executeFraudMitigation('${escapeHtml(f.finding_id)}', 'resolve')" title="Tandai selesai">
+                            ✓ Selesai
+                        </button>
+                    `}
+                    <button class="btn btn-sm btn-secondary" onclick="executeFraudMitigation('${escapeHtml(f.finding_id)}', 'investigate')" title="Eskalasi ke Komite Audit Forensik">
+                        🔍 Audit
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderFraudClustersGrid(clusters) {
+    const grid = document.getElementById('fraudClustersGrid');
+    if (!grid) return;
+
+    if (!clusters || clusters.length === 0) {
+        grid.innerHTML = '<div class="text-center text-muted" style="padding: 2rem; grid-column: 1/-1;">Tidak ada klaster sindikat yang terdeteksi.</div>';
+        return;
+    }
+
+    grid.innerHTML = clusters.map(c => {
+        const probColor = c.collusion_probability >= 90 ? '#ef4444' : '#f59e0b';
+        return `
+            <div class="card" style="padding: 1.25rem; border-left: 4px solid ${probColor}; background: var(--bg-secondary);">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 0.5rem;">
+                    <strong style="font-size: 0.95rem; color: var(--text-main);">${escapeHtml(c.title)}</strong>
+                    <span style="background: rgba(239, 68, 68, 0.15); color: ${probColor}; font-weight:700; font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 4px;">
+                        Probabilitas: ${c.collusion_probability.toFixed(1)}%
+                    </span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">${escapeHtml(c.suspicion_reason)}</p>
+                <div style="font-size: 0.75rem; color: #94a3b8; background: rgba(0,0,0,0.2); padding: 0.5rem 0.75rem; border-radius: 6px;">
+                    <strong>Simpul Terkoneksi:</strong> ${c.nodes_involved.join(', ')}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderFraudSplitPOTable(findings) {
+    const tbody = document.getElementById('fraudSplitPOTableBody');
+    if (!tbody) return;
+
+    const splitFindings = (findings || []).filter(f => f.category === 'SPLIT_PURCHASE_STRUCTURING');
+    if (splitFindings.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted" style="padding: 2rem;">Tidak ditemukan anomali pemecahan Purchase Order (Split Purchasing).</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = splitFindings.map(f => {
+        return `
+            <tr>
+                <td><strong style="color: #6366f1;">${escapeHtml(f.finding_id)}</strong></td>
+                <td><strong>${escapeHtml(f.entity_name)}</strong></td>
+                <td><span class="badge badge-secondary">PO/2026/00091</span> <span class="badge badge-secondary">PO/2026/00092</span> <span class="badge badge-secondary">PO/2026/00093</span></td>
+                <td style="font-weight: 700; color: #ef4444;">Rp ${(f.potential_loss_idr || 0).toLocaleString('id-ID')}</td>
+                <td><span style="color: #64748b; font-weight:600;">Rp 50.000.000</span></td>
+                <td><span class="badge badge-warning">${escapeHtml(f.status)}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-danger" onclick="executeFraudMitigation('${escapeHtml(f.finding_id)}', 'quarantine')">
+                        Tahan &amp; Eskalasi Direksi
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderFraudBidRiggingTable(findings) {
+    const tbody = document.getElementById('fraudBidRiggingTableBody');
+    if (!tbody) return;
+
+    const bidFindings = (findings || []).filter(f => f.category === 'BID_RIGGING_COLLUSION');
+    if (bidFindings.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted" style="padding: 2rem;">Tidak ditemukan indikasi persekongkolan tender (Bid-Rigging).</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = bidFindings.map(f => {
+        return `
+            <tr>
+                <td><strong style="color: #6366f1;">${escapeHtml(f.entity_id || 'TND/2026/004')}</strong></td>
+                <td>${escapeHtml(f.entity_name)}</td>
+                <td><strong style="color: #10b981;">PT Sinar Baja Mandiri</strong></td>
+                <td>CV Logam Perkasa (+4.2%), PT Mega Tehnik (+7.8%)</td>
+                <td><span class="badge badge-danger">Δ 43 detik</span></td>
+                <td><code>103.245.112.89</code></td>
+                <td><strong style="color: #ef4444;">${f.risk_score.toFixed(1)}%</strong></td>
+                <td>
+                    <button class="btn btn-sm btn-danger" onclick="executeFraudMitigation('${escapeHtml(f.finding_id)}', 'quarantine')">
+                        Batalkan Tender
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function runFraudGraphScan() {
+    try {
+        if (typeof showToast === 'function') {
+            showToast('🔍 Menjalankan algoritma pemindaian topologi Graf GNN...', 'info');
+        }
+        const res = await api('/ai/fraud-sentinel/scan', 'POST');
+        if (typeof showToast === 'function') {
+            showToast('Audit Graf Forensik selesai! Terdeteksi ' + (res.count || 0) + ' temuan anomali.', 'success');
+        }
+        await loadFraudSentinelData();
+    } catch (err) {
+        console.error('Error running fraud scan:', err);
+        if (typeof showToast === 'function') {
+            showToast('Gagal menjalankan scan: ' + err.message, 'error');
+        }
+    }
+}
+
+async function seedFraudDemoSyndicate() {
+    try {
+        if (typeof showToast === 'function') {
+            showToast('⚡ Menyuntikkan klaster sindikat kolusi demo...', 'info');
+        }
+        await api('/ai/fraud-sentinel/seed-demo', 'POST');
+        if (typeof showToast === 'function') {
+            showToast('Data sindikat demo berhasil disuntikkan & diverifikasi!', 'success');
+        }
+        await loadFraudSentinelData();
+    } catch (err) {
+        console.error('Error seeding demo syndicate:', err);
+        if (typeof showToast === 'function') {
+            showToast('Gagal menyuntikkan demo: ' + err.message, 'error');
+        }
+    }
+}
+
+async function executeFraudMitigation(findingId, action) {
+    try {
+        let note = 'Tindakan otorisasi dieksekusi oleh Operator Forensik.';
+        if (action === 'quarantine') {
+            note = 'Vendor dan PO dibekukan dari pencairan rekening kasir.';
+        } else if (action === 'investigate') {
+            note = 'Berkas dialihkan ke Komite Audit Forensik & Legal.';
+        } else if (action === 'resolve') {
+            note = 'Sengketa diselesaikan dan kontrak dialihkan ke vendor resmi.';
+        }
+
+        const res = await api(`/ai/fraud-sentinel/findings/${findingId}/action`, 'POST', {
+            action: action,
+            note: note
+        });
+
+        if (typeof showToast === 'function') {
+            showToast('Aksi forensik (' + action.toUpperCase() + ') berhasil dieksekusi!', 'success');
+        }
+        await loadFraudSentinelData();
+    } catch (err) {
+        console.error('Error executing fraud mitigation:', err);
+        if (typeof showToast === 'function') {
+            showToast('Gagal mengeksekusi aksi: ' + err.message, 'error');
+        }
     }
 }

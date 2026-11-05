@@ -268,6 +268,10 @@
                     <span class="nav-icon">🔮</span>
                     <span class="nav-label">Digital Twin &amp; What-If</span>
                 </button>
+                <button class="nav-item" data-tab="fraud-graph-sentinel">
+                    <span class="nav-icon">🛡️</span>
+                    <span class="nav-label">Anti-Fraud Graph Sentinel</span>
+                </button>
             </nav>
 
             <div class="user-profile">
@@ -3671,6 +3675,218 @@
                                     </thead>
                                     <tbody id="twinHistoryTableBody">
                                         <tr><td colspan="7" class="text-center text-muted" style="padding: 2rem;">Memuat riwayat skenario...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===================================================== -->
+                <!-- SECTION: ENTERPRISE KNOWLEDGE GRAPH & GNN ANTI-FRAUD SENTINEL -->
+                <!-- ===================================================== -->
+                <section id="tab-fraud-graph-sentinel" class="tab-view">
+                    <div class="content-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                                <h2>Enterprise Knowledge Graph &amp; GNN Anti-Fraud Sentinel</h2>
+                                <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.75rem;">AI FORENSIC SENTINEL</span>
+                            </div>
+                            <p class="subtitle">Deteksi persekongkolan tender (bid rigging), pemecahan nilai PO (split purchasing), rekening bayangan, dan anomali relasi pengadaan berbasis Graph Neural Network &amp; topological link prediction.</p>
+                        </div>
+                        <div class="header-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <button class="btn btn-primary" onclick="runFraudGraphScan()" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);">
+                                <span>🔍</span> Jalankan Audit Graf GNN
+                            </button>
+                            <button class="btn btn-secondary" onclick="seedFraudDemoSyndicate()" title="Injeksi data klaster sindikat untuk simulasi forensik">
+                                <span>⚡</span> Injeksi Sindikat Demo
+                            </button>
+                            <button class="btn btn-secondary" onclick="loadFraudSentinelData()" title="Segarkan Data Graf">
+                                <span>🔄</span> Refresh Graf
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 5 KPI Metric Cards -->
+                    <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                        <div class="card stat-card" style="border-top: 3px solid #3b82f6;">
+                            <div class="stat-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">🌐</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Total Node Graf Entitas</span>
+                                <h3 id="fraudStatTotalNodes" class="stat-value">0</h3>
+                                <small id="fraudStatTotalEdges" style="color: var(--text-muted); font-size: 0.75rem;">0 Relasi / Busur Terhubung</small>
+                            </div>
+                        </div>
+
+                        <div class="card stat-card" style="border-top: 3px solid #ef4444;">
+                            <div class="stat-icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">⚠️</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Entitas Berisiko Tinggi</span>
+                                <h3 id="fraudStatHighRiskEntities" class="stat-value" style="color: #ef4444;">0</h3>
+                                <small style="color: var(--text-muted); font-size: 0.75rem;">Vendor / Akun Mencurigakan</small>
+                            </div>
+                        </div>
+
+                        <div class="card stat-card" style="border-top: 3px solid #f59e0b;">
+                            <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">🕸️</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Indeks Kolusi Pengadaan</span>
+                                <h3 id="fraudStatCollusionIndex" class="stat-value">0%</h3>
+                                <small id="fraudStatCollusionBadge" style="color: #f59e0b; font-size: 0.75rem; font-weight: 600;">Waspada Sedang</small>
+                            </div>
+                        </div>
+
+                        <div class="card stat-card" style="border-top: 3px solid #8b5cf6;">
+                            <div class="stat-icon" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">🔒</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Belanja Dikarantina</span>
+                                <h3 id="fraudStatQuarantinedSpend" class="stat-value" style="font-size: 1.15rem;">Rp 0</h3>
+                                <small style="color: var(--text-muted); font-size: 0.75rem;">Pembayaran Dibekukan</small>
+                            </div>
+                        </div>
+
+                        <div class="card stat-card" style="border-top: 3px solid #10b981;">
+                            <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">🛡️</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Nilai Terlindungi (IDR)</span>
+                                <h3 id="fraudStatSafeguarded" class="stat-value" style="color: #10b981; font-size: 1.15rem;">Rp 0</h3>
+                                <small style="color: var(--text-muted); font-size: 0.75rem;">Potensi Kebocoran Dicegah</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visual Graph Canvas & Interactive Inspector -->
+                    <div class="card" style="margin-bottom: 1.5rem; overflow: hidden; border: 1px solid var(--border-color);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color);">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="font-size: 1.2rem;">🌐</span>
+                                <h3 style="margin: 0; font-size: 1.05rem;">Visualisasi Topologi Jejaring Graf Penipuan &amp; Kolusi</h3>
+                                <span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6; font-size: 0.75rem;">Interactive SVG Node Map</span>
+                            </div>
+                            <div style="display: flex; gap: 0.75rem; align-items: center; font-size: 0.8rem;">
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444; display: inline-block;"></span> Vendor Berisiko</span>
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #f59e0b; display: inline-block;"></span> Rekening / IP Bersama</span>
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #3b82f6; display: inline-block;"></span> Purchase Order / Tender</span>
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #10b981; display: inline-block;"></span> Buyer / Karyawan</span>
+                            </div>
+                        </div>
+                        <div id="fraudGraphContainer" style="position: relative; width: 100%; height: 420px; background: radial-gradient(circle, rgba(15, 23, 42, 0.8) 0%, rgba(2, 6, 23, 0.95) 100%); overflow: hidden;">
+                            <svg id="fraudGraphSvg" style="width: 100%; height: 100%; display: block;"></svg>
+                            <div id="fraudGraphNodeDetails" style="position: absolute; bottom: 12px; left: 12px; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0.75rem 1rem; color: #fff; font-size: 0.8rem; max-width: 380px; display: none;">
+                                <div id="fraudGraphNodeDetailsContent"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4 Subtab Navigations -->
+                    <div class="twin-subtabs" style="display: flex; gap: 0.5rem; border-bottom: 2px solid var(--border-color); margin-bottom: 1.5rem;">
+                        <button class="twin-tab-btn active" onclick="switchFraudSubtab('findings')" id="fraudTabBtn-findings">
+                            📑 Temuan Forensik &amp; Bukti Anomali (<span id="fraudFindingsCountBadge">0</span>)
+                        </button>
+                        <button class="twin-tab-btn" onclick="switchFraudSubtab('clusters')" id="fraudTabBtn-clusters">
+                            🕸️ Klaster Sindikat Terdeteksi
+                        </button>
+                        <button class="twin-tab-btn" onclick="switchFraudSubtab('splitpo')" id="fraudTabBtn-splitpo">
+                            ✂️ Audit Pemecahan PO (Split Purchasing)
+                        </button>
+                        <button class="twin-tab-btn" onclick="switchFraudSubtab('bidrigging')" id="fraudTabBtn-bidrigging">
+                            🤝 Matriks Persekongkolan Tender (Bid-Rigging)
+                        </button>
+                    </div>
+
+                    <!-- Subtab 1: Findings Table -->
+                    <div id="fraudPane-findings" class="twin-subpane active">
+                        <div class="card" style="padding: 1.25rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                                <h3 style="margin: 0; font-size: 1rem;">Daftar Temuan Forensik Pengadaan &amp; Status Mitigasi</h3>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <select id="fraudFilterSeverity" onchange="filterFraudFindingsSeverity()" class="form-control" style="font-size: 0.85rem; padding: 0.35rem 0.75rem; width: auto;">
+                                        <option value="ALL">Semua Tingkat Keparahan</option>
+                                        <option value="CRITICAL">Kritis (Critical)</option>
+                                        <option value="HIGH">Tinggi (High)</option>
+                                        <option value="MEDIUM">Sedang (Medium)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID Temuan</th>
+                                            <th>Kategori Pelanggaran</th>
+                                            <th>Tingkat Risiko</th>
+                                            <th>Entitas Terlibat</th>
+                                            <th>Deskripsi &amp; Pola Anomali</th>
+                                            <th>Potensi Kerugian</th>
+                                            <th>Status</th>
+                                            <th style="text-align: right;">Aksi Tindakan Forensik</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="fraudFindingsTableBody">
+                                        <tr><td colspan="8" class="text-center text-muted" style="padding: 2rem;">Memuat data temuan forensik...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subtab 2: Clusters -->
+                    <div id="fraudPane-clusters" class="twin-subpane" style="display: none;">
+                        <div class="card" style="padding: 1.25rem;">
+                            <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.05rem;">Ringkasan Klaster Sindikat &amp; Cincin Kolusi Pengadaan</h3>
+                            <div id="fraudClustersGrid" class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.25rem;">
+                                <div class="text-center text-muted" style="padding: 2rem; grid-column: 1/-1;">Memuat ringkasan klaster...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subtab 3: Split PO Audit -->
+                    <div id="fraudPane-splitpo" class="twin-subpane" style="display: none;">
+                        <div class="card" style="padding: 1.25rem;">
+                            <h3 style="margin-top: 0; margin-bottom: 0.5rem; font-size: 1.05rem;">Forensik Struktur Pemecahan Nilai PO (Bypass Otorisasi Plafon Rp 50.000.000)</h3>
+                            <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 1rem;">Algoritma GNN memindai Purchase Order berganda ke vendor yang sama dalam kurun waktu kurang dari 72 jam dengan nilai masing-masing sengaja dibuat di rentang Rp 40jt - Rp 49.9jt guna menghindari otorisasi Direksi.</p>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID Klaster PO</th>
+                                            <th>Vendor Penerima</th>
+                                            <th>Daftar Nomor PO</th>
+                                            <th>Akumulasi Nilai</th>
+                                            <th>Plafon Otorisasi</th>
+                                            <th>Status Audit</th>
+                                            <th>Rekomendasi Tindakan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="fraudSplitPOTableBody">
+                                        <tr><td colspan="7" class="text-center text-muted" style="padding: 2rem;">Memuat data split PO...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subtab 4: Bid-Rigging Matrix -->
+                    <div id="fraudPane-bidrigging" class="twin-subpane" style="display: none;">
+                        <div class="card" style="padding: 1.25rem;">
+                            <h3 style="margin-top: 0; margin-bottom: 0.5rem; font-size: 1.05rem;">Matriks Deteksi Persekongkolan Penawaran Tender (Bid-Rigging &amp; Cover Bidding)</h3>
+                            <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 1rem;">Menganalisis delta waktu pengajuan penawaran, kesamaan subnet IP, dan pola cover-bidding (penawaran pendamping yang sengaja ditinggikan 4-8% agar vendor target menang pasti).</p>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nomor Tender</th>
+                                            <th>Judul Pengadaan</th>
+                                            <th>Vendor Pemenang Target</th>
+                                            <th>Vendor Penawar Pendamping (Cover)</th>
+                                            <th>Delta Waktu Submit</th>
+                                            <th>Subnet IP Terdeteksi</th>
+                                            <th>Probabilitas Kolusi</th>
+                                            <th>Status Intervensi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="fraudBidRiggingTableBody">
+                                        <tr><td colspan="8" class="text-center text-muted" style="padding: 2rem;">Memuat data persekongkolan tender...</td></tr>
                                     </tbody>
                                 </table>
                             </div>
