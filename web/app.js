@@ -1,4 +1,4 @@
-// State & Global Variables
+﻿// State & Global Variables
 let state = {
     token: localStorage.getItem('erp_token') || '',
     user: null,
@@ -34800,6 +34800,332 @@ async function triggerCRISPRPAT() {
         }
     } catch (err) {
         if (answerEl) answerEl.textContent = 'Gagal memproses CRISPR PAT sentinel: ' + err.message;
+    }
+}
+
+
+
+async function triggerUHTCHypersonic() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memantau leading edge UHTC Mach 8.4, fluks panas stagnasi, dan shock-shock interference Edney Type-IV...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const vehicleID = "VEHICLE-HYPERSONIC-GLIDE-01";
+        await api('/aerospace/uhtc-hypersonic/ingest-hypersonic-telemetry', 'POST', {
+            telemetry_id: "TEL-UHTC-8801",
+            vehicle_id: vehicleID,
+            mach_number: 8.45,
+            altitude_km: 32.5,
+            stagnation_heat_flux_mw_per_m2: 9.15,
+            uhtc_surface_temp_c: 2280.0,
+            porous_matrix_pressure_drop_bar: 5.85,
+            shock_impingement_pressure_bar: 52.0,
+            boundary_layer_transition_rms: 0.78,
+            transpiration_coolant_flow_kg_per_sec: 1.45
+        });
+
+        const evalRes = await api('/aerospace/uhtc-hypersonic/evaluate-thermal-protection', 'POST', { vehicle_id: vehicleID });
+        const actRes = await api('/aerospace/uhtc-hypersonic/trigger-coolant-surge-and-aoa-trim', 'POST', { vehicle_id: vehicleID });
+        const dossierRes = await api(`/aerospace/uhtc-hypersonic/uhtc-hypersonic-dossier/${vehicleID}`, 'GET');
+
+        if (badge) badge.textContent = `🚀 UHTC Hypersonic: Mach ${dossierRes.data.mach_number} | Temp: ${dossierRes.data.uhtc_surface_temp_c}°C | Status: ${evalRes.data.thermal_protection_integrity}`;
+        if (answerEl) {
+            let out = `🚀 HYPERSONIC UHTC TRANSPIRATION COOLING & SHOCK-SHOCK INTERFERENCE SENTINEL (AIAA S-102.2 & NASA SP-8000):\n`;
+            out += `Identifikasi Wahana Hypersonic: ${vehicleID} | Kecepatan: Mach ${dossierRes.data.mach_number} @ Altitudo ${dossierRes.data.altitude_km} km\n`;
+            out += `Kepatuhan Aerotermal: AIAA S-102.2 (${dossierRes.data.aiaa_s102_compliant ? 'Compliant' : 'Warning'}) | NASA SP-8000 (Certified) | MIL-STD-1530 (Cleared)\n\n`;
+            out += `PARAMETER AEROTERMAL LEADING-EDGE & INTERFERENSI GELOMBANG KEJUT:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Fluks Kalor Stagnasi (Heat Flux): ${dossierRes.data.stagnation_heat_flux_mw_m2} MW/m² (Batas Aman UHTC Diboride < 8.5 MW/m²) | Ekses: +${evalRes.data.heat_flux_excess_margin_pct.toFixed(1)}%\n`;
+            out += `• Suhu Permukaan Material UHTC (ZrB2-SiC Matrix): ${dossierRes.data.uhtc_surface_temp_c}°C (Batas Sublimasi/Ablasi < 2200°C)\n`;
+            out += `• Tekanan Tumbukan Gelombang Kejut (Shock Impingement): ${dossierRes.data.shock_impingement_bar} bar (Batas Edney Type-IV < 45.0 bar)\n`;
+            out += `• Integritas Struktur Perlindungan Termal: ${evalRes.data.thermal_protection_integrity}\n`;
+            out += `• Klasifikasi Pola Bahaya Gelombang Kejut: ${evalRes.data.shock_interference_hazard}\n\n`;
+            out += `SURGE TRANSPIRASI MATRIKS PORI, AKTUATOR PLASMA & TRIM SUDUT SERANG (AoA):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Manuver Termal: ${actRes.data.action_id}\n`;
+            out += `• Laju Aliran Surge Gas Transpirasi Pori: ${actRes.data.commanded_coolant_surge_flow_kg_per_sec} kg/s (Gas Helium/Nitrogen Membentuk Lapisan Insulasi Film Dingin)\n`;
+            out += `• Tegangan Discharge Aktuator Plasma Nanodetik: ${actRes.data.plasma_actuator_voltage_kv} kV (Menstabilkan Lapisan Batas / Mencegah Turbulensi Dini)\n`;
+            out += `• Koreksi Trim Sudut Serang (AoA Trim): ${actRes.data.angle_of_attack_trim_deg}° (Menggeser Titik Tumbuk Gelombang Kejut dari Apex Leading Edge)\n`;
+            out += `• Nilai Kerugian Wahana Terhindar: $${actRes.data.avoided_hypersonic_breakup_loss_usd.toLocaleString()} USD (Mencegah Breakup Katastropik Aerotermal dan Kehilangan Misi)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Surge transpirasi gas 3.45 kg/s melalui matriks keramik berpori membentuk lapisan pelindung dingin yang memotong laju fluks panas seketika.</li>
+                <li>Aktuator plasma 18.5 kV dan trim elevon -0.45° menggeser interaksi shock Edney Type-IV menjauh dari radius tumpul leading edge.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses hypersonic UHTC sentinel: ' + err.message;
+    }
+}
+
+async function triggerMagmaGeothermal() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memantau sumur panas bumi superkritis magma 500°C, tekanan uap ekstrem, dan tegangan casing...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const wellboreID = "WELL-KRAFLA-DEEP-MAGMA-07";
+        await api('/energy/magma-geothermal/ingest-magma-telemetry', 'POST', {
+            telemetry_id: "TEL-MAGMA-7701",
+            wellbore_id: wellboreID,
+            well_depth_meters: 4850.0,
+            bottom_hole_temp_c: 508.5,
+            supercritical_pressure_bar: 375.0,
+            casing_von_mises_stress_mpa: 585.0,
+            drillstring_chloride_ppm: 2850.0,
+            hydrogen_sulfide_h2s_ppm: 195.0,
+            drilling_mud_return_temp_c: 168.0,
+            thermal_expansion_strain_pct: 1.48
+        });
+
+        const evalRes = await api('/energy/magma-geothermal/evaluate-blowout-and-casing-buckling', 'POST', { wellbore_id: wellboreID });
+        const actRes = await api('/energy/magma-geothermal/trigger-quench-mud-and-slip-joint', 'POST', { wellbore_id: wellboreID });
+        const dossierRes = await api(`/energy/magma-geothermal/magma-wellbore-dossier/${wellboreID}`, 'GET');
+
+        if (badge) badge.textContent = `🌋 Magma Geothermal: ${dossierRes.data.bottom_hole_temp_c}°C | Tekanan: ${dossierRes.data.supercritical_pressure_bar} bar | Status: ${evalRes.data.wellbore_integrity_status}`;
+        if (answerEl) {
+            let out = `🌋 DEEP EARTH MAGMA-SUPERHEATED GEOTHERMAL DRILLING SENTINEL (API SPEC 5CT & ISO 10424):\n`;
+            out += `Identifikasi Sumur Pengeboran Magma: ${wellboreID} | Kedalaman: ${dossierRes.data.well_depth_meters} m\n`;
+            out += `Kepatuhan Integritas Sumur: API Spec 5CT (${dossierRes.data.api_spec_5ct_compliant ? 'Compliant' : 'Warning'}) | ISO 10424 (Certified)\n\n`;
+            out += `PARAMETER TERMODINAMIKA SUPERKRITIS & TEGANGAN MATERIAL CASING:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Suhu Dasar Lubang Sumur (Bottom-Hole Temp): ${dossierRes.data.bottom_hole_temp_c}°C (Batas Intrusi Magma Superkritis < 480°C)\n`;
+            out += `• Tekanan Fluida Superkritis: ${dossierRes.data.supercritical_pressure_bar} bar (Batas Ambang Blowout < 350.0 bar)\n`;
+            out += `• Tegangan Von Mises Casing Paduan Khusus: ${dossierRes.data.casing_stress_mpa} MPa (Batas Luluh Material < 550.0 MPa) | Ekses: +${evalRes.data.stress_yield_margin_pct.toFixed(1)}%\n`;
+            out += `• Konsentrasi Gas Korosif H2S: ${dossierRes.data.h2s_concentration_ppm} ppm (Batas Embrittlement < 150 ppm)\n`;
+            out += `• Status Integritas Lubang Bor: ${evalRes.data.wellbore_integrity_status}\n`;
+            out += `• Risiko Buckling Plastis Casing: ${evalRes.data.casing_buckling_risk}\n\n`;
+            out += `INJEKSI LUMPUR QUENCH DENSITAS TINGGI & PELEPASAN TEKANAN SLIP-JOINT:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Tanggap Darurat Sumur: ${actRes.data.action_id}\n`;
+            out += `• Laju Pemompaan Lumpur Quench Barit-Bentonit: ${actRes.data.commanded_quench_mud_flow_lpm.toLocaleString()} L/menit (Mendinginkan Fluida Superkritis & Menahan Bubble Kick)\n`;
+            out += `• Perpanjangan Teleskopik Sambungan Casing (Slip Joint): ${actRes.data.slip_joint_axial_stroke_mm} mm (Menyerap Ekspansi Termal & Mencegah Deformasi Plastis)\n`;
+            out += `• Tekanan Selubung Gas Nitrogen (N2 Purge): ${actRes.data.nitrogen_purge_pressure_bar} bar (Mencegah Migrasi Gas H2S Korosif ke Permukaan)\n`;
+            out += `• Nilai Kerugian Semburan Liar Terhindar: $${actRes.data.avoided_magma_blowout_loss_usd.toLocaleString()} USD (Mencegah Blowout Magma Katastropik & Kehilangan Rig Pengeboran)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pemompaan lumpur quench 4,850 L/menit menekan ekspansi uap superkritis dan menurunkan temperatur dasar sumur ke zona aman.</li>
+                <li>Ekspansi sambungan slip joint 185 mm membebaskan tegangan aksial luluh dan melindungi casing dari tekuk plastis akibat pemuaian termal.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses magma geothermal sentinel: ' + err.message;
+    }
+}
+
+async function triggerImmersionCHF() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memantau fluks panas GPU die immersion 2-fase, kepergian gelembung uap, dan Critical Heat Flux (CHF)...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const nodeID = "GPU-NODE-H100-IMMERSION-RACK-03";
+        await api('/datacenter/immersion-chf/ingest-immersion-telemetry', 'POST', {
+            telemetry_id: "TEL-CHF-6601",
+            gpu_node_id: nodeID,
+            cluster_rack_id: "RACK-AI-SUPERCLUSTER-09",
+            gpu_heat_flux_w_per_cm2: 128.5,
+            silicon_junction_temp_c: 98.2,
+            dielectric_fluid_temp_c: 62.0,
+            bubble_departure_frequency_hz: 920.0,
+            dielectric_breakdown_voltage_kv: 33.5,
+            vapor_chamber_pressure_bar: 1.35,
+            condenser_subcooling_delta_c: 6.5
+        });
+
+        const evalRes = await api('/datacenter/immersion-chf/evaluate-chf-and-vapor-blanket', 'POST', { gpu_node_id: nodeID });
+        const actRes = await api('/datacenter/immersion-chf/trigger-microjet-and-power-capping', 'POST', { gpu_node_id: nodeID });
+        const dossierRes = await api(`/datacenter/immersion-chf/immersion-cooling-dossier/${nodeID}`, 'GET');
+
+        if (badge) badge.textContent = `🧊 Immersion CHF: Flux ${dossierRes.data.gpu_heat_flux_w_cm2} W/cm² | Tj: ${dossierRes.data.silicon_junction_temp_c}°C | Status: ${evalRes.data.boiling_regime_state}`;
+        if (answerEl) {
+            let out = `🧊 AI DATA CENTER 2-PHASE DIELECTRIC IMMERSION CHF SENTINEL (ASHRAE TC 9.9 & OCP STANDARD):\n`;
+            out += `Identifikasi Node Akselerator AI: ${nodeID} | Rak: ${dossierRes.data.cluster_rack_id}\n`;
+            out += `Kepatuhan Termal Pusat Data AI: ASHRAE TC 9.9 (${dossierRes.data.ashrae_tc99_compliant ? 'Compliant' : 'Warning'}) | OCP Advanced Cooling (Pass)\n\n`;
+            out += `REJEM PENDIDIHAN DIELEKTRIK & PERJALANAN MENUJU TITIK CHF (CRITICAL HEAT FLUX):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Fluks Kalor Silikon GPU: ${dossierRes.data.gpu_heat_flux_w_cm2} W/cm² (Batas Ambang Departure CHF < 120.0 W/cm²) | Ekses: +${evalRes.data.heat_flux_excess_margin_pct.toFixed(1)}%\n`;
+            out += `• Suhu Sambungan Silikon (Junction Temp Tj): ${dossierRes.data.silicon_junction_temp_c}°C (Batas Thermal Runaway Semikonduktor < 95.0°C)\n`;
+            out += `• Frekuensi Pelepasan Gelembung Didih: ${dossierRes.data.bubble_frequency_hz} Hz (Batas Koalesensi Selimut Uap < 850 Hz)\n`;
+            out += `• Tegangan Tembus Dielektrik Fluida: ${dossierRes.data.breakdown_voltage_kv} kV (Batas Kemurnian Isolasi > 35.0 kV)\n`;
+            out += `• Status Rejim Perpindahan Kalor: ${evalRes.data.boiling_regime_state}\n`;
+            out += `• Kondisi Kemurnian Fluida Dielektrik: ${evalRes.data.dielectric_fluid_condition}\n\n`;
+            out += `SEMPROTAN MICROJET SUB-COOLED, POWER CAPPING & PENINGKATAN KONDENSOR:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Proteksi Termal GPU: ${actRes.data.action_id}\n`;
+            out += `• Kecepatan Semburan Microjet Dielektrik Terarah: ${actRes.data.commanded_microjet_velocity_m_per_sec} m/s (Memecah Selimut Uap & Membasahi Kembali Heat Spreader)\n`;
+            out += `• Pembatasan Daya Maksimum GPU (Power Capping): ${actRes.data.power_capping_limit_watts} W (Diturunkan dari 1000 W untuk Meredam Fluks Ekstrem)\n`;
+            out += `• Putaran Kipas Kondensor Sirkulasi Uap: ${actRes.data.condenser_fan_speed_rpm} RPM (Meningkatkan Subcooling Delta Kondensat)\n`;
+            out += `• Nilai Kerugian Kluster AI Terhindar: $${actRes.data.avoided_silicon_meltdown_loss_usd.toLocaleString()} USD (Mencegah Kerusakan Permanen Chiplet GPU, Karhutla Rak & Downtime Bisnis)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Jet fluida sub-cooled 8.75 m/s menghancurkan lapisan uap isolatif dan mengembalikan rejim ke nucleate boiling yang stabil.</li>
+                <li>Power capping 650 W dan pendinginan kondensor 4,500 RPM menurunkan suhu silikon ke batas aman sebelum terjadi delaminasi sambungan micro-bump.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses immersion CHF sentinel: ' + err.message;
+    }
+}
+
+async function triggerAsteroidMining() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memantau konsentrator optik desorpsi surya asteroid, integritas kanopi penampung, dan perangkap kriogenik...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const probeID = "PROBE-MINING-PSYCHE-OPTICAL-02";
+        await api('/space/asteroid-mining/ingest-mining-telemetry', 'POST', {
+            telemetry_id: "TEL-AST-5501",
+            mining_probe_id: probeID,
+            target_asteroid_name: "16-Psyche-Carbonaceous-MType",
+            concentrated_solar_flux_kw_per_m2: 268.0,
+            regolith_desorption_temp_c: 645.0,
+            inflatable_canopy_pressure_bar: 0.92,
+            cryo_cold_trap_temp_k: 138.0,
+            dust_ejecta_micron_size: 185.0,
+            volatile_extraction_rate_kg_per_hr: 54.5,
+            canopy_tear_stress_mpa: 195.0
+        });
+
+        const evalRes = await api('/space/asteroid-mining/evaluate-desorption-and-canopy-integrity', 'POST', { mining_probe_id: probeID });
+        const actRes = await api('/space/asteroid-mining/trigger-defocus-and-cryo-trap-boost', 'POST', { mining_probe_id: probeID });
+        const dossierRes = await api(`/space/asteroid-mining/asteroid-mining-dossier/${probeID}`, 'GET');
+
+        if (badge) badge.textContent = `☄️ Asteroid Mining: ${dossierRes.data.target_asteroid} | Fluks: ${dossierRes.data.solar_flux_kw_m2} kW/m² | Kanopi: ${evalRes.data.canopy_integrity_status}`;
+        if (answerEl) {
+            let out = `☄️ DEEP-SPACE ASTEROID OPTICAL MINING DESORPTION & CRYO TRAPPING SENTINEL (NASA & ISO 14620):\n`;
+            out += `Identifikasi Wahana Tambang Antariksa: ${probeID} | Target Asteroid: ${dossierRes.data.target_asteroid}\n`;
+            out += `Kepatuhan Misi Antariksa: ISO 14620 (${dossierRes.data.iso_14620_compliant ? 'Compliant' : 'Warning'}) | NASA Planetary Protection (Pass)\n\n`;
+            out += `KONSENTRASI RADIASI SURYA, TEKANAN KANOPI KEMBUNG & EFISIENSI PERANGKAP KRIO:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Fluks Termal Konsentrasi Surya: ${dossierRes.data.solar_flux_kw_m2} kW/m² (Batas Ambang Desorpsi Regolit < 250.0 kW/m²)\n`;
+            out += `• Suhu Desorpsi Termal Regolit: ${dossierRes.data.regolith_temp_c}°C (Pelepasan Volatil Air & Logam Berharga)\n`;
+            out += `• Tekanan Gas dalam Kanopi Kembung: ${dossierRes.data.canopy_pressure_bar} bar (Batas Ledak Kanopi Film Polimer < 0.85 bar) | Ekses: +${evalRes.data.canopy_pressure_margin_pct.toFixed(1)}%\n`;
+            out += `• Suhu Perangkap Dingin Kriogenik (Cold Trap): ${dossierRes.data.cold_trap_temp_k} K (Batas Efisiensi Pembekuan Volatil < 125.0 K)\n`;
+            out += `• Status Integritas Fisik Kanopi Penampung: ${evalRes.data.canopy_integrity_status}\n`;
+            out += `• Efisiensi Kondensasi Fraksi Volatil: ${evalRes.data.volatile_condensation_efficiency}\n\n`;
+            out += `DEFOKUS CERMIN SURYA, SURGE DAYA KRIOGENIK & KATUP PEMBUANG KELENBIHAN TEKANAN:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Misi Penambangan Asteroid: ${actRes.data.action_id}\n`;
+            out += `• Sudut Gimbal Defokus Reflektor Surya: ${actRes.data.commanded_solar_defocus_angle_deg}° (Menjauhkan Titik Fokus dari Regolit untuk Mengurangi Pendidihan)\n`;
+            out += `• Daya Chiller Kriogenik Stirling/Pulse-Tube: ${actRes.data.cryo_chiller_power_watts} W (Membekukan Uap Air dan Senyawa Volatil Seketika)\n`;
+            out += `• Laju Pembuangan Katup Pelepas Tekanan: ${actRes.data.relief_valve_vent_rate_kg_per_sec} kg/s (Mencegah Robeknya Membran Kanopi Akibat Overpressure)\n`;
+            out += `• Nilai Kerugian Misi Antariksa Terhindar: $${actRes.data.avoided_canopy_blowout_loss_usd.toLocaleString()} USD (Mencegah Ledakan Kanopi, Kerusakan Wahana dan Kehilangan Muatan Volatil)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Defokus cermin 14.5° seketika meredakan overpressure termal tanpa mematikan operasi propulsi stasiun penambang.</li>
+                <li>Daya pendingin kriogenik 3,600 W mengkondensasikan kembali uap volatil dan menjaga integritas kanopi penampung regolit.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses asteroid mining sentinel: ' + err.message;
+    }
+}
+
+async function triggerDOCCOcean() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Memantau elektrodialisis membran bipolar (BPMED) penangkapan karbon laut lepas dan kerak brucite...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const plantID = "PLANT-DOCC-PACIFIC-PLATFORM-01";
+        await api('/ocean/docc-capture/ingest-docc-telemetry', 'POST', {
+            telemetry_id: "TEL-DOCC-4401",
+            plant_id: plantID,
+            ocean_platform_id: "PLATFORM-CARBON-CAPTURE-OFFSHORE-05",
+            seawater_flow_rate_m3_per_hr: 2450.0,
+            bipolar_membrane_cell_voltage_v: 2.58,
+            current_density_ma_per_cm2: 125.0,
+            brucite_calcite_scale_thickness_um: 14.8,
+            effluent_discharge_ph: 7.42,
+            ocean_co2_extraction_rate_tons_per_day: 68.0,
+            co2_product_gas_purity_pct: 98.6
+        });
+
+        const evalRes = await api('/ocean/docc-capture/evaluate-scaling-and-acidification', 'POST', { plant_id: plantID });
+        const actRes = await api('/ocean/docc-capture/trigger-edr-polarity-reversal-and-acid-flush', 'POST', { plant_id: plantID });
+        const dossierRes = await api(`/ocean/docc-capture/docc-environmental-dossier/${plantID}`, 'GET');
+
+        if (badge) badge.textContent = `🌊 DOCC Ocean Capture: ${dossierRes.data.ocean_platform} | Volt: ${dossierRes.data.bpmed_cell_voltage_v}V | Status: ${evalRes.data.electrodialysis_stack_condition}`;
+        if (answerEl) {
+            let out = `🌊 MARINE DIRECT OCEAN CARBON CAPTURE (DOCC) BPMED SENTINEL (IMO LONDON PROTOCOL & ISO 14064-2):\n`;
+            out += `Identifikasi Fasilitas DOCC Lepas Pantai: ${plantID} | Platform: ${dossierRes.data.ocean_platform}\n`;
+            out += `Kepatuhan Pembuangan Air Laut: IMO London Protocol (${dossierRes.data.imo_london_protocol_cleared ? 'Cleared' : 'Warning'}) | ISO 14064-2 (Certified)\n\n`;
+            out += `TEGANGAN SEL ELEKTRODIALISIS, PENGERAKAN MINERAL BRUCITE & KUALITAS EFFLUENT:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Tegangan Sel Membran Bipolar (BPMED Cell Voltage): ${dossierRes.data.bpmed_cell_voltage_v} V (Batas Penurunan Efisiensi Tumpukan < 2.40 V) | Ekses: +${evalRes.data.cell_voltage_excess_margin_pct.toFixed(1)}%\n`;
+            out += `• Ketebalan Kerak Presipitasi Mineral Brucite/Kalsit: ${dossierRes.data.scale_thickness_um} µm (Batas Hambatan Fouling < 12.0 µm)\n`;
+            out += `• pH Efluen Air Laut yang Dibuang: ${dossierRes.data.effluent_ph} pH (Batas Wajib London Protocol: 7.60 - 8.40 pH)\n`;
+            out += `• Kemurnian Gas Produk Karbon Dioksida: ${dossierRes.data.co2_purity_pct}% CO2\n`;
+            out += `• Kondisi Kesehatan Tumpukan Membran: ${evalRes.data.electrodialysis_stack_condition}\n`;
+            out += `• Status Kepatuhan Lingkungan Laut: ${evalRes.data.discharge_compliance}\n\n`;
+            out += `REVERSI POLARITAS ELEKTRODA (EDR), BILAS ASAM SITRAT & RESTORASI pH NETRAL:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Pemeliharaan Tumpukan DOCC: ${actRes.data.action_id}\n`;
+            out += `• Durasi Reversi Polaritas Elektroda (EDR Mode): ${actRes.data.electrodialysis_polarity_reversal_sec} detik (Melarutkan Endapan Mg(OH)2 pada Permukaan Katoda)\n`;
+            out += `• Laju Pembilasan Larutan Asam Sitrat Organik: ${actRes.data.citric_acid_flush_rate_lpm} L/menit (Menghilangkan Lapisan Kerak Tanpa Merusak Polimer Membran)\n`;
+            out += `• Restorasi pH Efluen dengan Dosis Kaustik Netral: ${actRes.data.effluent_caustic_neutralization_ph} pH (Memastikan Air Buangan Sesuai Standar Hayati Laut)\n`;
+            out += `• Nilai Kerugian Membran & Denda Terhindar: $${actRes.data.avoided_membrane_stack_burnout_loss_usd.toLocaleString()} USD (Mencegah Kerusakan Permanen Tumpukan Membran & Sanksi Maritim Internasional)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Reversi polaritas 120 detik melarutkan kerak brucite dan memulihkan voltase sel kembali ke nominal 1.95 V.</li>
+                <li>Injeksi penawar netral mengembalikan pH buangan air laut ke 8.18 sehingga biota laut terlindungi dari resiko asidifikasi lokal.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses DOCC ocean capture sentinel: ' + err.message;
     }
 }
 

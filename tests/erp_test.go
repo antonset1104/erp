@@ -108,6 +108,11 @@ import (
 	corespacesolar "erp-golang/internal/core/space_solar"
 	corehighnaeuv "erp-golang/internal/core/highna_euv"
 	corecrisprpat "erp-golang/internal/core/crispr_pat"
+	coreuhtchypersonic "erp-golang/internal/core/uhtc_hypersonic"
+	coremagmageothermal "erp-golang/internal/core/magma_geothermal"
+	coreimmersionchf "erp-golang/internal/core/immersion_chf"
+	coreasteroidmining "erp-golang/internal/core/asteroid_mining"
+	coredoccocean "erp-golang/internal/core/docc_ocean"
 	corescramjet "erp-golang/internal/core/scramjet"
 	coreseabed "erp-golang/internal/core/seabed"
 	coresemiconductor "erp-golang/internal/core/semiconductor"
@@ -14588,5 +14593,180 @@ IEA*1*000099123~`
 	t.Logf("✓ In-Vivo CRISPR-Cas Nanopore PAT Sentinel Verified: Batch='%s' (Patient='%s'), OnTarget=%.1f%%, OffTarget=%.4f%% (Excess=+%.1f%%), CasHours=%.1f h, NanoporeDepth=%.0fx, Status='%s', Hazard='%s', AcrDose=%.1f mg/L, Quench=%.0f s, PT_Ratio=%.2f, AvoidedLoss=$%.2fM USD",
 		crisprTel.BioreactorBatchID, crisprTel.PatientTherapyID, crisprTel.OnTargetIndelEfficiencyPct, crisprTel.OffTargetCleavageFrequencyPct, crisprAssess.OffTargetCleavageExcessPct, crisprTel.ActiveCasEnzymePersistenceHours, crisprTel.NanoporeCleavageReadDepth, crisprAssess.GeneEditingPrecisionStatus, crisprAssess.OffTargetCleavageHazard, crisprAct.CommandedAcrProteinDosingMgPerLiter, crisprAct.EnzymeQuenchRinseTimeSec, crisprAct.PhosphorothioateTrimRatio, crisprAct.AvoidedGeneTherapyFailureUSD/1e6)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (94 SECTIONS: 130+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD + CONTRACT LEAKAGE SENTINEL + MICROGRID ISLANDING + CARGO GEOFENCE + SHIFT BIDDING FATIGUE + CIRCULAR PACKAGING RTI + INDUSTRIAL WATER ZLD + VENDOR SANCTIONS GRAPH + BOILER TUBE DESCALING + SAAS DUNNING WATERFALL + TOLL MANUFACTURING RECON + SILO AERATION SENTINEL + EPC PROGRESS BILLING ESCROW + DYNAMIC PORT BERTH DEMURRAGE + TRANSFORMER DGA GUARDIAN + CROSS BORDER CASH REPATRIATION + ORE BLENDING OPTIMIZER + PHARMA CRYOGENIC SENTINEL + KILN REFRACTORY GUARDIAN + IP PATENT ANNUITY + TURBINE EOH CREEP + AVIATION MRO FATIGUE + MARINE LNG RELIQUEFACTION + SEMICONDUCTOR FAB YIELD + WASTEWATER BIOMETHANE + RAILWAY WHEEL RCF + NUCLEAR RADIOPHARM DECAY + UTILITY BESS THERMAL SOH + SATELLITE ORBITAL CONJUNCTION + SUBSEA FLOW ASSURANCE + CONNECTED VEHICLE OTA SUMS + BIOPHARMA BIOREACTOR PAT + FLOATING WIND MOORING + HVDC SUBSEA DTS + CCS CO2 ENVELOPE + MINE ROCKBURST SENTINEL + TOKAMAK FUSION DISRUPTION + CRYO LH2 ORTHO-PARA + HYPERSONIC TPS ABLATION + 3D CHIPLET TSV WARPAGE + SUPERHOT EGS GEOTHERMAL SEISMICITY + QUANTUM QKD PHASE GUARDIAN + SEABED NODULE PLUME + CSP MOLTEN SALT FREEZE + SOLID-STATE BATTERY CRACK + DIRECT AIR CAPTURE OPTIMIZER + EVTOL ACOUSTIC SENTINEL + HYPERLOOP MAGLEV QUENCH + SUBSEA DEEPWATER BOP + CAR-T ACOUSTIC SORTING + PLASTIC PYROLYSIS DIOXIN SENTINEL + GREEN AMMONIA SENTINEL + ROCKET POGO SENTINEL + SMR PASSIVE CONTAINMENT + EUV PELLICLE SENTINEL + UHVDC CONVERTER SENTINEL + SUBSEA CCS CO2 HYDRATE + HYPERSONIC SCRAMJET FUEL CRACKING + MRNA LNP MICROFLUIDIC + SILICON PHOTONICS CPO SKEW + SOEC EFUEL COELECTROLYSIS + SUPERHOT ROCK GEOTHERMAL SHR + SUBSEA AUV DOCKING IPT + ELECTRONIC H2O2 RUNAWAY + BIOPHARMA CONTROLLED ICE FOG LYO + CADMIUM FREE QLED INK PRINTING + HALL EFFECT THRUSTER PROPULSION + SUB 2NM GAAFET NANOSHEET + INDUSTRIAL FERMENTATION FOAM + SALT CAVERN HYDROGEN STORAGE + MOLTEN SALT REACTOR FUEL REDOX + REUSABLE ROCKET GRID FIN HYDRAULICS + SEMICONDUCTOR MBMW RETICLE + AAV GENE THERAPY VECTOR + SOLID STATE BATTERY DRY ELECTRODE + MARS ISRU SABATIER METHALOX + COMMERCIAL AIRCRAFT LH2 CRYO TANK + HBM4 16-DIE HYBRID DIRECT BONDING + NUCLEAR MICROREACTOR HEAT PIPE DRYOUT + CONTINUOUS MRNA 5-CAP1 PAT SYNTHESIS + SUBSEA WET GAS COMPRESSOR SLUG AMB + AVIATION AIRBORNE HTS STATOR QUENCH + GREEN STEEL 100% H-DRI SHAFT STICKING + QUANTUM COMPUTING 10mK DILUTION CRYOSTAT + CLEAN MARITIME AMMONIA DUAL-FUEL ENGINE + LUNAR REGOLITH MICROWAVE SINTERING + DGR NUCLEAR SPENT FUEL CANISTER BENTONITE + FUSION LIQUID PbLi BLANKET TBR MHD + SPACE SOLAR POWER GW MICROWAVE BEAM + HIGH-NA 0.55 EUV ANAMORPHIC WAVEFRONT + IN-VIVO CRISPR-CAS NANOPORE PAT) PASSED 100%!")
+	// -------------------------------------------------------------------------
+	// SECTION 95: FRONTIER ENTERPRISE & DEEP-TECH SENTINELS (HYPERSONIC UHTC TRANSPIRATION, MAGMA 500°C GEOTHERMAL INFLUX, AI IMMERSION CHF DEPARTURE, ASTEROID OPTICAL MINING & MARINE DOCC BPMED)
+	// -------------------------------------------------------------------------
+	t.Log("\n    --- SECTION 95: FRONTIER ENTERPRISE & DEEP-TECH SENTINELS (HYPERSONIC UHTC TRANSPIRATION, MAGMA 500°C GEOTHERMAL INFLUX, AI IMMERSION CHF DEPARTURE, ASTEROID OPTICAL MINING & MARINE DOCC BPMED) ---")
+
+	// 95.1 Hypersonic Aerostructure UHTC Diboride Transpiration Cooling & BLT Shock-Shock Sentinel (AIAA S-102.2 & NASA SP-8000)
+	uhtcTel := coreuhtchypersonic.GlobalUHTCHypersonicVault.IngestHypersonicTelemetry(coreuhtchypersonic.UHTCHypersonicTelemetry{
+		TelemetryID:                      "TEL-UHTC-9901",
+		VehicleID:                        "VEHICLE-HYPERSONIC-GLIDE-99",
+		MachNumber:                       8.65,
+		AltitudeKm:                       34.0,
+		StagnationHeatFluxMwPerM2:        9.45,
+		UhtcSurfaceTempC:                 2260.0,
+		PorousMatrixPressureDropBar:      6.15,
+		ShockImpingementPressureBar:      54.0,
+		BoundaryLayerTransitionRms:       0.82,
+		TranspirationCoolantFlowKgPerSec: 1.35,
+	})
+	if uhtcTel.VehicleID == "" || uhtcTel.MachNumber != 8.65 {
+		t.Fatalf("Failed to ingest UHTC hypersonic telemetry: %+v", uhtcTel)
+	}
+
+	uhtcAssess, err := coreuhtchypersonic.GlobalUHTCHypersonicVault.EvaluateThermalProtection("VEHICLE-HYPERSONIC-GLIDE-99")
+	if err != nil || uhtcAssess.ThermalProtectionIntegrity != "DIBORIDE_ABLATION_BREACH_HAZARD" || uhtcAssess.ShockInterferenceHazard != "EDNEY_TYPE_IV_SHOCK_IMPINGEMENT" || !uhtcAssess.TranspirationCoolantSurgeMandate || !uhtcAssess.PlasmaTripActuatorMandate {
+		t.Fatalf("Failed to evaluate UHTC thermal protection: %+v, err: %v", uhtcAssess, err)
+	}
+
+	uhtcAct, err := coreuhtchypersonic.GlobalUHTCHypersonicVault.TriggerCoolantSurgeAndAoATrim("VEHICLE-HYPERSONIC-GLIDE-99")
+	if err != nil || uhtcAct.CommandedCoolantSurgeFlowKgPerSec < 3.0 || uhtcAct.PlasmaActuatorVoltageKv < 15.0 || uhtcAct.AngleOfAttackTrimDeg >= 0 || uhtcAct.AvoidedHypersonicBreakupLossUSD <= 0 {
+		t.Fatalf("Failed to trigger UHTC coolant surge and AoA trim: %+v, err: %v", uhtcAct, err)
+	}
+
+	uhtcDossier, err := coreuhtchypersonic.GlobalUHTCHypersonicVault.GetUHTCHypersonicDossier("VEHICLE-HYPERSONIC-GLIDE-99")
+	if err != nil || !uhtcDossier["aiaa_s102_compliant"].(bool) || !uhtcDossier["nasa_sp8000_certified"].(bool) {
+		t.Fatalf("Failed to compile UHTC hypersonic dossier: %+v, err: %v", uhtcDossier, err)
+	}
+	t.Logf("✓ Hypersonic UHTC Transpiration Cooling Sentinel Verified: Vehicle='%s', Mach=%.2f, Alt=%.1f km, HeatFlux=%.2f MW/m2 (Excess=+%.1f%%), SurfaceT=%.1f°C, ShockP=%.1f bar, Integrity='%s', Hazard='%s', Surge=%.2f kg/s, Plasma=%.1f kV, Trim=%.2f°, AvoidedLoss=$%.2fM USD",
+		uhtcTel.VehicleID, uhtcTel.MachNumber, uhtcTel.AltitudeKm, uhtcTel.StagnationHeatFluxMwPerM2, uhtcAssess.HeatFluxExcessMarginPct, uhtcTel.UhtcSurfaceTempC, uhtcTel.ShockImpingementPressureBar, uhtcAssess.ThermalProtectionIntegrity, uhtcAssess.ShockInterferenceHazard, uhtcAct.CommandedCoolantSurgeFlowKgPerSec, uhtcAct.PlasmaActuatorVoltageKv, uhtcAct.AngleOfAttackTrimDeg, uhtcAct.AvoidedHypersonicBreakupLossUSD/1e6)
+
+	// 95.2 Deep Earth Magma-Superheated (500°C+) Geothermal Drilling Supercritical Influx Sentinel (API Spec 5CT & ISO 10424)
+	magmaTel := coremagmageothermal.GlobalMagmaGeothermalVault.IngestMagmaTelemetry(coremagmageothermal.MagmaGeothermalTelemetry{
+		TelemetryID:               "TEL-MAGMA-9901",
+		WellboreID:                "WELL-KRAFLA-DEEP-MAGMA-99",
+		WellDepthMeters:           4920.0,
+		BottomHoleTempC:           512.0,
+		SupercriticalPressureBar:  380.0,
+		CasingVonMisesStressMpa:   590.0,
+		DrillstringChloridePpm:    2950.0,
+		HydrogenSulfideH2sPpm:     210.0,
+		DrillingMudReturnTempC:    175.0,
+		ThermalExpansionStrainPct: 1.55,
+	})
+	if magmaTel.WellboreID == "" || magmaTel.BottomHoleTempC != 512.0 {
+		t.Fatalf("Failed to ingest magma geothermal telemetry: %+v", magmaTel)
+	}
+
+	magmaAssess, err := coremagmageothermal.GlobalMagmaGeothermalVault.EvaluateBlowoutAndCasingBuckling("WELL-KRAFLA-DEEP-MAGMA-99")
+	if err != nil || magmaAssess.WellboreIntegrityStatus != "MAGMATIC_SUPERHEATED_BLOWOUT_CRITICAL" || magmaAssess.CasingBucklingRisk != "PLASTIC_DEFORMATION_BUCKLING_HAZARD" || !magmaAssess.QuenchMudPumpingMandate || !magmaAssess.SlipJointExpansionReleaseMandate {
+		t.Fatalf("Failed to evaluate magma wellbore integrity: %+v, err: %v", magmaAssess, err)
+	}
+
+	magmaAct, err := coremagmageothermal.GlobalMagmaGeothermalVault.TriggerQuenchMudAndSlipJoint("WELL-KRAFLA-DEEP-MAGMA-99")
+	if err != nil || magmaAct.CommandedQuenchMudFlowLpm < 4000.0 || magmaAct.SlipJointAxialStrokeMm < 150.0 || magmaAct.NitrogenPurgePressureBar < 70.0 || magmaAct.AvoidedMagmaBlowoutLossUSD <= 0 {
+		t.Fatalf("Failed to trigger quench mud and slip joint: %+v, err: %v", magmaAct, err)
+	}
+
+	magmaDossier, err := coremagmageothermal.GlobalMagmaGeothermalVault.GetMagmaWellboreDossier("WELL-KRAFLA-DEEP-MAGMA-99")
+	if err != nil || !magmaDossier["api_spec_5ct_compliant"].(bool) || !magmaDossier["iso_10424_certified"].(bool) {
+		t.Fatalf("Failed to compile magma wellbore dossier: %+v, err: %v", magmaDossier, err)
+	}
+	t.Logf("✓ Magma Supercritical Geothermal Drilling Sentinel Verified: Wellbore='%s', Depth=%.0f m, BHT=%.1f°C, SupercriticalP=%.1f bar, Stress=%.1f MPa (Excess=+%.1f%%), H2S=%.0f ppm, Status='%s', Buckling='%s', QuenchMud=%.0f L/min, SlipStroke=%.1f mm, N2=%.1f bar, AvoidedLoss=$%.2fM USD",
+		magmaTel.WellboreID, magmaTel.WellDepthMeters, magmaTel.BottomHoleTempC, magmaTel.SupercriticalPressureBar, magmaTel.CasingVonMisesStressMpa, magmaAssess.StressYieldMarginPct, magmaTel.HydrogenSulfideH2sPpm, magmaAssess.WellboreIntegrityStatus, magmaAssess.CasingBucklingRisk, magmaAct.CommandedQuenchMudFlowLpm, magmaAct.SlipJointAxialStrokeMm, magmaAct.NitrogenPurgePressureBar, magmaAct.AvoidedMagmaBlowoutLossUSD/1e6)
+
+	// 95.3 AI Data Center 2-Phase Dielectric Immersion Boiling & CHF Departure Sentinel (ASHRAE TC 9.9 & OCP Standard)
+	chfTel := coreimmersionchf.GlobalImmersionCHFVault.IngestImmersionTelemetry(coreimmersionchf.ImmersionCHFTelemetry{
+		TelemetryID:                  "TEL-CHF-9901",
+		GpuNodeID:                    "GPU-NODE-H100-IMMERSION-99",
+		ClusterRackID:                "RACK-AI-SUPERCLUSTER-99",
+		GpuHeatFluxWPerCm2:           132.0,
+		SiliconJunctionTempC:         99.5,
+		DielectricFluidTempC:         64.5,
+		BubbleDepartureFrequencyHz:   940.0,
+		DielectricBreakdownVoltageKv: 32.0,
+		VaporChamberPressureBar:      1.40,
+		CondenserSubcoolingDeltaC:    6.0,
+	})
+	if chfTel.GpuNodeID == "" || chfTel.GpuHeatFluxWPerCm2 != 132.0 {
+		t.Fatalf("Failed to ingest immersion CHF telemetry: %+v", chfTel)
+	}
+
+	chfAssess, err := coreimmersionchf.GlobalImmersionCHFVault.EvaluateCHFAndVaporBlanket("GPU-NODE-H100-IMMERSION-99")
+	if err != nil || chfAssess.BoilingRegimeState != "FILM_BOILING_CHF_DEPARTURE_CRITICAL" || chfAssess.DielectricFluidCondition != "MOISTURE_CONTAMINATION_DEGRADED" || !chfAssess.MicrojetPumpingMandate || !chfAssess.GpuClockThrottlingMandate {
+		t.Fatalf("Failed to evaluate immersion CHF: %+v, err: %v", chfAssess, err)
+	}
+
+	chfAct, err := coreimmersionchf.GlobalImmersionCHFVault.TriggerMicrojetAndPowerCapping("GPU-NODE-H100-IMMERSION-99")
+	if err != nil || chfAct.CommandedMicrojetVelocityMPerSec < 8.0 || chfAct.PowerCappingLimitWatts > 700.0 || chfAct.CondenserFanSpeedRpm < 4000.0 || chfAct.AvoidedSiliconMeltdownLossUSD <= 0 {
+		t.Fatalf("Failed to trigger microjet and power capping: %+v, err: %v", chfAct, err)
+	}
+
+	chfDossier, err := coreimmersionchf.GlobalImmersionCHFVault.GetImmersionCoolingDossier("GPU-NODE-H100-IMMERSION-99")
+	if err != nil || !chfDossier["ashrae_tc99_compliant"].(bool) || !chfDossier["ocp_advanced_cooling_pass"].(bool) {
+		t.Fatalf("Failed to compile immersion cooling dossier: %+v, err: %v", chfDossier, err)
+	}
+	t.Logf("✓ AI Immersion 2-Phase Boiling CHF Sentinel Verified: GPU='%s' (Rack='%s'), HeatFlux=%.1f W/cm2 (Excess=+%.1f%%), Tj=%.1f°C, BubbleFreq=%.0f Hz, Breakdown=%.1f kV, Boiling='%s', Fluid='%s', Microjet=%.2f m/s, Cap=%.0f W, Fan=%.0f RPM, AvoidedLoss=$%.2fM USD",
+		chfTel.GpuNodeID, chfTel.ClusterRackID, chfTel.GpuHeatFluxWPerCm2, chfAssess.HeatFluxExcessMarginPct, chfTel.SiliconJunctionTempC, chfTel.BubbleDepartureFrequencyHz, chfTel.DielectricBreakdownVoltageKv, chfAssess.BoilingRegimeState, chfAssess.DielectricFluidCondition, chfAct.CommandedMicrojetVelocityMPerSec, chfAct.PowerCappingLimitWatts, chfAct.CondenserFanSpeedRpm, chfAct.AvoidedSiliconMeltdownLossUSD/1e6)
+
+	// 95.4 Deep-Space Asteroid Optical Mining Desorption & Volatile Trapping Sentinel (NASA Planetary Protection & ISO 14620)
+	astTel := coreasteroidmining.GlobalAsteroidMiningVault.IngestMiningTelemetry(coreasteroidmining.AsteroidMiningTelemetry{
+		TelemetryID:                   "TEL-AST-9901",
+		MiningProbeID:                 "PROBE-MINING-PSYCHE-99",
+		TargetAsteroidName:            "16-Psyche-Carbonaceous-Deep",
+		ConcentratedSolarFluxKwPerM2:  275.0,
+		RegolithDesorptionTempC:       655.0,
+		InflatableCanopyPressureBar:   0.94,
+		CryoColdTrapTempK:             142.0,
+		DustEjectaMicronSize:          195.0,
+		VolatileExtractionRateKgPerHr: 58.0,
+		CanopyTearStressMpa:           205.0,
+	})
+	if astTel.MiningProbeID == "" || astTel.ConcentratedSolarFluxKwPerM2 != 275.0 {
+		t.Fatalf("Failed to ingest asteroid mining telemetry: %+v", astTel)
+	}
+
+	astAssess, err := coreasteroidmining.GlobalAsteroidMiningVault.EvaluateDesorptionAndCanopyIntegrity("PROBE-MINING-PSYCHE-99")
+	if err != nil || astAssess.CanopyIntegrityStatus != "CATASTROPHIC_CANOPY_RUPTURE_RISK" || astAssess.VolatileCondensationEfficiency != "THERMAL_LEAK_INSUFFICIENT" || !astAssess.SolarConcentratorDefocusMandate || !astAssess.CryoChillerBoostMandate {
+		t.Fatalf("Failed to evaluate asteroid mining desorption: %+v, err: %v", astAssess, err)
+	}
+
+	astAct, err := coreasteroidmining.GlobalAsteroidMiningVault.TriggerDefocusAndCryoTrapBoost("PROBE-MINING-PSYCHE-99")
+	if err != nil || astAct.CommandedSolarDefocusAngleDeg < 10.0 || astAct.CryoChillerPowerWatts < 3000.0 || astAct.ReliefValveVentRateKgPerSec <= 0 || astAct.AvoidedCanopyBlowoutLossUSD <= 0 {
+		t.Fatalf("Failed to trigger defocus and cryo trap boost: %+v, err: %v", astAct, err)
+	}
+
+	astDossier, err := coreasteroidmining.GlobalAsteroidMiningVault.GetAsteroidMiningDossier("PROBE-MINING-PSYCHE-99")
+	if err != nil || !astDossier["iso_14620_compliant"].(bool) || !astDossier["nasa_planetary_protection"].(bool) {
+		t.Fatalf("Failed to compile asteroid mining dossier: %+v, err: %v", astDossier, err)
+	}
+	t.Logf("✓ Asteroid Optical Mining Desorption Sentinel Verified: Probe='%s' (Target='%s'), SolarFlux=%.1f kW/m2, RegolithT=%.1f°C, CanopyP=%.2f bar (Excess=+%.1f%%), ColdTrap=%.1f K, Canopy='%s', Trapping='%s', Defocus=%.1f°, CryoPower=%.0f W, VentRate=%.2f kg/s, AvoidedLoss=$%.2fM USD",
+		astTel.MiningProbeID, astTel.TargetAsteroidName, astTel.ConcentratedSolarFluxKwPerM2, astTel.RegolithDesorptionTempC, astTel.InflatableCanopyPressureBar, astAssess.CanopyPressureMarginPct, astTel.CryoColdTrapTempK, astAssess.CanopyIntegrityStatus, astAssess.VolatileCondensationEfficiency, astAct.CommandedSolarDefocusAngleDeg, astAct.CryoChillerPowerWatts, astAct.ReliefValveVentRateKgPerSec, astAct.AvoidedCanopyBlowoutLossUSD/1e6)
+
+	// 95.5 Marine Electrochemical Direct Ocean Carbon Capture (DOCC) BPMED Sentinel (IMO London Protocol & ISO 14064-2)
+	doccTel := coredoccocean.GlobalDOCCOceanVault.IngestDOCCTelemetry(coredoccocean.DOCCOceanTelemetry{
+		TelemetryID:                      "TEL-DOCC-9901",
+		PlantID:                          "PLANT-DOCC-PACIFIC-99",
+		OceanPlatformID:                  "PLATFORM-CARBON-CAPTURE-OFFSHORE-99",
+		SeawaterFlowRateM3PerHr:          2650.0,
+		BipolarMembraneCellVoltageV:      2.62,
+		CurrentDensityMaPerCm2:           130.0,
+		BruciteCalciteScaleThicknessUm:   15.5,
+		EffluentDischargePh:              7.35,
+		OceanCo2ExtractionRateTonsPerDay: 72.0,
+		Co2ProductGasPurityPct:           98.8,
+	})
+	if doccTel.PlantID == "" || doccTel.BipolarMembraneCellVoltageV != 2.62 {
+		t.Fatalf("Failed to ingest DOCC ocean telemetry: %+v", doccTel)
+	}
+
+	doccAssess, err := coredoccocean.GlobalDOCCOceanVault.EvaluateScalingAndAcidification("PLANT-DOCC-PACIFIC-99")
+	if err != nil || doccAssess.ElectrodialysisStackCondition != "SEVERE_BRUCITE_MINERAL_FOULING_CRITICAL" || doccAssess.LondonProtocolDischargeCompliance != "EFFLUENT_ACIDITY_EXCURSION_RISK" || !doccAssess.PolarityReversalMandate || !doccAssess.DiluteAcidFlushMandate {
+		t.Fatalf("Failed to evaluate DOCC scaling and acidification: %+v, err: %v", doccAssess, err)
+	}
+
+	doccAct, err := coredoccocean.GlobalDOCCOceanVault.TriggerEDRPolarityReversalAndAcidFlush("PLANT-DOCC-PACIFIC-99")
+	if err != nil || doccAct.ElectrodialysisPolarityReversalSec < 100.0 || doccAct.CitricAcidFlushRateLpm < 200.0 || doccAct.EffluentCausticNeutralizationPh < 8.0 || doccAct.AvoidedMembraneStackBurnoutLossUSD <= 0 {
+		t.Fatalf("Failed to trigger EDR polarity reversal and acid flush: %+v, err: %v", doccAct, err)
+	}
+
+	doccDossier, err := coredoccocean.GlobalDOCCOceanVault.GetDOCCEnvironmentalDossier("PLANT-DOCC-PACIFIC-99")
+	if err != nil || !doccDossier["imo_london_protocol_cleared"].(bool) || !doccDossier["iso_14064_certified"].(bool) {
+		t.Fatalf("Failed to compile DOCC environmental dossier: %+v, err: %v", doccDossier, err)
+	}
+	t.Logf("✓ Marine DOCC BPMED Electrodialysis Sentinel Verified: Plant='%s' (Platform='%s'), Flow=%.0f m3/h, CellVolt=%.2f V (Excess=+%.1f%%), Scale=%.1f um, EffluentPH=%.2f, CO2Purity=%.1f%%, Condition='%s', Compliance='%s', PolarityRev=%.0f s, CitricFlush=%.0f L/min, NeutralPH=%.2f, AvoidedLoss=$%.2fM USD",
+		doccTel.PlantID, doccTel.OceanPlatformID, doccTel.SeawaterFlowRateM3PerHr, doccTel.BipolarMembraneCellVoltageV, doccAssess.CellVoltageExcessMarginPct, doccTel.BruciteCalciteScaleThicknessUm, doccTel.EffluentDischargePh, doccTel.Co2ProductGasPurityPct, doccAssess.ElectrodialysisStackCondition, doccAssess.LondonProtocolDischargeCompliance, doccAct.ElectrodialysisPolarityReversalSec, doccAct.CitricAcidFlushRateLpm, doccAct.EffluentCausticNeutralizationPh, doccAct.AvoidedMembraneStackBurnoutLossUSD/1e6)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (95 SECTIONS: 135+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD + CONTRACT LEAKAGE SENTINEL + MICROGRID ISLANDING + CARGO GEOFENCE + SHIFT BIDDING FATIGUE + CIRCULAR PACKAGING RTI + INDUSTRIAL WATER ZLD + VENDOR SANCTIONS GRAPH + BOILER TUBE DESCALING + SAAS DUNNING WATERFALL + TOLL MANUFACTURING RECON + SILO AERATION SENTINEL + EPC PROGRESS BILLING ESCROW + DYNAMIC PORT BERTH DEMURRAGE + TRANSFORMER DGA GUARDIAN + CROSS BORDER CASH REPATRIATION + ORE BLENDING OPTIMIZER + PHARMA CRYOGENIC SENTINEL + KILN REFRACTORY GUARDIAN + IP PATENT ANNUITY + TURBINE EOH CREEP + AVIATION MRO FATIGUE + MARINE LNG RELIQUEFACTION + SEMICONDUCTOR FAB YIELD + WASTEWATER BIOMETHANE + RAILWAY WHEEL RCF + NUCLEAR RADIOPHARM DECAY + UTILITY BESS THERMAL SOH + SATELLITE ORBITAL CONJUNCTION + SUBSEA FLOW ASSURANCE + CONNECTED VEHICLE OTA SUMS + BIOPHARMA BIOREACTOR PAT + FLOATING WIND MOORING + HVDC SUBSEA DTS + CCS CO2 ENVELOPE + MINE ROCKBURST SENTINEL + TOKAMAK FUSION DISRUPTION + CRYO LH2 ORTHO-PARA + HYPERSONIC TPS ABLATION + 3D CHIPLET TSV WARPAGE + SUPERHOT EGS GEOTHERMAL SEISMICITY + QUANTUM QKD PHASE GUARDIAN + SEABED NODULE PLUME + CSP MOLTEN SALT FREEZE + SOLID-STATE BATTERY CRACK + DIRECT AIR CAPTURE OPTIMIZER + EVTOL ACOUSTIC SENTINEL + HYPERLOOP MAGLEV QUENCH + SUBSEA DEEPWATER BOP + CAR-T ACOUSTIC SORTING + PLASTIC PYROLYSIS DIOXIN SENTINEL + GREEN AMMONIA SENTINEL + ROCKET POGO SENTINEL + SMR PASSIVE CONTAINMENT + EUV PELLICLE SENTINEL + UHVDC CONVERTER SENTINEL + SUBSEA CCS CO2 HYDRATE + HYPERSONIC SCRAMJET FUEL CRACKING + MRNA LNP MICROFLUIDIC + SILICON PHOTONICS CPO SKEW + SOEC EFUEL COELECTROLYSIS + SUPERHOT ROCK GEOTHERMAL SHR + SUBSEA AUV DOCKING IPT + ELECTRONIC H2O2 RUNAWAY + BIOPHARMA CONTROLLED ICE FOG LYO + CADMIUM FREE QLED INK PRINTING + HALL EFFECT THRUSTER PROPULSION + SUB 2NM GAAFET NANOSHEET + INDUSTRIAL FERMENTATION FOAM + SALT CAVERN HYDROGEN STORAGE + MOLTEN SALT REACTOR FUEL REDOX + REUSABLE ROCKET GRID FIN HYDRAULICS + SEMICONDUCTOR MBMW RETICLE + AAV GENE THERAPY VECTOR + SOLID STATE BATTERY DRY ELECTRODE + MARS ISRU SABATIER METHALOX + COMMERCIAL AIRCRAFT LH2 CRYO TANK + HBM4 16-DIE HYBRID DIRECT BONDING + NUCLEAR MICROREACTOR HEAT PIPE DRYOUT + CONTINUOUS MRNA 5-CAP1 PAT SYNTHESIS + SUBSEA WET GAS COMPRESSOR SLUG AMB + AVIATION AIRBORNE HTS STATOR QUENCH + GREEN STEEL 100% H-DRI SHAFT STICKING + QUANTUM COMPUTING 10mK DILUTION CRYOSTAT + CLEAN MARITIME AMMONIA DUAL-FUEL ENGINE + LUNAR REGOLITH MICROWAVE SINTERING + DGR NUCLEAR SPENT FUEL CANISTER BENTONITE + FUSION LIQUID PbLi BLANKET TBR MHD + SPACE SOLAR POWER GW MICROWAVE BEAM + HIGH-NA 0.55 EUV ANAMORPHIC WAVEFRONT + IN-VIVO CRISPR-CAS NANOPORE PAT + HYPERSONIC UHTC TRANSPIRATION COOLING + MAGMA SUPERCRITICAL GEOTHERMAL DRILLING + AI IMMERSION BOILING CHF DEPARTURE + ASTEROID OPTICAL MINING DESORPTION + MARINE DOCC BPMED ELECTRODIALYSIS) PASSED 100%!")
 }

@@ -2147,6 +2147,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/aerospace/uhtc-hypersonic/evaluate-thermal-protection": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Hypersonic UHTC Diboride Transpiration Cooling & Shock-Shock Interference Sentinel (AIAA S-102.2 & NASA SP-8000)",
+					"description": "Monitors stagnation aerothermal heat flux, UHTC surface temperature, porous matrix pressure drop, and Edney Type-IV shock impingement.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Thermal protection integrity, shock interference hazard, coolant surge flow kg/s, and plasma actuator voltage kV"},
+					},
+				},
+			},
+			"/api/v1/energy/magma-geothermal/evaluate-blowout-and-casing-buckling": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Deep Earth Magma-Superheated (500°C+) Geothermal Drilling Supercritical Influx Sentinel (API Spec 5CT & ISO 10424)",
+					"description": "Monitors bottom-hole temperature, supercritical steam pressure, casing von Mises stress, drillstring chloride, and H2S concentration.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Wellbore integrity status, casing buckling risk, quench mud flow L/min, and slip joint expansion stroke mm"},
+					},
+				},
+			},
+			"/api/v1/datacenter/immersion-chf/evaluate-chf-and-vapor-blanket": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "AI Data Center 2-Phase Dielectric Immersion Boiling & Critical Heat Flux (CHF) Sentinel (ASHRAE TC 9.9 & OCP Standard)",
+					"description": "Monitors GPU silicon heat flux, junction temperature, bubble departure frequency, and dielectric fluid breakdown voltage.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Boiling regime state, dielectric fluid condition, microjet velocity m/s, and GPU power capping limit watts"},
+					},
+				},
+			},
+			"/api/v1/space/asteroid-mining/evaluate-desorption-and-canopy-integrity": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Deep-Space Asteroid Optical Mining Concentrated Solar Thermal Desorption Sentinel (NASA Planetary Protection & ISO 14620)",
+					"description": "Monitors concentrated solar heat flux, regolith desorption temperature, inflatable canopy pressure, and cryo cold-trap temperature.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Canopy containment integrity, volatile condensation efficiency, solar mirror defocus angle deg, and cryocooler power watts"},
+					},
+				},
+			},
+			"/api/v1/ocean/docc-capture/evaluate-scaling-and-acidification": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Marine Electrochemical Direct Ocean Carbon Capture (DOCC) BPMED Acidification & Brucite Scaling Sentinel (IMO London Protocol & ISO 14064-2)",
+					"description": "Monitors bipolar membrane cell voltage, current density, brucite/calcite mineral scale thickness, effluent pH, and CO2 product gas purity.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Electrodialysis stack condition, London Protocol discharge compliance, EDR polarity reversal seconds, and citric acid flush rate L/min"},
+					},
+				},
+			},
 		},
 	}
 }

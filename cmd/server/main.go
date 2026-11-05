@@ -98,6 +98,11 @@ import (
 	corespacesolar "erp-golang/internal/core/space_solar"
 	corehighnaeuv "erp-golang/internal/core/highna_euv"
 	corecrisprpat "erp-golang/internal/core/crispr_pat"
+	coreuhtchypersonic "erp-golang/internal/core/uhtc_hypersonic"
+	coremagmageothermal "erp-golang/internal/core/magma_geothermal"
+	coreimmersionchf "erp-golang/internal/core/immersion_chf"
+	coreasteroidmining "erp-golang/internal/core/asteroid_mining"
+	coredoccocean "erp-golang/internal/core/docc_ocean"
 	corescramjet "erp-golang/internal/core/scramjet"
 	coreseabed "erp-golang/internal/core/seabed"
 	coresemiconductor "erp-golang/internal/core/semiconductor"
@@ -374,7 +379,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.80.0",
+			"version":    "1.81.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -589,6 +594,11 @@ func main() {
 		corespacesolar.RegisterSpaceSolarRoutes(apiV1)
 		corehighnaeuv.RegisterHighNAEUVRoutes(apiV1)
 		corecrisprpat.RegisterCRISPRPATRoutes(apiV1)
+		coreuhtchypersonic.RegisterUHTCHypersonicRoutes(apiV1)
+		coremagmageothermal.RegisterMagmaGeothermalRoutes(apiV1)
+		coreimmersionchf.RegisterImmersionCHFRoutes(apiV1)
+		coreasteroidmining.RegisterAsteroidMiningRoutes(apiV1)
+		coredoccocean.RegisterDOCCOceanRoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend
