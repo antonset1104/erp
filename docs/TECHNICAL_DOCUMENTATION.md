@@ -1636,3 +1636,40 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **HITL Action Authorization**: Endpoint `POST /api/v1/ai/swarm/actions/:id/approve` enables human supervisors to validate and execute high-value or high-risk business actions that exceed agent autonomy limits.
 - **HITL Action Rejection & Feedback Loop**: Endpoint `POST /api/v1/ai/swarm/actions/:id/reject` allows operators to decline proposals with mandatory contextual feedback that is injected back into the agent dialogue.
 - **Dynamic Autonomy Configuration**: Endpoint `POST /api/v1/ai/swarm/agents/:role/autonomy` enables runtime adjustments of operating autonomy levels (`full_autonomous`, `supervised_hitl`, `assistive`, `paused`) and auto-approval amount limits.
+
+
+## 50. Neuro-Symbolic Enterprise Digital Twin & Monte Carlo What-If War-Room (Strategic Scenario Simulator)
+
+### 50.1 Enterprise Digital Twin Real-Time Baseline (`internal/core/ai/digital_twin_simulator.go`)
+- **Real-Time Digital Twin Baseline Ingestion**: Endpoint `GET /api/v1/ai/digital-twin/baseline` queries current enterprise state across financial ledgers, inventory quants, and order pipelines to compute real-time operational baselines:
+  - Total liquid cash balance across all active bank and cash accounts (`total_cash_idr`).
+  - Outstanding accounts receivable (`outstanding_ar_idr`) and accounts payable (`outstanding_ap_idr`).
+  - 30-day rolling monthly revenue baseline (`monthly_revenue_idr`) derived from completed customer sales invoices.
+  - 30-day operating expenditure burn rate (`monthly_opex_idr`) encompassing procurement, payroll, and fixed liabilities.
+  - Active stock quant valuation (`inventory_val_idr`) across warehouse bins.
+  - Import raw material exposure ratio (`import_exposure_pct`) and foreign currency baseline exchange rate (`fx_baseline_usd_idr`, e.g., Rp 15.800/USD).
+
+### 50.2 Multi-Factor Probabilistic Monte Carlo Simulation Engine
+- **What-If Crisis Simulation Execution**: Endpoint `POST /api/v1/ai/digital-twin/monte-carlo` executes a Marsaglia polar Gaussian approximation Monte Carlo simulation across $1,000\text{ - }10,000$ iterations over an adjustable 4-week to 52-week forward horizon (default: 13 weeks / 1 fiscal quarter).
+  - **Macroeconomic & Operational Shock Perturbations**: Simulates user-calibrated shock distributions including:
+    - Currency devaluation: USD/IDR exchange rate spike (e.g., $+15\%$).
+    - Market demand contraction / expansion (e.g., $-25\%$).
+    - Raw material inflation and freight surcharge (e.g., $+18\%$).
+    - Supply chain vendor lead time delay (e.g., $+14\text{ days}$).
+    - Central bank interest rate hike (e.g., $+200\text{ bps}$).
+  - **Probabilistic Cash Trajectory Envelope**: Generates stochastic cash flow distributions computing:
+    - 10th percentile pessimistic envelope ($P_{10}$ Cash at Risk).
+    - 50th percentile median expected trajectory ($P_{50}$).
+    - 90th percentile optimistic upper bound ($P_{90}$).
+    - Probabilistic Cash Runway (weeks remaining before reserve exhaustion).
+    - Stockout Risk Probability ($\%$) and working capital insolvency risk ($P(\text{Cash} < 0)$).
+  - **Simulation Persistence**: Automatically archives scenario parameters and statistical distributions into `ai_simulation_scenarios` for longitudinal auditability.
+
+### 50.3 Strategic AI Mitigation Playbooks & Closed-Loop Execution
+- **Dynamic Playbook Formulation**: Generates actionable, quantified mitigation playbooks evaluated against simulated crisis factors:
+  - *USD/IDR FX Forward Hedging Contract*: Hedging $65\%$ of imported AP exposure to lock in currency exchange ceilings.
+  - *Strategic Buffer Safety Stock Allocation*: Increasing reorder points by $+20\%$ on high-risk bill of materials (BOM) components to shield against lead time delays.
+  - *Dynamic AR Discounting Acceleration*: Implementing 2/10 Net 30 accelerated payment incentives to compress Days Sales Outstanding (DSO) by $14\text{ days}$.
+  - *Discretionary OPEX Freeze & CapEx Deferral*: Auto-freezing non-essential operating expenditures to extend runway by $+3.5\text{ weeks}$.
+- **Closed-Loop Mitigation Execution**: Endpoint `POST /api/v1/ai/digital-twin/playbooks/:id/apply` enables human executive operators to authorize and execute mitigation actions directly into the operational ERP environment with persistent audit logging.
+- **Scenario History & Sensitivity Archive**: Endpoint `GET /api/v1/ai/digital-twin/history` lists archived historical simulations with variance comparisons and execution tracking.

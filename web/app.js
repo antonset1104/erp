@@ -1,4 +1,4 @@
-﻿// State & Global Variables
+// State & Global Variables
 let state = {
     token: localStorage.getItem('erp_token') || '',
     user: null,
@@ -287,7 +287,8 @@ function updateHeaderTitles(tab) {
         'lowcode-studio': { title: 'Universal Low-Code Studio & Dynamic Schema Engine', sub: 'Rancang model bisnis kustom, kolom dinamis (EAV) & ekstensi entitas tanpa menulis kode Golang' },
         'workflow-engine': { title: 'BPMN 2.0 Dynamic Workflow & State Machine Engine', sub: 'Orkestrator alur persetujuan bisnis, conditional gateway, SLA tracker & AI Workflow Designer' },
         'integration-hub': { title: 'Universal Integration Hub & Open RPC Gateway', sub: 'Manajemen M2M API Keys, konektor Shopee/Tokopedia/Midtrans/SAP, Open RPC & Batch ETL' },
-        'agentic-swarm': { title: 'Agentic AI Swarm & Autonomous Orchestrator', sub: 'Multi-Agent Network otonom untuk pengadaan cerdas, 3-way matching, audit likuiditas & human-in-the-loop governance' }
+        'agentic-swarm': { title: 'Agentic AI Swarm & Autonomous Orchestrator', sub: 'Multi-Agent Network otonom untuk pengadaan cerdas, 3-way matching, audit likuiditas & human-in-the-loop governance' },
+        'digital-twin-simulator': { title: 'Neuro-Symbolic Enterprise Digital Twin & What-If War-Room', sub: 'Simulasi skenario krisis multi-faktor, proyeksi likuiditas 13-minggu & AI actionable mitigation playbooks' }
     };
     const t = titleMap[tab] || titleMap.dashboard;
     document.getElementById('pageTitle').textContent = t.title;
@@ -347,6 +348,7 @@ function loadCurrentTab() {
         case 'workflow-engine': loadWorkflowEngineData(); break;
         case 'integration-hub': loadIntegrationHubData(); break;
         case 'agentic-swarm': loadAgentSwarmData(); break;
+        case 'digital-twin-simulator': loadDigitalTwinSimulatorData(); break;
     }
 }
 
@@ -35420,5 +35422,458 @@ async function handleSaveSwarmConfig(event) {
         if (typeof showToast === 'function') {
             showToast('Gagal menyimpan konfigurasi agen: ' + err.message, 'error');
         }
+    }
+}
+
+
+// =========================================================================
+// MODUL 52: NEURO-SYMBOLIC ENTERPRISE DIGITAL TWIN & MONTE CARLO SIMULATOR
+// =========================================================================
+let cachedTwinBaseline = {};
+let cachedTwinReport = null;
+let currentTwinSubtab = 'twinSubtabTrajectory';
+
+function syncTwinSlider(sliderId, displayId, prefix, suffix) {
+    const slider = document.getElementById(sliderId);
+    const display = document.getElementById(displayId);
+    if (slider && display) {
+        const val = parseFloat(slider.value) || 0;
+        const sign = (prefix === '+' && val > 0) ? '+' : '';
+        display.textContent = sign + val.toFixed(1) + (suffix || '');
+    }
+}
+
+function resetTwinParametersDefault() {
+    const fx = document.getElementById('twinParamFXShock');
+    if (fx) { fx.value = '10.0'; syncTwinSlider('twinParamFXShock', 'twinDisplayFX', '+', '%'); }
+
+    const dem = document.getElementById('twinParamDemandShock');
+    if (dem) { dem.value = '-15.0'; syncTwinSlider('twinParamDemandShock', 'twinDisplayDemand', '', '%'); }
+
+    const delay = document.getElementById('twinParamSupplierDelay');
+    if (delay) { delay.value = '2.5'; syncTwinSlider('twinParamSupplierDelay', 'twinDisplayDelay', '+', ' wks'); }
+
+    const inf = document.getElementById('twinParamInflationCost');
+    if (inf) { inf.value = '6.5'; syncTwinSlider('twinParamInflationCost', 'twinDisplayInflation', '+', '%'); }
+
+    const horizon = document.getElementById('twinParamHorizonWeeks');
+    if (horizon) horizon.value = '13';
+
+    const iter = document.getElementById('twinParamIterations');
+    if (iter) iter.value = '2500';
+
+    if (typeof showToast === 'function') {
+        showToast('Parameter guncangan dikembalikan ke nilai default.', 'info');
+    }
+}
+
+function switchTwinSubtab(targetId) {
+    currentTwinSubtab = targetId;
+    const panes = document.querySelectorAll('.twin-subtab-pane');
+    panes.forEach(p => { p.style.display = 'none'; });
+
+    const activePane = document.getElementById(targetId);
+    if (activePane) {
+        activePane.style.display = 'block';
+    }
+
+    const buttons = document.querySelectorAll('.twin-subtab-btn');
+    buttons.forEach(btn => {
+        if (btn.getAttribute('data-target') === targetId) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+}
+
+async function loadDigitalTwinSimulatorData() {
+    await fetchDigitalTwinBaseline();
+    await loadDigitalTwinHistory();
+}
+
+async function fetchDigitalTwinBaseline() {
+    try {
+        const res = await api('/ai/digital-twin/baseline');
+        const data = (res && res.data) ? res.data : (res || {});
+        cachedTwinBaseline = data;
+
+        if (typeof showToast === 'function') {
+            showToast('Data baseline aktual ERP berhasil disinkronisasi.', 'info');
+        }
+    } catch (err) {
+        console.error('Error fetching digital twin baseline:', err);
+    }
+}
+
+async function runMonteCarloSimulation(customScenarioName, customNote) {
+    const fx = parseFloat(document.getElementById('twinParamFXShock')?.value) || 0;
+    const demand = parseFloat(document.getElementById('twinParamDemandShock')?.value) || 0;
+    const delay = parseFloat(document.getElementById('twinParamSupplierDelay')?.value) || 0;
+    const inflation = parseFloat(document.getElementById('twinParamInflationCost')?.value) || 0;
+    const horizon = parseInt(document.getElementById('twinParamHorizonWeeks')?.value) || 13;
+    const iterations = parseInt(document.getElementById('twinParamIterations')?.value) || 2500;
+
+    const payload = {
+        scenario_name: customScenarioName || ('Uji Stres ' + new Date().toLocaleDateString('id-ID')),
+        time_horizon_weeks: horizon,
+        iterations: iterations,
+        currency_fx_shock_pct: fx,
+        demand_shock_pct: demand,
+        supplier_delay_weeks: delay,
+        inflation_cost_pct: inflation,
+        interest_rate_hike_bp: 75.0,
+        custom_note: customNote || ''
+    };
+
+    try {
+        if (typeof showToast === 'function') {
+            showToast('🎲 Menjalankan ' + iterations.toLocaleString('id-ID') + ' iterasi Monte Carlo...', 'info');
+        }
+
+        const res = await api('/ai/digital-twin/monte-carlo', 'POST', payload);
+        const report = (res && res.data) ? res.data : (res || {});
+        cachedTwinReport = report;
+
+        renderSimulationResults(report);
+
+        if (typeof showToast === 'function') {
+            showToast('Simulasi selesai (' + (report.duration_ms || 45) + 'ms)! Hasil proyeksi & playbook tersedia.', 'success');
+        }
+    } catch (err) {
+        console.error('Error running simulation:', err);
+        if (typeof showToast === 'function') {
+            showToast('Gagal menjalankan simulasi: ' + err.message, 'error');
+        }
+    }
+}
+
+function renderSimulationResults(report) {
+    if (!report) return;
+
+    // 1. KPI Cards
+    const cashDist = report.ending_cash_distribution || {};
+    const runwayDist = report.cash_runway_weeks || {};
+    const playbooks = report.playbooks || [];
+
+    let totalMitigationVal = 0;
+    playbooks.forEach(pb => { totalMitigationVal += (pb.financial_impact_idr || 0); });
+
+    const elMed = document.getElementById('twinKpiEndingCashMedian');
+    if (elMed) elMed.textContent = typeof formatCurrency === 'function' ? formatCurrency(cashDist.p50 || 0) : 'Rp ' + (cashDist.p50 || 0).toLocaleString('id-ID');
+
+    const elPess = document.getElementById('twinKpiPessimisticCash');
+    if (elPess) {
+        elPess.textContent = typeof formatCurrency === 'function' ? formatCurrency(cashDist.p10 || 0) : 'Rp ' + (cashDist.p10 || 0).toLocaleString('id-ID');
+        elPess.style.color = (cashDist.p10 < 0) ? '#dc2626' : '#ef4444';
+    }
+
+    const elRun = document.getElementById('twinKpiRunwayWeeks');
+    if (elRun) {
+        elRun.textContent = (runwayDist.p50 || 0).toFixed(1) + ' minggu';
+        elRun.style.color = (runwayDist.p50 < 8) ? '#dc2626' : ((runwayDist.p50 < 13) ? '#f59e0b' : '#10b981');
+    }
+
+    const elStock = document.getElementById('twinKpiStockoutRisk');
+    if (elStock) {
+        elStock.textContent = (report.stockout_risk_pct || 0).toFixed(1) + '%';
+        elStock.style.color = (report.stockout_risk_pct > 30) ? '#dc2626' : ((report.stockout_risk_pct > 15) ? '#f59e0b' : '#10b981');
+    }
+
+    const elMitig = document.getElementById('twinKpiMitigationValue');
+    if (elMitig) elMitig.textContent = typeof formatCurrency === 'function' ? formatCurrency(totalMitigationVal) : 'Rp ' + totalMitigationVal.toLocaleString('id-ID');
+
+    // 2. Executive Synthesis
+    const elSynth = document.getElementById('twinSynthesisText');
+    if (elSynth) elSynth.textContent = report.executive_synthesis || 'Simulasi berhasil dijalankan.';
+
+    // 3. Render Weekly Trajectory
+    renderTwinTrajectoryTable(report.weekly_trajectory || []);
+
+    // 4. Render Playbooks
+    renderTwinPlaybooksGrid(playbooks);
+
+    // 5. Render Comparison Matrix
+    renderTwinComparisonMatrix(report);
+}
+
+function renderTwinTrajectoryTable(trajectory) {
+    const tbody = document.getElementById('twinTrajectoryTableBody');
+    if (!tbody) return;
+
+    if (!trajectory || trajectory.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted" style="padding: 2rem;">Tidak ada data trajektori.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = trajectory.map(pt => {
+        const p10Fmt = typeof formatCurrency === 'function' ? formatCurrency(pt.p10_cash) : 'Rp ' + (pt.p10_cash || 0).toLocaleString('id-ID');
+        const p50Fmt = typeof formatCurrency === 'function' ? formatCurrency(pt.p50_cash) : 'Rp ' + (pt.p50_cash || 0).toLocaleString('id-ID');
+        const p90Fmt = typeof formatCurrency === 'function' ? formatCurrency(pt.p90_cash) : 'Rp ' + (pt.p90_cash || 0).toLocaleString('id-ID');
+        const inFmt = typeof formatCurrency === 'function' ? formatCurrency(pt.projected_inflow) : 'Rp ' + (pt.projected_inflow || 0).toLocaleString('id-ID');
+        const outFmt = typeof formatCurrency === 'function' ? formatCurrency(pt.projected_outflow) : 'Rp ' + (pt.projected_outflow || 0).toLocaleString('id-ID');
+
+        let statusBadge = '<span class="badge badge-success">Solvent</span>';
+        if (pt.p10_cash < 0 && pt.p50_cash < 0) {
+            statusBadge = '<span class="badge badge-danger">Defisit Kritis</span>';
+        } else if (pt.p10_cash < 0) {
+            statusBadge = '<span class="badge badge-warning">Risiko Defisit P10</span>';
+        }
+
+        return `
+            <tr>
+                <td style="font-weight: 700;">Minggu ${pt.week_number} (${escapeHtml(pt.week_label)})</td>
+                <td style="color: #ef4444; font-weight: 600;">${p10Fmt}</td>
+                <td style="color: #6366f1; font-weight: 700; font-size: 0.95rem;">${p50Fmt}</td>
+                <td style="color: #10b981; font-weight: 600;">${p90Fmt}</td>
+                <td style="color: #0284c7;">${inFmt}</td>
+                <td style="color: #64748b;">${outFmt}</td>
+                <td>${statusBadge}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderTwinPlaybooksGrid(playbooks) {
+    const container = document.getElementById('twinPlaybooksGridContainer');
+    if (!container) return;
+
+    if (!playbooks || playbooks.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted" style="grid-column: 1/-1; padding: 2rem;">Tidak ada playbook khusus yang diperlukan untuk skenario ini.</div>';
+        return;
+    }
+
+    container.innerHTML = playbooks.map(pb => {
+        let priorityBadge = 'badge-danger';
+        if (pb.priority === 'HIGH') priorityBadge = 'badge-warning';
+        else if (pb.priority === 'MEDIUM') priorityBadge = 'badge-info';
+
+        const impactFmt = typeof formatCurrency === 'function' ? formatCurrency(pb.financial_impact_idr) : 'Rp ' + (pb.financial_impact_idr || 0).toLocaleString('id-ID');
+
+        return `
+            <div class="card" style="box-shadow: var(--shadow-sm); border-radius: 10px; border-top: 4px solid #8b5cf6; display: flex; flex-direction: column; justify-content: space-between;">
+                <div class="card-body" style="padding: 1.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                        <span class="badge ${priorityBadge}">Prioritas ${escapeHtml(pb.priority)}</span>
+                        <span class="badge badge-secondary" style="font-family: monospace;">${escapeHtml(pb.category)}</span>
+                    </div>
+
+                    <h4 style="margin: 0 0 0.5rem 0; font-size: 1.05rem; font-weight: 700;">${escapeHtml(pb.title)}</h4>
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.45; margin-bottom: 1rem;">
+                        ${escapeHtml(pb.description)}
+                    </p>
+
+                    <div style="background: var(--bg-main); border-radius: 6px; padding: 0.75rem; font-size: 0.84rem; margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem;">
+                            <span class="text-muted">Estimasi Nilai Diamankan:</span>
+                            <span style="font-weight: 700; color: #10b981;">${impactFmt}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span class="text-muted">Reduksi Peluang Risiko:</span>
+                            <span style="font-weight: 600; color: #6366f1;">-${(pb.risk_reduction_pct || 0).toFixed(1)}% Downside</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer" style="padding: 0.75rem 1.25rem; background: var(--surface-hover); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">
+                        ${pb.is_applied ? '<span style="color: #10b981; font-weight: 600;">✓ Telah Diterapkan</span>' : 'Siap Dieksekusi'}
+                    </span>
+                    <button class="btn btn-sm ${pb.is_applied ? 'btn-secondary' : 'btn-primary'}" onclick="applyDigitalTwinPlaybook('${escapeHtml(pb.id)}')" ${pb.is_applied ? 'disabled' : ''}>
+                        ${pb.is_applied ? 'Telah Aktif' : '⚡ Terapkan Mitigasi Ini'}
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderTwinComparisonMatrix(report) {
+    const tbody = document.getElementById('twinComparisonTableBody');
+    if (!tbody) return;
+
+    const base = report.baseline_summary || {};
+    const cashDist = report.ending_cash_distribution || {};
+    const revDist = report.revenue_distribution || {};
+    const profitDist = report.net_profit_distribution || {};
+    const runway = report.cash_runway_weeks || {};
+
+    const rows = [
+        {
+            label: 'Saldo Kas Likuid',
+            baseline: base.cash_balance || 185000000,
+            shocked: cashDist.p50 || 0,
+            unit: 'currency',
+            stability: (cashDist.p50 < base.cash_balance) ? 'Penurunan Kas' : 'Peningkatan'
+        },
+        {
+            label: 'Estimasi Pendapatan Penjualan Periode',
+            baseline: (base.monthly_revenue || 245000000) * ((report.scenario?.time_horizon_weeks || 13) / 4.33),
+            shocked: revDist.p50 || 0,
+            unit: 'currency',
+            stability: (revDist.p50 < ((base.monthly_revenue || 245000000) * 3)) ? 'Terkontraksi' : 'Sesuai Target'
+        },
+        {
+            label: 'Laba Operasional Bersih',
+            baseline: ((base.monthly_revenue || 245000000) - (base.monthly_expense || 165000000)) * ((report.scenario?.time_horizon_weeks || 13) / 4.33),
+            shocked: profitDist.p50 || 0,
+            unit: 'currency',
+            stability: (profitDist.p50 < 0) ? 'Defisit Operasional' : 'Profitabel'
+        },
+        {
+            label: 'Ketahanan Kas (Runway)',
+            baseline: 24.5,
+            shocked: runway.p50 || 13.0,
+            unit: 'weeks',
+            stability: (runway.p50 < 13) ? 'Kritis' : 'Normal'
+        },
+        {
+            label: 'Probabilitas Stockout Komponen Kritis',
+            baseline: 5.0,
+            shocked: report.stockout_risk_pct || 0,
+            unit: 'percent',
+            stability: (report.stockout_risk_pct > 25) ? 'Tinggi' : 'Terkendali'
+        }
+    ];
+
+    tbody.innerHTML = rows.map(r => {
+        let baseFmt = '-';
+        let shockedFmt = '-';
+        let diffFmt = '-';
+
+        if (r.unit === 'currency') {
+            baseFmt = typeof formatCurrency === 'function' ? formatCurrency(r.baseline) : 'Rp ' + r.baseline.toLocaleString('id-ID');
+            shockedFmt = typeof formatCurrency === 'function' ? formatCurrency(r.shocked) : 'Rp ' + r.shocked.toLocaleString('id-ID');
+            const diff = r.shocked - r.baseline;
+            const sign = diff >= 0 ? '+' : '';
+            diffFmt = sign + (typeof formatCurrency === 'function' ? formatCurrency(diff) : 'Rp ' + diff.toLocaleString('id-ID'));
+        } else if (r.unit === 'weeks') {
+            baseFmt = r.baseline.toFixed(1) + ' minggu';
+            shockedFmt = r.shocked.toFixed(1) + ' minggu';
+            const diff = r.shocked - r.baseline;
+            diffFmt = (diff >= 0 ? '+' : '') + diff.toFixed(1) + ' minggu';
+        } else if (r.unit === 'percent') {
+            baseFmt = r.baseline.toFixed(1) + '%';
+            shockedFmt = r.shocked.toFixed(1) + '%';
+            const diff = r.shocked - r.baseline;
+            diffFmt = (diff >= 0 ? '+' : '') + diff.toFixed(1) + '%';
+        }
+
+        let badgeClass = 'badge-success';
+        if (r.stability.includes('Defisit') || r.stability.includes('Kritis') || r.stability.includes('Tinggi')) {
+            badgeClass = 'badge-danger';
+        } else if (r.stability.includes('Penurunan') || r.stability.includes('Terkontraksi')) {
+            badgeClass = 'badge-warning';
+        }
+
+        return `
+            <tr>
+                <td style="font-weight: 600;">${escapeHtml(r.label)}</td>
+                <td style="color: var(--text-muted);">${baseFmt}</td>
+                <td style="font-weight: 700;">${shockedFmt}</td>
+                <td style="font-weight: 600; color: ${diffFmt.startsWith('-') ? '#ef4444' : '#10b981'};">${diffFmt}</td>
+                <td><span class="badge ${badgeClass}">${escapeHtml(r.stability)}</span></td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function applyDigitalTwinPlaybook(playbookId) {
+    if (!confirm('Apakah Anda ingin mengeksekusi rekomendasi mitigasi strategis ini ke dalam sistem?')) {
+        return;
+    }
+
+    try {
+        const res = await api(`/ai/digital-twin/playbooks/${playbookId}/apply`, 'POST', {
+            actor: 'Executive War-Room Commander'
+        });
+        if (typeof showToast === 'function') {
+            showToast('Playbook mitigasi berhasil dieksekusi & dicatat di jejak audit!', 'success');
+        }
+
+        if (cachedTwinReport && Array.isArray(cachedTwinReport.playbooks)) {
+            const pb = cachedTwinReport.playbooks.find(p => p.id === playbookId);
+            if (pb) pb.isApplied = true;
+            renderTwinPlaybooksGrid(cachedTwinReport.playbooks);
+        }
+    } catch (err) {
+        console.error('Error applying playbook:', err);
+        if (typeof showToast === 'function') {
+            showToast('Gagal menerapkan playbook: ' + err.message, 'error');
+        }
+    }
+}
+
+function openModalSaveScenario() {
+    if (!cachedTwinReport) {
+        alert('Silakan jalankan simulasi Monte Carlo terlebih dahulu sebelum menyimpan skenario.');
+        return;
+    }
+    const nameInput = document.getElementById('twinSaveScenarioNameInput');
+    if (nameInput) {
+        nameInput.value = cachedTwinReport.scenario?.scenario_name || ('Skenario Stres ' + new Date().toLocaleDateString('id-ID'));
+    }
+    if (typeof openModal === 'function') {
+        openModal('modalSaveSimulationScenario');
+    }
+}
+
+async function handleSaveSimulationScenario(event) {
+    if (event) event.preventDefault();
+    const name = document.getElementById('twinSaveScenarioNameInput')?.value || 'Skenario Tanpa Judul';
+    const note = document.getElementById('twinSaveScenarioNoteInput')?.value || '';
+
+    if (typeof closeModal === 'function') {
+        closeModal('modalSaveSimulationScenario');
+    }
+
+    await runMonteCarloSimulation(name, note);
+    await loadDigitalTwinHistory();
+
+    if (typeof showToast === 'function') {
+        showToast('Skenario berhasil disimpan ke dalam arsip simulasi!', 'success');
+    }
+}
+
+async function loadDigitalTwinHistory() {
+    const tbody = document.getElementById('twinHistoryTableBody');
+    if (!tbody) return;
+
+    try {
+        const res = await api('/ai/digital-twin/history');
+        const list = (res && res.data) ? res.data : (res || []);
+
+        if (!list || list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted" style="padding: 2rem;">Belum ada arsip skenario simulasi tersimpan.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = list.map(item => {
+            const dateStr = item.created_at ? new Date(item.created_at).toLocaleString('id-ID', { hour12: false }) : '-';
+            const cashP50Fmt = typeof formatCurrency === 'function' ? formatCurrency(item.ending_cash_p50) : 'Rp ' + (item.ending_cash_p50 || 0).toLocaleString('id-ID');
+
+            return `
+                <tr>
+                    <td>
+                        <div style="font-weight: 700; color: #8b5cf6;">${escapeHtml(item.id)}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">${dateStr}</div>
+                    </td>
+                    <td>
+                        <div style="font-weight: 600;">${escapeHtml(item.scenario_name)}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">Dibuat oleh: ${escapeHtml(item.created_by || 'Executive AI')}</div>
+                    </td>
+                    <td>${item.horizon_weeks || 13} wks (${(item.iterations || 2500).toLocaleString('id-ID')} iter)</td>
+                    <td>
+                        <span class="badge badge-secondary">FX: +${(item.fx_shock_pct || 0).toFixed(1)}%</span>
+                        <span class="badge badge-secondary">Dem: ${(item.demand_shock_pct || 0).toFixed(1)}%</span>
+                    </td>
+                    <td style="font-weight: 700; color: #6366f1;">${cashP50Fmt}</td>
+                    <td style="font-weight: 600;">${(item.runway_weeks_median || 0).toFixed(1)} minggu</td>
+                    <td><span class="badge ${item.stockout_risk_pct > 25 ? 'badge-danger' : 'badge-success'}">${(item.stockout_risk_pct || 0).toFixed(1)}%</span></td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error('Error loading simulation history:', err);
     }
 }

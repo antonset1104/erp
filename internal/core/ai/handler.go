@@ -586,6 +586,58 @@ func (h *Handler) UpdateAgentAutonomy(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Agent autonomy settings updated", "role": role})
 }
 
+// ============================================================================
+// NEURO-SYMBOLIC ENTERPRISE DIGITAL TWIN & MONTE CARLO SIMULATOR HANDLERS
+// ============================================================================
+
+func (h *Handler) GetDigitalTwinBaseline(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	baseline := GetDigitalTwinSimulatorManager().FetchLiveBaseline(h.db, companyID)
+	c.JSON(http.StatusOK, gin.H{"data": baseline})
+}
+
+func (h *Handler) RunDigitalTwinSimulation(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	var params ScenarioParameters
+	if err := c.ShouldBindJSON(&params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	report, err := GetDigitalTwinSimulatorManager().RunMonteCarloSimulation(h.db, companyID, params)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, report)
+}
+
+func (h *Handler) GetDigitalTwinHistory(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	limit := 10
+	history := GetDigitalTwinSimulatorManager().GetSimulationHistory(h.db, companyID, limit)
+	c.JSON(http.StatusOK, gin.H{"data": history})
+}
+
+func (h *Handler) ApplyDigitalTwinPlaybook(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	playbookID := c.Param("id")
+	var req struct {
+		Actor string `json:"actor"`
+	}
+	_ = c.ShouldBindJSON(&req)
+	if req.Actor == "" {
+		req.Actor = "Executive Director"
+	}
+
+	pb, err := GetDigitalTwinSimulatorManager().ApplyPlaybookAction(h.db, companyID, playbookID, req.Actor)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Playbook applied successfully", "playbook": pb})
+}
+
 // RegisterRootProtocolRoutes registers public protocol discovery endpoints like /.well-known/agent.json and /mcp
 func RegisterRootProtocolRoutes(r *gin.Engine, h *Handler) {
 	r.GET("/.well-known/agent.json", h.GetA2AAgentCard)
@@ -667,6 +719,12 @@ func RegisterAIRoutes(router *gin.RouterGroup, authMiddleware gin.HandlerFunc, h
 			authed.POST("/swarm/actions/:id/approve", h.ApproveSwarmAction)
 			authed.POST("/swarm/actions/:id/reject", h.RejectSwarmAction)
 			authed.POST("/swarm/agents/:role/autonomy", h.UpdateAgentAutonomy)
+
+			// Neuro-Symbolic Enterprise Digital Twin & Monte Carlo What-If War-Room
+			authed.GET("/digital-twin/baseline", h.GetDigitalTwinBaseline)
+			authed.POST("/digital-twin/monte-carlo", h.RunDigitalTwinSimulation)
+			authed.GET("/digital-twin/history", h.GetDigitalTwinHistory)
+			authed.POST("/digital-twin/playbooks/:id/apply", h.ApplyDigitalTwinPlaybook)
 		}
 	}
 }

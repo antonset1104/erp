@@ -117,6 +117,7 @@ var erpModuleCatalog = []ModuleCatalogItem{
 	{Tab: "workflow-engine", Title: "Workflow Engine", Category: "OPERATIONS & HR", Icon: "🔀", Keywords: "workflow bpmn alur persetujuan sla state machine"},
 	{Tab: "integration-hub", Title: "Integration Hub & API", Category: "OPERATIONS & HR", Icon: "🔌", Keywords: "integration hub api key konektor sap shopee tokopedia rpc etl"},
 	{Tab: "agentic-swarm", Title: "Agentic AI Swarm", Category: "AI & INTELLIGENCE", Icon: "🤖", Keywords: "agentic ai swarm multi-agent otonom hitl orchestrator pengadaan matching procurement cashflow wms"},
+	{Tab: "digital-twin-simulator", Title: "Digital Twin & What-If War-Room", Category: "AI & INTELLIGENCE", Icon: "🔮", Keywords: "digital twin monte carlo simulasi skenario what if krisis valas shock stress test runway playbook"},
 }
 
 // RegisterRoutes mounts the continuous improvement Command Center endpoints on /api/v1

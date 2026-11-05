@@ -264,6 +264,10 @@
                     <span class="nav-icon">🤖</span>
                     <span class="nav-label">Agentic AI Swarm</span>
                 </button>
+                <button class="nav-item" data-tab="digital-twin-simulator">
+                    <span class="nav-icon">🔮</span>
+                    <span class="nav-label">Digital Twin &amp; What-If</span>
+                </button>
             </nav>
 
             <div class="user-profile">
@@ -3426,6 +3430,247 @@
                                     </thead>
                                     <tbody id="swarmActionLogsTableBody">
                                         <tr><td colspan="8" class="text-center text-muted">Memuat riwayat log aksi...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- ===================================================== -->
+                <!-- SECTION: DIGITAL TWIN & MONTE CARLO SIMULATOR (MODUL 52) -->
+                <!-- ===================================================== -->
+                <section id="tab-digital-twin-simulator" class="tab-view">
+                    <div class="content-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                        <div>
+                            <h2 style="margin: 0; font-size: 1.6rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+                                <span>🔮</span> Neuro-Symbolic Enterprise Digital Twin &amp; What-If War-Room
+                            </h2>
+                            <p style="margin: 0.3rem 0 0 0; color: var(--text-muted); font-size: 0.95rem;">
+                                Simulasi Probabilistik Monte Carlo Multi-Faktor (Valas, Permintaan, Rantai Pasok) &amp; Rekomendasi Playbook Mitigasi Strategis AI
+                            </p>
+                        </div>
+                        <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+                            <button class="btn btn-primary" onclick="runMonteCarloSimulation()" style="background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); color: white; border: none; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);">
+                                <span>🎲</span> Jalankan Simulasi Monte Carlo
+                            </button>
+                            <button class="btn btn-secondary" onclick="openModalSaveScenario()">
+                                <span>💾</span> Simpan Skenario
+                            </button>
+                            <button class="btn btn-secondary" onclick="fetchDigitalTwinBaseline()">
+                                <span>🔄</span> Segarkan Data Aktual ERP
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 5 KPI METRICS CARDS -->
+                    <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                        <div class="metric-card" style="background: var(--surface); border-radius: 10px; padding: 1.2rem; border-left: 4px solid #6366f1; box-shadow: var(--shadow-sm);">
+                            <div class="metric-label" style="font-size: 0.82rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Median Kas Akhir (P50)</div>
+                            <div class="metric-value" id="twinKpiEndingCashMedian" style="font-size: 1.65rem; font-weight: 700; color: #6366f1; margin-top: 0.3rem;">Rp 0</div>
+                            <div class="metric-sub" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Hasil Paling Mungkin</div>
+                        </div>
+                        <div class="metric-card" style="background: var(--surface); border-radius: 10px; padding: 1.2rem; border-left: 4px solid #ef4444; box-shadow: var(--shadow-sm);">
+                            <div class="metric-label" style="font-size: 0.82rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Skenario Pesimis (P10)</div>
+                            <div class="metric-value" id="twinKpiPessimisticCash" style="font-size: 1.65rem; font-weight: 700; color: #ef4444; margin-top: 0.3rem;">Rp 0</div>
+                            <div class="metric-sub" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Risiko Downside 10% Terburuk</div>
+                        </div>
+                        <div class="metric-card" style="background: var(--surface); border-radius: 10px; padding: 1.2rem; border-left: 4px solid #10b981; box-shadow: var(--shadow-sm);">
+                            <div class="metric-label" style="font-size: 0.82rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Ketahanan Kas (Runway)</div>
+                            <div class="metric-value" id="twinKpiRunwayWeeks" style="font-size: 1.65rem; font-weight: 700; color: #10b981; margin-top: 0.3rem;">0.0 wks</div>
+                            <div class="metric-sub" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Bulan/Minggu Bertahan</div>
+                        </div>
+                        <div class="metric-card" style="background: var(--surface); border-radius: 10px; padding: 1.2rem; border-left: 4px solid #f59e0b; box-shadow: var(--shadow-sm);">
+                            <div class="metric-label" style="font-size: 0.82rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Risiko Stockout Kritis</div>
+                            <div class="metric-value" id="twinKpiStockoutRisk" style="font-size: 1.65rem; font-weight: 700; color: #f59e0b; margin-top: 0.3rem;">0.0%</div>
+                            <div class="metric-sub" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Peluang Habisnya Safety Stock</div>
+                        </div>
+                        <div class="metric-card" style="background: var(--surface); border-radius: 10px; padding: 1.2rem; border-left: 4px solid #06b6d4; box-shadow: var(--shadow-sm);">
+                            <div class="metric-label" style="font-size: 0.82rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Proteksi Playbook AI</div>
+                            <div class="metric-value" id="twinKpiMitigationValue" style="font-size: 1.65rem; font-weight: 700; color: #06b6d4; margin-top: 0.3rem;">Rp 0</div>
+                            <div class="metric-sub" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Nilai Nilai Kas Diamankan</div>
+                        </div>
+                    </div>
+
+                    <!-- SCENARIO SHOCK CONTROL PANEL -->
+                    <div class="card mb-4" style="box-shadow: var(--shadow-sm); border-radius: 10px; margin-bottom: 1.5rem;">
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 class="card-title" style="margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <span>🎛️</span> Parameter Guncangan Makro &amp; Operasional (Stress-Testing Inputs)
+                            </h3>
+                            <button class="btn btn-sm btn-outline" onclick="resetTwinParametersDefault()">Reset Parameter Default</button>
+                        </div>
+                        <div class="card-body" style="padding: 1.25rem;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
+                                <!-- Shock 1: FX -->
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem;">
+                                        <label style="font-size: 0.85rem; font-weight: 600;">Depresiasi Kurs Valas USD/IDR</label>
+                                        <span id="twinDisplayFX" style="font-size: 0.85rem; font-weight: 700; color: #ef4444;">+10.0%</span>
+                                    </div>
+                                    <input type="range" class="form-range" id="twinParamFXShock" min="0" max="35" step="0.5" value="10.0" oninput="syncTwinSlider('twinParamFXShock', 'twinDisplayFX', '+', '%')">
+                                    <div style="font-size: 0.72rem; color: var(--text-muted);">Mempengaruhi harga bahan baku impor &amp; saldo AP valas.</div>
+                                </div>
+
+                                <!-- Shock 2: Demand -->
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem;">
+                                        <label style="font-size: 0.85rem; font-weight: 600;">Fluktuasi Permintaan Pasar</label>
+                                        <span id="twinDisplayDemand" style="font-size: 0.85rem; font-weight: 700; color: #f59e0b;">-15.0%</span>
+                                    </div>
+                                    <input type="range" class="form-range" id="twinParamDemandShock" min="-40" max="40" step="1" value="-15.0" oninput="syncTwinSlider('twinParamDemandShock', 'twinDisplayDemand', '', '%')">
+                                    <div style="font-size: 0.72rem; color: var(--text-muted);">Kontraksi atau lonjakan pesanan penjualan pelanggan.</div>
+                                </div>
+
+                                <!-- Shock 3: Supplier Delay -->
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem;">
+                                        <label style="font-size: 0.85rem; font-weight: 600;">Keterlambatan Vendor (Lead-Time)</label>
+                                        <span id="twinDisplayDelay" style="font-size: 0.85rem; font-weight: 700; color: #ec4899;">+2.5 wks</span>
+                                    </div>
+                                    <input type="range" class="form-range" id="twinParamSupplierDelay" min="0" max="8" step="0.5" value="2.5" oninput="syncTwinSlider('twinParamSupplierDelay', 'twinDisplayDelay', '+', ' wks')">
+                                    <div style="font-size: 0.72rem; color: var(--text-muted);">Hambatan logistik pelabuhan atau suplai pabrik vendor.</div>
+                                </div>
+
+                                <!-- Shock 4: Inflation -->
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem;">
+                                        <label style="font-size: 0.85rem; font-weight: 600;">Inflasi Bahan Baku &amp; Biaya Logistik</label>
+                                        <span id="twinDisplayInflation" style="font-size: 0.85rem; font-weight: 700; color: #8b5cf6;">+6.5%</span>
+                                    </div>
+                                    <input type="range" class="form-range" id="twinParamInflationCost" min="0" max="25" step="0.5" value="6.5" oninput="syncTwinSlider('twinParamInflationCost', 'twinDisplayInflation', '+', '%')">
+                                    <div style="font-size: 0.72rem; color: var(--text-muted);">Kenaikan ongkos angkut kargo dan harga komponen.</div>
+                                </div>
+
+                                <!-- Iterations & Horizon -->
+                                <div>
+                                    <label style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; display: block;">Horizon Waktu &amp; Iterasi</label>
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <select class="form-control" id="twinParamHorizonWeeks" style="font-size: 0.85rem;">
+                                            <option value="4">4 Minggu (1 Bulan)</option>
+                                            <option value="13" selected>13 Minggu (1 Triwulan / Q4)</option>
+                                            <option value="26">26 Minggu (Semester)</option>
+                                            <option value="52">52 Minggu (1 Tahun Penuh)</option>
+                                        </select>
+                                        <select class="form-control" id="twinParamIterations" style="font-size: 0.85rem;">
+                                            <option value="1000">1.000 Iterasi</option>
+                                            <option value="2500" selected>2.500 Iterasi (Rekomendasi)</option>
+                                            <option value="5000">5.000 Iterasi</option>
+                                            <option value="10000">10.000 Iterasi (Akuras Eksak)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EXECUTIVE SYNTHESIS BOX -->
+                    <div id="twinSynthesisContainer" style="background: rgba(99, 102, 241, 0.08); border-left: 4px solid #6366f1; border-radius: 8px; padding: 1.2rem; margin-bottom: 1.5rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 700; color: #4f46e5; margin-bottom: 0.4rem;">
+                            <span>🧠</span> Executive Strategic Foresight &amp; AI Synthesis:
+                        </div>
+                        <p id="twinSynthesisText" style="margin: 0; font-size: 0.92rem; color: var(--text-primary); line-height: 1.55;">
+                            Tekan tombol "Jalankan Simulasi Monte Carlo" untuk memproyeksikan ribuan jalur probabilitas bisnis GoERP di bawah kondisi stress-testing terpilih.
+                        </p>
+                    </div>
+
+                    <!-- SUBTABS NAVIGATION -->
+                    <div class="subtabs-container" style="display: flex; gap: 0.5rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                        <button class="btn btn-sm btn-outline active twin-subtab-btn" data-target="twinSubtabTrajectory" onclick="switchTwinSubtab('twinSubtabTrajectory')">
+                            📈 Trajektori Kas Mingguan (P10 - P50 - P90)
+                        </button>
+                        <button class="btn btn-sm btn-outline twin-subtab-btn" data-target="twinSubtabPlaybooks" onclick="switchTwinSubtab('twinSubtabPlaybooks')">
+                            🛡️ AI Mitigation Playbooks
+                        </button>
+                        <button class="btn btn-sm btn-outline twin-subtab-btn" data-target="twinSubtabComparison" onclick="switchTwinSubtab('twinSubtabComparison')">
+                            📊 Matriks Komparasi Baseline vs Guncangan
+                        </button>
+                        <button class="btn btn-sm btn-outline twin-subtab-btn" data-target="twinSubtabHistory" onclick="switchTwinSubtab('twinSubtabHistory')">
+                            📜 Riwayat Skenario Tersimpan
+                        </button>
+                    </div>
+
+                    <!-- SUBTAB 1: WEEKLY TRAJECTORY TABLE -->
+                    <div id="twinSubtabTrajectory" class="twin-subtab-pane">
+                        <div class="card">
+                            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                <h3 class="card-title">Proyeksi Likuiditas &amp; Pita Probabilitas Saldo Kas Mingguan</h3>
+                                <span class="badge badge-primary">Monte Carlo CI 95%</span>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Periode Minggu</th>
+                                            <th>P10 (Pesimis 10%)</th>
+                                            <th>P50 (Median 50%)</th>
+                                            <th>P90 (Optimis 90%)</th>
+                                            <th>Proyeksi Kas Masuk</th>
+                                            <th>Proyeksi Kas Keluar</th>
+                                            <th>Pita Volatilitas Kas</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="twinTrajectoryTableBody">
+                                        <tr><td colspan="7" class="text-center text-muted" style="padding: 2rem;">Silakan jalankan simulasi untuk melihat trajektori mingguan.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUBTAB 2: MITIGATION PLAYBOOKS -->
+                    <div id="twinSubtabPlaybooks" class="twin-subtab-pane" style="display: none;">
+                        <div id="twinPlaybooksGridContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.2rem;">
+                            <div class="text-center text-muted" style="grid-column: 1/-1; padding: 2rem;">Belum ada playbook mitigasi yang dihitung. Jalankan simulasi untuk merumuskan aksi strategis.</div>
+                        </div>
+                    </div>
+
+                    <!-- SUBTAB 3: COMPARISON MATRIX -->
+                    <div id="twinSubtabComparison" class="twin-subtab-pane" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Komparasi Metriks: Kondisi Eksisting vs Terpapar Guncangan vs Pasca-Mitigasi</h3>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Metrik Finansial &amp; Operasional</th>
+                                            <th>Baseline Aktual ERP</th>
+                                            <th>Skenario Guncangan (Shocked)</th>
+                                            <th>Dampak Bersih</th>
+                                            <th>Status Stabilitas</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="twinComparisonTableBody">
+                                        <tr><td colspan="5" class="text-center text-muted" style="padding: 2rem;">Jalankan simulasi untuk mengompilasi matriks komparasi.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUBTAB 4: SIMULATION HISTORY -->
+                    <div id="twinSubtabHistory" class="twin-subtab-pane" style="display: none;">
+                        <div class="card">
+                            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                <h3 class="card-title">Arsip Riwayat Skenario Simulasi Stres Manajemen</h3>
+                                <button class="btn btn-sm btn-secondary" onclick="loadDigitalTwinHistory()">🔄 Segarkan Arsip</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID &amp; Tanggal</th>
+                                            <th>Nama Skenario</th>
+                                            <th>Horizon &amp; Iterasi</th>
+                                            <th>Guncangan Valas / Demand</th>
+                                            <th>Median Kas Akhir</th>
+                                            <th>Cash Runway</th>
+                                            <th>Risiko Stockout</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="twinHistoryTableBody">
+                                        <tr><td colspan="7" class="text-center text-muted" style="padding: 2rem;">Memuat riwayat skenario...</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -16534,6 +16779,32 @@ if ('serviceWorker' in navigator) {
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('modalRejectHITLAction')">Batal</button>
                     <button type="submit" class="btn btn-danger">Konfirmasi Penolakan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Simpan Skenario Simulasi -->
+    <div id="modalSaveSimulationScenario" class="modal-overlay">
+        <div class="modal-card" style="max-width: 520px;">
+            <div class="modal-header">
+                <h3 class="modal-title">💾 Simpan Skenario Simulasi Strategis</h3>
+                <button class="modal-close" onclick="closeModal('modalSaveSimulationScenario')">✕</button>
+            </div>
+            <form id="formSaveSimulationScenario" onsubmit="handleSaveSimulationScenario(event)">
+                <div class="modal-body">
+                    <div class="form-group mb-3">
+                        <label class="form-label">Nama Skenario Bisnis *</label>
+                        <input type="text" class="form-control" id="twinSaveScenarioNameInput" placeholder="Contoh: Skenario Stagflasi Q4 &amp; Gangguan Pasokan Asia Timur" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label">Catatan Analisis Manajerial (Opsional)</label>
+                        <textarea class="form-control" id="twinSaveScenarioNoteInput" rows="3" placeholder="Catatan asumsi, mitigasi yang diusulkan oleh komite risiko direksi..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modalSaveSimulationScenario')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan ke Database ERP</button>
                 </div>
             </form>
         </div>
