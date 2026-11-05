@@ -1747,6 +1747,56 @@ func GetSpec(appName, version string) map[string]interface{} {
 					},
 				},
 			},
+			"/api/v1/ammonia/loop/evaluate-ammonia-kinetics": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Industrial Green Ammonia Synthesis & Haber-Bosch Dynamic Load-Ramping / Nitriding Embrittlement Sentinel (ISO 22734 & ASME Section VIII Div 1)",
+					"description": "Evaluates Haber-Bosch chemical equilibrium conversion, fluctuating renewable load ramping shock, Fe4N case depth nitriding, and bypass quench gas actuation.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Synthesis equilibrium deviation, load ramping rate, thermal shock hazard level, and vessel nitriding embrittlement risk"},
+					},
+				},
+			},
+			"/api/v1/pogo/engine/evaluate-pogo-cavitation": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Orbital Launch Vehicle Cryogenic Methalox Pogo Oscillation & Turbopump Cavitation Sentinel (NASA SP-8007 & ISO 14620)",
+					"description": "Models feedline acoustic standing wave structural resonance, liquid oxygen NPSH margin collapse, turbopump inducer vapor lock, and active helium bladder dampening.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Pogo resonance coupling status, oxygen NPSH margin, acoustic feedback severity, and active helium accumulator pressurization mandate"},
+					},
+				},
+			},
+			"/api/v1/smr/containment/evaluate-passive-safety": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Next-Generation Small Modular Reactor (SMR) Passive Containment Natural Circulation & Boron Dilution Reactivity Sentinel (IAEA Safety Standards SSR-2/1 & 10 CFR 50)",
+					"description": "Monitors buoyancy-driven natural circulation decay heat loops, unborated demineralized water slug dilution, prompt positive reactivity insertion, and passive containment isolation.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Core subcriticality margin pcm, natural convection buoyancy ratio, boron dilution criticality risk, and emergency gravity boron injection status"},
+					},
+				},
+			},
+			"/api/v1/pellicle/scanner/evaluate-pellicle-degradation": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Semiconductor High-NA EUV Photolithography Pellicle Degradation & Hydrogen Plasma Radical Etch Sentinel (SEMI S2 & ISO 14644)",
+					"description": "Analyzes extreme ultraviolet nanomembrane thermal sublimation (800°C), hydrogen plasma radical chemical etching, pinhole defect yield degradation, and robotic pod exchange.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Pellicle etch thinning rate, transmission margin loss, pinhole defect density status, and robotic reticle pod exchange mandate"},
+					},
+				},
+			},
+			"/api/v1/uhvdc/station/evaluate-commutation-and-thermal": map[string]interface{}{
+				"post": map[string]interface{}{
+					"tags":        []string{"Core ERP Modules"},
+					"summary":     "Ultra-High Voltage Direct Current (UHVDC ±1100 kV) Converter Station Thyristor Valve Thermal Overstress & Commutation Failure Sentinel (IEC 60700-1 & IEEE 857)",
+					"description": "Calculates inverter extinction margin angle gamma collapse (<15°), thyristor silicon junction thermal headroom, AC grid harmonic distortion, and fast alpha firing advance.",
+					"responses": map[string]interface{}{
+						"200": map[string]interface{}{"description": "Extinction angle gamma delta, thyristor junction thermal headroom, commutation collapse hazard level, and dynamic STATCOM reactive power injection mandate"},
+					},
+				},
+			},
 		},
 	}
 }

@@ -24,6 +24,7 @@ import (
 	coreaccount "erp-golang/internal/core/account"
 	coreaerospace "erp-golang/internal/core/aerospace"
 	coreagriculture "erp-golang/internal/core/agriculture"
+	coreammonia "erp-golang/internal/core/ammonia"
 	coreasset "erp-golang/internal/core/asset"
 	coreautomotive "erp-golang/internal/core/automotive"
 	coreaviation "erp-golang/internal/core/aviation"
@@ -64,7 +65,9 @@ import (
 	coremrp "erp-golang/internal/core/mrp"
 	corenuclear "erp-golang/internal/core/nuclear"
 	corepackaging "erp-golang/internal/core/packaging"
+	corepellicle "erp-golang/internal/core/pellicle"
 	corepharma "erp-golang/internal/core/pharma"
+	corepogo "erp-golang/internal/core/pogo"
 	corepowergrid "erp-golang/internal/core/powergrid"
 	corepricing "erp-golang/internal/core/pricing"
 	coreprocurement "erp-golang/internal/core/procurement"
@@ -77,6 +80,7 @@ import (
 	corescm "erp-golang/internal/core/scm"
 	coreseabed "erp-golang/internal/core/seabed"
 	coresemiconductor "erp-golang/internal/core/semiconductor"
+	coresmr "erp-golang/internal/core/smr"
 	coresolidstate "erp-golang/internal/core/solidstate"
 	coreservice "erp-golang/internal/core/service"
 	coresubsea "erp-golang/internal/core/subsea"
@@ -85,6 +89,7 @@ import (
 	coretax "erp-golang/internal/core/tax"
 	coretradefinance "erp-golang/internal/core/tradefinance"
 	coretreasury "erp-golang/internal/core/treasury"
+	coreuhvdc "erp-golang/internal/core/uhvdc"
 	coreutilities "erp-golang/internal/core/utilities"
 	corevmi "erp-golang/internal/core/vmi"
 	corewms "erp-golang/internal/core/wms"
@@ -13122,5 +13127,184 @@ IEA*1*000099123~`
 	t.Logf("✓ Industrial Waste Plastic Pyrolysis Depolymerization & Dioxin Sentinel Verified: Reactor='%s' (Facility='%s'), BedT=%.1f°C, Rate=%.0f kg/h, Conversion=%.1f%%, PyoilYield=%.1f%%, GasLoopT=%.1f°C, Cl=%.1f ppm, DioxinRisk='%s', CrackerCompliance='%s', RapidQuenchReq=%t, QuenchDrop=-%.1f°C, TunedSorbent=%.1f kg/h, AvoidedCatalystLoss=$%.2fM USD",
 		pyroTel.ReactorID, pyroTel.FacilityLocation, pyroTel.PyrolysisBedTempC, pyroTel.FeedstockFeedRateKgHr, pyroAssess.DepolymerizationConversionPct, pyroTel.PyrolysisOilYieldPct, pyroTel.GasRecycleLoopTempC, pyroTel.ChlorineContentPPM, pyroAssess.DioxinDeNovoSynthesisRiskLevel, pyroAssess.SteamCrackerFeedstockComplianceStatus, pyroAssess.RapidGasQuenchRequired, pyroAct.QuenchTemperatureDropC, pyroAct.TunedSorbentInjectionKgHr, pyroAct.AvoidedRefineryCatalystLossUSD/1e6)
 
-	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (86 SECTIONS: 95+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD + CONTRACT LEAKAGE SENTINEL + MICROGRID ISLANDING + CARGO GEOFENCE + SHIFT BIDDING FATIGUE + CIRCULAR PACKAGING RTI + INDUSTRIAL WATER ZLD + VENDOR SANCTIONS GRAPH + BOILER TUBE DESCALING + SAAS DUNNING WATERFALL + TOLL MANUFACTURING RECON + SILO AERATION SENTINEL + EPC PROGRESS BILLING ESCROW + DYNAMIC PORT BERTH DEMURRAGE + TRANSFORMER DGA GUARDIAN + CROSS BORDER CASH REPATRIATION + ORE BLENDING OPTIMIZER + PHARMA CRYOGENIC SENTINEL + KILN REFRACTORY GUARDIAN + IP PATENT ANNUITY + TURBINE EOH CREEP + AVIATION MRO FATIGUE + MARINE LNG RELIQUEFACTION + SEMICONDUCTOR FAB YIELD + WASTEWATER BIOMETHANE + RAILWAY WHEEL RCF + NUCLEAR RADIOPHARM DECAY + UTILITY BESS THERMAL SOH + SATELLITE ORBITAL CONJUNCTION + SUBSEA FLOW ASSURANCE + CONNECTED VEHICLE OTA SUMS + BIOPHARMA BIOREACTOR PAT + FLOATING WIND MOORING + HVDC SUBSEA DTS + CCS CO2 ENVELOPE + MINE ROCKBURST SENTINEL + TOKAMAK FUSION DISRUPTION + CRYO LH2 ORTHO-PARA + HYPERSONIC TPS ABLATION + 3D CHIPLET TSV WARPAGE + SUPERHOT EGS GEOTHERMAL SEISMICITY + QUANTUM QKD PHASE GUARDIAN + SEABED NODULE PLUME + CSP MOLTEN SALT FREEZE + SOLID-STATE BATTERY CRACK + DIRECT AIR CAPTURE OPTIMIZER + EVTOL ACOUSTIC SENTINEL + HYPERLOOP MAGLEV QUENCH + SUBSEA DEEPWATER BOP + CAR-T ACOUSTIC SORTING + PLASTIC PYROLYSIS DIOXIN SENTINEL) PASSED 100%!")
+	// =========================================================================
+	// SECTION 87: GREEN AMMONIA HABER-BOSCH, ROCKET METHALOX POGO, SMR PASSIVE
+	// CONTAINMENT, HIGH-NA EUV PELLICLE, UHVDC ±1100KV CONVERTER SENTINEL
+	// =========================================================================
+
+	// 87.1 Industrial Green Ammonia Synthesis & Haber-Bosch Dynamic Load-Ramping Sentinel (ISO 22734 & ASME VIII-1)
+	nh3Tel := coreammonia.GlobalAmmoniaVault.IngestLoopTelemetry(coreammonia.AmmoniaLoopTelemetry{
+		TelemetryID:                  "TEL-NH3-9901",
+		SynthesisLoopID:              "LOOP-HABER-BOSCH-GREEN-99",
+		PlantID:                      "PLANT-NEOM-OXAGON-GREEN-NH3",
+		ReactorBedTemperatureC:       485.0,
+		LoopPressureBar:              198.0,
+		RenewablePowerAvailabilityMW: 24.5,
+		HydrogenFeedFlowNm3Hr:        11500.0,
+		NitrogenFeedFlowNm3Hr:        4200.0,
+		StoichiometricH2N2Ratio:      2.74,
+		AmmoniaConversionPct:         14.2,
+		NitridingDepthMicrons:        48.5,
+	})
+	if nh3Tel.SynthesisLoopID == "" || nh3Tel.ReactorBedTemperatureC != 485.0 {
+		t.Fatalf("Failed to ingest green ammonia loop telemetry: %+v", nh3Tel)
+	}
+
+	nh3Assess, err := coreammonia.GlobalAmmoniaVault.EvaluateAmmoniaKinetics("LOOP-HABER-BOSCH-GREEN-99")
+	if err != nil || nh3Assess.EquilibriumDeviationKelvin <= 0 || nh3Assess.ThermalShockHazardLevel != "CRITICAL_THERMAL_SHOCK_AND_NITRIDING_BREACH" || nh3Assess.NitridingEmbrittlementRisk != "CRITICAL_VESSEL_HYDROGEN_NITRIDING_FAIL" || !nh3Assess.LoopBypassTripMandate || !nh3Assess.QuenchGasInjectionRequired {
+		t.Fatalf("Failed to evaluate green ammonia kinetics: %+v, err: %v", nh3Assess, err)
+	}
+
+	nh3Act, err := coreammonia.GlobalAmmoniaVault.TriggerLoopBypassAndQuenchControl("LOOP-HABER-BOSCH-GREEN-99")
+	if err != nil || nh3Act.CommandedBypassRatioPct <= 0 || nh3Act.ModulatedSyngasRecycleRatio <= 0 || nh3Act.NitrogenPurgeFlowNm3Hr <= 0 || nh3Act.AvoidedReactorExplosionLossUSD <= 0 {
+		t.Fatalf("Failed to trigger ammonia loop bypass and quench: %+v, err: %v", nh3Act, err)
+	}
+
+	nh3Dossier, err := coreammonia.GlobalAmmoniaVault.GetGreenAmmoniaSafetyDossier("LOOP-HABER-BOSCH-GREEN-99")
+	if err != nil || !nh3Dossier["iso_22734_compliant"].(bool) || !nh3Dossier["asme_section8_approved"].(bool) {
+		t.Fatalf("Failed to compile green ammonia safety dossier: %+v, err: %v", nh3Dossier, err)
+	}
+	t.Logf("✓ Green Ammonia Haber-Bosch & Nitriding Embrittlement Sentinel Verified: Loop='%s' (Plant='%s'), BedT=%.1f°C, Press=%.0f bar, H2/N2=%.2f, EqDelta=%.1fK, Nitriding=%.1f µm, Hazard='%s', Risk='%s', Bypass=%.1f%%, Recycle=%.1f:1, AvoidedLoss=$%.2fM USD",
+		nh3Tel.SynthesisLoopID, nh3Tel.PlantID, nh3Tel.ReactorBedTemperatureC, nh3Tel.LoopPressureBar, nh3Tel.StoichiometricH2N2Ratio, nh3Assess.EquilibriumDeviationKelvin, nh3Tel.NitridingDepthMicrons, nh3Assess.ThermalShockHazardLevel, nh3Assess.NitridingEmbrittlementRisk, nh3Act.CommandedBypassRatioPct, nh3Act.ModulatedSyngasRecycleRatio, nh3Act.AvoidedReactorExplosionLossUSD/1e6)
+
+	// 87.2 Orbital Launch Vehicle Cryogenic Methalox Pogo Oscillation & Cavitation Sentinel (NASA SP-8007 & ISO 14620)
+	pogoTel := corepogo.GlobalPogoVault.IngestPogoTelemetry(corepogo.MethaloxPogoTelemetry{
+		TelemetryID:                       "TEL-POGO-9901",
+		EngineClusterID:                   "ENGINE-RAPTOR-V3-STAGE1-CLUSTER-99",
+		LaunchVehicleTailID:               "VEHICLE-METHALOX-STARSHIP-SN33",
+		FlightTimeSeconds:                 142.5,
+		SuctionLineResonanceFreqHz:        18.1,
+		PropellantAccelerationG:           4.92,
+		LiquidMethaneNPSHActualMeter:      4.6,
+		LiquidOxygenNPSHActualMeter:       3.1,
+		TurbopumpInducerVibrationG:        76.0,
+		PogoAccumulatorHeliumPressureBar: 40.5,
+		ChamberPressureBar:                298.0,
+	})
+	if pogoTel.EngineClusterID == "" || pogoTel.FlightTimeSeconds != 142.5 {
+		t.Fatalf("Failed to ingest rocket pogo telemetry: %+v", pogoTel)
+	}
+
+	pogoAssess, err := corepogo.GlobalPogoVault.EvaluatePogoCavitation("ENGINE-RAPTOR-V3-STAGE1-CLUSTER-99")
+	if err != nil || pogoAssess.NPSHMarginOxygenMeters >= 0 || pogoAssess.PogoResonanceCouplingStatus != "CRITICAL_POGO_TURBOPUMP_CAVITATION_HAZARD" || pogoAssess.AcousticCombustionFeedbackLevel != "DESTRUCTIVE_ACOUSTIC_RESONANCE" || !pogoAssess.ActivePogoSuppressionMandate || !pogoAssess.InducerVaporLockDetected {
+		t.Fatalf("Failed to evaluate rocket pogo cavitation: %+v, err: %v", pogoAssess, err)
+	}
+
+	pogoAct, err := corepogo.GlobalPogoVault.TriggerPogoSuppressionAndTrim("ENGINE-RAPTOR-V3-STAGE1-CLUSTER-99")
+	if err != nil || pogoAct.HeliumDampenerChargeBoostBar <= 0 || pogoAct.ThrustThrottlingModulationPct >= 0 || pogoAct.OxidizerTrimBiasPct <= 0 || pogoAct.AvoidedLaunchVehicleLossUSD <= 0 {
+		t.Fatalf("Failed to trigger pogo suppression and trim: %+v, err: %v", pogoAct, err)
+	}
+
+	pogoDossier, err := corepogo.GlobalPogoVault.GetRocketPogoSafetyDossier("ENGINE-RAPTOR-V3-STAGE1-CLUSTER-99")
+	if err != nil || !pogoDossier["nasa_sp8007_compliant"].(bool) || !pogoDossier["iso_14620_certified"].(bool) {
+		t.Fatalf("Failed to compile rocket pogo safety dossier: %+v, err: %v", pogoDossier, err)
+	}
+	t.Logf("✓ Rocket Methalox Pogo Oscillation & Cavitation Sentinel Verified: Cluster='%s' (Vehicle='%s'), t=%.1fs, Freq=%.1f Hz, LOX NPSH Margin=%.2fm, InducerVib=%.1f G, Status='%s', Feedback='%s', VaporLock=%t, HeBoost=+%.1f bar, Throttle=%.1f%%, AvoidedLoss=$%.2fM USD",
+		pogoTel.EngineClusterID, pogoTel.LaunchVehicleTailID, pogoTel.FlightTimeSeconds, pogoTel.SuctionLineResonanceFreqHz, pogoAssess.NPSHMarginOxygenMeters, pogoTel.TurbopumpInducerVibrationG, pogoAssess.PogoResonanceCouplingStatus, pogoAssess.AcousticCombustionFeedbackLevel, pogoAssess.InducerVaporLockDetected, pogoAct.HeliumDampenerChargeBoostBar, pogoAct.ThrustThrottlingModulationPct, pogoAct.AvoidedLaunchVehicleLossUSD/1e6)
+
+	// 87.3 Next-Generation SMR Passive Containment Natural Circulation & Boron Sentinel (IAEA SSR-2/1 & 10 CFR 50)
+	smrTel := coresmr.GlobalSMRVault.IngestContainmentTelemetry(coresmr.SMRContainmentTelemetry{
+		TelemetryID:                      "TEL-SMR-9901",
+		ModuleUnitID:                     "SMR-NUSCALE-VOYGR-UNIT-99",
+		PlantSiteID:                      "PLANT-IDAHO-NATIONAL-LAB-CFPP",
+		ReactorThermalPowerMWth:          250.0,
+		NaturalCirculationFlowKgPerSec:   480.0,
+		RCSHotLegTemperatureC:           315.0,
+		RCSColdLegTemperatureC:          255.0,
+		PrimaryCoolantBoronPPM:           940.0,
+		ReactivityInsertionRatePcmPerSec: 4.2,
+		ContainmentPoolWaterLevelMeter:   14.6,
+		ContainmentPressureBar:           1.12,
+	})
+	if smrTel.ModuleUnitID == "" || smrTel.PrimaryCoolantBoronPPM != 940.0 {
+		t.Fatalf("Failed to ingest SMR containment telemetry: %+v", smrTel)
+	}
+
+	smrAssess, err := coresmr.GlobalSMRVault.EvaluatePassiveSafety("SMR-NUSCALE-VOYGR-UNIT-99")
+	if err != nil || smrAssess.CoreSubcriticalityMarginPcm >= 500.0 || smrAssess.BoronDilutionReactivityHazardLevel != "CRITICAL_UNPLANNED_PROMPT_CRITICALITY_RISK" || !smrAssess.EmergencyBoronInjectionMandate || !smrAssess.PassiveContainmentDepressurizationActive {
+		t.Fatalf("Failed to evaluate SMR passive safety: %+v, err: %v", smrAssess, err)
+	}
+
+	smrAct, err := coresmr.GlobalSMRVault.TriggerEmergencyPassiveBoronInjection("SMR-NUSCALE-VOYGR-UNIT-99")
+	if err != nil || smrAct.InjectedBoronSolutionVolumeLiters <= 0 || smrAct.PassiveIsolationValveActuationMS <= 0 || smrAct.AvoidedCoreMeltRadiationLossUSD <= 0 {
+		t.Fatalf("Failed to trigger emergency passive boron injection: %+v, err: %v", smrAct, err)
+	}
+
+	smrDossier, err := coresmr.GlobalSMRVault.GetSMRPassiveSafetyDossier("SMR-NUSCALE-VOYGR-UNIT-99")
+	if err != nil || !smrDossier["iaea_ssr2_1_compliant"].(bool) || !smrDossier["nrc_10cfr50_certified"].(bool) {
+		t.Fatalf("Failed to compile SMR passive safety dossier: %+v, err: %v", smrDossier, err)
+	}
+	t.Logf("✓ SMR Passive Containment Natural Circulation & Boron Sentinel Verified: Unit='%s' (Site='%s'), Power=%.0f MWth, Flow=%.0f kg/s, Boron=%.0f ppm, SubcritMargin=%.1f pcm, Buoyancy=%.2f, ReactivityRisk='%s', DecayHeat='%s', BoronInj=%.0f L, ValveTime=%.0f ms, AvoidedLoss=$%.2fM USD",
+		smrTel.ModuleUnitID, smrTel.PlantSiteID, smrTel.ReactorThermalPowerMWth, smrTel.NaturalCirculationFlowKgPerSec, smrTel.PrimaryCoolantBoronPPM, smrAssess.CoreSubcriticalityMarginPcm, smrAssess.NaturalConvectionBuoyancyRatio, smrAssess.BoronDilutionReactivityHazardLevel, smrAssess.PassiveDecayHeatRemovalStatus, smrAct.InjectedBoronSolutionVolumeLiters, smrAct.PassiveIsolationValveActuationMS, smrAct.AvoidedCoreMeltRadiationLossUSD/1e6)
+
+	// 87.4 Semiconductor High-NA EUV Photolithography Pellicle Degradation Sentinel (SEMI S2 & ISO 14644)
+	pellTel := corepellicle.GlobalPellicleVault.IngestPellicleTelemetry(corepellicle.EUVPellicleTelemetry{
+		TelemetryID:                  "TEL-EUV-9901",
+		ScannerID:                    "SCANNER-ASML-EXE5200-NA055-99",
+		ReticlePodID:                 "POD-EUV-MASK-2NM-N2-0042",
+		SourceEUVPowerWatts:          500.0,
+		PellicleCoreTempC:            815.0,
+		HydrogenRadicalFlowSCCM:      380.0,
+		PellicleThicknessRemainingNM: 14.8,
+		EUVTransmissionPct:           87.6,
+		PinholeDefectDensityPerCm2:   0.092,
+		CumulativeDoseExposureKJ:     920.0,
+	})
+	if pellTel.ScannerID == "" || pellTel.PellicleThicknessRemainingNM != 14.8 {
+		t.Fatalf("Failed to ingest EUV pellicle telemetry: %+v", pellTel)
+	}
+
+	pellAssess, err := corepellicle.GlobalPellicleVault.EvaluatePellicleDegradation("SCANNER-ASML-EXE5200-NA055-99")
+	if err != nil || pellAssess.PellicleRuptureRiskLevel != "CRITICAL_PELLICLE_RUPTURE_MASK_CONTAMINATION" || pellAssess.PinholeDefectStatus != "CRITICAL_UNREPAIRABLE_RETICLE_DEFECT" || !pellAssess.PelliclePodSwapMandate || !pellAssess.LaserDoseAttenuationRequired {
+		t.Fatalf("Failed to evaluate EUV pellicle degradation: %+v, err: %v", pellAssess, err)
+	}
+
+	pellAct, err := corepellicle.GlobalPellicleVault.TriggerPellicleProtectionAndSwap("SCANNER-ASML-EXE5200-NA055-99")
+	if err != nil || pellAct.AttenuatedLaserPowerWatts <= 0 || !pellAct.AutomatedPodExchangeScheduled || pellAct.AvoidedReticleAndWaferScrapLossUSD <= 0 {
+		t.Fatalf("Failed to trigger EUV pellicle protection and pod exchange: %+v, err: %v", pellAct, err)
+	}
+
+	pellDossier, err := corepellicle.GlobalPellicleVault.GetEUVPellicleReliabilityDossier("SCANNER-ASML-EXE5200-NA055-99")
+	if err != nil || !pellDossier["semi_s2_compliant"].(bool) || !pellDossier["iso_14644_certified"].(bool) {
+		t.Fatalf("Failed to compile EUV pellicle reliability dossier: %+v, err: %v", pellDossier, err)
+	}
+	t.Logf("✓ Semiconductor High-NA EUV Pellicle Degradation Sentinel Verified: Scanner='%s' (Pod='%s'), Power=%.0fW, CoreT=%.1f°C, Thick=%.1fnm, Trans=%.1f%%, ThinningRate=%.2fnm/M-Dose, TransMargin=%.2f%%, RuptureRisk='%s', DefectStatus='%s', SwapMandate=%t, LaserAtten=%.0fW, AvoidedLoss=$%.2fM USD",
+		pellTel.ScannerID, pellTel.ReticlePodID, pellTel.SourceEUVPowerWatts, pellTel.PellicleCoreTempC, pellTel.PellicleThicknessRemainingNM, pellTel.EUVTransmissionPct, pellAssess.EtchThinningRateNmPerMillionDose, pellAssess.TransmissionLossMarginPct, pellAssess.PellicleRuptureRiskLevel, pellAssess.PinholeDefectStatus, pellAssess.PelliclePodSwapMandate, pellAct.AttenuatedLaserPowerWatts, pellAct.AvoidedReticleAndWaferScrapLossUSD/1e6)
+
+	// 87.5 Ultra-High Voltage Direct Current (UHVDC ±1100 kV) Converter Valve & Commutation Sentinel (IEC 60700-1 & IEEE 857)
+	uhvdcTel := coreuhvdc.GlobalUHVDVault.IngestValveTelemetry(coreuhvdc.UHVDCValveTelemetry{
+		TelemetryID:                        "TEL-UHVDC-9901",
+		ConverterStationID:                 "STATION-CHANGJI-GUQUAN-1100KV-99",
+		ThyristorValveHallID:               "VALVE-HALL-POLE1-INVERTER-12PULSE",
+		TransmissionVoltageKV:              1100.0,
+		TransmissionCurrentAmps:            5600.0,
+		FiringAngleAlphaDeg:                144.0,
+		ExtinctionAngleGammaDeg:            13.2,
+		ThyristorJunctionTempC:             121.5,
+		DeionizedCoolingWaterLPM:           2350.0,
+		ACGridVoltageHarmonicTHDPct:        5.2,
+		CommutationFailureCountLastMinute: 3,
+	})
+	if uhvdcTel.ConverterStationID == "" || uhvdcTel.TransmissionVoltageKV != 1100.0 {
+		t.Fatalf("Failed to ingest UHVDC converter valve telemetry: %+v", uhvdcTel)
+	}
+
+	uhvdcAssess, err := coreuhvdc.GlobalUHVDVault.EvaluateCommutationAndThermal("STATION-CHANGJI-GUQUAN-1100KV-99")
+	if err != nil || uhvdcAssess.ExtinctionMarginAngleDeltaDeg >= 0 || uhvdcAssess.CommutationFailureHazardLevel != "CRITICAL_VALVE_SHORT_CIRCUIT_COMMUTATION_COLLAPSE" || uhvdcAssess.ValveThermalStressTier != "CRITICAL_THYRISTOR_OVERHEAT_TRIP" || !uhvdcAssess.FiringAngleAdvanceMandate || !uhvdcAssess.DynamicSTATCOMInjectionRequired {
+		t.Fatalf("Failed to evaluate UHVDC commutation and thermal: %+v, err: %v", uhvdcAssess, err)
+	}
+
+	uhvdcAct, err := coreuhvdc.GlobalUHVDVault.TriggerFastAdvanceAndReactiveSupport("STATION-CHANGJI-GUQUAN-1100KV-99")
+	if err != nil || uhvdcAct.AdvancedFiringAngleAlphaDeg <= 0 || uhvdcAct.InjectedReactivePowerMVAR <= 0 || uhvdcAct.AvoidedContinentalGridBlackoutLossUSD <= 0 {
+		t.Fatalf("Failed to trigger UHVDC fast advance and reactive support: %+v, err: %v", uhvdcAct, err)
+	}
+
+	uhvdcDossier, err := coreuhvdc.GlobalUHVDVault.GetUHVDCConverterSafetyDossier("STATION-CHANGJI-GUQUAN-1100KV-99")
+	if err != nil || !uhvdcDossier["iec_60700_1_compliant"].(bool) || !uhvdcDossier["ieee_857_certified"].(bool) {
+		t.Fatalf("Failed to compile UHVDC converter safety dossier: %+v, err: %v", uhvdcDossier, err)
+	}
+	t.Logf("✓ UHVDC ±1100 kV Converter Valve & Commutation Sentinel Verified: Station='%s' (Hall='%s'), Voltage=±%.0f kV, Current=%.0f A, Gamma=%.1f°, GammaDelta=%.2f°, JunctionT=%.1f°C, Headroom=%.1f°C, CommutationHazard='%s', ThermalStress='%s', AdvAlpha=%.1f°, STATCOM=+%.0f MVAR, AvoidedLoss=$%.2fM USD",
+		uhvdcTel.ConverterStationID, uhvdcTel.ThyristorValveHallID, uhvdcTel.TransmissionVoltageKV, uhvdcTel.TransmissionCurrentAmps, uhvdcTel.ExtinctionAngleGammaDeg, uhvdcAssess.ExtinctionMarginAngleDeltaDeg, uhvdcTel.ThyristorJunctionTempC, uhvdcAssess.ValveJunctionThermalHeadroomC, uhvdcAssess.CommutationFailureHazardLevel, uhvdcAssess.ValveThermalStressTier, uhvdcAct.AdvancedFiringAngleAlphaDeg, uhvdcAct.InjectedReactivePowerMVAR, uhvdcAct.AvoidedContinentalGridBlackoutLossUSD/1e6)
+
+	t.Log("🎉 COMPLETE GOERP EXPANDED TEST SUITE (87 SECTIONS: 95+ MODULES + OPENAPI 3.1 + MCP JSON-RPC 2.0 + GOOGLE A2A + AI DEMAND SENSING + LIVE SSE PRESENCE + SAAS MULTI-TENANCY + OFFLINE POS + VOICE ASSISTANT + RFQ BIDDING WARS + MERKLE AUDIT + DIGITAL TWIN + FIELD RBAC + VISUAL BI + DYNAMIC PRICING + FX HEDGING + IOT HEALTH + VENDOR PASSPORT + RAG COPILOT + AI CLM + 3D BIN PACKING + HR ATTRITION RADAR + FUZZY BANK RECON + UNIVERSAL EDI + WMS CROSS-DOCKING + INTERCOMPANY CONSOLIDATION + BULLWHIP GUARD + EXPENSE FRAUD + REVERSE LOGISTICS RMA + MRP LINE BALANCING + LAST-MILE VRPTW + AR CREDIT RISK DSO + ASSET CARBON TAX + HEADLESS GRAPHQL + SHIFT ROSTER OPTIMIZER + STOCK EQUALIZER + PREDICTIVE CLV CHURN + QUORUM VAULT + RFID RADAR + CONTINUOUS FAST CLOSE + VMI CONSIGNMENT + FTA RULES OF ORIGIN + CQRS DATABASE ROUTER + EHS SAFETY RADAR + TREASURY CASH POOLING + LANDED COST ENGINE + SCOPE 3 CBAM PASSPORT + FIELD SERVICE LIGHTNING + DYNAMIC PRICING MARGIN GUARD + ANDON VISUAL CONTROL + TRADE FINANCE LC + DYNAMIC DISCOUNTING + VIBRATION FFT RUL + TRAVEL POLICY PER-DIEM + TRANSFER PRICING BEPS + LEASE ACCOUNTING IFRS16 + YARD MANAGEMENT YMS + CPQ CONFIGURATOR + ETHICS VAULT ISO37002 + SCM MEIO + IFRS9 DERIVATIVE HEDGING + PHARMA EBR 21CFR11 + WHT EQUALIZATION DGT1 + CRM LOYALTY IFRS15 + INTERNAL CARBON PRICING + WMS AMR FLEET + MILESTONE ESCROW + IFRS15 REVREC + 9BOX SUCCESSION + DIGITAL PRODUCT PASSPORT + SPOT FREIGHT AUCTION + GLOBAL LIQUIDITY SWEEPER + CPQ DEAL DESK + EHS OSHA SENTINEL + CRM DUAL-SOURCING + INDUSTRIAL ENERGY PEAK-SHAVING + SLL GREEN LOANS + DYNAMIC SLOTTING + SME EXPERT GRAPH + CLOSED-LOOP ECO CONTROLLER + COLD-CHAIN PARAMETRIC INSURANCE + LIQUIDITY STRESS TESTING + CSDDD HUMAN RIGHTS + GIG MARKETPLACE + TOC DRUM-BUFFER-ROPE + VPP ENERGY ARBITRAGE + DTAA TAX TREATY + ZKP ANTI-COUNTERFEIT + GATT CUSTOMS TP HARMONIZER + AI 8D CAPA ISHIKAWA + DUAL-CURRENCY NDF HEDGE + MULTI-CARRIER BROKER + FINOPS CLOUD REAPER + GREEN TRAVEL CARBON BUDGET + SCF REVERSE FACTORING + HAZMAT DANGEROUS GOODS + WARRANTY FRAUD SENTINEL + PEPPOL BIS 3.0 CTC + ISO 7243 HEAT STRESS + CBAM GREEN SURCHARGE + ROBOTIC AGF CROSS-DOCK + ZBA CASH SWEEPING + SPARES CANNIBALIZATION + AI INSURED CREDIT GUARD + CONTRACT LEAKAGE SENTINEL + MICROGRID ISLANDING + CARGO GEOFENCE + SHIFT BIDDING FATIGUE + CIRCULAR PACKAGING RTI + INDUSTRIAL WATER ZLD + VENDOR SANCTIONS GRAPH + BOILER TUBE DESCALING + SAAS DUNNING WATERFALL + TOLL MANUFACTURING RECON + SILO AERATION SENTINEL + EPC PROGRESS BILLING ESCROW + DYNAMIC PORT BERTH DEMURRAGE + TRANSFORMER DGA GUARDIAN + CROSS BORDER CASH REPATRIATION + ORE BLENDING OPTIMIZER + PHARMA CRYOGENIC SENTINEL + KILN REFRACTORY GUARDIAN + IP PATENT ANNUITY + TURBINE EOH CREEP + AVIATION MRO FATIGUE + MARINE LNG RELIQUEFACTION + SEMICONDUCTOR FAB YIELD + WASTEWATER BIOMETHANE + RAILWAY WHEEL RCF + NUCLEAR RADIOPHARM DECAY + UTILITY BESS THERMAL SOH + SATELLITE ORBITAL CONJUNCTION + SUBSEA FLOW ASSURANCE + CONNECTED VEHICLE OTA SUMS + BIOPHARMA BIOREACTOR PAT + FLOATING WIND MOORING + HVDC SUBSEA DTS + CCS CO2 ENVELOPE + MINE ROCKBURST SENTINEL + TOKAMAK FUSION DISRUPTION + CRYO LH2 ORTHO-PARA + HYPERSONIC TPS ABLATION + 3D CHIPLET TSV WARPAGE + SUPERHOT EGS GEOTHERMAL SEISMICITY + QUANTUM QKD PHASE GUARDIAN + SEABED NODULE PLUME + CSP MOLTEN SALT FREEZE + SOLID-STATE BATTERY CRACK + DIRECT AIR CAPTURE OPTIMIZER + EVTOL ACOUSTIC SENTINEL + HYPERLOOP MAGLEV QUENCH + SUBSEA DEEPWATER BOP + CAR-T ACOUSTIC SORTING + PLASTIC PYROLYSIS DIOXIN SENTINEL + GREEN AMMONIA SENTINEL + ROCKET POGO SENTINEL + SMR PASSIVE CONTAINMENT + EUV PELLICLE SENTINEL + UHVDC CONVERTER SENTINEL) PASSED 100%!")
 }

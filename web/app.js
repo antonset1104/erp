@@ -32194,6 +32194,331 @@ async function triggerPlasticPyrolysis() {
     }
 }
 
+async function triggerGreenAmmonia() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi kinetika kesetimbangan Haber-Bosch & risiko nitriding reaktor amonia hijau...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const loopID = "LOOP-HABER-BOSCH-GREEN-01";
+        await api('/ammonia/loop/ingest-loop-telemetry', 'POST', {
+            synthesis_loop_id: loopID,
+            plant_id: "PLANT-NEOM-OXAGON-GREEN-NH3",
+            reactor_bed_temperature_c: 485.0,
+            loop_pressure_bar: 198.0,
+            renewable_power_availability_mw: 24.5,
+            hydrogen_feed_flow_nm3_hr: 11500.0,
+            nitrogen_feed_flow_nm3_hr: 4200.0,
+            stoichiometric_h2_n2_ratio: 2.74,
+            ammonia_conversion_pct: 14.2,
+            nitriding_depth_microns: 48.5
+        });
+
+        const evalRes = await api('/ammonia/loop/evaluate-ammonia-kinetics', 'POST', { synthesis_loop_id: loopID });
+        const actRes = await api('/ammonia/loop/trigger-loop-bypass-and-quench', 'POST', { synthesis_loop_id: loopID });
+        const dossierRes = await api(`/ammonia/loop/green-ammonia-safety-dossier/${loopID}`, 'GET');
+
+        if (badge) badge.textContent = `🧪 NH3: ${evalRes.data.nitriding_embrittlement_risk} | Nitriding: ${dossierRes.data.nitriding_depth_um} µm | Bypass: ${actRes.data.commanded_bypass_ratio_pct}%`;
+        if (answerEl) {
+            let out = `🧪 INDUSTRIAL GREEN AMMONIA HABER-BOSCH & NITRIDING EMBRITTLEMENT SENTINEL (ISO 22734 & ASME VIII-1):\n`;
+            out += `Loop Sintesis Amonia Hijau: ${loopID} | Fasilitas: ${dossierRes.data.plant_id}\n`;
+            out += `Daya EBT Terpasang: 24.5 MW (Fluktuasi Angin/Surya) | Tekanan Loop: ${dossierRes.data.loop_pressure_bar} bar | Rasio H2/N2: ${dossierRes.data.stoichiometric_ratio}\n\n`;
+            out += `ANALISIS KESETIMBANGAN TERMODINAMIKA & DEGRADASI NITRIDING KELONGSONGAN REAKTOR:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Suhu Bed Katalis Ruthenium/Besi: ${dossierRes.data.bed_temp_c}°C (Deviasi Kesetimbangan: ${evalRes.data.equilibrium_deviation_kelvin} K)\n`;
+            out += `• Laju Ramping Beban Transien: ${evalRes.data.load_ramping_rate_pct_per_min}%/menit\n`;
+            out += `• Tingkat Bahaya Kejutan Termal (Thermal Shock): ${evalRes.data.thermal_shock_hazard_level}\n`;
+            out += `• Kedalaman Lapisan Nitriding Fe4N: ${dossierRes.data.nitriding_depth_um} µm (Ambang Kritis ASME: < 50.0 µm)\n`;
+            out += `• Status Risiko Perapuhan Logam (Embrittlement): ${evalRes.data.nitriding_embrittlement_risk}\n`;
+            out += `• Mandat Bypass Loop & Injeksi Quench Gas: ${evalRes.data.loop_bypass_trip_mandate ? 'DIPERLUKAN SEGERA' : 'NORMAL'}\n\n`;
+            out += `DISPOSISI MITIGASI TRANSIEN REAKTOR (BYPASS SYNGAS & QUENCH NITROGEN):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Keselamatan: ${actRes.data.action_id}\n`;
+            out += `• Rasio Bypass Loop Gas Diperintahkan: ${actRes.data.commanded_bypass_ratio_pct}% (Mengalirkan Sebagian Syngas Melewati Bed Katalis)\n`;
+            out += `• Modulasi Rasio Sirkulasi Ulang (Recycle Ratio): ${actRes.data.modulated_syngas_recycle_ratio}:1\n`;
+            out += `• Injeksi Purging Nitrogen Dingin: ${actRes.data.nitrogen_purge_flow_nm3_hr} Nm³/jam (Meredam Lonjakan Suara Termal)\n`;
+            out += `• Estimasi Kerugian Ledakan Bejana Bertekanan Terhindar: $${actRes.data.avoided_reactor_explosion_loss_usd.toLocaleString()} USD (Mencegah Keretakan Logam Bejana Bertekanan Tinggi)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Bypass 28.5% syngas seketika menurunkan temperatur puncak bed katalis untuk memutus laju difusi nitrogen atomik ke dinding bejana.</li>
+                <li>Injeksi gas nitrogen dingin menstabilkan rasio stoikiometri dan mencegah sintering katalis logam berharga tinggi.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses green ammonia sentinel: ' + err.message;
+    }
+}
+
+async function triggerRocketPogo() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi resonansi akustik-struktur Pogo & kavitasi inducer turbopump methalox...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const clusterID = "ENGINE-RAPTOR-V3-STAGE1-CLUSTER-09";
+        await api('/pogo/engine/ingest-pogo-telemetry', 'POST', {
+            engine_cluster_id: clusterID,
+            launch_vehicle_tail_id: "VEHICLE-METHALOX-STARSHIP-SN33",
+            flight_time_seconds: 142.5,
+            suction_line_resonance_freq_hz: 18.1,
+            propellant_acceleration_g: 4.92,
+            liquid_methane_npsh_actual_meter: 4.6,
+            liquid_oxygen_npsh_actual_meter: 3.1,
+            turbopump_inducer_vibration_g: 76.0,
+            pogo_accumulator_helium_pressure_bar: 40.5,
+            chamber_pressure_bar: 298.0
+        });
+
+        const evalRes = await api('/pogo/engine/evaluate-pogo-cavitation', 'POST', { engine_cluster_id: clusterID });
+        const actRes = await api('/pogo/engine/trigger-pogo-suppression-and-trim', 'POST', { engine_cluster_id: clusterID });
+        const dossierRes = await api(`/pogo/engine/rocket-pogo-safety-dossier/${clusterID}`, 'GET');
+
+        if (badge) badge.textContent = `🚀 Pogo: ${evalRes.data.pogo_resonance_coupling_status} | LOX NPSH: ${evalRes.data.npsh_margin_oxygen_meters} m | Vib: ${dossierRes.data.inducer_vib_g} G`;
+        if (answerEl) {
+            let out = `🚀 ORBITAL LAUNCH VEHICLE METHALOX POGO OSCILLATION & CAVITATION SENTINEL (NASA SP-8007 & ISO 14620):\n`;
+            out += `Kluster Mesin Roket: ${clusterID} | Wahana Peluncur: ${dossierRes.data.vehicle_tail_id}\n`;
+            out += `Waktu Terbang: ${dossierRes.data.flight_time_s} detik (Menjelang MECO) | Akselerasi Wahana: 4.92 G\n\n`;
+            out += `KOPLING RESONANSI STRUKTUR-HIDRODINAMIKA & MARGIN KAVITASI NPSH:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Frekuensi Akustik Pipa Hisap: ${dossierRes.data.resonance_freq_hz} Hz (Kopling dengan Mode Struktur 18.0 Hz)\n`;
+            out += `• Margin Tekanan Hisap Netto (NPSH Margin LOX): ${evalRes.data.npsh_margin_oxygen_meters} m (Defisit di Bawah Standar Aman 3.6 m)\n`;
+            out += `• Getaran Inducer Turbopump: ${dossierRes.data.inducer_vib_g} G (Batas Kritis < 50.0 G)\n`;
+            out += `• Status Kopling Resonansi Pogo: ${evalRes.data.pogo_resonance_coupling_status}\n`;
+            out += `• Tingkat Umpan Balik Akustik Pembakaran: ${evalRes.data.feedback_level}\n`;
+            out += `• Peringatan Kavitasi / Vapor Lock Inducer: ${evalRes.data.inducer_vapor_lock_detected ? 'TERDETEKSI GELEMBUNG UAP OKSIGEN' : 'NORMAL'}\n\n`;
+            out += `PEREDAMAN POGO AKTIF (PENGISIAN HELIUM & MODULASI THRUST):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Propulsi: ${actRes.data.action_id}\n`;
+            out += `• Tambahan Tekanan Kandung Helium Akumulator: +${actRes.data.helium_dampener_charge_boost_bar} bar (Meredam Pulsa Tekanan Akustik Hidrolik)\n`;
+            out += `• Modulasi Throttling Dorongan Mesin: ${actRes.data.thrust_throttling_modulation_pct}% (Menggeser Frekuensi Struktur dari Mode Resonansi)\n`;
+            out += `• Penyesuaian Rasio Campuran O/F (Oxidizer Trim): +${actRes.data.oxidizer_trim_bias_pct}%\n`;
+            out += `• Estimasi Kerugian Kegagalan Roket & Muatan Terhindar: $${actRes.data.avoided_launch_vehicle_loss_usd.toLocaleString()} USD (Mencegah Ledakan Turbopump & Kegagalan Orbit)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Peningkatan tekanan helium pogo accumulator mengabsorpsi osilasi hidraulik pipa umpan sebelum masuk ke turbopump Raptor 30.000 RPM.</li>
+                <li>Throttling -8% mengubah kekakuan struktur bodi roket sehingga memutus kopling osilasi umpan balik Rayleigh.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses rocket pogo sentinel: ' + err.message;
+    }
+}
+
+async function triggerSMRPassive() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi sirkulasi alami bejana penahan pasif SMR & reaktivitas dilusi boron...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const unitID = "SMR-NUSCALE-VOYGR-UNIT-04";
+        await api('/smr/containment/ingest-containment-telemetry', 'POST', {
+            module_unit_id: unitID,
+            plant_site_id: "PLANT-IDAHO-NATIONAL-LAB-CFPP",
+            reactor_thermal_power_mwth: 250.0,
+            natural_circulation_flow_kg_per_sec: 480.0,
+            rcs_hot_leg_temperature_c: 315.0,
+            rcs_cold_leg_temperature_c: 255.0,
+            primary_coolant_boron_ppm: 940.0,
+            reactivity_insertion_rate_pcm_per_sec: 4.2,
+            containment_pool_water_level_meter: 14.6,
+            containment_pressure_bar: 1.12
+        });
+
+        const evalRes = await api('/smr/containment/evaluate-passive-safety', 'POST', { module_unit_id: unitID });
+        const actRes = await api('/smr/containment/trigger-emergency-passive-injection', 'POST', { module_unit_id: unitID });
+        const dossierRes = await api(`/smr/containment/smr-passive-safety-dossier/${unitID}`, 'GET');
+
+        if (badge) badge.textContent = `⚛️ SMR: Subkritikal ${evalRes.data.core_subcriticality_margin_pcm} pcm | Buoyancy: ${evalRes.data.natural_convection_buoyancy_ratio} | Boron: ${dossierRes.data.boron_ppm} ppm`;
+        if (answerEl) {
+            let out = `⚛️ NEXT-GEN SMALL MODULAR REACTOR (SMR) PASSIVE CONTAINMENT & BORON SENTINEL (IAEA SSR-2/1 & 10 CFR 50):\n`;
+            out += `Unit Modul SMR Pasif: ${unitID} | Lokasi Reaktor: ${dossierRes.data.plant_site_id}\n`;
+            out += `Daya Termal Reaktor: ${dossierRes.data.thermal_power_mwth} MWth | Level Kolam Pendingin Pasif: ${dossierRes.data.pool_level_m} m\n\n`;
+            out += `DIFUSI KONSENTRASI BORON & SIRKULASI ALAMI PEMBUANGAN PANAS PELURUHAN:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Konsentrasi Boron Terlarut dalam Pendingin Primer: ${dossierRes.data.boron_ppm} ppm (Dilusi dari Nominal 1200 ppm)\n`;
+            out += `• Laju Penyisipan Reaktivitas Positif: ${dossierRes.data.reactivity_rate_pcm_s} pcm/detik (Batas Aman < 2.0 pcm/s)\n`;
+            out += `• Margin Subkritikalitas Teras Reaktor: ${evalRes.data.core_subcriticality_margin_pcm} pcm\n`;
+            out += `• Tingkat Bahaya Dilusi Boron & Reaktivitas: ${evalRes.data.boron_dilution_reactivity_hazard_level}\n`;
+            out += `• Rasio Daya Apung Konveksi Alami (Buoyancy Head): ${evalRes.data.natural_convection_buoyancy_ratio}\n`;
+            out += `• Status Sirkulasi Alami Penolak Panas: ${evalRes.data.passive_decay_heat_removal_status}\n`;
+            out += `• Mandat Injeksi Boron Darurat: ${evalRes.data.emergency_boron_injection_mandate ? 'DIPERINTAHKAN GRAVITASI CEPAT' : 'STANDBY'}\n\n`;
+            out += `AKTUASI SISTEM KESELAMATAN PASIF BEBAS LISTRIK (GRAVITY BORON & DEPRESSURIZATION):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Proteksi Nuklir: ${actRes.data.action_id}\n`;
+            out += `• Volume Larutan Natrium Pentaborat Terinjeksi: ${actRes.data.injected_boron_solution_volume_liters} Liter (Pengisian Gravitasi Tanpa Pompa AC)\n`;
+            out += `• Kecepatan Pembukaan Katup Isolasi Pasif: ${actRes.data.passive_isolation_valve_actuation_ms} ms (Katup Squib Pyroteknik)\n`;
+            out += `• Laju Pelepasan Panas Peluruhan ke Kolam: ${actRes.data.decay_heat_rejection_rate_mwth} MWth\n`;
+            out += `• Estimasi Kerugian Pelelehan Teras & Radiasi Terhindar: $${actRes.data.avoided_core_melt_radiation_loss_usd.toLocaleString()} USD (Mencegah Kecelakaan Reaktivitas & Penghentian Operasi Lisensi)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pelepasan larutan boron pekat secara gravitasi mengembalikan margin subkritikalitas teras reaktor tanpa memerlukan pasokan listrik darurat.</li>
+                <li>Katup pembuang uap pasif mentransfer panas peluruhan ke kolam penampung air utama selama 30 hari tanpa intervensi operator.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses SMR sentinel: ' + err.message;
+    }
+}
+
+async function triggerEUVPellicle() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi degradasi termal & pengikisan radikal hidrogen membran pelikel EUV High-NA...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const scannerID = "SCANNER-ASML-EXE5200-NA055-01";
+        await api('/pellicle/scanner/ingest-pellicle-telemetry', 'POST', {
+            scanner_id: scannerID,
+            reticle_pod_id: "POD-EUV-MASK-2NM-N2-0042",
+            source_euv_power_watts: 500.0,
+            pellicle_core_temp_c: 815.0,
+            hydrogen_radical_flow_sccm: 380.0,
+            pellicle_thickness_remaining_nm: 14.8,
+            euv_transmission_pct: 87.6,
+            pinhole_defect_density_per_cm2: 0.092,
+            cumulative_dose_exposure_kj: 920.0
+        });
+
+        const evalRes = await api('/pellicle/scanner/evaluate-pellicle-degradation', 'POST', { scanner_id: scannerID });
+        const actRes = await api('/pellicle/scanner/trigger-pellicle-protection-and-swap', 'POST', { scanner_id: scannerID });
+        const dossierRes = await api(`/pellicle/scanner/euv-pellicle-reliability-dossier/${scannerID}`, 'GET');
+
+        if (badge) badge.textContent = `🔬 EUV: Tebal ${dossierRes.data.thickness_nm} nm | Transmisi: ${dossierRes.data.transmission_pct}% | Rupture: ${evalRes.data.pellicle_rupture_risk_level}`;
+        if (answerEl) {
+            let out = `🔬 SEMICONDUCTOR HIGH-NA EUV PELLICLE DEGRADATION & RADICAL ETCH SENTINEL (SEMI S2 & ISO 14644):\n`;
+            out += `Scanner Fotolitografi: ${scannerID} | Reticle Mask Pod: ${dossierRes.data.reticle_pod_id}\n`;
+            out += `Daya Sumber EUV 13.5nm: ${dossierRes.data.source_power_w} W (High-NA 0.55 NA) | Dosis Kumulatif: 920.0 kJ\n\n`;
+            out += `INTEGRITAS NANOMEMBRAN KARBON/POLISILIKON & PENGIKISAN RADIKAL HIDROGEN:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Suhu Inti Membran Pelikel: ${dossierRes.data.core_temp_c}°C (Ambang Sublimasi Vakum 850°C)\n`;
+            out += `• Ketebalan Membran Pelikel Tersisa: ${dossierRes.data.thickness_nm} nm (Kritis di Bawah Batas Integritas 15.0 nm)\n`;
+            out += `• Transmisi Foton EUV Aktual: ${dossierRes.data.transmission_pct}% (Margin Transmisi: ${evalRes.data.transmission_loss_margin_pct}%)\n`;
+            out += `• Laju Pengikisan Kimiawi Radikal H*: ${evalRes.data.etch_thinning_rate_nm_per_million_dose} nm/M-Dose\n`;
+            out += `• Tingkat Risiko Pecahnya Pelikel (Pellicle Rupture): ${evalRes.data.pellicle_rupture_risk_level}\n`;
+            out += `• Kerapatan Cacat Pinhole: 0.092 cacat/cm² (${evalRes.data.pinhole_defect_status})\n`;
+            out += `• Mandat Penggantian Pod Pelikel Robotik: ${evalRes.data.pellicle_pod_swap_mandate ? 'DIPERLUKAN SEGERA' : 'NORMAL'}\n\n`;
+            out += `DISPOSISI PERLINDUNGAN RETIKEL MASTER & PENUKARAN POD OTOMATIS:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Fabrikasi Semikonduktor: ${actRes.data.action_id}\n`;
+            out += `• Modulasi Daya Sumber Laser Plasma: Diturunkan ke ${actRes.data.attenuated_laser_power_watts} W\n`;
+            out += `• Penjadwalan Penukaran Pod Retikel Robotik: ${actRes.data.automated_pod_exchange_scheduled ? 'TERJADWAL OTOMATIS KE CHAMBER DUAL-POD' : 'STANDBY'}\n`;
+            out += `• Estimasi Kerugian Cacat Masker & Wafer Terhindar: $${actRes.data.avoided_reticle_and_wafer_scrap_loss_usd.toLocaleString()} USD (Menyelamatkan Photomask Node 2nm & Mencegah Wafer Scrap)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Penurunan daya laser EUV ke 380 W mendinginkan membran nanotube di bawah 750°C sehingga laju penguapan termal terhenti.</li>
+                <li>Robot pembawa pod retikel otomatis mengganti masker sebelum pecah di ruang vakum ultra-tinggi yang berpotensi melumpuhkan fab berbulan-bulan.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses EUV pellicle sentinel: ' + err.message;
+    }
+}
+
+async function triggerUHVDCConverter() {
+    const resBox = document.getElementById('askERPAIResult');
+    const answerEl = document.getElementById('askERPAIAnswer');
+    const traceEl = document.getElementById('askERPAIToolTrace');
+    const actionsList = document.getElementById('askERPAIActionsList');
+    const badge = document.getElementById('askERPAISourceBadge');
+
+    if (answerEl) answerEl.textContent = 'Mengevaluasi sudut margin komutasi gamma thyristor & bahaya kegagalan komutasi UHVDC ±1100kV...';
+    if (traceEl) { traceEl.style.display = 'none'; traceEl.textContent = ''; }
+    if (actionsList) actionsList.innerHTML = '';
+    if (resBox) resBox.style.display = 'block';
+
+    try {
+        const stationID = "STATION-CHANGJI-GUQUAN-1100KV";
+        await api('/uhvdc/station/ingest-valve-telemetry', 'POST', {
+            converter_station_id: stationID,
+            thyristor_valve_hall_id: "VALVE-HALL-POLE1-INVERTER-12PULSE",
+            transmission_voltage_kv: 1100.0,
+            transmission_current_amps: 5600.0,
+            firing_angle_alpha_deg: 144.0,
+            extinction_angle_gamma_deg: 13.2,
+            thyristor_junction_temp_c: 121.5,
+            deionized_cooling_water_lpm: 2350.0,
+            ac_grid_voltage_harmonic_thd_pct: 5.2,
+            commutation_failure_count_last_minute: 3
+        });
+
+        const evalRes = await api('/uhvdc/station/evaluate-commutation-and-thermal', 'POST', { converter_station_id: stationID });
+        const actRes = await api('/uhvdc/station/trigger-fast-advance-and-reactive-support', 'POST', { converter_station_id: stationID });
+        const dossierRes = await api(`/uhvdc/station/uhvdc-converter-safety-dossier/${stationID}`, 'GET');
+
+        if (badge) badge.textContent = `⚡ UHVDC: ${evalRes.data.commutation_failure_hazard_level} | Gamma Delta: ${evalRes.data.extinction_margin_angle_delta_deg}° | Temp: ${dossierRes.data.junction_temp_c}°C`;
+        if (answerEl) {
+            let out = `⚡ ULTRA-HIGH VOLTAGE DC (UHVDC ±1100 kV) CONVERTER VALVE & COMMUTATION SENTINEL (IEC 60700 & IEEE 857):\n`;
+            out += `Gardu Induk Konverter UHVDC: ${stationID} | Valve Hall: ${dossierRes.data.valve_hall_id}\n`;
+            out += `Tegangan Transmisi: ±${dossierRes.data.voltage_kv} kV (Kapasitas 12 GW) | Arus Saluran DC: 5,600 A\n\n`;
+            out += `ANALISIS KOMUTASI INVERTER & BEBAN TERMAL SAMBUNGAN THYRISTOR:\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Sudut Pemadaman Komutasi (Extinction Angle Gamma): ${dossierRes.data.extinction_gamma_deg}° (Margin Delta: ${evalRes.data.extinction_margin_angle_delta_deg}° di Bawah Ambang 15.0°)\n`;
+            out += `• Frekuensi Kegagalan Komutasi Terdeteksi: ${dossierRes.data.commutation_failures} kali/menit\n`;
+            out += `• Suhu Sambungan Semikonduktor (Junction Temp): ${dossierRes.data.junction_temp_c}°C (Headroom Kritis: ${evalRes.data.valve_junction_thermal_headroom_c}°C ke Batas Maks 125°C)\n`;
+            out += `• Tingkat Bahaya Keruntuhan Komutasi: ${evalRes.data.commutation_failure_hazard_level}\n`;
+            out += `• Tingkat Stres Termal Valve Thyristor: ${evalRes.data.valve_thermal_stress_tier}\n`;
+            out += `• Mandat Maju Sudut Picu Cepat (Alpha Advance): ${evalRes.data.firing_angle_advance_mandate ? 'DIPERLUKAN KILAT (< 5 MS)' : 'NORMAL'}\n\n`;
+            out += `TINDAKAN KONTROL TRANSISI CEPAT (ALPHA ADVANCE & SUNTIKAN REAKTIF STATCOM):\n`;
+            out += `------------------------------------------------------------------------------------\n`;
+            out += `• Nomor Disposisi Transmisi Daya: ${actRes.data.action_id}\n`;
+            out += `• Pemajuan Sudut Picu Firing Angle (Alpha): Dimajukan ke ${actRes.data.advanced_firing_angle_alpha_deg}° dalam 5 ms (Mencegah Arus Hubung Singkat Balik DC)\n`;
+            out += `• Injeksi Daya Reaktif Dinamis STATCOM: +${actRes.data.injected_reactive_power_mvar} MVAR (Memulihkan Tegangan AC Gardu Induk)\n`;
+            out += `• Peningkatan Aliran Air Pendingin Deionisasi: +${actRes.data.cooling_water_flow_boost_lpm} LPM\n`;
+            out += `• Estimasi Kerugian Blackout Antar-Benua Terhindar: $${actRes.data.avoided_continental_grid_blackout_loss_usd.toLocaleString()} USD (Mencegah Pemadaman Skala Nasional & Ledakan Trafo Konverter)\n`;
+            out += `------------------------------------------------------------------------------------`;
+            answerEl.textContent = out;
+        }
+        if (actionsList) {
+            actionsList.innerHTML = `
+                <li>Pemajuan sudut penyalaan thyristor ke 135° dalam 5 milidetik memperluas margin komutasi dan mencegah fenomena commutation failure beruntun.</li>
+                <li>Injeksi 450 MVAR daya reaktif oleh kompensator STATCOM memulihkan tegangan grid AC lokal yang anjlok akibat gangguan jaringan.</li>
+            `;
+        }
+    } catch (err) {
+        if (answerEl) answerEl.textContent = 'Gagal memproses UHVDC sentinel: ' + err.message;
+    }
+}
+
 // Auto-initialize Real-Time SSE Event Stream
 function initSSEEventListener() {
     if (typeof EventSource !== 'undefined') {

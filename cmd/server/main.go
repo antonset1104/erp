@@ -14,6 +14,7 @@ import (
 	coreaccount "erp-golang/internal/core/account"
 	coreaerospace "erp-golang/internal/core/aerospace"
 	coreagriculture "erp-golang/internal/core/agriculture"
+	coreammonia "erp-golang/internal/core/ammonia"
 	coreasset "erp-golang/internal/core/asset"
 	coreautomotive "erp-golang/internal/core/automotive"
 	coreaviation "erp-golang/internal/core/aviation"
@@ -54,7 +55,9 @@ import (
 	coremrp "erp-golang/internal/core/mrp"
 	corenuclear "erp-golang/internal/core/nuclear"
 	corepackaging "erp-golang/internal/core/packaging"
+	corepellicle "erp-golang/internal/core/pellicle"
 	corepharma "erp-golang/internal/core/pharma"
+	corepogo "erp-golang/internal/core/pogo"
 	corepowergrid "erp-golang/internal/core/powergrid"
 	corepricing "erp-golang/internal/core/pricing"
 	coreprocurement "erp-golang/internal/core/procurement"
@@ -67,6 +70,7 @@ import (
 	corescm "erp-golang/internal/core/scm"
 	coreseabed "erp-golang/internal/core/seabed"
 	coresemiconductor "erp-golang/internal/core/semiconductor"
+	coresmr "erp-golang/internal/core/smr"
 	coresolidstate "erp-golang/internal/core/solidstate"
 	coreservice "erp-golang/internal/core/service"
 	coresubsea "erp-golang/internal/core/subsea"
@@ -75,6 +79,7 @@ import (
 	coretax "erp-golang/internal/core/tax"
 	coretradefinance "erp-golang/internal/core/tradefinance"
 	coretreasury "erp-golang/internal/core/treasury"
+	coreuhvdc "erp-golang/internal/core/uhvdc"
 	coreutilities "erp-golang/internal/core/utilities"
 	corevmi "erp-golang/internal/core/vmi"
 	corewms "erp-golang/internal/core/wms"
@@ -334,7 +339,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ok",
 			"app":        cfg.AppName,
-			"version":    "1.72.0",
+			"version":    "1.73.0",
 			"db_type":    cfg.DBType,
 			"storage":    storageProv.Type(),
 			"upload_dir": cfg.UploadDir,
@@ -509,6 +514,11 @@ func main() {
 		corebop.RegisterBOPRoutes(apiV1)
 		corecart.RegisterCARTRoutes(apiV1)
 		corepyrolysis.RegisterPyrolysisRoutes(apiV1)
+		coreammonia.RegisterAmmoniaRoutes(apiV1)
+		corepogo.RegisterPogoRoutes(apiV1)
+		coresmr.RegisterSMRRoutes(apiV1)
+		corepellicle.RegisterPellicleRoutes(apiV1)
+		coreuhvdc.RegisterUHVDCRoutes(apiV1)
 	}
 
 	// Serve Static Web Frontend
