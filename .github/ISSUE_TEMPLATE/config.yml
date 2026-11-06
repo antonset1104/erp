@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: 💬 GitHub Discussions (Community Q&A & Ideas)
-    url: https://github.com/antonset1104/erp/discussions
-    about: Ask implementation questions, discuss architecture, or brainstorm ideas before submitting a formal issue.
-  - name: 🛡️ Security Vulnerability Report
-    url: https://github.com/antonset1104/erp/security/advisories/new
-    about: Report security vulnerabilities privately and responsibly.
+  - name: Enterprise Customer Support Portal
+    url: https://support.goerp-enterprise.internal
+    about: Licensed customers may submit enterprise support tickets, configuration inquiries, and SLA escalations.
+  - name: Confidential Enterprise Security Desk
+    url: https://support.goerp-enterprise.internal/security
+    about: Report potential enterprise security vulnerabilities privately and confidentially under NDA.

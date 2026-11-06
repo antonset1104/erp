@@ -1,4 +1,4 @@
-name: CI / Build & Test Suite
+name: Enterprise CI / Build & Test Suite
 
 on:
   push:

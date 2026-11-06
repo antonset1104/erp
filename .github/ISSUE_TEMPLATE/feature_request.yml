@@ -1,49 +1,63 @@
-name: 💡 Feature Request
-description: Propose an enterprise module improvement, business workflow addition, or system optimization for GoERP.
-title: "[FEAT]: <feature proposal title>"
-labels: ["enhancement", "feature"]
+name: Enterprise Change Request (ECR)
+description: Propose an enterprise functional module, architecture enhancement, or regulatory localization for GoERP.
+title: "[ECR]: <enterprise change title>"
+labels: ["enhancement", "architecture-review"]
 body:
   - type: markdown
     attributes:
       value: |
-        Have an idea to make GoERP even more powerful? Tell us about the business need or technical capability you would like to see!
+        **GoERP Enterprise Change Request (ECR) Intake**  
+        All non-trivial feature additions and architectural modifications require review by the Technical Review Board (TRB).
+  - type: input
+    id: internal_initiative
+    attributes:
+      label: Jira Initiative / Internal Ticket ID
+      description: Enter the corresponding internal Jira epic or project tracking key.
+      placeholder: "e.g., ERP-2048 or FIN-CORP-Q4"
+    validations:
+      required: true
   - type: dropdown
     id: category
     attributes:
-      label: Enhancement Category
+      label: Functional Category
       options:
-        - "New Business Module"
-        - "Existing Module Enhancement"
-        - "Regional Tax & Regulatory Localization"
-        - "API, RPC & Webhook Integration"
-        - "Performance, Scalability & Database Engine"
-        - "User Experience / UI Design"
-        - "Documentation & Testing Suite"
+        - "Core Architecture & Data Engine"
+        - "Financial Accounting & General Ledger"
+        - "Supply Chain & Warehouse Management (WMS)"
+        - "Manufacturing (MRP II) & Quality"
+        - "Customs & Regional Tax Localization"
+        - "Integration Hub & M2M RPC Protocols"
+        - "User Experience & Web SPA Client"
     validations:
       required: true
   - type: textarea
-    id: problem
+    id: business_case
     attributes:
-      label: Underlying Problem or Business Use Case
-      description: Describe the operational pain point or workflow requirement this feature solves.
-      placeholder: "E.g., Currently bank reconciliation requires manual CSV mapping for format X..."
+      label: Business Justification & ROI
+      description: Explain the business necessity, client requirement, or operational efficiency gain driving this proposal.
     validations:
       required: true
   - type: textarea
-    id: proposed_solution
+    id: technical_specification
     attributes:
-      label: Proposed Solution & Workflow
-      description: Explain how this feature should work from both a user and technical perspective.
+      label: Technical Design & Proposed Architecture
+      description: Outline the proposed database schema, API contracts, balance invariants, and module interactions.
     validations:
       required: true
   - type: textarea
-    id: alternatives
+    id: compatibility_impact
     attributes:
-      label: Alternatives Considered
-      description: Any alternative solutions or workarounds you have tested or evaluated?
-  - type: checkboxes
-    id: contribution
+      label: Backward Compatibility & Migration Impact
+      description: Detail whether this change impacts existing database tables, API schemas, or requires zero-downtime data migration.
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
     attributes:
-      label: Willingness to Contribute
+      label: Enterprise Target Priority
       options:
-        - label: I am interested in helping implement this feature via a Pull Request.
+        - "P1 - Critical Enterprise Requirement (Current Release Stream)"
+        - "P2 - Strategic Enhancement (Next Minor Release)"
+        - "P3 - Optimization / Long-term Architecture Roadmap"
+    validations:
+      required: true

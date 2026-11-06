@@ -48,7 +48,7 @@ func (c *Client) GetA2AAgentCard(baseURL string) map[string]interface{} {
 		"mcpEndpoint":     baseURL + "/mcp",
 		"version":         "1.42.0",
 		"provider": map[string]interface{}{
-			"organization": "GoERP Open Source Enterprise",
+			"organization": "GoERP Enterprise",
 			"url":          "https://github.com/antonset1104/erp",
 		},
 		"capabilities": map[string]interface{}{

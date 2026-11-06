@@ -20,14 +20,14 @@ func GetSpec(appName, version string) map[string]interface{} {
 		"info": map[string]interface{}{
 			"title":       appName + " — OpenAPI 3.1 & AI Agent Specification",
 			"version":     version,
-			"description": "Production-grade Open-Source Enterprise Resource Planning (ERP) REST API, Native Model Context Protocol (MCP) JSON-RPC 2.0 Server, Google Cloud A2A (Agent-to-Agent) Protocol, and Multi-Provider AI Intelligence Engine.",
+			"description": "Production-grade Enterprise Resource Planning (ERP) REST API, Native Model Context Protocol (MCP) JSON-RPC 2.0 Server, Google Cloud A2A (Agent-to-Agent) Protocol, and Multi-Provider AI Intelligence Engine.",
 			"contact": map[string]interface{}{
-				"name": "GoERP Open Source Community",
+				"name": "GoERP Enterprise Systems",
 				"url":  "https://github.com/antonset1104/erp",
 			},
 			"license": map[string]interface{}{
-				"name": "MIT License",
-				"url":  "https://opensource.org/licenses/MIT",
+				"name": "Proprietary Commercial Enterprise License",
+				"url":  "/LICENSE",
 			},
 		},
 		"servers": []map[string]interface{}{

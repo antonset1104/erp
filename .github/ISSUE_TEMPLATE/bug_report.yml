@@ -1,26 +1,46 @@
-name: 🐛 Bug Report
-description: Report unexpected behavior, transaction calculation failures, or system errors in GoERP.
-title: "[BUG]: <concise description of the issue>"
-labels: ["bug", "triage"]
+name: Enterprise Defect Report
+description: Report an operational defect, transaction discrepancy, or system issue in GoERP Enterprise.
+title: "[DEFECT]: <concise description of the defect>"
+labels: ["defect", "internal-triage"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thank you for taking the time to report an issue! A clear, reproducible bug report helps the community identify and fix issues faster.
+        **GoERP Enterprise Defect Intake Form**  
+        This form is for internal engineering teams and licensed enterprise organizations. Please provide detailed reproduction steps and logs.
+  - type: input
+    id: enterprise_account
+    attributes:
+      label: Enterprise Customer ID / Internal Team
+      description: Enter your commercial license identifier or internal department code.
+      placeholder: "e.g., ENT-CUST-8492 or Internal Eng / Finance Team"
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Defect Severity Level
+      options:
+        - "Severity 1 (Critical - Core Outage / Transaction Halted)"
+        - "Severity 2 (High - Major Workflow Impaired)"
+        - "Severity 3 (Normal - Moderate Calculation / UI Defect)"
+        - "Severity 4 (Low - Cosmetic / Minor Typo)"
+    validations:
+      required: true
   - type: dropdown
     id: module
     attributes:
-      label: Affected Module
-      description: Select the ERP module where the bug occurs.
+      label: Affected Subsystem / Domain
+      description: Select the functional domain where the defect was observed.
       options:
-        - "Executive Dashboard & Command Center (Ctrl+K)"
-        - "Base & Authentication (base / res.users / res.partner)"
-        - "Inventory & Stock (stock / stock.picking)"
+        - "Executive Dashboard & Command Center"
+        - "Base & Authentication (res.users / res.partner)"
+        - "Inventory & Stock (stock / stock.picking / quants)"
         - "Sales & Quotations (sale / sale.order)"
-        - "Purchases & RFQ (purchase / purchase.order)"
+        - "Purchases & Procurement (purchase / purchase.order)"
         - "Accounting & Invoicing (account / account.move)"
-        - "Manufacturing & BOM (mrp / mrp.production)"
-        - "Point of Sale / POS (pos / pos.order)"
+        - "Manufacturing & Production (mrp / mrp.production)"
+        - "Point of Sale (pos / pos.order)"
         - "HRIS, Attendance & Payroll (hr / hr.payslip)"
         - "CRM & Sales Pipeline (crm / crm.lead)"
         - "Customs & Bonded Zones (customs_bonded)"
@@ -29,55 +49,56 @@ body:
         - "Low-Code Studio & Dynamic Schemas (lowcode_studio)"
         - "BPMN 2.0 Workflow Engine (workflow_engine)"
         - "Universal Integration Hub & Open RPC (integration_hub)"
+        - "Core System / Database / Migration"
         - "Other"
     validations:
       required: true
   - type: textarea
     id: description
     attributes:
-      label: Description
-      description: Explain what happened and how the problem manifested.
+      label: Defect Description
+      description: Provide a clear summary of the defect and observed system behavior.
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
       label: Steps to Reproduce
-      description: Provide clear, sequential steps to reproduce this behavior.
+      description: Sequential instructions to reproduce the defect in a staging or development environment.
       placeholder: |
-        1. Navigate to the 'Sales & Quotations' module
-        2. Create a Sales Order for customer '...'
-        3. Click 'Confirm Order'
-        4. Observe error message '...'
+        1. Access the 'Accounting & Invoicing' module
+        2. Create Customer Invoice for customer ID 10
+        3. Attempt to post invoice with mismatched debit/credit
+        4. Observe unexpected system response
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
       label: Expected Behavior
-      description: What should have happened under normal operational conditions?
+      description: What was the expected system behavior in accordance with business requirements?
     validations:
       required: true
   - type: input
     id: environment
     attributes:
-      label: Environment Details
-      description: E.g., Go 1.22.5, Windows 11 / Ubuntu 22.04, Chrome 128, SQLite / PostgreSQL.
-      placeholder: "Go 1.22.x, OS Linux/Windows, Browser Chrome/Firefox, SQLite/PostgreSQL"
+      label: Deployment Environment
+      description: Specific runtime version, database engine, and operating system.
+      placeholder: "GoERP v1.82.0 Enterprise, PostgreSQL 15, Ubuntu 22.04 LTS"
     validations:
       required: true
   - type: textarea
     id: logs
     attributes:
-      label: Terminal Logs or Browser Console Output
-      description: Paste any relevant terminal logs, stack traces, or browser console errors.
+      label: System Logs or Diagnostic Traces
+      description: Paste relevant application error logs, database traces, or HTTP error payloads.
       render: shell
   - type: checkboxes
     id: checklist
     attributes:
-      label: Submitter Checklist
+      label: Verification Checklist
       options:
-        - label: I have verified this bug is not already reported in existing issues.
+        - label: I confirm this issue has been validated in an internal staging or test environment.
           required: true
-        - label: I have provided clear reproduction steps and relevant logs.
+        - label: I have verified that no confidential customer passwords, JWT tokens, or credentials are included in this report.
           required: true

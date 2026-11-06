@@ -1,59 +1,68 @@
-# Security Policy
+# Enterprise Security & Vulnerability Policy — GoERP Enterprise
 
-The security and integrity of financial records, business operations, and customer data is a foundational priority in GoERP. We value responsible security research and appreciate disclosures that help protect our users.
+The security and integrity of financial transactions, customer data, and supply chain operations is paramount. This policy outlines security standards, supported versions, and the enterprise incident reporting process for **GoERP Enterprise**.
 
 ---
 
-## Supported Versions
+## 1. Supported Enterprise Releases
 
-Security updates and vulnerability patches are actively maintained for the following release branches:
+Security maintenance updates and emergency patches are actively provided for licensed enterprise installations on the following versions:
 
-| Version | Supported | Maintenance Status |
+| Version Stream | Security Support | Lifecycle Status |
 | :--- | :---: | :--- |
-| `1.82.x` | Yes | Current Production Release |
-| `1.81.x` | Yes | Active Security Maintenance |
-| `< 1.81.0`| No | End-of-Life (Please upgrade to the latest release) |
+| `1.82.x Enterprise` | Active | Current Production Enterprise LTS |
+| `1.81.x Enterprise` | Active | Maintenance Enterprise LTS |
+| `< 1.81.0` | Inactive | End-of-Life (Upgrade required for security coverage) |
 
 ---
 
-## Reporting a Vulnerability
+## 2. Reporting a Vulnerability (Confidential Disclosure)
 
-Please do not file public GitHub issues for security vulnerabilities.
+Under the terms of the GoERP Enterprise Commercial Agreement and applicable non-disclosure agreements (NDAs), all potential vulnerabilities must be submitted exclusively through private, encrypted channels. **Do not create public tickets or issues.**
 
-If you discover a vulnerability (such as authentication bypass, privilege escalation, SQL injection, remote code execution, or sensitive data exposure), report it responsibly using one of the following methods:
+### Channel 1: Enterprise Support Portal (Commercial Customers)
+Licensed customers should submit a high-priority ticket via the **Enterprise Support Portal** under the category `Security Incident`:
+- URL: `https://support.goerp-enterprise.internal/security`
 
-### Option 1: GitHub Private Vulnerability Reporting (Preferred)
-1. Navigate to the repository: [https://github.com/antonset1104/erp](https://github.com/antonset1104/erp)
-2. Go to the **Security** tab -> **Advisories** -> **Report a vulnerability**.
-3. Submit a detailed description, reproduction steps or proof-of-concept, and expected impact.
+### Channel 2: Enterprise Security Desk (Email)
+Send an encrypted report to the dedicated enterprise security desk:
+- Email: `security-desk@goerp.internal` (or `antonset1104@users.noreply.github.com` for verified security disclosures).
 
-### Option 2: Direct Email
-Send a confidential report to:
-`antonset1104@users.noreply.github.com`
-
-Please include:
-- Affected components or module paths.
-- Step-by-step reproduction instructions (curl commands, script payloads, or screenshots).
-- Estimated severity (Low, Medium, High, or Critical).
-- Any proposed mitigations or patch suggestions.
+### Required Information
+To accelerate triage and remediation, reports should include:
+- Affected subsystem or module (e.g., `account/moves`, `stock/pickings`, `auth/jwt`).
+- Reproduction steps, including sample API requests or sanitized logs.
+- Assessed business impact and estimated CVSS severity score.
+- Any observed indicators of compromise (IoC).
 
 ---
 
-## Response Process & SLAs
+## 3. Enterprise Incident Response SLA
 
-1. **Initial Acknowledgment**: The maintainers will acknowledge receipt of your report within 48 hours.
-2. **Triage & Validation**: Severity and reproducibility assessment will be completed within 3 to 5 business days.
-3. **Patch Preparation**: Fixes will be developed and validated against our regression test suites in a private fork.
-4. **Public Disclosure**: Security releases will be published in coordination with the reporter within 14 calendar days of patch validation.
-5. **Credit**: Reporters will be credited in the release notes and advisory (unless anonymity is requested).
+GoERP maintains strict Service Level Agreements for enterprise security incidents:
+
+| Severity Level | Initial Acknowledgment | Containment / Mitigation | Hotfix & Patch Delivery |
+| :--- | :--- | :--- | :--- |
+| **Critical (P1)** | **< 2 hours** | **< 12 hours** | **< 24 hours** |
+| **High (P2)** | **< 8 hours** | **< 48 hours** | **< 72 hours** |
+| **Medium (P3)** | **< 24 hours** | **< 5 business days** | Next scheduled maintenance release |
+| **Low (P4)** | **< 48 hours** | **< 10 business days** | Next minor release cycle |
 
 ---
 
-## Built-In Security Architecture
+## 4. Confidentiality & Non-Disclosure
 
-GoERP applies defense-in-depth principles across its core services:
-- **Authentication**: Stateless, time-limited JSON Web Tokens (JWT) signed using HMAC-SHA256 with mandatory minimum key lengths.
-- **Credential Storage**: Passwords hashed using Bcrypt with an adaptive work factor.
-- **SQL Injection Prevention**: All database queries are executed via parameterized statements in GORM.
-- **Multi-Tenant Isolation**: Database operations enforce company-scoping (`company_id`) at the service and repository layers.
-- **Audit Logging**: Sensitive master data mutations and financial document postings generate immutable audit records with user attribution and timestamping.
+All security disclosures, vulnerability analyses, proof-of-concept materials, and remediation patches constitute confidential, proprietary information of GoERP Systems. 
+
+Public disclosure or dissemination of unresolved or resolved vulnerabilities without explicit written authorization from the GoERP Technical Review Board is strictly prohibited.
+
+---
+
+## 5. Defense-in-Depth Security Architecture
+
+GoERP Enterprise incorporates defense-in-depth principles across all architectural layers:
+- **Stateless Authentication**: Cryptographically signed JSON Web Tokens (JWT HS256) with strict token expiry and revocation safeguards.
+- **Machine-to-Machine Security**: API key authentication with SHA-256 storage hashing, per-key route scoping, and IP address allowlists.
+- **Parametric Query Enforcement**: Zero dynamic SQL concatenation; all database operations use GORM parameterized statements to eliminate SQL injection vectors.
+- **Multi-Tenant Isolation**: Rigid company-level tenancy constraints (`company_id`) enforced across both service and repository boundaries.
+- **Tamper-Evident Audit Trail**: High-consequence financial mutations and master data changes record immutable change logs with user attribution and cryptographic hashing.

@@ -1,7 +1,8 @@
-# GoERP: High-Performance Enterprise Resource Planning in Go
+# GoERP Enterprise — High-Performance Enterprise Resource Planning System
 
 [![Go Version](https://img.shields.io/badge/Go-1.22+-00ADD8?style=flat&logo=go)](https://golang.org)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
+[![Edition](https://img.shields.io/badge/Edition-Enterprise-blue.svg)](#)
 [![CI Status](https://img.shields.io/badge/CI-Passing-success?style=flat&logo=githubactions)](https://github.com/antonset1104/erp/actions)
 [![Release](https://img.shields.io/badge/Release-v1.82.0-emerald)](https://github.com/antonset1104/erp/releases)
 
@@ -29,8 +30,8 @@ Detailed architectural, operational, and development guides are maintained in th
 - [Technical Documentation](docs/TECHNICAL_DOCUMENTATION.md): System architecture, database schema, security model, and API specifications.
 - [Functional Documentation](docs/FUNCTIONAL_DOCUMENTATION.md): End-to-end business workflows (Order-to-Cash, Procure-to-Pay, MRP II, HR/Payroll, and Tax).
 - [User Operational Guide](docs/USER_DOCUMENTATION.md): Step-by-step handbook for daily operations across administrative and operational roles.
-- [Open Source Guide](docs/OPEN_SOURCE_GUIDE.md): Governance structure, RFC process, and repository standards.
-- [Contributing Guidelines](CONTRIBUTING.md): Environment setup, coding conventions, and pull request workflows.
+- [Enterprise Governance Guide](docs/ENTERPRISE_GOVERNANCE_GUIDE.md): Architecture governance, release lifecycle, security compliance, and change management controls.
+- [Internal Engineering Guide](CONTRIBUTING.md): Engineering standards, environment setup, and internal code review workflows.
 - [Security Policy](SECURITY.md): Vulnerability reporting procedures and response timelines.
 
 ---
@@ -187,6 +188,12 @@ erp/
 
 ---
 
-## License
+## Proprietary License & Commercial Terms
 
-GoERP is released under the [Apache License 2.0](LICENSE). You are free to use, modify, and distribute this software for commercial or private purposes in accordance with the license terms.
+Copyright (c) 2026 GoERP Systems. All rights reserved.
+
+GoERP Enterprise is commercial proprietary software. Possession, access, and use are strictly governed by the terms of an executed GoERP Enterprise Commercial License Agreement or Master Services Agreement. 
+
+Unauthorized copying, distribution, modification, reverse engineering, decompilation, or public dissemination of this codebase or any portion thereof is strictly prohibited.
+
+For commercial licensing, on-premise air-gapped deployments, and SLA contracts, contact the Enterprise Operations team at `enterprise@goerp.internal`.

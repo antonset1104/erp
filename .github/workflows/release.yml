@@ -1,4 +1,4 @@
-name: Release / Multi-Platform Binaries
+name: Enterprise Release / Multi-Platform Binaries
 
 on:
   push:
