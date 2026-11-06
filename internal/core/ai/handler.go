@@ -1025,6 +1025,147 @@ func (h *Handler) SeedLegalContractDemoData(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Demo legal contract audits and redlines successfully seeded"})
 }
 
+// =========================================================================
+// Section 103: Physics-Informed Industrial Energy AI & Peak-Load Shaving
+// =========================================================================
+
+func (h *Handler) GetEnergySentinelOverview(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	engine := GetEnergySentinelEngine(h.db)
+	overview, err := engine.GetOverview(companyID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": overview})
+}
+
+func (h *Handler) GetEnergyProfiles(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	engine := GetEnergySentinelEngine(h.db)
+	profiles, err := engine.GetProfiles(companyID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": profiles})
+}
+
+func (h *Handler) GetEnergyProfileDetail(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	idStr := c.Param("id")
+	var id uint
+	if _, err := fmt.Sscanf(idStr, "%d", &id); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid profile ID"})
+		return
+	}
+	engine := GetEnergySentinelEngine(h.db)
+	profile, schedules, err := engine.GetProfileByID(companyID, id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Profile not found"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"data": gin.H{
+			"profile":   profile,
+			"schedules": schedules,
+		},
+	})
+}
+
+func (h *Handler) RunEnergyOptimization(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	var req RunOptimizationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	engine := GetEnergySentinelEngine(h.db)
+	profile, schedules, err := engine.OptimizeFacilityEnergy(companyID, req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message":   "Physics-informed peak-shaving optimization successfully completed",
+		"profile":   profile,
+		"schedules": schedules,
+	})
+}
+
+func (h *Handler) UpdateMachineScheduleStatus(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	idStr := c.Param("id")
+	var id uint
+	if _, err := fmt.Sscanf(idStr, "%d", &id); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid schedule ID"})
+		return
+	}
+	var req struct {
+		Status string `json:"status" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	engine := GetEnergySentinelEngine(h.db)
+	updated, err := engine.UpdateScheduleStatus(companyID, id, req.Status)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Schedule status updated successfully",
+		"data":    updated,
+	})
+}
+
+func (h *Handler) GetProductCarbonFootprints(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	engine := GetEnergySentinelEngine(h.db)
+	footprints, err := engine.GetProductCarbonFootprints(companyID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": footprints})
+}
+
+func (h *Handler) CalculateProductCarbon(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	var req struct {
+		ProductSKU     string  `json:"product_sku"`
+		ProductName    string  `json:"product_name"`
+		ProductionUnit string  `json:"production_unit"`
+		ElectricityKWh float64 `json:"electricity_kwh_per_unit"`
+		ThermalMJ      float64 `json:"thermal_mj_per_unit"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	engine := GetEnergySentinelEngine(h.db)
+	record, err := engine.CalculateProductCarbonFootprint(companyID, req.ProductSKU, req.ProductName, req.ProductionUnit, req.ElectricityKWh, req.ThermalMJ)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Product carbon footprint & CBAM tax calculated successfully",
+		"data":    record,
+	})
+}
+
+func (h *Handler) SeedEnergyDemoData(c *gin.Context) {
+	_, companyID, _ := middleware.GetUserContext(c)
+	engine := GetEnergySentinelEngine(h.db)
+	if err := engine.SeedDemoData(companyID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Demo energy profiles, machine schedules, and carbon footprints seeded successfully"})
+}
+
 // RegisterRootProtocolRoutes registers public protocol discovery endpoints like /.well-known/agent.json and /mcp
 func RegisterRootProtocolRoutes(r *gin.Engine, h *Handler) {
 	r.GET("/.well-known/agent.json", h.GetA2AAgentCard)
@@ -1146,6 +1287,16 @@ func RegisterAIRoutes(router *gin.RouterGroup, authMiddleware gin.HandlerFunc, h
 			authed.POST("/contracts/clauses/:id/status", h.UpdateLegalClauseStatus)
 			authed.GET("/contracts/audits/:id/export", h.ExportLegalCounterProposal)
 			authed.POST("/contracts/seed-demo", h.SeedLegalContractDemoData)
+
+			// Physics-Informed Industrial Energy AI & Smart Peak-Load Shaving Sentinel
+			authed.GET("/energy/overview", h.GetEnergySentinelOverview)
+			authed.GET("/energy/profiles", h.GetEnergyProfiles)
+			authed.GET("/energy/profiles/:id", h.GetEnergyProfileDetail)
+			authed.POST("/energy/optimize", h.RunEnergyOptimization)
+			authed.POST("/energy/schedules/:id/status", h.UpdateMachineScheduleStatus)
+			authed.GET("/energy/carbon-footprints", h.GetProductCarbonFootprints)
+			authed.POST("/energy/carbon-footprints/calc", h.CalculateProductCarbon)
+			authed.POST("/energy/seed-demo", h.SeedEnergyDemoData)
 		}
 	}
 }

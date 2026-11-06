@@ -1793,3 +1793,46 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - `POST /api/v1/ai/contracts/clauses/:id/status`: Updates individual clause negotiation progress (`PROPOSED`, `ACCEPTED_BY_COUNTERPARTY`, `WAIVED`, `REJECTED`).
 - `GET /api/v1/ai/contracts/audits/:id/export`: Exports a formal B2B legal redline memorandum.
 - `POST /api/v1/ai/contracts/seed-demo`: Injects representative enterprise contracts (logistics PKS with extreme late penalties, cloud infrastructure MSA with IP ownership overreach, and bilateral balanced NDA).
+
+## 55. Physics-Informed Industrial Energy AI & Smart Peak-Load Shaving Sentinel (ESG Scope 1-2 Optimization & CBAM Compliance)
+
+### 55.1 Physics-Informed 24-Hour Electrical Load Modeling & Peak Shaving (`internal/core/ai/energy_sentinel.go`)
+- **Industrial Tariff Differentiation**: Dynamically computes commercial electricity expenses based on state utility (PLN Industrial Tariff Category I-3 / Medium Voltage) parameters:
+  - Off-Peak Window (*Luar Waktu Beban Puncak / LWBP*): $\text{Rp } 1,114.74 / \text{kWh}$.
+  - Peak Window (*Waktu Beban Puncak / WBP*, 18:00 – 22:00 WIB): $\text{Rp } 2,229.48 / \text{kWh}$ ($\sim 2.0\times$ peak multiplier).
+- **Physics-Informed Load Curve Generation**: Simulates 24-hour manufacturing facility power draw across operational regimes:
+  $$P_{\text{baseline}}(h) = \begin{cases}
+  450 + 30 \sin(h), & 0 \le h < 6 \text{ (Night Shift Base Load)} \\
+  950 + 25h, & 6 \le h < 12 \text{ (Morning Ramp-Up)} \\
+  1100 + 40 \cos(h), & 12 \le h < 18 \text{ (Afternoon Production)} \\
+  1480 + 50 \sin(h), & 18 \le h < 22 \text{ (WBP Peak Second Shift)} \\
+  820 - 60(h - 22), & 22 \le h < 24 \text{ (Night Ramp-Down)}
+  \end{cases}$$
+- **Dynamic Load Shifting & Precooling Recipes**:
+  - *Induction Melting Furnace* ($350\text{ kW}$): Rescheduled from $19:00 - 22:00$ (WBP) to $22:00 - 01:00$ (LWBP).
+  - *Ball Mill Pulverizer* ($180\text{ kW}$): Rescheduled from $18:00 - 21:00$ (WBP) to $13:00 - 16:00$ (LWBP afternoon valley).
+  - *Wastewater Aeration Blowers* ($75\text{ kW}$): Rescheduled from $20:00 - 23:00$ to $02:00 - 05:00$ (deep night LWBP).
+  - *HVAC Central Chiller Bank* ($220\text{ kW}$): Thermal storage precooling executed from $15:00 - 18:00$, shedding $110\text{ kW}$ during peak WBP window.
+
+### 55.2 Product Carbon Accounting & European CBAM Tax Exposure
+- **Scope 1 GHG Emissions**: Direct thermal fuel combustion (diesel/natural gas) calculated per unit:
+  $$E_{\text{Scope 1}} = \text{ThermalMJ} \times 0.0561\text{ kg CO}_2\text{e/MJ}$$
+- **Scope 2 GHG Emissions**: Indirect electricity generation emissions based on Indonesian Jamali grid carbon intensity:
+  $$E_{\text{Scope 2}} = \text{ElectricityKWh} \times 0.794\text{ kg CO}_2\text{e/kWh}$$
+- **European Carbon Border Adjustment Mechanism (CBAM) Tariff Exposure**: Calculates mandatory carbon import certificate liability for EU exports:
+  $$\text{Tax}_{\text{CBAM}} = \left(\frac{E_{\text{Scope 1}} + E_{\text{Scope 2}}}{1000}\right) \times €85.00/\text{Ton CO}_2\text{e}$$
+
+### 55.3 REST API Endpoints
+- `GET /api/v1/ai/energy/overview`: Executive metrics aggregating active facilities, cumulative monthly IDR savings, average peak shaving percentage, avoided carbon tons, and machine schedules.
+- `GET /api/v1/ai/energy/profiles`: Retrieves historical facility optimization runs.
+- `GET /api/v1/ai/energy/profiles/:id`: Returns specific facility profile with associated machine reschedule records and 24-hour hourly points JSON.
+- `POST /api/v1/ai/energy/optimize`: Runs physics-informed peak shaving on a facility, producing optimized load curves and machine dispatch plans.
+- `POST /api/v1/ai/energy/schedules/:id/status`: Updates individual machine load rescheduling acceptance (`ACCEPTED`, `DISMISSED`, `PROPOSED`).
+- `GET /api/v1/ai/energy/carbon-footprints`: Lists SKU-level Scope 1/2 carbon footprints and CBAM exposure.
+- `POST /api/v1/ai/energy/carbon-footprints/calc`: Computes product-level greenhouse gas emissions and CBAM financial exposure.
+- `POST /api/v1/ai/energy/seed-demo`: Seeds manufacturing plant profiles (Cikarang Stamping, Surabaya Cold Storage) and export SKU carbon footprints.
+
+### 55.4 Web Client & Interactive 24-Hour SVG Load Curve
+- Accessible via Command Center and sidebar navigation `#tab-energy-peak-shaving`.
+- High-performance SVG line chart depicting 24-hour electrical load before and after peak shaving with visual WBP window highlighting (18:00 - 22:00).
+- Machine dispatch cards allowing plant engineers to accept or dismiss load shift proposals with real-time financial savings computation.

@@ -355,6 +355,7 @@ function loadCurrentTab() {
         case 'self-healing-data': loadSelfHealingData(); break;
         case 'ambient-vision-dock': loadAmbientVisionData(); break;
         case 'contract-legal-copilot': loadLegalCopilotData(); break;
+        case 'energy-peak-shaving': loadEnergySentinelData(); break;
     }
 }
 
@@ -37762,4 +37763,417 @@ function triggerLegalAuditModal() {
     const title = prompt('Masukkan Judul Kontrak Perjanjian:', 'Perjanjian Jasa Vendor Pengadaan IT 2026');
     if (!title) return;
     simulateContractAudit('LOGISTICS_CRITICAL');
+}
+
+
+// =========================================================================
+// SECTION 103: PHYSICS-INFORMED INDUSTRIAL ENERGY AI & PEAK SHAVING
+// =========================================================================
+
+let currentEnergyProfile = null;
+let currentEnergySchedules = [];
+
+async function loadEnergySentinelData() {
+    try {
+        const res = await api('/ai/energy/overview');
+        const overview = res.data || res;
+        renderEnergyOverview(overview);
+
+        if (overview.recent_profiles && overview.recent_profiles.length > 0) {
+            currentEnergyProfile = overview.recent_profiles[0];
+            renderEnergyLoadCurve(currentEnergyProfile);
+        } else {
+            // Render default synthetic profile if empty
+            renderDefaultEnergyLoadCurve();
+        }
+
+        if (overview.machine_schedules) {
+            currentEnergySchedules = overview.machine_schedules;
+            renderEnergySchedules(currentEnergySchedules);
+        }
+
+        renderEnergyProfilesTable(overview.recent_profiles || []);
+        renderCarbonFootprintsTable(overview.top_carbon_footprints || []);
+    } catch (err) {
+        console.error('Error loading energy sentinel data:', err);
+        showToast('Gagal memuat data Energy AI Sentinel: ' + (err.message || err), 'error');
+    }
+}
+
+function renderEnergyOverview(overview) {
+    if (!overview) return;
+
+    const elFacilities = document.getElementById('energyStatActiveFacilities');
+    const elSavings = document.getElementById('energyStatMonthlySavings');
+    const elPeakRed = document.getElementById('energyStatPeakReductionPct');
+    const elCarbon = document.getElementById('energyStatCarbonAvoidedTon');
+    const elSchedules = document.getElementById('energyStatActiveSchedules');
+
+    if (elFacilities) elFacilities.textContent = (overview.total_active_facilities || 0).toLocaleString();
+    if (elSavings) elSavings.textContent = 'Rp ' + Math.round(overview.total_monthly_savings_idr || 0).toLocaleString('id-ID');
+    if (elPeakRed) elPeakRed.textContent = (overview.average_peak_reduction_pct || 0).toFixed(1) + '%';
+    if (elCarbon) elCarbon.textContent = (overview.total_carbon_avoided_ton_co2e || 0).toFixed(1) + ' Ton';
+    if (elSchedules) elSchedules.textContent = (overview.active_schedules_count || 0).toLocaleString();
+
+    const countProfiles = document.getElementById('countSubtabProfiles');
+    const countCarbon = document.getElementById('countSubtabCarbon');
+    if (countProfiles) countProfiles.textContent = (overview.recent_profiles ? overview.recent_profiles.length : 0);
+    if (countCarbon) countCarbon.textContent = (overview.top_carbon_footprints ? overview.top_carbon_footprints.length : 0);
+}
+
+function renderEnergyLoadCurve(profile) {
+    const container = document.getElementById('energyLoadCurveChartContainer');
+    if (!container) return;
+
+    const elTitle = document.getElementById('energyCurveTitle');
+    const elSub = document.getElementById('energyCurveSubtitle');
+    if (elTitle && profile) elTitle.textContent = 'Kurva Beban Daya Listrik 24 Jam (' + (profile.facility_name || 'Pabrik Industri') + ')';
+    if (elSub && profile) elSub.textContent = 'Reduksi Beban: ' + (profile.peak_reduction_kw || 0).toFixed(1) + ' kW (' + (profile.peak_reduction_pct || 0).toFixed(1) + '%) | Hemat: Rp ' + Math.round(profile.monthly_cost_savings_idr || 0).toLocaleString('id-ID') + '/bln';
+
+    let hourlyPoints = [];
+    if (profile && profile.hourly_curve_json) {
+        try {
+            hourlyPoints = JSON.parse(profile.hourly_curve_json);
+        } catch (e) {
+            console.warn('Failed parsing hourly_curve_json', e);
+        }
+    }
+
+    if (!hourlyPoints || hourlyPoints.length === 0) {
+        renderDefaultEnergyLoadCurve();
+        return;
+    }
+
+    // Chart dimensions
+    const svgWidth = 680;
+    const svgHeight = 250;
+    const padL = 50;
+    const padR = 25;
+    const padT = 30;
+    const padB = 40;
+    const plotW = svgWidth - padL - padR;
+    const plotH = svgHeight - padT - padB;
+
+    let maxKW = 0;
+    let minKW = 99999;
+    hourlyPoints.forEach(p => {
+        if (p.baseline_kw > maxKW) maxKW = p.baseline_kw;
+        if (p.optimized_kw > maxKW) maxKW = p.optimized_kw;
+        if (p.baseline_kw < minKW) minKW = p.baseline_kw;
+        if (p.optimized_kw < minKW) minKW = p.optimized_kw;
+    });
+
+    maxKW = Math.ceil(maxKW * 1.15 / 100) * 100;
+    minKW = Math.floor(minKW * 0.85 / 100) * 100;
+    if (minKW < 0) minKW = 0;
+    const rangeKW = (maxKW - minKW) || 1;
+
+    const getX = (h) => padL + (h / 23) * plotW;
+    const getY = (kw) => padT + plotH - ((kw - minKW) / rangeKW) * plotH;
+
+    // Peak window rect (18:00 to 22:00)
+    const peakStart = profile.peak_window_start_hour || 18;
+    const peakEnd = profile.peak_window_end_hour || 22;
+    const peakX1 = getX(peakStart);
+    const peakX2 = getX(peakEnd);
+    const peakW = Math.max(10, peakX2 - peakX1);
+
+    // Build SVG paths
+    let baselinePointsStr = '';
+    let optimizedPointsStr = '';
+    let baselineCircles = '';
+    let optimizedCircles = '';
+
+    hourlyPoints.forEach(p => {
+        const x = getX(p.hour).toFixed(1);
+        const yBase = getY(p.baseline_kw).toFixed(1);
+        const yOpt = getY(p.optimized_kw).toFixed(1);
+
+        baselinePointsStr += (p.hour === 0 ? '' : ' ') + x + ',' + yBase;
+        optimizedPointsStr += (p.hour === 0 ? '' : ' ') + x + ',' + yOpt;
+
+        baselineCircles += '<circle cx="' + x + '" cy="' + yBase + '" r="3.5" fill="#ef4444"><title>Jam ' + p.hour + ':00 Baseline ' + p.baseline_kw + ' kW</title></circle>';
+        optimizedCircles += '<circle cx="' + x + '" cy="' + yOpt + '" r="3.5" fill="#10b981"><title>Jam ' + p.hour + ':00 Teroptimasi ' + p.optimized_kw + ' kW</title></circle>';
+    });
+
+    // Horizontal grid lines
+    let gridLines = '';
+    const steps = 4;
+    for (let i = 0; i <= steps; i++) {
+        const val = minKW + (rangeKW / steps) * i;
+        const y = getY(val).toFixed(1);
+        gridLines += '<line x1="' + padL + '" y1="' + y + '" x2="' + (padL + plotW) + '" y2="' + y + '" stroke="rgba(255,255,255,0.08)" stroke-dasharray="2,2" />';
+        gridLines += '<text x="' + (padL - 8) + '" y="' + (parseFloat(y) + 3) + '" fill="#94a3b8" font-size="10" text-anchor="end">' + Math.round(val) + '</text>';
+    }
+
+    // X-axis Hour Labels
+    let xLabels = '';
+    [0, 3, 6, 9, 12, 15, 18, 20, 22, 23].forEach(h => {
+        const x = getX(h).toFixed(1);
+        const y = (padT + plotH + 18).toFixed(1);
+        xLabels += '<text x="' + x + '" y="' + y + '" fill="#94a3b8" font-size="10" text-anchor="middle">' + (h < 10 ? '0' : '') + h + ':00</text>';
+    });
+
+    container.innerHTML = `
+        <svg viewBox="0 0 ${svgWidth} ${svgHeight}" style="width: 100%; height: 100%; display: block;" preserveAspectRatio="none">
+            <!-- Grid Lines -->
+            ${gridLines}
+
+            <!-- Peak Window Shading (WBP) -->
+            <rect x="${peakX1.toFixed(1)}" y="${padT}" width="${peakW.toFixed(1)}" height="${plotH}" fill="rgba(245, 158, 11, 0.12)" stroke="#f59e0b" stroke-dasharray="3,3" stroke-width="1.2" rx="4" />
+            <text x="${((peakX1 + peakX2) / 2).toFixed(1)}" y="${(padT + 14)}" fill="#f59e0b" font-size="10" font-weight="bold" text-anchor="middle">JENDELA WBP</text>
+
+            <!-- Baseline Load Polyline -->
+            <polyline fill="none" stroke="#ef4444" stroke-width="2.5" points="${baselinePointsStr}" />
+            ${baselineCircles}
+
+            <!-- Optimized Load Polyline -->
+            <polyline fill="none" stroke="#10b981" stroke-width="2.5" points="${optimizedPointsStr}" />
+            ${optimizedCircles}
+
+            <!-- X Labels -->
+            ${xLabels}
+        </svg>
+    `;
+}
+
+function renderDefaultEnergyLoadCurve() {
+    const container = document.getElementById('energyLoadCurveChartContainer');
+    if (!container) return;
+    container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:0.85rem;">Belum ada simulasi kurva beban. Klik salah satu tombol simulasi skenario fasilitas di bawah atau "Jalankan Optimasi Peak Shaving".</div>';
+}
+
+function renderEnergySchedules(schedules) {
+    const container = document.getElementById('energyMachineSchedulesContainer');
+    if (!container) return;
+
+    if (!schedules || schedules.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted" style="padding: 2rem;">Belum ada jadwal shifting mesin. Klik "Injeksi Data Demo" atau "Jalankan Optimasi".</div>';
+        return;
+    }
+
+    container.innerHTML = schedules.map(s => {
+        let stratBadge = '<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">PEAK LOAD SHIFT</span>';
+        if (s.shift_strategy === 'THERMAL_STORAGE_PRECOOL') {
+            stratBadge = '<span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">THERMAL PRECOOL</span>';
+        } else if (s.shift_strategy === 'BATTERY_BESS_DISCHARGE') {
+            stratBadge = '<span class="badge" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;">BESS BATTERY</span>';
+        }
+
+        const isAccepted = s.status === 'ACCEPTED';
+        const isDismissed = s.status === 'DISMISSED';
+        let statusBadge = '<span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">PROPOSED</span>';
+        if (isAccepted) statusBadge = '<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">ACCEPTED</span>';
+        if (isDismissed) statusBadge = '<span class="badge" style="background: rgba(100, 116, 139, 0.15); color: #94a3b8;">DISMISSED</span>';
+
+        return `
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 0.75rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.25rem;">
+                    <div>
+                        <div style="font-weight: 600; font-size: 0.85rem; color: #f8fafc;">${s.machine_name}</div>
+                        <small style="color: var(--text-muted); font-size: 0.7rem;">${s.machine_code} | Rated: ${s.rated_power_kw} kW</small>
+                    </div>
+                    ${statusBadge}
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center; margin: 0.5rem 0; font-size: 0.75rem;">
+                    <span style="color: #ef4444; text-decoration: line-through;">${s.original_start_hour}:00 - ${s.original_end_hour}:00</span>
+                    <span style="color: var(--text-muted);">➔</span>
+                    <span style="color: #10b981; font-weight: 600;">${s.optimized_start_hour}:00 - ${s.optimized_end_hour}:00</span>
+                    ${stratBadge}
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 0.5rem; font-size: 0.75rem;">
+                    <span style="color: #10b981; font-weight: 600;">Hemat: Rp ${Math.round(s.cost_savings_per_cycle_idr || 0).toLocaleString('id-ID')} / siklus</span>
+                    <div style="display: flex; gap: 0.25rem;">
+                        <button class="btn btn-xs ${isAccepted ? 'btn-success' : 'btn-secondary'}" onclick="updateMachineScheduleStatus(${s.id}, 'ACCEPTED')" ${isAccepted ? 'disabled' : ''} style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">
+                            Terima
+                        </button>
+                        <button class="btn btn-xs ${isDismissed ? 'btn-danger' : 'btn-secondary'}" onclick="updateMachineScheduleStatus(${s.id}, 'DISMISSED')" ${isDismissed ? 'disabled' : ''} style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">
+                            Abaikan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderEnergyProfilesTable(profiles) {
+    const tbody = document.getElementById('energyProfilesTableBody');
+    if (!tbody) return;
+
+    if (!profiles || profiles.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted" style="padding: 2rem;">Belum ada riwayat profil optimasi energi.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = profiles.map(p => {
+        const dateStr = p.created_at ? new Date(p.created_at).toLocaleString('id-ID') : '-';
+        return `
+            <tr>
+                <td><code>${p.profile_code}</code></td>
+                <td><small>${dateStr}</small></td>
+                <td><strong>${p.facility_name}</strong></td>
+                <td>Rp ${p.grid_tariff_lwbp_idr} / Rp ${p.grid_tariff_wbp_idr}</td>
+                <td>${(p.total_baseline_power_kw || 0).toLocaleString()} kW</td>
+                <td style="color: #10b981; font-weight: 600;">${(p.optimized_power_kw || 0).toLocaleString()} kW</td>
+                <td><span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">-${(p.peak_reduction_kw || 0).toFixed(1)} kW (-${(p.peak_reduction_pct || 0).toFixed(1)}%)</span></td>
+                <td style="color: #3b82f6; font-weight: 600;">Rp ${Math.round(p.monthly_cost_savings_idr || 0).toLocaleString('id-ID')}</td>
+                <td style="color: #14b8a6;">${(p.monthly_carbon_avoided_kg_co2e || 0).toFixed(1)} kg</td>
+                <td><span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">${p.status || 'ACTIVE'}</span></td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderCarbonFootprintsTable(footprints) {
+    const tbody = document.getElementById('energyCarbonTableBody');
+    if (!tbody) return;
+
+    if (!footprints || footprints.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted" style="padding: 2rem;">Belum ada jejak karbon produk. Klik "Hitung Jejak Karbon SKU & CBAM" untuk kalkulasi.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = footprints.map(f => {
+        return `
+            <tr>
+                <td><code>${f.product_sku}</code></td>
+                <td><strong>${f.product_name}</strong></td>
+                <td><span class="badge" style="background: rgba(255, 255, 255, 0.08);">${f.production_unit}</span></td>
+                <td>${(f.electricity_kwh_per_unit || 0).toFixed(2)} kWh</td>
+                <td>${(f.thermal_mj_per_unit || 0).toFixed(2)} MJ</td>
+                <td style="color: #f59e0b;">${(f.scope1_emissions_kg_co2e || 0).toFixed(3)}</td>
+                <td style="color: #3b82f6;">${(f.scope2_emissions_kg_co2e || 0).toFixed(3)}</td>
+                <td style="color: #10b981; font-weight: bold;">${(f.total_carbon_per_unit_kg_co2e || 0).toFixed(3)} kg CO2e</td>
+                <td style="color: #ef4444; font-weight: 600;">€ ${(f.cbam_tax_exposure_eur || 0).toFixed(2)}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function switchEnergySubtab(tab) {
+    const btnProfiles = document.getElementById('btnEnergySubtabProfiles');
+    const btnCarbon = document.getElementById('btnEnergySubtabCarbon');
+    const viewProfiles = document.getElementById('energySubtabProfilesView');
+    const viewCarbon = document.getElementById('energySubtabCarbonView');
+
+    if (tab === 'profiles') {
+        if (btnProfiles) { btnProfiles.classList.add('btn-primary'); btnProfiles.classList.remove('btn-secondary'); }
+        if (btnCarbon) { btnCarbon.classList.add('btn-secondary'); btnCarbon.classList.remove('btn-primary'); }
+        if (viewProfiles) viewProfiles.style.display = 'block';
+        if (viewCarbon) viewCarbon.style.display = 'none';
+    } else {
+        if (btnProfiles) { btnProfiles.classList.add('btn-secondary'); btnProfiles.classList.remove('btn-primary'); }
+        if (btnCarbon) { btnCarbon.classList.add('btn-primary'); btnCarbon.classList.remove('btn-secondary'); }
+        if (viewProfiles) viewProfiles.style.display = 'none';
+        if (viewCarbon) viewCarbon.style.display = 'block';
+    }
+}
+
+async function updateMachineScheduleStatus(scheduleId, status) {
+    try {
+        await api('/ai/energy/schedules/' + scheduleId + '/status', {
+            method: 'POST',
+            body: JSON.stringify({ status })
+        });
+        showToast('Status jadwal mesin berhasil diperbarui menjadi: ' + status, 'success');
+        loadEnergySentinelData();
+    } catch (err) {
+        showToast('Gagal mengubah status jadwal mesin: ' + (err.message || err), 'error');
+    }
+}
+
+async function simulateEnergyProfile(preset) {
+    let facility = 'Pabrik Utama Cikarang Plant 1 (Metal Stamping & Casting)';
+    let applyThermal = true;
+    let lwbp = 1114.74;
+    let wbp = 2229.48;
+
+    if (preset === 'SURABAYA_COLD') {
+        facility = 'Cold Storage & Freezing Hub Regional Surabaya';
+        applyThermal = true;
+    } else if (preset === 'KARAWANG_EXTRUSION') {
+        facility = 'Pabrik Ekstrusi & Polimer Presisi Karawang';
+        applyThermal = false;
+    }
+
+    try {
+        const res = await api('/ai/energy/optimize', {
+            method: 'POST',
+            body: JSON.stringify({
+                facility_name: facility,
+                grid_tariff_lwbp_idr: lwbp,
+                grid_tariff_wbp_idr: wbp,
+                peak_window_start: 18,
+                peak_window_end: 22,
+                apply_thermal_precool: applyThermal
+            })
+        });
+        showToast('Optimasi energi berhasil dijalankan untuk ' + facility, 'success');
+        loadEnergySentinelData();
+    } catch (err) {
+        showToast('Gagal menjalankan simulasi optimasi: ' + (err.message || err), 'error');
+    }
+}
+
+async function triggerEnergyOptimizeModal() {
+    const facility = prompt('Masukkan Nama Fasilitas Pabrik:', 'Pabrik Perakitan Cikarang Plant 2');
+    if (!facility) return;
+
+    try {
+        await api('/ai/energy/optimize', {
+            method: 'POST',
+            body: JSON.stringify({
+                facility_name: facility,
+                grid_tariff_lwbp_idr: 1114.74,
+                grid_tariff_wbp_idr: 2229.48,
+                peak_window_start: 18,
+                peak_window_end: 22,
+                apply_thermal_precool: true
+            })
+        });
+        showToast('Optimasi energi fasilitas berhasil disimpan!', 'success');
+        loadEnergySentinelData();
+    } catch (err) {
+        showToast('Gagal menjalankan optimasi: ' + (err.message || err), 'error');
+    }
+}
+
+async function triggerCarbonCalcModal() {
+    const sku = prompt('Masukkan SKU Produk Ekspor:', 'SKU-AUTO-CHASSIS-01');
+    if (!sku) return;
+    const name = prompt('Masukkan Nama Produk:', 'Chassis Subframe Baja Ringan');
+    const kwhStr = prompt('Konsumsi Listrik per Unit (kWh):', '8.5');
+    const fuelStr = prompt('Konsumsi Bahan Bakar Termal per Unit (MJ):', '15.0');
+
+    const kwh = parseFloat(kwhStr) || 0;
+    const fuel = parseFloat(fuelStr) || 0;
+
+    try {
+        await api('/ai/energy/carbon-footprints/calc', {
+            method: 'POST',
+            body: JSON.stringify({
+                product_sku: sku,
+                product_name: name || sku,
+                production_unit: 'PCS',
+                electricity_kwh_per_unit: kwh,
+                thermal_mj_per_unit: fuel
+            })
+        });
+        showToast('Jejak karbon produk dan tarif CBAM berhasil dihitung!', 'success');
+        switchEnergySubtab('carbon');
+        loadEnergySentinelData();
+    } catch (err) {
+        showToast('Gagal menghitung jejak karbon produk: ' + (err.message || err), 'error');
+    }
+}
+
+async function seedEnergyDemoData() {
+    try {
+        await api('/ai/energy/seed-demo', { method: 'POST' });
+        showToast('Data demo profil energi, jadwal mesin, dan jejak karbon berhasil diinjeksi!', 'success');
+        loadEnergySentinelData();
+    } catch (err) {
+        showToast('Gagal injeksi demo energy: ' + (err.message || err), 'error');
+    }
 }

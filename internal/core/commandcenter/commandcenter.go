@@ -122,6 +122,7 @@ var erpModuleCatalog = []ModuleCatalogItem{
 	{Tab: "self-healing-data", Title: "Self-Healing Data Sentinel", Category: "AI & INTELLIGENCE", Icon: "✨", Keywords: "self healing data rekonsiliasi otomatis zero touch closing gr ir clearing deduplikasi semantik master data buku besar"},
 	{Tab: "ambient-vision-dock", Title: "Ambient Vision Logistics (WMS Dock AI)", Category: "AI & INTELLIGENCE", Icon: "👁️", Keywords: "ambient computer vision wms dock receiving kargo volumetrik dimensi p l t defect detection kerusakan rma klaim asuransi freight surcharges"},
 	{Tab: "contract-legal-copilot", Title: "Legal Contract AI & Redlining", Category: "AI & INTELLIGENCE", Icon: "⚖️", Keywords: "legal contract copilot redline klausul kontrak pks msa nda risiko hukum ganti rugi denda arbitrase counter offer"},
+	{Tab: "energy-peak-shaving", Title: "Industrial Energy AI & Peak-Shaving", Category: "AI & INTELLIGENCE", Icon: "⚡", Keywords: "energy ai peak load shaving wbp lwbp tarif listrik pln beban puncak esg emisi karbon scope 1 2 cbam chiller optimasi pabrik"},
 }
 
 // RegisterRoutes mounts the continuous improvement Command Center endpoints on /api/v1
