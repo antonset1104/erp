@@ -82,7 +82,7 @@ func GetSpec(appName, version string) map[string]interface{} {
 				"post": map[string]interface{}{
 					"tags":        []string{"System & Protocols"},
 					"summary":     "Native Model Context Protocol (MCP) JSON-RPC 2.0 Server",
-					"description": "Standard MCP JSON-RPC 2.0 endpoint supporting initialize, tools/list, tools/call, resources/list, resources/read, and prompts/list for Claude Desktop, Cursor, Gemini CLI, and Antigravity.",
+					"description": "Standard MCP JSON-RPC 2.0 endpoint supporting initialize, tools/list, tools/call, resources/list, resources/read, and prompts/list for enterprise clients and developer IDEs.",
 					"responses": map[string]interface{}{
 						"200": map[string]interface{}{"description": "JSON-RPC 2.0 Response"},
 					},

@@ -36685,7 +36685,7 @@ async function seedHealingDemoData() {
 
 
 // =========================================================================
-// SECTION 101: AMBIENT MULTIMODAL COMPUTER VISION & DOCK AI
+// Ambient Computer Vision & Volumetric Dock Operations
 // =========================================================================
 
 let cachedVisionOverview = null;
@@ -37294,7 +37294,7 @@ function triggerVisionScanModal() {
 
 
 // =========================================================================
-// SECTION 102: AUTONOMOUS LEGAL CONTRACT RISK & REDLINING COPILOT
+// Legal Contract Risk Analysis & Redlining Copilot
 // =========================================================================
 
 let cachedLegalOverview = null;
@@ -37767,7 +37767,7 @@ function triggerLegalAuditModal() {
 
 
 // =========================================================================
-// SECTION 103: PHYSICS-INFORMED INDUSTRIAL ENERGY AI & PEAK SHAVING
+// Industrial Energy Management & Peak Load Shaving
 // =========================================================================
 
 let currentEnergyProfile = null;

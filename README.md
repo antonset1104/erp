@@ -35,7 +35,7 @@ GoERP includes built-in executive productivity tools to accelerate day-to-day op
 - **🔔 Actionable Notification & Approval Center (`GET /api/v1/dashboard/notifications`)**: Intelligent notification bell aggregating pending approvals, active BPMN workflows, draft documents, and security alerts.
 - **📊 Executive Financial Pulse Strip & 50-Module Health Matrix**: Live liquidity tracking across Treasury bank accounts, Accounts Receivable (AR), Accounts Payable (AP), CRM Pipeline revenue, Subscription MRR, live transaction feeds, and 1-click executive KPI CSV export (`GET /api/v1/dashboard/export-summary`).
 - **📑 OpenAPI 3.1 & Interactive API Explorer (`/api/docs`)**: Native browser console to test all REST endpoints, Model Context Protocol (MCP), and Google A2A tasks.
-- **🔌 Native Model Context Protocol (MCP) JSON-RPC 2.0 Server (`/mcp`)**: Zero-code integration for Claude Desktop, Cursor, Gemini CLI, and Antigravity.
+- **🔌 Native Model Context Protocol (MCP) JSON-RPC 2.0 Server (`/mcp`)**: Integration for Claude Desktop, Cursor, and standard MCP developer clients.
 - **🤖 Google Cloud Agent-to-Agent (A2A) Discovery Card (`/.well-known/agent.json`)**: Autonomous B2B agent negotiation for inventory availability, 3-way matching, and Scope 3 ESG carbon exchange.
 - **🧾 AI Document Intelligence & Automated 3-Way Matching**: Multimodal OCR invoice/e-Faktur extraction with automated PO and Goods Receipt (GRN) verification.
 - **🛡️ AI Fraud Radar & Predictive Cashflow (30/60/90 Days)**: Real-time anomaly detection (Split POs, high-value postings) and CFO liquidity runway projections.

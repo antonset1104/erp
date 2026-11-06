@@ -1026,7 +1026,7 @@ func (h *Handler) SeedLegalContractDemoData(c *gin.Context) {
 }
 
 // =========================================================================
-// Section 103: Physics-Informed Industrial Energy AI & Peak-Load Shaving
+// Industrial Energy Management & Peak-Load Shaving Engine
 // =========================================================================
 
 func (h *Handler) GetEnergySentinelOverview(c *gin.Context) {

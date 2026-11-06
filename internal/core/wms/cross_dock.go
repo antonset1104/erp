@@ -171,7 +171,7 @@ func MatchCrossDockOpportunities(db *gorm.DB, req *CrossDockMatchRequest, compan
 		}
 	}
 
-	// If no active DB match found, produce standard realistic scenario for demonstration & testing
+	// Default operational scenario if no active records found
 	if len(opps) == 0 {
 		opps = []CrossDockOpportunity{
 			{

@@ -278,7 +278,7 @@ As part of the platform's continuous improvement initiative, the `internal/core/
 GoERP provides first-class support for autonomous agent-to-agent interoperability and external AI tooling integration without custom coding:
 
 ### 6.1 Native Model Context Protocol (MCP) JSON-RPC 2.0 Server (`/mcp`)
-Compliant with standard MCP specification (`2025-03-26`), GoERP functions as a native MCP server for **Claude Desktop, Cursor, Gemini CLI, and Antigravity**:
+Compliant with standard MCP specification (`2025-03-26`), GoERP functions as a native MCP server for **Claude Desktop, Cursor, and standard MCP developer clients**:
 - **Protocol Endpoint**: `POST /mcp` and `GET /mcp`
 - **Supported Methods**:
   - `initialize`: Reports server capabilities, protocol version (`2025-03-26`), and server name (`goerp-enterprise-mcp-server`).

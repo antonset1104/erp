@@ -68,7 +68,7 @@ func RunFuzzyReconciliation(db *gorm.DB, lines []RawBankStatementLine, companyID
 	var openMoves []account.AccountMove
 	db.Where("company_id = ? AND state = 'posted' AND payment_state != 'paid'", companyID).Find(&openMoves)
 
-	// If no open moves found, query all posted moves for demonstration
+	// Fallback to posted moves if no open moves are present
 	if len(openMoves) == 0 {
 		db.Where("company_id = ? AND state = 'posted'", companyID).Find(&openMoves)
 	}
