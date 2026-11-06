@@ -1,19 +1,19 @@
-## 📌 Pull Request Overview
+## Pull Request Overview
 
 Please provide a concise summary of the changes made, the problem addressed, and the affected modules.
 
 - **Related Issue:** Closes #...
 - **Type of Change:**
-  - [ ] 🐛 Bug fix
-  - [ ] ✨ New feature or enterprise module
-  - [ ] ⚡ Performance improvement
-  - [ ] 📝 Documentation update
-  - [ ] 🎨 Code refactoring
-  - [ ] 🧪 Testing & coverage
+  - [ ] Bug fix
+  - [ ] New feature or enterprise module
+  - [ ] Performance improvement
+  - [ ] Documentation update
+  - [ ] Code refactoring
+  - [ ] Testing & coverage
 
 ---
 
-## 🏢 Affected Modules
+## Affected Modules
 
 - [ ] Core Engine / Database / Routing
 - [ ] Sales & Quotations / CRM
@@ -29,7 +29,7 @@ Please provide a concise summary of the changes made, the problem addressed, and
 
 ---
 
-## 🧪 Verification & Evidence
+## Verification & Evidence
 
 Describe the testing performed to verify this change:
 
@@ -41,11 +41,11 @@ go test -v -race ./tests/...
 
 - [ ] All unit and integration tests pass 100% (`PASS`).
 - [ ] No regression introduced to intersecting modules.
-- [ ] *(If UI-related)* Verified in live browser with 0 JavaScript console errors.
+- [ ] *(If UI-related)* Verified in browser with 0 JavaScript console errors.
 
 ---
 
-## ✅ Contributor Checklist
+## Contributor Checklist
 
 - [ ] My code follows the [CONTRIBUTING.md](CONTRIBUTING.md) guidelines.
 - [ ] Code is formatted with `go fmt ./...`.

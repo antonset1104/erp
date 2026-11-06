@@ -1,159 +1,115 @@
-# Strategic & Operational Open-Source Project Guide
+# Open Source Project Guide — GoERP
 
-This document serves as the comprehensive blueprint for repository owners, core maintainers, and community contributors in governing **GoERP** as a world-class, enterprise-grade open-source software project.
-
----
-
-## 1. Vision & Market Positioning
-
-### Why GoERP?
-Traditional enterprise ERP systems (primarily built on Python/PostgreSQL or legacy Java/C++ monoliths) are widespread but face chronic structural drawbacks:
-- High memory consumption (hundreds of megabytes per worker process).
-- Fragile runtime dependencies (Python virtualenvs, pip packages, NodeJS for asset pipelines, external C bindings).
-- Execution bottlenecks and GIL contention under high-concurrency I/O spikes.
-
-**GoERP** resolves these industry pain points by providing:
-1. **Single Standalone Binary**: All 50 enterprise modules and web SPA assets are compiled into a single executable binary (no Python, pip, or npm needed on production servers).
-2. **Native Go Concurrency & Speed**: Sub-50ms cold boot time, ~25–40 MB idle RAM consumption, and native goroutine scheduling capable of sustaining thousands of concurrent transactions per second.
-3. **Flexible Storage Strategy**: Embedded SQLite for edge deployments, branches, and SMEs, or PostgreSQL for large-scale enterprise conglomerates.
-4. **Complete & Battle-Tested**: Comes equipped with 50 integrated modules (O2C, P2P, MRP II, WMS, double-entry accounting, HRIS, taxation, bonded customs, low-code studio, BPMN 2.0 workflow engine, and integration hub).
+This document outlines the governance model, contribution policies, release engineering, and community standards for the GoERP open-source project.
 
 ---
 
-## 2. Open-Source Governance Model
+## 1. Vision & Architecture Philosophy
 
-The project operates under a **Benevolent Maintainer / Core Team Governance** model:
+Traditional enterprise resource planning platforms often suffer from structural operational challenges:
+- High idle memory consumption (hundreds of megabytes per worker process).
+- Fragile runtime dependencies across language runtimes, virtual environments, and asset pipelines.
+- Slow cold start times and complex multi-container setup requirements.
+
+GoERP addresses these limitations through deliberate architectural choices:
+1. **Single Static Binary**: The backend application, database migrations, and web interface compile into a single executable binary. No external runtime dependencies (such as Python, Node.js, or Ruby) are required on production host servers.
+2. **Native Go Concurrency**: Low idle memory footprint (~25–30 MB), sub-50ms cold starts, and goroutine-based concurrent request handling capable of serving thousands of transactions per second on modest hardware.
+3. **Flexible Data Storage**: Embedded pure-Go SQLite for zero-configuration branch and edge deployments, and PostgreSQL for distributed, high-concurrency enterprise installations.
+4. **Comprehensive Core**: Standard business functions (double-entry general ledger, inventory mass conservation, MRP II, WMS, HR/Payroll, and tax localization) are integrated natively without fragmented plugins.
+
+---
+
+## 2. Project Governance Model
+
+GoERP operates under a **Core Team Governance** model:
 
 ```mermaid
 graph TD
-    A["👑 Project Lead / Owner<br/>(@antonset1104)"] --> B["🛡️ Core Maintainers Team"]
-    B --> C["🔍 Module Stewards / Reviewers"]
-    B --> D["👥 Triage & Community Moderators"]
-    C --> E["🌍 Global Contributors & Community"]
+    A["Project Lead / Maintainer<br/>(@antonset1104)"] --> B["Core Maintainers"]
+    B --> C["Module Reviewers"]
+    B --> D["Community Moderators"]
+    C --> E["Contributors & Community"]
     D --> E
 ```
 
-### Roles & Responsibilities:
-1. **Project Lead / Owner (`@antonset1104`)**:
-   - Oversees strategic project direction, public release signing, domain ownership, and final merge authority on the `main` branch.
-2. **Core Maintainers**:
-   - Review and approve Pull Requests.
-   - Coordinate release cycles and publish security advisories.
-   - Preserve architectural hygiene within `internal/core`.
-3. **Module Stewards**:
-   - Domain experts who maintain specific sub-systems (e.g., General Ledger Accounting, WMS/Inventory, MRP II, or Frontend SPA).
-4. **Triage Team**:
-   - Triage incoming issues, verify bug reproduction steps, and apply appropriate taxonomy labels.
-5. **Contributors**:
-   - Community members who submit bug fixes, new modules, localization plugins, or documentation enhancements.
+### Roles and Responsibilities
+- **Project Lead**: Oversees project vision, cryptographic release signing, domain governance, and final merge decisions on the `main` branch.
+- **Core Maintainers**: Review and merge pull requests, coordinate release cycles, manage security advisories, and maintain architecture hygiene in `internal/core`.
+- **Module Reviewers**: Domain specialists who maintain and review specific subsystems (Accounting, Inventory/WMS, Manufacturing, or Web UI).
+- **Contributors**: Community developers who report bugs, submit documentation updates, contribute localization packs, and implement features via pull requests.
 
-### Architectural Decision Process: RFC (Request for Comments)
-For substantial architectural changes (such as core schema refactoring, new database engines, or protocol alterations), contributors must submit an RFC:
-1. Open an issue titled **RFC: [Proposal Title]** or create a post in GitHub Discussions under the *Ideas* category.
-2. Detail the motivation, alternatives considered, performance benchmarks, and proposed implementation.
-3. Allow a minimum of 7 calendar days for open discussion before a decision by Core Maintainers.
+### Request for Comments (RFC) Process
+Significant architectural changes (such as core database schema refactoring, protocol modifications, or breaking API changes) require an RFC:
+1. Open an issue titled **RFC: [Proposal Title]** or start a thread in GitHub Discussions under the *Ideas* category.
+2. Outline the motivation, technical alternatives evaluated, backward compatibility impact, and proposed implementation plan.
+3. Allow a minimum discussion period of 7 calendar days before core maintainers decide on implementation.
 
 ---
 
-## 3. Licensing & Copyright Strategy (Apache 2.0 & DCO)
+## 3. Licensing & Copyright Policy
 
-### Primary License: Apache License 2.0
-GoERP is distributed under the terms of the **Apache License 2.0**.
-- **Commercial Permissiveness**: Grants individuals and companies the freedom to use, modify, distribute, and self-host the platform commercially without royalty fees.
+### Apache License 2.0
+GoERP is licensed under the **Apache License 2.0**.
+- **Permissive Commercial Use**: Allows organizations and individuals to use, customize, self-host, and distribute the software without royalty fees.
 - **Explicit Patent Grant**: Provides mutual patent protection from contributors to users and downstream distributors.
-- **Limitation of Liability**: Shields maintainers and contributors from legal liability and operational damages.
+- **Limitation of Liability**: Protects maintainers and contributors from operational liability.
 
-### Contribution Policy: Developer Certificate of Origin (DCO)
-To guarantee copyright provenance without imposing bureaucratic paperwork, GoERP adheres to the **Developer Certificate of Origin (DCO v1.1)** standard (used by Linux and Git).
+### Developer Certificate of Origin (DCO)
+To ensure copyright provenance without bureaucratic contributor license agreements, GoERP uses the **Developer Certificate of Origin (DCO v1.1)** standard (the same process used by the Linux kernel and Git projects).
 Contributors sign off on their commits by including the `-s` flag:
 ```bash
 git commit -s -m "feat(wms): implement wave picking algorithm"
 ```
-Which appends: `Signed-off-by: Full Name <email@example.com>`.
+This automatically appends: `Signed-off-by: Full Name <email@example.com>`.
 
 ---
 
-## 4. GitHub Repository Configuration Standards
+## 4. Repository Standards & Branch Protection
 
-To maintain professional open-source engineering hygiene, the repository is configured with the following settings:
+To ensure code quality and stability, the following rules are enforced on the `main` branch:
 
-### A. General Repository Settings
-- **Repository Name**: `erp`
-- **Description**: `High-performance Enterprise Resource Planning (ERP) platform in Golang — 50 enterprise modules, single-binary, high concurrency, double-entry inventory & accounting, low-code & BPMN engine.`
-- **Homepage**: `https://github.com/antonset1104/erp`
-- **Topics**: `golang`, `go`, `erp`, `accounting`, `crm`, `wms`, `mrp`, `hris`, `bpm`, `workflow-engine`, `low-code`, `enterprise`, `double-entry`, `rest-api`, `open-source`
-- **Enabled Features**:
-  - ✅ **Issues** (Enabled with structured YAML issue forms)
-  - ✅ **Discussions** (Enabled for community Q&A and RFCs)
-  - ✅ **Projects & Wiki** (Enabled)
-
-### B. Main Branch Protection Rules (`main`)
-- **Require pull request before merging**: Enabled.
-- **Require status checks to pass before merging**:
-  - `Test (Go 1.22.x on ubuntu-latest)`
-  - `Test (Go 1.22.x on windows-latest)`
-- **Strict status checks**: Requires branches to be up-to-date with `main` before merging.
-- **Require linear history**: Enabled (enforces clean, rebased git history).
-- **Prevent force pushes & deletions**: Enforced.
-
-### C. Security & Dependency Automation
-- ✅ **Dependabot alerts**: Enabled.
-- ✅ **Dependabot automated security fixes**: Enabled.
-- ✅ **Secret scanning**: Enabled.
-- ✅ **Private vulnerability reporting**: Enabled.
+### Branch Protection Rules
+- **Pull Requests Required**: Direct pushes to `main` are restricted; changes must land via reviewed pull requests.
+- **Required Automated Status Checks**:
+  - `go test -v ./tests/...` must pass 100% on target platforms (Linux and Windows).
+  - `go vet ./...` must complete with zero warnings.
+- **Linear History**: Commits must be rebased or squashed to maintain a clean git history.
+- **Automated Security Scanning**: Dependabot vulnerability alerts and secret scanning are enabled across the repository.
 
 ---
 
-## 5. Release Engineering & Semantic Versioning (SemVer)
+## 5. Release Engineering & Versioning
 
-GoERP adheres to the **Semantic Versioning 2.0.0** (`vMAJOR.MINOR.PATCH`) standard:
-- **MAJOR (`v2.0.0`)**: Breaking architectural changes, incompatible API modifications, or fundamental schema migrations.
-- **MINOR (`v1.42.0`)**: Backwards-compatible features, new enterprise modules, or significant performance enhancements.
+GoERP follows the **Semantic Versioning 2.0.0** (`vMAJOR.MINOR.PATCH`) specification:
+- **MAJOR (`v2.0.0`)**: Breaking architectural changes, incompatible API modifications, or database schema restructuring requiring manual intervention.
+- **MINOR (`v1.42.0`)**: Backwards-compatible features, new business modules, or performance improvements.
 - **PATCH (`v1.41.1`)**: Backwards-compatible bug fixes and security patches.
 
-### Release Cadence:
-- **Patch Releases**: Published ad-hoc as soon as critical bugs or vulnerabilities are resolved.
-- **Minor Releases**: Published every 4–6 weeks aggregating validated features from `main`.
-
-### Automated Release Pipeline (GitHub Actions & GoReleaser):
-When maintainers push a semver tag (e.g. `git tag -a v1.41.0 -m "Release v1.41.0" && git push origin v1.41.0`), `.github/workflows/release.yml` automatically:
-1. Cross-compiles optimized binaries for supported platforms:
-   - `go-erp_v1.41.0_linux_amd64.tar.gz`
-   - `go-erp_v1.41.0_linux_arm64.tar.gz`
-   - `go-erp_v1.41.0_windows_amd64.zip`
-   - `go-erp_v1.41.0_darwin_amd64.tar.gz`
-   - `go-erp_v1.41.0_darwin_arm64.tar.gz` (Apple Silicon M-Series)
+### Automated Release Pipeline
+When a release tag is pushed (e.g., `git tag -a v1.82.0 -m "Release v1.82.0" && git push origin v1.82.0`), GitHub Actions automatically:
+1. Compiles optimized production binaries for target platforms:
+   - `go-erp_linux_amd64.tar.gz`
+   - `go-erp_linux_arm64.tar.gz`
+   - `go-erp_windows_amd64.zip`
+   - `go-erp_darwin_arm64.tar.gz` (Apple Silicon)
 2. Generates cryptographic checksums (`SHA256SUMS.txt`).
-3. Publishes official Docker images to GitHub Container Registry (`ghcr.io/antonset1104/erp:latest`).
-4. Generates automated release notes and changelogs on GitHub Releases.
+3. Publishes multi-architecture Docker container images to GitHub Container Registry (`ghcr.io/antonset1104/erp`).
+4. Compiles structured release notes on the GitHub Releases page.
 
 ---
 
-## 6. Extensibility Architecture for Community Modules
+## 6. Extending the Platform
 
-Third-party developers can extend GoERP through three primary extension vectors:
+Developers can extend GoERP through three primary extension vectors:
 
-1. **Native Go Modules**: Add a dedicated package under `internal/modules/<module_name>`, register model migrations in `internal/core/database/db.go`, and wire HTTP routes in `cmd/server/main.go`.
-2. **Low-Code Studio & Dynamic Schemas**: Define dynamic database models, relational foreign keys, and UI views directly from the web interface without recompiling Go binaries.
-3. **Integration Hub, Open RPC & Webhooks**: Connect external systems (marketplaces, payment gateways, WhatsApp bots, third-party CRMs) through standardized JSON-RPC and outbound webhook events.
-
----
-
-## 7. Sustainability & Commercialization Model
-
-As an enterprise-grade platform, long-term open-source sustainability is supported through an **Open Core & Value-Added Services** model:
-
-| Tier | License | Description |
-| :--- | :---: | :--- |
-| **GoERP Core Engine (50 Modules)** | 🆓 Open Source (Apache 2.0) | Completely free for commercial self-hosting without user seats or database row limits. |
-| **Enterprise Cloud Hosting (Managed SaaS)** | 💼 Commercial Service | Managed cloud hosting with automated daily backups, SSL, 99.9% uptime SLA, and 1-click upgrades. |
-| **Custom Integration & Enterprise Consulting** | 💼 Professional Services | Tailored enterprise implementations, custom fiscal compliance adapters, and dedicated technical training. |
-| **Enterprise Support & SLA** | 💼 Subscription | Priority technical support with 24/7 hotline and rapid incident response SLAs. |
+1. **Native Go Modules**: Create a package in `internal/modules/<module_name>`, register database models in `internal/core/database/db.go`, and mount HTTP routes in `cmd/server/main.go`.
+2. **Low-Code Studio**: Define dynamic business models, custom fields, and views through the browser UI without recompiling Go source code.
+3. **Integration Hub & Webhooks**: Connect external services (payment gateways, e-commerce storefronts, logistics tracking) via standardized REST/JSON-RPC APIs and outbound webhook events.
 
 ---
 
-## 8. Community Communication Channels
+## 7. Community Communication
 
-- **GitHub Discussions**: The primary venue for architecture discussions, Q&A, and community showcases.
-- **GitHub Issues**: Reserved exclusively for verified bug reports and tracked work items.
-- **Official Documentation**: Kept version-controlled in the repository's `docs/` folder (*documentation as code*).
+- **GitHub Discussions**: The primary channel for technical questions, architecture ideas, and showcases.
+- **GitHub Issues**: Reserved exclusively for reproducible bug reports and tracked implementation items.
+- **Documentation**: Maintained in the repository under `docs/` following the *documentation-as-code* approach.

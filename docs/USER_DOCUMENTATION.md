@@ -1,132 +1,254 @@
-# User Operational Guide — GoERP v1.0
+# User Operational Guide — GoERP
+
+This guide provides step-by-step operational instructions for day-to-day users, department managers, and system administrators working with GoERP.
+
+---
 
 ## 1. Getting Started
 
-### 1.1 Accessing the ERP System
-1. Open any modern web browser (Google Chrome, Microsoft Edge, Mozilla Firefox, or Safari) and navigate to:
-   **`http://localhost:8080`**
-2. The application includes a built-in **Enterprise Demo Auto-Login** as **Administrator (`admin`)** for **PT Golang ERP Nusantara**, allowing you to explore all 50 enterprise modules immediately.
-3. If you log out using the **🚪** icon in the bottom-left corner, the system refreshes your session seamlessly.
+### 1.1 Accessing the Application
+1. Open a modern web browser (Google Chrome, Mozilla Firefox, Microsoft Edge, or Apple Safari) and navigate to your GoERP host address (for local instances: `http://localhost:8080`).
+2. Enter your credentials on the login screen. Default local installations provide pre-configured demonstration accounts:
+   - **Administrator**: Username `admin` / Password `admin123`
+3. Click **Sign In** to access the main workspace.
 
-### 1.2 User Interface Layout
-The GoERP interface is structured into three primary areas:
-- **Sidebar Navigation (Left)**: Displays the full, scrollable directory of **50 Enterprise Modules**. Click on any module name to switch screens instantly without page reloads (SPA architecture).
-- **Top Header Bar**:
-  - Displays the active module title and operational subtitle.
-  - **🔍 Global Search (`Ctrl+K`)**: Opens the universal Omni-Search command palette.
-  - **🔔 Notifications**: Actionable notification center badge for pending approvals and task queues.
-  - **☀️ / 🌙 Theme Toggle**: Switch seamlessly between Light Enterprise and Dark mode.
-  - **📷 Scan Barcode**: Opens the universal camera barcode/QR scanner.
-  - **✨ Ask ERP AI**: Executive AI Copilot to ask natural language questions about your business data.
-- **Main Content Area**: Hosts KPI metric cards, operational sub-tabs, data tables with live filtering and sorting, CSV export buttons, and interactive modals.
-
----
-
-## 2. Core Operational Modules
-
-### 2.1 Executive Dashboard (`Dashboard`)
-- Features **6 Core Metric Cards**: *Total Sales (Confirmed)*, *Sales Orders*, *Purchase Orders*, *Stock Pickings*, *Invoices & Bills*, and *Active Products*.
-- **Quick Workflow Actions**: 1-click creation cards to launch a new *Sales Order*, *Purchase Order*, *Product*, or *Partner*.
-- **Executive Pulse Strip**: High-level financial indicators for liquid bank cash, Accounts Receivable (AR), Accounts Payable (AP), CRM pipeline revenue, and MRR.
-
-### 2.2 Sales & Invoicing (`Sales Orders` & `Invoicing`)
-1. Open **Sales Orders** in the sidebar, then click **+ Create Sales Order**.
-2. Select a **Customer**, add line items with quantities and unit prices, then click **Save Quotation**.
-3. On a `DRAFT` order, click **Confirm** to convert it to a confirmed `SALE`. The system automatically generates a Delivery Order (`WH/OUT`) in **Inventory**.
-4. To print official business documents, click the **🖨️ Print** icon to generate an A4 SHA-256 sealed document ready for printing or saving as PDF.
-
-### 2.3 Purchasing & Warehouse Operations (`Purchase Orders` & `Inventory`)
-1. Open **Purchase Orders**, click **+ Create RFQ**, choose a **Vendor**, add items, and save.
-2. Click **Confirm PO**. The system automatically generates a warehouse incoming receipt document (`WH/IN`).
-3. Open **Inventory**, find the incoming `WH/IN` or outgoing `WH/OUT` record with status `ASSIGNED` or `DRAFT`, and click **Validate**. Stock on hand in **Stock On-Hand (Quants)** updates atomically.
-
-### 2.4 Manufacturing & MRP II (`Manufacturing` & `MRP II: Work Center & OEE`)
-1. In **Manufacturing**, manage **Bills of Materials (BoM)** or issue new production orders via **+ Manufacturing Order**.
-2. Click **Produce** on a Manufacturing Order to atomically consume raw components and receive finished goods into stock.
-3. In **MRP II: Work Center, Routing & OEE**, manage production machinery stations (*Work Centers*), configure *Routing*, start/finish shop-floor *Work Orders*, and run the **🤖 AI OEE & Bottleneck Analyzer**.
-
-### 2.5 Human Resources, Attendance, Leaves & Payroll (`HR`, `Attendance`, `Leave` & `Enterprise Payroll`)
-1. **HR & Employees**: Manage departments and employee profiles with base salary information.
-2. **Attendance**: Use **📍 Clock In** and **🏁 Clock Out** with GPS location capture to log employee work hours.
-3. **Enterprise Payroll**:
-   - Open **Enterprise Payroll**, click **+ Generate Payslip** or **⚡ Batch Payroll Run**.
-   - The engine automatically calculates base salary, allowances, health insurance, social security, and tax withholdings.
-   - Click **Confirm & Post to GL** to post balanced payroll journal entries to the General Ledger.
-
-### 2.6 Fiscal & Tax Localization (`Tax & e-Faktur` & `Unified e-Bupot`)
-1. **VAT 11% (e-Faktur)**:
-   - Register official tax invoice numbers (**NSFP**) via **+ Register NSFP**.
-   - Create Output/Input tax invoices, approve them, export official CSV formats, or run the **🤖 AI Tax Compliance Auditor**.
-2. **Withholding Tax (e-Bupot)**:
-   - Issue official withholding tax slips and manage unified periodic tax returns.
-
-### 2.7 Customs & Bonded Zones (`Customs & Bonded Zones (CEISA 4.0)`)
-1. Open **Customs & Bonded Zones**.
-2. Click **+ Create Customs Document** to register customs declarations (**BC 2.3**, **BC 2.5**, **BC 2.7**, **BC 4.0**, **BC 4.1**, **BC 2.6.1**, **BC 2.6.2**, or **BC 3.0**).
-3. Click **🛃 Issue SPPB** on submitted declarations to authorize goods movement and automatically update the **4 Official IT Inventory Ledgers** (Raw Materials, Finished Goods, Machinery, and Scrap/Waste).
-4. Run the **🤖 AI Customs Compliance Audit** to reconcile physical warehouse stock with customs balances.
+### 1.2 Interface Navigation
+The interface is divided into three primary functional zones:
+- **Left Sidebar**: Contains the complete categorized navigation tree for all enterprise business areas. Click any module name to navigate directly without a full page reload.
+- **Top Navigation Bar**:
+  - Displays the active screen title and contextual operational tools.
+  - **Global Search (`Ctrl+K`)**: Opens the universal search palette for finding records, documents, or navigation targets.
+  - **Module Filter (`/`)**: Focuses the module filter input in the sidebar for quick keyword filtering.
+  - **Notifications**: Displays pending approval requests, workflow tasks, and operational alerts.
+  - **Theme Toggle**: Switches between Light and Dark visual themes.
+  - **Barcode Scanner**: Activates the camera or hardware barcode reader for scanning product codes or document numbers.
+- **Main Workspace**: Displays key metrics, searchable data tables, filter toolbars, document creation buttons, and detail views.
 
 ---
 
-## 3. Advanced Platform Tools
+## 2. Sales & Customer Invoicing (Order-to-Cash)
 
-### 3.1 Universal Low-Code Studio (`Low-Code Studio`)
-Create custom business models and data tables without writing Go code:
+### 2.1 Creating a Sales Quotation
+1. Navigate to **Sales Orders** in the sidebar.
+2. Click **+ Create Sales Order**.
+3. Select an existing **Customer** from the dropdown or type to filter.
+4. Set the quotation date and payment terms (e.g., Immediate Payment, Net 30, Net 60).
+5. Add line items in the **Order Lines** section:
+   - Select the **Product**.
+   - Enter the requested **Quantity** and verify the **Unit Price**.
+   - Tax rates (e.g., standard 11% VAT) are calculated automatically.
+6. Click **Save Quotation**. The record is saved in `DRAFT` status.
+
+### 2.2 Confirming an Order and Fulfilling Delivery
+1. Open the draft quotation and review line item totals.
+2. Click **Confirm Order**. The document status transitions to `SALE`.
+3. The system automatically reserves stock and generates a corresponding Delivery Order (`WH/OUT/xxxxx`) in the Inventory module.
+4. When warehouse personnel pick, pack, and ship the items:
+   - Open **Inventory** -> **Delivery Orders**.
+   - Locate the picking document (`WH/OUT/xxxxx`).
+   - Click **Validate** to register the physical stock movement. Stock on hand is reduced immediately.
+
+### 2.3 Issuing Customer Invoices
+1. From the confirmed sales order (or via **Invoicing** -> **Customer Invoices**), click **Create Invoice**.
+2. Select whether to invoice the full delivered quantity or specific line items.
+3. Review line items, payment terms, and applicable tax codes.
+4. Click **Post to General Ledger**. The invoice moves to `POSTED` status, generating double-entry journal lines:
+   - Debit: Accounts Receivable (Asset)
+   - Credit: Sales Revenue (Income)
+   - Credit: Output VAT Payable (Liability)
+5. To print or download a formal PDF invoice with an SHA-256 seal, click the **Print** icon on the document view.
+
+### 2.4 Registering Customer Payments
+1. Open the posted customer invoice.
+2. Click **Register Payment**.
+3. Select the payment method (Bank Transfer, Cash, or Credit Card), enter the received amount, and select the destination bank account.
+4. Click **Confirm Payment**. The invoice status transitions to `PAID`, and the open balance updates to zero.
+
+---
+
+## 3. Procurement & Inbound Receiving (Procure-to-Pay)
+
+### 3.1 Creating a Request for Quotation (RFQ)
+1. Navigate to **Purchase Orders** in the sidebar.
+2. Click **+ Create RFQ**.
+3. Select the target **Vendor** and set expected delivery dates.
+4. Add components or products in the line items table with required quantities.
+5. Click **Save RFQ**. You can print or export the request to send to your supplier.
+
+### 3.2 Confirming a Purchase Order
+1. Once vendor pricing is agreed upon, open the RFQ and update unit prices if needed.
+2. If the total order exceeds authorization limits, the order routes through the approval matrix automatically.
+3. Click **Confirm Order**. The document moves to `PURCHASE` status, and an incoming warehouse receipt (`WH/IN/xxxxx`) is created.
+
+### 3.3 Receiving Goods into Warehouse
+1. Navigate to **Inventory** -> **Receipts**.
+2. Locate the incoming receipt (`WH/IN/xxxxx`).
+3. Click **Check Availability** to verify dock staging space.
+4. Review received quantities against the purchase order. Enter serial or lot numbers if tracking is enabled on the product.
+5. Click **Validate**. Inventory valuation layers and stock quantities update automatically.
+
+### 3.4 Processing Vendor Bills
+1. Navigate to **Invoicing** -> **Vendor Bills**.
+2. Click **+ Create Vendor Bill** and link it to the confirmed Purchase Order.
+3. Verify line items against the warehouse Goods Receipt (3-way matching).
+4. Enter the vendor's invoice number and billing date.
+5. Click **Post**. The system records:
+   - Debit: Inventory Received Not Invoiced / Expense
+   - Debit: Input VAT Receivable
+   - Credit: Accounts Payable
+
+---
+
+## 4. Inventory & Warehouse Management
+
+### 4.1 Checking Real-Time Stock
+1. Navigate to **Inventory** -> **Stock On-Hand (Quants)**.
+2. Filter by product name, SKU, warehouse, or storage location.
+3. Columns display:
+   - **On Hand**: Physical inventory present in warehouse locations.
+   - **Reserved**: Stock allocated to pending delivery orders or manufacturing orders.
+   - **Available**: On hand minus reserved quantities available for immediate sale.
+
+### 4.2 Internal Stock Transfers
+1. Navigate to **Inventory** -> **Internal Transfers**.
+2. Click **+ Create Transfer**.
+3. Select the **Source Location** (e.g., `WH/Stock` or a specific bin) and **Destination Location** (e.g., a branch warehouse or transit location).
+4. Add products and quantities to transfer.
+5. Click **Validate**. Both source and destination balances update atomically.
+
+### 4.3 Physical Inventory & Stocktaking
+1. Navigate to **Stock Opname**.
+2. Click **+ Start Stocktake Cycle**.
+3. Select the target warehouse or storage zone. The system takes a snapshot of current theoretical book quantities.
+4. Print physical count sheets or enter counted quantities directly via mobile tablet or barcode scanner.
+5. Click **Calculate Discrepancies**. The system highlights variances between book stock and physical count.
+6. Click **Post Inventory Adjustments**. Balanced inventory adjustment journals post to the General Ledger.
+
+---
+
+## 5. Manufacturing & Work Orders (Shop Floor)
+
+### 5.1 Setting Up a Bill of Materials (BoM)
+1. Navigate to **Manufacturing** -> **Bills of Materials**.
+2. Click **+ Create BoM**.
+3. Select the parent finished product.
+4. In the components table, specify required raw materials, quantities, and expected scrap percentages.
+5. Optionally assign production operations to specific **Work Centers** with estimated standard run times.
+6. Save the BoM.
+
+### 5.2 Executing a Manufacturing Order
+1. Navigate to **Manufacturing** -> **Manufacturing Orders**.
+2. Click **+ Create Production Order**.
+3. Select the finished product, specify the planned quantity, and choose the BoM.
+4. Click **Check Material Availability**. The system confirms whether raw components exist in inventory.
+5. Click **Produce**. The system:
+   - Consumes component materials from raw stock.
+   - Credits component inventory accounts.
+   - Debits finished goods inventory.
+   - Adds completed units to finished stock.
+
+---
+
+## 6. Financial Accounting & Reporting
+
+### 6.1 Reviewing Financial Statements
+Navigate to **Accounting** -> **Financial Reports**:
+- **Balance Sheet**: Displays assets, liabilities, and equity at any selected date.
+- **Profit & Loss**: Displays operating revenue, cost of goods sold (COGS), gross profit, operating expenses, and net income over a custom date range.
+- **Trial Balance**: Confirms that total debits equal total credits across all ledger accounts.
+- **General Ledger**: Filter transactions by account code to view full transaction histories with audit links.
+
+### 6.2 Manual Journal Entries
+1. Navigate to **Accounting** -> **Journal Entries**.
+2. Click **+ Create Journal Entry**.
+3. Select the target journal (e.g., Miscellaneous, Bank, General Operations).
+4. Enter line items, specifying Account, Debit, and Credit amounts.
+5. The entry can only be saved when total debits match total credits ($\sum \text{Debit} = \sum \text{Credit}$).
+6. Click **Post**.
+
+---
+
+## 7. Human Resources & Payroll
+
+### 7.1 Employee Directory
+1. Navigate to **HR** -> **Employees**.
+2. Click **+ Add Employee**.
+3. Enter personal details, department, job position, contract start date, and base salary.
+4. Assign bank account details for direct deposit processing.
+
+### 7.2 Time & Attendance
+- **Clock In / Out**: Employees access the **Attendance** screen and click **Clock In** or **Clock Out**. If geofencing is enabled, coordinates must fall within company-defined boundaries.
+- **Leave Requests**: Navigate to **Leave** -> **Request Leave**. Select leave type (Annual, Sick, Maternity), choose date range, and submit for managerial approval.
+
+### 7.3 Running Monthly Payroll
+1. Navigate to **Enterprise Payroll**.
+2. Click **+ Batch Payroll Run**.
+3. Select the pay period (Month and Year) and target department or all employees.
+4. Click **Compute Payslips**. The system calculates:
+   - Base salary and position allowances.
+   - Attendance deductions for unpaid absences.
+   - Statutory health and employment insurance withholdings.
+   - Income tax withholdings.
+5. Review the summary registers.
+6. Click **Confirm & Post to GL**. Salary expense and tax liability entries post to the General Ledger automatically.
+
+---
+
+## 8. Fiscal & Tax Compliance
+
+### 8.1 Electronic Tax Invoices (e-Faktur)
+1. Navigate to **Tax & e-Faktur**.
+2. Manage official tax invoice serial numbers (**NSFP**) under the **NSFP Quota** tab.
+3. Outbound customer invoices automatically assign the next sequential NSFP number.
+4. Export official CSV tax returns for periodic filing with tax authorities.
+
+### 8.2 Customs Bonded Zones (CEISA)
+1. Navigate to **Customs & Bonded Zones**.
+2. Register customs declarations (BC 2.3 for inbound materials, BC 2.7 for inter-bonded transfers, BC 4.0 for domestic supply, BC 3.0 for export).
+3. Record clearance permits (SPPB) to authorize goods movement.
+4. The system automatically maintains the four mandatory regulatory mutation ledgers:
+   - Raw Materials
+   - Finished Goods
+   - Capital Machinery & Equipment
+   - Scrap & Rejected Output
+
+---
+
+## 9. Platform Administration & Utilities
+
+### 9.1 Low-Code Studio
+Create custom business models and data tables without editing source code:
 1. Open **Low-Code Studio** from the sidebar.
-2. **Manual Model Creation**:
-   - Click **➕ Create Custom Model**, provide a Model Name (e.g., *Mine Safety Inspection*), Technical Name (`x_mine_safety`), menu category, and save.
-   - Click **🧩 Fields** to add custom columns (Text, Integer, Float, Date, Dropdown Selection, Boolean, or JSON).
-3. **AI Schema Copilot**:
-   - Click **🤖 AI Schema Copilot**, enter a plain-language prompt of your business requirements, click **🚀 Design Schema with AI**, then click **✅ Apply Schema to ERP Database**.
-4. **Data Management**:
-   - Click **📊 Browse Data** on any model (or open **Dynamic Data Explorer**) to create, edit, and delete records dynamically.
-5. **Core Entity Extensions**:
-   - Open the **🧩 Core Entity Extensions** sub-tab to append custom dynamic JSON attributes (`x_...`) onto standard models like `res.partner`, `product.product`, `sale.order`, or `purchase.order`.
+2. Click **Create Custom Model**, specify a display name (e.g., *Safety Inspection Log*), and technical identifier (`x_safety_log`).
+3. Click **Fields** to add columns: Text, Number, Date, Selection, Boolean, or JSON.
+4. Click **Browse Data** to immediately create, view, and edit records in the custom table.
 
-### 3.2 BPMN 2.0 Dynamic Workflow Engine (`Workflow Engine`)
-Visually configure multi-tiered document approval workflows:
+### 9.2 BPMN 2.0 Workflow Engine
+Design multi-tier approval rules visually:
 1. Open **Workflow Engine**.
-2. Under **📋 Workflow Definitions & Visual Canvas**, click **👁️ View Diagram** to render the BPMN 2.0 visual state machine with *Exclusive Gateway* conditional branching (e.g., `IF amount >= 50000000`).
-3. Click **🤖 AI Workflow Designer** to generate complete approval workflows from a text prompt, or click **+ Create Workflow** to define custom nodes and transitions.
-4. Click **🚀 Launch Instance** to initiate an approval process against any ERP document.
-5. Review and process approval tasks (**📤 Submit**, **✅ Approve**, **❌ Reject**) from the **📥 Approval Task Inbox** or inspect historical audit trails in **⚡ Active Instances & Audit Trail**.
+2. Select an existing definition or create a new workflow.
+3. Configure conditional gateways (e.g., `IF amount >= 100000000`) and assign approval roles.
+4. Monitor active running instances and review pending approval queues from your inbox.
 
-### 3.3 Universal Integration Hub & Open RPC Gateway (`Integration Hub & API`)
-Manage third-party integrations and external API connectivity:
-1. **Pre-Built Connector Catalog**: Test external connectivity (**🔌 Test Connection**), trigger marketplace stock synchronization (**🔄 Sync Stock**), or send test transactional WhatsApp messages (**💬 Test WA**).
-2. **M2M API Key Management**: Click **🔑 Generate M2M API Key** to provision secure API keys (`ak_live_...`) with granular scope constraints and rate limiting.
-3. **Universal Open RPC Playground**: Under **🧪 Universal Open RPC Playground**, select an operation (`search_read`, `create`, `write`, `unlink`, `execute_action`), pick a target ERP model, configure your JSON payload, and click **🚀 Send RPC Request** to test live API responses.
-4. **Batch Data ETL Jobs**: Execute batch export or import jobs for thousands of records across JSON and CSV formats.
-
----
-
-## 4. Continuous Improvement Features
-
-### 4.1 Universal Command Palette & Omni-Search (`Ctrl+K`)
-1. Press the **`Ctrl+K`** shortcut anywhere in the application (or click **🔍 Global Search** in the header).
-2. Type any module name (e.g., `accounting`, `wms`, `payroll`), document number (`SO00001`, `PO00001`, `INV/`), product name, or customer name.
-3. Click any result to navigate directly to the target record or screen.
-
-### 4.2 Sidebar Instant Module Filter (`/`)
-1. Press **`/`** on your keyboard (or click into the **🔍 Search 50 modules...** input in the left sidebar).
-2. Type a keyword to filter the 50 modules in real time. Click **`✕`** to reset the filter.
-
-### 4.3 1-Click Business Cycle Simulator
-1. Open the **📊 Dashboard**.
-2. On the **Enterprise Command Center** banner, click **🚀 Simulate Business Cycle (1-Click)**.
-3. The engine automatically creates & confirms a Purchase Order, receives goods into stock (`WH/IN`), creates & confirms a Sales Order, executes warehouse delivery (`WH/OUT`), and posts a balanced Customer Invoice (`INV`) with 11% VAT to the General Ledger.
-
-### 4.4 Notification Center (`🔔`) & Enterprise Theme Switcher (`☀️ / 🌙`)
-- Click **🔔 Notifications** to view pending approval tasks, draft documents, and operational alerts.
-- Click **☀️ Light / 🌙 Dark** to toggle themes with settings preserved in your browser's local storage.
+### 9.3 Global Command Palette (`Ctrl+K`)
+Press **`Ctrl+K`** anywhere in the application to:
+- Jump directly to any module or menu.
+- Search for specific document numbers (`SO00001`, `PO00002`, `INV/2026/00001`).
+- Search for customers, suppliers, or product SKUs.
+- Run quick administrative tasks.
 
 ---
 
-## 5. Frequently Asked Questions (FAQ)
+## 10. Frequently Asked Questions
 
-- **How do I export data tables to Microsoft Excel?**
-  Almost all data tables include an **📥 Export CSV** button at the top right. Downloaded CSV files can be opened directly in Microsoft Excel, Google Sheets, or LibreOffice Calc.
-- **Does the system function without internet connectivity or Cloudflare credentials?**
-  **Yes.** All 20+ AI Copilot features in GoERP include a built-in *Smart Local Heuristic Fallback* that provides instant financial insights, risk audits, and schema generation even when external AI API keys are not configured.
-- **How do I export Invoices or Reports as PDF?**
-  Click the **🖨️ Print** icon on any transaction record, review the print preview window, and select **Save as PDF** in your browser's print dialog.
+**How do I export tables to Excel or CSV?**
+Click the **Export CSV** button located at the top-right of almost all data tables. The generated file uses UTF-8 encoding with a byte order mark (BOM) for native compatibility with Microsoft Excel, Apple Numbers, and Google Sheets.
+
+**How do I save a document as a PDF?**
+Click the **Print** icon on any document (Sales Order, Purchase Order, Invoice, or Payslip). In your browser's print preview window, select **Save as PDF** as the destination printer.
+
+**Can GoERP run offline?**
+Yes. The Point of Sale (POS) and warehouse scanning screens operate offline using local browser storage. Transactions are queued locally and synchronized automatically once network connectivity is restored.
+
+**How is data access controlled between departments?**
+GoERP implements role-based access control (RBAC). Departmental roles (e.g., Warehouse Operator, Sales Representative, Accountant, HR Manager) restrict visibility and actions so staff only access functions relevant to their responsibilities.

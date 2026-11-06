@@ -35,7 +35,7 @@ flowchart TD
 | **Programming Language** | Go `1.22+` (Fully compatible up to Go `1.27`) | Single-binary static compilation, native high concurrency (*goroutines*), minimal memory footprint (~25 MB idle RAM). |
 | **HTTP Web Framework** | `github.com/gin-gonic/gin` v1.9+ | High-throughput RESTful routing, middleware chaining, strict JSON payload binding and validation. |
 | **ORM & Database Layer** | `gorm.io/gorm` v1.25+ | Object-relational mapping, automatic *Auto-Migration* of 120+ tables at startup, strict ACID transactions (`db.Transaction`). |
-| **SQLite Driver (Zero-CGO)** | `github.com/glebarez/sqlite` (`modernc.org/sqlite`) | Pure-Go SQLite engine running seamlessly across Windows, Linux, and macOS under `CGO_ENABLED=0` without GCC dependencies. |
+| **SQLite Driver (Zero-CGO)** | `github.com/glebarez/sqlite` (`modernc.org/sqlite`) | Pure-Go SQLite engine running across Windows, Linux, and macOS under `CGO_ENABLED=0` without external GCC or C compiler dependencies. |
 | **PostgreSQL / Cloud SQL** | `gorm.io/driver/postgres` | Enterprise-grade production driver for high-concurrency transactional workloads on PostgreSQL 15+ and Google Cloud SQL. |
 | **Security & Authentication** | `github.com/golang-jwt/jwt/v5` & `golang.org/x/crypto/bcrypt` | JSON Web Token (HS256) user authentication, Bcrypt password hashing, and SHA-256 scoped Machine-to-Machine (M2M) API keys. |
 | **Multi-Provider AI & Agents** | Google Gemini 2.5 / Vertex AI, OpenAI GPT-4o, Anthropic Claude 3.7 (MCP), DeepSeek R1, Cloudflare Workers AI + Local Agent | Unified AI router with Autonomous ReAct Tool-Calling (`query_inventory_stock`, `get_financial_summary`, `sync_gcp_bigquery`), MCP tool manifests, and deterministic offline fallback. |
@@ -348,7 +348,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 9. Next-Gen Enterprise Capabilities (v1.43.0)
+## 9. Next-Gen Enterprise Capabilities
 
 ### 9.1 AI Demand Sensing & Smart Inventory Replenishment (`internal/core/ai/demand_sensing.go`)
 - **Daily Demand Velocity**: Calculates 30, 60, and 90-day moving sales velocity across historical order lines.
@@ -379,7 +379,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 10. Advanced Intelligence & Enterprise Security (v1.44.0)
+## 10. Advanced Intelligence & Enterprise Security
 
 ### 10.1 AI Autonomous Supplier Negotiation & RFQ Bidding Wars (`internal/core/ai/bidding_engine.go`)
 - **Tokenized Vendor Bid Intake**: Endpoint `POST /api/v1/ai/rfq/tenders` initializes competitive tenders with secure vendor submission tokens (`POST /api/v1/ai/rfq/submit-bid`).
@@ -420,7 +420,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 11. Strategic Enterprise Optimization & IoT Operations (v1.45.0)
+## 11. Strategic Enterprise Optimization & IoT Operations
 
 ### 11.1 AI Autonomous Dynamic Pricing & Elasticity Optimizer (`internal/core/ai/pricing_optimizer.go`)
 - **Price Elasticity of Demand (PED)**: Evaluates volume elasticity $PED = \frac{\% \Delta Q}{\% \Delta P}$ per customer tier (Retail, Wholesale, Key Account, E-Commerce).
@@ -449,7 +449,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 12. Advanced Legal Intelligence, Spatial Optimization & Global Supply Chain EDI (v1.46.0)
+## 12. Advanced Legal Intelligence, Spatial Optimization & Global Supply Chain EDI
 
 ### 12.1 AI Automated Contract Lifecycle Management (CLM) & Clause Risk Redlining (`internal/core/ai/clm_analyzer.go`)
 - **Automated Legal Risk Scoring**: Endpoint `POST /api/v1/ai/contracts/analyze` ingests Vendor MSAs, NDAs, and Customer Agreements, extracting high-liability clauses (Unlimited Liability, one-sided Indemnification, aggressive Liquidated Damages, lock-in Auto-Renewal, and unbalanced Termination for Convenience).
@@ -482,7 +482,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 13. High-Throughput WMS, Group Consolidation & Multi-Tier Supply Chain AI (v1.47.0)
+## 13. High-Throughput WMS, Group Consolidation & Multi-Tier Supply Chain AI
 
 ### 13.1 AI Automated Cross-Docking & Wave Dispatch Director (`internal/core/wms/cross_dock.go`)
 - **Direct Dock-to-Dock Cross-Docking**: Endpoint `POST /api/v1/wms/cross-dock/match` intercepts incoming warehouse receipts (`stock.picking` incoming), matching arriving stock directly against waiting customer backorders based on order SLA cutoff deadlines.
@@ -508,7 +508,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 14. Industrial Line Balancing, Spatial Route VRPTW, AR Credit Guard, Carbon Tax & Headless GraphQL (v1.48.0)
+## 14. Industrial Line Balancing, Spatial Route VRPTW, AR Credit Guard, Carbon Tax & Headless GraphQL
 
 ### 14.1 AI Automated Production Line Balancing & OEE Bottleneck Optimizer (`internal/core/mrp/line_balancing.go`)
 - **Takt Time & Cycle Time Analysis**: Endpoint `POST /api/v1/mrp/line-balancing/analyze` evaluates manufacturing lines by computing theoretical takt time from daily demand ($T_{\text{takt}} = \frac{\text{Available Operating Time}}{\text{Daily Demand}}$), workstation cycle times, and line balance efficiency:
@@ -540,7 +540,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 15. Workforce Rostering, Multi-Warehouse Equalizer, CLV Churn, Quorum Vault & RFID Radar (v1.49.0)
+## 15. Workforce Rostering, Multi-Warehouse Equalizer, CLV Churn, Quorum Vault & RFID Radar
 
 ### 15.1 AI Automated Shift Scheduling & Labor Rostering Optimizer (`internal/core/hr/roster_optimizer.go`)
 - **Labor Law Constraint Satisfaction (PP 35/2021)**: Endpoint `POST /api/v1/hr/roster-optimizer/generate` enforces statutory labor boundaries (maximum 40 standard weekly hours, daily overtime caps of 4 hours/day, 18 hours/week maximum, and mandatory 11-hour rest intervals between shifts).
@@ -569,7 +569,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 16. Continuous Virtual Close, VMI Gateway, FTA Rules of Origin, CQRS DB Router & EHS Safety (v1.50.0 - Golden Jubilee Landmark)
+## 16. Continuous Virtual Close, VMI Gateway, FTA Rules of Origin, CQRS DB Router & EHS Safety
 
 ### 16.1 Continuous Financial Virtual Close & Smart Accruals Engine (`internal/core/account/continuous_close.go`)
 - **24/7 Subledger Reconciliation**: Endpoint `POST /api/v1/accounting/continuous-close/run` continuously audits Accounts Receivable (AR), Accounts Payable (AP), Inventory, Fixed Assets, and Intercompany accounts against the General Ledger.
@@ -578,7 +578,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ### 16.2 Vendor-Managed Inventory (VMI) Consignment & Replenishment Gateway (`internal/core/vmi/replenishment_gateway.go`)
 - **Telemetric Consignment Visibility**: Endpoint `POST /api/v1/vmi/replenishment-forecast` provides suppliers with real-time on-hand stock and min-max replenishment bands inside buyer factory staging bays.
-- **Authorized Self-Dispatch**: Empowers key suppliers to self-dispatch restocking shipments without waiting for manual Purchase Orders when stocks drop below safety thresholds.
+- **Authorized Self-Dispatch**: Allows approved suppliers to trigger restocking shipments automatically when inventory drops below configured safety stock thresholds, bypassing manual Purchase Order generation.
 - **Pay-as-Consumed Auto-Billing**: Endpoint `POST /api/v1/vmi/consignment-consumption/log` logs production line material drawdowns, instantly releasing inventory into manufacturing and creating auto-generated vendor bills with 11% VAT.
 
 ### 16.3 Automated FTA Rules-of-Origin & Preferential Tariff Optimizer (`internal/core/customs/fta_optimizer.go`)
@@ -596,7 +596,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 17. Global Treasury Cash Pooling, Landed Costs, Scope 3 CBAM, Field Service & Dynamic Pricing (v1.51.0)
+## 17. Global Treasury Cash Pooling, Landed Costs, Scope 3 CBAM, Field Service & Dynamic Pricing
 
 ### 17.1 Global Treasury Cash Pooling, In-House Banking & Multilateral Netting (`internal/core/treasury/cash_pooling.go`)
 - **End-of-Day Zero-Balance Account (ZBA) Sweeps**: Endpoint `POST /api/v1/treasury/cash-pool/sweep` concentrates liquidity from subsidiaries to the holding header account, or funds operational deficits, calculating intercompany arm's-length daily interest yields.
@@ -624,7 +624,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 18. Smart Factory Andon, Trade Finance LC, Dynamic Discounting, Vibration FFT & Travel Policy (v1.52.0)
+## 18. Smart Factory Andon, Trade Finance LC, Dynamic Discounting, Vibration FFT & Travel Policy
 
 ### 18.1 Smart Factory Floor Andon Visual Control & Shopfloor Anomaly Gateway (`internal/core/mrp/andon_hub.go`)
 - **Real-Time Workstation Status Visualization**: Endpoint `GET /api/v1/mrp/andon/board/:line_id` serves live line visual status (`GREEN` Optimal, `YELLOW` Paced Warning, `RED` Line Stop) directly to wall-mounted production monitors.
@@ -653,7 +653,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 19. Cross-Border Transfer Pricing, Lease Accounting, Yard Management, CPQ & Ethics Vault (v1.53.0)
+## 19. Cross-Border Transfer Pricing, Lease Accounting, Yard Management, CPQ & Ethics Vault
 
 ### 19.1 Cross-Border Transfer Pricing & OECD BEPS Action 13 Hub (`internal/core/tax/transfer_pricing.go`)
 - **OECD Interquartile Arm's-Length Testing**: Endpoint `POST /api/v1/tax/transfer-pricing/audit-margins` computes tested party operating margins under the Transactional Net Margin Method (TNMM) and audits them against industry benchmark interquartile distributions ($Q1 \le \text{Margin} \le Q3$).
@@ -682,7 +682,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 20. SCM MEIO, Derivative Hedging, Pharma EBR, WHT Equalization & Loyalty Ledger (v1.54.0)
+## 20. SCM MEIO, Derivative Hedging, Pharma EBR, WHT Equalization & Loyalty Ledger
 
 ### 20.1 Supply Chain Multi-Echelon Inventory Optimization (MEIO) & Risk Pooling (`internal/core/scm/meio.go`)
 - **Multi-Tier Inventory Positioning**: Endpoint `POST /api/v1/scm/meio/optimize-network` calculates safety stock across a 3-tier supply chain network (Central DC, Regional Hubs, Retail Spokes), pooling variance to unlock 15%–30% in working capital without impacting customer fill rates.
@@ -711,7 +711,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 21. Carbon Pricing, AMR Robotics, Milestone Escrow, RevRec & 9-Box Succession (v1.55.0)
+## 21. Carbon Pricing, AMR Robotics, Milestone Escrow, RevRec & 9-Box Succession
 
 ### 21.1 Internal Carbon Pricing (ICP) & Shadow Carbon Fee Ledger (`internal/core/esg/carbon_pricing.go`)
 - **Internal Shadow Carbon Levies**: Endpoint `POST /api/v1/esg/carbon-pricing/evaluate-capex` simulates shadow carbon pricing ($75/ton CO2e) against capital investment proposals, computing carbon-adjusted Total Cost of Ownership (TCO).
@@ -737,7 +737,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 22. Digital Product Passport, Spot Freight Auction, Global Liquidity Sweeper, CPQ Deal Desk & EHS Sentinel (v1.56.0)
+## 22. Digital Product Passport, Spot Freight Auction, Global Liquidity Sweeper, CPQ Deal Desk & EHS Sentinel
 
 ### 22.1 Digital Product Passport (DPP) & Circular Economy Lifecycle Engine (`internal/core/scm/product_passport.go`)
 - **EU ESPR & Battery Directive Compliance**: Endpoint `POST /api/v1/scm/dpp/issue` mints cryptographically signed Digital Product Passports tracking material composition, recycled material %, critical raw materials (CRM Act), and cradle-to-gate carbon intensity ($\text{kgCO}_2\text{e}/\text{kg}$).
@@ -766,7 +766,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 23. CRM Resilience, Industrial Energy Peak-Shaving, SLL Green Loans, Dynamic Slotting & SME Graph (v1.57.0)
+## 23. CRM Resilience, Industrial Energy Peak-Shaving, SLL Green Loans, Dynamic Slotting & SME Graph
 
 ### 23.1 Critical Raw Material (CRM) Dual-Sourcing & Geopolitical Resilience Engine (`internal/core/procurement/crm_resilience.go`)
 - **Geopolitical Risk & Tariff Modeling**: Endpoint `POST /api/v1/procurement/crm/evaluate-resilience` models critical raw material supply chains (Lithium, Rare Earth Elements, Gallium, Nickel) against country Geopolitical Risk Indexes (GRI) and tariff schedules, calculating optimal dual-sourcing splits (e.g. 70/30 primary vs nearshore secondary).
@@ -795,7 +795,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 24. ECO Controller, Cold-Chain Parametric Insurance, Liquidity Stress, CSDDD & Gig Market (v1.58.0)
+## 24. ECO Controller, Cold-Chain Parametric Insurance, Liquidity Stress, CSDDD & Gig Market
 
 ### 24.1 Closed-Loop Engineering Change Order (ECO) & BOM Revision Rollout Controller (`internal/core/mrp/eco_controller.go`)
 - **Multi-Level BOM Blast-Radius Modeling**: Endpoint `POST /api/v1/mrp/eco/create-order` drafts engineering change orders and calculates affected open Purchase Orders, active WIP assemblies, and obsolete inventory values.
@@ -824,7 +824,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 25. TOC Drum-Buffer-Rope, VPP Energy Arbitrage, DTAA Tax Treaty, ZKP Anti-Counterfeit & GATT Customs TP Harmonizer (v1.59.0)
+## 25. TOC Drum-Buffer-Rope, VPP Energy Arbitrage, DTAA Tax Treaty, ZKP Anti-Counterfeit & GATT Customs TP Harmonizer
 
 ### 25.1 Predictive WIP Bottleneck Radar & Theory of Constraints (TOC) Drum-Buffer-Rope Engine (`internal/core/mrp/toc_dbr_engine.go`)
 - **TOC Constraint & Drum Identification**: Identifies the critical factory bottleneck workstation (Drum) and tracks its cycle times, OEE, micro-stoppages, and maximum buffer capacity.
@@ -858,7 +858,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 26. AI CAPA RCA, NDF FX Hedge, Multi-Carrier Broker, FinOps Reaper & Green Travel Carbon Budget (v1.60.0)
+## 26. AI CAPA RCA, NDF FX Hedge, Multi-Carrier Broker, FinOps Reaper & Green Travel Carbon Budget
 
 ### 26.1 Closed-Loop AI Root Cause Analysis (RCA) & Ishikawa 5-Why CAPA Generator (`internal/core/quality/ai_capa_rca.go`)
 - **Automated 6M Ishikawa Taxonomy**: Endpoint `POST /api/v1/quality/rca/generate-fishbone-tree` structures non-conformance defects across Man, Machine, Material, Method, Measurement, and Milieu, identifying the highest-probability root cause categories.
@@ -888,7 +888,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 27. SCF Reverse Factoring, HAZMAT Dangerous Goods, Warranty Fraud Sentinel, PEPPOL BIS 3.0 & ISO 7243 Heat Stress (v1.61.0)
+## 27. SCF Reverse Factoring, HAZMAT Dangerous Goods, Warranty Fraud Sentinel, PEPPOL BIS 3.0 & ISO 7243 Heat Stress
 
 ### 27.1 Autonomous Vendor Early-Payment & Supply Chain Reverse Factoring (SCF) Liquidity Vault (`internal/core/treasury/scf_reverse_factoring.go`)
 - **Buyer-Centric Dynamic Invoicing Facility**: Endpoint `POST /api/v1/treasury/scf/publish-invoice-facility` allows enterprise buyers to publish approved AP invoices into the reverse factoring liquidity vault with dynamic APR discount curves based on days remaining to invoice maturity.
@@ -922,7 +922,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 28. CBAM Green Surcharge, Robotic AGF Cross-Dock, ZBA Cash Sweeping, Spares Cannibalization & AI Insured Credit Guard (v1.62.0)
+## 28. CBAM Green Surcharge, Robotic AGF Cross-Dock, ZBA Cash Sweeping, Spares Cannibalization & AI Insured Credit Guard
 
 ### 28.1 Autonomous Carbon Border Adjustment Mechanism (CBAM) & Green Export Surcharge Engine (`internal/core/esg/cbam_surcharge.go`)
 - **Granular Embedded Carbon Footprint Decomposition**: Endpoint `POST /api/v1/esg/cbam/calculate-embedded-emissions` calculates Scope 1 direct, Scope 2 indirect, and precursor material emissions to derive verified Specific Embedded Emissions ($SEE$, $\text{tCO}_2\text{e} / \text{t product}$) under EU Regulation (EU) 2023/956.
@@ -956,7 +956,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 29. Contract Leakage Sentinel, Microgrid Islanding, Cargo Geofence, Shift Bidding Fatigue & Circular Packaging RTI (v1.63.0)
+## 29. Contract Leakage Sentinel, Microgrid Islanding, Cargo Geofence, Shift Bidding Fatigue & Circular Packaging RTI
 
 ### 29.1 Autonomous AI Contract Leakage Sentinel & Obligation Milestone Interceptor (`internal/core/grc/contract_leakage_sentinel.go`)
 - **Structured Obligation & SLA Metric Tracking**: Endpoint `POST /api/v1/grc/contract/register-obligation` registers contract terms, SLA targets (availability %, OTIF delivery), liquidated damages penalty hourly rates, and tiered volume rebate thresholds.
@@ -990,7 +990,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 30. Industrial Water ZLD, Vendor Sanctions Graph, Boiler Descaling, SaaS Dunning Waterfall & Toll Manufacturing Recon (v1.64.0)
+## 30. Industrial Water ZLD, Vendor Sanctions Graph, Boiler Descaling, SaaS Dunning Waterfall & Toll Manufacturing Recon
 
 ### 30.1 Autonomous Industrial Water Stewardship & Zero-Liquid Discharge (ZLD) Effluent Sentinel (`internal/core/ehs/water_stewardship.go`)
 - **Continuous In-Line Wastewater Effluent Telemetry**: Endpoint `POST /api/v1/ehs/water/ingest-effluent-telemetry` monitors real-time industrial outfall sensor streams across key environmental parameters (pH, COD, BOD, TSS, and TDS).
@@ -1024,7 +1024,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 31. Silo Aeration Sentinel, EPC Progress Billing Escrow, Dynamic Port Berth Demurrage, Transformer DGA & Cross-Border Cash Repatriation (v1.65.0)
+## 31. Silo Aeration Sentinel, EPC Progress Billing Escrow, Dynamic Port Berth Demurrage, Transformer DGA & Cross-Border Cash Repatriation
 
 ### 31.1 Grain & Bulk Agricultural Silo Aeration & Mycotoxin Spoilage Sentinel (`internal/core/agriculture/silo_aeration.go`)
 - **Multi-Depth In-Line Silo Telemetry**: Endpoint `POST /api/v1/agriculture/silo/ingest-telemetry` monitors real-time vertical bulk grain sensors including multi-depth temperature cables, interstitial relative humidity, grain moisture content (MC %), and headspace $CO_2$ ppm (early metabolic respiration indicator).
@@ -1058,7 +1058,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 32. Ore Blending Optimizer, Pharma Cryogenic Sentinel, Kiln Refractory Guardian, IP Patent Annuity & Turbine EOH Creep (v1.66.0)
+## 32. Ore Blending Optimizer, Pharma Cryogenic Sentinel, Kiln Refractory Guardian, IP Patent Annuity & Turbine EOH Creep
 
 ### 32.1 Mining & Bulk Mineral Ore Blending & Grade Optimization Engine (`internal/core/mining/ore_blending.go`)
 - **JORC Code Mineral Assay & Stockpile Tracking**: Endpoint `POST /api/v1/mining/ore/register-stockpile-parcel` registers mineral stockpile parcels with JORC-compliant copper grades ($Cu\%$), gold grades ($Au\text{ g/t}$), slag-forming silica ($SiO_2\%$), penalty arsenic ($As\text{ ppm}$), and transportable moisture limits ($TML\%$).
@@ -1092,7 +1092,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 ---
 
-## 33. Aviation MRO Fatigue, Marine LNG Reliquefaction, Semiconductor Fab Yield, Wastewater Biomethane & Railway Wheel RCF (v1.67.0)
+## 33. Aviation MRO Fatigue, Marine LNG Reliquefaction, Semiconductor Fab Yield, Wastewater Biomethane & Railway Wheel RCF
 
 ### 33.1 Aviation MRO Aircraft Structural Fatigue, Flight Cycles & Hard Landing Sentinel (`internal/core/aviation/mro_fatigue.go`)
 - **QAR/FDR Flight Telemetry & Cyclic Stress Ingestion**: Endpoint `POST /api/v1/aviation/mro/ingest-flight-telemetry` captures commercial aircraft flight recorder touchdown metrics, tracking vertical G-force loads, sink rates (ft/s), pitch/roll angles, and cumulative flight hours and flight cycles (FH/FC).
@@ -1124,7 +1124,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Underfloor CNC Wheel Lathe Reprofiling Work Order**: Endpoint `POST /api/v1/railway/wheel/schedule-wheelset-lathe-reprofiling` generates workshop reprofiling machining work orders with target cut depths, restoring standard UIC tread profiles and preventing multimillion-dollar derailments.
 - **Bogies Safety Dossier**: Endpoint `GET /api/v1/railway/wheel/bogies-safety-dossier/:bogie_id` compiles ultrasonic flaw test histories, wheel wear curves, and track safety compliance metrics.
 
-## 34. Nuclear Medicine Radiopharm Decay, Utility BESS Thermal Runaway, Satellite Conjunction, Subsea Multiphase & Connected Vehicle OTA SUMS (v1.68.0)
+## 34. Nuclear Medicine Radiopharm Decay, Utility BESS Thermal Runaway, Satellite Conjunction, Subsea Multiphase & Connected Vehicle OTA SUMS
 
 ### 34.1 Nuclear Medicine Radiopharmaceutical Decay & Reactor Poisoning Sentinel (`internal/core/nuclear/radiopharm_decay.go`)
 - **Radioisotope Batch Assay Registration**: Endpoint `POST /api/v1/nuclear/radiopharm/register-radioisotope-batch` logs production batches of diagnostic and therapeutic isotopes (Lutetium-177, Technetium-99m, Iodine-131), capturing initial activity in Gigabecquerels ($GBq$), production timestamps, cask lead shielding thickness ($mm$), and external surface dose rates under IAEA and US NRC 10 CFR Part 35.
@@ -1156,7 +1156,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Cryptographic ECU Flashing & Dual-Partition Rollback Guard**: Endpoint `POST /api/v1/automotive/ota/dispatch-firmware-update-package` coordinates secure cryptographic flashing with digital signature validation and dual-partition A/B rollback protection, preventing ECU bricking and costly vehicle recovery operations.
 - **UNECE R155/R156 Campaign Compliance Dossier**: Endpoint `GET /api/v1/automotive/ota/campaign-compliance-dossier/:campaign_id` compiles fleet completion percentages, cryptographic validation signatures, and vehicle type-approval audit dossiers.
 
-## 35. Biopharma Bioreactor PAT, Floating Wind Mooring, HVDC Subsea Cable Rating, Supercritical CO2 Pipeline & Deep Mine Rockburst (v1.69.0)
+## 35. Biopharma Bioreactor PAT, Floating Wind Mooring, HVDC Subsea Cable Rating, Supercritical CO2 Pipeline & Deep Mine Rockburst
 
 ### 35.1 Biopharmaceutical Bioreactor Cell Culture Fed-Batch & VCD Metabolic Sentinel (`internal/core/biopharma/bioreactor_metabolic.go`)
 - **In-Line Raman Spectroscopy PAT Telemetry Ingestion**: Endpoint `POST /api/v1/biopharma/bioreactor/ingest-culture-telemetry` captures continuous non-invasive mammalian cell culture metrics (CHO cells producing monoclonal antibodies) in $2,000\text{L}$ single-use bioreactors, monitoring Viable Cell Density ($VCD$ in $10^6\text{ cells/mL}$), viability percentage, glucose substrate ($g/L$), lactate byproduct ($g/L$), and toxic ammonia ($mM$) under FDA cGMP 21 CFR Part 211 and ICH Q8/Q11 PAT.
@@ -1188,7 +1188,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Red-Tag Drift Exclusion Zone Lockout & Autonomous Fleet Halting**: Endpoint `POST /api/v1/geotech/seismic/order-exclusion-zone-evacuation` broadcasts automated red-tag drift exclusion commands ($150\text{m}$ perimeter), activates subterranean visual/audible alarms, and immediately shuts down autonomous Load-Haul-Dump (LHD) loaders, saving miner lives and preventing $\$12.5\text{M USD}$ in cave-in destruction.
 - **Mine Seismic Safety Dossier**: Endpoint `GET /api/v1/geotech/seismic/mine-seismic-safety-dossier/:level_id` compiles hypocenter spatial clusters, energy release history, and ISRM Suggested Methods compliance certificates.
 
-## 36. Tokamak Plasma Disruption, Cryogenic LH2 Ortho-Para Isomerization, Hypersonic TPS Ablation, 3D Chiplet TSV Warpage & Superhot EGS Geothermal Seismicity (v1.70.0)
+## 36. Tokamak Plasma Disruption, Cryogenic LH2 Ortho-Para Isomerization, Hypersonic TPS Ablation, 3D Chiplet TSV Warpage & Superhot EGS Geothermal Seismicity
 
 ### 36.1 Commercial Nuclear Fusion Tokamak Plasma Magnetic Confinement & Disruption Sentinel (`internal/core/fusion/tokamak_plasma_disruption.go`)
 - **Magnetic Confinement & Thomson Scattering Telemetry Ingestion**: Endpoint `POST /api/v1/fusion/plasma/ingest-tokamak-telemetry` captures real-time high-field magnetic confinement data (ITER and commercial tokamak reactors), tracking plasma current $I_p$ ($MA$), minor radius $a$ ($m$), toroidal magnetic field $B_t$ ($T$), Thomson scattering electron density $n_e$ ($10^{19}\text{ m}^{-3}$), safety factor $q_{95}$, Mirnov coil MHD tearing mode perturbation amplitude $\delta B / B$, core electron temperature $T_e$ ($keV$), and radiated power fraction $P_{rad} / P_{heat}$ under IAEA Fusion Safety and ITER Guidelines.
@@ -1220,7 +1220,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Automated Wellhead Emergency Flowback Bleed-Off Execution**: Endpoint `POST /api/v1/geothermal/egs/trigger-emergency-bleed-off` opens high-pressure hydraulic choke manifolds to bleed off downhole overpressure ($2,450\text{ L/min}$ flowback, $145\text{ bar}$ pressure relief), rapidly depolarizing fault shear stress, preventing felt public earthquakes ($M_L > 3.0$), and avoiding $\$42\text{M USD}$ in surface infrastructure damage and project licensing cancellation.
 - **EGS Geothermal Safety Dossier**: Endpoint `GET /api/v1/geothermal/egs/egs-safety-dossier/:wellbore_id` compiles pore pressure diffusion contours, seismic cloud focal mechanisms, and US DOE EGS Traffic Light Protocol compliance records.
 
-## 37. Quantum Key Distribution QKD, Seabed Nodule Plume, CSP Molten Salt Freeze, Solid-State Battery & Direct Air Capture DAC (v1.71.0)
+## 37. Quantum Key Distribution QKD, Seabed Nodule Plume, CSP Molten Salt Freeze, Solid-State Battery & Direct Air Capture DAC
 
 ### 37.1 Quantum Key Distribution (QKD) Optical Fiber Link & Entangled Photon Phase Drift Guardian (`internal/core/quantum/qkd_phase_guardian.go`)
 - **Single-Photon Detector & Acoustic Phase Drift Telemetry Ingestion**: Endpoint `POST /api/v1/quantum/qkd/ingest-link-telemetry` monitors metro/intercity QKD links (BB84 / Decoy-State protocols) under ETSI GS QKD 014 and ITU-T Y.3800, tracking quantum bit error rate ($QBER$), fiber distance ($km$), single-photon avalanche photodiode ($SPAD$) dark count rates ($Hz$), overall link attenuation ($dB$), and Mach-Zehnder interferometer thermal/acoustic phase drift ($\Delta\phi$ in radians).
@@ -1252,7 +1252,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Dynamic Pre-Drying Cycle & Vacuum Steam Recuperation Action**: Endpoint `POST /api/v1/dac/capture/optimize-tvsd-desorption-cycle` modulates contactor pre-drying air cycles and optimizes vacuum steam desorption ($98^\circ\text{C}$, $0.25\text{ bar}$), achieving $32.5\%$ reduction in parasitic steam consumption while guaranteeing $> 99\%$ pure $\text{CO}_2$ output, saving $\$16.5\text{M USD}$ in energy costs and verified carbon removal credits.
 - **DAC Carbon Removal Dossier**: Endpoint `GET /api/v1/dac/capture/dac-carbon-removal-dossier/:contactor_id` compiles competitive sorption isotherm plots, TVSD energy balance audits, and ISO 14064-2 carbon dioxide removal compliance records.
 
-## 38. Aerospace eVTOL Acoustic Sentinel, Hyperloop Maglev Quench, Subsea Deepwater BOP, Bioprocess CAR-T Sorting & Waste Plastic Pyrolysis (v1.72.0)
+## 38. Aerospace eVTOL Acoustic Sentinel, Hyperloop Maglev Quench, Subsea Deepwater BOP, Bioprocess CAR-T Sorting & Waste Plastic Pyrolysis
 
 ### 38.1 Autonomous Electric Vertical Take-Off & Landing (eVTOL) Acoustic Noise Signature & Vertiport Corridor Sentinel (`internal/core/evtol/uam_acoustic_sentinel.go`)
 - **Urban Air Mobility (UAM) Flight Dynamics & Acoustic Telemetry Ingestion**: Endpoint `POST /api/v1/evtol/corridor/ingest-flight-telemetry` captures real-time flight vectors under FAA 14 CFR Part 36 and EASA SC-VTOL-01, monitoring AGL altitude ($m$), airspeed ($kts$), multi-rotor distributed RPM, blade tip Mach numbers, blade-vortex interaction ($BVI$) acoustic emissions ($dBA$), vertiport microburst windshear gradients ($kts$), and glide slope approach angles.
@@ -1284,7 +1284,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Ultra-Rapid Gas Quench (< 200°C) & In-Situ Calcium Dechlorination**: Endpoint `POST /api/v1/pyrolysis/reactor/trigger-quench-and-dechlorination` triggers rapid vapor oil quenching (dropping temperature by $135^\circ\text{C}$ in $0.6\text{ seconds}$ to suppress de novo synthesis) and boosts active calcium/lime sorbent dosing ($52\text{ kg/hr}$) to neutralize hydrochloric acid gas, saving $\$21\text{M USD}$ in refinery hydrotreater catalyst deactivation and EPA hazardous emission fines.
 - **Pyrolysis Circularity Dossier**: Endpoint `GET /api/v1/pyrolysis/reactor/pyrolysis-circularity-dossier/:reactor_id` compiles thermal cracking conversion curves, mass balance yields, gas chromatography chlorine profiles, and ASTM D8338 circular polymer certifications.
 
-## 39. Green Ammonia Synthesis Sentinel, Orbital Rocket Pogo Cavitation, SMR Passive Containment, High-NA EUV Pellicle & UHVDC Converter (v1.73.0)
+## 39. Green Ammonia Synthesis Sentinel, Orbital Rocket Pogo Cavitation, SMR Passive Containment, High-NA EUV Pellicle & UHVDC Converter
 
 ### 39.1 Industrial Green Ammonia Synthesis & Haber-Bosch Dynamic Load-Ramping / Nitriding Embrittlement Sentinel (`internal/core/ammonia/green_ammonia_sentinel.go`)
 - **Green Ammonia Synthesis Loop Telemetry Ingestion**: Endpoint `POST /api/v1/ammonia/loop/ingest-loop-telemetry` monitors Haber-Bosch green ammonia synthesis plants powered by intermittent renewable hydrogen and nitrogen from air separation units under ISO 22734 and ASME Section VIII Div 1, tracking synthesis loop pressures ($145\text{ bar}$), reactor bed temperatures ($460^\circ\text{C}$), renewable hydrogen supply ramp rates ($\%/\text{min}$), catalyst active bed hotspot gradients ($^\circ\text{C}$), recycle syngas flow ($Nm^3/hr$), and steel nitriding diffusion depths ($\mu m$).
@@ -1316,7 +1316,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Dynamic Firing Angle Advance & STATCOM Reactive Voltage Support Action**: Endpoint `POST /api/v1/uhvdc/station/trigger-firing-angle-advance-and-statcom-boost` instantaneously advances the inverter firing angle $\alpha$ to $135.0^\circ$ (re-establishing extinction angle margin $\gamma > 18.0^\circ$), commands $+450\text{ MVAR}$ capacitive reactive power boost from station STATCOM units to stabilize AC commutating voltages, and increases deionized cooling pump speed, averting $\$75\text{M USD}$ in valve flashovers, bipolar trip outages, and grid blackouts.
 - **UHVDC Converter Safety Dossier**: Endpoint `GET /api/v1/uhvdc/station/uhvdc-converter-safety-dossier/:station_id` compiles extinction angle phase diagrams, valve thermal junction profiles, dynamic STATCOM response records, and IEC 60700-1 / IEEE 857 compliance certificates.
 
-## 40. Subsea CCS CO2 Hydrate Sentinel, Hypersonic Scramjet Fuel Cracking, Continuous mRNA-LNP Microfluidics, Silicon Photonics CPO & SOEC SAF E-Fuel (v1.74.0)
+## 40. Subsea CCS CO2 Hydrate Sentinel, Hypersonic Scramjet Fuel Cracking, Continuous mRNA-LNP Microfluidics, Silicon Photonics CPO & SOEC SAF E-Fuel
 
 ### 40.1 Subsea Carbon Dioxide Injection & Wellhead Hydrate/Supercritical Phase Inversion Sentinel (`internal/core/subsea_ccs/subsea_ccs_sentinel.go`)
 - **Offshore Subsea Wellhead & Downhole Injection Telemetry Ingestion**: Endpoint `POST /api/v1/ccs/injection/ingest-wellhead-telemetry` captures deepwater offshore $\text{CO}_2$ geological storage dynamics ($1,250\text{ m}$ seabed depth) under ISO 27914 and DNV-RP-J202, monitoring dense-phase wellhead pressures ($92.5\text{ bar}$), ambient seabed temperatures ($7.5^\circ\text{C}$), subsea choke pressure drops ($\Delta P = 36.0\text{ bar}$), injection flow rates ($85.0\text{ kg/s}$), caprock fracture margins ($bar$), and trace water moisture contents ($ppm$).
@@ -1357,7 +1357,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 
 
 
-## 41. Superhot Rock Geothermal SHR, Deep-Sea AUV Docking IPT, Electronic H2O2 Runaway, Biopharma Lyophilization & Quantum Dot Inkjet Printing (v1.75.0)
+## 41. Superhot Rock Geothermal SHR, Deep-Sea AUV Docking IPT, Electronic H2O2 Runaway, Biopharma Lyophilization & Quantum Dot Inkjet Printing
 
 ### 41.1 Ultra-Deep Supercritical Superhot Rock (SHR) Geothermal Casing Thermal-Stress & Micro-Seismic Slip Sentinel (`internal/core/geothermal_shr/geothermal_shr_sentinel.go`)
 - **Superhot Rock Wellhead & Downhole Ingestion**: Endpoint `POST /api/v1/geothermal/shr/ingest-well-telemetry` monitors supercritical geothermal wells ($4,650\text{ m}$ depth, near brittle-ductile transition) under API Spec 5CT and ISO 19901-2, capturing supercritical reservoir temperatures ($485^\circ\text{C}$), lithostatic pressures ($320\text{ bar}$), casing triaxial von Mises stress ($685\text{ MPa}$), induced micro-seismic moment magnitudes ($1.85\text{ ML}$), peak ground acceleration ($0.042\text{ g}$), and cold-water injection rates ($95.0\text{ kg/s}$).
@@ -1390,7 +1390,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **QLED Display Quality Dossier**: Endpoint `GET /api/v1/qled/display/qled-display-quality-dossier/:batch_id` compiles 2D sub-pixel optical profilometry scans, PLQY photoluminescence emission spectra, glovebox environmental logs, and IEC 62341 / SEMI D73 certifications.
 
 
-## 42. High-Power Hall Thruster Propulsion, Sub-2nm GAAFET Nanosheet Sentinel, Fermentation Foam-Out & kLa, Salt Cavern Hydrogen Storage & Molten Salt Reactor Redox (v1.76.0)
+## 42. High-Power Hall Thruster Propulsion, Sub-2nm GAAFET Nanosheet Sentinel, Fermentation Foam-Out & kLa, Salt Cavern Hydrogen Storage & Molten Salt Reactor Redox
 
 ### 42.1 Aerospace & Satellite High-Power Hall-Effect Thruster (HET) Electric Propulsion Sentinel (`internal/core/hallthruster/hall_thruster_sentinel.go`)
 - **High-Power Hall Thruster Telemetry Ingestion**: Endpoint `POST /api/v1/propulsion/het/ingest-thruster-telemetry` monitors satellite electric propulsion systems ($12.5\text{ kW}$ Xenon plasma discharge) under ECSS-E-ST-20-07C and AIAA S-110, capturing discharge voltages ($300.0\text{ V}$), currents ($41.67\text{ A}$), propellant mass flow ($185.0\text{ sccm}$), hollow cathode keeper voltages ($24.5\text{ V}$), channel wall Boron Nitride ceramic sputtering rates ($14.8\ \mu\text{m/1000h}$), and plume half-angle beam divergence ($44.5^\circ$).
@@ -1423,7 +1423,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **MSR Nuclear Safety Dossier**: Endpoint `GET /api/v1/nuclear/msr/msr-nuclear-safety-dossier/:core_id` compiles online cyclic voltammetry redox curves, tellurium crack depth scans, xenon-135 off-gas stripping trends, and ASME BPVC Div 5 / IAEA SSR-2/1 certifications.
 
 
-## 43. Reusable Rocket Grid Fin Hydraulics, Multi-Beam Mask Writer Reticle, Gene Therapy AAV Viral Vector, Solid-State Dry Electrode & Mars ISRU Methalox (v1.77.0)
+## 43. Reusable Rocket Grid Fin Hydraulics, Multi-Beam Mask Writer Reticle, Gene Therapy AAV Viral Vector, Solid-State Dry Electrode & Mars ISRU Methalox
 
 ### 43.1 Aerospace Super-Heavy Reusable Rocket Booster Aerogrid Fin Hydraulic & Re-entry Thermal Sentinel (`internal/core/rocket_gridfin/gridfin_sentinel.go`)
 - **Aerospace Grid Fin Telemetry Ingestion**: Endpoint `POST /api/v1/aerospace/gridfin/ingest-fin-telemetry` monitors super-heavy reusable rocket booster aerogrid fin actuators during hypersonic atmospheric re-entry ($\text{Mach } 5.8$) under FAA 14 CFR Part 450 and AIAA S-081, capturing hydraulic servo pressures ($295.0\text{ bar}$), hinge aerodynamic torques ($142.5\text{ kNm}$ against $160.0\text{ kNm}$ design limit), actuator oil bulk temperatures ($215.0^\circ\text{C}$ near vaporization boundary), active coolant flow ($18.5\text{ L/min}$), limit-cycle aeroelastic flutter frequencies ($28.5\text{ Hz}$), and plasma electron densities ($1.8\times 10^{12}\text{ cm}^{-3}$).
@@ -1456,7 +1456,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **ISRU Mission Dossier**: Endpoint `GET /api/v1/space/isru/isru-mission-dossier/:plant_id` compiles Sabatier catalyst temperature profiles, gas chromatography purity logs, electrostatic filter differential pressure trends, and NASA SP-8000 / ISO 14300 certifications.
 
 
-## 44. Commercial Aircraft LH2 Cryo Fuel Tank, HBM4 16-Die Hybrid Direct Bonding, Nuclear Microreactor Heat Pipe, mRNA Cap-1 PAT Synthesis & Subsea Wet Gas Compressor (v1.78.0)
+## 44. Commercial Aircraft LH2 Cryo Fuel Tank, HBM4 16-Die Hybrid Direct Bonding, Nuclear Microreactor Heat Pipe, mRNA Cap-1 PAT Synthesis & Subsea Wet Gas Compressor
 
 ### 44.1 Commercial Aircraft Liquid Hydrogen (LH2) Cryo Boil-Off Gas (BOG) & Cavitation Sentinel (`internal/core/lh2_aviation/lh2_aviation_sentinel.go`)
 - **Aviation Liquid Hydrogen Fuel Telemetry Ingestion**: Endpoint `POST /api/v1/aviation/lh2/ingest-tank-telemetry` monitors civil aircraft liquid hydrogen ($4,250.0\text{ kg } \text{LH}_2$ at $20.4\text{ K}$) fuel tanks during cruise ($\text{FL350}$) under FAA 14 CFR Part 25 and SAE AS6858, capturing tank ullage pressures ($3.45\text{ bar}$ vs $3.20\text{ bar}$ relief valve limit), bulk liquid temperatures ($23.2\text{ K}$), vacuum jacket insulation pressures ($0.085\text{ mbar}$ vs $0.050\text{ mbar}$ loss-of-vacuum threshold), boil-off gas evaporation rates ($18.5\text{ kg/hr}$), cryopump inlet NPSH margins ($0.35\text{ m}$ vs $0.60\text{ m}$ cavitation inception), and ortho-to-para conversion ratios ($0.045$).
@@ -1489,7 +1489,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Compressor Integrity Dossier**: Endpoint `GET /api/v1/subsea/compressor/compressor-integrity-dossier/:compressor_id` compiles compressor 4D performance surge maps, AMB shaft center orbit plots, ultrasonic wall erosion logs, and API 17D / ISO 13628-4 subsea certifications.
 
 
-## 45. Aviation Airborne HTS Stator Quench, Green Steel H-DRI Shaft Sticking, 10mK Quantum Cryostat, Maritime Ammonia Dual-Fuel & Lunar Regolith Sintering (v1.79.0)
+## 45. Aviation Airborne HTS Stator Quench, Green Steel H-DRI Shaft Sticking, 10mK Quantum Cryostat, Maritime Ammonia Dual-Fuel & Lunar Regolith Sintering
 
 ### 45.1 Aviation Megawatt Airborne Superconducting (HTS) Stator Quench Sentinel (`internal/core/airborne_hts/airborne_hts_sentinel.go`)
 - **Aviation Megawatt Superconducting Propulsion Telemetry Ingestion**: Endpoint `POST /api/v1/aviation/airborne-hts/ingest-stator-telemetry` monitors civil electric/hybrid-electric aircraft propulsion systems ($4.8\text{ MW}$ electric generation) under FAA 14 CFR Part 33, SAE AS6129, and RTCA DO-160G, tracking REBCO high-temperature superconductor stator temperatures ($78.8\text{ K}$ against $77.0\text{ K}$ critical threshold), stator voltage tap signals ($32.5\ \mu\text{V}$ vs $25.0\ \mu\text{V}$ quench runaway limit), supercritical helium coolant flow ($2.1\text{ kg/s}$), Lorentz mechanical strain ($0.38\%$ vs $0.35\%$ delamination ceiling), and normalized quench risk index ($0.92$).
@@ -1522,7 +1522,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Lunar Pad Quality Dossier**: Endpoint `GET /api/v1/space/lunar-sintering/lunar-pad-quality-dossier/:rover_id` aggregates ultrasonic acoustic tomography scans, dielectric heating thermal cross-sections, plume erosion resistance test logs, and NASA SP-8000 / ISO 14620 space structure release records.
 
 
-## 46. Deep Geological Repository (DGR) Nuclear Canister, Fusion Liquid Blanket, Space Solar Power GW Beam, High-NA 0.55 EUV Wavefront & In-Vivo CRISPR PAT (v1.80.0)
+## 46. Deep Geological Repository (DGR) Nuclear Canister, Fusion Liquid Blanket, Space Solar Power GW Beam, High-NA 0.55 EUV Wavefront & In-Vivo CRISPR PAT
 
 ### 46.1 Deep Geological Repository (DGR) Spent Nuclear Fuel KBS-3 Copper Canister & Bentonite Sentinel (`internal/core/dgr_canister/dgr_canister_sentinel.go`)
 - **Deep Geological Repository Telemetry Ingestion**: Endpoint `POST /api/v1/nuclear/dgr-canister/ingest-canister-telemetry` monitors KBS-3 copper canisters ($505.0\text{ m}$ host rock depth) under IAEA Safety Standards SSG-14 and ISO 12749, capturing canister surface temperatures ($96.2^\circ\text{C}$ vs $95.0^\circ\text{C}$ ceiling), bentonite swelling pressures ($4.65\text{ MPa}$ vs $5.00\text{ MPa}$ hydraulic seal minimum), sulfate-reducing bacteria sulfide concentrations ($1.25\text{ ppm}$ vs $1.00\text{ ppm}$ SCC limit), bedrock shear displacement ($52.5\text{ mm}$ exceeding $50.0\text{ mm}$ shear rupture boundary), electron-beam weld integrity ($99.8\%$), and gamma dose rates ($0.38\text{ Gy/hr}$).
@@ -1619,7 +1619,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Arctic Wellhead Safety Dossier**: Endpoint `GET /api/v1/polar/iceberg-scour/arctic-wellhead-dossier/:wellhead_id` compiles sonar bathymetry scour gouge maps, seabed acoustic Doppler profiles, subsea structural strain telemetry, and DNV-OS-F101 / ISO 19906 compliance records.
 
 
-## 49. Autonomous Agentic Multi-Agent Collaboration Network (Agentic ERP Orchestra & HITL Governance Engine)
+## 49. Multi-Agent Task Orchestration & Human-in-the-Loop Governance
 
 ### 49.1 Multi-Agent Architecture & Specialized Autonomous Squad (`internal/core/ai/agent_swarm.go`)
 - **Apex-Orchestrator (Executive Chief Swarm)**: Coordinates cross-functional task consensus, delegates mandates across domain agents, and guarantees corporate policy compliance and SLA velocity.
@@ -1638,7 +1638,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Dynamic Autonomy Configuration**: Endpoint `POST /api/v1/ai/swarm/agents/:role/autonomy` enables runtime adjustments of operating autonomy levels (`full_autonomous`, `supervised_hitl`, `assistive`, `paused`) and auto-approval amount limits.
 
 
-## 50. Neuro-Symbolic Enterprise Digital Twin & Monte Carlo What-If War-Room (Strategic Scenario Simulator)
+## 50. Operations Simulation & Financial Stress Testing (Digital Twin)
 
 ### 50.1 Enterprise Digital Twin Real-Time Baseline (`internal/core/ai/digital_twin_simulator.go`)
 - **Real-Time Digital Twin Baseline Ingestion**: Endpoint `GET /api/v1/ai/digital-twin/baseline` queries current enterprise state across financial ledgers, inventory quants, and order pipelines to compute real-time operational baselines:
@@ -1675,7 +1675,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Scenario History & Sensitivity Archive**: Endpoint `GET /api/v1/ai/digital-twin/history` lists archived historical simulations with variance comparisons and execution tracking.
 
 
-## 51. Enterprise Knowledge Graph & GNN Procurement Fraud / Anti-Collusion Sentinel
+## 51. Procurement Audit Graph & Anti-Collusion Intelligence
 
 ### 51.1 Enterprise Knowledge Graph Topology Ingestion (`internal/core/ai/fraud_sentinel.go`)
 - **Heterogeneous Graph Vertex & Edge Modeling**: Endpoint `GET /api/v1/ai/fraud-sentinel/graph` reconstructs a live bipartite and semantic enterprise network:
@@ -1705,7 +1705,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Demo Syndicate Injection**: Endpoint `POST /api/v1/ai/fraud-sentinel/seed-demo` seeds multi-vendor bid-rigging syndicates and split-PO structures for compliance stress testing.
 
 
-## 52. Self-Healing Enterprise Data & Autonomous Continuous Reconciliation Sentinel
+## 52. Continuous Financial Reconciliation & Data Quality Sentinel
 
 ### 52.1 Continuous General Ledger & Clearing Account Anomaly Scanner (`internal/core/ai/self_healing_data.go`)
 - **Unbilled GR/IR Variance Sentinel**: Scans 3-way reconciliation gaps between inbound warehouse receipts (`stock_pickings`) and posted vendor invoices (`account_moves`). Flags dangling clearing balances where Goods Receipts are completed without corresponding accounts payable bills, preventing understated liabilities during month-end closes.
@@ -1727,7 +1727,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - **Demo Anomaly Seeding**: Endpoint `POST /api/v1/ai/self-healing/seed-demo` injects synthetic GR/IR clearing delays and master data duplications for operator training and compliance verification.
 
 
-## 53. Ambient Multimodal Computer Vision & Autonomous Volumetric Receiving Dock AI
+## 53. Inbound Cargo Volumetric Scanning & Computer Vision Dock System
 
 ### 53.1 3D Spatial Volumetric Dimensional Sizing & Freight Overcharge Protection (`internal/core/ai/multimodal_vision.go`)
 - **Automated Dimension Extraction**: Processes edge vision camera streams and depth sensors deployed at warehouse receiving docks to compute spatial packaging dimensions (Length, Width, Height in centimeters) and cubic meter volume.
@@ -1764,7 +1764,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - `POST /api/v1/ai/vision/seed-demo`: Seeds realistic receiving scenarios (pristine cargo, crushed electronics pallets, oversized plastic totes, compromised cold-chain pharmaceuticals, and heavy crated machinery).
 
 
-## 54. Autonomous Legal Contract Risk & Intelligent Negotiation Redlining Copilot
+## 54. Commercial Contract Risk Analysis & Legal Playbook Redlining
 
 ### 54.1 Semantic Legal Playbook & Risk Exposure Analyzer (`internal/core/ai/legal_redline_copilot.go`)
 - **Automated Agreement Ingestion**: Ingests vendor Master Service Agreements (MSAs), procurement cooperation agreements (*Perjanjian Kerjasama / PKS*), customer SLAs, and non-disclosure agreements (NDAs).
@@ -1794,7 +1794,7 @@ GoERP serves a built-in OpenAPI 3.1.0 specification and an interactive browser-b
 - `GET /api/v1/ai/contracts/audits/:id/export`: Exports a formal B2B legal redline memorandum.
 - `POST /api/v1/ai/contracts/seed-demo`: Injects representative enterprise contracts (logistics PKS with extreme late penalties, cloud infrastructure MSA with IP ownership overreach, and bilateral balanced NDA).
 
-## 55. Physics-Informed Industrial Energy AI & Smart Peak-Load Shaving Sentinel (ESG Scope 1-2 Optimization & CBAM Compliance)
+## 55. Industrial Energy Optimization & Peak-Load Shaving (ESG & CBAM Compliance)
 
 ### 55.1 Physics-Informed 24-Hour Electrical Load Modeling & Peak Shaving (`internal/core/ai/energy_sentinel.go`)
 - **Industrial Tariff Differentiation**: Dynamically computes commercial electricity expenses based on state utility (PLN Industrial Tariff Category I-3 / Medium Voltage) parameters:
